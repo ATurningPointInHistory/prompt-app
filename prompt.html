@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIプロンプト生成Pro v5.4</title>
+
+<style>
+:root {
+  --bg: #f0f2f5;
+  --text: #1c1e21;
+  --card: #ffffff;
+  --accent: #007aff;
+  --border: #ddd;
+  --warn-bg: #fff3cd;
+  --warn-text: #664d03;
+  --warn-border: #ffecb5;
+}
+
+body.dark {
+  --bg: #18191a;
+  --text: #e4e6eb;
+  --card: #242526;
+  --accent: #3793ff;
+  --border: #444;
+  --warn-bg: #4a3b00;
+  --warn-text: #ffe08a;
+  --warn-border: #7a6400;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, sans-serif;
+  padding: 15px;
+  max-width: 600px;
+  margin: auto;
+  background: var(--bg);
+  color: var(--text);
+  transition: 0.3s;
+}
+
+.card {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-top: 0;
+}
+
+h3, h4 {
+  margin-bottom: 8px;
+}
+
+.tab-container {
+  display: flex;
+  border-bottom: 2px solid rgba(128,128,128,0.2);
+  margin-bottom: 15px;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.tab.active {
+  border-bottom: 3px solid var(--accent);
+  color: var(--accent);
+}
+
+label {
+  display: block;
+  margin-top: 12px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+input, textarea, select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-top: 5px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 16px;
+}
+
+.btn-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+button {
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.btn-full {
+  grid-column: span 2;
+}
+
+.btn-secondary {
+  background: #606770;
+}
+
+button.active-panel {
+  background: #ff9500;
+  color: white;
+}
+
+body.dark button.active-panel {
+  background: #ffb340;
+  color: #1c1c1c;
+}
+
+#output {
+  white-space: pre-wrap;
+  border: 1px dashed var(--border);
+  padding: 15px;
+  margin-top: 15px;
+  background: rgba(128,128,128,0.05);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  min-height: 80px;
+}
+
+.history, .template-item, .danger-item, .pattern-item {
+  font-size: 12px;
+  border: 1px solid var(--border);
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.section-box {
+  margin-top: 15px;
+}
+
+.small {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.history-actions,
+.item-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.history-actions button,
+.item-actions button {
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.warning-box {
+  display: none;
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  border: 1px solid var(--warn-border);
+  white-space: pre-wrap;
+}
+
+.code-like {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  opacity: 0.9;
+  word-break: break-all;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>AIプロンプト生成Pro</h2>
+
+  <div class="tab-container">
+    <div id="tab1" class="tab active" onclick="switchTab(1)">マニュアル入力</div>
+    <div id="tab2" class="tab" onclick="switchTab(2)">ラフから変換</div>
+  </div>
+
+  <div id="mode-normal">
+    <label for="role">役割</label>
+    <input id="role" placeholder="例：プログラマー、翻訳家、AIオーケストレーター">
+
+    <label for="task">目的</label>
+    <input id="task" placeholder="何をしたいですか？">
+
+    <label for="details">詳細（背景・条件など）</label>
+    <textarea id="details" rows="5" placeholder="具体的な指示や制約があれば入力"></textarea>
+
+    <label for="tone">トーン</label>
+    <select id="tone">
+      <option>プロフェッショナル</option>
+      <option>丁寧</option>
+      <option>カジュアル</option>
+      <option>簡潔に</option>
+    </select>
+  </div>
+
+  <div id="mode-auto" style="display:none;">
+    <label for="raw-input">やりたいことを自由に入力（AIに整理させます）</label>
+    <textarea id="raw-input" rows="8" placeholder="例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。"></textarea>
+
+    <label for="rough-tone">トーン</label>
+    <select id="rough-tone">
+      <option>プロフェッショナル</option>
+      <option>丁寧</option>
+      <option>カジュアル</option>
+      <option>簡潔に</option>
+    </select>
+  </div>
+
+  <div class="btn-group">
+    <button id="main-btn" class="btn-full" onclick="generatePrompt()">⚡ プロンプトを生成する</button>
+    <button onclick="copyText()" class="btn-secondary">📋 コピー</button>
+    <button onclick="download()" class="btn-secondary">💾 保存</button>
+    <button onclick="toggleDark()" class="btn-secondary">🌙 ダークモード</button>
+  </div>
+
+  <div class="btn-group">
+    <button id="templateBtn" onclick="toggleTemplateManager()">📂 テンプレ管理</button>
+    <button id="dangerBtn" onclick="toggleDangerManager()">🚨 危険ワード管理</button>
+    <button id="patternBtn" onclick="togglePatternManager()">🧩 NGパターン管理</button>
+    <button onclick="exportTemplates()">📤 テンプレバックアップ</button>
+  </div>
+
+  <div class="btn-group">
+    <button onclick="importTemplates()">📥 テンプレ復元</button>
+    <button onclick="clearOutput()" class="btn-secondary">🧹 出力クリア</button>
+    <button onclick="clearHistory()" class="btn-secondary">🗑 履歴全削除</button>
+    <button onclick="recheckOutput()" class="btn-secondary">🔍 再チェック</button>
+  </div>
+
+  <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
+
+  <label>生成結果</label>
+  <div id="output">ここに表示</div>
+
+  <div id="warningBox" class="warning-box"></div>
+
+  <div id="template-manager" class="section-box" style="display:none;">
+    <h3>テンプレ管理</h3>
+
+    <label for="templateSelect">固定テンプレ / 保存テンプレ</label>
+    <select id="templateSelect" onchange="applyTemplateFromSelect()">
+      <option value="">テンプレを選択</option>
+    </select>
+
+    <div class="small">下の入力欄から新しいテンプレも追加できます。</div>
+
+    <label for="tempName">テンプレ名</label>
+    <input id="tempName" placeholder="例：バグ修正用、営業文作成">
+
+    <label for="tempRole">役割</label>
+    <input id="tempRole" placeholder="例：シニアエンジニア">
+
+    <label for="tempTask">目的</label>
+    <input id="tempTask" placeholder="例：JavaScriptの不具合修正">
+
+    <label for="tempDetails">詳細</label>
+    <textarea id="tempDetails" rows="5" placeholder="テンプレの詳細内容"></textarea>
+
+    <label for="tempTone">トーン</label>
+    <select id="tempTone">
+      <option>プロフェッショナル</option>
+      <option>丁寧</option>
+      <option>カジュアル</option>
+      <option>簡潔に</option>
+    </select>
+
+    <button onclick="saveTemplate()" class="btn-full">テンプレ保存</button>
+
+    <h4>保存済みテンプレ一覧</h4>
+    <div id="templateList"></div>
+  </div>
+
+  <div id="danger-manager" class="section-box" style="display:none;">
+    <h3>危険ワード管理</h3>
+    <div class="small">単語が含まれていたら警告します。</div>
+
+    <label for="dangerWord">危険ワード</label>
+    <input id="dangerWord" placeholder="例：パスワード、住所、電話番号">
+
+    <button onclick="saveDangerWord()" class="btn-full">危険ワード追加</button>
+
+    <h4>固定危険ワード + 追加危険ワード</h4>
+    <div id="dangerList"></div>
+  </div>
+
+  <div id="pattern-manager" class="section-box" style="display:none;">
+    <h3>NGパターン管理</h3>
+    <div class="small">形式で検出します。正規表現を追加できます。</div>
+
+    <label for="patternName">パターン名</label>
+    <input id="patternName" placeholder="例：社員番号、会員ID">
+
+    <label for="patternRegex">正規表現</label>
+    <input id="patternRegex" placeholder="例：\\b[A-Z]{2}\\d{6}\\b">
+
+    <label for="patternFlags">フラグ</label>
+    <input id="patternFlags" placeholder="例：g または gi">
+
+    <div class="small">よく分からなければ、まずは g を入れてください。</div>
+
+    <button onclick="savePattern()" class="btn-full">NGパターン追加</button>
+
+    <h4>固定NGパターン + 追加NGパターン</h4>
+    <div id="patternList"></div>
+  </div>
+
+  <div class="section-box">
+    <label>履歴（最新5件）</label>
+    <div id="history"></div>
+  </div>
+</div>
+
+<script>
+const get = (id) => document.getElementById(id);
+let currentTab = 1;
+
+const defaultTemplates = [
+  {
+    name: "AIオーケストレーター",
+    role: "AIオーケストレーター",
+    task: "ユーザーの質問に対して最適なロールを生成して回答する",
+    details: `あなたは「AIオーケストレーター」です。
+
+ユーザーの質問に対して、最適な専門ロール（ジョブ）を自動生成・選定し、そのロールとして回答してください。
+
+【処理手順】
+① 質問の意図を分析する
+② 必要なロールを3〜5個生成する
+③ 各ロールの役割を簡潔に説明する
+④ 最適なロールを1つ選び、理由を述べる
+⑤ 選ばれたロールとして最終回答を行う
+
+【条件】
+・ロールは具体的かつ専門的にする
+・最終回答は選ばれたロールになりきる
+・無駄な説明は省き、論理的に出力する
+
+【出力形式】
+1. 意図分析
+2. ロール候補
+3. 最適ロールと選定理由
+4. 最終回答`,
+    tone: "プロフェッショナル"
+  }
+];
+
+const defaultDangerWords = [
+  "パスワード",
+  "住所",
+  "電話番号",
+  "メールアドレス",
+  "マイナンバー",
+  "クレジットカード",
+  "カード番号",
+  "暗証番号",
+  "口座番号",
+  "銀行口座",
+  "本人確認書類",
+  "運転免許証",
+  "保険証",
+  "秘密の質問",
+  "生年月日"
+];
+
+const defaultPatterns = [
+  { name: "メールアドレス", regex: "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", flags: "g" },
+  { name: "電話番号", regex: "(?:\\+?\\d{1,3}[-\\s]?)?(?:\\d{2,4}[-\\s]?){2,4}\\d{3,4}", flags: "g" },
+  { name: "郵便番号", regex: "\\b\\d{3}-?\\d{4}\\b", flags: "g" },
+  { name: "クレジットカード候補", regex: "\\b(?:\\d[ -]*?){13,16}\\b", flags: "g" },
+  { name: "マイナンバー候補", regex: "\\b\\d{12}\\b", flags: "g" }
+];
+
+function switchTab(tabNum) {
+  currentTab = tabNum;
+  get("tab1").classList.toggle("active", tabNum === 1);
+  get("tab2").classList.toggle("active", tabNum === 2);
+  get("mode-normal").style.display = tabNum === 1 ? "block" : "none";
+  get("mode-auto").style.display = tabNum === 2 ? "block" : "none";
+  get("main-btn").innerText = tabNum === 1
+    ? "⚡ プロンプトを生成する"
+    : "🪄 AI整形用プロンプトを作る";
+  localStorage.setItem("currentTab", String(tabNum));
+}
+
+function toggleDark() {
+  document.body.classList.toggle("dark");
+  localStorage.setItem("darkMode", document.body.classList.contains("dark") ? "1" : "0");
+}
+
+function closeAllManagers() {
+  get("template-manager").style.display = "none";
+  get("danger-manager").style.display = "none";
+  get("pattern-manager").style.display = "none";
+}
+
+function updatePanelButtonStates() {
+  get("templateBtn").classList.toggle("active-panel", get("template-manager").style.display !== "none");
+  get("dangerBtn").classList.toggle("active-panel", get("danger-manager").style.display !== "none");
+  get("patternBtn").classList.toggle("active-panel", get("pattern-manager").style.display !== "none");
+}
+
+function toggleTemplateManager() {
+  const isOpen = get("template-manager").style.display !== "none";
+  closeAllManagers();
+  if (!isOpen) {
+    get("template-manager").style.display = "block";
+    renderTemplates();
+    renderTemplateSelect();
+  }
+  updatePanelButtonStates();
+}
+
+function toggleDangerManager() {
+  const isOpen = get("danger-manager").style.display !== "none";
+  closeAllManagers();
+  if (!isOpen) {
+    get("danger-manager").style.display = "block";
+    renderDangerWords();
+  }
+  updatePanelButtonStates();
+}
+
+function togglePatternManager() {
+  const isOpen = get("pattern-manager").style.display !== "none";
+  closeAllManagers();
+  if (!isOpen) {
+    get("pattern-manager").style.display = "block";
+    renderPatterns();
+  }
+  updatePanelButtonStates();
+}
+
+function generatePrompt() {
+  let p = "";
+
+  if (currentTab === 1) {
+    const role = get("role").value.trim() || "AIアシスタント";
+    const task = get("task").value.trim();
+    const details = get("details").value.trim();
+    const tone = get("tone").value;
+
+    if (!task) {
+      alert("目的を入力してください");
+      return;
+    }
+
+    p = `あなたは「${role}」として振る舞ってください。\n\n# 目的\n${task}\n`;
+
+    if (details) p += `\n# 詳細・条件\n${details}\n`;
+
+    p += `\n# トーン\n${tone}\n\n上記に基づき、具体的かつ最適な回答を出力してください。`;
+  } else {
+    const raw = get("raw-input").value.trim();
+    const tone = get("rough-tone").value;
+
+    if (!raw) {
+      alert("内容を入力してください");
+      return;
+    }
+
+    p = `以下の「やりたいこと」を分析し、プロンプトの各項目（役割、目的、背景、条件、出力形式、トーン）に整理して再構成してください。不明な点は最適と思われる内容を補完してください。
+
+【やりたいこと】
+${raw}
+
+---
+出力は以下の形式で整理してください：
+役割：
+目的：
+背景・条件：
+出力形式：
+トーン：${tone}`;
+  }
+
+  get("output").innerText = p;
+  saveHistory(p);
+  checkSensitiveContent(p);
+}
+
+function copyText() {
+  const text = get("output").innerText.trim();
+  if (!text || text === "ここに表示") {
+    alert("先に生成してください");
+    return;
+  }
+
+  const report = detectSensitiveContent(text);
+  if (report.hasAny) {
+    const ok = confirm(buildConfirmMessage(report, "コピー"));
+    if (!ok) return;
+  }
+
+  navigator.clipboard.writeText(text)
+    .then(() => alert("コピー完了"))
+    .catch(() => alert("コピー失敗（長押しコピーしてください）"));
+}
+
+function download() {
+  const text = get("output").innerText.trim();
+  if (!text || text === "ここに表示") {
+    alert("先に生成してください");
+    return;
+  }
+
+  const report = detectSensitiveContent(text);
+  if (report.hasAny) {
+    const ok = confirm(buildConfirmMessage(report, "保存"));
+    if (!ok) return;
+  }
+
+  const blob = new Blob([text], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "prompt.txt";
+  a.click();
+}
+
+function clearOutput() {
+  get("output").innerText = "ここに表示";
+  hideWarning();
+}
+
+function recheckOutput() {
+  const text = get("output").innerText.trim();
+  if (!text || text === "ここに表示") {
+    alert("先に生成してください");
+    return;
+  }
+  checkSensitiveContent(text);
+}
+
+function saveHistory(text) {
+  let h = JSON.parse(localStorage.getItem("h") || "[]");
+  h.unshift(text);
+  h = h.slice(0, 5);
+  localStorage.setItem("h", JSON.stringify(h));
+  renderHistory();
+}
+
+function renderHistory() {
+  const h = JSON.parse(localStorage.getItem("h") || "[]");
+  get("history").innerHTML = h.map((x, i) => `
+    <div class="history">
+      ${escapeHtml(x.substring(0, 80))}...
+      <div class="history-actions">
+        <button onclick='reuseHistory(${JSON.stringify(x)})'>再利用</button>
+        <button onclick='saveFromHistory(${JSON.stringify(x)})'>テンプレ化</button>
+        <button onclick='deleteHistory(${i})'>削除</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function reuseHistory(text) {
+  get("output").innerText = text;
+  checkSensitiveContent(text);
+}
+
+function deleteHistory(index) {
+  let h = JSON.parse(localStorage.getItem("h") || "[]");
+  h.splice(index, 1);
+  localStorage.setItem("h", JSON.stringify(h));
+  renderHistory();
+}
+
+function clearHistory() {
+  if (!confirm("履歴をすべて削除しますか？")) return;
+  localStorage.removeItem("h");
+  renderHistory();
+}
+
+function saveTemplate() {
+  const name = get("tempName").value.trim();
+  const role = get("tempRole").value.trim();
+  const task = get("tempTask").value.trim();
+  const details = get("tempDetails").value.trim();
+  const tone = get("tempTone").value;
+
+  if (!name) {
+    alert("テンプレ名を入力してください");
+    return;
+  }
+
+  let list = JSON.parse(localStorage.getItem("templates") || "[]");
+  list.push({ name, role, task, details, tone });
+  localStorage.setItem("templates", JSON.stringify(list));
+
+  get("tempName").value = "";
+  get("tempRole").value = "";
+  get("tempTask").value = "";
+  get("tempDetails").value = "";
+  get("tempTone").value = "プロフェッショナル";
+
+  alert("保存完了");
+  renderTemplates();
+  renderTemplateSelect();
+}
+
+function renderTemplates() {
+  const local = JSON.parse(localStorage.getItem("templates") || "[]");
+  const all = [...defaultTemplates, ...local];
+
+  get("templateList").innerHTML = all.map((t, i) => `
+    <div class="template-item">
+      <b>${escapeHtml(t.name)}</b><br>
+      <div class="small">役割: ${escapeHtml(t.role || "")}</div>
+      <div class="item-actions">
+        <button onclick="applyTemplateAll(${i})">使う</button>
+        ${i >= defaultTemplates.length ? `<button onclick="deleteTemplate(${i - defaultTemplates.length})">削除</button>` : ""}
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderTemplateSelect() {
+  const local = JSON.parse(localStorage.getItem("templates") || "[]");
+  const all = [...defaultTemplates, ...local];
+
+  get("templateSelect").innerHTML =
+    `<option value="">テンプレを選択</option>` +
+    all.map((t, i) => `<option value="${i}">${escapeHtml(t.name)}</option>`).join("");
+}
+
+function applyTemplateFromSelect() {
+  const value = get("templateSelect").value;
+  if (value === "") return;
+  applyTemplateAll(Number(value));
+}
+
+function applyTemplateAll(i) {
+  const local = JSON.parse(localStorage.getItem("templates") || "[]");
+  const all = [...defaultTemplates, ...local];
+  const t = all[i];
+  if (!t) return;
+
+  switchTab(1);
+  get("role").value = t.role || "";
+  get("task").value = t.task || "";
+  get("details").value = t.details || "";
+  get("tone").value = t.tone || "プロフェッショナル";
+}
+
+function deleteTemplate(i) {
+  let list = JSON.parse(localStorage.getItem("templates") || "[]");
+  list.splice(i, 1);
+  localStorage.setItem("templates", JSON.stringify(list));
+  renderTemplates();
+  renderTemplateSelect();
+}
+
+function saveFromHistory(text) {
+  const name = prompt("テンプレ名を入力してください");
+  if (!name) return;
+
+  const roleMatch = text.match(/あなたは「(.+?)」/);
+  const taskMatch = text.match(/# 目的\n([\s\S]*?)(\n#|\n$|$)/);
+
+  let list = JSON.parse(localStorage.getItem("templates") || "[]");
+  list.push({
+    name,
+    role: roleMatch ? roleMatch[1] : "",
+    task: taskMatch ? taskMatch[1].trim() : "",
+    details: text,
+    tone: "プロフェッショナル"
+  });
+
+  localStorage.setItem("templates", JSON.stringify(list));
+  alert("テンプレ化しました");
+  renderTemplates();
+  renderTemplateSelect();
+}
+
+function exportTemplates() {
+  const data = localStorage.getItem("templates") || "[]";
+  const blob = new Blob([data], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "templates.json";
+  a.click();
+}
+
+function importTemplates() {
+  get("fileInput").click();
+}
+
+get("fileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      if (!Array.isArray(parsed)) {
+        alert("テンプレファイルの形式が正しくありません");
+        return;
+      }
+      localStorage.setItem("templates", JSON.stringify(parsed));
+      renderTemplates();
+      renderTemplateSelect();
+      alert("復元完了");
+    } catch {
+      alert("読み込みに失敗しました");
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+function saveDangerWord() {
+  const word = get("dangerWord").value.trim();
+  if (!word) {
+    alert("危険ワードを入力してください");
+    return;
+  }
+
+  let list = JSON.parse(localStorage.getItem("dangerWords") || "[]");
+  if (defaultDangerWords.includes(word) || list.includes(word)) {
+    alert("すでに登録されています");
+    return;
+  }
+
+  list.push(word);
+  localStorage.setItem("dangerWords", JSON.stringify(list));
+  get("dangerWord").value = "";
+  renderDangerWords();
+}
+
+function renderDangerWords() {
+  const local = JSON.parse(localStorage.getItem("dangerWords") || "[]");
+  const all = [...defaultDangerWords, ...local];
+
+  get("dangerList").innerHTML = all.map((word, i) => `
+    <div class="danger-item">
+      <b>${escapeHtml(word)}</b>
+      <div class="item-actions">
+        ${
+          i >= defaultDangerWords.length
+            ? `<button onclick="deleteDangerWord(${i - defaultDangerWords.length})">削除</button>`
+            : `<span class="small">固定ワード</span>`
+        }
+      </div>
+    </div>
+  `).join("");
+}
+
+function deleteDangerWord(index) {
+  let list = JSON.parse(localStorage.getItem("dangerWords") || "[]");
+  list.splice(index, 1);
+  localStorage.setItem("dangerWords", JSON.stringify(list));
+  renderDangerWords();
+}
+
+function getAllDangerWords() {
+  const local = JSON.parse(localStorage.getItem("dangerWords") || "[]");
+  return [...defaultDangerWords, ...local];
+}
+
+function savePattern() {
+  const name = get("patternName").value.trim();
+  const regex = get("patternRegex").value.trim();
+  const flags = get("patternFlags").value.trim() || "g";
+
+  if (!name || !regex) {
+    alert("パターン名と正規表現を入力してください");
+    return;
+  }
+
+  try {
+    new RegExp(regex, flags);
+  } catch {
+    alert("正規表現が正しくありません");
+    return;
+  }
+
+  let list = JSON.parse(localStorage.getItem("dangerPatterns") || "[]");
+  list.push({ name, regex, flags });
+  localStorage.setItem("dangerPatterns", JSON.stringify(list));
+
+  get("patternName").value = "";
+  get("patternRegex").value = "";
+  get("patternFlags").value = "";
+
+  alert("NGパターンを追加しました");
+  renderPatterns();
+}
+
+function renderPatterns() {
+  const local = JSON.parse(localStorage.getItem("dangerPatterns") || "[]");
+  const all = [...defaultPatterns, ...local];
+
+  get("patternList").innerHTML = all.map((p, i) => `
+    <div class="pattern-item">
+      <b>${escapeHtml(p.name)}</b>
+      <div class="code-like">/${escapeHtml(p.regex)}/${escapeHtml(p.flags || "")}</div>
+      <div class="item-actions">
+        ${
+          i >= defaultPatterns.length
+            ? `<button onclick="deletePattern(${i - defaultPatterns.length})">削除</button>`
+            : `<span class="small">固定パターン</span>`
+        }
+      </div>
+    </div>
+  `).join("");
+}
+
+function deletePattern(index) {
+  let list = JSON.parse(localStorage.getItem("dangerPatterns") || "[]");
+  list.splice(index, 1);
+  localStorage.setItem("dangerPatterns", JSON.stringify(list));
+  renderPatterns();
+}
+
+function getAllPatterns() {
+  const local = JSON.parse(localStorage.getItem("dangerPatterns") || "[]");
+  return [...defaultPatterns, ...local];
+}
+
+function detectSensitiveContent(text) {
+  const source = String(text || "");
+  const foundWords = getAllDangerWords().filter(word => word && source.includes(word));
+
+  const foundPatterns = [];
+  for (const p of getAllPatterns()) {
+    try {
+      const regex = new RegExp(p.regex, p.flags || "g");
+      const matches = source.match(regex);
+      if (matches && matches.length > 0) {
+        foundPatterns.push({
+          name: p.name,
+          count: matches.length,
+          samples: [...new Set(matches)].slice(0, 3)
+        });
+      }
+    } catch {}
+  }
+
+  return {
+    hasAny: foundWords.length > 0 || foundPatterns.length > 0,
+    foundWords,
+    foundPatterns
+  };
+}
+
+function checkSensitiveContent(text) {
+  const report = detectSensitiveContent(text);
+
+  if (!report.hasAny) {
+    hideWarning();
+    return;
+  }
+
+  const lines = [];
+  lines.push("警告：個人情報・認証情報が含まれている可能性があります。");
+  lines.push("");
+
+  if (report.foundWords.length > 0) {
+    lines.push("【危険ワード】");
+    lines.push(report.foundWords.join("、"));
+    lines.push("");
+  }
+
+  if (report.foundPatterns.length > 0) {
+    lines.push("【NGパターン検出】");
+    report.foundPatterns.forEach(item => {
+      const sampleText = item.samples.length > 0 ? ` 例: ${item.samples.join(" / ")}` : "";
+      lines.push(`・${item.name}（${item.count}件）${sampleText}`);
+    });
+    lines.push("");
+  }
+
+  lines.push("外部に送る前に、本当に問題ないか確認してください。");
+
+  get("warningBox").style.display = "block";
+  get("warningBox").innerText = lines.join("\n");
+}
+
+function buildConfirmMessage(report, actionName) {
+  const lines = [];
+  lines.push(`警告：${actionName}前に確認してください。`);
+  lines.push("");
+
+  if (report.foundWords.length > 0) {
+    lines.push("【危険ワード】");
+    lines.push(report.foundWords.join("、"));
+    lines.push("");
+  }
+
+  if (report.foundPatterns.length > 0) {
+    lines.push("【NGパターン検出】");
+    report.foundPatterns.forEach(item => {
+      const sampleText = item.samples.length > 0 ? ` 例: ${item.samples.join(" / ")}` : "";
+      lines.push(`・${item.name}（${item.count}件）${sampleText}`);
+    });
+    lines.push("");
+  }
+
+  lines.push(`それでも${actionName}しますか？`);
+  return lines.join("\n");
+}
+
+function hideWarning() {
+  get("warningBox").style.display = "none";
+  get("warningBox").innerText = "";
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function loadSettings() {
+  if (localStorage.getItem("darkMode") === "1") {
+    document.body.classList.add("dark");
+  }
+
+  const savedTab = Number(localStorage.getItem("currentTab") || "1");
+  switchTab(savedTab);
+
+  closeAllManagers();
+  renderHistory();
+  renderTemplates();
+  renderTemplateSelect();
+  renderDangerWords();
+  renderPatterns();
+  updatePanelButtonStates();
+}
+
+document.addEventListener("DOMContentLoaded", loadSettings);
+</script>
+
+</body>
+</html>
