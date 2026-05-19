@@ -503,6 +503,7 @@ function switchTab(tabNum) {
     ? "⚡ プロンプトを生成する"
     : "🪄 AI整形用プロンプトを作る";
   localStorage.setItem("currentTab", String(tabNum));
+saveCurrentState();
 }
 
 function toggleDark() {
@@ -639,7 +640,7 @@ function applyPreset(commands) {
   input.value = `${text} ${commandText}`.trim();
 
   syncCommandButtons();
-
+  saveCurrentState();
   input.focus();
 }
 
@@ -1234,7 +1235,7 @@ function saveCurrentState() {
 
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
+document.addEventListener("change", saveCurrentState);
 </script>
-
 </body>
 </html>
