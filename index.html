@@ -1209,9 +1209,72 @@ function loadSettings() {
   renderCommandChips();
   renderPresetChips();
   updatePanelButtonStates();
+
+  get("raw-input").value =
+    localStorage.getItem("rawInput") || "";
+
+  get("rough-tone").value =
+    localStorage.getItem("roughTone") || "プロフェッショナル";
+
+  get("rough-output-format").value =
+    localStorage.getItem("roughOutputFormat") || "prompt";
+
+  get("role").value =
+    localStorage.getItem("roleValue") || "";
+
+  get("task").value =
+    localStorage.getItem("taskValue") || "";
+
+  get("details").value =
+    localStorage.getItem("detailsValue") || "";
+
+  get("tone").value =
+    localStorage.getItem("toneValue") || "プロフェッショナル";
+
+  syncCommandButtons();
+
+}
+
+function saveCurrentState() {
+
+  localStorage.setItem(
+    "rawInput",
+    get("raw-input").value
+  );
+
+  localStorage.setItem(
+    "roughTone",
+    get("rough-tone").value
+  );
+
+  localStorage.setItem(
+    "roughOutputFormat",
+    get("rough-output-format").value
+  );
+
+  localStorage.setItem(
+    "roleValue",
+    get("role").value
+  );
+
+  localStorage.setItem(
+    "taskValue",
+    get("task").value
+  );
+
+  localStorage.setItem(
+    "detailsValue",
+    get("details").value
+  );
+
+  localStorage.setItem(
+    "toneValue",
+    get("tone").value
+  );
 }
 
 document.addEventListener("DOMContentLoaded", loadSettings);
+document.addEventListener("input", saveCurrentState);
 </script>
 
 </body>
