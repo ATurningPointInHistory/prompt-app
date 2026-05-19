@@ -479,6 +479,14 @@ const commandDefinitions = {
   prompt: "生成AI向けの高品質プロンプトに再構成する"
 };
 
+const presetDefinitions = {
+  "要約": ["tldr", "sort"],
+  "初心者向け": ["eli15", "step"],
+  "設計レビュー": ["enemy", "gap", "priority"],
+  "実装支援": ["step", "code", "test"],
+  "JSON設計": ["schema", "real", "prompt"]
+};
+
 function switchTab(tabNum) {
   currentTab = tabNum;
   get("tab1").classList.toggle("active", tabNum === 1);
@@ -595,6 +603,36 @@ function renderCommandChips() {
   syncCommandButtons();
 }
 
+function renderPresetChips() {
+  const box = get("presetBox");
+  if (!box) return;
+
+  box.innerHTML = Object.entries(presetDefinitions).map(([name, commands]) => {
+    return `<button
+      type="button"
+      class="preset-chip"
+      onclick="applyPreset(${JSON.stringify(commands)})">
+      ${name}
+    </button>`;
+  }).join("");
+}
+
+function applyPreset(commands) {
+
+  const input = get("raw-input");
+
+  // 既存コマンド削除
+  let text = input.value.replace(/\/[a-zA-Z0-9]+/g, "").trim();
+
+  // プリセット追加
+  const commandText = commands.map(c => `/${c}`).join(" ");
+
+  input.value = `${text} ${commandText}`.trim();
+
+  syncCommandButtons();
+
+  input.focus();
+}
 
 function addCommand(cmd) {
   const input = get("raw-input");
@@ -1133,6 +1171,7 @@ function loadSettings() {
   renderDangerWords();
   renderPatterns();
   renderCommandChips();
+  renderPresetChips();
   updatePanelButtonStates();
 }
 
