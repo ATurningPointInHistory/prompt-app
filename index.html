@@ -260,10 +260,6 @@ body.dark button.active-panel {
     <textarea id="raw-input" rows="8" placeholder="例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。"></textarea>
 
 <div class="small">変換モードをクリックすると入力欄に追加されます。</div>
-
-<div id="commandBox" class="command-box"></div>
-
-<div class="small">変換モードをクリックすると入力欄に追加されます。</div>
 <div id="commandBox" class="command-box"></div>
 
     <label for="rough-tone">トーン</label>
@@ -567,44 +563,43 @@ function renderCommandChips() {
       /${cmd}
     </button>`;
   }).join("");
+
+  syncCommandButtons();
 }
+
 
 function addCommand(cmd) {
   const input = get("raw-input");
-
   let current = input.value;
 
-  const regex = new RegExp(`\\/${cmd}\\b`, "g");
+  const commandText = `/${cmd}`;
+  const commands = current.match(/\/[a-zA-Z0-9]+/g) || [];
+  const exists = commands.includes(commandText);
 
-  const button = document.querySelector(
-    `.command-chip[data-cmd="${cmd}"]`
-  );
-
-  // 既に存在 → OFF
-  if (regex.test(current)) {
-
-    current = current.replace(regex, "");
-
-    // 空白整理
-    current = current.replace(/\s+/g, " ").trim();
-
-    input.value = current;
-
-    if (button) {
-      button.classList.remove("active");
-    }
-
+  if (exists) {
+    current = current
+      .split(/\s+/)
+      .filter(part => part !== commandText)
+      .join(" ")
+      .trim();
   } else {
-
-    // ON
-    input.value = (current.trim() + ` /${cmd}`).trim();
-
-    if (button) {
-      button.classList.add("active");
-    }
+    current = `${current.trim()} ${commandText}`.trim();
   }
 
+  input.value = current;
+  syncCommandButtons();
   input.focus();
+}
+
+function syncCommandButtons() {
+  const input = get("raw-input");
+  const text = input.value;
+  const commands = text.match(/\/[a-zA-Z0-9]+/g) || [];
+
+  document.querySelectorAll(".command-chip").forEach(btn => {
+    const cmd = btn.dataset.cmd;
+    btn.classList.toggle("active", commands.includes(`/${cmd}`));
+  });
 }
 
 function generatePrompt() {
