@@ -586,12 +586,13 @@ function generatePrompt() {
 
     p += `\n# トーン\n${tone}\n\n上記に基づき、具体的かつ最適な回答を出力してください。`;
   } else {
-    const rawOriginalget("raw-input").value.trim();
-const tone = get("rough-tone").value;
 
-const parsed = parseCommands(rawOriginal);
-const raw = parsed.cleanedText;
-const commandInstruction = buildCommandInstructions(parsed.commands);
+  const rawOriginal =   get("raw-input").value.trim();
+  const tone = get("rough-tone").value;
+  const parsed = parseCommands(rawOriginal);
+  const raw = parsed.cleanedText;
+  const commandInstruction =   buildCommandInstructions(parsed.commands);
+
     if (!raw) {
       alert("内容を入力してください");
       return;
@@ -602,6 +603,7 @@ const commandInstruction = buildCommandInstructions(parsed.commands);
 【やりたいこと】
 ${raw}
 
+${commandInstruction}
 ---
 出力は以下の形式で整理してください：
 役割：
