@@ -248,6 +248,29 @@ body.dark button.active-panel {
   color: white;
 }
 
+.preset-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.preset-chip {
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,149,0,0.15);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.preset-chip:hover {
+  background: #ff9500;
+  color: white;
+}
+
 </style>
 </head>
 <body>
@@ -285,7 +308,6 @@ body.dark button.active-panel {
 
 <div class="small">変換モードをクリックすると入力欄に追加されます。</div>
 <div id="commandBox" class="command-box"></div>
-
 
 <div class="small">用途別プリセット</div>
 <div id="presetBox" class="preset-box"></div>
