@@ -698,58 +698,59 @@ function generatePrompt() {
     if (details) p += `\n# 詳細・条件\n${details}\n`;
 
     p += `\n# トーン\n${tone}\n\n上記に基づき、具体的かつ最適な回答を出力してください。`;
+
   } else {
+    const rawOriginal = get("raw-input").value.trim();
+    const tone = get("rough-tone").value;
+    const outputFormat = get("rough-output-format").value;
 
-  const rawOriginal =   get("raw-input").value.trim();
-  const tone = get("rough-tone").value;
-  const outputFormat = get("rough-output-format").value;
-
-  const parsed = parseCommands(rawOriginal);
-  const raw = parsed.cleanedText;
-  const commandInstruction =   buildCommandInstructions(parsed.commands);
+    const parsed = parseCommands(rawOriginal);
+    const raw = parsed.cleanedText;
+    const commandInstruction = buildCommandInstructions(parsed.commands);
 
     if (!raw) {
       alert("内容を入力してください");
       return;
     }
 
-  if (outputFormat === "json") {
-    p = `以下の「やりたいこと」を分析し、生成AI向けプロンプト設計データとしてJSON形式に構造化してください。不明な点は推測で補完してよいですが、推測した内容は "assumptions" に分けてください。
+    if (outputFormat === "json") {
+      p = `以下の「やりたいこと」を分析し、生成AI向けプロンプト設計データとしてJSON形式に構造化してください。不明な点は推測で補完してよいですが、推測した内容は "assumptions" に分けてください。
 
-  【やりたいこと】
-  ${raw}
+【やりたいこと】
+${raw}
 
-  ${commandInstruction}
-  ---
-  必ず以下のJSON形式だけで出力してください。説明文やMarkdownは不要です。
+${commandInstruction}
+---
+必ず以下のJSON形式だけで出力してください。説明文やMarkdownは不要です。
 
-  {
-    "role": "",
-    "purpose": "",
-    "background": [],
-    "conditions": [],
-    "constraints": [],
-    "output_format": "",
-    "tone": "${tone}",
-    "additional_instructions": [],
-    "commands": [],
-    "assumptions": [],
-    "missing_information": []
-  }`;
-  } else {
-    p = `以下の「やりたいこと」を分析し、プロンプトの各項目（役割、目的、背景、条件、出力形式、トーン）に整理して再構成してください。不明な点は最適と思われる内容を補完してください。
+{
+  "role": "",
+  "purpose": "",
+  "background": [],
+  "conditions": [],
+  "constraints": [],
+  "output_format": "",
+  "tone": "${tone}",
+  "additional_instructions": [],
+  "commands": [],
+  "assumptions": [],
+  "missing_information": []
+}`;
+    } else {
+      p = `以下の「やりたいこと」を分析し、プロンプトの各項目（役割、目的、背景、条件、出力形式、トーン）に整理して再構成してください。不明な点は最適と思われる内容を補完してください。
 
-  【やりたいこと】
-  ${raw}
+【やりたいこと】
+${raw}
 
-  ${commandInstruction}
-  ---
-  出力は以下の形式で整理してください：
-  役割：
-  目的：
-  背景・条件：
-  出力形式：
-  トーン：${tone}`;
+${commandInstruction}
+---
+出力は以下の形式で整理してください：
+役割：
+目的：
+背景・条件：
+出力形式：
+トーン：${tone}`;
+    }
   }
 
   get("output").innerText = p;
