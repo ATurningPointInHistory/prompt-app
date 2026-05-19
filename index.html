@@ -559,7 +559,13 @@ function renderCommandChips() {
   if (!box) return;
 
   box.innerHTML = Object.keys(commandDefinitions).map(cmd => {
-    return `<button type="button" class="command-chip" onclick="addCommand('${cmd}')">/${cmd}</button>`;
+    return `<button
+      type="button"
+      class="command-chip"
+      data-cmd="${cmd}"
+      onclick="addCommand('${cmd}')">
+      /${cmd}
+    </button>`;
   }).join("");
 }
 
