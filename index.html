@@ -1193,48 +1193,6 @@ function escapeHtml(str) {
 }
 
 function loadSettings() {
-  if (localStorage.getItem("darkMode") === "1") {
-    document.body.classList.add("dark");
-  }
-
-  const savedTab = Number(localStorage.getItem("currentTab") || "1");
-  switchTab(savedTab);
-
-  closeAllManagers();
-  renderHistory();
-  renderTemplates();
-  renderTemplateSelect();
-  renderDangerWords();
-  renderPatterns();
-  renderCommandChips();
-  renderPresetChips();
-  updatePanelButtonStates();
-
-  get("raw-input").value =
-    localStorage.getItem("rawInput") || "";
-
-  get("rough-tone").value =
-    localStorage.getItem("roughTone") || "プロフェッショナル";
-
-  get("rough-output-format").value =
-    localStorage.getItem("roughOutputFormat") || "prompt";
-
-  get("role").value =
-    localStorage.getItem("roleValue") || "";
-
-  get("task").value =
-    localStorage.getItem("taskValue") || "";
-
-  get("details").value =
-    localStorage.getItem("detailsValue") || "";
-
-  get("tone").value =
-    localStorage.getItem("toneValue") || "プロフェッショナル";
-
-  syncCommandButtons();
-
-}
-
 function saveCurrentState() {
 
   localStorage.setItem(
