@@ -602,14 +602,21 @@ function renderPresetChips() {
   const box = get("presetBox");
   if (!box) return;
 
-  box.innerHTML = Object.entries(presetDefinitions).map(([name, commands]) => {
+  box.innerHTML = Object.keys(presetDefinitions).map(name => {
     return `<button
       type="button"
       class="preset-chip"
-      onclick="applyPreset(${JSON.stringify(commands)})">
+      onclick="applyPresetByName('${name}')">
       ${name}
     </button>`;
   }).join("");
+}
+
+function applyPresetByName(name) {
+  const commands = presetDefinitions[name];
+  if (!commands) return;
+
+  applyPreset(commands);
 }
 
 function applyPreset(commands) {
