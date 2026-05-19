@@ -196,6 +196,28 @@ body.dark button.active-panel {
   opacity: 0.9;
   word-break: break-all;
 }
+
+.command-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.command-chip {
+  padding: 7px 9px;
+  font-size: 12px;
+  border-radius: 999px;
+  background: rgba(128,128,128,0.15);
+  color: var(--text);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.command-chip:hover {
+  background: var(--accent);
+  color: white;
+}
 </style>
 </head>
 <body>
@@ -230,6 +252,9 @@ body.dark button.active-panel {
   <div id="mode-auto" style="display:none;">
     <label for="raw-input">やりたいことを自由に入力（AIに整理させます）</label>
     <textarea id="raw-input" rows="8" placeholder="例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。"></textarea>
+
+<div class="small">変換モードをクリックすると入力欄に追加されます。</div>
+<div id="commandBox" class="command-box"></div>
 
     <label for="rough-tone">トーン</label>
     <select id="rough-tone">
@@ -404,6 +429,22 @@ const defaultPatterns = [
   { name: "マイナンバー候補", regex: "\\b\\d{12}\\b", flags: "g" }
 ];
 
+const commandDefinitions = {
+  tldr: "要点を短く箇条書きでまとめる",
+  eli15: "専門用語を減らし、15歳でも理解できる説明にする",
+  human: "AIっぽさを減らし、自然な文章にする",
+  step: "実行可能な手順に分解する",
+  enemy: "弱点・リスク・反論を洗い出す",
+  real: "事実・推測・不明点を分けて、根拠重視で回答する",
+  gap: "不足情報・確認すべき点を洗い出す",
+  sort: "内容をカテゴリ別に整理する",
+  priority: "重要度・実装優先度を整理する",
+  schema: "JSONスキーマやデータ構造に変換する",
+  code: "実装コード案を出す",
+  test: "テスト観点を作る",
+  prompt: "生成AI向けの高品質プロンプトに再構成する"
+};
+
 function switchTab(tabNum) {
   currentTab = tabNum;
   get("tab1").classList.toggle("active", tabNum === 1);
@@ -464,6 +505,67 @@ function togglePatternManager() {
   updatePanelButtonStates();
 }
 
+function parseCommands(text) {
+  const commandKeys = Object.keys(commandDefinitions);
+  const found = [];
+  let cleaned = text;
+
+  commandKeys.forEach(cmd => {
+    const patterns = [
+      new RegExp(`\\/${cmd}\\b`, "gi"),
+      new RegExp(`\\b${cmd}\\b`, "gi")
+    ];
+
+    patterns.forEach(pattern => {
+      if (pattern.test(cleaned)) {
+        found.push(cmd);
+        cleaned = cleaned.replace(pattern, "");
+      }
+    });
+  });
+
+  return {
+    cleanedText: cleaned.trim(),
+    commands: [...new Set(found)]
+  };
+}
+
+function buildCommandInstructions(commands) {
+  if (!commands || commands.length === 0) return "";
+
+  const lines = commands.map(cmd => {
+    return `・${cmd}: ${commandDefinitions[cmd]}`;
+  });
+
+  return `
+# 追加変換モード
+以下の変換モードを反映してください。
+${lines.join("\n")}
+`;
+}
+
+function renderCommandChips() {
+  const box = get("commandBox");
+  if (!box) return;
+
+  box.innerHTML = Object.keys(commandDefinitions).map(cmd => {
+    return `<button type="button" class="command-chip" onclick="addCommand('${cmd}')">/${cmd}</button>`;
+  }).join("");
+}
+
+function addCommand(cmd) {
+  const input = get("raw-input");
+  const current = input.value.trim();
+
+  if (current.includes(`/${cmd}`)) return;
+
+  input.value = current
+    ? `${current} /${cmd}`
+    : `/${cmd} `;
+
+  input.focus();
+}
+
 function generatePrompt() {
   let p = "";
 
@@ -484,9 +586,12 @@ function generatePrompt() {
 
     p += `\n# トーン\n${tone}\n\n上記に基づき、具体的かつ最適な回答を出力してください。`;
   } else {
-    const raw = get("raw-input").value.trim();
-    const tone = get("rough-tone").value;
+    const rawOriginalget("raw-input").value.trim();
+const tone = get("rough-tone").value;
 
+const parsed = parseCommands(rawOriginal);
+const raw = parsed.cleanedText;
+const commandInstruction = buildCommandInstructions(parsed.commands);
     if (!raw) {
       alert("内容を入力してください");
       return;
