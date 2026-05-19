@@ -565,13 +565,38 @@ function renderCommandChips() {
 
 function addCommand(cmd) {
   const input = get("raw-input");
-  const current = input.value.trim();
 
-  if (current.includes(`/${cmd}`)) return;
+  let current = input.value;
 
-  input.value = current
-    ? `${current} /${cmd}`
-    : `/${cmd} `;
+  const regex = new RegExp(`\\/${cmd}\\b`, "g");
+
+  const button = document.querySelector(
+    `.command-chip[data-cmd="${cmd}"]`
+  );
+
+  // 既に存在 → OFF
+  if (regex.test(current)) {
+
+    current = current.replace(regex, "");
+
+    // 空白整理
+    current = current.replace(/\s+/g, " ").trim();
+
+    input.value = current;
+
+    if (button) {
+      button.classList.remove("active");
+    }
+
+  } else {
+
+    // ON
+    input.value = (current.trim() + ` /${cmd}`).trim();
+
+    if (button) {
+      button.classList.add("active");
+    }
+  }
 
   input.focus();
 }
