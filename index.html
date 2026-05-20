@@ -1211,7 +1211,10 @@ function saveCurrentState() {
 
   localStorage.setItem("currentTab", String(currentTab));
 }
+
 function loadSettings() {
+  isLoading = true;
+
   if (localStorage.getItem("darkMode") === "1") {
     document.body.classList.add("dark");
   }
@@ -1235,10 +1238,13 @@ function loadSettings() {
   get("tone").value = localStorage.getItem("toneValue") || "プロフェッショナル";
 
   const savedTab = Number(localStorage.getItem("currentTab") || "1");
+  currentTab = savedTab;
   switchTab(savedTab);
 
   syncCommandButtons();
   updatePanelButtonStates();
+
+  isLoading = false;
 }
 
 document.addEventListener("DOMContentLoaded", loadSettings);
