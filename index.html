@@ -507,6 +507,41 @@ const presetDefinitions = {
   "JSON設計": ["schema", "real", "prompt"]
 };
 
+
+const aiPresetDefinitions = {
+
+  chatgpt: {
+    name: "ChatGPT",
+    instruction:
+      "役割、目的、条件、制約、出力形式、トーンを明確に整理してください。"
+  },
+
+  claude: {
+    name: "Claude",
+    instruction:
+      "背景、意図、考慮点、判断理由を自然文中心で整理してください。"
+  },
+
+  gemini: {
+    name: "Gemini",
+    instruction:
+      "目的、必要な出力、条件を短く明確に整理してください。"
+  },
+
+  cursor: {
+    name: "Cursor",
+    instruction:
+      "目的、問題、期待動作、制約、修正方針を明確に整理してください。"
+  },
+
+  copilot: {
+    name: "Copilot",
+    instruction:
+      "Goal、Context、Expected behavior、Constraints を短いコメント形式で整理してください。"
+  }
+
+};
+
 function switchTab(tabNum) {
   currentTab = tabNum;
   get("tab1").classList.toggle("active", tabNum === 1);
