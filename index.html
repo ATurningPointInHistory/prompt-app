@@ -869,6 +869,28 @@ function reviewPrompt() {
   const warnings = [];
   const goodPoints = [];
 
+  const vagueWords = ["いい感じ", "なんとか", "適当に", "わかりやすく", "詳しく", "改善", "修正"];
+
+  if (vagueWords.some(word => text.includes(word))) {
+    score -= 10;
+    warnings.push("曖昧な表現が含まれています");
+  }
+
+  if (!text.includes("制約") && !text.includes("禁止") && !text.includes("注意")) {
+    score -= 10;
+    warnings.push("制約・禁止事項が不足しています");
+  }
+
+  if (!text.includes("対象") && !text.includes("読者") && !text.includes("ユーザー")) {
+    score -= 10;
+    warnings.push("対象者が不明です");
+  }
+
+  if (!text.includes("不足") && !text.includes("確認")) {
+    score -= 10;
+    warnings.push("不足情報の確認指示がありません");
+  }
+
   // role
   if (
     text.includes("役割") ||
