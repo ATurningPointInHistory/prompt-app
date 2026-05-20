@@ -754,7 +754,7 @@ function generatePrompt() {
     const rawOriginal = get("raw-input").value.trim();
     const tone = get("rough-tone").value;
     const outputFormat = get("rough-output-format").value;
-
+    const aiTarget = get("ai-target").value;
     const parsed = parseCommands(rawOriginal);
     const raw = parsed.cleanedText;
     const commandInstruction = buildCommandInstructions(parsed.commands);
