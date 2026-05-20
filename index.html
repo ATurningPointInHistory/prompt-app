@@ -325,6 +325,8 @@ body.dark button.active-panel {
     <button onclick="clearHistory()" class="btn-secondary">🗑 履歴全削除</button>
     <button onclick="recheckOutput()" class="btn-secondary">🔍 再チェック</button>
     <button onclick="formatJsonOutput()" class="btn-secondary">📦 JSON整形</button>
+    <button onclick="testJsonFormat()" class="btn-secondary">🧪 JSONテスト</button>
+
 
   </div>
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
@@ -804,6 +806,10 @@ function download() {
 function clearOutput() {
   get("output").innerText = "ここに表示";
   hideWarning();
+}
+
+function testJsonFormat() {
+  get("output").innerText = '{"a":1,"b":2}';
 }
 
 function recheckOutput() {
