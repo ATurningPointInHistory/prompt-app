@@ -815,6 +815,39 @@ function recheckOutput() {
   checkSensitiveContent(text);
 }
 
+function formatJsonOutput() {
+  const output = get("output");
+  let text = output.innerText.trim();
+
+  if (!text || text === "ここに表示") {
+    alert("JSONがありません");
+    return;
+  }
+
+  try {
+
+    // ```json 除去
+    text = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    // JSON化
+    const parsed = JSON.parse(text);
+
+    // 整形
+    const formatted = JSON.stringify(parsed, null, 2);
+
+    output.innerText = formatted;
+
+    alert("JSON整形完了");
+
+  } catch (e) {
+
+    alert("JSON形式が不正です\n\n" + e.message);
+
+  }
+}
 function saveHistory(text) {
   let h = JSON.parse(localStorage.getItem("h") || "[]");
   h.unshift(text);
