@@ -336,6 +336,7 @@ body.dark button.active-panel {
     <button onclick="formatJsonOutput()" class="btn-secondary">📦 JSON整形</button>
     <button onclick="testJsonFormat()" class="btn-secondary">🧪 JSONテスト</button>
     <button onclick="reviewPrompt()" class="btn-secondary">🛠 Promptレビュー</button>
+    <button onclick="testPromptObject()" class="btn-secondary">🧩 内部JSONテスト</button>
 
   </div>
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
@@ -506,7 +507,6 @@ const presetDefinitions = {
   "実装支援": ["step", "code", "test"],
   "JSON設計": ["schema", "real", "prompt"]
 };
-
 
 const aiPresetDefinitions = {
 
@@ -938,6 +938,28 @@ function clearOutput() {
 
 function testJsonFormat() {
   get("output").innerText = '{"a":1,"b":2}';
+}
+
+function testPromptObject() {
+
+  const raw =
+    get("raw-input").value.trim();
+
+  const tone =
+    get("rough-tone").value;
+
+  const parsed =
+    parseCommands(raw);
+
+  const obj =
+    buildPromptObject(
+      parsed.cleanedText,
+      tone,
+      parsed.commands
+    );
+
+  get("output").innerText =
+    JSON.stringify(obj, null, 2);
 }
 
 function recheckOutput() {
