@@ -759,6 +759,25 @@ function generatePrompt() {
     const raw = parsed.cleanedText;
     const commandInstruction = buildCommandInstructions(parsed.commands);
 
+    let aiInstruction = "";
+
+    if (
+      aiTarget &&
+      aiPresetDefinitions[aiTarget]
+    ) {
+
+      const aiPreset =
+        aiPresetDefinitions[aiTarget];
+
+      aiInstruction = `
+
+    # AI向け最適化
+    対象AI：${aiPreset.name}
+
+    ${aiPreset.instruction}
+    `;
+    }
+
     if (!raw) {
       alert("内容を入力してください");
       return;
