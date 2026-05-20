@@ -411,7 +411,9 @@ body.dark button.active-panel {
 
 <script>
 const get = (id) => document.getElementById(id);
+
 let currentTab = 1;
+let isLoading = false;
 
 const defaultTemplates = [
   {
