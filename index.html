@@ -502,7 +502,10 @@ function switchTab(tabNum) {
   get("main-btn").innerText = tabNum === 1
     ? "⚡ プロンプトを生成する"
     : "🪄 AI整形用プロンプトを作る";
-  localStorage.setItem("currentTab", String(tabNum));
+  if (!isLoading) {
+    localStorage.setItem("currentTab",
+String(tabNum));
+  }
 }
 
 function toggleDark() {
@@ -1194,6 +1197,7 @@ function escapeHtml(str) {
 }
 
 function saveCurrentState() {
+  if (isLoading) return;
   if (!get("raw-input")) return;
 
   localStorage.setItem("rawInput", get("raw-input").value);
@@ -1207,7 +1211,6 @@ function saveCurrentState() {
 
   localStorage.setItem("currentTab", String(currentTab));
 }
-
 function loadSettings() {
   if (localStorage.getItem("darkMode") === "1") {
     document.body.classList.add("dark");
