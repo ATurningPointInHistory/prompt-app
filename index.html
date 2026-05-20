@@ -326,7 +326,7 @@ body.dark button.active-panel {
     <button onclick="recheckOutput()" class="btn-secondary">🔍 再チェック</button>
     <button onclick="formatJsonOutput()" class="btn-secondary">📦 JSON整形</button>
     <button onclick="testJsonFormat()" class="btn-secondary">🧪 JSONテスト</button>
-
+    <button onclick="reviewPrompt()" class="btn-secondary">🛠 Promptレビュー</button>
 
   </div>
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
@@ -854,6 +854,78 @@ function formatJsonOutput() {
 
   }
 }
+
+function reviewPrompt() {
+
+  const text = get("output").innerText.trim();
+
+  if (!text || text === "ここに表示") {
+    alert("先に生成してください");
+    return;
+  }
+
+  let score = 100;
+
+  const warnings = [];
+  const goodPoints = [];
+
+  // role
+  if (
+    text.includes("役割") ||
+    text.includes('"role"')
+  ) {
+    goodPoints.push("役割が明確");
+  } else {
+    score -= 15;
+    warnings.push("役割が不明");
+  }
+
+  // 出力形式
+  if (
+    text.includes("出力形式") ||
+    text.includes('"output_format"')
+  ) {
+    goodPoints.push("出力形式あり");
+  } else {
+    score -= 15;
+    warnings.push("出力形式が曖昧");
+  }
+
+  // 条件
+  if (
+    text.includes("条件") ||
+    text.includes("詳細")
+  ) {
+    goodPoints.push("条件記載あり");
+  } else {
+    score -= 10;
+    warnings.push("条件不足の可能性");
+  }
+
+  // 長さ
+  if (text.length < 120) {
+    score -= 10;
+    warnings.push("内容が短く曖昧な可能性");
+  }
+
+  let result = `Prompt Score : ${score} / 100\n\n`;
+
+  if (goodPoints.length > 0) {
+    result += "良い点:\n";
+    result += goodPoints.map(x => `✔ ${x}`).join("\n");
+    result += "\n\n";
+  }
+
+  if (warnings.length > 0) {
+    result += "改善候補:\n";
+    result += warnings.map(x => `⚠ ${x}`).join("\n");
+  } else {
+    result += "非常に良いPromptです";
+  }
+
+  alert(result);
+}
+
 function saveHistory(text) {
   let h = JSON.parse(localStorage.getItem("h") || "[]");
   h.unshift(text);
