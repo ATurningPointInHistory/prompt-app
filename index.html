@@ -558,6 +558,129 @@ function buildPromptObject(raw, tone, commands) {
   };
 }
 
+function convertForAI(obj, aiTarget, outputFormat) {
+  if (outputFormat === "json") {
+    return JSON.stringify(obj, null, 2);
+  }
+
+  switch (aiTarget) {
+    case "chatgpt":
+      return convertForChatGPT(obj);
+
+    case "claude":
+      return convertForClaude(obj);
+
+    case "gemini":
+      return convertForGemini(obj);
+
+    case "cursor":
+      return convertForCursor(obj);
+
+    case "copilot":
+      return convertForCopilot(obj);
+
+    default:
+      return convertForChatGPT(obj);
+  }
+}
+
+function convertForChatGPT(obj) {
+  return `以下の「やりたいこと」を分析し、プロンプトの各項目に整理して再構成してください。
+
+【やりたいこと】
+${obj.purpose}
+
+${buildCommandInstructions(obj.commands)}
+---
+出力は以下の形式で整理してください：
+役割：
+目的：
+背景・条件：
+出力形式：
+トーン：${obj.tone}`;
+}
+
+function convertForClaude(obj) {
+  return `背景：
+${obj.purpose}
+
+意図：
+この依頼で達成したいことを整理してください。
+
+考慮点：
+前提、制約、不明点、判断理由を丁寧に整理してください。
+
+${buildCommandInstructions(obj.commands)}
+
+期待する出力：
+読みやすく、自然文中心で、必要に応じて箇条書きで回答してください。
+
+トーン：
+${obj.tone}`;
+}
+
+function convertForGemini(obj) {
+  return `目的：
+${obj.purpose}
+
+必要な出力：
+要点を短く整理し、実行しやすい形で回答してください。
+
+条件：
+- 簡潔に
+- 重要点を優先
+- 必要に応じて箇条書き
+
+${buildCommandInstructions(obj.commands)}
+
+トーン：
+${obj.tone}`;
+}
+
+function convertForCursor(obj) {
+  return `目的:
+${obj.purpose}
+
+現状:
+現在のコードや動作状況を整理してください。
+
+問題:
+発生している不具合・課題・原因候補を整理してください。
+
+期待動作:
+修正後にどう動くべきかを明確にしてください。
+
+制約:
+既存UI・既存機能を壊さないでください。
+
+${buildCommandInstructions(obj.commands)}
+
+出力:
+1. 原因
+2. 修正方針
+3. 修正コード
+4. 確認方法`;
+}
+
+function convertForCopilot(obj) {
+  return `// Goal:
+${obj.purpose}
+
+// Context:
+// 現在の状況・背景・関連コードの前提を整理してください。
+
+// Expected behavior:
+// 期待する動作・完成状態を整理してください。
+
+// Constraints:
+// 制約・禁止事項・注意点を整理してください。
+
+${buildCommandInstructions(obj.commands)}
+
+// Output:
+// 必要なコード、修正方針、簡潔な説明を出力してください。`;
+}
+
 function switchTab(tabNum) {
   currentTab = tabNum;
   get("tab1").classList.toggle("active", tabNum === 1);
@@ -783,130 +906,33 @@ ${tone}
     const rawOriginal = get("raw-input").value.trim();
     const tone = get("rough-tone").value;
     const outputFormat = get("rough-output-format").value;
-    const aiTarget = get("ai-target").value;
+    const aiTarget = get("ai-target").value || "chatgpt";
 
     const parsed = parseCommands(rawOriginal);
     const raw = parsed.cleanedText;
-    const commandInstruction = buildCommandInstructions(parsed.commands);
 
     if (!raw) {
       alert("内容を入力してください");
       return;
     }
 
-    if (outputFormat === "json") {
-      p = `以下の「やりたいこと」を分析し、生成AI向けプロンプト設計データとしてJSON形式に構造化してください。不明な点は推測で補完してよいですが、推測した内容は "assumptions" に分けてください。
+    const obj = buildPromptObject(
+      raw,
+      tone,
+      parsed.commands
+    );
 
-【やりたいこと】
-${raw}
-
-${commandInstruction}
----
-必ず以下のJSON形式だけで出力してください。説明文やMarkdownは不要です。
-
-{
-  "role": "",
-  "purpose": "",
-  "background": [],
-  "conditions": [],
-  "constraints": [],
-  "output_format": "",
-  "tone": "${tone}",
-  "additional_instructions": [],
-  "commands": [],
-  "assumptions": [],
-  "missing_information": []
-}`;
-
-    } else if (aiTarget === "copilot") {
-      p = `// Goal:
-${raw}
-
-// Context:
-// 現在の状況・背景・関連コードの前提を整理してください。
-
-// Expected behavior:
-// 期待する動作・完成状態を整理してください。
-
-// Constraints:
-// 制約・禁止事項・注意点を整理してください。
-
-// Output:
-// 必要なコード、修正方針、簡潔な説明を出力してください。`;
-
-    } else if (aiTarget === "cursor") {
-      p = `目的:
-${raw}
-
-現状:
-現在のコードや動作状況を整理してください。
-
-問題:
-発生している不具合・課題・原因候補を整理してください。
-
-期待動作:
-修正後にどう動くべきかを明確にしてください。
-
-制約:
-既存UI・既存機能を壊さないでください。
-
-出力:
-1. 原因
-2. 修正方針
-3. 修正コード
-4. 確認方法`;
-
-    } else if (aiTarget === "claude") {
-      p = `背景:
-${raw}
-
-意図:
-この依頼で達成したいことを整理してください。
-
-考慮点:
-前提、制約、不明点、判断理由を丁寧に整理してください。
-
-期待する出力:
-読みやすく、自然文中心で、必要に応じて箇条書きで回答してください。
-
-トーン:
-${tone}`;
-
-    } else if (aiTarget === "gemini") {
-      p = `目的:
-${raw}
-
-必要な出力:
-要点を短く整理し、実行しやすい形で回答してください。
-
-条件:
-- 簡潔に
-- 重要点を優先
-- 必要に応じて箇条書き
-
-トーン:
-${tone}`;
-
-    } else {
-      p = `以下の「やりたいこと」を分析し、プロンプトの各項目（役割、目的、背景、条件、出力形式、トーン）に整理して再構成してください。不明な点は最適と思われる内容を補完してください。
-
-【やりたいこと】
-${raw}
-
-${commandInstruction}
----
-出力は以下の形式で整理してください：
-役割：
-目的：
-背景・条件：
-出力形式：
-トーン：${tone}`;
-    }
+    p = convertForAI(
+      obj,
+      aiTarget,
+      outputFormat
+    );
   }
 
   get("output").innerText = p;
   saveHistory(p);
   checkSensitiveContent(p);
+  saveCurrentState();
 }
 
 function copyText() {
@@ -1511,6 +1537,7 @@ function saveCurrentState() {
   localStorage.setItem("aiTarget", get("ai-target").value);
 }
 
+
 function loadSettings() {
   isLoading = true;
 
@@ -1534,7 +1561,8 @@ function loadSettings() {
   get("task").value = localStorage.getItem("taskValue") || "";
   get("details").value = localStorage.getItem("detailsValue") || "";
   get("tone").value = localStorage.getItem("toneValue") || "プロフェッショナル";
-  get("ai-target").value = localStorage.getItem("aiTarget") || "";
+  get("ai-target").value = localStorage.getItem("aiTarget") || "chatgpt";
+
   const savedTab = Number(localStorage.getItem("currentTab") || "1");
   currentTab = savedTab;
   switchTab(savedTab);
