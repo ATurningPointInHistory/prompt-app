@@ -1083,7 +1083,6 @@ function formatJsonOutput() {
 }
 
 function reviewPrompt() {
-
   const text = get("output").innerText.trim();
 
   if (!text || text === "ここに表示") {
@@ -1095,67 +1094,65 @@ function reviewPrompt() {
 
   const warnings = [];
   const goodPoints = [];
+  const suggestions = [];
 
   const vagueWords = ["いい感じ", "なんとか", "適当に", "わかりやすく", "詳しく", "改善", "修正"];
 
   if (vagueWords.some(word => text.includes(word))) {
     score -= 10;
     warnings.push("曖昧な表現が含まれています");
+    suggestions.push("「何を」「どの範囲で」「どの状態になれば完了か」を具体化してください。");
   }
 
   if (!text.includes("制約") && !text.includes("禁止") && !text.includes("注意")) {
     score -= 10;
     warnings.push("制約・禁止事項が不足しています");
+    suggestions.push("既存仕様を壊さない、API直送しない、出力形式を守るなどの制約を追加してください。");
   }
 
   if (!text.includes("対象") && !text.includes("読者") && !text.includes("ユーザー")) {
     score -= 10;
     warnings.push("対象者が不明です");
+    suggestions.push("初心者向け、開発者向け、管理者向けなど、想定する読み手を指定してください。");
   }
 
   if (!text.includes("不足") && !text.includes("確認")) {
     score -= 10;
     warnings.push("不足情報の確認指示がありません");
+    suggestions.push("不明点がある場合は、推測せず確認するか、仮定として明示する指示を追加してください。");
   }
 
-  // role
-  if (
-    text.includes("役割") ||
-    text.includes('"role"')
-  ) {
+  if (text.includes("役割") || text.includes('"role"')) {
     goodPoints.push("役割が明確");
   } else {
     score -= 15;
     warnings.push("役割が不明");
+    suggestions.push("例：あなたはHTML/JavaScriptに詳しいフロントエンド設計者です、のように役割を明記してください。");
   }
 
-  // 出力形式
-  if (
-    text.includes("出力形式") ||
-    text.includes('"output_format"')
-  ) {
+  if (text.includes("出力形式") || text.includes('"output_format"')) {
     goodPoints.push("出力形式あり");
   } else {
     score -= 15;
     warnings.push("出力形式が曖昧");
+    suggestions.push("箇条書き、表、JSON、修正コードなど、期待する出力形式を指定してください。");
   }
 
-  // 条件
-  if (
-    text.includes("条件") ||
-    text.includes("詳細")
-  ) {
+  if (text.includes("条件") || text.includes("詳細") || text.includes("制約")) {
     goodPoints.push("条件記載あり");
   } else {
     score -= 10;
     warnings.push("条件不足の可能性");
+    suggestions.push("前提、制約、対象範囲、禁止事項を追加してください。");
   }
 
-  // 長さ
   if (text.length < 120) {
     score -= 10;
     warnings.push("内容が短く曖昧な可能性");
+    suggestions.push("背景、目的、条件、期待する完成形を1〜2文ずつ追加してください。");
   }
+
+  score = Math.max(0, score);
 
   let result = `Prompt Score : ${score} / 100\n\n`;
 
@@ -1168,13 +1165,18 @@ function reviewPrompt() {
   if (warnings.length > 0) {
     result += "改善候補:\n";
     result += warnings.map(x => `⚠ ${x}`).join("\n");
+    result += "\n\n";
+  }
+
+  if (suggestions.length > 0) {
+    result += "改善案:\n";
+    result += suggestions.map(x => `・${x}`).join("\n");
   } else {
-    result += "非常に良いPromptです";
+    result += "大きな改善点は見つかりません。";
   }
 
   alert(result);
 }
-
 function saveHistory(text) {
   let h = JSON.parse(localStorage.getItem("h") || "[]");
   h.unshift(text);
