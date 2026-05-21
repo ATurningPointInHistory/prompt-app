@@ -542,6 +542,22 @@ const aiPresetDefinitions = {
 
 };
 
+function buildPromptObject(raw, tone, commands) {
+  return {
+    role: "",
+    purpose: raw,
+    background: [],
+    conditions: [],
+    constraints: [],
+    output_format: "",
+    tone: tone,
+    additional_instructions: [],
+    commands: commands || [],
+    assumptions: [],
+    missing_information: []
+  };
+}
+
 function switchTab(tabNum) {
   currentTab = tabNum;
   get("tab1").classList.toggle("active", tabNum === 1);
@@ -934,6 +950,10 @@ function download() {
 function clearOutput() {
   get("output").innerText = "ここに表示";
   hideWarning();
+}
+
+function testJsonFormat() {
+  get("output").innerText = '{"a":1,"b":2}';
 }
 
 function testPromptObject() {
@@ -1483,13 +1503,12 @@ function saveCurrentState() {
   localStorage.setItem("rawInput", get("raw-input").value);
   localStorage.setItem("roughTone", get("rough-tone").value);
   localStorage.setItem("roughOutputFormat", get("rough-output-format").value);
-
   localStorage.setItem("roleValue", get("role").value);
   localStorage.setItem("taskValue", get("task").value);
   localStorage.setItem("detailsValue", get("details").value);
   localStorage.setItem("toneValue", get("tone").value);
-
   localStorage.setItem("currentTab", String(currentTab));
+  localStorage.setItem("aiTarget", get("ai-target").value);
 }
 
 function loadSettings() {
@@ -1511,12 +1530,11 @@ function loadSettings() {
   get("raw-input").value = localStorage.getItem("rawInput") || "";
   get("rough-tone").value = localStorage.getItem("roughTone") || "プロフェッショナル";
   get("rough-output-format").value = localStorage.getItem("roughOutputFormat") || "prompt";
-
   get("role").value = localStorage.getItem("roleValue") || "";
   get("task").value = localStorage.getItem("taskValue") || "";
   get("details").value = localStorage.getItem("detailsValue") || "";
   get("tone").value = localStorage.getItem("toneValue") || "プロフェッショナル";
-
+  get("ai-target").value = localStorage.getItem("aiTarget") || "";
   const savedTab = Number(localStorage.getItem("currentTab") || "1");
   currentTab = savedTab;
   switchTab(savedTab);
