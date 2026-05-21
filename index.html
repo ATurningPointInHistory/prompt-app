@@ -543,21 +543,44 @@ const aiPresetDefinitions = {
 };
 
 function buildPromptObject(raw, tone, commands) {
+  const safeRaw = String(raw || "").trim();
+  const safeTone = tone || "プロフェッショナル";
+  const safeCommands = Array.isArray(commands) ? commands : [];
+
   return {
-    role: "",
-    purpose: raw,
-    background: [],
-    conditions: [],
-    constraints: [],
-    output_format: "",
-    tone: tone,
-    additional_instructions: [],
-    commands: commands || [],
+    version: "5.6_dev",
+
+    source: {
+      input_type: "rough",
+      raw_text: safeRaw
+    },
+
+    prompt: {
+      role: "AIアシスタント",
+      purpose: safeRaw,
+      background: [],
+      conditions: [],
+      constraints: [],
+      output_format: "目的に合った最適な形式で出力する",
+      tone: safeTone,
+      additional_instructions: []
+    },
+
+    commands: safeCommands.map(cmd => ({
+      key: cmd,
+      instruction: commandDefinitions[cmd] || ""
+    })),
+
     assumptions: [],
-    missing_information: []
+    missing_information: [],
+
+    metadata: {
+      created_at: new Date().toISOString(),
+      app_name: "AIプロンプト生成Pro",
+      app_version: "v5.6_dev"
+    }
   };
 }
-
 function convertForAI(obj, aiTarget, outputFormat) {
   if (outputFormat === "json") {
     return JSON.stringify(obj, null, 2);
