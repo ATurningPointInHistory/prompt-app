@@ -543,21 +543,6 @@ const aiPresetDefinitions = {
 };
 
 function buildPromptObject(raw, tone, commands) {
-  return {
-    role: "",
-    purpose: raw,
-    background: [],
-    conditions: [],
-    constraints: [],
-    output_format: "",
-    tone: tone,
-    additional_instructions: [],
-    commands: commands || [],
-    assumptions: [],
-    missing_information: []
-  };
-}
-
 function convertForAI(obj, aiTarget, outputFormat) {
   if (outputFormat === "json") {
     return JSON.stringify(obj, null, 2);
@@ -770,6 +755,20 @@ function buildCommandInstructions(commands) {
 
   const lines = commands.map(cmd => {
     return `・${cmd}: ${commandDefinitions[cmd]}`;
+  });
+
+  return `
+# 追加変換モード
+以下の変換モードを反映してください。
+${lines.join("\n")}
+`;
+}
+
+function buildCommandInstructionsFromObject(obj) {
+  if (!obj.commands || obj.commands.length === 0) return "";
+
+  const lines = obj.commands.map(cmd => {
+    return `・${cmd.key}: ${cmd.instruction}`;
   });
 
   return `
