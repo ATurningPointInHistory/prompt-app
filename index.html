@@ -543,6 +543,21 @@ const aiPresetDefinitions = {
 };
 
 function buildPromptObject(raw, tone, commands) {
+  return {
+    role: "",
+    purpose: raw,
+    background: [],
+    conditions: [],
+    constraints: [],
+    output_format: "",
+    tone: tone,
+    additional_instructions: [],
+    commands: commands || [],
+    assumptions: [],
+    missing_information: []
+  };
+}
+
 function convertForAI(obj, aiTarget, outputFormat) {
   if (outputFormat === "json") {
     return JSON.stringify(obj, null, 2);
