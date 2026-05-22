@@ -417,34 +417,34 @@ body.dark button.active-panel {
     <div id="patternList"></div>
   </div>
 
-  <div class="section-box">
-    <label>履歴（最新5件）</label>
-    <div id="ai-preset-manager" class="section-box" style="display:none;">
-      <h3>AIプリセット管理</h3>
-      <div class="small">AI別の変換方針を編集できます。</div>
+<div id="ai-preset-manager" class="section-box" style="display:none;">
+  <h3>AIプリセット管理</h3>
+  <div class="small">AI別の変換方針を編集できます。</div>
 
-      <label for="aiPresetTarget">対象AI</label>
-      <select id="aiPresetTarget" onchange="loadAiPresetToEditor()">
-        <option value="chatgpt">ChatGPT</option>
-        <option value="claude">Claude</option>
-        <option value="gemini">Gemini</option>
-        <option value="cursor">Cursor</option>
-        <option value="copilot">Copilot</option>
-      </select>
+  <label for="aiPresetTarget">対象AI</label>
+  <select id="aiPresetTarget" onchange="loadAiPresetToEditor()">
+    <option value="chatgpt">ChatGPT</option>
+    <option value="claude">Claude</option>
+    <option value="gemini">Gemini</option>
+    <option value="cursor">Cursor</option>
+    <option value="copilot">Copilot</option>
+  </select>
 
-      <label for="aiPresetName">表示名</label>
-      <input id="aiPresetName" placeholder="例：ChatGPT">
+  <label for="aiPresetName">表示名</label>
+  <input id="aiPresetName" placeholder="例：ChatGPT">
 
-      <label for="aiPresetInstruction">変換方針</label>
-      <textarea id="aiPresetInstruction" rows="6" placeholder="このAI向けの変換方針を入力"></textarea>
+  <label for="aiPresetInstruction">変換方針</label>
+  <textarea id="aiPresetInstruction" rows="6" placeholder="このAI向けの変換方針を入力"></textarea>
 
-      <div class="btn-group">
-        <button onclick="saveAiPresetFromEditor()">保存</button>
-        <button onclick="resetAiPreset()">初期値に戻す</button>
-      </div>
-    </div>
-    <div id="history"></div>
+  <div class="btn-group">
+    <button onclick="saveAiPresetFromEditor()">保存</button>
+    <button onclick="resetAiPreset()">初期値に戻す</button>
   </div>
+</div>
+
+<div class="section-box">
+  <label>履歴（最新5件）</label>
+  <div id="history"></div>
 </div>
 
 <script>
@@ -843,6 +843,47 @@ function toggleAiPresetManager() {
   }
 
   updatePanelButtonStates();
+}
+
+function loadAiPresetToEditor() {
+  const target = get("aiPresetTarget").value;
+  const preset = getAiPreset(target);
+
+  get("aiPresetName").value = preset.name || "";
+  get("aiPresetInstruction").value = preset.instruction || "";
+}
+
+function saveAiPresetFromEditor() {
+  const target = get("aiPresetTarget").value;
+  const name = get("aiPresetName").value.trim();
+  const instruction = get("aiPresetInstruction").value.trim();
+
+  if (!name || !instruction) {
+    alert("表示名と変換方針を入力してください");
+    return;
+  }
+
+  const presets = getAiPresets();
+
+  presets[target] = {
+    name,
+    instruction
+  };
+
+  saveAiPresets(presets);
+  alert("AIプリセットを保存しました");
+}
+
+function resetAiPreset() {
+  const target = get("aiPresetTarget").value;
+
+  const saved = loadJson("aiPresets", {});
+  delete saved[target];
+
+  saveAiPresets(saved);
+  loadAiPresetToEditor();
+
+  alert("初期値に戻しました");
 }
 
 function parseCommands(text) {
