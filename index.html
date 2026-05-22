@@ -542,6 +542,28 @@ const aiPresetDefinitions = {
 
 };
 
+function getAiPresets() {
+  const saved = loadJson("aiPresets", null);
+
+  if (!saved) {
+    return aiPresetDefinitions;
+  }
+
+  return {
+    ...aiPresetDefinitions,
+    ...saved
+  };
+}
+
+function saveAiPresets(presets) {
+  localStorage.setItem("aiPresets", JSON.stringify(presets));
+}
+
+function getAiPreset(aiTarget) {
+const presets = getAiPresets();
+return presets[aiTarget] || presets.chatgpt;
+}
+
 function buildPromptObject(raw, tone, commands) {
   const safeRaw = String(raw || "").trim();
   const safeTone = tone || "プロフェッショナル";
@@ -585,6 +607,8 @@ function convertForAI(obj, aiTarget, outputFormat) {
   if (outputFormat === "json") {
     return JSON.stringify(obj, null, 2);
   }
+
+  obj.ai_preset = getAiPreset(aiTarget);
 
   switch (aiTarget) {
     case "chatgpt":
@@ -1559,6 +1583,17 @@ function escapeHtml(str) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function loadJson(key, fallback) {
+  try {
+    return JSON.parse(
+      localStorage.getItem(key) || JSON.stringify(fallback)
+    );
+  } catch {
+    localStorage.removeItem(key);
+    return fallback;
+  }
 }
 
 function saveCurrentState() {
