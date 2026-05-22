@@ -451,6 +451,8 @@ body.dark button.active-panel {
   <div id="history"></div>
 </div>
 
+</div>
+
 <script>
 const get = (id) => document.getElementById(id);
 
@@ -1378,7 +1380,7 @@ function reviewPrompt() {
 
   const checks = [
 
-    ...(selectedAi !== "claude"
+    ...(!["claude", "cursor", "copilot"].includes(selectedAi)
       ? [{
           name: "役割",
           ok: text.includes("役割") || text.includes('"role"'),
@@ -1406,7 +1408,8 @@ function reviewPrompt() {
         text.includes("背景") ||
         text.includes("条件") ||
         text.includes('"conditions"') ||
-        text.includes("Context"),
+        text.includes("Context") ||
+        text.includes("現状"),
       penalty: 10,
       warning: "背景・条件が不足しています",
       suggestion: "前提、対象範囲、現在の状況を追加してください。"
@@ -1426,7 +1429,7 @@ function reviewPrompt() {
         }]
       : []),
 
-    ...(selectedAi !== "claude"
+    ...(!["claude", "cursor"].includes(selectedAi)
       ? [{
           name: "出力形式",
           ok:
@@ -1439,7 +1442,7 @@ function reviewPrompt() {
         }]
       : []),
 
-    ...(selectedAi !== "copilot"
+    ...(!["cursor", "copilot"].includes(selectedAi)
       ? [{
           name: "トーン",
           ok:
