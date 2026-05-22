@@ -781,10 +781,25 @@ function closeAllManagers() {
 }
 
 function updatePanelButtonStates() {
-  get("templateBtn").classList.toggle("active-panel", get("template-manager").style.display !== "none");
-  get("dangerBtn").classList.toggle("active-panel", get("danger-manager").style.display !== "none");
-  get("patternBtn").classList.toggle("active-panel", get("pattern-manager").style.display !== "none");
-  get("aiPresetBtn").classList.toggle("active-panel", get("ai-preset-manager").style.display !== "none");
+  get("templateBtn").classList.toggle(
+    "active-panel",
+    get("template-manager").style.display !== "none"
+  );
+
+  get("dangerBtn").classList.toggle(
+    "active-panel",
+    get("danger-manager").style.display !== "none"
+  );
+
+  get("patternBtn").classList.toggle(
+    "active-panel",
+    get("pattern-manager").style.display !== "none"
+  );
+
+  get("aiPresetBtn").classList.toggle(
+    "active-panel",
+    get("ai-preset-manager").style.display !== "none"
+  );
 }
 
 function toggleTemplateManager() {
