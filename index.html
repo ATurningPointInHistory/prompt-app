@@ -1369,7 +1369,7 @@ function reviewPrompt() {
 
     aiSpecificChecks.forEach(check => {
       if (check.ok) {
-        goodPoints.push(`AI向け最適化OK`);
+        goodPoints.push(`AI別評価OK：${selectedAi}`);
       } else {
         score -= 6;
         warnings.push(check.warning);
