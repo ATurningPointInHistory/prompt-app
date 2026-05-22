@@ -657,12 +657,18 @@ function convertForAI(obj, aiTarget, outputFormat) {
 }
 
 function convertForChatGPT(obj) {
+
+  const preset = obj.ai_preset || {};
+
   return `以下の「やりたいこと」を分析し、プロンプトの各項目に整理して再構成してください。
+
+${preset.instruction || ""}
 
 【やりたいこと】
 ${obj.prompt.purpose}
 
 ${buildCommandInstructionsFromObject(obj)}
+
 ---
 出力は以下の形式で整理してください：
 役割：
@@ -673,8 +679,13 @@ ${buildCommandInstructionsFromObject(obj)}
 }
 
 function convertForClaude(obj) {
+
+  const preset = obj.ai_preset || {};
+
   return `背景：
 ${obj.prompt.purpose}
+
+${preset.instruction || ""}
 
 意図：
 この依頼で達成したいことを整理してください。
