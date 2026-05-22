@@ -1323,7 +1323,7 @@ function reviewPrompt() {
   alert(result);
 }
 function saveHistory(text) {
-let h = loadJson("h", []);
+  let h = loadJson("h", []);
   h.unshift(text);
   h = h.slice(0, 5);
   localStorage.setItem("h", JSON.stringify(h));
@@ -1350,7 +1350,7 @@ function reuseHistory(text) {
 }
 
 function deleteHistory(index) {
-let h = loadJson("h", []);
+  let h = loadJson("h", []);
   h.splice(index, 1);
   localStorage.setItem("h", JSON.stringify(h));
   renderHistory();
@@ -1374,7 +1374,7 @@ function saveTemplate() {
     return;
   }
 
-  let list = JSON.parse(localStorage.getItem("templates") || "[]");
+  let list = loadJson("templates", []);
   list.push({ name, role, task, details, tone });
   localStorage.setItem("templates", JSON.stringify(list));
 
@@ -1390,7 +1390,7 @@ function saveTemplate() {
 }
 
 function renderTemplates() {
-const local = loadJson("templates", []);
+  const local = loadJson("templates", []);
   const all = [...defaultTemplates, ...local];
 
   get("templateList").innerHTML = all.map((t, i) => `
@@ -1406,7 +1406,7 @@ const local = loadJson("templates", []);
 }
 
 function renderTemplateSelect() {
-const local = loadJson("templates", []);
+  const local = loadJson("templates", []);
   const all = [...defaultTemplates, ...local];
 
   get("templateSelect").innerHTML =
@@ -1434,7 +1434,7 @@ function applyTemplateAll(i) {
 }
 
 function deleteTemplate(i) {
-  let list = JSON.parse(localStorage.getItem("templates") || "[]");
+  let list = loadJson("templates", []);
   list.splice(i, 1);
   localStorage.setItem("templates", JSON.stringify(list));
   renderTemplates();
@@ -1448,7 +1448,7 @@ function saveFromHistory(text) {
   const roleMatch = text.match(/あなたは「(.+?)」/);
   const taskMatch = text.match(/# 目的\n([\s\S]*?)(\n#|\n$|$)/);
 
-  let list = JSON.parse(localStorage.getItem("templates") || "[]");
+  let list = loadJson("templates", []);
   list.push({
     name,
     role: roleMatch ? roleMatch[1] : "",
@@ -1520,7 +1520,7 @@ function saveDangerWord() {
 }
 
 function renderDangerWords() {
-  const local = JSON.parse(localStorage.getItem("dangerWords") || "[]");
+  const local = loadJson("dangerWords", []);
   const all = [...defaultDangerWords, ...local];
 
   get("dangerList").innerHTML = all.map((word, i) => `
@@ -1538,14 +1538,14 @@ function renderDangerWords() {
 }
 
 function deleteDangerWord(index) {
-  let list = JSON.parse(localStorage.getItem("dangerWords") || "[]");
+  let list = loadJson("dangerWords", []);
   list.splice(index, 1);
   localStorage.setItem("dangerWords", JSON.stringify(list));
   renderDangerWords();
 }
 
 function getAllDangerWords() {
-  const local = JSON.parse(localStorage.getItem("dangerWords") || "[]");
+  const local = loadJson("dangerWords", []);
   return [...defaultDangerWords, ...local];
 }
 
@@ -1579,7 +1579,7 @@ function savePattern() {
 }
 
 function renderPatterns() {
-  const local = JSON.parse(localStorage.getItem("dangerPatterns") || "[]");
+  const local = loadJson("dangerPatterns", []);
   const all = [...defaultPatterns, ...local];
 
   get("patternList").innerHTML = all.map((p, i) => `
@@ -1598,14 +1598,14 @@ function renderPatterns() {
 }
 
 function deletePattern(index) {
-  let list = JSON.parse(localStorage.getItem("dangerPatterns") || "[]");
+  let list = loadJson("dangerPatterns", []);
   list.splice(index, 1);
   localStorage.setItem("dangerPatterns", JSON.stringify(list));
   renderPatterns();
 }
 
 function getAllPatterns() {
-  const local = JSON.parse(localStorage.getItem("dangerPatterns") || "[]");
+  const local = loadJson("dangerPatterns", []);
   return [...defaultPatterns, ...local];
 }
 
