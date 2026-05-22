@@ -675,6 +675,12 @@ ${obj.prompt.purpose}
 
 ${buildCommandInstructionsFromObject(obj)}
 
+不明点がある場合は、
+・不足情報
+・確認事項
+・仮定した内容
+を分けて整理してください。
+
 ---
 出力は以下の形式で整理してください：
 役割：
@@ -701,6 +707,12 @@ ${preset.instruction || ""}
 
 ${buildCommandInstructionsFromObject(obj)}
 
+不明点がある場合は、
+・不足情報
+・確認事項
+・仮定した内容
+を分けて整理してください。
+
 期待する出力：
 読みやすく、自然文中心で、必要に応じて箇条書きで回答してください。
 
@@ -720,12 +732,21 @@ ${preset.instruction || ""}
 必要な出力：
 要点を短く整理し、実行しやすい形で回答してください。
 
+期待結果：
+ユーザーがすぐ実行・判断できる形で整理してください。
+
 条件：
 - 簡潔に
 - 重要点を優先
 - 必要に応じて箇条書き
 
 ${buildCommandInstructionsFromObject(obj)}
+
+不明点がある場合は、
+・不足情報
+・確認事項
+・仮定した内容
+を分けて整理してください。
 
 トーン：
 ${obj.prompt.tone}`;
@@ -754,6 +775,12 @@ ${preset.instruction || ""}
 
 ${buildCommandInstructionsFromObject(obj)}
 
+不明点がある場合は、
+・不足情報
+・確認事項
+・仮定した内容
+を分けて整理してください。
+
 出力:
 1. 原因
 2. 修正方針
@@ -780,6 +807,12 @@ ${preset.instruction || ""}
 // 制約・禁止事項・注意点を整理してください。
 
 ${buildCommandInstructionsFromObject(obj)}
+
+不明点がある場合は、
+・不足情報
+・確認事項
+・仮定した内容
+を分けて整理してください。
 
 // Output:
 // 必要なコード、修正方針、簡潔な説明を出力してください。`;
