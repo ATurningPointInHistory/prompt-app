@@ -1377,58 +1377,96 @@ function reviewPrompt() {
     });
 
   const checks = [
-    {
-      name: "役割",
-      ok: text.includes("役割") || text.includes('"role"'),
-      penalty: 12,
-      warning: "役割が不明です",
-      suggestion: "誰として回答するかを明記してください。例：あなたはHTML/JavaScriptに詳しい設計者です。"
-    },
+
+    ...(selectedAi !== "claude"
+      ? [{
+          name: "役割",
+          ok: text.includes("役割") || text.includes('"role"'),
+          penalty: 12,
+          warning: "役割が不明です",
+          suggestion: "誰として回答するかを明記してください。例：あなたはHTML/JavaScriptに詳しい設計者です。"
+        }]
+      : []),
+
     {
       name: "目的",
-      ok: text.includes("目的") || text.includes('"purpose"') || text.includes("Goal"),
+      ok:
+        text.includes("目的") ||
+        text.includes('"purpose"') ||
+        text.includes("Goal") ||
+        text.includes("意図"),
       penalty: 12,
       warning: "目的が不明です",
       suggestion: "何を達成したいのかを1文で明記してください。"
     },
+
     {
       name: "背景・条件",
-      ok: text.includes("背景") || text.includes("条件") || text.includes('"conditions"') || text.includes("Context"),
+      ok:
+        text.includes("背景") ||
+        text.includes("条件") ||
+        text.includes('"conditions"') ||
+        text.includes("Context"),
       penalty: 10,
       warning: "背景・条件が不足しています",
       suggestion: "前提、対象範囲、現在の状況を追加してください。"
     },
-    {
-      name: "制約",
-      ok: text.includes("制約") || text.includes("禁止") || text.includes("注意") || text.includes('"constraints"'),
-      penalty: 10,
-      warning: "制約・禁止事項が不足しています",
-      suggestion: "既存仕様を壊さない、API直送しない、出力形式を守るなどを追加してください。"
-    },
-    {
-      name: "出力形式",
-      ok: text.includes("出力形式") || text.includes('"output_format"') || text.includes("Output"),
-      penalty: 12,
-      warning: "出力形式が曖昧です",
-      suggestion: "箇条書き、表、JSON、修正コードなど、期待する出力形式を指定してください。"
-    },
-    {
-      name: "トーン",
-      ok: text.includes("トーン") || text.includes('"tone"'),
-      penalty: 8,
-      warning: "トーン指定がありません",
-      suggestion: "プロフェッショナル、簡潔、初心者向けなどの文体を指定してください。"
-    },
+
+    ...(selectedAi !== "claude"
+      ? [{
+          name: "制約",
+          ok:
+            text.includes("制約") ||
+            text.includes("禁止") ||
+            text.includes("注意") ||
+            text.includes('"constraints"'),
+          penalty: 10,
+          warning: "制約・禁止事項が不足しています",
+          suggestion: "既存仕様を壊さない、API直送しない、出力形式を守るなどを追加してください。"
+        }]
+      : []),
+
+    ...(selectedAi !== "claude"
+      ? [{
+          name: "出力形式",
+          ok:
+            text.includes("出力形式") ||
+            text.includes('"output_format"') ||
+            text.includes("Output"),
+          penalty: 12,
+          warning: "出力形式が曖昧です",
+          suggestion: "箇条書き、表、JSON、修正コードなど、期待する出力形式を指定してください。"
+        }]
+      : []),
+
+    ...(selectedAi !== "copilot"
+      ? [{
+          name: "トーン",
+          ok:
+            text.includes("トーン") ||
+            text.includes('"tone"'),
+          penalty: 8,
+          warning: "トーン指定がありません",
+          suggestion: "プロフェッショナル、簡潔、初心者向けなどの文体を指定してください。"
+        }]
+      : []),
+
     {
       name: "不足情報",
-      ok: text.includes("不足") || text.includes("確認") || text.includes('"missing_information"'),
+      ok:
+        text.includes("不足") ||
+        text.includes("確認") ||
+        text.includes('"missing_information"'),
       penalty: 8,
       warning: "不足情報への対応指示がありません",
       suggestion: "不明点がある場合は、確認するか仮定として明示する指示を追加してください。"
     },
+
     {
       name: "追加指示",
-      ok: text.includes("追加変換モード") || text.includes('"commands"'),
+      ok:
+        text.includes("追加変換モード") ||
+        text.includes('"commands"'),
       penalty: 5,
       warning: "追加指示・コマンドが反映されていません",
       suggestion: "必要に応じて /step /enemy /schema などを追加してください。"
