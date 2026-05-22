@@ -1316,12 +1316,28 @@ function reviewPrompt() {
             warning: "Gemini向けの目的整理が不足しています"
           },
           {
-            ok: text.includes("必要な出力"),
+            ok:
+              text.includes("必要な出力") ||
+              text.includes("出力"),
             warning: "Gemini向けの必要な出力整理が不足しています"
           },
           {
-            ok: text.includes("条件"),
+            ok:
+              text.includes("条件") ||
+              text.includes("制約"),
             warning: "Gemini向けの条件整理が不足しています"
+          },
+          {
+            ok:
+              text.includes("優先") ||
+              text.includes("重要"),
+            warning: "Gemini向けの優先順位整理が不足しています"
+          },
+          {
+            ok:
+              text.includes("成功条件") ||
+              text.includes("期待結果"),
+            warning: "Gemini向けの成功条件整理が不足しています"
           }
         ];
         break;
@@ -1380,7 +1396,7 @@ function reviewPrompt() {
 
   const checks = [
 
-    ...(!["claude", "cursor", "copilot"].includes(selectedAi)
+    ...(!["claude", "cursor", "copilot", "gemini"].includes(selectedAi)
       ? [{
           name: "役割",
           ok: text.includes("役割") || text.includes('"role"'),
@@ -1415,7 +1431,7 @@ function reviewPrompt() {
       suggestion: "前提、対象範囲、現在の状況を追加してください。"
     },
 
-    ...(selectedAi !== "claude"
+    ...(!["claude", "gemini"].includes(selectedAi)
       ? [{
           name: "制約",
           ok:
@@ -1429,7 +1445,7 @@ function reviewPrompt() {
         }]
       : []),
 
-    ...(!["claude", "cursor"].includes(selectedAi)
+    ...(!["claude", "cursor", "gemini"].includes(selectedAi)
       ? [{
           name: "出力形式",
           ok:
