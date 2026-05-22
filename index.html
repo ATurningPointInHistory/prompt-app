@@ -1323,7 +1323,7 @@ function reviewPrompt() {
   alert(result);
 }
 function saveHistory(text) {
-  let h = JSON.parse(localStorage.getItem("h") || "[]");
+let h = loadJson("h", []);
   h.unshift(text);
   h = h.slice(0, 5);
   localStorage.setItem("h", JSON.stringify(h));
@@ -1331,7 +1331,7 @@ function saveHistory(text) {
 }
 
 function renderHistory() {
-  const h = JSON.parse(localStorage.getItem("h") || "[]");
+  const h = loadJson("h", []);
   get("history").innerHTML = h.map((x, i) => `
     <div class="history">
       ${escapeHtml(x.substring(0, 80))}...
@@ -1350,7 +1350,7 @@ function reuseHistory(text) {
 }
 
 function deleteHistory(index) {
-  let h = JSON.parse(localStorage.getItem("h") || "[]");
+let h = loadJson("h", []);
   h.splice(index, 1);
   localStorage.setItem("h", JSON.stringify(h));
   renderHistory();
@@ -1390,7 +1390,7 @@ function saveTemplate() {
 }
 
 function renderTemplates() {
-  const local = JSON.parse(localStorage.getItem("templates") || "[]");
+const local = loadJson("templates", []);
   const all = [...defaultTemplates, ...local];
 
   get("templateList").innerHTML = all.map((t, i) => `
@@ -1406,7 +1406,7 @@ function renderTemplates() {
 }
 
 function renderTemplateSelect() {
-  const local = JSON.parse(localStorage.getItem("templates") || "[]");
+const local = loadJson("templates", []);
   const all = [...defaultTemplates, ...local];
 
   get("templateSelect").innerHTML =
