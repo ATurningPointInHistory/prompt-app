@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIプロンプト生成Pro v5.６.4</title>
+<title>AIプロンプト生成Pro v5.7.0</title>
 
 <style>
 :root {
@@ -459,6 +459,8 @@ const get = (id) => document.getElementById(id);
 let currentTab = 1;
 let isLoading = false;
 
+const APP_VERSION = "v5.7.0";
+
 const defaultTemplates = [
   {
     name: "AIオーケストレーター",
@@ -601,8 +603,7 @@ function buildPromptObject(raw, tone, commands) {
   const safeCommands = Array.isArray(commands) ? commands : [];
 
   return {
-    version: "5.6_dev",
-
+    version: APP_VERSION,
     source: {
       input_type: "rough",
       raw_text: safeRaw
@@ -630,7 +631,7 @@ function buildPromptObject(raw, tone, commands) {
     metadata: {
       created_at: new Date().toISOString(),
       app_name: "AIプロンプト生成Pro",
-      app_version: "v5.6_dev"
+      app_version: APP_VERSION
     }
   };
 }
