@@ -346,6 +346,7 @@ body.dark button.active-panel {
   <div id="output">ここに表示</div>
 
   <div id="warningBox" class="warning-box"></div>
+<div id="debugBox" class="warning-box" style="display:none;"></div>
 
   <div id="template-manager" class="section-box" style="display:none;">
     <h3>テンプレ管理</h3>
@@ -1767,6 +1768,24 @@ function loadSettings() {
 
   isLoading = false;
 }
+
+window.onerror = function(message, source, line, col, error) {
+  const box = get("debugBox");
+  if (!box) return;
+
+  box.style.display = "block";
+  box.innerText =
+`JS Error
+
+message:
+${message}
+
+line:
+${line}
+
+column:
+${col}`;
+};
 
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
