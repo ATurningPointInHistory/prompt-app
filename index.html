@@ -325,6 +325,7 @@ body.dark button.active-panel {
     <button id="templateBtn" onclick="toggleTemplateManager()">📂 テンプレ管理</button>
     <button id="dangerBtn" onclick="toggleDangerManager()">🚨 危険ワード管理</button>
     <button id="patternBtn" onclick="togglePatternManager()">🧩 NGパターン管理</button>
+    <button id="aiPresetBtn" onclick="toggleAiPresetManager()">🤖 AIプリセット管理</button>
     <button onclick="exportTemplates()">📤 テンプレバックアップ</button>
   </div>
 
@@ -418,6 +419,30 @@ body.dark button.active-panel {
 
   <div class="section-box">
     <label>履歴（最新5件）</label>
+    <div id="ai-preset-manager" class="section-box" style="display:none;">
+      <h3>AIプリセット管理</h3>
+      <div class="small">AI別の変換方針を編集できます。</div>
+
+      <label for="aiPresetTarget">対象AI</label>
+      <select id="aiPresetTarget" onchange="loadAiPresetToEditor()">
+        <option value="chatgpt">ChatGPT</option>
+        <option value="claude">Claude</option>
+        <option value="gemini">Gemini</option>
+        <option value="cursor">Cursor</option>
+        <option value="copilot">Copilot</option>
+      </select>
+
+      <label for="aiPresetName">表示名</label>
+      <input id="aiPresetName" placeholder="例：ChatGPT">
+
+      <label for="aiPresetInstruction">変換方針</label>
+      <textarea id="aiPresetInstruction" rows="6" placeholder="このAI向けの変換方針を入力"></textarea>
+
+      <div class="btn-group">
+        <button onclick="saveAiPresetFromEditor()">保存</button>
+        <button onclick="resetAiPreset()">初期値に戻す</button>
+      </div>
+    </div>
     <div id="history"></div>
   </div>
 </div>
@@ -752,12 +777,14 @@ function closeAllManagers() {
   get("template-manager").style.display = "none";
   get("danger-manager").style.display = "none";
   get("pattern-manager").style.display = "none";
+  get("ai-preset-manager").style.display = "none";
 }
 
 function updatePanelButtonStates() {
   get("templateBtn").classList.toggle("active-panel", get("template-manager").style.display !== "none");
   get("dangerBtn").classList.toggle("active-panel", get("danger-manager").style.display !== "none");
   get("patternBtn").classList.toggle("active-panel", get("pattern-manager").style.display !== "none");
+  get("aiPresetBtn").classList.toggle("active-panel", get("ai-preset-manager").style.display !== "none");
 }
 
 function toggleTemplateManager() {
@@ -788,6 +815,18 @@ function togglePatternManager() {
     get("pattern-manager").style.display = "block";
     renderPatterns();
   }
+  updatePanelButtonStates();
+}
+
+function toggleAiPresetManager() {
+  const isOpen = get("ai-preset-manager").style.display !== "none";
+  closeAllManagers();
+
+  if (!isOpen) {
+    get("ai-preset-manager").style.display = "block";
+    loadAiPresetToEditor();
+  }
+
   updatePanelButtonStates();
 }
 
