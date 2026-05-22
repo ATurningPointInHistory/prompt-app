@@ -328,9 +328,10 @@ body.dark button.active-panel {
     <button id="aiPresetBtn" onclick="toggleAiPresetManager()">🤖 AIプリセット管理</button>
     <button onclick="exportTemplates()">📤 テンプレバックアップ</button>
   </div>
-
   <div class="btn-group">
     <button onclick="importTemplates()">📥 テンプレ復元</button>
+    <button onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
+    <button onclick="importAiPresets()">🤖 AI設定復元</button>
     <button onclick="clearOutput()" class="btn-secondary">🧹 出力クリア</button>
     <button onclick="clearHistory()" class="btn-secondary">🗑 履歴全削除</button>
     <button onclick="recheckOutput()" class="btn-secondary">🔍 再チェック</button>
@@ -341,6 +342,8 @@ body.dark button.active-panel {
 
   </div>
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
+
+  <input type="file" id="aiPresetFileInput" accept=".json,application/json" style="display:none;">
 
   <label>生成結果</label>
   <div id="output">ここに表示</div>
@@ -1477,6 +1480,21 @@ function importTemplates() {
   get("fileInput").click();
 }
 
+function exportAiPresets() {
+  const data = JSON.stringify(getAiPresets(), null, 2);
+
+  const blob = new Blob([data], { type: "application/json" });
+  const a = document.createElement("a");
+
+  a.href = URL.createObjectURL(blob);
+  a.download = "ai-presets.json";
+  a.click();
+}
+
+function importAiPresets() {
+  get("aiPresetFileInput").click();
+}
+
 get("fileInput").addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -1497,6 +1515,56 @@ get("fileInput").addEventListener("change", (e) => {
       alert("読み込みに失敗しました");
     }
   };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+get("aiPresetFileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        alert("AIプリセットファイルの形式が正しくありません");
+        return;
+      }
+
+      const validKeys = ["chatgpt", "claude", "gemini", "cursor", "copilot"];
+
+      for (const key of Object.keys(parsed)) {
+        if (!validKeys.includes(key)) {
+          alert(`不明なAI設定が含まれています: ${key}`);
+          return;
+        }
+
+        if (
+          !parsed[key] ||
+          typeof parsed[key].name !== "string" ||
+          typeof parsed[key].instruction !== "string"
+        ) {
+          alert(`AI設定の形式が正しくありません: ${key}`);
+          return;
+        }
+      }
+
+      saveAiPresets(parsed);
+
+      if (get("ai-preset-manager").style.display !== "none") {
+        loadAiPresetToEditor();
+      }
+
+      alert("AIプリセットを復元しました");
+
+    } catch (e) {
+      alert("AIプリセットの読み込みに失敗しました\n\n" + e.message);
+    }
+  };
+
   reader.readAsText(file);
   e.target.value = "";
 });
