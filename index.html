@@ -1259,6 +1259,123 @@ function reviewPrompt() {
     }
   }
 
+  const selectedAi = get("ai-target")
+      ? get("ai-target").value || "chatgpt"
+      : "chatgpt";
+
+    let aiSpecificChecks = [];
+
+    switch (selectedAi) {
+
+      case "chatgpt":
+        aiSpecificChecks = [
+          {
+            ok:
+              text.includes("役割") ||
+              text.includes('"role"'),
+            warning: "ChatGPT向けの役割整理が不足しています"
+          },
+          {
+            ok:
+              text.includes("目的") ||
+              text.includes('"purpose"'),
+            warning: "ChatGPT向けの目的整理が不足しています"
+          },
+          {
+            ok:
+              text.includes("出力形式") ||
+              text.includes('"output_format"'),
+            warning: "ChatGPT向けの出力形式整理が不足しています"
+          }
+        ];
+        break;
+
+      case "claude":
+        aiSpecificChecks = [
+          {
+            ok: text.includes("背景"),
+            warning: "Claude向けの背景整理が不足しています"
+          },
+          {
+            ok: text.includes("意図"),
+            warning: "Claude向けの意図整理が不足しています"
+          },
+          {
+            ok: text.includes("考慮点"),
+            warning: "Claude向けの考慮点整理が不足しています"
+          }
+        ];
+        break;
+
+      case "gemini":
+        aiSpecificChecks = [
+          {
+            ok: text.includes("目的"),
+            warning: "Gemini向けの目的整理が不足しています"
+          },
+          {
+            ok: text.includes("必要な出力"),
+            warning: "Gemini向けの必要な出力整理が不足しています"
+          },
+          {
+            ok: text.includes("条件"),
+            warning: "Gemini向けの条件整理が不足しています"
+          }
+        ];
+        break;
+
+      case "cursor":
+        aiSpecificChecks = [
+          {
+            ok: text.includes("現状"),
+            warning: "Cursor向けの現状整理が不足しています"
+          },
+          {
+            ok: text.includes("問題"),
+            warning: "Cursor向けの問題整理が不足しています"
+          },
+          {
+            ok: text.includes("期待動作"),
+            warning: "Cursor向けの期待動作整理が不足しています"
+          },
+          {
+            ok: text.includes("修正方針"),
+            warning: "Cursor向けの修正方針整理が不足しています"
+          }
+        ];
+        break;
+
+      case "copilot":
+        aiSpecificChecks = [
+          {
+            ok: text.includes("Goal"),
+            warning: "Copilot向けのGoal整理が不足しています"
+          },
+          {
+            ok: text.includes("Context"),
+            warning: "Copilot向けのContext整理が不足しています"
+          },
+          {
+            ok: text.includes("Expected behavior"),
+            warning: "Copilot向けのExpected behavior整理が不足しています"
+          },
+          {
+            ok: text.includes("Constraints"),
+            warning: "Copilot向けのConstraints整理が不足しています"
+          }
+        ];
+        break;
+    }
+
+    aiSpecificChecks.forEach(check => {
+      if (check.ok) {
+        goodPoints.push(`AI向け最適化OK`);
+      } else {
+        score -= 6;
+        warnings.push(check.warning);
+      }
+    });
+
   const checks = [
     {
       name: "役割",
