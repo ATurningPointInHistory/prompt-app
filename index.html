@@ -1241,91 +1241,153 @@ function reviewPrompt() {
 
   let score = 100;
 
-  const warnings = [];
   const goodPoints = [];
+  const warnings = [];
   const suggestions = [];
 
-  const vagueWords = ["いい感じ", "なんとか", "適当に", "わかりやすく", "詳しく", "改善", "修正"];
+  const hasJsonLike = text.startsWith("{") || text.startsWith("[");
+  let parsedJson = null;
 
-  if (vagueWords.some(word => text.includes(word))) {
+  if (hasJsonLike) {
+    try {
+      parsedJson = JSON.parse(text);
+      goodPoints.push("JSONとして解析可能");
+    } catch (e) {
+      score -= 25;
+      warnings.push("JSON形式が不正です");
+      suggestions.push("JSON整形ボタンで確認し、余計な説明文やMarkdownを除去してください。");
+    }
+  }
+
+  const checks = [
+    {
+      name: "役割",
+      ok: text.includes("役割") || text.includes('"role"'),
+      penalty: 12,
+      warning: "役割が不明です",
+      suggestion: "誰として回答するかを明記してください。例：あなたはHTML/JavaScriptに詳しい設計者です。"
+    },
+    {
+      name: "目的",
+      ok: text.includes("目的") || text.includes('"purpose"') || text.includes("Goal"),
+      penalty: 12,
+      warning: "目的が不明です",
+      suggestion: "何を達成したいのかを1文で明記してください。"
+    },
+    {
+      name: "背景・条件",
+      ok: text.includes("背景") || text.includes("条件") || text.includes('"conditions"') || text.includes("Context"),
+      penalty: 10,
+      warning: "背景・条件が不足しています",
+      suggestion: "前提、対象範囲、現在の状況を追加してください。"
+    },
+    {
+      name: "制約",
+      ok: text.includes("制約") || text.includes("禁止") || text.includes("注意") || text.includes('"constraints"'),
+      penalty: 10,
+      warning: "制約・禁止事項が不足しています",
+      suggestion: "既存仕様を壊さない、API直送しない、出力形式を守るなどを追加してください。"
+    },
+    {
+      name: "出力形式",
+      ok: text.includes("出力形式") || text.includes('"output_format"') || text.includes("Output"),
+      penalty: 12,
+      warning: "出力形式が曖昧です",
+      suggestion: "箇条書き、表、JSON、修正コードなど、期待する出力形式を指定してください。"
+    },
+    {
+      name: "トーン",
+      ok: text.includes("トーン") || text.includes('"tone"'),
+      penalty: 8,
+      warning: "トーン指定がありません",
+      suggestion: "プロフェッショナル、簡潔、初心者向けなどの文体を指定してください。"
+    },
+    {
+      name: "不足情報",
+      ok: text.includes("不足") || text.includes("確認") || text.includes('"missing_information"'),
+      penalty: 8,
+      warning: "不足情報への対応指示がありません",
+      suggestion: "不明点がある場合は、確認するか仮定として明示する指示を追加してください。"
+    },
+    {
+      name: "追加指示",
+      ok: text.includes("追加変換モード") || text.includes('"commands"'),
+      penalty: 5,
+      warning: "追加指示・コマンドが反映されていません",
+      suggestion: "必要に応じて /step /enemy /schema などを追加してください。"
+    }
+  ];
+
+  checks.forEach(check => {
+    if (check.ok) {
+      goodPoints.push(`${check.name}あり`);
+    } else {
+      score -= check.penalty;
+      warnings.push(check.warning);
+      suggestions.push(check.suggestion);
+    }
+  });
+
+  const vagueWords = ["いい感じ", "なんとか", "適当に", "わかりやすく", "詳しく"];
+  const foundVague = vagueWords.filter(word => text.includes(word));
+
+  if (foundVague.length > 0) {
     score -= 10;
-    warnings.push("曖昧な表現が含まれています");
-    suggestions.push("「何を」「どの範囲で」「どの状態になれば完了か」を具体化してください。");
-  }
-
-  if (!text.includes("制約") && !text.includes("禁止") && !text.includes("注意")) {
-    score -= 10;
-    warnings.push("制約・禁止事項が不足しています");
-    suggestions.push("既存仕様を壊さない、API直送しない、出力形式を守るなどの制約を追加してください。");
-  }
-
-  if (!text.includes("対象") && !text.includes("読者") && !text.includes("ユーザー")) {
-    score -= 10;
-    warnings.push("対象者が不明です");
-    suggestions.push("初心者向け、開発者向け、管理者向けなど、想定する読み手を指定してください。");
-  }
-
-  if (!text.includes("不足") && !text.includes("確認")) {
-    score -= 10;
-    warnings.push("不足情報の確認指示がありません");
-    suggestions.push("不明点がある場合は、推測せず確認するか、仮定として明示する指示を追加してください。");
-  }
-
-  if (text.includes("役割") || text.includes('"role"')) {
-    goodPoints.push("役割が明確");
-  } else {
-    score -= 15;
-    warnings.push("役割が不明");
-    suggestions.push("例：あなたはHTML/JavaScriptに詳しいフロントエンド設計者です、のように役割を明記してください。");
-  }
-
-  if (text.includes("出力形式") || text.includes('"output_format"')) {
-    goodPoints.push("出力形式あり");
-  } else {
-    score -= 15;
-    warnings.push("出力形式が曖昧");
-    suggestions.push("箇条書き、表、JSON、修正コードなど、期待する出力形式を指定してください。");
-  }
-
-  if (text.includes("条件") || text.includes("詳細") || text.includes("制約")) {
-    goodPoints.push("条件記載あり");
-  } else {
-    score -= 10;
-    warnings.push("条件不足の可能性");
-    suggestions.push("前提、制約、対象範囲、禁止事項を追加してください。");
+    warnings.push(`曖昧な表現があります：${foundVague.join("、")}`);
+    suggestions.push("曖昧語を、具体的な完了条件・対象範囲・評価基準に置き換えてください。");
   }
 
   if (text.length < 120) {
     score -= 10;
-    warnings.push("内容が短く曖昧な可能性");
-    suggestions.push("背景、目的、条件、期待する完成形を1〜2文ずつ追加してください。");
+    warnings.push("内容が短く、情報不足の可能性があります");
+    suggestions.push("背景、目的、条件、期待する完成形を追加してください。");
+  } else {
+    goodPoints.push("一定の情報量あり");
   }
 
-  score = Math.max(0, score);
+  if (parsedJson) {
+    if (parsedJson.version) goodPoints.push("バージョン情報あり");
+    if (parsedJson.prompt && parsedJson.prompt.purpose) goodPoints.push("内部JSONの目的あり");
+    if (Array.isArray(parsedJson.commands)) goodPoints.push("commands配列あり");
 
-  let result = `Prompt Score : ${score} / 100\n\n`;
+    if (!parsedJson.prompt) {
+      score -= 10;
+      warnings.push("内部JSONに prompt オブジェクトがありません");
+      suggestions.push("buildPromptObject() の構造を確認してください。");
+    }
+  }
+
+  score = Math.max(0, Math.min(100, score));
+
+  let rank = "C";
+  if (score >= 90) rank = "S";
+  else if (score >= 80) rank = "A";
+  else if (score >= 65) rank = "B";
+
+  let result = `Prompt Score : ${score} / 100\nRank : ${rank}\n\n`;
 
   if (goodPoints.length > 0) {
     result += "良い点:\n";
-    result += goodPoints.map(x => `✔ ${x}`).join("\n");
+    result += [...new Set(goodPoints)].map(x => `✔ ${x}`).join("\n");
     result += "\n\n";
   }
 
   if (warnings.length > 0) {
     result += "改善候補:\n";
-    result += warnings.map(x => `⚠ ${x}`).join("\n");
+    result += [...new Set(warnings)].map(x => `⚠ ${x}`).join("\n");
     result += "\n\n";
   }
 
   if (suggestions.length > 0) {
     result += "改善案:\n";
-    result += suggestions.map(x => `・${x}`).join("\n");
+    result += [...new Set(suggestions)].map(x => `・${x}`).join("\n");
   } else {
     result += "大きな改善点は見つかりません。";
   }
 
   alert(result);
 }
+
 function saveHistory(text) {
   let h = loadJson("h", []);
   h.unshift(text);
