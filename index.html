@@ -331,6 +331,7 @@ body.dark button.active-panel {
     <button onclick="importTemplates()">📥 テンプレ復元</button>
     <button onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
     <button onclick="importAiPresets()">🤖 AI設定復元</button>
+    <button onclick="backupProgram()">🗂 プログラムバックアップ</button>
     <button onclick="clearOutput()" class="btn-secondary">🧹 出力クリア</button>
     <button onclick="clearHistory()" class="btn-secondary">🗑 履歴全削除</button>
     <button onclick="recheckOutput()" class="btn-secondary">🔍 再チェック</button>
@@ -1779,6 +1780,34 @@ function exportAiPresets() {
 
 function importAiPresets() {
   get("aiPresetFileInput").click();
+}
+
+function backupProgram() {
+
+  const html =
+    document.documentElement.outerHTML;
+
+  const blob =
+    new Blob(
+      [html],
+      { type:"text/html" }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g,"-");
+
+  a.download =
+    `AIPro_${APP_VERSION}_${timestamp}.html`;
+
+  a.click();
 }
 
 get("fileInput").addEventListener("change", (e) => {
