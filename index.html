@@ -284,6 +284,16 @@ body.dark button.active-panel {
   background: rgba(128,128,128,0.06);
 }
 
+.tool-section-title {
+  grid-column: span 2;
+  font-size: 12px;
+  font-weight: bold;
+  opacity: 0.8;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
 </style>
 </head>
 <body>
@@ -386,22 +396,33 @@ body.dark button.active-panel {
   class="btn-group"
   style="display:none;">
 
-  <button onclick="importTemplates()">📥 テンプレ復元</button>
-  <button onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
-  <button onclick="importAiPresets()">🤖 AI設定復元</button>
+  <div class="tool-section-title">💾 バックアップ系</div>
+
   <button onclick="backupProgram()">🗂 フルバックアップ</button>
   <button onclick="saveProgramHtml()">💾 本体HTML保存</button>
   <button onclick="restoreProgramBackup()">♻ フル復元</button>
 
-  <button onclick="clearOutput()" class="btn-secondary">🧹 出力クリア</button>
-  <button onclick="clearHistory()" class="btn-secondary">🗑 履歴全削除</button>
-  <button onclick="recheckOutput()" class="btn-secondary">🔍 再チェック</button>
-  <button onclick="formatJsonOutput()" class="btn-secondary">📦 JSON整形</button>
-  <button onclick="testJsonFormat()" class="btn-secondary">🧪 JSONテスト</button>
+  <div class="tool-section-title">🤖 AI設定系</div>
+
+  <button onclick="importTemplates()">📥 テンプレ復元</button>
+  <button onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
+  <button onclick="importAiPresets()">🤖 AI設定復元</button>
+
+  <div class="tool-section-title">🧪 開発・確認系</div>
+
   <button onclick="reviewPrompt()" class="btn-secondary">🛠 Promptレビュー</button>
   <button onclick="testPromptObject()" class="btn-secondary">🧩 内部JSONテスト</button>
+  <button onclick="testJsonFormat()" class="btn-secondary">🧪 JSONテスト</button>
+  <button onclick="formatJsonOutput()" class="btn-secondary">📦 JSON整形</button>
+  <button onclick="recheckOutput()" class="btn-secondary">🔍 再チェック</button>
+
+  <div class="tool-section-title">🧹 整理系</div>
+
+  <button onclick="clearOutput()" class="btn-secondary">🧹 出力クリア</button>
+  <button onclick="clearHistory()" class="btn-secondary">🗑 履歴全削除</button>
 
 </div>
+
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
 
   <input type="file" id="aiPresetFileInput" accept=".json,application/json" style="display:none;">
