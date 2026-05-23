@@ -537,6 +537,90 @@ body.dark button.active-panel {
 
 </div>
 
+  <button
+    class="tool-category-btn"
+    onclick="toggleToolCategory('aiTools')">
+
+    🤖 AI設定系
+
+  </button>
+
+  <div
+    id="aiTools"
+    class="tool-category">
+
+    <button onclick="importTemplates()">
+      📥 テンプレ復元
+    </button>
+
+    <button onclick="exportAiPresets()">
+      🤖 AI設定バックアップ
+    </button>
+
+    <button onclick="importAiPresets()">
+      🤖 AI設定復元
+    </button>
+
+  </div>
+
+  <button
+    class="tool-category-btn"
+    onclick="toggleToolCategory('devTools')">
+
+    🧪 開発・確認系
+
+  </button>
+
+  <div
+    id="devTools"
+    class="tool-category">
+
+    <button onclick="reviewPrompt()">
+      🛠 Promptレビュー
+    </button>
+
+    <button onclick="testPromptObject()">
+      🧩 内部JSONテスト
+    </button>
+
+    <button onclick="testJsonFormat()">
+      🧪 JSONテスト
+    </button>
+
+    <button onclick="formatJsonOutput()">
+      📦 JSON整形
+    </button>
+
+    <button onclick="recheckOutput()">
+      🔍 再チェック
+    </button>
+
+  </div>
+
+  <button
+    class="tool-category-btn"
+    onclick="toggleToolCategory('cleanTools')">
+
+    🧹 整理系
+
+  </button>
+
+  <div
+    id="cleanTools"
+    class="tool-category">
+
+    <button onclick="clearOutput()">
+      🧹 出力クリア
+    </button>
+
+    <button onclick="clearHistory()">
+      🗑 履歴全削除
+    </button>
+
+  </div>
+
+</div>
+
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
 
   <input type="file" id="aiPresetFileInput" accept=".json,application/json" style="display:none;">
