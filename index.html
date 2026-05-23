@@ -254,7 +254,7 @@ body.dark button.active-panel {
 
 <div class="card">
   <h2>AIプロンプト生成Pro</h2>
-
+  <div class="small" id="versionLabel"></div>
   <div class="tab-container">
     <div id="tab1" class="tab active" onclick="switchTab(1)">マニュアル入力</div>
     <div id="tab2" class="tab" onclick="switchTab(2)">ラフから変換</div>
@@ -2087,7 +2087,7 @@ function loadSettings() {
   renderPatterns();
   renderCommandChips();
   renderPresetChips();
-
+  get("versionLabel").innerText = APP_VERSION;
   get("raw-input").value = localStorage.getItem("rawInput") || "";
   get("rough-tone").value = localStorage.getItem("roughTone") || "プロフェッショナル";
   get("rough-output-format").value = localStorage.getItem("roughOutputFormat") || "prompt";
