@@ -333,6 +333,8 @@ body.dark button.active-panel {
     <button onclick="importAiPresets()">🤖 AI設定復元</button>
     <button onclick="backupProgram()">
   🗂 フルバックアップ</button>
+    <button onclick="saveProgramHtml()">
+  💾 本体HTML保存</button>
     <button onclick="restoreProgramBackup()">
   ♻ フル復元</button>
     <button onclick="clearOutput()" class="btn-secondary">🧹 出力クリア</button>
@@ -1941,6 +1943,37 @@ function restoreProgramBackup() {
   };
 
   input.click();
+}
+
+function saveProgramHtml() {
+
+  const html =
+    "<!DOCTYPE html>\n" +
+    document.documentElement.outerHTML;
+
+  const blob =
+    new Blob(
+      [html],
+      { type: "text/html" }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-");
+
+  a.download =
+    `AIPro_${APP_VERSION}_${timestamp}.html`;
+
+  a.click();
+
+  alert("本体HTMLを保存しました");
 }
 
 get("fileInput").addEventListener("change", (e) => {
