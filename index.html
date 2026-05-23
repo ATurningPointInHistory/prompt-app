@@ -1572,7 +1572,13 @@ function reviewPrompt() {
   else if (score >= 80) rank = "A";
   else if (score >= 65) rank = "B";
 
-  let result = `Prompt Score : ${score} / 100\nRank : ${rank}\n\n`;
+  let result =
+`AIプロンプト生成Pro ${APP_VERSION}
+
+  Prompt Score : ${score} / 100
+  Rank : ${rank}
+
+  `;
 
   if (goodPoints.length > 0) {
     result += "良い点:\n";
