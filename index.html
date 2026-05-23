@@ -299,7 +299,6 @@ body.dark button.active-panel {
 
     <label for="ai-target">AI向け最適化</label>
     <select id="ai-target">
-      <option value="">なし</option>
       <option value="chatgpt">ChatGPT</option>
       <option value="claude">Claude</option>
       <option value="gemini">Gemini</option>
@@ -1712,7 +1711,7 @@ function applyTemplateFromSelect() {
 }
 
 function applyTemplateAll(i) {
-  const local = JSON.parse(localStorage.getItem("templates") || "[]");
+  const local = loadJson("templates", []);
   const all = [...defaultTemplates, ...local];
   const t = all[i];
   if (!t) return;
@@ -1863,7 +1862,7 @@ function saveDangerWord() {
     return;
   }
 
-  let list = JSON.parse(localStorage.getItem("dangerWords") || "[]");
+  let list = loadJson("dangerWords", []);
   if (defaultDangerWords.includes(word) || list.includes(word)) {
     alert("すでに登録されています");
     return;
@@ -1922,7 +1921,7 @@ function savePattern() {
     return;
   }
 
-  let list = JSON.parse(localStorage.getItem("dangerPatterns") || "[]");
+  let list = loadJson("dangerPatterns", []);
   list.push({ name, regex, flags });
   localStorage.setItem("dangerPatterns", JSON.stringify(list));
 
@@ -2104,7 +2103,6 @@ function loadSettings() {
   renderPatterns();
   renderCommandChips();
   renderPresetChips();
-  get("versionLabel").innerText = APP_VERSION;
   get("raw-input").value = localStorage.getItem("rawInput") || "";
   get("rough-tone").value = localStorage.getItem("roughTone") || "プロフェッショナル";
   get("rough-output-format").value = localStorage.getItem("roughOutputFormat") || "prompt";
@@ -2123,8 +2121,9 @@ function loadSettings() {
 
   get("versionLabel").innerText = APP_VERSION;
 
-  get("changelogLabel").innerText =
-CHANGELOG.join("\n");
+  get("changelogLabel").innerHTML =
+  CHANGELOG.map(x =>
+escapeHtml(x)).join("<br>");
 
   isLoading = false;
   }
