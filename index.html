@@ -276,6 +276,14 @@ body.dark button.active-panel {
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
 }
 
+#commandMenu {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(128,128,128,0.06);
+}
+
 </style>
 </head>
 <body>
@@ -311,8 +319,26 @@ body.dark button.active-panel {
     <label for="raw-input">やりたいことを自由に入力（AIに整理させます）</label>
     <textarea id="raw-input" rows="8" placeholder="例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。"></textarea>
 
-<div class="small">変換モードをクリックすると入力欄に追加されます。</div>
-<div id="commandBox" class="command-box"></div>
+<button
+  type="button"
+  onclick="toggleCommandMenu()"
+  class="btn-secondary btn-full">
+
+  🧩 変換モード
+
+</button>
+
+<div
+  id="commandMenu"
+  style="display:none;">
+
+  <div class="small">
+    変換モードをクリックすると入力欄に追加されます。
+  </div>
+
+  <div id="commandBox" class="command-box"></div>
+
+</div>
 
 <div class="small">用途別プリセット</div>
 <div id="presetBox" class="preset-box"></div>
@@ -895,6 +921,17 @@ function toggleToolsMenu() {
 
   btn.innerText =
     isOpen ? "⚙" : "×";
+}
+
+function toggleCommandMenu() {
+
+  const menu =
+    get("commandMenu");
+
+  menu.style.display =
+    menu.style.display === "none"
+      ? "block"
+      : "none";
 }
 
 function closeAllManagers() {
