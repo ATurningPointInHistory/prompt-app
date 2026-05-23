@@ -331,7 +331,9 @@ body.dark button.active-panel {
     <button onclick="importTemplates()">📥 テンプレ復元</button>
     <button onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
     <button onclick="importAiPresets()">🤖 AI設定復元</button>
-    <button onclick="backupProgram()">🗂 プログラムバックアップ</button>
+    <button onclick="backupProgram()">
+  🗂 フルバックアップ
+</button>
     <button onclick="clearOutput()" class="btn-secondary">🧹 出力クリア</button>
     <button onclick="clearHistory()" class="btn-secondary">🗑 履歴全削除</button>
     <button onclick="recheckOutput()" class="btn-secondary">🔍 再チェック</button>
@@ -1784,13 +1786,71 @@ function importAiPresets() {
 
 function backupProgram() {
 
-  const html =
-    document.documentElement.outerHTML;
+  const backupData = {
+
+    version: APP_VERSION,
+
+    created_at:
+      new Date().toISOString(),
+
+    changelog: CHANGELOG,
+
+    html:
+      document.documentElement.outerHTML,
+
+    localStorageData: {
+
+      templates:
+        loadJson("templates", []),
+
+      aiPresets:
+        loadJson("aiPresets", {}),
+
+      dangerWords:
+        loadJson("dangerWords", []),
+
+      dangerPatterns:
+        loadJson("dangerPatterns", []),
+
+      history:
+        loadJson("h", []),
+
+      rawInput:
+        localStorage.getItem("rawInput"),
+
+      roleValue:
+        localStorage.getItem("roleValue"),
+
+      taskValue:
+        localStorage.getItem("taskValue"),
+
+      detailsValue:
+        localStorage.getItem("detailsValue"),
+
+      toneValue:
+        localStorage.getItem("toneValue"),
+
+      roughTone:
+        localStorage.getItem("roughTone"),
+
+      roughOutputFormat:
+        localStorage.getItem("roughOutputFormat"),
+
+      aiTarget:
+        localStorage.getItem("aiTarget"),
+
+      currentTab:
+        localStorage.getItem("currentTab"),
+
+      darkMode:
+        localStorage.getItem("darkMode")
+    }
+  };
 
   const blob =
     new Blob(
-      [html],
-      { type:"text/html" }
+      [JSON.stringify(backupData, null, 2)],
+      { type:"application/json" }
     );
 
   const a =
@@ -1805,9 +1865,11 @@ function backupProgram() {
       .replace(/[:.]/g,"-");
 
   a.download =
-    `AIPro_${APP_VERSION}_${timestamp}.html`;
+    `AIProBackup_${APP_VERSION}_${timestamp}.json`;
 
   a.click();
+
+  alert("フルバックアップ保存完了");
 }
 
 get("fileInput").addEventListener("change", (e) => {
@@ -2115,7 +2177,6 @@ function saveCurrentState() {
   localStorage.setItem("currentTab", String(currentTab));
   localStorage.setItem("aiTarget", get("ai-target").value);
 }
-
 
 function loadSettings() {
   isLoading = true;
