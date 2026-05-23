@@ -332,8 +332,9 @@ body.dark button.active-panel {
     <button onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
     <button onclick="importAiPresets()">🤖 AI設定復元</button>
     <button onclick="backupProgram()">
-  🗂 フルバックアップ
-</button>
+  🗂 フルバックアップ</button>
+    <button onclick="restoreProgramBackup()">
+  ♻ フル復元</button>
     <button onclick="clearOutput()" class="btn-secondary">🧹 出力クリア</button>
     <button onclick="clearHistory()" class="btn-secondary">🗑 履歴全削除</button>
     <button onclick="recheckOutput()" class="btn-secondary">🔍 再チェック</button>
@@ -1870,6 +1871,76 @@ function backupProgram() {
   a.click();
 
   alert("フルバックアップ保存完了");
+}
+
+function restoreProgramBackup() {
+
+  const input =
+    document.createElement("input");
+
+  input.type = "file";
+  input.accept = ".json,application/json";
+
+  input.onchange = (e) => {
+
+    const file =
+      e.target.files[0];
+
+    if (!file) return;
+
+    const reader =
+      new FileReader();
+
+    reader.onload = () => {
+
+      try {
+
+        const data =
+          JSON.parse(reader.result);
+
+        if (!data || !data.localStorageData) {
+          alert("フルバックアップ形式ではありません");
+          return;
+        }
+
+        Object.entries(data.localStorageData)
+          .forEach(([key, value]) => {
+
+            if (value === null || value === undefined) {
+              localStorage.removeItem(key);
+              return;
+            }
+
+            if (typeof value === "string") {
+              localStorage.setItem(key, value);
+            } else {
+              localStorage.setItem(
+                key,
+                JSON.stringify(value)
+              );
+            }
+
+          });
+
+        alert("フル復元完了。再読み込みします。");
+
+        location.reload();
+
+      } catch (err) {
+
+        alert(
+          "フル復元に失敗しました\n\n" +
+          err.message
+        );
+
+      }
+
+    };
+
+    reader.readAsText(file);
+  };
+
+  input.click();
 }
 
 get("fileInput").addEventListener("change", (e) => {
