@@ -305,10 +305,10 @@ body.dark button.active-panel {
   right:18px;
   bottom:158px;
   z-index:996;
-  width:240px;
+  width:260px;
   max-width:calc(100vw - 24px);
   max-height:45vh;
-  overflow:hidden;
+  overflow-y:auto;
   background:var(--card);
   border:1px solid var(--border);
   border-radius:14px;
@@ -697,35 +697,34 @@ mark {
   class="btn-secondary">
   🔍
 </button>
+<button
+  id="repairSearchBtn"
+  onclick="toggleRepairSearchBox()"
+  class="btn-secondary">
+  🔍
+</button>
+
 <div
   id="repairSearchBox"
   style="display:none;">
-  <input
-    id="repairSearch"
-    placeholder="検索">
-  <div class="repair-search-actions">
-    <button
-      class="repair-mini-btn"
-      onclick="searchRepairText()">
-      🔍
-    </button>
-    <button
-      class="repair-mini-btn"
-      onclick="searchRepairNext()">
-      ▶
-    </button>
-    <button
-      class="repair-mini-btn"
-      onclick="
-        get('repairSearchResult')
-        .style.display='none'">
-      －
-    </button>
+
+  <div class="repair-search-row">
+    <input
+      id="repairSearch"
+      placeholder="検索">
   </div>
+
+  <div class="repair-search-actions">
+    <button class="repair-mini-btn" onclick="searchRepairText()">🔍</button>
+    <button class="repair-mini-btn" onclick="searchRepairNext()">▶</button>
+    <button class="repair-mini-btn" onclick="closeRepairSearchBox()">－</button>
+  </div>
+
   <div
     id="repairSearchResult"
     class="diagnose-box">
   </div>
+
 </div>
 
 
