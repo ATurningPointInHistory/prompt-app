@@ -5,288 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AIプロンプト生成Pro v5.7.0</title>
 
-<style>
-:root {
-  --bg: #f0f2f5;
-  --text: #1c1e21;
-  --card: #ffffff;
-  --accent: #007aff;
-  --border: #ddd;
-  --warn-bg: #fff3cd;
-  --warn-text: #664d03;
-  --warn-border: #ffecb5;
-}
-
-body.dark {
-  --bg: #18191a;
-  --text: #e4e6eb;
-  --card: #242526;
-  --accent: #3793ff;
-  --border: #444;
-  --warn-bg: #4a3b00;
-  --warn-text: #ffe08a;
-  --warn-border: #7a6400;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, sans-serif;
-  padding: 15px;
-  max-width: 600px;
-  margin: auto;
-  background: var(--bg);
-  color: var(--text);
-  transition: 0.3s;
-}
-
-.card {
-  background: var(--card);
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-h2 {
-  text-align: center;
-  font-size: 1.2rem;
-  margin-top: 0;
-}
-
-h3, h4 {
-  margin-bottom: 8px;
-}
-
-.tab-container {
-  display: flex;
-  border-bottom: 2px solid rgba(128,128,128,0.2);
-  margin-bottom: 15px;
-}
-
-.tab {
-  flex: 1;
-  text-align: center;
-  padding: 10px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 0.9rem;
-  color: #888;
-}
-
-.tab.active {
-  border-bottom: 3px solid var(--accent);
-  color: var(--accent);
-}
-
-label {
-  display: block;
-  margin-top: 12px;
-  font-weight: bold;
-  font-size: 0.85rem;
-  opacity: 0.9;
-}
-
-input, textarea, select {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  margin-top: 5px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--card);
-  color: var(--text);
-  font-size: 16px;
-}
-
-.btn-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 20px;
-}
-
-button {
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  background: var(--accent);
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 0.9rem;
-}
-
-.btn-full {
-  grid-column: span 2;
-}
-
-.btn-secondary {
-  background: #606770;
-}
-
-button.active-panel {
-  background: #ff9500;
-  color: white;
-}
-
-body.dark button.active-panel {
-  background: #ffb340;
-  color: #1c1c1c;
-}
-
-#output {
-  white-space: pre-wrap;
-  border: 1px dashed var(--border);
-  padding: 15px;
-  margin-top: 15px;
-  background: rgba(128,128,128,0.05);
-  border-radius: 10px;
-  font-size: 0.9rem;
-  min-height: 80px;
-}
-
-.history, .template-item, .danger-item, .pattern-item {
-  font-size: 12px;
-  border: 1px solid var(--border);
-  margin-top: 6px;
-  padding: 8px;
-  border-radius: 8px;
-}
-
-.section-box {
-  margin-top: 15px;
-}
-
-.small {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.history-actions,
-.item-actions {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-
-.history-actions button,
-.item-actions button {
-  padding: 8px 10px;
-  font-size: 12px;
-}
-
-.warning-box {
-  display: none;
-  margin-top: 15px;
-  padding: 12px;
-  border-radius: 10px;
-  background: var(--warn-bg);
-  color: var(--warn-text);
-  border: 1px solid var(--warn-border);
-  white-space: pre-wrap;
-}
-
-.diagnose-box{
-  display:none;
-  margin-top:15px;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:rgba(0,122,255,0.08);
-  white-space:pre-wrap;
-  font-size:13px;
-}
-
-.code-like {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
-  opacity: 0.9;
-  word-break: break-all;
-}
-
-.command-box {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.command-chip {
-  padding: 7px 9px;
-  font-size: 12px;
-  border-radius: 999px;
-  background: rgba(128,128,128,0.15);
-  color: var(--text);
-  border: 1px solid var(--border);
-  cursor: pointer;
-}
-
-.command-chip.active {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-}
-
-.command-chip:hover {
-  background: var(--accent);
-  color: white;
-}
-
-.preset-box {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.preset-chip {
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: rgba(255,149,0,0.15);
-  color: var(--text);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.preset-chip:hover {
-  background: #ff9500;
-  color: white;
-}
-
-#toolsBtn {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 999;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  padding: 0;
-  font-size: 22px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.25);
-}
-
-#toolsMenu {
-  position: fixed;
-  right: 18px;
-  bottom: 88px;
-  z-index: 998;
-  width: min(320px, calc(100vw - 36px));
-  max-height: 65vh;
-  overflow-y: auto;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 15px;
-  padding: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-}
-
 #repairSearchBtn{
   position:fixed;
   right:18px;
@@ -316,126 +34,26 @@ body.dark button.active-panel {
   box-shadow:0 4px 20px rgba(0,0,0,.25);
 }
 
-#repairSearchResult{
-  display:none;
-  max-height:160px;
-  overflow-y:auto;
-  margin-top:8px;
+.repair-search-row{
+  margin-bottom:8px;
 }
 
-#repairSearchBtn {
-  position: fixed;
-  right: 18px;
-  bottom: 88px;
-  z-index: 997;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  padding: 0;
-  font-size: 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.25);
-}
-
-#repairSearchBox{
-  position:fixed;
-  right:12px;
-  bottom:90px;
-  z-index:996;
-  width:280px;
-  max-width:calc(100vw - 24px);
-  max-height:45vh;
-  overflow:hidden;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:10px;
-  box-shadow:0 4px 20px rgba(0,0,0,.25);
-}
-
-#repairSearchResult{
-  display:none;
-  max-height:180px;
-  overflow-y:auto;
-  margin-top:8px;
-  font-size:11px;
-}
-
-#commandMenu {
-  margin-top: 8px;
-  padding: 10px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: rgba(128,128,128,0.06);
-}
-
-.tool-section-title {
-  grid-column: span 2;
-  font-size: 12px;
-  font-weight: bold;
-  opacity: 0.8;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
-}
-
-.tool-category-btn {
-  grid-column: span 2;
-  background: rgba(128,128,128,0.12);
-  color: var(--text);
-  border: 1px solid var(--border);
-  text-align: left;
-  padding: 10px 12px;
-  font-size: 13px;
-}
-
-.tool-category {
-  grid-column: span 2;
-  display: none;
-  gap: 8px;
-  grid-template-columns: 1fr 1fr;
-  margin-bottom: 6px;
-}
-
-mark {
-  background: #fff176;
-  color: #000;
-  padding: 1px 3px;
-  border-radius: 4px;
-}
-
-.search-result-line {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
-  padding: 6px;
-  border-bottom: 1px solid var(--border);
-  white-space: pre-wrap;
-}
-
-.code-preview {
-  margin-top: 12px;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: #0d1117;
-  color: #c9d1d9;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  overflow-x: auto;
+#repairSearch{
+  padding:9px 10px;
+  font-size:14px;
+  margin-top:0;
 }
 
 .repair-search-actions{
-  position:absolute;
-  right:78px;
-  bottom:14px;
   display:flex;
   gap:8px;
+  justify-content:flex-end;
+  margin-top:8px;
 }
 
 .repair-mini-btn{
-  width:48px;
-  height:48px;
+  width:44px;
+  height:44px;
   border-radius:50%;
   padding:0;
   font-size:18px;
@@ -444,13 +62,14 @@ mark {
   justify-content:center;
 }
 
-.code-tag { color: #7ee787; }
-.code-attr { color: #79c0ff; }
-.code-string { color: #a5d6ff; }
-.code-comment { color: #8b949e; }
-.code-keyword { color: #ff7b72; }
+#repairSearchResult{
+  display:none;
+  max-height:160px;
+  overflow-y:auto;
+  margin-top:8px;
+  font-size:11px;
+}
 
-</style>
 </head>
 <body>
 
@@ -697,39 +316,24 @@ mark {
   class="btn-secondary">
   🔍
 </button>
-<button
-  id="repairSearchBtn"
-  onclick="toggleRepairSearchBox()"
-  class="btn-secondary">
-  🔍
-</button>
-
 <div
   id="repairSearchBox"
   style="display:none;">
-
   <div class="repair-search-row">
     <input
       id="repairSearch"
       placeholder="検索">
   </div>
-
   <div class="repair-search-actions">
     <button class="repair-mini-btn" onclick="searchRepairText()">🔍</button>
     <button class="repair-mini-btn" onclick="searchRepairNext()">▶</button>
     <button class="repair-mini-btn" onclick="closeRepairSearchBox()">－</button>
   </div>
-
   <div
     id="repairSearchResult"
     class="diagnose-box">
   </div>
-
 </div>
-
-
-
-
 
   <label for="repairEditor">
     HTML編集エリア
@@ -986,9 +590,7 @@ ${buildCommandInstructionsFromObject(obj)}
 }
 
 function convertForClaude(obj) {
-
   const preset = obj.ai_preset || {};
-
   return `背景：
 ${obj.prompt.purpose}
 
@@ -1167,47 +769,36 @@ function toggleToolsMenu() {
     isOpen ? "⚙" : "×";
 }
 
-function toggleRepairSearchBox(){
-  const box =
-    get("repairSearchBox");
-  const isOpen =
-    box.style.display !== "none";
-  box.style.display =
-    isOpen
-      ? "none"
-      : "block";
-}
-
 function toggleRepairSearchBox() {
-
   const box = get("repairSearchBox");
   const btn = get("repairSearchBtn");
-
   const isOpen =
     box.style.display !== "none";
-
   box.style.display =
     isOpen ? "none" : "block";
-
   btn.innerText =
     isOpen ? "🔍" : "×";
 }
 
+function closeRepairSearchBox(){
+  get("repairSearchBox")
+    .style.display = "none";
+  get("repairSearchBtn")
+    .innerText = "🔍";
+  get("repairSearchResult")
+    .style.display = "none";
+}
+
 function toggleToolCategory(id) {
-
   const box = get(id);
-
   const btn =
     document.querySelector(
       `[onclick="toggleToolCategory('${id}')"]`
     );
-
   const isOpen =
     getComputedStyle(box).display !== "none";
-
   box.style.display =
     isOpen ? "none" : "grid";
-
   if (btn) {
     btn.innerText =
       btn.innerText.replace(
@@ -1218,10 +809,8 @@ function toggleToolCategory(id) {
 }
 
 function toggleCommandMenu() {
-
   const menu =
     get("commandMenu");
-
   menu.style.display =
     menu.style.display === "none"
       ? "block"
@@ -1236,37 +825,32 @@ function closeAllManagers() {
 }
 
 function updatePanelButtonStates() {
-
   const templateBtn = get("templateBtn");
   const dangerBtn = get("dangerBtn");
   const patternBtn = get("patternBtn");
   const aiPresetBtn = get("aiPresetBtn");
-
   if (templateBtn) {
     templateBtn.classList.toggle(
       "active-panel",
       get("template-manager").style.display !== "none"
     );
   }
-
   if (dangerBtn) {
     dangerBtn.classList.toggle(
       "active-panel",
       get("danger-manager").style.display !== "none"
     );
   }
-
   if (patternBtn) {
     patternBtn.classList.toggle(
       "active-panel",
       get("pattern-manager").style.display !== "none"
     );
   }
-
   if (aiPresetBtn) {
     aiPresetBtn.classList.toggle(
       "active-panel",
-      get("ai-preset-manager").style.display !== "none"
+    get("ai-preset-manager").style.display !== "none"
     );
   }
 }
@@ -1313,14 +897,12 @@ function toggleAiPresetManager() {
     get("ai-preset-manager").style.display = "block";
     loadAiPresetToEditor();
   }
-
   updatePanelButtonStates();
 }
 
 function loadAiPresetToEditor() {
   const target = get("aiPresetTarget").value;
   const preset = getAiPreset(target);
-
   get("aiPresetName").value = preset.name || "";
   get("aiPresetInstruction").value = preset.instruction || "";
 }
@@ -1329,32 +911,25 @@ function saveAiPresetFromEditor() {
   const target = get("aiPresetTarget").value;
   const name = get("aiPresetName").value.trim();
   const instruction = get("aiPresetInstruction").value.trim();
-
   if (!name || !instruction) {
     alert("表示名と変換方針を入力してください");
     return;
   }
-
   const presets = getAiPresets();
-
   presets[target] = {
     name,
     instruction
   };
-
   saveAiPresets(presets);
   alert("AIプリセットを保存しました");
 }
 
 function resetAiPreset() {
   const target = get("aiPresetTarget").value;
-
   const saved = loadJson("aiPresets", {});
   delete saved[target];
-
   saveAiPresets(saved);
   loadAiPresetToEditor();
-
   alert("初期値に戻しました");
 }
 
@@ -3088,6 +2663,27 @@ ${col}`;
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
+function closeRepairSearchBox() {
+  const box = get("repairSearchBox");
+  const btn = get("repairSearchBtn");
+  if (box) box.style.display = "none";
+  if (btn) btn.innerText = "🔍";
+}
+function compactRepairSearchUi() {
+  const box = get("repairSearchBox");
+  if (!box) return;
+  const oldGroup = box.querySelector(".btn-group");
+  if (!oldGroup) return;
+  oldGroup.classList.remove("btn-group"); oldGroup.classList.add("repair-search-actions"); oldGroup.querySelectorAll("button").forEach(btn => {
+    btn.classList.add("repair-mini-btn");
+  });
+  const closeBtn = oldGroup.querySelectorAll("button")[2];
+  if (closeBtn) {
+    closeBtn.onclick = closeRepairSearchBox;
+    closeBtn.innerText = "－";
+  }
+}
+document.addEventListener("DOMContentLoaded", compactRepairSearchUi);
 </script>
 </body>
 </html>
