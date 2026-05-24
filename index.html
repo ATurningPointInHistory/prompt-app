@@ -311,17 +311,10 @@ body.dark button.active-panel {
 }
 
 .tool-category {
-
   grid-column: span 2;
-
   display: none;
-
   gap: 8px;
-
-  display: grid;
-
   grid-template-columns: 1fr 1fr;
-
   margin-bottom: 6px;
 }
 
@@ -427,196 +420,45 @@ body.dark button.active-panel {
   class="btn-group"
   style="display:none;">
 
-  <button
-    class="tool-category-btn"
-    onclick="toggleToolCategory('backupTools')">
-
-    💾 バックアップ系
-
+  <button class="tool-category-btn" onclick="toggleToolCategory('backupTools')">
+    💾 バックアップ系 ▼
   </button>
 
-  <div
-    id="backupTools"
-    class="tool-category">
-
-    <button onclick="backupProgram()">
-      🗂 フルバックアップ
-    </button>
-
-    <button onclick="saveProgramHtml()">
-      💾 本体HTML保存
-    </button>
-
-    <button onclick="restoreProgramBackup()">
-      ♻ フル復元
-    </button>
-
+  <div id="backupTools" class="tool-category">
+    <button onclick="backupProgram()">🗂 フルバックアップ</button>
+    <button onclick="saveProgramHtml()">💾 本体HTML保存</button>
+    <button onclick="restoreProgramBackup()">♻ フル復元</button>
   </div>
 
-  <button
-    class="tool-category-btn"
-    onclick="toggleToolCategory('aiTools')">
-
-    🤖 AI設定系
-
+  <button class="tool-category-btn" onclick="toggleToolCategory('aiTools')">
+    🤖 AI設定系 ▼
   </button>
 
-  <div
-    id="aiTools"
-    class="tool-category">
-
-    <button onclick="importTemplates()">
-      📥 テンプレ復元
-    </button>
-
-    <button onclick="exportAiPresets()">
-      🤖 AI設定バックアップ
-    </button>
-
-    <button onclick="importAiPresets()">
-      🤖 AI設定復元
-    </button>
-
+  <div id="aiTools" class="tool-category">
+    <button onclick="importTemplates()">📥 テンプレ復元</button>
+    <button onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
+    <button onclick="importAiPresets()">🤖 AI設定復元</button>
   </div>
 
-  <button
-    class="tool-category-btn"
-    onclick="toggleToolCategory('devTools')">
-
-    🧪 開発・確認系
-
+  <button class="tool-category-btn" onclick="toggleToolCategory('devTools')">
+    🧪 開発・確認系 ▼
   </button>
 
-  <div
-    id="devTools"
-    class="tool-category">
-
-    <button onclick="reviewPrompt()">
-      🛠 Promptレビュー
-    </button>
-
-    <button onclick="testPromptObject()">
-      🧩 内部JSONテスト
-    </button>
-
-    <button onclick="testJsonFormat()">
-      🧪 JSONテスト
-    </button>
-
-    <button onclick="formatJsonOutput()">
-      📦 JSON整形
-    </button>
-
-    <button onclick="recheckOutput()">
-      🔍 再チェック
-    </button>
-
+  <div id="devTools" class="tool-category">
+    <button onclick="reviewPrompt()">🛠 Promptレビュー</button>
+    <button onclick="testPromptObject()">🧩 内部JSONテスト</button>
+    <button onclick="testJsonFormat()">🧪 JSONテスト</button>
+    <button onclick="formatJsonOutput()">📦 JSON整形</button>
+    <button onclick="recheckOutput()">🔍 再チェック</button>
   </div>
 
-  <button
-    class="tool-category-btn"
-    onclick="toggleToolCategory('cleanTools')">
-
-    🧹 整理系
-
+  <button class="tool-category-btn" onclick="toggleToolCategory('cleanTools')">
+    🧹 整理系 ▼
   </button>
 
-  <div
-    id="cleanTools"
-    class="tool-category">
-
-    <button onclick="clearOutput()">
-      🧹 出力クリア
-    </button>
-
-    <button onclick="clearHistory()">
-      🗑 履歴全削除
-    </button>
-
-  </div>
-
-</div>
-
-  <button
-    class="tool-category-btn"
-    onclick="toggleToolCategory('aiTools')">
-
-    🤖 AI設定系
-
-  </button>
-
-  <div
-    id="aiTools"
-    class="tool-category">
-
-    <button onclick="importTemplates()">
-      📥 テンプレ復元
-    </button>
-
-    <button onclick="exportAiPresets()">
-      🤖 AI設定バックアップ
-    </button>
-
-    <button onclick="importAiPresets()">
-      🤖 AI設定復元
-    </button>
-
-  </div>
-
-  <button
-    class="tool-category-btn"
-    onclick="toggleToolCategory('devTools')">
-
-    🧪 開発・確認系
-
-  </button>
-
-  <div
-    id="devTools"
-    class="tool-category">
-
-    <button onclick="reviewPrompt()">
-      🛠 Promptレビュー
-    </button>
-
-    <button onclick="testPromptObject()">
-      🧩 内部JSONテスト
-    </button>
-
-    <button onclick="testJsonFormat()">
-      🧪 JSONテスト
-    </button>
-
-    <button onclick="formatJsonOutput()">
-      📦 JSON整形
-    </button>
-
-    <button onclick="recheckOutput()">
-      🔍 再チェック
-    </button>
-
-  </div>
-
-  <button
-    class="tool-category-btn"
-    onclick="toggleToolCategory('cleanTools')">
-
-    🧹 整理系
-
-  </button>
-
-  <div
-    id="cleanTools"
-    class="tool-category">
-
-    <button onclick="clearOutput()">
-      🧹 出力クリア
-    </button>
-
-    <button onclick="clearHistory()">
-      🗑 履歴全削除
-    </button>
-
+  <div id="cleanTools" class="tool-category">
+    <button onclick="clearOutput()">🧹 出力クリア</button>
+    <button onclick="clearHistory()">🗑 履歴全削除</button>
   </div>
 
 </div>
@@ -1146,11 +988,24 @@ function toggleToolCategory(id) {
 
   const box = get(id);
 
+  const btn =
+    document.querySelector(
+      `[onclick="toggleToolCategory('${id}')"]`
+    );
+
   const isOpen =
-    box.style.display !== "none";
+    getComputedStyle(box).display !== "none";
 
   box.style.display =
     isOpen ? "none" : "grid";
+
+  if (btn) {
+    btn.innerText =
+      btn.innerText.replace(
+        isOpen ? "▲" : "▼",
+        isOpen ? "▼" : "▲"
+      );
+  }
 }
 
 function toggleCommandMenu() {
