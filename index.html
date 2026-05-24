@@ -300,19 +300,28 @@ body.dark button.active-panel {
   box-shadow: 0 4px 15px rgba(0,0,0,0.25);
 }
 
-#repairSearchBox {
-  position: fixed;
-  right: 18px;
-  bottom: 158px;
-  z-index: 996;
-  width: min(320px, calc(100vw - 36px));
-  max-height: 55vh;
-  overflow-y: auto;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 15px;
-  padding: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+#repairSearchBox{
+  position:fixed;
+  right:12px;
+  bottom:90px;
+  z-index:996;
+  width:280px;
+  max-width:calc(100vw - 24px);
+  max-height:45vh;
+  overflow:hidden;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+}
+
+#repairSearchResult{
+  display:none;
+  max-height:180px;
+  overflow-y:auto;
+  margin-top:8px;
+  font-size:11px;
 }
 
 #commandMenu {
@@ -334,18 +343,12 @@ body.dark button.active-panel {
 }
 
 .tool-category-btn {
-
   grid-column: span 2;
-
   background: rgba(128,128,128,0.12);
   color: var(--text);
-
   border: 1px solid var(--border);
-
   text-align: left;
-
   padding: 10px 12px;
-
   font-size: 13px;
 }
 
@@ -398,47 +401,33 @@ mark {
 
 <div class="card">
   <h2>AIプロンプト生成Pro</h2>
-
   <div class="tab-container">
-
     <div
       class="tab active"
       id="appPageTab"
       onclick="switchAppPage('app')">
-
       通常モード
-
     </div>
-
     <div
       class="tab"
       id="repairPageTab"
       onclick="switchAppPage('repair')">
-
       修復モード
-
     </div>
-
   </div>
-
   <div id="appPage">
-
   <div class="small" id="versionLabel"></div>
   <div class="small" id="changelogLabel"></div>
   <div class="tab-container">    <div id="tab1" class="tab active" onclick="switchTab(1)">マニュアル入力</div>
     <div id="tab2" class="tab" onclick="switchTab(2)">ラフから変換</div>
   </div>
-
   <div id="mode-normal">
     <label for="role">役割</label>
     <input id="role" placeholder="例：プログラマー、翻訳家、AIオーケストレーター">
-
     <label for="task">目的</label>
     <input id="task" placeholder="何をしたいですか？">
-
     <label for="details">詳細（背景・条件など）</label>
     <textarea id="details" rows="5" placeholder="具体的な指示や制約があれば入力"></textarea>
-
     <label for="tone">トーン</label>
     <select id="tone">
       <option>プロフェッショナル</option>
@@ -447,35 +436,25 @@ mark {
       <option>簡潔に</option>
     </select>
   </div>
-
   <div id="mode-auto" style="display:none;">
     <label for="raw-input">やりたいことを自由に入力（AIに整理させます）</label>
     <textarea id="raw-input" rows="8" placeholder="例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。"></textarea>
-
 <button
   type="button"
   onclick="toggleCommandMenu()"
   class="btn-secondary btn-full">
-
   🧩 変換モード
-
 </button>
-
 <div
   id="commandMenu"
   style="display:none;">
-
   <div class="small">
     変換モードをクリックすると入力欄に追加されます。
   </div>
-
   <div id="commandBox" class="command-box"></div>
-
 </div>
-
 <div class="small">用途別プリセット</div>
 <div id="presetBox" class="preset-box"></div>
-
     <label for="rough-tone">トーン</label>
     <select id="rough-tone">
       <option>プロフェッショナル</option>
@@ -483,7 +462,6 @@ mark {
       <option>カジュアル</option>
       <option>簡潔に</option>
     </select>
-
     <label for="ai-target">AI向け最適化</label>
     <select id="ai-target">
       <option value="chatgpt">ChatGPT</option>
@@ -497,52 +475,42 @@ mark {
       <option value="prompt">通常プロンプト</option>
       <option value="json">JSON</option>
     </select>
-
   </div>
-
   <div class="btn-group">
     <button id="main-btn" class="btn-full" onclick="generatePrompt()">⚡ プロンプトを生成する</button>
     <button onclick="copyText()" class="btn-secondary">📋 コピー</button>
     <button onclick="download()" class="btn-secondary">💾 保存</button>
     <button onclick="toggleDark()" class="btn-secondary">🌙 ダークモード</button>
   </div>
-
  <button
   id="toolsBtn"
   onclick="toggleToolsMenu()"
   class="btn-secondary">
   ⚙
 </button>
-
 <div
   id="toolsMenu"
   class="btn-group"
   style="display:none;">
-
   <button class="tool-category-btn" onclick="toggleToolCategory('backupTools')">
     💾 バックアップ系 ▼
   </button>
-
   <div id="backupTools" class="tool-category">
     <button onclick="backupProgram()">🗂 フルバックアップ</button>
     <button onclick="saveProgramHtml()">💾 本体HTML保存</button>
     <button onclick="restoreProgramBackup()">♻ フル復元</button>
   </div>
-
   <button class="tool-category-btn" onclick="toggleToolCategory('aiTools')">
     🤖 AI設定系 ▼
   </button>
-
   <div id="aiTools" class="tool-category">
     <button onclick="importTemplates()">📥 テンプレ復元</button>
     <button onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
     <button onclick="importAiPresets()">🤖 AI設定復元</button>
   </div>
-
   <button class="tool-category-btn" onclick="toggleToolCategory('devTools')">
     🧪 開発・確認系 ▼
   </button>
-
   <div id="devTools" class="tool-category">
     <button onclick="reviewPrompt()">🛠 Promptレビュー</button>
     <button onclick="testPromptObject()">🧩 内部JSONテスト</button>
@@ -552,59 +520,41 @@ mark {
 <button onclick="diagnoseHtml()">
   🩺 HTML診断</button>
   </div>
-    
-
   <button class="tool-category-btn" onclick="toggleToolCategory('cleanTools')">
     🧹 整理系 ▼
   </button>
-
   <div id="cleanTools" class="tool-category">
     <button onclick="clearOutput()">🧹 出力クリア</button>
     <button onclick="clearHistory()">🗑 履歴全削除</button>
   </div>
-
 </div>
-
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
-
   <input type="file" id="aiPresetFileInput" accept=".json,application/json" style="display:none;">
-
   <label>生成結果</label>
   <div id="output">ここに表示</div>
-
   <div id="warningBox" class="warning-box"></div>
-
   <div id="debugBox"
   class="warning-box"
   style="display:none;"></div>
-
   <div
   id="diagnoseBox"
   class="diagnose-box">
 </div>
-
   <div id="template-manager" class="section-box" style="display:none;">
     <h3>テンプレ管理</h3>
-
     <label for="templateSelect">固定テンプレ / 保存テンプレ</label>
     <select id="templateSelect" onchange="applyTemplateFromSelect()">
       <option value="">テンプレを選択</option>
     </select>
-
     <div class="small">下の入力欄から新しいテンプレも追加できます。</div>
-
     <label for="tempName">テンプレ名</label>
     <input id="tempName" placeholder="例：バグ修正用、営業文作成">
-
     <label for="tempRole">役割</label>
     <input id="tempRole" placeholder="例：シニアエンジニア">
-
     <label for="tempTask">目的</label>
     <input id="tempTask" placeholder="例：JavaScriptの不具合修正">
-
     <label for="tempDetails">詳細</label>
     <textarea id="tempDetails" rows="5" placeholder="テンプレの詳細内容"></textarea>
-
     <label for="tempTone">トーン</label>
     <select id="tempTone">
       <option>プロフェッショナル</option>
@@ -612,51 +562,36 @@ mark {
       <option>カジュアル</option>
       <option>簡潔に</option>
     </select>
-
     <button onclick="saveTemplate()" class="btn-full">テンプレ保存</button>
-
     <h4>保存済みテンプレ一覧</h4>
     <div id="templateList"></div>
   </div>
-
   <div id="danger-manager" class="section-box" style="display:none;">
     <h3>危険ワード管理</h3>
     <div class="small">単語が含まれていたら警告します。</div>
-
     <label for="dangerWord">危険ワード</label>
     <input id="dangerWord" placeholder="例：パスワード、住所、電話番号">
-
     <button onclick="saveDangerWord()" class="btn-full">危険ワード追加</button>
-
     <h4>固定危険ワード + 追加危険ワード</h4>
     <div id="dangerList"></div>
   </div>
-
   <div id="pattern-manager" class="section-box" style="display:none;">
     <h3>NGパターン管理</h3>
     <div class="small">形式で検出します。正規表現を追加できます。</div>
-
     <label for="patternName">パターン名</label>
     <input id="patternName" placeholder="例：社員番号、会員ID">
-
     <label for="patternRegex">正規表現</label>
     <input id="patternRegex" placeholder="例：\\b[A-Z]{2}\\d{6}\\b">
-
     <label for="patternFlags">フラグ</label>
     <input id="patternFlags" placeholder="例：g または gi">
-
     <div class="small">よく分からなければ、まずは g を入れてください。</div>
-
     <button onclick="savePattern()" class="btn-full">NGパターン追加</button>
-
     <h4>固定NGパターン + 追加NGパターン</h4>
     <div id="patternList"></div>
   </div>
-
 <div id="ai-preset-manager" class="section-box" style="display:none;">
   <h3>AIプリセット管理</h3>
   <div class="small">AI別の変換方針を編集できます。</div>
-
   <label for="aiPresetTarget">対象AI</label>
   <select id="aiPresetTarget" onchange="loadAiPresetToEditor()">
     <option value="chatgpt">ChatGPT</option>
@@ -665,130 +600,99 @@ mark {
     <option value="cursor">Cursor</option>
     <option value="copilot">Copilot</option>
   </select>
-
   <label for="aiPresetName">表示名</label>
   <input id="aiPresetName" placeholder="例：ChatGPT">
-
   <label for="aiPresetInstruction">変換方針</label>
   <textarea id="aiPresetInstruction" rows="6" placeholder="このAI向けの変換方針を入力"></textarea>
-
   <div class="btn-group">
     <button onclick="saveAiPresetFromEditor()">保存</button>
     <button onclick="resetAiPreset()">初期値に戻す</button>
   </div>
 </div>
-
 <div class="section-box">
   <label>履歴（最新5件）</label>
   <div id="history"></div>
 </div>
 </div>
-
 <div
   id="repairPage"
   style="display:none;">
-
   <h3>🛠 修復モード</h3>
-
   <div class="small">
     HTMLファイルを文字列として読み込み、編集して保存できます。
   </div>
+</div>
 
-  <div class="btn-group">
 
+<div class="btn-group">
   <button onclick="loadRepairHtml()">
-  📖 HTML読込
-  </button>
-
+    📖 HTML読込</button>
   <button onclick="saveRepairHtml()">
-  💾 修正版保存
-  </button>
-
+    💾 修正版保存</button>
   <button onclick="diagnoseRepairHtml()">
-  🩺 編集内容診断
-  </button>
-
+    🩺 編集内容診断</button>
   <button onclick="selectFunctionBlock()">
-  📦 関数選択
-  </button>
-
+    📦 関数選択</button>
   <button onclick="replaceFunctionBlock()">
-  ✏ 関数置換
-  </button>
-
-  </div>
-
+    ✏ 関数置換</button>
+</div>
 <button
   id="repairSearchBtn"
   onclick="toggleRepairSearchBox()"
   class="btn-secondary">
-  🔍
-</button>
-
-  <div
-    id="repairSearchBox"
-    style="display:none;">
-
-    <label for="repairSearch">
-      検索
-    </label>
-
-    <input
-      id="repairSearch"
-      placeholder="検索したい文字を入力">
-
-    <div class="btn-group">
-      <button onclick="searchRepairText()">
-        🔍 検索
-      </button>
-
-      <button onclick="searchRepairNext()">
-        次へ
-      </button>
-    </div>
-
-    <div
-      id="repairSearchResult"
-      class="diagnose-box">
-    </div>
-
+  🔍</button>
+<div
+  id="repairSearchBox"
+  style="display:none;">
+  <input
+    id="repairSearch"
+    placeholder="検索">
+  <div class="btn-group">
+    <button onclick="searchRepairText()">
+      🔍</button>
+    <button onclick="searchRepairNext()">
+      ▶</button>
+    <button
+      onclick="
+      get('repairSearchResult')
+      .style.display='none'">
+      －</button>
   </div>
+  <div
+    id="repairSearchResult"
+    class="diagnose-box">
+  </div>
+</div>
+
+
+
+
 
   <label for="repairEditor">
     HTML編集エリア
   </label>
-
   <textarea
     id="repairEditor"
     rows="20"
     placeholder="ここにHTML全文が表示されます"></textarea>
-
   <button
     onclick="previewRepairHtml()"
     class="btn-full">
-    🎨 色分けプレビュー
-  </button>
-
+    🎨 色分けプレビュー</button>
   <div
     id="repairPreview"
     class="code-preview"
     style="display:none;">
   </div>
-
 </div>
-
 </div>
-
 <script>
-const get = (id) => document.getElementById(id);
 
+const get = (id) => document.getElementById(id);
 let currentTab = 1;
 let isLoading = false;
-
 const APP_VERSION = "v5.7.0";
-
 const DEBUG_MODE = true;
-
 const CHANGELOG = [
   "v5.7.0 AI別レビュー強化",
   "v5.7.0 AIプリセット保存/復元",
@@ -974,32 +878,24 @@ function convertForAI(obj, aiTarget, outputFormat) {
   if (outputFormat === "json") {
     return JSON.stringify(obj, null, 2);
   }
-
   obj.ai_preset = getAiPreset(aiTarget);
-
   switch (aiTarget) {
     case "chatgpt":
       return convertForChatGPT(obj);
-
     case "claude":
       return convertForClaude(obj);
-
     case "gemini":
       return convertForGemini(obj);
-
     case "cursor":
       return convertForCursor(obj);
-
     case "copilot":
       return convertForCopilot(obj);
-
     default:
       return convertForChatGPT(obj);
   }
 }
 
 function convertForChatGPT(obj) {
-
   const preset = obj.ai_preset || {};
 
   return `以下の「やりたいこと」を分析し、プロンプトの各項目に整理して再構成してください。
@@ -2248,63 +2144,42 @@ function importAiPresets() {
 }
 
 function backupProgram() {
-
   const backupData = {
-
     version: APP_VERSION,
-
     created_at:
       new Date().toISOString(),
-
     changelog: CHANGELOG,
-
     html:
       document.documentElement.outerHTML,
-
     localStorageData: {
-
       templates:
         loadJson("templates", []),
-
       aiPresets:
         loadJson("aiPresets", {}),
-
       dangerWords:
         loadJson("dangerWords", []),
-
       dangerPatterns:
         loadJson("dangerPatterns", []),
-
       history:
         loadJson("h", []),
-
       rawInput:
         localStorage.getItem("rawInput"),
-
       roleValue:
         localStorage.getItem("roleValue"),
-
       taskValue:
         localStorage.getItem("taskValue"),
-
       detailsValue:
         localStorage.getItem("detailsValue"),
-
       toneValue:
         localStorage.getItem("toneValue"),
-
       roughTone:
         localStorage.getItem("roughTone"),
-
       roughOutputFormat:
-        localStorage.getItem("roughOutputFormat"),
-
+   localStorage.getItem("roughOutputFormat"),
       aiTarget:
         localStorage.getItem("aiTarget"),
-
       currentTab:
         localStorage.getItem("currentTab"),
-
       darkMode:
         localStorage.getItem("darkMode")
     }
@@ -2315,51 +2190,35 @@ function backupProgram() {
       [JSON.stringify(backupData, null, 2)],
       { type:"application/json" }
     );
-
   const a =
     document.createElement("a");
-
   a.href =
     URL.createObjectURL(blob);
-
   const timestamp =
     new Date()
       .toISOString()
       .replace(/[:.]/g,"-");
-
   a.download =
     `AIProBackup_${APP_VERSION}_${timestamp}.json`;
-
   a.click();
-
   alert("フルバックアップ保存完了");
 }
 
 function restoreProgramBackup() {
-
   const input =
     document.createElement("input");
-
   input.type = "file";
   input.accept = ".json,application/json";
-
   input.onchange = (e) => {
-
     const file =
       e.target.files[0];
-
     if (!file) return;
-
     const reader =
       new FileReader();
-
     reader.onload = () => {
-
       try {
-
         const data =
           JSON.parse(reader.result);
-
         if (!data || !data.localStorageData) {
           alert("フルバックアップ形式ではありません");
           return;
@@ -2367,12 +2226,10 @@ function restoreProgramBackup() {
 
         Object.entries(data.localStorageData)
           .forEach(([key, value]) => {
-
             if (value === null || value === undefined) {
               localStorage.removeItem(key);
               return;
             }
-
             if (typeof value === "string") {
               localStorage.setItem(key, value);
             } else {
@@ -2381,27 +2238,19 @@ function restoreProgramBackup() {
                 JSON.stringify(value)
               );
             }
-
           });
 
         alert("フル復元完了。再読み込みします。");
-
         location.reload();
-
       } catch (err) {
-
         alert(
           "フル復元に失敗しました\n\n" +
           err.message
         );
-
       }
-
     };
-
     reader.readAsText(file);
   };
-
   input.click();
 }
 
@@ -2608,6 +2457,8 @@ function searchRepairText() {
   editor.setSelectionRange(index, index + keyword.length);
 
   renderRepairSearchResults(keyword);
+  get("repairSearchResult")
+  .style.display="block";
 }
 
 function searchRepairNext() {
