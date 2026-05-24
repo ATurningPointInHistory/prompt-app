@@ -2322,31 +2322,52 @@ function saveProgramHtml() {
 
 function loadRepairHtml() {
 
-  const input =
-    document.createElement("input");
+  const input=document.createElement("input");
 
-  input.type = "file";
-  input.accept = ".html,text/html";
+  input.type="file";
 
-  input.onchange = (e) => {
+  input.accept=
+  ".html,.json,text/html,application/json";
 
-    const file =
-      e.target.files[0];
+  input.onchange=(e)=>{
 
-    if (!file) return;
+    const file=e.target.files[0];
+    if(!file)return;
 
-    const reader =
-      new FileReader();
+    const reader=new FileReader();
 
-    reader.onload = () => {
+    reader.onload=()=>{
 
-      get("repairEditor").value =
-        reader.result;
+      try{
+
+        // JSON判定
+        const parsed=
+        JSON.parse(reader.result);
+
+        if(parsed.html){
+
+          get("repairEditor").value=
+          parsed.html;
+
+          alert(
+          "フルバックアップJSON読込完了"
+          );
+
+          return;
+        }
+
+      }catch{}
+
+      // 通常HTML
+      get("repairEditor").value=
+      reader.result;
 
       alert("HTML読込完了");
+
     };
 
     reader.readAsText(file);
+
   };
 
   input.click();
