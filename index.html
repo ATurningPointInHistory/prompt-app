@@ -438,20 +438,38 @@ mark {
       id="appPageTab"
       onclick="switchAppPage('app')">
       通常モード
+
     </div>
+
     <div
       class="tab"
       id="repairPageTab"
       onclick="switchAppPage('repair')">
       修復モード
+
     </div>
+
   </div>
+
   <div id="appPage">
-  <div class="small" id="versionLabel"></div>
-  <div class="small" id="changelogLabel"></div>
-  <div class="tab-container">    <div id="tab1" class="tab active" onclick="switchTab(1)">マニュアル入力</div>
-    <div id="tab2" class="tab" onclick="switchTab(2)">ラフから変換</div>
+  <div class="small" id="versionLabel">
+
+</div>
+
+  <div class="small" id="changelogLabel">
+
+</div>
+
+  <div class="tab-container">    <div id="tab1" class="tab active" onclick="switchTab(1)">マニュアル入力
+
   </div>
+
+    <div id="tab2" class="tab" onclick="switchTab(2)">ラフから変換
+
+  </div>
+
+  </div>
+
   <div id="mode-normal">
     <label for="role">役割</label>
     <input id="role" placeholder="例：プログラマー、翻訳家、AIオーケストレーター">
@@ -466,7 +484,9 @@ mark {
       <option>カジュアル</option>
       <option>簡潔に</option>
     </select>
+
   </div>
+
   <div id="mode-auto" style="display:none;">
     <label for="raw-input">やりたいことを自由に入力（AIに整理させます）</label>
     <textarea id="raw-input" rows="8" placeholder="例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。"></textarea>
@@ -481,8 +501,13 @@ mark {
   style="display:none;">
   <div class="small">
     変換モードをクリックすると入力欄に追加されます。
+
   </div>
-  <div id="commandBox" class="command-box"></div>
+
+  <div id="commandBox" class="command-box">
+
+</div>
+
 </div>
 <div class="small">用途別プリセット</div>
 <div id="presetBox" class="preset-box"></div>
@@ -506,13 +531,17 @@ mark {
       <option value="prompt">通常プロンプト</option>
       <option value="json">JSON</option>
     </select>
+
   </div>
+
   <div class="btn-group">
     <button id="main-btn" class="btn-full" onclick="generatePrompt()">⚡ プロンプトを生成する</button>
     <button onclick="copyText()" class="btn-secondary">📋 コピー</button>
     <button onclick="download()" class="btn-secondary">💾 保存</button>
     <button onclick="toggleDark()" class="btn-secondary">🌙 ダークモード</button>
+
   </div>
+
  <button
   id="toolsBtn"
   onclick="toggleToolsMenu()"
@@ -530,7 +559,9 @@ mark {
     <button onclick="backupProgram()">🗂 フルバックアップ</button>
     <button onclick="saveProgramHtml()">💾 本体HTML保存</button>
     <button onclick="restoreProgramBackup()">♻ フル復元</button>
+
   </div>
+
   <button class="tool-category-btn" onclick="toggleToolCategory('aiTools')">
     🤖 AI設定系 ▼
   </button>
@@ -538,7 +569,9 @@ mark {
     <button onclick="importTemplates()">📥 テンプレ復元</button>
     <button onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
     <button onclick="importAiPresets()">🤖 AI設定復元</button>
+
   </div>
+
   <button class="tool-category-btn" onclick="toggleToolCategory('devTools')">
     🧪 開発・確認系 ▼
   </button>
@@ -550,27 +583,37 @@ mark {
     <button onclick="recheckOutput()">🔍 再チェック</button>
 <button onclick="diagnoseHtml()">
   🩺 HTML診断</button>
+
   </div>
+
   <button class="tool-category-btn" onclick="toggleToolCategory('cleanTools')">
     🧹 整理系 ▼
   </button>
   <div id="cleanTools" class="tool-category">
     <button onclick="clearOutput()">🧹 出力クリア</button>
     <button onclick="clearHistory()">🗑 履歴全削除</button>
+
   </div>
+
 </div>
+
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
   <input type="file" id="aiPresetFileInput" accept=".json,application/json" style="display:none;">
   <label>生成結果</label>
   <div id="output">ここに表示</div>
-  <div id="warningBox" class="warning-box"></div>
+  <div id="warningBox" class="warning-box">
+
+  </div>
+
   <div id="debugBox"
   class="warning-box"
   style="display:none;"></div>
   <div
   id="diagnoseBox"
   class="diagnose-box">
-</div>
+
+  </div>
+
   <div id="template-manager" class="section-box" style="display:none;">
     <h3>テンプレ管理</h3>
     <label for="templateSelect">固定テンプレ / 保存テンプレ</label>
@@ -595,17 +638,28 @@ mark {
     </select>
     <button onclick="saveTemplate()" class="btn-full">テンプレ保存</button>
     <h4>保存済みテンプレ一覧</h4>
-    <div id="templateList"></div>
+    <div id="templateList">
+
   </div>
+
+  </div>
+
   <div id="danger-manager" class="section-box" style="display:none;">
     <h3>危険ワード管理</h3>
-    <div class="small">単語が含まれていたら警告します。</div>
+    <div class="small">単語が含まれていたら警告します。
+
+</div>
+
     <label for="dangerWord">危険ワード</label>
     <input id="dangerWord" placeholder="例：パスワード、住所、電話番号">
     <button onclick="saveDangerWord()" class="btn-full">危険ワード追加</button>
     <h4>固定危険ワード + 追加危険ワード</h4>
-    <div id="dangerList"></div>
+    <div id="dangerList">
+
   </div>
+
+  </div>
+
   <div id="pattern-manager" class="section-box" style="display:none;">
     <h3>NGパターン管理</h3>
     <div class="small">形式で検出します。正規表現を追加できます。</div>
@@ -618,11 +672,18 @@ mark {
     <div class="small">よく分からなければ、まずは g を入れてください。</div>
     <button onclick="savePattern()" class="btn-full">NGパターン追加</button>
     <h4>固定NGパターン + 追加NGパターン</h4>
-    <div id="patternList"></div>
+    <div id="patternList">
+
   </div>
+
+  </div>
+
 <div id="ai-preset-manager" class="section-box" style="display:none;">
   <h3>AIプリセット管理</h3>
-  <div class="small">AI別の変換方針を編集できます。</div>
+  <div class="small">AI別の変換方針を編集できます。
+
+</div>
+
   <label for="aiPresetTarget">対象AI</label>
   <select id="aiPresetTarget" onchange="loadAiPresetToEditor()">
     <option value="chatgpt">ChatGPT</option>
@@ -638,13 +699,21 @@ mark {
   <div class="btn-group">
     <button onclick="saveAiPresetFromEditor()">保存</button>
     <button onclick="resetAiPreset()">初期値に戻す</button>
+
   </div>
+
 </div>
+
 <div class="section-box">
   <label>履歴（最新5件）</label>
-  <div id="history"></div>
+  <div id="history">
+
 </div>
+
 </div>
+
+</div>
+
 <div id="repairPage"
 style="display:none;">
 
@@ -653,6 +722,7 @@ style="display:none;">
   <div class="small">
     HTMLファイルを文字列として読み込み、
     編集して保存できます。
+
   </div>
 
   <div class="btn-group">
@@ -668,13 +738,16 @@ style="display:none;">
     📚 関数一覧</button>
   <button onclick="replaceFunctionBlock()">
     ✏ 関数置換</button>
+
 </div>
+
 <button
   id="repairSearchBtn"
   onclick="toggleRepairSearchBox()"
   class="btn-secondary">
   🔍
 </button>
+
 <div
   id="repairSearchBox"
   style="display:none;">
@@ -682,16 +755,22 @@ style="display:none;">
     <input
       id="repairSearch"
       placeholder="検索">
+
   </div>
+
   <div class="repair-search-actions">
     <button class="repair-mini-btn" onclick="searchRepairText()">🔍</button>
     <button class="repair-mini-btn" onclick="searchRepairNext()">▶</button>
     <button class="repair-mini-btn" onclick="closeRepairSearchBox()">－</button>
+
   </div>
+
   <div
     id="repairSearchResult"
     class="diagnose-box">
+
   </div>
+
 </div>
 
   <label for="repairEditor">
@@ -707,11 +786,22 @@ style="display:none;">
     class="btn-full">
     🎨 色分けプレビュー
   </button>
+
 <div id="repairPreview"
 class="code-preview"
 style="display:none;">
+
 </div>
+
+<div
+  id="functionListBox"
+  class="diagnose-box"
+  style="display:none;">
+
+</div>
+
 </div> <!-- repairPage -->
+
 </div> <!-- card -->
 
 <script>
@@ -1377,22 +1467,15 @@ function renderPresetChips() {
 function applyPresetByName(name) {
   const commands = presetDefinitions[name];
   if (!commands) return;
-
   applyPreset(commands);
 }
-
 function applyPreset(commands) {
-
   const input = get("raw-input");
-
   // 既存コマンド削除
   let text = input.value.replace(/\/[a-zA-Z0-9]+/g, "").trim();
-
   // プリセット追加
   const commandText = commands.map(c => `/${c}`).join(" ");
-
   input.value = `${text} ${commandText}`.trim();
-
   syncCommandButtons();
   saveCurrentState();
   input.focus();
@@ -1401,11 +1484,9 @@ function applyPreset(commands) {
 function addCommand(cmd) {
   const input = get("raw-input");
   let current = input.value;
-
   const commandText = `/${cmd}`;
   const commands = current.match(/\/[a-zA-Z0-9]+/g) || [];
   const exists = commands.includes(commandText);
-
   if (exists) {
     current = current
       .split(/\s+/)
@@ -1415,7 +1496,6 @@ function addCommand(cmd) {
   } else {
     current = `${current.trim()} ${commandText}`.trim();
   }
-
   input.value = current;
   syncCommandButtons();
   saveCurrentState();
@@ -1434,18 +1514,15 @@ function syncCommandButtons() {
 
 function generatePrompt() {
   let p = "";
-
   if (currentTab === 1) {
     const role = get("role").value.trim() || "AIアシスタント";
     const task = get("task").value.trim();
     const details = get("details").value.trim();
     const tone = get("tone").value;
-
     if (!task) {
       alert("目的を入力してください");
       return;
     }
-
     p = `あなたは「${role}」として振る舞ってください。
 
 # 目的
@@ -1504,13 +1581,11 @@ function copyText() {
     alert("先に生成してください");
     return;
   }
-
   const report = detectSensitiveContent(text);
   if (report.hasAny) {
     const ok = confirm(buildConfirmMessage(report, "コピー"));
     if (!ok) return;
   }
-
   navigator.clipboard.writeText(text)
     .then(() => alert("コピー完了"))
     .catch(() => alert("コピー失敗（長押しコピーしてください）"));
@@ -1552,16 +1627,13 @@ function testPromptObject() {
     alert("ラフ入力欄にテスト用の文章を入力してください");
     return;
   }
-
   const tone = get("rough-tone").value;
   const parsed = parseCommands(rawOriginal);
-
   const obj = buildPromptObject(
     parsed.cleanedText,
     tone,
     parsed.commands
   );
-
   get("output").innerText = JSON.stringify(obj, null, 2);
 }
 
@@ -1575,41 +1647,30 @@ function recheckOutput() {
 }
 
 function diagnoseHtml() {
-
   let html =
     "<!DOCTYPE html>\n" +
     document.documentElement.outerHTML;
-
   html = html
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "");
-
   const report = [];
-
   report.push("AIプロンプト生成Pro HTML診断");
   report.push("v5.7.2 Diagnose Fixed\n");
-
   const tags = ["div", "section", "article", "main", "header", "footer"];
-
   tags.forEach(tag => {
     const open = (html.match(new RegExp(`<${tag}\\b`, "gi")) || []).length;
     const close = (html.match(new RegExp(`</${tag}>`, "gi")) || []).length;
     report.push(open === close ? `✔ ${tag}: ${open}/${close}` : `⚠ ${tag}: ${open}/${close}`);
   });
-
   const ids = [...html.matchAll(/id="([^"]+)"/g)].map(m => m[1]);
-
   const dupIds = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))];
-
   report.push(dupIds.length ? `⚠ id重複\n${dupIds.join("\n")}` : "✔ id重複なし");
-
   try {
     [...document.scripts].forEach(s => new Function(s.textContent));
     report.push("✔ JS構文OK");
   } catch (e) {
     report.push(`⚠ JS構文エラー\n${e.message}`);
   }
-
   const box = get("diagnoseBox");
   box.style.display = "block";
   box.innerText = report.join("\n");
@@ -1618,54 +1679,39 @@ function diagnoseHtml() {
 function formatJsonOutput() {
   const output = get("output");
   let text = output.innerText.trim();
-
   if (!text || text === "ここに表示") {
     alert("JSONがありません");
     return;
   }
-
   try {
-
     // ```json 除去
     text = text
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
-
     // JSON化
     const parsed = JSON.parse(text);
-
     // 整形
     const formatted = JSON.stringify(parsed, null, 2);
-
     output.innerText = formatted;
-
     alert("JSON整形完了");
-
   } catch (e) {
-
     alert("JSON形式が不正です\n\n" + e.message);
-
   }
 }
 
 function reviewPrompt() {
   const text = get("output").innerText.trim();
-
   if (!text || text === "ここに表示") {
     alert("先に生成してください");
     return;
   }
-
   let score = 100;
-
   const goodPoints = [];
   const warnings = [];
   const suggestions = [];
-
   const hasJsonLike = text.startsWith("{") || text.startsWith("[");
   let parsedJson = null;
-
   if (hasJsonLike) {
     try {
       parsedJson = JSON.parse(text);
@@ -1676,15 +1722,11 @@ function reviewPrompt() {
       suggestions.push("JSON整形ボタンで確認し、余計な説明文やMarkdownを除去してください。");
     }
   }
-
   const selectedAi = get("ai-target")
       ? get("ai-target").value || "chatgpt"
       : "chatgpt";
-
     let aiSpecificChecks = [];
-
     switch (selectedAi) {
-
       case "chatgpt":
         aiSpecificChecks = [
           {
@@ -2432,6 +2474,41 @@ function replaceFunctionBlock(){
 }
 
 function showFunctionList(){
+  const text = get("repairEditor").value;
+  if(!text.trim()){
+    alert("HTMLが空です");
+    return;
+  }
+  const matches = [...text.matchAll(
+    /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+  )];
+  const box = get("functionListBox");
+  if(matches.length === 0){
+    box.style.display = "block";
+    box.innerHTML = "関数なし";
+    return;
+  }
+  box.style.display = "block";
+  box.innerHTML =
+    `<b>関数一覧 (${matches.length}件)</b><br><br>` +
+    matches.map((m,i)=>{
+      const name = m[1];
+      return `
+        <button onclick="selectFunctionByName('${name}')">
+          ${i+1}. ${name}
+        </button>
+      `;
+    }).join("<br>");
+}
+
+function selectFunctionByName(name){
+  const result = findFunctionBlock(name);
+  if(!result)return;
+  const editor = get("repairEditor");
+  editor.focus(); editor.setSelectionRange(result.start,result.end);
+}
+
+function showFunctionList(){
   const text =
     get("repairEditor").value;
   if(!text.trim()){
@@ -2492,6 +2569,24 @@ function renderRepairSearchResults(keyword) {
       </div>
     `;
   }
+}
+
+function selectFunctionByName(name){
+
+  const result =
+    findFunctionBlock(name);
+
+  if(!result)return;
+
+  const editor =
+    get("repairEditor");
+
+  editor.focus();
+
+  editor.setSelectionRange(
+    result.start,
+    result.end
+  );
 }
 
 function diagnoseRepairHtml() {
@@ -2861,36 +2956,25 @@ function loadSettings() {
   const savedTab = Number(localStorage.getItem("currentTab") || "1");
   currentTab = savedTab;
   switchTab(savedTab);
-
   syncCommandButtons();
   updatePanelButtonStates();
-
   get("versionLabel").innerText = APP_VERSION;
-
   get("changelogLabel").innerHTML =
   CHANGELOG.map(x =>
 escapeHtml(x)).join("<br>");
-
   isLoading = false;
   }
-
 window.onerror = function(message, source, line, col, error) {
-
   if (!DEBUG_MODE) return;
-
   const box = get("debugBox");
   if (!box) return;
-
   box.style.display = "block";
   box.innerText =
 `JS Error
-
 message:
 ${message}
-
 line:
 ${line}
-
 column:
 ${col}`;
 };
@@ -2898,7 +2982,6 @@ ${col}`;
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
-
 function closeRepairSearchBox() {
   const box = get("repairSearchBox");
   const btn = get("repairSearchBtn");
