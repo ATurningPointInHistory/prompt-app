@@ -539,7 +539,9 @@ mark {
 
 <div class="card">
   <h2>AIプロンプト生成Pro</h2>
+
   <div class="tab-container">
+
     <div
       class="tab active"
       id="appPageTab"
@@ -559,6 +561,7 @@ mark {
   </div>
 
   <div id="appPage">
+
   <div class="small" id="versionLabel">
 
 </div>
@@ -603,9 +606,11 @@ mark {
   class="btn-secondary btn-full">
   🧩 変換モード
 </button>
+
 <div
   id="commandMenu"
   style="display:none;">
+
   <div class="small">
     変換モードをクリックすると入力欄に追加されます。
 
@@ -616,8 +621,13 @@ mark {
 </div>
 
 </div>
+
 <div class="small">用途別プリセット</div>
-<div id="presetBox" class="preset-box"></div>
+
+<div id="presetBox" class="preset-box">
+
+</div>
+
     <label for="rough-tone">トーン</label>
     <select id="rough-tone">
       <option>プロフェッショナル</option>
@@ -656,6 +666,7 @@ mark {
   <button class="tool-category-btn" onclick="toggleToolCategory('backupTools')">
     💾 バックアップ系 ▼
   </button>
+
   <div id="backupTools" class="tool-category">
     <button onclick="backupProgram()">🗂 フルバックアップ</button>
     <button onclick="saveProgramHtml()">💾 本体HTML保存</button>
@@ -666,6 +677,7 @@ mark {
   <button class="tool-category-btn" onclick="toggleToolCategory('aiTools')">
     🤖 AI設定系 ▼
   </button>
+
   <div id="aiTools" class="tool-category">
     <button onclick="importTemplates()">📥 テンプレ復元</button>
     <button onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
@@ -676,6 +688,7 @@ mark {
   <button class="tool-category-btn" onclick="toggleToolCategory('devTools')">
     🧪 開発・確認系 ▼
   </button>
+
   <div id="devTools" class="tool-category">
     <button onclick="reviewPrompt()">🛠 Promptレビュー</button>
     <button onclick="testPromptObject()">🧩 内部JSONテスト</button>
@@ -690,6 +703,7 @@ mark {
   <button class="tool-category-btn" onclick="toggleToolCategory('cleanTools')">
     🧹 整理系 ▼
   </button>
+
   <div id="cleanTools" class="tool-category">
     <button onclick="clearOutput()">🧹 出力クリア</button>
     <button onclick="clearHistory()">🗑 履歴全削除</button>
@@ -721,6 +735,7 @@ mark {
     <select id="templateSelect" onchange="applyTemplateFromSelect()">
       <option value="">テンプレを選択</option>
     </select>
+
     <div class="small">下の入力欄から新しいテンプレも追加できます。</div>
     <label for="tempName">テンプレ名</label>
     <input id="tempName" placeholder="例：バグ修正用、営業文作成">
@@ -739,6 +754,7 @@ mark {
     </select>
     <button onclick="saveTemplate()" class="btn-full">テンプレ保存</button>
     <h4>保存済みテンプレ一覧</h4>
+
     <div id="templateList">
 
   </div>
@@ -747,6 +763,7 @@ mark {
 
   <div id="danger-manager" class="section-box" style="display:none;">
     <h3>危険ワード管理</h3>
+
     <div class="small">単語が含まれていたら警告します。
 
 </div>
@@ -755,6 +772,7 @@ mark {
     <input id="dangerWord" placeholder="例：パスワード、住所、電話番号">
     <button onclick="saveDangerWord()" class="btn-full">危険ワード追加</button>
     <h4>固定危険ワード + 追加危険ワード</h4>
+
     <div id="dangerList">
 
   </div>
@@ -763,6 +781,7 @@ mark {
 
   <div id="pattern-manager" class="section-box" style="display:none;">
     <h3>NGパターン管理</h3>
+
     <div class="small">形式で検出します。正規表現を追加できます。
 
   </div>
@@ -773,12 +792,14 @@ mark {
     <input id="patternRegex" placeholder="例：\\b[A-Z]{2}\\d{6}\\b">
     <label for="patternFlags">フラグ</label>
     <input id="patternFlags" placeholder="例：g または gi">
+
     <div class="small">よく分からなければ、まずは g を入れてください。
 
   </div>
 
     <button onclick="savePattern()" class="btn-full">NGパターン追加</button>
     <h4>固定NGパターン + 追加NGパターン</h4>
+
     <div id="patternList">
 
   </div>
@@ -787,6 +808,7 @@ mark {
 
 <div id="ai-preset-manager" class="section-box" style="display:none;">
   <h3>AIプリセット管理</h3>
+
   <div class="small">AI別の変換方針を編集できます。
 
 </div>
@@ -813,6 +835,7 @@ mark {
 
 <div class="section-box">
   <label>履歴（最新5件）</label>
+
   <div id="history">
 
 </div>
@@ -863,6 +886,7 @@ style="display:none;">
 <div
   id="repairSearchBox"
   style="display:none;">
+
   <div class="repair-search-row">
     <input
       id="repairSearch"
