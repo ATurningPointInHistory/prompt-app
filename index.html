@@ -645,17 +645,17 @@ mark {
   <div id="history"></div>
 </div>
 </div>
-<div
-  id="repairPage"
-  style="display:none;">
+<div id="repairPage"
+style="display:none;">
+
   <h3>🛠 修復モード</h3>
+
   <div class="small">
-    HTMLファイルを文字列として読み込み、編集して保存できます。
+    HTMLファイルを文字列として読み込み、
+    編集して保存できます。
   </div>
-</div>
 
-
-<div class="btn-group">
+  <div class="btn-group">
   <button onclick="loadRepairHtml()">
     📖 HTML読込</button>
   <button onclick="saveRepairHtml()">
@@ -703,13 +703,13 @@ mark {
     onclick="previewRepairHtml()"
     class="btn-full">
     🎨 色分けプレビュー</button>
-  <div
-    id="repairPreview"
-    class="code-preview"
-    style="display:none;">
-  </div>
+<div id="repairPreview"
+class="code-preview"
+style="display:none;">
 </div>
-</div>
+</div> <!-- repairPage -->
+</div> <!-- card -->
+
 <script>
 
 const get = (id) => document.getElementById(id);
