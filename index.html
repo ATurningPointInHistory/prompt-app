@@ -668,17 +668,25 @@ mark {
 
   <div class="btn-group">
 
-    <button onclick="loadRepairHtml()">
-      📖 HTML読込
-    </button>
+  <button onclick="loadRepairHtml()">
+  📖 HTML読込
+  </button>
 
-    <button onclick="saveRepairHtml()">
-      💾 修正版保存
-    </button>
+  <button onclick="saveRepairHtml()">
+  💾 修正版保存
+  </button>
 
-    <button onclick="diagnoseRepairHtml()">
-      🩺 編集内容診断
-    </button>
+  <button onclick="diagnoseRepairHtml()">
+  🩺 編集内容診断
+  </button>
+
+  <button onclick="selectFunctionBlock()">
+  📦 関数選択
+  </button>
+
+  <button onclick="replaceFunctionBlock()">
+  ✏ 関数置換
+  </button>
 
   </div>
 
@@ -2470,6 +2478,45 @@ function escapeRegExp(str) {
   return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function findFunctionBlock(functionName){
+
+  const editor=get("repairEditor");
+  const text=editor.value;
+
+  const start=
+    text.indexOf(
+      `function ${functionName}`
+    );
+
+  if(start===-1){
+    alert("関数が見つかりません");
+    return null;
+  }
+
+  const braceStart=
+    text.indexOf("{",start);
+
+  let depth=1;
+  let end=braceStart+1;
+
+  while(
+    end<text.length &&
+    depth>0
+  ){
+
+    if(text[end]==="{") depth++;
+    if(text[end]==="}") depth--;
+
+    end++;
+  }
+
+  return{
+    start,
+    end,
+    block:text.slice(start,end)
+  };
+}
+
 function highlightKeyword(text, keyword) {
   const safeText = escapeHtml(text);
   const safeKeyword = escapeHtml(keyword);
@@ -2536,6 +2583,60 @@ function searchRepairNext() {
   editor.setSelectionRange(index, index + keyword.length);
 
   renderRepairSearchResults(keyword);
+}
+
+function selectFunctionBlock(){
+
+  const name=
+    prompt("関数名");
+
+  if(!name)return;
+
+  const result=
+    findFunctionBlock(name);
+
+  if(!result)return;
+
+  const editor=
+    get("repairEditor");
+
+  editor.focus();
+
+  editor.setSelectionRange(
+    result.start,
+    result.end
+  );
+}
+
+function replaceFunctionBlock(){
+
+  const name=
+    prompt("置換する関数名");
+
+  if(!name)return;
+
+  const result=
+    findFunctionBlock(name);
+
+  if(!result)return;
+
+  const newCode=
+    prompt(
+      "新コード",
+      result.block
+    );
+
+  if(newCode===null)return;
+
+  const editor=
+    get("repairEditor");
+
+  editor.value=
+    editor.value.slice(0,result.start)+
+    newCode+
+    editor.value.slice(result.end);
+
+  alert("置換完了");
 }
 
 function renderRepairSearchResults(keyword) {
