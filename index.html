@@ -287,6 +287,42 @@ body.dark button.active-panel {
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
 }
 
+#repairSearchBtn{
+  position:fixed;
+  right:18px;
+  bottom:88px;
+  z-index:997;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  padding:0;
+  font-size:20px;
+  box-shadow:0 4px 15px rgba(0,0,0,.25);
+}
+
+#repairSearchBox{
+  position:fixed;
+  right:18px;
+  bottom:158px;
+  z-index:996;
+  width:240px;
+  max-width:calc(100vw - 24px);
+  max-height:45vh;
+  overflow:hidden;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+}
+
+#repairSearchResult{
+  display:none;
+  max-height:160px;
+  overflow-y:auto;
+  margin-top:8px;
+}
+
 #repairSearchBtn {
   position: fixed;
   right: 18px;
@@ -1102,6 +1138,17 @@ function toggleToolsMenu() {
 
   btn.innerText =
     isOpen ? "⚙" : "×";
+}
+
+function toggleRepairSearchBox(){
+  const box =
+    get("repairSearchBox");
+  const isOpen =
+    box.style.display !== "none";
+  box.style.display =
+    isOpen
+      ? "none"
+      : "block";
 }
 
 function toggleRepairSearchBox() {
