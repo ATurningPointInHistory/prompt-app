@@ -664,6 +664,8 @@ style="display:none;">
     🩺 編集内容診断</button>
   <button onclick="selectFunctionBlock()">
     📦 関数選択</button>
+  <button onclick="showFunctionList()">
+    📚 関数一覧</button>
   <button onclick="replaceFunctionBlock()">
     ✏ 関数置換</button>
 </div>
@@ -1699,13 +1701,11 @@ function reviewPrompt() {
           },
           {
             ok:
-              text.includes("出力形式") ||
-              text.includes('"output_format"'),
+              text.includes("出力形式") ||               text.includes('"output_format"'),
             warning: "ChatGPT向けの出力形式整理が不足しています"
           }
         ];
         break;
-
       case "claude":
         aiSpecificChecks = [
           {
@@ -1722,7 +1722,6 @@ function reviewPrompt() {
           }
         ];
         break;
-
       case "gemini":
         aiSpecificChecks = [
           {
@@ -1755,7 +1754,6 @@ function reviewPrompt() {
           }
         ];
         break;
-
       case "cursor":
         aiSpecificChecks = [
           {
@@ -1798,7 +1796,6 @@ function reviewPrompt() {
         ];
         break;
     }
-
     aiSpecificChecks.forEach(check => {
       if (check.ok) {
         goodPoints.push(`AI別評価OK：${selectedAi}`);
@@ -1807,9 +1804,7 @@ function reviewPrompt() {
         warnings.push(check.warning);
       }
     });
-
   const checks = [
-
     ...(!["claude", "cursor", "copilot", "gemini"].includes(selectedAi)
       ? [{
           name: "役割",
@@ -1819,7 +1814,6 @@ function reviewPrompt() {
           suggestion: "誰として回答するかを明記してください。例：あなたはHTML/JavaScriptに詳しい設計者です。"
         }]
       : []),
-
     {
       name: "目的",
       ok:
@@ -1831,7 +1825,6 @@ function reviewPrompt() {
       warning: "目的が不明です",
       suggestion: "何を達成したいのかを1文で明記してください。"
     },
-
     {
       name: "背景・条件",
       ok:
@@ -1844,7 +1837,6 @@ function reviewPrompt() {
       warning: "背景・条件が不足しています",
       suggestion: "前提、対象範囲、現在の状況を追加してください。"
     },
-
     ...(!["claude", "gemini"].includes(selectedAi)
       ? [{
           name: "制約",
@@ -1858,7 +1850,6 @@ function reviewPrompt() {
           suggestion: "既存仕様を壊さない、API直送しない、出力形式を守るなどを追加してください。"
         }]
       : []),
-
     ...(!["claude", "cursor", "gemini"].includes(selectedAi)
       ? [{
           name: "出力形式",
@@ -1871,7 +1862,6 @@ function reviewPrompt() {
           suggestion: "箇条書き、表、JSON、修正コードなど、期待する出力形式を指定してください。"
         }]
       : []),
-
     ...(!["cursor", "copilot"].includes(selectedAi)
       ? [{
           name: "トーン",
@@ -1883,18 +1873,16 @@ function reviewPrompt() {
           suggestion: "プロフェッショナル、簡潔、初心者向けなどの文体を指定してください。"
         }]
       : []),
-
     {
       name: "不足情報",
       ok:
         text.includes("不足") ||
-        text.includes("確認") ||
-        text.includes('"missing_information"'),
+        text.includes("確認") ||        
+         text.includes('"missing_information"'),
       penalty: 8,
       warning: "不足情報への対応指示がありません",
       suggestion: "不明点がある場合は、確認するか仮定として明示する指示を追加してください。"
     },
-
     {
       name: "追加指示",
       ok:
@@ -1905,7 +1893,6 @@ function reviewPrompt() {
       suggestion: "必要に応じて /step /enemy /schema などを追加してください。"
     }
   ];
-
   checks.forEach(check => {
     if (check.ok) {
       goodPoints.push(`${check.name}あり`);
@@ -1915,16 +1902,13 @@ function reviewPrompt() {
       suggestions.push(check.suggestion);
     }
   });
-
   const vagueWords = ["いい感じ", "なんとか", "適当に", "わかりやすく", "詳しく"];
   const foundVague = vagueWords.filter(word => text.includes(word));
-
   if (foundVague.length > 0) {
     score -= 10;
     warnings.push(`曖昧な表現があります：${foundVague.join("、")}`);
     suggestions.push("曖昧語を、具体的な完了条件・対象範囲・評価基準に置き換えてください。");
   }
-
   if (text.length < 120) {
     score -= 10;
     warnings.push("内容が短く、情報不足の可能性があります");
@@ -1932,53 +1916,42 @@ function reviewPrompt() {
   } else {
     goodPoints.push("一定の情報量あり");
   }
-
   if (parsedJson) {
     if (parsedJson.version) goodPoints.push("バージョン情報あり");
     if (parsedJson.prompt && parsedJson.prompt.purpose) goodPoints.push("内部JSONの目的あり");
     if (Array.isArray(parsedJson.commands)) goodPoints.push("commands配列あり");
-
     if (!parsedJson.prompt) {
       score -= 10;
       warnings.push("内部JSONに prompt オブジェクトがありません");
       suggestions.push("buildPromptObject() の構造を確認してください。");
     }
   }
-
   score = Math.max(0, Math.min(100, score));
-
   let rank = "C";
   if (score >= 90) rank = "S";
   else if (score >= 80) rank = "A";
   else if (score >= 65) rank = "B";
-
   let result =
 `AIプロンプト生成Pro ${APP_VERSION}
-
   Prompt Score : ${score} / 100
   Rank : ${rank}
-
   `;
-
   if (goodPoints.length > 0) {
     result += "良い点:\n";
     result += [...new Set(goodPoints)].map(x => `✔ ${x}`).join("\n");
     result += "\n\n";
   }
-
   if (warnings.length > 0) {
     result += "改善候補:\n";
     result += [...new Set(warnings)].map(x => `⚠ ${x}`).join("\n");
     result += "\n\n";
   }
-
   if (suggestions.length > 0) {
     result += "改善案:\n";
     result += [...new Set(suggestions)].map(x => `・${x}`).join("\n");
   } else {
     result += "大きな改善点は見つかりません。";
   }
-
   alert(result);
 }
 
@@ -2028,22 +2001,18 @@ function saveTemplate() {
   const task = get("tempTask").value.trim();
   const details = get("tempDetails").value.trim();
   const tone = get("tempTone").value;
-
   if (!name) {
     alert("テンプレ名を入力してください");
     return;
   }
-
   let list = loadJson("templates", []);
   list.push({ name, role, task, details, tone });
   localStorage.setItem("templates", JSON.stringify(list));
-
   get("tempName").value = "";
   get("tempRole").value = "";
   get("tempTask").value = "";
   get("tempDetails").value = "";
   get("tempTone").value = "プロフェッショナル";
-
   alert("保存完了");
   renderTemplates();
   renderTemplateSelect();
@@ -2068,7 +2037,6 @@ function renderTemplates() {
 function renderTemplateSelect() {
   const local = loadJson("templates", []);
   const all = [...defaultTemplates, ...local];
-
   get("templateSelect").innerHTML =
     `<option value="">テンプレを選択</option>` +
     all.map((t, i) => `<option value="${i}">${escapeHtml(t.name)}</option>`).join("");
@@ -2085,7 +2053,6 @@ function applyTemplateAll(i) {
   const all = [...defaultTemplates, ...local];
   const t = all[i];
   if (!t) return;
-
   switchTab(1);
   get("role").value = t.role || "";
   get("task").value = t.task || "";
@@ -2104,10 +2071,8 @@ function deleteTemplate(i) {
 function saveFromHistory(text) {
   const name = prompt("テンプレ名を入力してください");
   if (!name) return;
-
   const roleMatch = text.match(/あなたは「(.+?)」/);
   const taskMatch = text.match(/# 目的\n([\s\S]*?)(\n#|\n$|$)/);
-
   let list = loadJson("templates", []);
   list.push({
     name,
@@ -2116,7 +2081,6 @@ function saveFromHistory(text) {
     details: text,
     tone: "プロフェッショナル"
   });
-
   localStorage.setItem("templates", JSON.stringify(list));
   alert("テンプレ化しました");
   renderTemplates();
@@ -2138,10 +2102,8 @@ function importTemplates() {
 
 function exportAiPresets() {
   const data = JSON.stringify(getAiPresets(), null, 2);
-
   const blob = new Blob([data], { type: "application/json" });
   const a = document.createElement("a");
-
   a.href = URL.createObjectURL(blob);
   a.download = "ai-presets.json";
   a.click();
@@ -2192,7 +2154,6 @@ function backupProgram() {
         localStorage.getItem("darkMode")
     }
   };
-
   const blob =
     new Blob(
       [JSON.stringify(backupData, null, 2)],
@@ -2231,7 +2192,6 @@ function restoreProgramBackup() {
           alert("フルバックアップ形式ではありません");
           return;
         }
-
         Object.entries(data.localStorageData)
           .forEach(([key, value]) => {
             if (value === null || value === undefined) {
@@ -2247,7 +2207,6 @@ function restoreProgramBackup() {
               );
             }
           });
-
         alert("フル復元完了。再読み込みします。");
         location.reload();
       } catch (err) {
@@ -2263,166 +2222,117 @@ function restoreProgramBackup() {
 }
 
 function saveProgramHtml() {
-
   const html =
     "<!DOCTYPE html>\n" +
     document.documentElement.outerHTML;
-
   const blob =
     new Blob(
       [html],
       { type: "text/html" }
     );
-
   const a =
     document.createElement("a");
-
   a.href =
     URL.createObjectURL(blob);
-
   const timestamp =
     new Date()
       .toISOString()
       .replace(/[:.]/g, "-");
-
   a.download =
     `AIPro_${APP_VERSION}_${timestamp}.html`;
-
   a.click();
-
   alert("本体HTMLを保存しました");
 }
 
 function loadRepairHtml() {
-
   const input=document.createElement("input");
-
   input.type="file";
-
   input.accept=
   ".html,.json,text/html,application/json";
-
   input.onchange=(e)=>{
-
     const file=e.target.files[0];
     if(!file)return;
-
     const reader=new FileReader();
-
     reader.onload=()=>{
-
       try{
-
         // JSON判定
         const parsed=
         JSON.parse(reader.result);
-
         if(parsed.html){
-
           get("repairEditor").value=
           parsed.html;
-
           alert(
           "フルバックアップJSON読込完了"
           );
-
           return;
         }
-
       }catch{}
-
       // 通常HTML
       get("repairEditor").value=
       reader.result;
-
       alert("HTML読込完了");
-
     };
-
     reader.readAsText(file);
-
   };
-
   input.click();
 }
 
 function saveRepairHtml() {
-
   const html =
     get("repairEditor")
       .value
       .trim();
-
   if (!html) {
     alert("HTMLが空です");
     return;
   }
-
   const blob =
     new Blob(
       [html],
       { type: "text/html" }
     );
-
   const a =
     document.createElement("a");
-
   a.href =
     URL.createObjectURL(blob);
-
   const timestamp =
     new Date()
       .toISOString()
       .replace(/[:.]/g, "-");
-
   a.download =
     `AIPro_Repaired_${timestamp}.html`;
-
   a.click();
-
   alert("修正版保存完了")
-
 }
-
 let repairSearchIndex = 0;
 let repairSearchMatches = [];
-
 function escapeRegExp(str) {
   return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function findFunctionBlock(functionName){
-
   const editor=get("repairEditor");
   const text=editor.value;
-
   const start=
     text.indexOf(
       `function ${functionName}`
     );
-
   if(start===-1){
     alert("関数が見つかりません");
     return null;
   }
-
   const braceStart=
     text.indexOf("{",start);
-
   let depth=1;
   let end=braceStart+1;
-
   while(
     end<text.length &&
     depth>0
   ){
-
     if(text[end]==="{") depth++;
     if(text[end]==="}") depth--;
-
     end++;
   }
-
   return{
     start,
     end,
@@ -2434,89 +2344,65 @@ function highlightKeyword(text, keyword) {
   const safeText = escapeHtml(text);
   const safeKeyword = escapeHtml(keyword);
   const regex = new RegExp(escapeRegExp(safeKeyword), "gi");
-
   return safeText.replace(regex, match => `<mark>${match}</mark>`);
 }
 
 function searchRepairText() {
-
   const editor = get("repairEditor");
   const keyword = get("repairSearch").value;
   const resultBox = get("repairSearchResult");
-
   if (!keyword) {
     alert("検索文字を入力してください");
     return;
   }
-
   const text = editor.value;
   const index = text.indexOf(keyword);
-
   if (index === -1) {
     resultBox.style.display = "block";
     resultBox.innerText = "検索結果：0件";
     alert("見つかりませんでした");
     return;
   }
-
   repairSearchIndex = index + keyword.length;
-
   editor.focus();
   editor.setSelectionRange(index, index + keyword.length);
-
   renderRepairSearchResults(keyword);
   get("repairSearchResult")
   .style.display="block";
 }
 
 function searchRepairNext() {
-
   const editor = get("repairEditor");
   const keyword = get("repairSearch").value;
-
   if (!keyword) {
     alert("検索文字を入力してください");
     return;
   }
-
   const text = editor.value;
-
   let index = text.indexOf(keyword, repairSearchIndex);
-
   if (index === -1) {
     index = text.indexOf(keyword);
   }
-
   if (index === -1) {
     alert("見つかりませんでした");
     return;
   }
-
   repairSearchIndex = index + keyword.length;
-
   editor.focus();
   editor.setSelectionRange(index, index + keyword.length);
-
   renderRepairSearchResults(keyword);
 }
 
 function selectFunctionBlock(){
-
   const name=
     prompt("関数名");
-
   if(!name)return;
-
   const result=
     findFunctionBlock(name);
-
   if(!result)return;
-
   const editor=
     get("repairEditor");
-
   editor.focus();
-
   editor.setSelectionRange(
     result.start,
     result.end
@@ -2524,34 +2410,51 @@ function selectFunctionBlock(){
 }
 
 function replaceFunctionBlock(){
-
   const name=
     prompt("置換する関数名");
-
   if(!name)return;
-
   const result=
     findFunctionBlock(name);
-
   if(!result)return;
-
   const newCode=
     prompt(
       "新コード",
       result.block
     );
-
   if(newCode===null)return;
-
   const editor=
     get("repairEditor");
-
   editor.value=
     editor.value.slice(0,result.start)+
     newCode+
     editor.value.slice(result.end);
-
   alert("置換完了");
+}
+
+function showFunctionList(){
+  const text =
+    get("repairEditor").value;
+  if(!text.trim()){
+    alert("HTMLが空です");
+    return;
+  }
+  const matches =
+    [...text.matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )];
+  if(matches.length===0){
+    alert("関数なし");
+    return;
+  }
+  const list =
+    matches.map(
+      (m,i)=>
+      `${i+1}. ${m[1]}`
+    );
+  alert(
+    `関数一覧 (${matches.length}件)\n\n`+
+    list.join("\n")
+  );
 }
 
 function renderRepairSearchResults(keyword) {
@@ -2822,6 +2725,7 @@ function getAllPatterns() {
   const local = loadJson("dangerPatterns", []);
   return [...defaultPatterns, ...local];
 }
+
 function detectSensitiveContent(text) {
   const source = String(text || "");
   const foundWords = getAllDangerWords().filter(word => word && source.includes(word));
@@ -2994,6 +2898,7 @@ ${col}`;
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
+
 function closeRepairSearchBox() {
   const box = get("repairSearchBox");
   const btn = get("repairSearchBtn");
