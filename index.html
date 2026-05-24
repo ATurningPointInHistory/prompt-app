@@ -420,6 +420,40 @@ mark {
   overflow-x: auto;
 }
 
+#functionListBox{
+  position:fixed;
+  right:18px;
+  bottom:158px;
+  z-index:995;
+  width:260px;
+  max-width:calc(100vw - 24px);
+  max-height:45vh;
+  overflow-y:auto;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+  font-size:11px;
+}
+
+.function-list-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+  font-weight:bold;
+}
+
+.function-list-item{
+  width:100%;
+  text-align:left;
+  padding:8px 10px;
+  margin-bottom:6px;
+  font-size:12px;
+  border-radius:8px;
+}
+
 .code-tag { color: #7ee787; }
 .code-attr { color: #79c0ff; }
 .code-string { color: #a5d6ff; }
@@ -1067,19 +1101,16 @@ ${buildCommandInstructionsFromObject(obj)}
 トーン：
 ${obj.prompt.tone}`;
 }
-
 function convertForGemini(obj) {
-
   const preset = obj.ai_preset || {};
-
   return `目的：
+
 ${obj.prompt.purpose}
 
 ${preset.instruction || ""}
 
 必要な出力：
 要点を短く整理し、実行しやすい形で回答してください。
-
 期待結果：
 ユーザーがすぐ実行・判断できる形で整理してください。
 
@@ -1097,16 +1128,13 @@ ${buildCommandInstructionsFromObject(obj)}
 を分けて整理してください。
 
 トーン：
+
 ${obj.prompt.tone}`;
 }
-
 function convertForCursor(obj) {
-
   const preset = obj.ai_preset || {};
-
   return `目的:
 ${obj.prompt.purpose}
-
 ${preset.instruction || ""}
 
 現状:
@@ -1137,12 +1165,9 @@ ${buildCommandInstructionsFromObject(obj)}
 }
 
 function convertForCopilot(obj) {
-
   const preset = obj.ai_preset || {};
-
   return `// Goal:
 ${obj.prompt.purpose}
-
 ${preset.instruction || ""}
 
 // Context:
@@ -1206,16 +1231,12 @@ function switchAppPage(mode) {
 }
 
 function toggleToolsMenu() {
-
   const menu = get("toolsMenu");
   const btn = get("toolsBtn");
-
   const isOpen =
     menu.style.display !== "none";
-
   menu.style.display =
     isOpen ? "none" : "grid";
-
   btn.innerText =
     isOpen ? "⚙" : "×";
 }
@@ -1387,18 +1408,14 @@ function resetAiPreset() {
 function parseCommands(text) {
   const commandKeys = Object.keys(commandDefinitions);
   const found = [];
-
   const matches = text.match(/\/[a-zA-Z0-9]+/g) || [];
-
   matches.forEach(m => {
     const cmd = m.replace("/", "").toLowerCase();
     if (commandKeys.includes(cmd)) {
       found.push(cmd);
     }
   });
-
   const cleaned = text.replace(/\/[a-zA-Z0-9]+/g, "").trim();
-
   return {
     cleanedText: cleaned,
     commands: [...new Set(found)]
@@ -1407,11 +1424,9 @@ function parseCommands(text) {
 
 function buildCommandInstructions(commands) {
   if (!commands || commands.length === 0) return "";
-
   const lines = commands.map(cmd => {
     return `・${cmd}: ${commandDefinitions[cmd]}`;
   });
-
   return `
 # 追加変換モード
 以下の変換モードを反映してください。
@@ -1421,11 +1436,9 @@ ${lines.join("\n")}
 
 function buildCommandInstructionsFromObject(obj) {
   if (!obj.commands || obj.commands.length === 0) return "";
-
   const lines = obj.commands.map(cmd => {
     return `・${cmd.key}: ${cmd.instruction}`;
   });
-
   return `
 # 追加変換モード
 以下の変換モードを反映してください。
@@ -1436,7 +1449,6 @@ ${lines.join("\n")}
 function renderCommandChips() {
   const box = get("commandBox");
   if (!box) return;
-
   box.innerHTML = Object.keys(commandDefinitions).map(cmd => {
     return `<button
       type="button"
@@ -1446,14 +1458,12 @@ function renderCommandChips() {
       /${cmd}
     </button>`;
   }).join("");
-
   syncCommandButtons();
 }
 
 function renderPresetChips() {
   const box = get("presetBox");
   if (!box) return;
-
   box.innerHTML = Object.keys(presetDefinitions).map(name => {
     return `<button
       type="button"
@@ -1547,21 +1557,17 @@ ${tone}
     const tone = get("rough-tone").value;
     const outputFormat = get("rough-output-format").value;
     const aiTarget = get("ai-target").value || "chatgpt";
-
     const parsed = parseCommands(rawOriginal);
     const raw = parsed.cleanedText;
-
     if (!raw) {
       alert("内容を入力してください");
       return;
     }
-
     const obj = buildPromptObject(
       raw,
       tone,
       parsed.commands
     );
-
     p = convertForAI(
       obj,
       aiTarget,
@@ -1597,13 +1603,11 @@ function download() {
     alert("先に生成してください");
     return;
   }
-
   const report = detectSensitiveContent(text);
   if (report.hasAny) {
     const ok = confirm(buildConfirmMessage(report, "保存"));
     if (!ok) return;
   }
-
   const blob = new Blob([text], { type: "text/plain" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -2063,7 +2067,6 @@ function saveTemplate() {
 function renderTemplates() {
   const local = loadJson("templates", []);
   const all = [...defaultTemplates, ...local];
-
   get("templateList").innerHTML = all.map((t, i) => `
     <div class="template-item">
       <b>${escapeHtml(t.name)}</b><br>
@@ -2475,6 +2478,7 @@ function replaceFunctionBlock(){
 
 function showFunctionList(){
   const text = get("repairEditor").value;
+  const box = get("functionListBox");
   if(!text.trim()){
     alert("HTMLが空です");
     return;
@@ -2482,7 +2486,6 @@ function showFunctionList(){
   const matches = [...text.matchAll(
     /function\s+([a-zA-Z0-9_$]+)\s*\(/g
   )];
-  const box = get("functionListBox");
   if(matches.length === 0){
     box.style.display = "block";
     box.innerHTML = "関数なし";
@@ -2490,15 +2493,20 @@ function showFunctionList(){
   }
   box.style.display = "block";
   box.innerHTML =
-    `<b>関数一覧 (${matches.length}件)</b><br><br>` +
+    `<div class="function-list-header">
+      <span>関数一覧 (${matches.length})</span>
+      <button class="repair-mini-btn" onclick="closeFunctionList()">×</button>
+    </div>` +
     matches.map((m,i)=>{
       const name = m[1];
       return `
-        <button onclick="selectFunctionByName('${name}')">
+        <button
+          class="function-list-item"
+          onclick="selectFunctionByName('${name}')">
           ${i+1}. ${name}
         </button>
       `;
-    }).join("<br>");
+    }).join("");
 }
 
 function selectFunctionByName(name){
@@ -2506,6 +2514,10 @@ function selectFunctionByName(name){
   if(!result)return;
   const editor = get("repairEditor");
   editor.focus(); editor.setSelectionRange(result.start,result.end);
+}
+
+function closeFunctionList(){
+  get("functionListBox").style.display = "none";
 }
 
 function renderRepairSearchResults(keyword) {
