@@ -700,9 +700,11 @@ style="display:none;">
     rows="20"
     placeholder="ここにHTML全文が表示されます"></textarea>
   <button
+    id="previewBtn"
     onclick="previewRepairHtml()"
     class="btn-full">
-    🎨 色分けプレビュー</button>
+    🎨 色分けプレビュー
+  </button>
 <div id="repairPreview"
 class="code-preview"
 style="display:none;">
@@ -2553,14 +2555,11 @@ function replaceFunctionBlock(){
 }
 
 function renderRepairSearchResults(keyword) {
-
   const editor = get("repairEditor");
   const resultBox = get("repairSearchResult");
   const text = editor.value;
   const lines = text.split("\n");
-
   const results = [];
-
   lines.forEach((line, index) => {
     if (line.includes(keyword)) {
       results.push({
@@ -2569,14 +2568,11 @@ function renderRepairSearchResults(keyword) {
       });
     }
   });
-
   resultBox.style.display = "block";
-
   if (results.length === 0) {
     resultBox.innerText = "検索結果：0件";
     return;
   }
-
   resultBox.innerHTML =
     `<b>検索結果：${results.length}件</b>` +
     results.slice(0, 30).map(item => {
@@ -2586,7 +2582,6 @@ function renderRepairSearchResults(keyword) {
         </div>
       `;
     }).join("");
-
   if (results.length > 30) {
     resultBox.innerHTML += `
       <div class="small">
@@ -2597,63 +2592,76 @@ function renderRepairSearchResults(keyword) {
 }
 
 function diagnoseRepairHtml() {
-
   let html = get("repairEditor").value;
-
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
-
   let cleanHtml = html
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "");
-
   const open = (cleanHtml.match(/<div\b/g) || []).length;
   const close = (cleanHtml.match(/<\/div>/g) || []).length;
-
   const report = [];
-
   report.push("Repair HTML Diagnose\n");
   report.push(`div: ${open}/${close}`);
-
   const parserError = doc.querySelector("parsererror");
-
   if (parserError) {
     report.push("⚠ DOM解析エラー");
   } else {
     report.push("✔ DOM解析OK");
   }
-
   alert(report.join("\n"));
 }
 
 function previewRepairHtml() {
-
-  const html = get("repairEditor").value;
-
+  const box = get("repairPreview");
+  const btn = get("previewBtn");
+  // OFF処理
+  if (box.style.display === "block") {
+    box.style.display = "none";
+    btn.innerText =
+      "🎨 色分けプレビュー";
+    return;
+  }
+  const html =
+    get("repairEditor").value;
   if (!html.trim()) {
     alert("HTMLが空です");
     return;
   }
-
-  let escaped = escapeHtml(html);
-
+  let escaped =
+    escapeHtml(html);
   escaped = escaped
-    .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="code-comment">$1</span>')
-    .replace(/(&lt;\/?)([a-zA-Z0-9-]+)/g, '$1<span class="code-tag">$2</span>')
-    .replace(/\s([a-zA-Z-:]+)=/g, ' <span class="code-attr">$1</span>=')
-    .replace(/(&quot;.*?&quot;)/g, '<span class="code-string">$1</span>')
-    .replace(/\b(function|const|let|var|return|if|else|try|catch|for|while|switch|case|break|new)\b/g,
-      '<span class="code-keyword">$1</span>');
-
-  const box = get("repairPreview");
-  box.style.display = "block";
-  box.innerHTML = escaped;
+    .replace(
+      /(&lt;!--[\s\S]*?--&gt;)/g,
+      '<span class="code-comment">$1</span>'
+    )
+    .replace(
+      /(&lt;\/?)([a-zA-Z0-9-]+)/g,
+      '$1<span class="code-tag">$2</span>'
+    )
+    .replace(
+      /\s([a-zA-Z-:]+)=/g,
+      ' <span class="code-attr">$1</span>='
+    )
+    .replace(
+      /(&quot;.*?&quot;)/g,
+      '<span class="code-string">$1</span>'
+    )
+    .replace(
+      /\b(function|const|let|var|return|if|else|try|catch|for|while|switch|case|break|new)\b/g,
+      '<span class="code-keyword">$1</span>'
+    );
+  box.innerHTML =
+    escaped;
+  box.style.display =
+    "block";
+  btn.innerText =
+    "❌ プレビュー閉じる";
 }
 
 get("fileInput").addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) return;
-
   const reader = new FileReader();
   reader.onload = () => {
     try {
@@ -2677,18 +2685,14 @@ get("fileInput").addEventListener("change", (e) => {
 get("aiPresetFileInput").addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) return;
-
   const reader = new FileReader();
-
   reader.onload = () => {
     try {
       const parsed = JSON.parse(reader.result);
-
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
         alert("AIプリセットファイルの形式が正しくありません");
         return;
       }
-
       const validKeys = ["chatgpt", "claude", "gemini", "cursor", "copilot"];
 
       for (const key of Object.keys(parsed)) {
@@ -2696,7 +2700,6 @@ get("aiPresetFileInput").addEventListener("change", (e) => {
           alert(`不明なAI設定が含まれています: ${key}`);
           return;
         }
-
         if (
           !parsed[key] ||
           typeof parsed[key].name !== "string" ||
@@ -2706,20 +2709,15 @@ get("aiPresetFileInput").addEventListener("change", (e) => {
           return;
         }
       }
-
       saveAiPresets(parsed);
-
       if (get("ai-preset-manager").style.display !== "none") {
         loadAiPresetToEditor();
       }
-
       alert("AIプリセットを復元しました");
-
     } catch (e) {
       alert("AIプリセットの読み込みに失敗しました\n\n" + e.message);
     }
   };
-
   reader.readAsText(file);
   e.target.value = "";
 });
@@ -2730,13 +2728,11 @@ function saveDangerWord() {
     alert("危険ワードを入力してください");
     return;
   }
-
   let list = loadJson("dangerWords", []);
   if (defaultDangerWords.includes(word) || list.includes(word)) {
     alert("すでに登録されています");
     return;
   }
-
   list.push(word);
   localStorage.setItem("dangerWords", JSON.stringify(list));
   get("dangerWord").value = "";
@@ -2746,7 +2742,6 @@ function saveDangerWord() {
 function renderDangerWords() {
   const local = loadJson("dangerWords", []);
   const all = [...defaultDangerWords, ...local];
-
   get("dangerList").innerHTML = all.map((word, i) => `
     <div class="danger-item">
       <b>${escapeHtml(word)}</b>
@@ -2777,27 +2772,22 @@ function savePattern() {
   const name = get("patternName").value.trim();
   const regex = get("patternRegex").value.trim();
   const flags = get("patternFlags").value.trim() || "g";
-
   if (!name || !regex) {
     alert("パターン名と正規表現を入力してください");
     return;
   }
-
   try {
     new RegExp(regex, flags);
   } catch {
     alert("正規表現が正しくありません");
     return;
   }
-
   let list = loadJson("dangerPatterns", []);
   list.push({ name, regex, flags });
   localStorage.setItem("dangerPatterns", JSON.stringify(list));
-
   get("patternName").value = "";
   get("patternRegex").value = "";
   get("patternFlags").value = "";
-
   alert("NGパターンを追加しました");
   renderPatterns();
 }
@@ -2832,11 +2822,9 @@ function getAllPatterns() {
   const local = loadJson("dangerPatterns", []);
   return [...defaultPatterns, ...local];
 }
-
 function detectSensitiveContent(text) {
   const source = String(text || "");
   const foundWords = getAllDangerWords().filter(word => word && source.includes(word));
-
   const foundPatterns = [];
   for (const p of getAllPatterns()) {
     try {
@@ -2851,7 +2839,6 @@ function detectSensitiveContent(text) {
       }
     } catch {}
   }
-
   return {
     hasAny: foundWords.length > 0 || foundPatterns.length > 0,
     foundWords,
@@ -2861,22 +2848,18 @@ function detectSensitiveContent(text) {
 
 function checkSensitiveContent(text) {
   const report = detectSensitiveContent(text);
-
   if (!report.hasAny) {
     hideWarning();
     return;
   }
-
   const lines = [];
   lines.push("警告：個人情報・認証情報が含まれている可能性があります。");
   lines.push("");
-
   if (report.foundWords.length > 0) {
     lines.push("【危険ワード】");
     lines.push(report.foundWords.join("、"));
     lines.push("");
   }
-
   if (report.foundPatterns.length > 0) {
     lines.push("【NGパターン検出】");
     report.foundPatterns.forEach(item => {
@@ -2885,9 +2868,7 @@ function checkSensitiveContent(text) {
     });
     lines.push("");
   }
-
   lines.push("外部に送る前に、本当に問題ないか確認してください。");
-
   get("warningBox").style.display = "block";
   get("warningBox").innerText = lines.join("\n");
 }
@@ -2896,13 +2877,11 @@ function buildConfirmMessage(report, actionName) {
   const lines = [];
   lines.push(`警告：${actionName}前に確認してください。`);
   lines.push("");
-
   if (report.foundWords.length > 0) {
     lines.push("【危険ワード】");
     lines.push(report.foundWords.join("、"));
     lines.push("");
   }
-
   if (report.foundPatterns.length > 0) {
     lines.push("【NGパターン検出】");
     report.foundPatterns.forEach(item => {
@@ -2911,7 +2890,6 @@ function buildConfirmMessage(report, actionName) {
     });
     lines.push("");
   }
-
   lines.push(`それでも${actionName}しますか？`);
   return lines.join("\n");
 }
@@ -2944,7 +2922,6 @@ function loadJson(key, fallback) {
 function saveCurrentState() {
   if (isLoading) return;
   if (!get("raw-input")) return;
-
   localStorage.setItem("rawInput", get("raw-input").value);
   localStorage.setItem("roughTone", get("rough-tone").value);
   localStorage.setItem("roughOutputFormat", get("rough-output-format").value);
@@ -2958,11 +2935,9 @@ function saveCurrentState() {
 
 function loadSettings() {
   isLoading = true;
-
   if (localStorage.getItem("darkMode") === "1") {
     document.body.classList.add("dark");
   }
-
   closeAllManagers();
   renderHistory();
   renderTemplates();
@@ -2979,7 +2954,6 @@ function loadSettings() {
   get("details").value = localStorage.getItem("detailsValue") || "";
   get("tone").value = localStorage.getItem("toneValue") || "プロフェッショナル";
   get("ai-target").value = localStorage.getItem("aiTarget") || "chatgpt";
-
   const savedTab = Number(localStorage.getItem("currentTab") || "1");
   currentTab = savedTab;
   switchTab(savedTab);
@@ -3026,6 +3000,7 @@ function closeRepairSearchBox() {
   if (box) box.style.display = "none";
   if (btn) btn.innerText = "🔍";
 }
+
 function compactRepairSearchUi() {
   const box = get("repairSearchBox");
   if (!box) return;
@@ -3040,6 +3015,7 @@ function compactRepairSearchUi() {
     closeBtn.innerText = "－";
   }
 }
+
 document.addEventListener("DOMContentLoaded", compactRepairSearchUi);
 </script>
 </body>
