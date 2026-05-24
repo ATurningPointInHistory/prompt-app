@@ -190,6 +190,17 @@ body.dark button.active-panel {
   white-space: pre-wrap;
 }
 
+.diagnose-box{
+  display:none;
+  margin-top:15px;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(0,122,255,0.08);
+  white-space:pre-wrap;
+  font-size:13px;
+}
+
 .code-like {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;
@@ -475,7 +486,10 @@ body.dark button.active-panel {
     <button onclick="testJsonFormat()">🧪 JSONテスト</button>
     <button onclick="formatJsonOutput()">📦 JSON整形</button>
     <button onclick="recheckOutput()">🔍 再チェック</button>
+<button onclick="diagnoseHtml()">
+  🩺 HTML診断</button>
   </div>
+    
 
   <button class="tool-category-btn" onclick="toggleToolCategory('cleanTools')">
     🧹 整理系 ▼
@@ -496,7 +510,15 @@ body.dark button.active-panel {
   <div id="output">ここに表示</div>
 
   <div id="warningBox" class="warning-box"></div>
-<div id="debugBox" class="warning-box" style="display:none;"></div>
+
+  <div id="debugBox"
+  class="warning-box"
+  style="display:none;"></div>
+
+  <div
+  id="diagnoseBox"
+  class="diagnose-box">
+</div>
 
   <div id="template-manager" class="section-box" style="display:none;">
     <h3>テンプレ管理</h3>
@@ -1359,7 +1381,6 @@ function syncCommandButtons() {
   const input = get("raw-input");
   const text = input.value;
   const commands = text.match(/\/[a-zA-Z0-9]+/g) || [];
-
   document.querySelectorAll(".command-chip").forEach(btn => {
     const cmd = btn.dataset.cmd;
     btn.classList.toggle("active", commands.includes(`/${cmd}`));
@@ -1506,6 +1527,113 @@ function recheckOutput() {
     return;
   }
   checkSensitiveContent(text);
+}
+
+function diagnoseHtml() {
+
+  const html =
+    document.documentElement.outerHTML;
+
+  let report = [];
+
+  report.push(
+    "AIプロンプト生成Pro HTML診断\n"
+  );
+
+  // div数
+
+  const openDiv =
+    (html.match(/<div\b/g)||[]).length;
+
+  const closeDiv =
+    (html.match(/<\/div>/g)||[]).length;
+
+  if(openDiv===closeDiv){
+
+    report.push(
+      `✔ div整合性 OK (${openDiv})`
+    );
+
+  }else{
+
+    report.push(
+      `⚠ div不一致 open:${openDiv} close:${closeDiv}`
+    );
+  }
+
+  // script確認
+
+  const scriptCount =
+    (html.match(/<script\b/g)||[]).length;
+
+  report.push(
+    `✔ scriptタグ: ${scriptCount}`
+  );
+
+  // id重複
+
+  const ids =
+    [...html.matchAll(/id="([^"]+)"/g)]
+      .map(m=>m[1]);
+
+  const dupIds =
+    [...new Set(
+      ids.filter(
+        (id,i)=>
+        ids.indexOf(id)!==i
+      )
+    )];
+
+  if(dupIds.length===0){
+
+    report.push(
+      "✔ id重複なし"
+    );
+
+  }else{
+
+    report.push(
+      `⚠ id重複:\n${dupIds.join("\n")}`
+    );
+  }
+
+  // function重複
+
+  const funcs =
+    [...html.matchAll(
+      /function\s+([A-Za-z0-9_]+)/g
+    )]
+    .map(m=>m[1]);
+
+  const dupFuncs =
+    [...new Set(
+      funcs.filter(
+        (f,i)=>
+        funcs.indexOf(f)!==i
+      )
+    )];
+
+  if(dupFuncs.length===0){
+
+    report.push(
+      "✔ function重複なし"
+    );
+
+  }else{
+
+    report.push(
+      `⚠ function重複:\n${dupFuncs.join("\n")}`
+    );
+  }
+
+  const box =
+    get("diagnoseBox");
+
+  box.style.display =
+    "block";
+
+  box.innerText =
+    report.join("\n");
 }
 
 function formatJsonOutput() {
