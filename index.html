@@ -287,6 +287,34 @@ body.dark button.active-panel {
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
 }
 
+#repairSearchBtn {
+  position: fixed;
+  right: 18px;
+  bottom: 88px;
+  z-index: 997;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+}
+
+#repairSearchBox {
+  position: fixed;
+  right: 18px;
+  bottom: 158px;
+  z-index: 996;
+  width: min(320px, calc(100vw - 36px));
+  max-height: 55vh;
+  overflow-y: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  padding: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+
 #commandMenu {
   margin-top: 8px;
   padding: 10px;
@@ -690,27 +718,40 @@ mark {
 
   </div>
 
-  <label for="repairSearch">
-    検索
-  </label>
-
-  <input
-    id="repairSearch"
-    placeholder="検索したい文字を入力">
-
-  <div class="btn-group">
-    <button onclick="searchRepairText()">
-      🔍 検索
-    </button>
+<button
+  id="repairSearchBtn"
+  onclick="toggleRepairSearchBox()"
+  class="btn-secondary">
+  🔍
+</button>
 
   <div
-    id="repairSearchResult"
-    class="diagnose-box">
-  </div>
+    id="repairSearchBox"
+    style="display:none;">
 
-    <button onclick="searchRepairNext()">
-      次へ
-    </button>
+    <label for="repairSearch">
+      検索
+    </label>
+
+    <input
+      id="repairSearch"
+      placeholder="検索したい文字を入力">
+
+    <div class="btn-group">
+      <button onclick="searchRepairText()">
+        🔍 検索
+      </button>
+
+      <button onclick="searchRepairNext()">
+        次へ
+      </button>
+    </div>
+
+    <div
+      id="repairSearchResult"
+      class="diagnose-box">
+    </div>
+
   </div>
 
   <label for="repairEditor">
@@ -1165,6 +1206,21 @@ function toggleToolsMenu() {
 
   btn.innerText =
     isOpen ? "⚙" : "×";
+}
+
+function toggleRepairSearchBox() {
+
+  const box = get("repairSearchBox");
+  const btn = get("repairSearchBtn");
+
+  const isOpen =
+    box.style.display !== "none";
+
+  box.style.display =
+    isOpen ? "none" : "block";
+
+  btn.innerText =
+    isOpen ? "🔍" : "×";
 }
 
 function toggleToolCategory(id) {
