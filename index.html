@@ -647,6 +647,24 @@ body.dark button.active-panel {
 
   </div>
 
+  <label for="repairSearch">
+    検索
+  </label>
+
+  <input
+    id="repairSearch"
+    placeholder="検索したい文字を入力">
+
+  <div class="btn-group">
+    <button onclick="searchRepairText()">
+      🔍 検索
+    </button>
+
+    <button onclick="searchRepairNext()">
+      次へ
+    </button>
+  </div>
+
   <label for="repairEditor">
     HTML編集エリア
   </label>
@@ -2369,6 +2387,61 @@ function saveRepairHtml() {
   a.click();
 
   alert("修正版保存完了");
+}
+
+let repairSearchIndex = 0;
+
+function searchRepairText() {
+
+  const editor = get("repairEditor");
+  const keyword = get("repairSearch").value;
+
+  if (!keyword) {
+    alert("検索文字を入力してください");
+    return;
+  }
+
+  const text = editor.value;
+  const index = text.indexOf(keyword);
+
+  if (index === -1) {
+    alert("見つかりませんでした");
+    return;
+  }
+
+  repairSearchIndex = index + keyword.length;
+
+  editor.focus();
+  editor.setSelectionRange(index, index + keyword.length);
+}
+
+function searchRepairNext() {
+
+  const editor = get("repairEditor");
+  const keyword = get("repairSearch").value;
+
+  if (!keyword) {
+    alert("検索文字を入力してください");
+    return;
+  }
+
+  const text = editor.value;
+
+  let index = text.indexOf(keyword, repairSearchIndex);
+
+  if (index === -1) {
+    index = text.indexOf(keyword);
+  }
+
+  if (index === -1) {
+    alert("見つかりませんでした");
+    return;
+  }
+
+  repairSearchIndex = index + keyword.length;
+
+  editor.focus();
+  editor.setSelectionRange(index, index + keyword.length);
 }
 
 function diagnoseRepairHtml() {
