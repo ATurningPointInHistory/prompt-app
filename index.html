@@ -619,18 +619,6 @@ mark {
 
   </div>
 
- <button
-  id="toolsBtn"
-  onclick="toggleToolsMenu()"
-  class="btn-secondary">
-  ⚙
-</button>
-
-<div
-  id="floatPanel"
-  style="display:none;">
-</div>
-
 <div
   id="toolsMenu"
   class="btn-group"
@@ -890,6 +878,18 @@ style="display:none;">
 </div>
 
 </div> <!-- repairPage -->
+
+<button
+  id="toolsBtn"
+  onclick="toggleToolsMenu()"
+  class="btn-secondary">
+  ⚙
+</button>
+
+<div
+  id="floatPanel"
+  style="display:none;">
+</div>
 
 </div> <!-- card -->
 
@@ -1268,18 +1268,15 @@ function toggleDark() {
 }
 
 function switchAppPage(mode) {
-
+  closeFloatPanel();
   get("appPage").style.display =
     mode === "app" ? "block" : "none";
-
   get("repairPage").style.display =
     mode === "repair" ? "block" : "none";
-
   get("appPageTab").classList.toggle(
     "active",
     mode === "app"
   );
-
   get("repairPageTab").classList.toggle(
     "active",
     mode === "repair"
