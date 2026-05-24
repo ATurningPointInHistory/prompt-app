@@ -454,6 +454,49 @@ mark {
   border-radius:8px;
 }
 
+#floatPanel{
+  position:fixed;
+  right:18px;
+  bottom:88px;
+  z-index:998;
+  width:280px;
+  max-width:calc(100vw - 36px);
+  max-height:65vh;
+  overflow-y:auto;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:15px;
+  padding:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.25);
+}
+
+.float-panel-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.float-panel-actions{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+}
+
+.float-panel-actions button{
+  flex:1;
+  padding:10px;
+}
+
+.float-list-btn{
+  width:100%;
+  text-align:left;
+  margin-top:6px;
+  padding:8px 10px;
+  font-size:12px;
+}
+
 .code-tag { color: #7ee787; }
 .code-attr { color: #79c0ff; }
 .code-string { color: #a5d6ff; }
@@ -582,6 +625,12 @@ mark {
   class="btn-secondary">
   ⚙
 </button>
+
+<div
+  id="floatPanel"
+  style="display:none;">
+</div>
+
 <div
   id="toolsMenu"
   class="btn-group"
@@ -696,14 +745,20 @@ mark {
 
   <div id="pattern-manager" class="section-box" style="display:none;">
     <h3>NGパターン管理</h3>
-    <div class="small">形式で検出します。正規表現を追加できます。</div>
+    <div class="small">形式で検出します。正規表現を追加できます。
+
+  </div>
+
     <label for="patternName">パターン名</label>
     <input id="patternName" placeholder="例：社員番号、会員ID">
     <label for="patternRegex">正規表現</label>
     <input id="patternRegex" placeholder="例：\\b[A-Z]{2}\\d{6}\\b">
     <label for="patternFlags">フラグ</label>
     <input id="patternFlags" placeholder="例：g または gi">
-    <div class="small">よく分からなければ、まずは g を入れてください。</div>
+    <div class="small">よく分からなければ、まずは g を入れてください。
+
+  </div>
+
     <button onclick="savePattern()" class="btn-full">NGパターン追加</button>
     <h4>固定NGパターン + 追加NGパターン</h4>
     <div id="patternList">
@@ -1230,26 +1285,62 @@ function switchAppPage(mode) {
   );
 }
 
-function toggleToolsMenu() {
-  const menu = get("toolsMenu");
-  const btn = get("toolsBtn");
-  const isOpen =
-    menu.style.display !== "none";
-  menu.style.display =
-    isOpen ? "none" : "grid";
-  btn.innerText =
-    isOpen ? "⚙" : "×";
+function toggleToolsMenu(){
+  const panel = get("floatPanel");
+  if(panel.style.display !== "none"){
+    closeFloatPanel();
+    get("toolsBtn").innerText = "⚙";
+    return;
+  }
+  get("toolsBtn").innerText = "×";
+  openFloatPanel(
+    "ツール",
+    `
+    <button class="float-list-btn" onclick="backupProgram()">🗂 フルバックアップ</button>
+    <button class="float-list-btn" onclick="saveProgramHtml()">💾 本体HTML保存</button>
+    <button class="float-list-btn" onclick="restoreProgramBackup()">♻ フル復元</button>
+    <button class="float-list-btn" onclick="reviewPrompt()">🛠 Promptレビュー</button>
+    <button class="float-list-btn" onclick="testPromptObject()">🧩 内部JSONテスト</button>
+    <button class="float-list-btn" onclick="testJsonFormat()">🧪 JSONテスト</button>
+    <button class="float-list-btn" onclick="formatJsonOutput()">📦 JSON整形</button>
+    <button class="float-list-btn" onclick="recheckOutput()">🔍 再チェック</button>
+    <button class="float-list-btn" onclick="diagnoseHtml()">🩺 HTML診断</button>
+
+    <button class="float-list-btn" onclick="clearOutput()">🧹 出力クリア</button>
+    <button class="float-list-btn" onclick="clearHistory()">🗑 履歴全削除</button>
+    `
+  );
+}
+function toggleRepairSearchBox(){
+  openFloatPanel(
+    "検索",
+    `
+    <input id="repairSearch" placeholder="検索">
+    <div class="float-panel-actions">
+      <button onclick="searchRepairText()">🔍</button>
+      <button onclick="searchRepairNext()">▶</button>
+    </div>
+    <div
+      id="repairSearchResult"
+      class="diagnose-box"
+      style="display:none;">
+    </div>
+    `
+  );
 }
 
-function toggleRepairSearchBox() {
-  const box = get("repairSearchBox");
-  const btn = get("repairSearchBtn");
-  const isOpen =
-    box.style.display !== "none";
-  box.style.display =
-    isOpen ? "none" : "block";
-  btn.innerText =
-    isOpen ? "🔍" : "×";
+function openFloatPanel(title, bodyHtml){
+  const panel = get("floatPanel");
+  panel.innerHTML =
+    `<div class="float-panel-header">
+      <span>${title}</span>
+      <button onclick="closeFloatPanel()">×</button>
+    </div>` +
+    bodyHtml;
+  panel.style.display = "block";
+}
+function closeFloatPanel(){
+  get("floatPanel").style.display = "none";
 }
 
 function closeRepairSearchBox(){
@@ -2478,7 +2569,6 @@ function replaceFunctionBlock(){
 
 function showFunctionList(){
   const text = get("repairEditor").value;
-  const box = get("functionListBox");
   if(!text.trim()){
     alert("HTMLが空です");
     return;
@@ -2487,26 +2577,22 @@ function showFunctionList(){
     /function\s+([a-zA-Z0-9_$]+)\s*\(/g
   )];
   if(matches.length === 0){
-    box.style.display = "block";
-    box.innerHTML = "関数なし";
+    openFloatPanel("関数一覧", "関数なし");
     return;
   }
-  box.style.display = "block";
-  box.innerHTML =
-    `<div class="function-list-header">
-      <span>関数一覧 (${matches.length})</span>
-      <button class="repair-mini-btn" onclick="closeFunctionList()">×</button>
-    </div>` +
+  const html =
+    `<div class="small">関数一覧：${matches.length}件</div>` +
     matches.map((m,i)=>{
       const name = m[1];
       return `
         <button
-          class="function-list-item"
+          class="float-list-btn"
           onclick="selectFunctionByName('${name}')">
           ${i+1}. ${name}
         </button>
       `;
     }).join("");
+  openFloatPanel("関数一覧", html);
 }
 
 function selectFunctionByName(name){
