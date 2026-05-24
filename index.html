@@ -2690,24 +2690,109 @@ function renderRepairSearchResults(keyword) {
 }
 
 function diagnoseRepairHtml() {
-  let html = get("repairEditor").value;
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
+  let html =
+    get("repairEditor").value;
+  const parser =
+    new DOMParser();
+  const doc =
+    parser.parseFromString(
+      html,
+      "text/html"
+    );
   let cleanHtml = html
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "");
-  const open = (cleanHtml.match(/<div\b/g) || []).length;
-  const close = (cleanHtml.match(/<\/div>/g) || []).length;
-  const report = [];
-  report.push("Repair HTML Diagnose\n");
-  report.push(`div: ${open}/${close}`);
-  const parserError = doc.querySelector("parsererror");
-  if (parserError) {
-    report.push("⚠ DOM解析エラー");
-  } else {
-    report.push("✔ DOM解析OK");
-  }
-  alert(report.join("\n"));
+    .replace(
+      /<script[\s\S]*?<\/script>/gi,
+      ""
+    )
+    .replace(
+      /<style[\s\S]*?<\/style>/gi,
+      ""
+    );
+  const report=[];
+  report.push(
+    "Repair HTML Diagnose\n"
+  );
+  // div整合性
+  const open =
+    (cleanHtml.match(
+      /<div\b/g
+    )||[]).length;
+  const close =
+    (cleanHtml.match(
+      /<\/div>/g
+    )||[]).length;
+  report.push(
+    open===close
+    ? `✔ div: ${open}/${close}`
+    : `⚠ div: ${open}/${close}`
+  );
+  // DOM
+  const parserError =
+    doc.querySelector(
+      "parsererror"
+    );
+  report.push(
+    parserError
+    ? "⚠ DOM解析エラー"
+    : "✔ DOM解析OK"
+  );
+  // id重複
+  const ids =
+    [...html.matchAll(
+      /id="([^"]+)"/g
+    )]
+    .map(x=>x[1]);
+  const dupIds =
+    [...new Set(
+      ids.filter(
+        (id,i)=>
+        ids.indexOf(id)!==i
+      )
+    )];
+  report.push(
+    dupIds.length
+    ? `⚠ id重複\n${dupIds.join("\n")}`
+    : "✔ id重複なし"
+  );
+  // function重複
+  const funcs =
+    [...html.matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )]
+    .map(x=>x[1]);
+  const dupFuncs =
+    [...new Set(
+      funcs.filter(
+        (f,i)=>
+        funcs.indexOf(f)!==i
+      )
+    )];
+  report.push(
+    dupFuncs.length
+    ? `⚠ function重複\n${dupFuncs.join("\n")}`
+    : "✔ function重複なし"
+  );
+  // onclick未定義
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )]
+    .map(x=>x[1]);
+  const undefinedFns =
+    [...new Set(
+      onclicks.filter(
+        fn=>
+        !funcs.includes(fn)
+      )
+    )];
+  report.push(
+    undefinedFns.length
+    ? `⚠ 未定義onclick\n${undefinedFns.join("\n")}`
+    : "✔ onclick定義OK"
+  );
+  alert(
+    report.join("\n")
+  );
 }
 
 function previewRepairHtml() {
