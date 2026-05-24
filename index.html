@@ -329,6 +329,21 @@ body.dark button.active-panel {
   margin-bottom: 6px;
 }
 
+mark {
+  background: #fff176;
+  color: #000;
+  padding: 1px 3px;
+  border-radius: 4px;
+}
+
+.search-result-line {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  padding: 6px;
+  border-bottom: 1px solid var(--border);
+  white-space: pre-wrap;
+}
+
 </style>
 </head>
 <body>
@@ -659,6 +674,11 @@ body.dark button.active-panel {
     <button onclick="searchRepairText()">
       🔍 検索
     </button>
+
+  <div
+    id="repairSearchResult"
+    class="diagnose-box">
+  </div>
 
     <button onclick="searchRepairNext()">
       次へ
@@ -2412,10 +2432,26 @@ function saveRepairHtml() {
 
 let repairSearchIndex = 0;
 
+let repairSearchIndex = 0;
+let repairSearchMatches = [];
+
+function escapeRegExp(str) {
+  return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightKeyword(text, keyword) {
+  const safeText = escapeHtml(text);
+  const safeKeyword = escapeHtml(keyword);
+  const regex = new RegExp(escapeRegExp(safeKeyword), "gi");
+
+  return safeText.replace(regex, match => `<mark>${match}</mark>`);
+}
+
 function searchRepairText() {
 
   const editor = get("repairEditor");
   const keyword = get("repairSearch").value;
+  const resultBox = get("repairSearchResult");
 
   if (!keyword) {
     alert("検索文字を入力してください");
@@ -2426,6 +2462,8 @@ function searchRepairText() {
   const index = text.indexOf(keyword);
 
   if (index === -1) {
+    resultBox.style.display = "block";
+    resultBox.innerText = "検索結果：0件";
     alert("見つかりませんでした");
     return;
   }
@@ -2434,6 +2472,8 @@ function searchRepairText() {
 
   editor.focus();
   editor.setSelectionRange(index, index + keyword.length);
+
+  renderRepairSearchResults(keyword);
 }
 
 function searchRepairNext() {
@@ -2463,6 +2503,52 @@ function searchRepairNext() {
 
   editor.focus();
   editor.setSelectionRange(index, index + keyword.length);
+
+  renderRepairSearchResults(keyword);
+}
+
+function renderRepairSearchResults(keyword) {
+
+  const editor = get("repairEditor");
+  const resultBox = get("repairSearchResult");
+  const text = editor.value;
+  const lines = text.split("\n");
+
+  const results = [];
+
+  lines.forEach((line, index) => {
+    if (line.includes(keyword)) {
+      results.push({
+        lineNumber: index + 1,
+        line
+      });
+    }
+  });
+
+  resultBox.style.display = "block";
+
+  if (results.length === 0) {
+    resultBox.innerText = "検索結果：0件";
+    return;
+  }
+
+  resultBox.innerHTML =
+    `<b>検索結果：${results.length}件</b>` +
+    results.slice(0, 30).map(item => {
+      return `
+        <div class="search-result-line">
+          <b>${item.lineNumber}</b>: ${highlightKeyword(item.line, keyword)}
+        </div>
+      `;
+    }).join("");
+
+  if (results.length > 30) {
+    resultBox.innerHTML += `
+      <div class="small">
+        ※ 30件まで表示しています
+      </div>
+    `;
+  }
 }
 
 function diagnoseRepairHtml() {
