@@ -324,6 +324,31 @@ body.dark button.active-panel {
 
 <div class="card">
   <h2>AIプロンプト生成Pro</h2>
+
+  <div class="tab-container">
+
+    <div
+      class="tab active"
+      id="appPageTab"
+      onclick="switchAppPage('app')">
+
+      通常モード
+
+    </div>
+
+    <div
+      class="tab"
+      id="repairPageTab"
+      onclick="switchAppPage('repair')">
+
+      修復モード
+
+    </div>
+
+  </div>
+
+  <div id="appPage">
+
   <div class="small" id="versionLabel"></div>
   <div class="small" id="changelogLabel"></div>
   <div class="tab-container">    <div id="tab1" class="tab active" onclick="switchTab(1)">マニュアル入力</div>
@@ -571,6 +596,40 @@ body.dark button.active-panel {
 <div class="section-box">
   <label>履歴（最新5件）</label>
   <div id="history"></div>
+</div>
+</div>
+
+<div
+  id="repairPage"
+  style="display:none;">
+
+  <h3>🛠 修復モード</h3>
+
+  <div class="small">
+    HTMLファイルを文字列として読み込み、編集して保存できます。
+  </div>
+
+  <div class="btn-group">
+
+    <button onclick="loadRepairHtml()">
+      📖 HTML読込
+    </button>
+
+    <button onclick="saveRepairHtml()">
+      💾 修正版保存
+    </button>
+
+  </div>
+
+  <label for="repairEditor">
+    HTML編集エリア
+  </label>
+
+  <textarea
+    id="repairEditor"
+    rows="20"
+    placeholder="ここにHTML全文が表示されます"></textarea>
+
 </div>
 
 </div>
@@ -967,6 +1026,25 @@ String(tabNum));
 function toggleDark() {
   document.body.classList.toggle("dark");
   localStorage.setItem("darkMode", document.body.classList.contains("dark") ? "1" : "0");
+}
+
+function switchAppPage(mode) {
+
+  get("appPage").style.display =
+    mode === "app" ? "block" : "none";
+
+  get("repairPage").style.display =
+    mode === "repair" ? "block" : "none";
+
+  get("appPageTab").classList.toggle(
+    "active",
+    mode === "app"
+  );
+
+  get("repairPageTab").classList.toggle(
+    "active",
+    mode === "repair"
+  );
 }
 
 function toggleToolsMenu() {
@@ -2155,6 +2233,75 @@ function saveProgramHtml() {
   a.click();
 
   alert("本体HTMLを保存しました");
+}
+
+function loadRepairHtml() {
+
+  const input =
+    document.createElement("input");
+
+  input.type = "file";
+  input.accept = ".html,text/html";
+
+  input.onchange = (e) => {
+
+    const file =
+      e.target.files[0];
+
+    if (!file) return;
+
+    const reader =
+      new FileReader();
+
+    reader.onload = () => {
+
+      get("repairEditor").value =
+        reader.result;
+
+      alert("HTML読込完了");
+    };
+
+    reader.readAsText(file);
+  };
+
+  input.click();
+}
+
+function saveRepairHtml() {
+
+  const html =
+    get("repairEditor")
+      .value
+      .trim();
+
+  if (!html) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  const blob =
+    new Blob(
+      [html],
+      { type: "text/html" }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-");
+
+  a.download =
+    `AIPro_Repaired_${timestamp}.html`;
+
+  a.click();
+
+  alert("修正版保存完了");
 }
 
 get("fileInput").addEventListener("change", (e) => {
