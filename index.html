@@ -425,6 +425,25 @@ mark {
   overflow-x: auto;
 }
 
+.repair-search-actions{
+  position:absolute;
+  right:78px;
+  bottom:14px;
+  display:flex;
+  gap:8px;
+}
+
+.repair-mini-btn{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  padding:0;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
 .code-tag { color: #7ee787; }
 .code-attr { color: #79c0ff; }
 .code-string { color: #a5d6ff; }
@@ -676,23 +695,32 @@ mark {
   id="repairSearchBtn"
   onclick="toggleRepairSearchBox()"
   class="btn-secondary">
-  🔍</button>
+  🔍
+</button>
 <div
   id="repairSearchBox"
   style="display:none;">
   <input
     id="repairSearch"
     placeholder="検索">
-  <div class="btn-group">
-    <button onclick="searchRepairText()">
-      🔍</button>
-    <button onclick="searchRepairNext()">
-      ▶</button>
+  <div class="repair-search-actions">
     <button
+      class="repair-mini-btn"
+      onclick="searchRepairText()">
+      🔍
+    </button>
+    <button
+      class="repair-mini-btn"
+      onclick="searchRepairNext()">
+      ▶
+    </button>
+    <button
+      class="repair-mini-btn"
       onclick="
-      get('repairSearchResult')
-      .style.display='none'">
-      －</button>
+        get('repairSearchResult')
+        .style.display='none'">
+      －
+    </button>
   </div>
   <div
     id="repairSearchResult"
