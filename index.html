@@ -1536,206 +1536,45 @@ function recheckOutput() {
 
 function diagnoseHtml() {
 
-  const html =
-  "<!DOCTYPE html>\n"+
-  document.documentElement.outerHTML;
+  let html =
+    "<!DOCTYPE html>\n" +
+    document.documentElement.outerHTML;
 
-  let report=[];
+  html = html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "");
 
-  report.push(
-  `AIプロンプト生成Pro HTML診断
-v5.7.1 Diagnose Enhanced\n`
-  );
+  const report = [];
 
-  // ========= タグ整合性 =========
+  report.push("AIプロンプト生成Pro HTML診断");
+  report.push("v5.7.2 Diagnose Fixed\n");
 
-  const tags=[
-  "div",
-  "section",
-  "article",
-  "main",
-  "header",
-  "footer",
-  "script",
-  "style"
-  ];
+  const tags = ["div", "section", "article", "main", "header", "footer"];
 
-  tags.forEach(tag=>{
-
-    const open=
-    (html.match(
-      new RegExp(`<${tag}\\b`,"gi")
-    )||[]).length;
-
-    const close=
-    (html.match(
-      new RegExp(`</${tag}>`,"gi")
-    )||[]).length;
-
-    if(open===close){
-
-      report.push(
-      `✔ ${tag}: ${open}/${close}`
-      );
-
-    }else{
-
-      report.push(
-      `⚠ ${tag}: ${open}/${close}`
-      );
-
-    }
-
+  tags.forEach(tag => {
+    const open = (html.match(new RegExp(`<${tag}\\b`, "gi")) || []).length;
+    const close = (html.match(new RegExp(`</${tag}>`, "gi")) || []).length;
+    report.push(open === close ? `✔ ${tag}: ${open}/${close}` : `⚠ ${tag}: ${open}/${close}`);
   });
 
-  // ========= script確認 =========
+  const ids = [...html.matchAll(/id="([^"]+)"/g)].map(m => m[1]);
 
-  report.push(
-  `✔ script要素: ${
-    document.scripts.length
-  }`
-  );
+  const dupIds = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))];
 
-  // ========= id重複 =========
+  report.push(dupIds.length ? `⚠ id重複\n${dupIds.join("\n")}` : "✔ id重複なし");
 
-  const ids=
-  [
-    ...html.matchAll(
-      /id="([^"]+)"/g
-    )
-  ].map(m=>m[1]);
-
-  const dupIds=
-  [
-    ...new Set(
-      ids.filter(
-        (id,i)=>
-        ids.indexOf(id)!==i
-      )
-    )
-  ];
-
-  if(dupIds.length){
-
-    report.push(
-    `⚠ id重複\n${
-      dupIds.join("\n")
-    }`
-    );
-
-  }else{
-
-    report.push(
-    "✔ id重複なし"
-    );
-
+  try {
+    [...document.scripts].forEach(s => new Function(s.textContent));
+    report.push("✔ JS構文OK");
+  } catch (e) {
+    report.push(`⚠ JS構文エラー\n${e.message}`);
   }
 
-  // ========= function重複 =========
-
-  const funcs=
-  [
-    ...html.matchAll(
-      /function\s+([A-Za-z0-9_]+)/g
-    )
-  ].map(m=>m[1]);
-
-  const dupFuncs=
-  [
-    ...new Set(
-      funcs.filter(
-        (f,i)=>
-        funcs.indexOf(f)!==i
-      )
-    )
-  ];
-
-  if(dupFuncs.length){
-
-    report.push(
-    `⚠ function重複\n${
-      dupFuncs.join("\n")
-    }`
-    );
-
-  }else{
-
-    report.push(
-    "✔ function重複なし"
-    );
-
-  }
-
-  // ========= 存在しないID検出 =========
-
-  const usedIds=
-  [
-    ...html.matchAll(
-      /get\("([^"]+)"\)/g
-    )
-  ].map(m=>m[1]);
-
-  const missingIds=
-  [
-    ...new Set(
-      usedIds.filter(
-        id=>!ids.includes(id)
-      )
-    )
-  ];
-
-  if(missingIds.length){
-
-    report.push(
-    `⚠ 存在しないID\n${
-      missingIds.join("\n")
-    }`
-    );
-
-  }else{
-
-    report.push(
-    "✔ get(id)整合性OK"
-    );
-
-  }
-
-  // ========= JS構文診断 =========
-
-  try{
-
-    const scripts=
-    [...document.scripts]
-    .map(s=>s.textContent)
-    .join("\n");
-
-    new Function(scripts);
-
-    report.push(
-    "✔ JS構文OK"
-    );
-
-  }catch(e){
-
-    report.push(
-    `⚠ JS構文エラー
-
-${e.message}`
-    );
-
-  }
-
-  // ========= 表示 =========
-
-  const box=
-  get("diagnoseBox");
-
-  box.style.display="block";
-
-  box.innerText=
-  report.join("\n");
-
+  const box = get("diagnoseBox");
+  box.style.display = "block";
+  box.innerText = report.join("\n");
 }
+
 function formatJsonOutput() {
   const output = get("output");
   let text = output.innerText.trim();
@@ -2532,54 +2371,34 @@ function saveRepairHtml() {
   alert("修正版保存完了");
 }
 
-function diagnoseRepairHtml(){
+function diagnoseRepairHtml() {
 
-const html=
-get("repairEditor").value;
+  let html = get("repairEditor").value;
 
-let report=[];
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
 
-const open=
-(html.match(/<div\b/g)||[])
-.length;
+  let cleanHtml = html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "");
 
-const close=
-(html.match(/<\/div>/g)||[])
-.length;
+  const open = (cleanHtml.match(/<div\b/g) || []).length;
+  const close = (cleanHtml.match(/<\/div>/g) || []).length;
 
-report.push(
-`Repair HTML Diagnose
+  const report = [];
 
-div:
-${open}/${close}`
-);
+  report.push("Repair HTML Diagnose\n");
+  report.push(`div: ${open}/${close}`);
 
-try{
+  const parserError = doc.querySelector("parsererror");
 
-new DOMParser()
-.parseFromString(
-html,
-"text/html"
-);
+  if (parserError) {
+    report.push("⚠ DOM解析エラー");
+  } else {
+    report.push("✔ DOM解析OK");
+  }
 
-report.push(
-"✔ DOM解析OK"
-);
-
-}catch(e){
-
-report.push(
-`⚠ DOM解析失敗
-
-${e.message}`
-);
-
-}
-
-alert(
-report.join("\n")
-);
-
+  alert(report.join("\n"));
 }
 
 get("fileInput").addEventListener("change", (e) => {
