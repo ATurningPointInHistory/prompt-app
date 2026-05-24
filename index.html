@@ -2508,32 +2508,6 @@ function selectFunctionByName(name){
   editor.focus(); editor.setSelectionRange(result.start,result.end);
 }
 
-function showFunctionList(){
-  const text =
-    get("repairEditor").value;
-  if(!text.trim()){
-    alert("HTMLが空です");
-    return;
-  }
-  const matches =
-    [...text.matchAll(
-      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
-    )];
-  if(matches.length===0){
-    alert("関数なし");
-    return;
-  }
-  const list =
-    matches.map(
-      (m,i)=>
-      `${i+1}. ${m[1]}`
-    );
-  alert(
-    `関数一覧 (${matches.length}件)\n\n`+
-    list.join("\n")
-  );
-}
-
 function renderRepairSearchResults(keyword) {
   const editor = get("repairEditor");
   const resultBox = get("repairSearchResult");
@@ -2569,24 +2543,6 @@ function renderRepairSearchResults(keyword) {
       </div>
     `;
   }
-}
-
-function selectFunctionByName(name){
-
-  const result =
-    findFunctionBlock(name);
-
-  if(!result)return;
-
-  const editor =
-    get("repairEditor");
-
-  editor.focus();
-
-  editor.setSelectionRange(
-    result.start,
-    result.end
-  );
 }
 
 function diagnoseRepairHtml() {
@@ -2982,26 +2938,12 @@ ${col}`;
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
+
 function closeRepairSearchBox() {
   const box = get("repairSearchBox");
   const btn = get("repairSearchBtn");
   if (box) box.style.display = "none";
   if (btn) btn.innerText = "🔍";
-}
-
-function compactRepairSearchUi() {
-  const box = get("repairSearchBox");
-  if (!box) return;
-  const oldGroup = box.querySelector(".btn-group");
-  if (!oldGroup) return;
-  oldGroup.classList.remove("btn-group"); oldGroup.classList.add("repair-search-actions"); oldGroup.querySelectorAll("button").forEach(btn => {
-    btn.classList.add("repair-mini-btn");
-  });
-  const closeBtn = oldGroup.querySelectorAll("button")[2];
-  if (closeBtn) {
-    closeBtn.onclick = closeRepairSearchBox;
-    closeBtn.innerText = "－";
-  }
 }
 
 document.addEventListener("DOMContentLoaded", compactRepairSearchUi);
