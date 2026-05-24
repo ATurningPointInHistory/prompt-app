@@ -1186,6 +1186,7 @@ ${buildCommandInstructionsFromObject(obj)}
 
 ${obj.prompt.tone}`;
 }
+
 function convertForCursor(obj) {
   const preset = obj.ai_preset || {};
   return `目的:
@@ -1311,20 +1312,27 @@ function toggleToolsMenu(){
     `
   );
 }
+
 function toggleRepairSearchBox(){
   openFloatPanel(
     "検索",
     `
-    <input id="repairSearch" placeholder="検索">
+    <input
+      id="repairSearch"
+      placeholder="検索">
     <div class="float-panel-actions">
       <button onclick="searchRepairText()">🔍</button>
       <button onclick="searchRepairNext()">▶</button>
+
     </div>
+
     <div
       id="repairSearchResult"
       class="diagnose-box"
       style="display:none;">
-    </div>
+ 
+   </div>
+
     `
   );
 }
@@ -2568,31 +2576,40 @@ function replaceFunctionBlock(){
 }
 
 function showFunctionList(){
-  const text = get("repairEditor").value;
+  const text =
+    get("repairEditor").value;
+
   if(!text.trim()){
     alert("HTMLが空です");
     return;
   }
-  const matches = [...text.matchAll(
-    /function\s+([a-zA-Z0-9_$]+)\s*\(/g
-  )];
-  if(matches.length === 0){
-    openFloatPanel("関数一覧", "関数なし");
-    return;
-  }
-  const html =
-    `<div class="small">関数一覧：${matches.length}件</div>` +
-    matches.map((m,i)=>{
-      const name = m[1];
-      return `
+  const matches =
+    [...text.matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )];
+  let html="";
+  if(matches.length===0){
+    html="関数なし";
+  }else{
+    html =
+      matches.map((m,i)=>{
+        const name=m[1];
+        return `
         <button
           class="float-list-btn"
-          onclick="selectFunctionByName('${name}')">
+          onclick="
+            selectFunctionByName('${name}');
+            closeFloatPanel();
+          ">
           ${i+1}. ${name}
         </button>
-      `;
-    }).join("");
-  openFloatPanel("関数一覧", html);
+        `;
+      }).join("");
+  }
+  openFloatPanel(
+    `関数一覧 (${matches.length})`,
+    html
+  );
 }
 
 function selectFunctionByName(name){
