@@ -344,6 +344,26 @@ mark {
   white-space: pre-wrap;
 }
 
+.code-preview {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #0d1117;
+  color: #c9d1d9;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.code-tag { color: #7ee787; }
+.code-attr { color: #79c0ff; }
+.code-string { color: #a5d6ff; }
+.code-comment { color: #8b949e; }
+.code-keyword { color: #ff7b72; }
+
 </style>
 </head>
 <body>
@@ -693,6 +713,18 @@ mark {
     id="repairEditor"
     rows="20"
     placeholder="ここにHTML全文が表示されます"></textarea>
+
+  <button
+    onclick="previewRepairHtml()"
+    class="btn-full">
+    🎨 色分けプレビュー
+  </button>
+
+  <div
+    id="repairPreview"
+    class="code-preview"
+    style="display:none;">
+  </div>
 
 </div>
 
@@ -2427,10 +2459,9 @@ function saveRepairHtml() {
 
   a.click();
 
-  alert("修正版保存完了");
-}
+  alert("修正版保存完了")
 
-let repairSearchIndex = 0;
+}
 
 let repairSearchIndex = 0;
 let repairSearchMatches = [];
@@ -2579,6 +2610,30 @@ function diagnoseRepairHtml() {
   }
 
   alert(report.join("\n"));
+}
+
+function previewRepairHtml() {
+
+  const html = get("repairEditor").value;
+
+  if (!html.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  let escaped = escapeHtml(html);
+
+  escaped = escaped
+    .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="code-comment">$1</span>')
+    .replace(/(&lt;\/?)([a-zA-Z0-9-]+)/g, '$1<span class="code-tag">$2</span>')
+    .replace(/\s([a-zA-Z-:]+)=/g, ' <span class="code-attr">$1</span>=')
+    .replace(/(&quot;.*?&quot;)/g, '<span class="code-string">$1</span>')
+    .replace(/\b(function|const|let|var|return|if|else|try|catch|for|while|switch|case|break|new)\b/g,
+      '<span class="code-keyword">$1</span>');
+
+  const box = get("repairPreview");
+  box.style.display = "block";
+  box.innerHTML = escaped;
 }
 
 get("fileInput").addEventListener("change", (e) => {
