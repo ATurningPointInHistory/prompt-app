@@ -461,7 +461,7 @@ mark {
   z-index:998;
   width:280px;
   max-width:calc(100vw - 36px);
-  max-height:65vh;
+  max-height:34vh;
   overflow-y:auto;
   background:var(--card);
   border:1px solid var(--border);
@@ -495,6 +495,36 @@ mark {
   margin-top:6px;
   padding:8px 10px;
   font-size:12px;
+}
+
+#functionListBtn {
+  position: fixed;
+  right: 18px;
+  bottom: 150px;
+  z-index: 997;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,.25);
+}
+
+#repairSearchBtn {
+  bottom: 88px;
+}
+
+.float-panel-header{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:var(--card);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:bold;
+  margin-bottom:10px;
+  padding-bottom:8px;
 }
 
 .code-tag { color: #7ee787; }
@@ -811,12 +841,17 @@ style="display:none;">
     🩺 編集内容診断</button>
   <button onclick="selectFunctionBlock()">
     📦 関数選択</button>
-  <button onclick="showFunctionList()">
-    📚 関数一覧</button>
   <button onclick="replaceFunctionBlock()">
     ✏ 関数置換</button>
 
 </div>
+
+<button
+  id="functionListBtn"
+  onclick="showFunctionList()"
+  class="btn-secondary">
+  📚
+</button>
 
 <button
   id="repairSearchBtn"
