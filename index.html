@@ -1542,11 +1542,36 @@ function diagnoseHtml() {
 
   // div数
 
+
+
+  const openDivs =
+  [...html.matchAll(/<div\b/g)];
+
+  const closeDivs =
+  [...html.matchAll(/<\/div>/g)];
+
   const openDiv =
-    (html.match(/<div\b/g)||[]).length;
+  openDivs.length;
 
   const closeDiv =
-    (html.match(/<\/div>/g)||[]).length;
+  closeDivs.length;
+
+  report.push(
+  `open=${openDiv} close=${closeDiv}`
+  );
+
+  if(openDiv!==closeDiv){
+
+    report.push(
+    "⚠ div数不一致\n閉じ忘れ候補:"
+    );
+
+    report.push(
+      html.slice(-2500)
+    );
+  }
+
+
 
   if(openDiv===closeDiv){
 
