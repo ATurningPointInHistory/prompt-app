@@ -641,6 +641,10 @@ body.dark button.active-panel {
       💾 修正版保存
     </button>
 
+    <button onclick="diagnoseRepairHtml()">
+      🩺 編集内容診断
+    </button>
+
   </div>
 
   <label for="repairEditor">
@@ -846,6 +850,7 @@ function buildPromptObject(raw, tone, commands) {
     }
   };
 }
+
 function convertForAI(obj, aiTarget, outputFormat) {
   if (outputFormat === "json") {
     return JSON.stringify(obj, null, 2);
@@ -1531,142 +1536,206 @@ function recheckOutput() {
 
 function diagnoseHtml() {
 
-  const clone =
-    document.documentElement.cloneNode(true);
-
-  clone.querySelectorAll("script, style")
-    .forEach(el => el.remove());
-
   const html =
-    clone.outerHTML;
+  "<!DOCTYPE html>\n"+
+  document.documentElement.outerHTML;
 
-  let report = [];
-
-  report.push(
-    "AIプロンプト生成Pro HTML診断\n"
-  );
-
-  // div数
-
-
-
-  const openDivs =
-  [...html.matchAll(/<div\b/g)];
-
-  const closeDivs =
-  [...html.matchAll(/<\/div>/g)];
-
-  const openDiv =
-  openDivs.length;
-
-  const closeDiv =
-  closeDivs.length;
+  let report=[];
 
   report.push(
-  `open=${openDiv} close=${closeDiv}`
+  `AIプロンプト生成Pro HTML診断
+v5.7.1 Diagnose Enhanced\n`
   );
 
-  if(openDiv!==closeDiv){
+  // ========= タグ整合性 =========
 
-    report.push(
-    "⚠ div数不一致\n閉じ忘れ候補:"
-    );
+  const tags=[
+  "div",
+  "section",
+  "article",
+  "main",
+  "header",
+  "footer",
+  "script",
+  "style"
+  ];
 
-    report.push(
-      html.slice(-2500)
-    );
-  }
+  tags.forEach(tag=>{
 
+    const open=
+    (html.match(
+      new RegExp(`<${tag}\\b`,"gi")
+    )||[]).length;
 
+    const close=
+    (html.match(
+      new RegExp(`</${tag}>`,"gi")
+    )||[]).length;
 
-  if(openDiv===closeDiv){
+    if(open===close){
 
-    report.push(
-      `✔ div整合性 OK (${openDiv})`
-    );
+      report.push(
+      `✔ ${tag}: ${open}/${close}`
+      );
 
-  }else{
+    }else{
 
-    report.push(
-      `⚠ div不一致 open:${openDiv} close:${closeDiv}`
-    );
-  }
+      report.push(
+      `⚠ ${tag}: ${open}/${close}`
+      );
 
-  // script確認
+    }
 
-  const scriptCount =
-    (html.match(/<script\b/g)||[]).length;
+  });
+
+  // ========= script確認 =========
 
   report.push(
-    `✔ scriptタグ: ${scriptCount}`
+  `✔ script要素: ${
+    document.scripts.length
+  }`
   );
 
-  // id重複
+  // ========= id重複 =========
 
-  const ids =
-    [...html.matchAll(/id="([^"]+)"/g)]
-      .map(m=>m[1]);
+  const ids=
+  [
+    ...html.matchAll(
+      /id="([^"]+)"/g
+    )
+  ].map(m=>m[1]);
 
-  const dupIds =
-    [...new Set(
+  const dupIds=
+  [
+    ...new Set(
       ids.filter(
         (id,i)=>
         ids.indexOf(id)!==i
       )
-    )];
+    )
+  ];
 
-  if(dupIds.length===0){
+  if(dupIds.length){
 
     report.push(
-      "✔ id重複なし"
+    `⚠ id重複\n${
+      dupIds.join("\n")
+    }`
     );
 
   }else{
 
     report.push(
-      `⚠ id重複:\n${dupIds.join("\n")}`
+    "✔ id重複なし"
     );
+
   }
 
-  // function重複
+  // ========= function重複 =========
 
-  const funcs =
-    [...html.matchAll(
+  const funcs=
+  [
+    ...html.matchAll(
       /function\s+([A-Za-z0-9_]+)/g
-    )]
-    .map(m=>m[1]);
+    )
+  ].map(m=>m[1]);
 
-  const dupFuncs =
-    [...new Set(
+  const dupFuncs=
+  [
+    ...new Set(
       funcs.filter(
         (f,i)=>
         funcs.indexOf(f)!==i
       )
-    )];
+    )
+  ];
 
-  if(dupFuncs.length===0){
+  if(dupFuncs.length){
 
     report.push(
-      "✔ function重複なし"
+    `⚠ function重複\n${
+      dupFuncs.join("\n")
+    }`
     );
 
   }else{
 
     report.push(
-      `⚠ function重複:\n${dupFuncs.join("\n")}`
+    "✔ function重複なし"
     );
+
   }
 
-  const box =
-    get("diagnoseBox");
+  // ========= 存在しないID検出 =========
 
-  box.style.display =
-    "block";
+  const usedIds=
+  [
+    ...html.matchAll(
+      /get\("([^"]+)"\)/g
+    )
+  ].map(m=>m[1]);
 
-  box.innerText =
-    report.join("\n");
+  const missingIds=
+  [
+    ...new Set(
+      usedIds.filter(
+        id=>!ids.includes(id)
+      )
+    )
+  ];
+
+  if(missingIds.length){
+
+    report.push(
+    `⚠ 存在しないID\n${
+      missingIds.join("\n")
+    }`
+    );
+
+  }else{
+
+    report.push(
+    "✔ get(id)整合性OK"
+    );
+
+  }
+
+  // ========= JS構文診断 =========
+
+  try{
+
+    const scripts=
+    [...document.scripts]
+    .map(s=>s.textContent)
+    .join("\n");
+
+    new Function(scripts);
+
+    report.push(
+    "✔ JS構文OK"
+    );
+
+  }catch(e){
+
+    report.push(
+    `⚠ JS構文エラー
+
+${e.message}`
+    );
+
+  }
+
+  // ========= 表示 =========
+
+  const box=
+  get("diagnoseBox");
+
+  box.style.display="block";
+
+  box.innerText=
+  report.join("\n");
+
 }
-
 function formatJsonOutput() {
   const output = get("output");
   let text = output.innerText.trim();
@@ -2461,6 +2530,56 @@ function saveRepairHtml() {
   a.click();
 
   alert("修正版保存完了");
+}
+
+function diagnoseRepairHtml(){
+
+const html=
+get("repairEditor").value;
+
+let report=[];
+
+const open=
+(html.match(/<div\b/g)||[])
+.length;
+
+const close=
+(html.match(/<\/div>/g)||[])
+.length;
+
+report.push(
+`Repair HTML Diagnose
+
+div:
+${open}/${close}`
+);
+
+try{
+
+new DOMParser()
+.parseFromString(
+html,
+"text/html"
+);
+
+report.push(
+"✔ DOM解析OK"
+);
+
+}catch(e){
+
+report.push(
+`⚠ DOM解析失敗
+
+${e.message}`
+);
+
+}
+
+alert(
+report.join("\n")
+);
+
 }
 
 get("fileInput").addEventListener("change", (e) => {
