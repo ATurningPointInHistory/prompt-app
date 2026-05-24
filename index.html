@@ -1531,8 +1531,14 @@ function recheckOutput() {
 
 function diagnoseHtml() {
 
+  const clone =
+    document.documentElement.cloneNode(true);
+
+  clone.querySelectorAll("script, style")
+    .forEach(el => el.remove());
+
   const html =
-    document.documentElement.outerHTML;
+    clone.outerHTML;
 
   let report = [];
 
