@@ -730,18 +730,24 @@ style="display:none;">
 
   </div>
 
-  <div class="btn-group">
-  <button onclick="loadRepairHtml()">
-    📖 HTML読込</button>
-  <button onclick="saveRepairHtml()">
-    💾 修正版保存</button>
-  <button onclick="diagnoseRepairHtml()">
-    🩺 編集内容診断</button>
-  <button onclick="selectFunctionBlock()">
-    📦 関数選択</button>
-  <button onclick="replaceFunctionBlock()">
-    ✏ 関数置換</button>
+<div class="btn-group">
+  <button onclick="loadRepairHtml()">📖 HTML読込</button>
+  <button onclick="saveRepairHtml()">💾 修正版保存</button>
+  <button onclick="diagnoseRepairHtml()">🩺 編集内容診断</button>
+  <button onclick="selectFunctionBlock()">📦 関数選択</button>
+  <button onclick="replaceFunctionBlock()">✏ 関数置換</button>
+  <button onclick="undoRepairEdit()">↩ Undo</button>
+  <button onclick="redoRepairEdit()">↪ Redo</button>
+  <button onclick="toggleRepairAutoSave()">💾 AutoSave</button>
+  <button onclick="openReplacePanel()">🔁 検索置換</button>
 
+</div>
+
+<div
+  id="repairStatus"
+  class="small"
+  style="margin-top:8px;">
+  状態：未変更
 </div>
 
 <button
@@ -1207,47 +1213,40 @@ function toggleToolsMenu(){
   openFloatPanel(
     "ツール",
 `
-<button class="float-list-btn"
-onclick="backupProgram()">
-🗂 フルバックアップ
-</button>
+<button class="float-list-btn" onclick="backupProgram()">
+🗂 フルバックアップ</button>
+<button class="float-list-btn" onclick="showBackupHistory()">
+📚 バックアップ履歴</button>
+<button class="float-list-btn" onclick="compareBackupSummary()"
+>📊 差分確認</button>
 <button class="float-list-btn"
 onclick="saveProgramHtml()">
-💾 本体HTML保存
-</button>
+💾 本体HTML保存</button>
 <button class="float-list-btn"
 onclick="restoreProgramBackup()">
-♻ フル復元
-</button>
+♻ フル復元</button>
 <hr>
 <button class="float-list-btn"
 onclick="reviewPrompt()">
-🛠 Promptレビュー
-</button>
+🛠 Promptレビュー</button>
 <button class="float-list-btn"
 onclick="testPromptObject()">
-🧩 内部JSONテスト
-</button>
+🧩 内部JSONテスト</button>
 <button class="float-list-btn"
 onclick="testJsonFormat()">
-🧪 JSONテスト
-</button>
+🧪 JSONテスト</button>
 <button class="float-list-btn"
 onclick="formatJsonOutput()">
-📦 JSON整形
-</button>
+📦 JSON整形</button>
 <button class="float-list-btn"
 onclick="recheckOutput()">
-🔍 再チェック
-</button>
+🔍 再チェック</button>
 <button class="float-list-btn"
 onclick="diagnoseHtml()">
-🩺 HTML診断
-</button>
+🩺 HTML診断</button>
 <button class="float-list-btn"
 onclick="compareBackupSummary()">
-📊 バックアップ差分確認
-</button>
+📊 バックアップ差分確認</button>
 <hr>
 <button class="float-list-btn"
 onclick="importTemplates()">
@@ -2334,8 +2333,15 @@ function backupProgram() {
       .replace(/[:.]/g, "-");
   a.download =
     `AIProBackup_${APP_VERSION}_${timestamp}.json`;
+
   a.click();
-  URL.revokeObjectURL(a.href);
+
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
+
+  saveBackupHistory(backupData);
+
   alert(
     "フルバックアップ保存完了\n\n" +
     "メモ: " + note
@@ -3288,9 +3294,204 @@ column:
 ${col}`;
 };
 
+document.addEventListener("DOMContentLoaded", initRepairIde);
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
+
+let repairUndoStack = [];
+let repairRedoStack = [];
+let repairLastValue = "";
+let repairAutoSaveEnabled = false;
+
+function initRepairIde() {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  repairLastValue = editor.value || "";
+
+  editor.addEventListener("input", () => {
+    if (repairLastValue !== editor.value) {
+      repairUndoStack.push(repairLastValue);
+      repairRedoStack = [];
+      repairLastValue = editor.value;
+      updateRepairStatus("変更あり");
+      autoSaveRepairDraft();
+    }
+  });
+
+  loadRepairDraft();
+}
+
+function updateRepairStatus(text) {
+  const box = get("repairStatus");
+  if (!box) return;
+  box.innerText = "状態：" + text;
+}
+
+function undoRepairEdit() {
+  const editor = get("repairEditor");
+  if (!editor || repairUndoStack.length === 0) return;
+  repairRedoStack.push(editor.value);
+  editor.value = repairUndoStack.pop();
+  repairLastValue = editor.value;
+  updateRepairStatus("Undo実行");
+}
+
+function redoRepairEdit() {
+  const editor = get("repairEditor");
+  if (!editor || repairRedoStack.length === 0) return;
+  repairUndoStack.push(editor.value);
+  editor.value = repairRedoStack.pop();
+  repairLastValue = editor.value;
+  updateRepairStatus("Redo実行");
+}
+
+function toggleRepairAutoSave() {
+  repairAutoSaveEnabled = !repairAutoSaveEnabled;
+  localStorage.setItem(
+    "repairAutoSaveEnabled",
+    repairAutoSaveEnabled ? "1" : "0"
+  );
+  updateRepairStatus(
+    repairAutoSaveEnabled ? "AutoSave ON" : "AutoSave OFF"
+  );
+}
+
+function autoSaveRepairDraft() {
+  if (!repairAutoSaveEnabled) return;
+  const editor = get("repairEditor");
+  if (!editor) return;
+  localStorage.setItem("repairDraftHtml", editor.value);
+  localStorage.setItem(
+    "repairDraftSavedAt",
+    new Date().toISOString()
+  );
+}
+
+function loadRepairDraft() {
+  repairAutoSaveEnabled =
+    localStorage.getItem("repairAutoSaveEnabled") === "1";
+  const draft = localStorage.getItem("repairDraftHtml");
+  if (!draft) return;
+  const ok = confirm("修復モードの自動保存データを復元しますか？");
+  if (!ok) return;
+  get("repairEditor").value = draft;
+  repairLastValue = draft;
+  updateRepairStatus("自動保存データ復元");
+}
+
+function openReplacePanel() {
+  openFloatPanel(
+    "検索置換",
+    `
+    <input id="repairFindText" placeholder="検索文字">
+    <input id="repairReplaceText" placeholder="置換後文字">
+    <div class="float-panel-actions">
+      <button onclick="replaceRepairText()">置換</button>
+      <button onclick="replaceAllRepairText()">全置換</button>
+    </div>
+    `
+  );
+}
+
+function replaceRepairText() {
+  const editor = get("repairEditor");
+  const findText = get("repairFindText").value;
+  const replaceText = get("repairReplaceText").value;
+  if (!findText) {
+    alert("検索文字を入力してください");
+    return;
+  }
+  const index = editor.value.indexOf(findText);
+  if (index === -1) {
+    alert("見つかりませんでした");
+    return;
+  }
+  repairUndoStack.push(editor.value);
+  editor.value =
+    editor.value.slice(0, index) +
+    replaceText +
+    editor.value.slice(index + findText.length);
+  repairLastValue = editor.value;
+  updateRepairStatus("1件置換");
+}
+
+function replaceAllRepairText() {
+  const editor = get("repairEditor");
+  const findText = get("repairFindText").value;
+  const replaceText = get("repairReplaceText").value;
+  if (!findText) {
+    alert("検索文字を入力してください");
+    return;
+  }
+  const count = editor.value.split(findText).length - 1;
+  if (count <= 0) {
+    alert("見つかりませんでした");
+    return;
+  }
+  repairUndoStack.push(editor.value);
+  editor.value = editor.value.split(findText).join(replaceText);
+  repairLastValue = editor.value;
+  updateRepairStatus(`${count}件置換`);
+  alert(`${count}件置換しました`);
+}
+
+function saveBackupHistory(backupData) {
+  const list = loadJson("backupHistory", []);
+  list.unshift({
+    version: backupData.version,
+    created_at: backupData.created_at,
+    backup_note: backupData.backup_note || "",
+    validation: backupData.validation || null,
+    html: backupData.html,
+    localStorageData: backupData.localStorageData
+  });
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list.slice(0, 10))
+  );
+}
+
+function showBackupHistory() {
+  const list = loadJson("backupHistory", []);
+  if (list.length === 0) {
+    alert("バックアップ履歴はありません");
+    return;
+  }
+  openFloatPanel(
+    "バックアップ履歴",
+    list.map((b, i) => `
+      <button
+        class="float-list-btn"
+        onclick="restoreBackupHistory(${i})">
+        ${i + 1}. ${b.version} / ${b.backup_note || "メモなし"}
+      </button>
+    `).join("")
+  );
+}
+
+function restoreBackupHistory(index) {
+  const list = loadJson("backupHistory", []);
+  const item = list[index];
+  if (!item) {
+    alert("履歴が見つかりません");
+    return;
+  }
+  const ok = confirm("このバックアップ履歴を復元しますか？");
+  if (!ok) return;
+  Object.entries(item.localStorageData || {}).forEach(([key, value]) => {
+    if (value === null || value === undefined) {
+      localStorage.removeItem(key);
+    } else if (typeof value === "string") {
+      localStorage.setItem(key, value);
+    } else {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  });
+  alert("履歴から復元しました。再読み込みします。");
+  location.reload();
+}
 
 </script>
 </body>
