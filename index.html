@@ -2214,51 +2214,67 @@ function importAiPresets() {
   get("aiPresetFileInput").click();
 }
 
+function getCleanProgramHtml() {
+  const clone =
+    document.documentElement.cloneNode(true);
+  const floatPanel = clone.querySelector("#floatPanel");
+  if (floatPanel) {
+    floatPanel.innerHTML = "";
+    floatPanel.style.display = "none";
+  }
+  const toolsBtn = clone.querySelector("#toolsBtn");
+  if (toolsBtn) {
+    toolsBtn.innerText = "⚙";
+  }
+  ["debugBox", "diagnoseBox", "warningBox", "repairPreview"].forEach(id => {
+    const el = clone.querySelector("#" + id);
+    if (el) {
+      el.innerHTML = "";
+      el.innerText = "";
+      el.style.display = "none";
+    }
+  });
+  const output = clone.querySelector("#output");
+  if (output) {
+    output.innerText = "ここに表示";
+  }
+  ["commandBox", "presetBox", "templateList", "dangerList", "patternList", "history"].forEach(id => {
+    const el = clone.querySelector("#" + id);
+    if (el) el.innerHTML = "";
+  });
+  return "<!DOCTYPE html>\n" + clone.outerHTML;
+}
+
 function backupProgram() {
+  saveCurrentState();
   const backupData = {
+    backup_type: "AI_PROMPT_PRO_FULL_BACKUP",
     version: APP_VERSION,
-    created_at:
-      new Date().toISOString(),
+    created_at: new Date().toISOString(),
     changelog: CHANGELOG,
-    html:
-      document.documentElement.outerHTML,
+    html: getCleanProgramHtml(),
     localStorageData: {
-      templates:
-        loadJson("templates", []),
-      aiPresets:
-        loadJson("aiPresets", {}),
-      dangerWords:
-        loadJson("dangerWords", []),
-      dangerPatterns:
-        loadJson("dangerPatterns", []),
-      history:
-        loadJson("h", []),
-      rawInput:
-        localStorage.getItem("rawInput"),
-      roleValue:
-        localStorage.getItem("roleValue"),
-      taskValue:
-        localStorage.getItem("taskValue"),
-      detailsValue:
-        localStorage.getItem("detailsValue"),
-      toneValue:
-        localStorage.getItem("toneValue"),
-      roughTone:
-        localStorage.getItem("roughTone"),
-      roughOutputFormat:
-   localStorage.getItem("roughOutputFormat"),
-      aiTarget:
-        localStorage.getItem("aiTarget"),
-      currentTab:
-        localStorage.getItem("currentTab"),
-      darkMode:
-        localStorage.getItem("darkMode")
+      templates: loadJson("templates", []),
+      aiPresets: loadJson("aiPresets", {}),
+      dangerWords: loadJson("dangerWords", []),
+      dangerPatterns: loadJson("dangerPatterns", []),
+      history: loadJson("h", []),
+      rawInput: localStorage.getItem("rawInput"),
+      roleValue: localStorage.getItem("roleValue"),
+      taskValue: localStorage.getItem("taskValue"),
+      detailsValue: localStorage.getItem("detailsValue"),
+      toneValue: localStorage.getItem("toneValue"),
+      roughTone: localStorage.getItem("roughTone"),
+      roughOutputFormat: localStorage.getItem("roughOutputFormat"),
+      aiTarget: localStorage.getItem("aiTarget"),
+      currentTab: localStorage.getItem("currentTab"),
+      darkMode: localStorage.getItem("darkMode")
     }
   };
   const blob =
     new Blob(
       [JSON.stringify(backupData, null, 2)],
-      { type:"application/json" }
+      { type: "application/json" }
     );
   const a =
     document.createElement("a");
@@ -2267,7 +2283,7 @@ function backupProgram() {
   const timestamp =
     new Date()
       .toISOString()
-      .replace(/[:.]/g,"-");
+      .replace(/[:.]/g, "-");
   a.download =
     `AIProBackup_${APP_VERSION}_${timestamp}.json`;
   a.click();
