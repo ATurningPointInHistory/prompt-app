@@ -2820,15 +2820,30 @@ function diagnoseRepairHtml() {
   );
   // 孤立id
   const orphanIds =
+  const orphanIds =
     ids.filter(id=>{
-      const useCount =
-        (html.match(
-          new RegExp(
-            escapeRegExp(id),
-            "g"
-          )
-        )||[]).length;
-      return useCount<=1;
+      if(
+        !id ||
+        /[()[\]^]/.test(id)
+      ){
+        return false;
+      }
+      try{
+        const useCount =
+          (
+            html.match(
+              new RegExp(
+                "\\b"+
+                escapeRegExp(id)+
+                "\\b",
+                "g"
+              )
+            )||[]
+          ).length;
+        return useCount<=1;
+      }catch{
+        return false;
+      }
     });
   report.push(
     orphanIds.length
