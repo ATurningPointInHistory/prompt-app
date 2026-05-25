@@ -700,7 +700,7 @@ mark {
   <button onclick="undoRepairEdit()">↩ Undo</button>
   <button onclick="redoRepairEdit()">↪ Redo</button>
   <button onclick="toggleRepairAutoSave()">💾 AutoSave</button>
-  <button <button onclick="openReplacePanel()">🔁 検索置換</button>
+  <button <button="" onclick="openReplacePanel()">🔁 検索置換</button>
 <button onclick="cleanupCandidates()">🧹 削除候補チェック</button>
 
 </div>
@@ -3386,13 +3386,35 @@ function cleanupCandidates() {
   const orphanIds =
     ids.filter(id => {
       if (!id) return false;
-      if (["appPage", "repairPage", "floatPanel"].includes(id)) return false;
-      const count =
-        (html.match(
-          new RegExp("\\b" + escapeRegExp(id) + "\\b", "g")
-        ) || []).length;
-
-      return count <= 1;
+      // 正規表現汚染防止
+      if (
+        /[\$\{\}\(\)\[\]\^\|\\]/.test(id)
+      ){
+        return false;
+      }
+      // 除外対象
+      if([
+        "appPage",
+        "repairPage",
+        "floatPanel",
+        "functionListBox"
+      ].includes(id)){
+        return false;
+      }
+      try{
+        const count =
+          (
+            html.match(
+              new RegExp(
+              `\\b${escapeRegExp(id)}\\b`,
+                "g"
+              )
+            ) || []
+          ).length;
+        return count <= 1;
+      }catch{
+        return false;
+      }
     });
   const message =
     "削除候補チェック\n\n" +
@@ -3713,4 +3735,5 @@ ${info.time || "unknown"}`;
 
 </script>
 
-</body></html>
+</body>
+</html>
