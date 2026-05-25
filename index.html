@@ -1325,6 +1325,7 @@ function updatePanelButtonStates() {
 console.log("CHANGELOG");
 console.table(CHANGELOG);
 
+/* cleanup候補: 未使用function toggleTemplateManager
 function toggleTemplateManager() {
   const isOpen = get("template-manager").style.display !== "none";
   closeAllManagers();
@@ -1335,7 +1336,9 @@ function toggleTemplateManager() {
   }
   updatePanelButtonStates();
 }
+*/
 
+/* cleanup候補: 未使用function toggleDangerManager
 function toggleDangerManager() {
   const isOpen = get("danger-manager").style.display !== "none";
   closeAllManagers();
@@ -1345,7 +1348,9 @@ function toggleDangerManager() {
   }
   updatePanelButtonStates();
 }
+*/
 
+/* cleanup候補: 未使用function togglePatternManager
 function togglePatternManager() {
   const isOpen = get("pattern-manager").style.display !== "none";
   closeAllManagers();
@@ -1355,7 +1360,9 @@ function togglePatternManager() {
   }
   updatePanelButtonStates();
 }
+*/
 
+/* cleanup候補: 未使用function toggleAiPresetManager
 function toggleAiPresetManager() {
   const isOpen = get("ai-preset-manager").style.display !== "none";
   closeAllManagers();
@@ -1366,6 +1373,7 @@ function toggleAiPresetManager() {
   }
   updatePanelButtonStates();
 }
+*/
 
 function loadAiPresetToEditor() {
   const target = get("aiPresetTarget").value;
@@ -1417,6 +1425,7 @@ function parseCommands(text) {
   };
 }
 
+/* cleanup候補: 未使用function buildCommandInstructions
 function buildCommandInstructions(commands) {
   if (!commands || commands.length === 0) return "";
   const lines = commands.map(cmd => {
@@ -1428,6 +1437,7 @@ function buildCommandInstructions(commands) {
 ${lines.join("\n")}
 `;
 }
+*/
 
 function buildCommandInstructionsFromObject(obj) {
   if (!obj.commands || obj.commands.length === 0) return "";
@@ -2217,6 +2227,7 @@ function saveFromHistory(text) {
   renderTemplateSelect();
 }
 
+/* cleanup候補: 未使用function exportTemplates
 function exportTemplates() {
   const data = localStorage.getItem("templates") || "[]";
   const blob = new Blob([data], { type: "application/json" });
@@ -2225,6 +2236,7 @@ function exportTemplates() {
   a.download = "templates.json";
   a.click();
 }
+*/
 
 function importTemplates() {
   get("fileInput").click();
