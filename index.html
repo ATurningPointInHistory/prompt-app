@@ -390,11 +390,18 @@ mark {
   max-width:calc(100vw - 36px);
   max-height:34vh;
   overflow-y:auto;
-  background:var(--card);
-  border:1px solid var(--border);
+  background:rgba(36,37,38,0.88);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.18);
   border-radius:15px;
   padding:12px;
   box-shadow:0 4px 20px rgba(0,0,0,0.25);
+}
+
+body:not(.dark) #floatPanel{
+  background:rgba(255,255,255,0.88);
+  border:1px solid rgba(0,0,0,0.12);
 }
 
 .float-panel-header{
@@ -694,14 +701,7 @@ mark {
 <div class="btn-group">
   <button onclick="loadRepairHtml()">📖 HTML読込</button>
   <button onclick="saveRepairHtml()">💾 修正版保存</button>
-  <button onclick="diagnoseRepairHtml()">🩺 編集内容診断</button>
-  <button onclick="selectFunctionBlock()">📦 関数選択</button>
-  <button onclick="replaceFunctionBlock()">✏ 関数置換</button>
-  <button onclick="undoRepairEdit()">↩ Undo</button>
-  <button onclick="redoRepairEdit()">↪ Redo</button>
-  <button onclick="toggleRepairAutoSave()">💾 AutoSave</button>
-  <button <button="" onclick="openReplacePanel()">🔁 検索置換</button>
-<button onclick="cleanupCandidates()">🧹 削除候補チェック</button>
+  <button 
 
 </div>
 
@@ -1208,6 +1208,43 @@ onclick="clearHistory()">
 onclick="cleanupCandidates()">
 🧹 削除候補チェック
 </button>
+<hr>
+<button class="float-list-btn"
+onclick="diagnoseRepairHtml()">
+🩺 編集内容診断
+</button>
+<button class="float-list-btn"
+onclick="selectFunctionBlock()">
+📦 関数選択
+</button>
+<button class="float-list-btn"
+onclick="replaceFunctionBlock()">
+✏ 関数置換
+</button>
+<button class="float-list-btn"
+onclick="undoRepairEdit()">
+↩ Undo
+</button>
+<button class="float-list-btn"
+onclick="redoRepairEdit()">
+↪ Redo
+</button>
+<button class="float-list-btn"
+onclick="toggleRepairAutoSave()">
+💾 AutoSave
+</button>
+<button class="float-list-btn"
+onclick="openReplacePanel()">
+🔁 検索置換
+</button>
+<button class="float-list-btn"
+onclick="cleanupCandidates()">
+🧹 削除候補チェック
+</button>
+<button class="float-list-btn"
+onclick="previewRepairHtml()">
+🎨 色分けプレビュー
+</button>
 `
   );
 }
@@ -1239,21 +1276,56 @@ function toggleRepairSearchBox(){
 function openFloatPanel(title, bodyHtml){
   const panel = get("floatPanel");
   panel.innerHTML =
-    `<div class="float-panel-header">
+    `<div class="float-panel-header" id="floatPanelHandle">
       <span>${title}</span>
       <button onclick="closeFloatPanel()">×</button>
     </div>` +
     bodyHtml;
   panel.style.display = "block";
+  enableFloatPanelDrag();
 }
-
 function closeFloatPanel(){
   get("floatPanel").style.display = "none";
-
   const btn = get("toolsBtn");
   if(btn){
     btn.innerText = "⚙";
   }
+}
+
+function enableFloatPanelDrag() {
+  const panel = get("floatPanel");
+  const handle = get("floatPanelHandle");
+  if (!panel || !handle) return;
+  let startX = 0;
+  let startY = 0;
+  let startLeft = 0;
+  let startTop = 0;
+  let dragging = false;
+  handle.style.cursor = "move";
+  handle.onpointerdown = function(e) {
+    dragging = true;
+    const rect = panel.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    startLeft = rect.left;
+    startTop = rect.top;
+    panel.style.left = startLeft + "px";
+    panel.style.top = startTop + "px";
+    panel.style.right = "auto";
+    panel.style.bottom = "auto";
+    handle.setPointerCapture(e.pointerId);
+  };
+  handle.onpointermove = function(e) {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    panel.style.left = Math.max(0, startLeft + dx) + "px";
+    panel.style.top = Math.max(0, startTop + dy) + "px";
+  };
+  handle.onpointerup = function(e) {
+    dragging = false;
+    handle.releasePointerCapture(e.pointerId);
+  };
 }
 
 function toggleToolCategory(id) {
@@ -2617,14 +2689,19 @@ function saveRepairHtml() {
   a.download =
     `AIPro_Repaired_${timestamp}.html`;
   a.click();
-  alert("修正版保存完了")
+  navigator.clipboard.writeText(html)
+    .then(() => {
+      alert("修正版保存完了\n保存内容もコピーしました");
+    })
+    .catch(() => {
+      alert("修正版保存完了\nコピーは失敗しました");
+    });
 }
 let repairSearchIndex = 0;
 let repairSearchMatches = [];
 function escapeRegExp(str) {
   return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
-
 function findFunctionBlock(functionName){
   const editor=get("repairEditor");
   const text=editor.value;
