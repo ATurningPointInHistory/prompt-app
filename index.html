@@ -587,61 +587,6 @@ mark {
 
   </div>
 
-<div
-  id="toolsMenu"
-  class="btn-group"
-  style="display:none;">
-  <button class="tool-category-btn" onclick="toggleToolCategory('backupTools')">
-    💾 バックアップ系 ▼
-  </button>
-
-  <div id="backupTools" class="tool-category">
-    <button onclick="backupProgram()">🗂 フルバックアップ</button>
-    <button onclick="saveProgramHtml()">💾 本体HTML保存</button>
-    <button onclick="restoreProgramBackup()">♻ フル復元</button>
-
-  </div>
-
-  <button class="tool-category-btn" onclick="toggleToolCategory('aiTools')">
-    🤖 AI設定系 ▼
-  </button>
-
-  <div id="aiTools" class="tool-category">
-    <button onclick="importTemplates()">📥 テンプレ復元</button>
-    <button onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
-    <button onclick="importAiPresets()">🤖 AI設定復元</button>
-
-  </div>
-
-  <button class="tool-category-btn" onclick="toggleToolCategory('devTools')">
-    🧪 開発・確認系 ▼
-  </button>
-
-  <div id="devTools" class="tool-category">
-    <button onclick="reviewPrompt()">🛠 Promptレビュー</button>
-    <button onclick="testPromptObject()">🧩 内部JSONテスト</button>
-    <button onclick="testJsonFormat()">🧪 JSONテスト</button>
-    <button onclick="formatJsonOutput()">📦 JSON整形</button>
-    <button onclick="recheckOutput()">🔍 再チェック</button>
-<button onclick="diagnoseHtml()">
-  🩺 HTML診断</button>
-<button onclick="compareBackupSummary()">
-  📊 バックアップ差分確認</button>
-
-  </div>
-
-  <button class="tool-category-btn" onclick="toggleToolCategory('cleanTools')">
-    🧹 整理系 ▼
-  </button>
-
-  <div id="cleanTools" class="tool-category">
-    <button onclick="clearOutput()">🧹 出力クリア</button>
-    <button onclick="clearHistory()">🗑 履歴全削除</button>
-
-  </div>
-
-</div>
-
   <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
   <input type="file" id="aiPresetFileInput" accept=".json,application/json" style="display:none;">
   <label>生成結果</label>
@@ -1247,31 +1192,85 @@ function switchAppPage(mode) {
 }
 
 function toggleToolsMenu(){
-  const panel = get("floatPanel");
-
-  if(panel.style.display !== "none"){
+  const panel =
+    get("floatPanel");
+  if(
+    panel.style.display !== "none"
+  ){
     closeFloatPanel();
+    get("toolsBtn").innerText =
+      "⚙";
     return;
   }
-
-  get("toolsBtn").innerText = "×";
-
+  get("toolsBtn").innerText =
+    "×";
   openFloatPanel(
     "ツール",
-    `
-    <button class="float-list-btn" onclick="backupProgram()">🗂 フルバックアップ</button>
-    <button class="float-list-btn" onclick="saveProgramHtml()">💾 本体HTML保存</button>
-    <button class="float-list-btn" onclick="restoreProgramBackup()">♻ フル復元</button>
-    <button class="float-list-btn" onclick="reviewPrompt()">🛠 Promptレビュー</button>
-    <button class="float-list-btn" onclick="testPromptObject()">🧩 内部JSONテスト</button>
-    <button class="float-list-btn" onclick="testJsonFormat()">🧪 JSONテスト</button>
-    <button class="float-list-btn" onclick="formatJsonOutput()">📦 JSON整形</button>
-    <button class="float-list-btn" onclick="recheckOutput()">🔍 再チェック</button>
-    <button class="float-list-btn" onclick="diagnoseHtml()">🩺 HTML診断</button>
-    <button class="float-list-btn" onclick="compareBackupSummary()">📊 バックアップ差分確認</button>
-    <button class="float-list-btn" onclick="clearOutput()">🧹 出力クリア</button>
-    <button class="float-list-btn" onclick="clearHistory()">🗑 履歴全削除</button>
-    `
+`
+<button class="float-list-btn"
+onclick="backupProgram()">
+🗂 フルバックアップ
+</button>
+<button class="float-list-btn"
+onclick="saveProgramHtml()">
+💾 本体HTML保存
+</button>
+<button class="float-list-btn"
+onclick="restoreProgramBackup()">
+♻ フル復元
+</button>
+<hr>
+<button class="float-list-btn"
+onclick="reviewPrompt()">
+🛠 Promptレビュー
+</button>
+<button class="float-list-btn"
+onclick="testPromptObject()">
+🧩 内部JSONテスト
+</button>
+<button class="float-list-btn"
+onclick="testJsonFormat()">
+🧪 JSONテスト
+</button>
+<button class="float-list-btn"
+onclick="formatJsonOutput()">
+📦 JSON整形
+</button>
+<button class="float-list-btn"
+onclick="recheckOutput()">
+🔍 再チェック
+</button>
+<button class="float-list-btn"
+onclick="diagnoseHtml()">
+🩺 HTML診断
+</button>
+<button class="float-list-btn"
+onclick="compareBackupSummary()">
+📊 バックアップ差分確認
+</button>
+<hr>
+<button class="float-list-btn"
+onclick="importTemplates()">
+📥 テンプレ復元
+</button>
+<button class="float-list-btn"
+onclick="exportAiPresets()">
+🤖 AI設定バックアップ
+</button>
+<button class="float-list-btn"
+onclick="importAiPresets()">
+🤖 AI設定復元
+</button>
+<hr>
+<button class="float-list-btn"
+onclick="clearOutput()">
+🧹 出力クリア
+</button>
+<button class="float-list-btn"
+onclick="clearHistory()">
+🗑 履歴全削除
+</button>
+`
   );
 }
 
