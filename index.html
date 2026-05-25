@@ -1203,6 +1203,10 @@ onclick="clearOutput()">
 onclick="clearHistory()">
 🗑 履歴全削除
 </button>
+<button class="float-list-btn"
+onclick="cleanupCandidates()">
+🧹 削除候補チェック
+</button>
 `
   );
 }
@@ -1673,6 +1677,7 @@ function diagnoseHtml() {
 }
 
 function showHtmlHealth() {
+
   const html =
     "<!DOCTYPE html>\n" +
     document.documentElement.outerHTML;
@@ -3343,6 +3348,113 @@ document.addEventListener("DOMContentLoaded", initRepairIde);
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
+function cleanupCandidates() {
+  const editor = get("repairEditor");
+  const html = editor && editor.value.trim()
+    ? editor.value
+    : document.documentElement.outerHTML;
+  const funcs =
+    [...html.matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )].map(x => x[1]);
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )].map(x => x[1]);
+  const ids =
+    [...html.matchAll(
+      /id="([^"]+)"/g
+    )].map(x => x[1]);
+  const safeIgnoreFuncs = [
+    "diagnoseRepairHtml",
+    "diagnoseHtml",
+    "showHtmlHealth",
+    "closeFloatPanel",
+    "loadSettings"
+  ];
+  const unusedFuncs =
+    funcs.filter(fn => {
+      if (safeIgnoreFuncs.includes(fn)) return false;
+      const count =
+        (html.match(
+          new RegExp("\\b" + escapeRegExp(fn) + "\\b", "g")
+        ) || []).length;
+      return count <= 1 && !onclicks.includes(fn);
+    });
+  const orphanIds =
+    ids.filter(id => {
+      if (!id) return false;
+      if (["appPage", "repairPage", "floatPanel"].includes(id)) return false;
+      const count =
+        (html.match(
+          new RegExp("\\b" + escapeRegExp(id) + "\\b", "g")
+        ) || []).length;
+
+      return count <= 1;
+    });
+  const message =
+    "削除候補チェック\n\n" +
+    "【未使用function】\n" +
+    (unusedFuncs.length ? unusedFuncs.join("\n") : "なし") +
+    "\n\n【孤立id】\n" +
+    (orphanIds.length ? orphanIds.join("\n") : "なし") +
+    "\n\nOKで修復エディタ内の候補をコメント化します。";
+  const ok = confirm(message);
+  if (!ok) return;
+  commentOutCleanupCandidates(unusedFuncs, orphanIds);
+}
+function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
+  const editor = get("repairEditor");
+  if (!editor || !editor.value.trim()) {
+    alert("修復モードでHTMLを読み込んでから実行してください");
+    return;
+  }
+  let html = editor.value;
+  unusedFuncs.forEach(fn => {
+    const block = findFunctionBlockInText(html, fn);
+    if (!block) return;
+    html =
+      html.slice(0, block.start) +
+      "/* cleanup候補: 未使用function\n" +
+      block.block +
+      "\n*/" +
+      html.slice(block.end);
+  });
+  orphanIds.forEach(id => {
+    const regex =
+      new RegExp(
+        `<[^>]+id="${escapeRegExp(id)}"[^>]*>[\\s\\S]*?<\\/[^>]+>`,
+        "m"
+      );
+    html = html.replace(regex, match => {
+      if (match.includes("cleanup候補")) return match;
+      return `<!-- cleanup候補: 孤立id ${id}\n${match}\n-->`;
+    });
+  });
+  editor.value = html;
+  alert("削除候補をコメント化しました。診断して問題なければ保存してください。");
+}
+function findFunctionBlockInText(text, functionName) {
+  const start =
+    text.indexOf(`function ${functionName}`);
+  if (start === -1) return null;
+  const braceStart =
+    text.indexOf("{", start);
+  if (braceStart === -1) return null;
+  let depth = 1;
+  let end = braceStart + 1;
+  while (end < text.length && depth > 0) {
+    if (text[end] === "{") depth++;
+    if (text[end] === "}") depth--;
+    end++;
+  }
+  return {
+    start,
+    end,
+    block: text.slice(start, end)
+  };
+}
+
 let repairUndoStack = [];
 let repairRedoStack = [];
 let repairLastValue = "";
