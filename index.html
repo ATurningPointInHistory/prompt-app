@@ -1382,12 +1382,6 @@ function closeFloatPanel(){
   get("floatPanel").style.display = "none";
 }
 
-function closeRepairSearchBox(){
-
-  closeFloatPanel();
-
-}
-
 function toggleToolCategory(id) {
   const box = get(id);
   const btn =
@@ -1457,48 +1451,6 @@ function updatePanelButtonStates() {
 console.log("CHANGELOG");
 console.table(CHANGELOG);
 
-function toggleTemplateManager() {
-  const isOpen = get("template-manager").style.display !== "none";
-  closeAllManagers();
-  if (!isOpen) {
-    get("template-manager").style.display = "block";
-    renderTemplates();
-    renderTemplateSelect();
-  }
-  updatePanelButtonStates();
-}
-
-function toggleDangerManager() {
-  const isOpen = get("danger-manager").style.display !== "none";
-  closeAllManagers();
-  if (!isOpen) {
-    get("danger-manager").style.display = "block";
-    renderDangerWords();
-  }
-  updatePanelButtonStates();
-}
-
-function togglePatternManager() {
-  const isOpen = get("pattern-manager").style.display !== "none";
-  closeAllManagers();
-  if (!isOpen) {
-    get("pattern-manager").style.display = "block";
-    renderPatterns();
-  }
-  updatePanelButtonStates();
-}
-
-function toggleAiPresetManager() {
-  const isOpen = get("ai-preset-manager").style.display !== "none";
-  closeAllManagers();
-
-  if (!isOpen) {
-    get("ai-preset-manager").style.display = "block";
-    loadAiPresetToEditor();
-  }
-  updatePanelButtonStates();
-}
-
 function loadAiPresetToEditor() {
   const target = get("aiPresetTarget").value;
   const preset = getAiPreset(target);
@@ -1547,18 +1499,6 @@ function parseCommands(text) {
     cleanedText: cleaned,
     commands: [...new Set(found)]
   };
-}
-
-function buildCommandInstructions(commands) {
-  if (!commands || commands.length === 0) return "";
-  const lines = commands.map(cmd => {
-    return `・${cmd}: ${commandDefinitions[cmd]}`;
-  });
-  return `
-# 追加変換モード
-以下の変換モードを反映してください。
-${lines.join("\n")}
-`;
 }
 
 function buildCommandInstructionsFromObject(obj) {
@@ -2261,15 +2201,6 @@ function saveFromHistory(text) {
   renderTemplateSelect();
 }
 
-function exportTemplates() {
-  const data = localStorage.getItem("templates") || "[]";
-  const blob = new Blob([data], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "templates.json";
-  a.click();
-}
-
 function importTemplates() {
   get("fileInput").click();
 }
@@ -2647,10 +2578,6 @@ function selectFunctionByName(name){
   if(!result)return;
   const editor = get("repairEditor");
   editor.focus(); editor.setSelectionRange(result.start,result.end);
-}
-
-function closeFunctionList(){
-  get("functionListBox").style.display = "none";
 }
 
 function renderRepairSearchResults(keyword) {
