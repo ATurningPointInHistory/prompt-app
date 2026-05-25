@@ -501,16 +501,11 @@ body:not(.dark) #floatPanel{
 #repairEditor{
   display:block;
   width:100%;
-  min-width:0;
-}
-
-#repairEditor{
-  display:block;
-  width:100%;
   max-width:100%;
   min-width:0;
-  overflow-x:auto;
-  white-space:pre;
+  overflow-x:hidden;
+  white-space:pre-wrap;
+  word-break:break-all;
   direction:ltr;
   text-align:left;
 }
@@ -774,7 +769,6 @@ body:not(.dark) #floatPanel{
 <div class="btn-group">
   <button onclick="loadRepairHtml()">📖 HTML読込</button>
   <button onclick="saveRepairHtml()">💾 修正版保存</button>
-  <button 
 
 </div>
 
@@ -1407,72 +1401,12 @@ function resetFloatPanelPosition() {
   panel.style.bottom = "88px";
 }
 
-function resetFloatPanelPosition() {
-  const panel = get("floatPanel");
-  if (!panel) return;
-
-  panel.style.left = "auto";
-  panel.style.top = "auto";
-  panel.style.right = "18px";
-  panel.style.bottom = "88px";
-}
-
 function closeFloatPanel(){
   get("floatPanel").style.display = "none";
   const btn = get("toolsBtn");
   if(btn){
     btn.innerText = "⚙";
   }
-}
-
-function enableFloatPanelDrag() {
-  const panel = get("floatPanel");
-  const dragBtn = get("floatPanelDragBtn");
-  if (!panel || !dragBtn) return;
-  let startX = 0;
-  let startY = 0;
-  let startLeft = 0;
-  let startTop = 0;
-  let dragging = false;
-  dragBtn.onpointerdown = function(e) {
-    e.preventDefault();
-    dragging = true;
-    const rect = panel.getBoundingClientRect();
-    startX = e.clientX;
-    startY = e.clientY;
-    startLeft = rect.left;
-    startTop = rect.top;
-    panel.style.left = startLeft + "px";
-    panel.style.top = startTop + "px";
-    panel.style.right = "auto";
-    panel.style.bottom = "auto";
-    dragBtn.setPointerCapture(e.pointerId);
-  };
-  dragBtn.onpointermove = function(e) {
-    if (!dragging) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    const panelWidth = panel.offsetWidth;
-    const panelHeight = panel.offsetHeight;
-    const maxLeft = window.innerWidth - panelWidth;
-    const maxTop = window.innerHeight - panelHeight;
-    const nextLeft =
-      Math.min(
-        Math.max(0, startLeft + dx),
-        Math.max(0, maxLeft)
-      );
-    const nextTop =
-      Math.min(
-        Math.max(0, startTop + dy),
-        Math.max(0, maxTop)
-      );
-    panel.style.left = nextLeft + "px";
-    panel.style.top = nextTop + "px";
-  };
-  dragBtn.onpointerup = function(e) {
-    dragging = false;
-    dragBtn.releasePointerCapture(e.pointerId);
-  };
 }
 
 function toggleToolCategory(id) {
