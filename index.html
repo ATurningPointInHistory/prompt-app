@@ -1377,17 +1377,15 @@ function openFloatPanel(title, bodyHtml){
     bodyHtml;
   panel.style.display = "block";
 }
+
 function closeFloatPanel(){
   get("floatPanel").style.display = "none";
 }
 
 function closeRepairSearchBox(){
-  get("repairSearchBox")
-    .style.display = "none";
-  get("repairSearchBtn")
-    .innerText = "🔍";
-  get("repairSearchResult")
-    .style.display = "none";
+
+  closeFloatPanel();
+
 }
 
 function toggleToolCategory(id) {
@@ -3168,13 +3166,6 @@ ${col}`;
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
-
-function closeRepairSearchBox() {
-  const box = get("repairSearchBox");
-  const btn = get("repairSearchBtn");
-  if (box) box.style.display = "none";
-  if (btn) btn.innerText = "🔍";
-}
 
 </script>
 </body>
