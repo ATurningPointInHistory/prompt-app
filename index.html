@@ -1248,12 +1248,14 @@ function switchAppPage(mode) {
 
 function toggleToolsMenu(){
   const panel = get("floatPanel");
+
   if(panel.style.display !== "none"){
     closeFloatPanel();
-    get("toolsBtn").innerText = "⚙";
     return;
   }
+
   get("toolsBtn").innerText = "×";
+
   openFloatPanel(
     "ツール",
     `
@@ -1266,7 +1268,7 @@ function toggleToolsMenu(){
     <button class="float-list-btn" onclick="formatJsonOutput()">📦 JSON整形</button>
     <button class="float-list-btn" onclick="recheckOutput()">🔍 再チェック</button>
     <button class="float-list-btn" onclick="diagnoseHtml()">🩺 HTML診断</button>
-
+    <button class="float-list-btn" onclick="compareBackupSummary()">📊 バックアップ差分確認</button>
     <button class="float-list-btn" onclick="clearOutput()">🧹 出力クリア</button>
     <button class="float-list-btn" onclick="clearHistory()">🗑 履歴全削除</button>
     `
