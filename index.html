@@ -3348,6 +3348,7 @@ document.addEventListener("DOMContentLoaded", initRepairIde);
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
+
 function cleanupCandidates() {
   const editor = get("repairEditor");
   const html = editor && editor.value.trim()
@@ -3695,6 +3696,5 @@ ${info.time || "unknown"}`;
 }
 
 </script>
-
-
-</body></html>
+</body>
+</html>
