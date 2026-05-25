@@ -1793,9 +1793,12 @@ function diagnoseHtml() {
     const close = (html.match(new RegExp(`</${tag}>`, "gi")) || []).length;
     report.push(open === close ? `✔ ${tag}: ${open}/${close}` : `⚠ ${tag}: ${open}/${close}`);
   });
+
+
+
   const ids =
- [...doc.querySelectorAll("[id]")]
- .map(el=>el.id);
+  [...document.querySelectorAll("[id]")]
+    .map(el=>el.id);
   const dupIds = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))];
   report.push(dupIds.length ? `⚠ id重複\n${dupIds.join("\n")}` : "✔ id重複なし");
   try {
@@ -2739,10 +2742,9 @@ function diagnoseRepairHtml() {
   );
   // id重複
   const ids =
-    [...html.matchAll(
-      /id="([^"]+)"/g
-    )]
-    .map(x=>x[1]);
+    [...doc.querySelectorAll("[id]")]
+      .map(el=>el.id);
+      .map(x=>x[1]);
   const dupIds =
     [...new Set(
       ids.filter(
@@ -2819,7 +2821,6 @@ function diagnoseRepairHtml() {
     : "✔ 未使用functionなし"
   );
   // 孤立id
-  const orphanIds =
   const orphanIds =
     ids.filter(id=>{
       if(
