@@ -2275,30 +2275,51 @@ function getCleanProgramHtml() {
 }
 
 function validateBackupHtml(html) {
-  const cleanHtml = String(html || "")
+  const source = String(html || "");
+
+  const cleanHtml = source
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "");
+
   const divOpen =
     (cleanHtml.match(/<div\b/gi) || []).length;
+
   const divClose =
     (cleanHtml.match(/<\/div>/gi) || []).length;
+
+  const parser = new DOMParser();
+
+  const doc =
+    parser.parseFromString(
+      source,
+      "text/html"
+    );
+
   const ids =
-    [...String(html || "").matchAll(/id="([^"]+)"/g)]
-      .map(m => m[1]);
+    [...doc.querySelectorAll("[id]")]
+      .map(el => el.id)
+      .filter(Boolean);
+
   const duplicateIds =
     [...new Set(
       ids.filter((id, i) => ids.indexOf(id) !== i)
     )];
+
   let jsOk = true;
   let jsError = "";
+
   try {
-    [...document.scripts].forEach(s => {
+    const scripts =
+      [...doc.querySelectorAll("script")];
+
+    scripts.forEach(s => {
       new Function(s.textContent);
     });
   } catch (e) {
     jsOk = false;
     jsError = e.message;
   }
+
   return {
     div_ok: divOpen === divClose,
     div_open: divOpen,
@@ -3270,16 +3291,14 @@ function loadJson(key, fallback) {
 
 function saveCurrentState() {
   if (isLoading) return;
-  if (!get("raw-input")) return;
-  localStorage.setItem("rawInput", get("raw-input").value);
-  localStorage.setItem("roughTone", get("rough-tone").value);
-  localStorage.setItem("roughOutputFormat", get("rough-output-format").value);
-  localStorage.setItem("roleValue", get("role").value);
-  localStorage.setItem("taskValue", get("task").value);
-  localStorage.setItem("detailsValue", get("details").value);
-  localStorage.setItem("toneValue", get("tone").value);
-  localStorage.setItem("currentTab", String(currentTab));
-  localStorage.setItem("aiTarget", get("ai-target").value);
+  if (!get("raw-input")) return; localStorage.setItem("rawInput", get("raw-input").value);
+localStorage.setItem("roughTone", get("rough-tone").value); localStorage.setItem("roughOutputFormat", get("rough-output-format").value);
+localStorage.setItem("roleValue", get("role").value);
+localStorage.setItem("taskValue", get("task").value);
+localStorage.setItem("detailsValue", get("details").value);
+localStorage.setItem("toneValue", get("tone").value);
+localStorage.setItem("currentTab", String(currentTab));
+localStorage.setItem("aiTarget", get("ai-target").value);
 }
 
 function loadSettings() {
@@ -3309,8 +3328,8 @@ function loadSettings() {
   switchTab(savedTab);
   syncCommandButtons();
   updatePanelButtonStates();
-  get("versionLabel").innerText = APP_VERSION;
-  get("changelogLabel").innerHTML =
+ get("versionLabel").innerText = APP_VERSION;
+get("changelogLabel").innerHTML =
   CHANGELOG.map(x =>
 escapeHtml(x)).join("<br>");
   isLoading = false;
@@ -3344,7 +3363,6 @@ ${line}
 column:
 ${col}`;
 };
-
 document.addEventListener("DOMContentLoaded", initRepairIde);
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
@@ -3363,10 +3381,16 @@ function cleanupCandidates() {
     [...html.matchAll(
       /onclick="([a-zA-Z0-9_$]+)\(/g
     )].map(x => x[1]);
+  const parser = new DOMParser();
+  const doc =
+    parser.parseFromString(
+      html,
+      "text/html"
+    );
   const ids =
-    [...html.matchAll(
-      /id="([^"]+)"/g
-    )].map(x => x[1]);
+    [...doc.querySelectorAll("[id]")]
+      .map(el => el.id)
+      .filter(Boolean);
   const safeIgnoreFuncs = [
     "diagnoseRepairHtml",
     "diagnoseHtml",
@@ -3425,9 +3449,8 @@ function cleanupCandidates() {
     "\n\nOKで修復エディタ内の候補をコメント化します。";
   const ok = confirm(message);
   if (!ok) return;
-  commentOutCleanupCandidates(unusedFuncs, orphanIds);
+commentOutCleanupCandidates(unusedFuncs, orphanIds);
 }
-
 function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
   const editor = get("repairEditor");
   if (!editor || !editor.value.trim()) {
@@ -3735,5 +3758,4 @@ ${info.time || "unknown"}`;
 
 </script>
 
-</body>
-</html>
+</body></html>
