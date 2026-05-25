@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
+<html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AIプロンプト生成Pro v5.7.2</title>
@@ -463,52 +462,42 @@ mark {
 
 </style>
 </head>
-<body>
+<body class="dark">
 
 <div class="card">
   <h2>AIプロンプト生成Pro</h2>
 
   <div class="tab-container">
 
-    <div
-      class="tab active"
-      id="appPageTab"
-      onclick="switchAppPage('app')">
+    <div class="tab active" id="appPageTab" onclick="switchAppPage('app')">
       通常モード
 
     </div>
 
-    <div
-      class="tab"
-      id="repairPageTab"
-      onclick="switchAppPage('repair')">
+    <div class="tab" id="repairPageTab" onclick="switchAppPage('repair')">
       修復モード
 
     </div>
 
   </div>
 
-  <div id="appPage">
+  <div id="appPage" style="display: block;">
 
-  <div class="small" id="versionLabel">
+  <div class="small" id="versionLabel">v5.7.2</div>
 
-</div>
+  <div class="small" id="changelogLabel">v5.7.0 AI別レビュー強化<br>v5.7.0 AIプリセット保存/復元<br>v5.7.0 Gemini/Cursor/Copilot評価改善</div>
 
-  <div class="small" id="changelogLabel">
-
-</div>
-
-  <div class="tab-container">    <div id="tab1" class="tab active" onclick="switchTab(1)">マニュアル入力
+  <div class="tab-container">    <div id="tab1" class="tab" onclick="switchTab(1)">マニュアル入力
 
   </div>
 
-    <div id="tab2" class="tab" onclick="switchTab(2)">ラフから変換
+    <div id="tab2" class="tab active" onclick="switchTab(2)">ラフから変換
 
   </div>
 
   </div>
 
-  <div id="mode-normal">
+  <div id="mode-normal" style="display: none;">
     <label for="role">役割</label>
     <input id="role" placeholder="例：プログラマー、翻訳家、AIオーケストレーター">
     <label for="task">目的</label>
@@ -525,36 +514,27 @@ mark {
 
   </div>
 
-  <div id="mode-auto" style="display:none;">
+  <div id="mode-auto" style="display: block;">
     <label for="raw-input">やりたいことを自由に入力（AIに整理させます）</label>
     <textarea id="raw-input" rows="8" placeholder="例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。"></textarea>
-<button
-  type="button"
-  onclick="toggleCommandMenu()"
-  class="btn-secondary btn-full">
+<button type="button" onclick="toggleCommandMenu()" class="btn-secondary btn-full">
   🧩 変換モード
 </button>
 
-<div
-  id="commandMenu"
-  style="display:none;">
+<div id="commandMenu" style="display:none;">
 
   <div class="small">
     変換モードをクリックすると入力欄に追加されます。
 
   </div>
 
-  <div id="commandBox" class="command-box">
-
-</div>
+  <div id="commandBox" class="command-box"></div>
 
 </div>
 
 <div class="small">用途別プリセット</div>
 
-<div id="presetBox" class="preset-box">
-
-</div>
+<div id="presetBox" class="preset-box"></div>
 
     <label for="rough-tone">トーン</label>
     <select id="rough-tone">
@@ -580,7 +560,7 @@ mark {
   </div>
 
   <div class="btn-group">
-    <button id="main-btn" class="btn-full" onclick="generatePrompt()">⚡ プロンプトを生成する</button>
+    <button id="main-btn" class="btn-full" onclick="generatePrompt()">🪄 AI整形用プロンプトを作る</button>
     <button onclick="copyText()" class="btn-secondary">📋 コピー</button>
     <button onclick="download()" class="btn-secondary">💾 保存</button>
     <button onclick="toggleDark()" class="btn-secondary">🌙 ダークモード</button>
@@ -591,25 +571,15 @@ mark {
   <input type="file" id="aiPresetFileInput" accept=".json,application/json" style="display:none;">
   <label>生成結果</label>
   <div id="output">ここに表示</div>
-  <div id="warningBox" class="warning-box">
+  <div id="warningBox" class="warning-box" style="display: none;"></div>
 
-  </div>
-
-  <div id="debugBox"
-  class="warning-box"
-  style="display:none;"></div>
-  <div
-  id="diagnoseBox"
-  class="diagnose-box">
-
-  </div>
+  <div id="debugBox" class="warning-box" style="display:none;"></div>
+  <div id="diagnoseBox" class="diagnose-box" style="display: none;"></div>
 
   <div id="template-manager" class="section-box" style="display:none;">
     <h3>テンプレ管理</h3>
     <label for="templateSelect">固定テンプレ / 保存テンプレ</label>
-    <select id="templateSelect" onchange="applyTemplateFromSelect()">
-      <option value="">テンプレを選択</option>
-    </select>
+    <select id="templateSelect" onchange="applyTemplateFromSelect()"><option value="">テンプレを選択</option><option value="0">AIオーケストレーター</option></select>
 
     <div class="small">下の入力欄から新しいテンプレも追加できます。</div>
     <label for="tempName">テンプレ名</label>
@@ -630,9 +600,7 @@ mark {
     <button onclick="saveTemplate()" class="btn-full">テンプレ保存</button>
     <h4>保存済みテンプレ一覧</h4>
 
-    <div id="templateList">
-
-  </div>
+    <div id="templateList"></div>
 
   </div>
 
@@ -648,9 +616,7 @@ mark {
     <button onclick="saveDangerWord()" class="btn-full">危険ワード追加</button>
     <h4>固定危険ワード + 追加危険ワード</h4>
 
-    <div id="dangerList">
-
-  </div>
+    <div id="dangerList"></div>
 
   </div>
 
@@ -675,9 +641,7 @@ mark {
     <button onclick="savePattern()" class="btn-full">NGパターン追加</button>
     <h4>固定NGパターン + 追加NGパターン</h4>
 
-    <div id="patternList">
-
-  </div>
+    <div id="patternList"></div>
 
   </div>
 
@@ -711,16 +675,13 @@ mark {
 <div class="section-box">
   <label>履歴（最新5件）</label>
 
-  <div id="history">
+  <div id="history"></div>
 
 </div>
 
 </div>
 
-</div>
-
-<div id="repairPage"
-style="display:none;">
+<div id="repairPage" style="display: none;">
 
   <h3>🛠 修復モード</h3>
 
@@ -743,67 +704,37 @@ style="display:none;">
 
 </div>
 
-<div
-  id="repairStatus"
-  class="small"
-  style="margin-top:8px;">
+<div id="repairStatus" class="small" style="margin-top:8px;">
   状態：未変更
 </div>
 
-<button
-  id="functionListBtn"
-  onclick="showFunctionList()"
-  class="btn-secondary">
+<button id="functionListBtn" onclick="showFunctionList()" class="btn-secondary">
   📚
 </button>
 
-<button
-  id="repairSearchBtn"
-  onclick="toggleRepairSearchBox()"
-  class="btn-secondary">
+<button id="repairSearchBtn" onclick="toggleRepairSearchBox()" class="btn-secondary">
   🔍
 </button>
 
   <label for="repairEditor">
     HTML編集エリア
   </label>
-  <textarea
-    id="repairEditor"
-    rows="20"
-    placeholder="ここにHTML全文が表示されます"></textarea>
-  <button
-    id="previewBtn"
-    onclick="previewRepairHtml()"
-    class="btn-full">
+  <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます"></textarea>
+  <button id="previewBtn" onclick="previewRepairHtml()" class="btn-full">
     🎨 色分けプレビュー
   </button>
 
-<div id="repairPreview"
-class="code-preview"
-style="display:none;">
+<div id="repairPreview" class="code-preview" style="display:none;"></div>
 
-</div>
-
-<div
-  id="functionListBox"
-  class="diagnose-box"
-  style="display:none;">
+<div id="functionListBox" class="diagnose-box" style="display:none;">
 
 </div>
 
 </div> <!-- repairPage -->
 
-<button
-  id="toolsBtn"
-  onclick="toggleToolsMenu()"
-  class="btn-secondary">
-  ⚙
-</button>
+<button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">⚙</button>
 
-<div
-  id="floatPanel"
-  style="display:none;">
-</div>
+<div id="floatPanel" style="display: none;"></div>
 
 </div> <!-- card -->
 
@@ -1217,8 +1148,6 @@ function toggleToolsMenu(){
 🗂 フルバックアップ</button>
 <button class="float-list-btn" onclick="showBackupHistory()">
 📚 バックアップ履歴</button>
-<button class="float-list-btn" onclick="compareBackupSummary()"
->📊 差分確認</button>
 <button class="float-list-btn"
 onclick="saveProgramHtml()">
 💾 本体HTML保存</button>
@@ -1247,6 +1176,11 @@ onclick="diagnoseHtml()">
 <button class="float-list-btn"
 onclick="compareBackupSummary()">
 📊 バックアップ差分確認</button>
+<button
+class="float-list-btn"
+onclick="showHtmlHealth()">
+💚 HTML HEALTH
+</button>
 <hr>
 <button class="float-list-btn"
 onclick="importTemplates()">
@@ -1736,6 +1670,27 @@ function diagnoseHtml() {
   const box = get("diagnoseBox");
   box.style.display = "block";
   box.innerText = report.join("\n");
+}
+
+function showHtmlHealth() {
+  const html =
+    "<!DOCTYPE html>\n" +
+    document.documentElement.outerHTML;
+  const validation =
+    validateBackupHtml(html);
+  const result =
+`HTML HEALTH
+div:
+${validation.div_ok ? "OK" : "NG"}
+${validation.div_open}/${validation.div_close}
+id重複:
+${validation.duplicate_ids.length
+  ? validation.duplicate_ids.join("\n")
+  : "なし"}
+JS:
+${validation.js_ok ? "OK" : "NG"}
+${validation.js_error || ""}`;
+  alert(result);
 }
 
 function formatJsonOutput() {
@@ -2340,8 +2295,16 @@ function backupProgram() {
     URL.revokeObjectURL(a.href);
   }, 1000);
 
-  saveBackupHistory(backupData);
+function manageBackupHistory() {
+  const list = loadJson("backupHistory", []);
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list.slice(0, 10))
+  );
+}
 
+saveBackupHistory(backupData);
+manageBackupHistory();
   alert(
     "フルバックアップ保存完了\n\n" +
     "メモ: " + note
@@ -3249,6 +3212,7 @@ function saveCurrentState() {
 
 function loadSettings() {
   isLoading = true;
+  checkSafeMode();
   if (localStorage.getItem("darkMode") === "1") {
     document.body.classList.add("dark");
   }
@@ -3279,7 +3243,22 @@ function loadSettings() {
 escapeHtml(x)).join("<br>");
   isLoading = false;
   }
-window.onerror = function(message, source, line, col, error) {
+window.onerror = function(
+  message,
+  source,
+  line,
+  col,
+  error
+) {
+  localStorage.setItem(
+    "lastCrash",
+    JSON.stringify({
+      time: new Date().toISOString(),
+      message,
+      line,
+      column: col
+    })
+  );
   if (!DEBUG_MODE) return;
   const box = get("debugBox");
   if (!box) return;
@@ -3298,7 +3277,6 @@ document.addEventListener("DOMContentLoaded", initRepairIde);
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
-
 let repairUndoStack = [];
 let repairRedoStack = [];
 let repairLastValue = "";
@@ -3493,6 +3471,52 @@ function restoreBackupHistory(index) {
   location.reload();
 }
 
+function checkSafeMode() {
+  const crash =
+    localStorage.getItem(
+      "lastCrash"
+    );
+  if (!crash) return;
+  let info = {};
+  try {
+    info =
+      JSON.parse(crash);
+  } catch {}
+  const msg =
+`SAFE MODE
+前回エラー終了を検出しました。
+message:
+${info.message || "unknown"}
+time:
+${info.time || "unknown"}
+修復モードで起動しますか？`;
+  const ok = confirm(msg);
+  if (!ok) {
+    localStorage.removeItem(
+      "lastCrash"
+    );
+    return;
+  }
+  switchAppPage("repair");
+  const debugBox =
+    get("debugBox");
+  if (debugBox) {
+    debugBox.style.display =
+      "block";
+    debugBox.innerText =
+`SAFE MODE
+前回クラッシュ情報
+message:
+${info.message || "unknown"}
+time:
+${info.time || "unknown"}`;
+  }
+  localStorage.removeItem(
+    "lastCrash"
+  );
+}
+
 </script>
-</body>
-</html>
+
+
+</body></html>
