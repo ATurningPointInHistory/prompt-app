@@ -1673,23 +1673,90 @@ function diagnoseHtml() {
 }
 
 function showHtmlHealth() {
+
   const html =
     "<!DOCTYPE html>\n" +
     document.documentElement.outerHTML;
   const validation =
     validateBackupHtml(html);
+  const funcs =
+    [...html.matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )]
+    .map(x => x[1]);
+  const dupFuncs =
+    [...new Set(
+      funcs.filter(
+        (f,i)=>
+        funcs.indexOf(f)!==i
+      )
+    )];
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )]
+    .map(x=>x[1]);
+  const undefinedFns =
+    [...new Set(
+      onclicks.filter(
+        fn =>
+        !funcs.includes(fn)
+      )
+    )];
   const result =
-`HTML HEALTH
+`HTML HEALTH REPORT
+=== HTML ===
 div:
-${validation.div_ok ? "OK" : "NG"}
-${validation.div_open}/${validation.div_close}
-id重複:
-${validation.duplicate_ids.length
-  ? validation.duplicate_ids.join("\n")
-  : "なし"}
-JS:
-${validation.js_ok ? "OK" : "NG"}
-${validation.js_error || ""}`;
+${validation.div_ok ? "✔ OK" : "⚠ NG"}
+open:
+${validation.div_open}
+close:
+${validation.div_close}
+=== ID ===
+duplicate ids:
+${
+validation.duplicate_ids.length
+? validation.duplicate_ids.join("\n")
+: "✔ none"
+}
+=== JavaScript ===
+JS syntax:
+${validation.js_ok ? "✔ OK" : "⚠ NG"}
+${validation.js_error || ""}
+=== Function ===
+function count:
+${funcs.length}
+duplicate functions:
+${
+dupFuncs.length
+? dupFuncs.join("\n")
+: "✔ none"
+}
+undefined onclick:
+${
+undefinedFns.length
+? undefinedFns.join("\n")
+: "✔ none"
+}
+onclick count:
+${onclicks.length}
+=== Health Score ===
+${
+(
+100
+-
+(validation.div_ok ? 0 : 20)
+-
+(validation.js_ok ? 0 : 25)
+-
+(validation.duplicate_ids.length * 5)
+-
+(undefinedFns.length * 10)
+-
+(dupFuncs.length * 10)
+)
+}/100
+`;
   alert(result);
 }
 
