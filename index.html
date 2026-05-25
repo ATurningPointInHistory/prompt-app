@@ -2791,6 +2791,54 @@ function diagnoseRepairHtml() {
     ? `⚠ 未定義onclick\n${undefinedFns.join("\n")}`
     : "✔ onclick定義OK"
   );
+  // 未使用function
+  const unusedFns =
+    funcs.filter(fn=>{
+      if(
+        fn==="diagnoseRepairHtml" ||
+        fn==="closeFloatPanel"
+      ){
+        return false;
+      }
+      const useCount =
+        (html.match(
+          new RegExp(
+            "\\b"+fn+"\\b",
+            "g"
+          )
+        )||[]).length;
+      return useCount<=1;
+    });
+  report.push(
+    unusedFns.length
+    ? `⚠ 未使用function\n${
+        unusedFns
+          .slice(0,15)
+          .join("\n")
+      }`
+    : "✔ 未使用functionなし"
+  );
+  // 孤立id
+  const orphanIds =
+    ids.filter(id=>{
+      const useCount =
+        (html.match(
+          new RegExp(
+            escapeRegExp(id),
+            "g"
+          )
+        )||[]).length;
+      return useCount<=1;
+    });
+  report.push(
+    orphanIds.length
+    ? `⚠ 孤立id\n${
+        orphanIds
+          .slice(0,15)
+          .join("\n")
+      }`
+    : "✔ 孤立idなし"
+  );
   alert(
     report.join("\n")
   );
