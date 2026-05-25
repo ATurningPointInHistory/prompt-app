@@ -504,6 +504,36 @@ body:not(.dark) #floatPanel{
   min-width:0;
 }
 
+#repairEditor{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-x:auto;
+  white-space:pre;
+  direction:ltr;
+  text-align:left;
+}
+
+.float-panel-header{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  flex-wrap:wrap;
+}
+
+.float-panel-header button{
+  width:34px;
+  height:34px;
+  padding:0;
+  border-radius:9px;
+  font-size:14px;
+}
+
+.float-panel-title{
+  flex:1 1 100%;
+}
+
 .code-tag { color: #7ee787; }
 .code-attr { color: #79c0ff; }
 .code-string { color: #a5d6ff; }
@@ -1321,21 +1351,60 @@ function openFloatPanel(title, bodyHtml){
 
   panel.innerHTML =
     `<div class="float-panel-header">
-      <button
-        id="floatPanelDragBtn"
-        class="float-drag-btn"
-        title="移動">
-        ↕
-      </button>
       <span class="float-panel-title">${title}</span>
+      <button onclick="moveFloatPanelBy(0,-60)">↑</button>
+      <button onclick="moveFloatPanelBy(0,60)">↓</button>
+      <button onclick="moveFloatPanelBy(-60,0)">←</button>
+      <button onclick="moveFloatPanelBy(60,0)">→</button>
       <button onclick="resetFloatPanelPosition()">↘</button>
       <button onclick="closeFloatPanel()">×</button>
     </div>` +
     bodyHtml;
 
   panel.style.display = "block";
+}
 
-  enableFloatPanelDrag();
+function moveFloatPanelBy(dx, dy) {
+  const panel = get("floatPanel");
+  if (!panel) return;
+
+  const rect = panel.getBoundingClientRect();
+
+  let nextLeft = rect.left + dx;
+  let nextTop = rect.top + dy;
+
+  const maxLeft =
+    window.innerWidth - rect.width;
+
+  const maxTop =
+    window.innerHeight - rect.height;
+
+  nextLeft =
+    Math.min(
+      Math.max(0, nextLeft),
+      Math.max(0, maxLeft)
+    );
+
+  nextTop =
+    Math.min(
+      Math.max(0, nextTop),
+      Math.max(0, maxTop)
+    );
+
+  panel.style.left = nextLeft + "px";
+  panel.style.top = nextTop + "px";
+  panel.style.right = "auto";
+  panel.style.bottom = "auto";
+}
+
+function resetFloatPanelPosition() {
+  const panel = get("floatPanel");
+  if (!panel) return;
+
+  panel.style.left = "auto";
+  panel.style.top = "auto";
+  panel.style.right = "18px";
+  panel.style.bottom = "88px";
 }
 
 function resetFloatPanelPosition() {
@@ -2726,6 +2795,7 @@ function loadRepairHtml() {
         if(parsed.html){
           get("repairEditor").value=
           parsed.html;
+          get("repairEditor").scrollLeft = 0;
           alert(
           "フルバックアップJSON読込完了"
           );
@@ -2735,6 +2805,7 @@ function loadRepairHtml() {
       // 通常HTML
       get("repairEditor").value=
       reader.result;
+      get("repairEditor").scrollLeft = 0;
       alert("HTML読込完了");
     };
     reader.readAsText(file);
