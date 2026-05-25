@@ -1793,7 +1793,22 @@ function diagnoseHtml() {
     const close = (html.match(new RegExp(`</${tag}>`, "gi")) || []).length;
     report.push(open === close ? `✔ ${tag}: ${open}/${close}` : `⚠ ${tag}: ${open}/${close}`);
   });
-  const ids = [...html.matchAll(/id="([^"]+)"/g)].map(m => m[1]);
+  const ids=[];
+const idRegex =
+ /id="([^"]+)"/g;
+let m;
+while(
+  (m=idRegex.exec(html))
+  !== null
+){
+  if(
+    m[1] &&
+    !m[1].includes("(") &&
+    !m[1].includes("^")
+  ){
+    ids.push(m[1]);
+  }
+}
   const dupIds = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))];
   report.push(dupIds.length ? `⚠ id重複\n${dupIds.join("\n")}` : "✔ id重複なし");
   try {
