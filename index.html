@@ -303,48 +303,10 @@ body.dark button.active-panel {
   box-shadow: 0 4px 15px rgba(0,0,0,.25);
 }
 
-#repairSearchBox {
-  position: fixed;
-  right: 18px;
-  bottom: 158px;
-  z-index: 996;
-  width: 260px;
-  max-width: calc(100vw - 24px);
-  max-height: 45vh;
-  overflow-y: auto;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 10px;
-  box-shadow: 0 4px 20px rgba(0,0,0,.25);
-}
-
-.repair-search-row {
-  margin-bottom: 8px;
-}
-
 #repairSearch {
   padding: 9px 10px;
   font-size: 14px;
   margin-top: 0;
-}
-
-.repair-search-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  margin-top: 8px;
-}
-
-.repair-mini-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  padding: 0;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 #repairSearchResult {
@@ -418,40 +380,6 @@ mark {
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-x: auto;
-}
-
-#functionListBox{
-  position:fixed;
-  right:18px;
-  bottom:158px;
-  z-index:995;
-  width:260px;
-  max-width:calc(100vw - 24px);
-  max-height:45vh;
-  overflow-y:auto;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:10px;
-  box-shadow:0 4px 20px rgba(0,0,0,.25);
-  font-size:11px;
-}
-
-.function-list-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:8px;
-  font-weight:bold;
-}
-
-.function-list-item{
-  width:100%;
-  text-align:left;
-  padding:8px 10px;
-  margin-bottom:6px;
-  font-size:12px;
-  border-radius:8px;
 }
 
 #floatPanel{
@@ -931,7 +859,7 @@ style="display:none;">
 const get = (id) => document.getElementById(id);
 let currentTab = 1;
 let isLoading = false;
-const APP_VERSION = "v5.7.0";
+const APP_VERSION = "v5.7.2";
 const DEBUG_MODE = true;
 const CHANGELOG = [
   "v5.7.0 AI別レビュー強化",
@@ -1380,12 +1308,11 @@ function openFloatPanel(title, bodyHtml){
 
 function closeFloatPanel(){
   get("floatPanel").style.display = "none";
-}
 
-function closeRepairSearchBox(){
-
-  closeFloatPanel();
-
+  const btn = get("toolsBtn");
+  if(btn){
+    btn.innerText = "⚙";
+  }
 }
 
 function toggleToolCategory(id) {
@@ -1793,9 +1720,6 @@ function diagnoseHtml() {
     const close = (html.match(new RegExp(`</${tag}>`, "gi")) || []).length;
     report.push(open === close ? `✔ ${tag}: ${open}/${close}` : `⚠ ${tag}: ${open}/${close}`);
   });
-
-
-
   const ids =
   [...document.querySelectorAll("[id]")]
     .map(el=>el.id);
@@ -2650,10 +2574,6 @@ function selectFunctionByName(name){
   if(!result)return;
   const editor = get("repairEditor");
   editor.focus(); editor.setSelectionRange(result.start,result.end);
-}
-
-function closeFunctionList(){
-  get("functionListBox").style.display = "none";
 }
 
 function renderRepairSearchResults(keyword) {
