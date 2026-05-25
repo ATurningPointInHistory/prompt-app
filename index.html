@@ -385,9 +385,10 @@ mark {
   position:fixed;
   right:18px;
   bottom:88px;
+  left:auto;
+  top:auto;
   z-index:998;
-  width:280px;
-  max-width:calc(100vw - 36px);
+  width:min(280px, calc(100vw - 36px));
   max-height:34vh;
   overflow-y:auto;
   background:rgba(36,37,38,0.88);
@@ -397,6 +398,42 @@ mark {
   border-radius:15px;
   padding:12px;
   box-shadow:0 4px 20px rgba(0,0,0,0.25);
+}
+
+.float-panel-header{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:rgba(36,37,38,0.88);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  font-weight:bold;
+  margin-bottom:10px;
+  padding-bottom:8px;
+}
+
+body:not(.dark) .float-panel-header{
+  background:rgba(255,255,255,0.88);
+}
+
+.float-panel-title{
+  flex:1;
+}
+
+.float-drag-btn{
+  width:36px;
+  height:36px;
+  padding:0;
+  border-radius:10px;
+  background:rgba(128,128,128,0.28);
+  color:var(--text);
+  cursor:grab;
+}
+
+.float-drag-btn:active{
+  cursor:grabbing;
 }
 
 body:not(.dark) #floatPanel{
@@ -459,6 +496,12 @@ body:not(.dark) #floatPanel{
   font-weight:bold;
   margin-bottom:10px;
   padding-bottom:8px;
+}
+
+#repairEditor{
+  display:block;
+  width:100%;
+  min-width:0;
 }
 
 .code-tag { color: #7ee787; }
@@ -1275,15 +1318,36 @@ function toggleRepairSearchBox(){
 
 function openFloatPanel(title, bodyHtml){
   const panel = get("floatPanel");
+
   panel.innerHTML =
-    `<div class="float-panel-header" id="floatPanelHandle">
-      <span>${title}</span>
+    `<div class="float-panel-header">
+      <button
+        id="floatPanelDragBtn"
+        class="float-drag-btn"
+        title="移動">
+        ↕
+      </button>
+      <span class="float-panel-title">${title}</span>
+      <button onclick="resetFloatPanelPosition()">↘</button>
       <button onclick="closeFloatPanel()">×</button>
     </div>` +
     bodyHtml;
+
   panel.style.display = "block";
+
   enableFloatPanelDrag();
 }
+
+function resetFloatPanelPosition() {
+  const panel = get("floatPanel");
+  if (!panel) return;
+
+  panel.style.left = "auto";
+  panel.style.top = "auto";
+  panel.style.right = "18px";
+  panel.style.bottom = "88px";
+}
+
 function closeFloatPanel(){
   get("floatPanel").style.display = "none";
   const btn = get("toolsBtn");
@@ -1294,15 +1358,15 @@ function closeFloatPanel(){
 
 function enableFloatPanelDrag() {
   const panel = get("floatPanel");
-  const handle = get("floatPanelHandle");
-  if (!panel || !handle) return;
+  const dragBtn = get("floatPanelDragBtn");
+  if (!panel || !dragBtn) return;
   let startX = 0;
   let startY = 0;
   let startLeft = 0;
   let startTop = 0;
   let dragging = false;
-  handle.style.cursor = "move";
-  handle.onpointerdown = function(e) {
+  dragBtn.onpointerdown = function(e) {
+    e.preventDefault();
     dragging = true;
     const rect = panel.getBoundingClientRect();
     startX = e.clientX;
@@ -1313,18 +1377,32 @@ function enableFloatPanelDrag() {
     panel.style.top = startTop + "px";
     panel.style.right = "auto";
     panel.style.bottom = "auto";
-    handle.setPointerCapture(e.pointerId);
+    dragBtn.setPointerCapture(e.pointerId);
   };
-  handle.onpointermove = function(e) {
+  dragBtn.onpointermove = function(e) {
     if (!dragging) return;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
-    panel.style.left = Math.max(0, startLeft + dx) + "px";
-    panel.style.top = Math.max(0, startTop + dy) + "px";
+    const panelWidth = panel.offsetWidth;
+    const panelHeight = panel.offsetHeight;
+    const maxLeft = window.innerWidth - panelWidth;
+    const maxTop = window.innerHeight - panelHeight;
+    const nextLeft =
+      Math.min(
+        Math.max(0, startLeft + dx),
+        Math.max(0, maxLeft)
+      );
+    const nextTop =
+      Math.min(
+        Math.max(0, startTop + dy),
+        Math.max(0, maxTop)
+      );
+    panel.style.left = nextLeft + "px";
+    panel.style.top = nextTop + "px";
   };
-  handle.onpointerup = function(e) {
+  dragBtn.onpointerup = function(e) {
     dragging = false;
-    handle.releasePointerCapture(e.pointerId);
+    dragBtn.releasePointerCapture(e.pointerId);
   };
 }
 
