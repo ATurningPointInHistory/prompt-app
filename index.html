@@ -2664,7 +2664,6 @@ function diagnoseRepairHtml() {
   const ids =
     [...doc.querySelectorAll("[id]")]
       .map(el=>el.id);
-      .map(x=>x[1]);
   const dupIds =
     [...new Set(
       ids.filter(
