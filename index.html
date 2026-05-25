@@ -625,6 +625,8 @@ mark {
     <button onclick="recheckOutput()">🔍 再チェック</button>
 <button onclick="diagnoseHtml()">
   🩺 HTML診断</button>
+<button onclick="compareBackupSummary()">
+  📊 バックアップ差分確認</button>
 
   </div>
 
@@ -2245,14 +2247,59 @@ function getCleanProgramHtml() {
   return "<!DOCTYPE html>\n" + clone.outerHTML;
 }
 
+function validateBackupHtml(html) {
+  const cleanHtml = String(html || "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "");
+  const divOpen =
+    (cleanHtml.match(/<div\b/gi) || []).length;
+  const divClose =
+    (cleanHtml.match(/<\/div>/gi) || []).length;
+  const ids =
+    [...String(html || "").matchAll(/id="([^"]+)"/g)]
+      .map(m => m[1]);
+  const duplicateIds =
+    [...new Set(
+      ids.filter((id, i) => ids.indexOf(id) !== i)
+    )];
+  let jsOk = true;
+  let jsError = "";
+  try {
+    [...document.scripts].forEach(s => {
+      new Function(s.textContent);
+    });
+  } catch (e) {
+    jsOk = false;
+    jsError = e.message;
+  }
+  return {
+    div_ok: divOpen === divClose,
+    div_open: divOpen,
+    div_close: divClose,
+    duplicate_ids: duplicateIds,
+    js_ok: jsOk,
+    js_error: jsError
+  };
+}
+
 function backupProgram() {
   saveCurrentState();
+  const note =
+    prompt(
+      "バックアップメモを入力してください",
+      "変更内容メモ"
+    ) || "";
+  const html =
+    getCleanProgramHtml();
   const backupData = {
     backup_type: "AI_PROMPT_PRO_FULL_BACKUP",
+    backup_format_version: "1.1",
     version: APP_VERSION,
     created_at: new Date().toISOString(),
+    backup_note: note,
     changelog: CHANGELOG,
-    html: getCleanProgramHtml(),
+    validation: validateBackupHtml(html),
+    html: html,
     localStorageData: {
       templates: loadJson("templates", []),
       aiPresets: loadJson("aiPresets", {}),
@@ -2287,7 +2334,88 @@ function backupProgram() {
   a.download =
     `AIProBackup_${APP_VERSION}_${timestamp}.json`;
   a.click();
-  alert("フルバックアップ保存完了");
+  URL.revokeObjectURL(a.href);
+  alert(
+    "フルバックアップ保存完了\n\n" +
+    "メモ: " + note
+  );
+}
+
+function restoreLocalStorageOnly(localStorageData) {
+  Object.entries(localStorageData)
+    .forEach(([key, value]) => {
+      if (value === null || value === undefined) {
+        localStorage.removeItem(key);
+        return;
+      }
+      if (typeof value === "string") {
+        localStorage.setItem(key, value);
+      } else {
+        localStorage.setItem(
+          key,
+          JSON.stringify(value)
+        );
+      }
+    });
+}
+
+function extractFunctionNames(html) {
+  return [
+    ...String(html || "").matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )
+  ].map(m => m[1]);
+}
+
+function compareBackupSummary() {
+  const input =
+    document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!data || !data.html) {
+          alert("比較できるバックアップ形式ではありません");
+          return;
+        }
+        const currentHtml =
+          "<!DOCTYPE html>\n" +
+          document.documentElement.outerHTML;
+        const oldHtml = data.html;
+        const currentFuncs =
+          extractFunctionNames(currentHtml);
+        const oldFuncs =
+          extractFunctionNames(oldHtml);
+        const added =
+          currentFuncs.filter(x => !oldFuncs.includes(x));
+        const removed =
+          oldFuncs.filter(x => !currentFuncs.includes(x));
+        const result =
+          "バックアップ差分サマリー\n\n" +
+          "比較元: " + (data.app_version || data.version || "不明") + "\n" +
+          "メモ: " + (data.backup_note || "なし") + "\n\n" +
+          "現在の関数数: " + currentFuncs.length + "\n" +
+          "バックアップ関数数: " + oldFuncs.length + "\n\n" +
+          "追加関数:\n" +
+          (added.length ? added.join("\n") : "なし") +
+          "\n\n削除関数:\n" +
+          (removed.length ? removed.join("\n") : "なし");
+        alert(result);
+      } catch (err) {
+        alert(
+          "差分確認に失敗しました\n\n" +
+          err.message
+        );
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
 
 function restoreProgramBackup() {
@@ -2296,35 +2424,30 @@ function restoreProgramBackup() {
   input.type = "file";
   input.accept = ".json,application/json";
   input.onchange = (e) => {
-    const file =
-      e.target.files[0];
+    const file = e.target.files[0];
     if (!file) return;
-    const reader =
-      new FileReader();
+    const reader = new FileReader();
     reader.onload = () => {
       try {
-        const data =
-          JSON.parse(reader.result);
+        const data = JSON.parse(reader.result);
         if (!data || !data.localStorageData) {
           alert("フルバックアップ形式ではありません");
           return;
         }
-        Object.entries(data.localStorageData)
-          .forEach(([key, value]) => {
-            if (value === null || value === undefined) {
-              localStorage.removeItem(key);
-              return;
-            }
-            if (typeof value === "string") {
-              localStorage.setItem(key, value);
-            } else {
-              localStorage.setItem(
-                key,
-                JSON.stringify(value)
-              );
-            }
-          });
-        alert("フル復元完了。再読み込みします。");
+        const info =
+          "バックアップ情報\n\n" +
+          "version: " + (data.app_version || data.version || "不明") + "\n" +
+          "created_at: " + (data.created_at || "不明") + "\n" +
+          "note: " + (data.backup_note || "なし") + "\n\n" +
+          "復元方法を選んでください。\n\n" +
+          "OK：設定のみ復元\n" +
+          "キャンセル：中止\n\n" +
+          "※HTML本体は修復モードで読み込んで保存してください。";
+        const ok = confirm(info);
+        if (!ok) return;
+        restoreLocalStorageOnly(data.localStorageData);
+
+        alert("設定のみ復元完了。再読み込みします。");
         location.reload();
       } catch (err) {
         alert(
