@@ -786,19 +786,22 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">状態：アウトデント</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：自動保存データ復元</div>
 
-<div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
+<div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1298 / Col 10</div>
 
   <label for="repairEditor">
     HTML編集エリア
   </label>
 
   <div class="repair-editor-wrap">
+  <div id="lineNumbers">1</div>
 
-    <div id="lineNumbers">1</div>
+    <textarea
+      id="repairEditor"
+        rows="20"
+        placeholder="ここにHTML全文が表示されます"></textarea>
 
-    <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます" style="width: 100%; max-width: 100%;">    </textarea>
   </div>
   <button id="previewBtn" onclick="previewRepairHtml()" class="btn-full">
     🎨 色分けプレビュー
@@ -1562,7 +1565,6 @@ function updatePanelButtonStates() {
 console.log("CHANGELOG");
 console.table(CHANGELOG);
 
-/* cleanup候補: 未使用function toggleTemplateManager
 function toggleTemplateManager() {
   const isOpen = get("template-manager").style.display !== "none";
   closeAllManagers();
@@ -1573,9 +1575,7 @@ function toggleTemplateManager() {
   }
   updatePanelButtonStates();
 }
-*/
 
-/* cleanup候補: 未使用function toggleDangerManager
 function toggleDangerManager() {
   const isOpen = get("danger-manager").style.display !== "none";
   closeAllManagers();
@@ -1585,9 +1585,7 @@ function toggleDangerManager() {
   }
   updatePanelButtonStates();
 }
-*/
 
-/* cleanup候補: 未使用function togglePatternManager
 function togglePatternManager() {
   const isOpen = get("pattern-manager").style.display !== "none";
   closeAllManagers();
@@ -1597,9 +1595,7 @@ function togglePatternManager() {
   }
   updatePanelButtonStates();
 }
-*/
 
-/* cleanup候補: 未使用function toggleAiPresetManager
 function toggleAiPresetManager() {
   const isOpen = get("ai-preset-manager").style.display !== "none";
   closeAllManagers();
@@ -1610,7 +1606,6 @@ function toggleAiPresetManager() {
   }
   updatePanelButtonStates();
 }
-*/
 
 function loadAiPresetToEditor() {
   const target = get("aiPresetTarget").value;
@@ -2533,6 +2528,11 @@ function getCleanProgramHtml() {
     }
   });
   const output = clone.querySelector("#output");
+  const lineNumbers =
+    clone.querySelector("#lineNumbers");
+  if (lineNumbers) {
+  lineNumbers.innerHTML = "1";
+  }
   if (output) {
     output.innerText = "ここに表示";
   }
@@ -2956,8 +2956,7 @@ function restoreProgramBackup() {
 
 function saveProgramHtml() {
   const html =
-    "<!DOCTYPE html>\n" +
-    document.documentElement.outerHTML;
+  getCleanProgramHtml();
   const blob =
     new Blob(
       [html],
