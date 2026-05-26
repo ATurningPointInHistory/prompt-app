@@ -726,10 +726,6 @@ mark {
 
 <div id="repairPreview" class="code-preview" style="display:none;"></div>
 
-<div id="functionListBox" class="diagnose-box" style="display:none;">
-
-</div>
-
 </div> <!-- repairPage -->
 
 <button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">⚙</button>
@@ -1682,6 +1678,94 @@ function diagnoseHtml() {
   const box = get("diagnoseBox");
   box.style.display = "block";
   box.innerText = report.join("\n");
+}
+
+function showHtmlHealth() {
+
+  const html =
+    "<!DOCTYPE html>\n" +
+    document.documentElement.outerHTML;
+  const validation =
+    validateBackupHtml(html);
+  const funcs =
+    [...html.matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )]
+    .map(x => x[1]);
+  const dupFuncs =
+    [...new Set(
+      funcs.filter(
+        (f,i)=>
+        funcs.indexOf(f)!==i
+      )
+    )];
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )]
+    .map(x=>x[1]);
+  const undefinedFns =
+    [...new Set(
+      onclicks.filter(
+        fn =>
+        !funcs.includes(fn)
+      )
+    )];
+  const result =
+`HTML HEALTH REPORT
+=== HTML ===
+div:
+${validation.div_ok ? "✔ OK" : "⚠ NG"}
+open:
+${validation.div_open}
+close:
+${validation.div_close}
+=== ID ===
+duplicate ids:
+${
+validation.duplicate_ids.length
+? validation.duplicate_ids.join("\n")
+: "✔ none"
+}
+=== JavaScript ===
+JS syntax:
+${validation.js_ok ? "✔ OK" : "⚠ NG"}
+${validation.js_error || ""}
+=== Function ===
+function count:
+${funcs.length}
+duplicate functions:
+${
+dupFuncs.length
+? dupFuncs.join("\n")
+: "✔ none"
+}
+undefined onclick:
+${
+undefinedFns.length
+? undefinedFns.join("\n")
+: "✔ none"
+}
+onclick count:
+${onclicks.length}
+=== Health Score ===
+${
+(
+100
+-
+(validation.div_ok ? 0 : 20)
+-
+(validation.js_ok ? 0 : 25)
+-
+(validation.duplicate_ids.length * 5)
+-
+(undefinedFns.length * 10)
+-
+(dupFuncs.length * 10)
+)
+}/100
+`;
+  alert(result);
 }
 
 function formatJsonOutput() {
