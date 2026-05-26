@@ -2882,6 +2882,7 @@ let repairSearchMatches = [];
 function escapeRegExp(str) {
   return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
+
 function findFunctionBlock(functionName){
   const editor=get("repairEditor");
   const text=editor.value;
@@ -3071,14 +3072,24 @@ function updateCursorPosition() {
     `Ln ${line} / Col ${col}`;
 }
 
-/* cleanup候補: 未使用function selectFunctionByName
 function selectFunctionByName(name){
   const result = findFunctionBlock(name);
   if(!result)return;
   const editor = get("repairEditor");
-  editor.focus(); editor.setSelectionRange(result.start,result.end);
+  editor.focus();
+  editor.setSelectionRange(
+    result.start,
+    result.end
+  );
+  const line =
+    editor.value
+      .slice(0, result.start)
+      .split("\n").length;
+  const lineHeight = 18;
+  editor.scrollTop =
+    Math.max(0, (line - 3) * lineHeight);
+  updateCursorPosition();
 }
-*/
 
 function renderRepairSearchResults(keyword) {
   const editor = get("repairEditor");
