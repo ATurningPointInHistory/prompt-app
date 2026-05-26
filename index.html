@@ -2853,6 +2853,8 @@ function saveRepairHtml() {
     alert("HTMLが空です");
     return;
   }
+  const copied =
+    copyTextFallback(html);
   const blob =
     new Blob(
       [html],
@@ -2869,13 +2871,36 @@ function saveRepairHtml() {
   a.download =
     `AIPro_Repaired_${timestamp}.html`;
   a.click();
-  navigator.clipboard.writeText(html)
-    .then(() => {
-      alert("修正版保存完了\n保存内容もコピーしました");
-    })
-    .catch(() => {
-      alert("修正版保存完了\nコピーは失敗しました");
-    });
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
+  alert(
+    copied
+      ? "修正版保存完了\n保存内容をコピーしました"
+      : "修正版保存完了\nコピー失敗"
+  );
+
+}
+
+function copyTextFallback(text) {
+  try {
+    const area =
+      document.createElement("textarea");
+    area.value = text;
+    area.style.position = "fixed";
+    area.style.left = "-9999px";
+    area.style.top = "0";
+    document.body.appendChild(area);
+    area.focus();
+    area.select();
+    const ok =
+      document.execCommand("copy");
+    document.body.removeChild(area);
+    return ok;
+  } catch (e) {
+    console.log("copy failed", e);
+    return false;
+  }
 }
 let repairSearchIndex = 0;
 let repairSearchMatches = [];
@@ -3888,17 +3913,35 @@ let repairAutoSaveEnabled = false;
 function initRepairIde() {
   const editor = get("repairEditor");
   if (!editor) return;
-  repairLastValue = editor.value || "";
-  editor.addEventListener("click", updateCursorPosition);
-  editor.addEventListener("keyup", updateCursorPosition);
-  editor.addEventListener("select", updateCursorPosition);
-  editor.addEventListener("scroll", () => {
-    const lineBox = get("lineNumbers");
-    if (lineBox) {
-      lineBox.scrollTop = editor.scrollTop;
-    }
+    repairLastValue = editor.value || "";
+  editor.addEventListener("keydown",(e)=>{
+    const isSearch =
+      (e.ctrlKey || e.metaKey)
+      &&
+      e.key.toLowerCase()==="f";
+    if(!isSearch)return;
+    e.preventDefault();
+    toggleRepairSearchBox();
+    setTimeout(()=>{
+      const box =
+        get("repairSearch");
+      if(box){
+        box.focus();
+        box.select();
+      }
+    },50);
   });
-  editor.addEventListener("input", () => {
+
+    editor.addEventListener("click", updateCursorPosition);
+    editor.addEventListener("keyup", updateCursorPosition);
+    editor.addEventListener("select", updateCursorPosition);
+    editor.addEventListener("scroll", () => {
+      const lineBox = get("lineNumbers");
+      if (lineBox) {
+        lineBox.scrollTop = editor.scrollTop;
+      }
+    });
+    editor.addEventListener("input", () => {
     updateLineNumbers();
     updateCursorPosition();
 
@@ -3917,25 +3960,61 @@ function initRepairIde() {
 }
 
 function enableRepairEditorTabIndent() {
-  const editor = get("repairEditor");
+  const editor =
+    get("repairEditor");
   if (!editor) return;
-  editor.addEventListener("keydown", (e) => {
-    if (e.key !== "Tab") return;
+  editor.addEventListener(
+    "keydown",
+    (e)=>{
+    if(e.key!=="Tab") return;
     e.preventDefault();
-    const start = editor.selectionStart;
-    const end = editor.selectionEnd;
-    const value = editor.value;
-    const indent = "  ";
-    editor.value =
-      value.slice(0, start) +
-      indent +
-      value.slice(end);
-    editor.selectionStart =
+    const value =
+      editor.value;
+    const start =
+      editor.selectionStart;
+    const end =
+      editor.selectionEnd;
+    const indent =
+      "  ";
+    // 単一行
+    if(start===end){
+      editor.value =
+        value.slice(0,start)+
+        indent+
+        value.slice(end);
+      editor.selectionStart =
+        editor.selectionEnd =
+        start + indent.length;
+    }
+    // 複数行
+    else{
+      const before =
+        value.slice(0,start);
+      const selected =
+        value.slice(start,end);
+      const lines =
+        selected.split("\n");
+      const indented =
+        lines.map(
+          line=>indent+line
+        ).join("\n");
+      editor.value =
+        value.slice(0,start)+
+        indented+
+        value.slice(end);
+      editor.selectionStart =
+        start;
       editor.selectionEnd =
-      start + indent.length;
+        end +
+        (indent.length * lines.length);
+    }
+    repairLastValue =
+      editor.value;
     updateLineNumbers();
     updateCursorPosition();
-    updateRepairStatus("Tabインデント");
+    updateRepairStatus(
+      "Tabインデント"
+    );
   });
 }
 
