@@ -2743,55 +2743,25 @@ function showDiffResult(text) {
   );
   window.latestDiffResult = text;
 }
-function copyDiffResult() {
-  const text = window.latestDiffResult || "";
-  if (!text) {
-    alert("コピーする差分結果がありません");
-    return;
-  }
-  navigator.clipboard.writeText(text)
-    .then(() => alert("差分結果をコピーしました"))
-    .catch(() => alert("コピー失敗"));
+
+async function copyDiffResult() {
+  await copyAnyText(
+    window.latestDiffResult || "",
+    "差分結果コピー完了"
+  );
 }
+
 function clearDiffResult() {
   window.latestDiffResult = "";
   closeFloatPanel();
 }
 
-function copyHealthResult() {
-  const text =
-    window.latestHealthResult || "";
-  if (!text) {
-    alert("コピー内容なし");
-    return;
-  }
-  if (
-    navigator.clipboard &&
-    window.isSecureContext
-  ) {
-    navigator.clipboard
-      .writeText(text)
-      .then(()=>
-        alert("コピー完了")
-      )
-      .catch(()=>{
-        const ok =
-          copyTextFallback(text);
-        alert(
-          ok
-          ? "コピー完了"
-          : "コピー失敗"
-        );
-      });
-    return;
-  }
-  const ok =
-    copyTextFallback(text);
-  alert(
-    ok
-    ? "コピー完了"
-    : "コピー失敗"
+async function copyHealthResult() {
+  await copyAnyText(
+    window.latestHealthResult || "",
+    "Health結果コピー完了"
   );
+
 }
 
 function restoreProgramBackup() {
@@ -2930,34 +2900,13 @@ function saveRepairHtml() {
 
 async function copyRepairHtml() {
   const html =
-    get("repairEditor").value.trim();
-  if (!html) {
-    alert("HTMLが空です");
-    return;
-  }
-  try {
-    if (navigator.clipboard &&
-        window.isSecureContext) {
-      await navigator.clipboard.writeText(html);
-      alert("HTMLコピー完了");
-      return;
-    }
-    const ok =
-      copyTextFallback(html);
-    if (ok) {
-      alert("HTMLコピー完了");
-    } else {
-      alert("コピー失敗");
-    }
-  } catch(e){
-    const ok =
-      copyTextFallback(html);
-    alert(
-      ok
-      ? "HTMLコピー完了"
-      : "コピー失敗"
-    );
-  }
+    get("repairEditor")
+      .value
+      .trim();
+  await copyAnyText(
+    html,
+    "HTMLコピー完了"
+  );
 }
 
 function copyTextFallback(text) {
@@ -2984,6 +2933,44 @@ let repairSearchIndex = 0;
 let repairSearchMatches = [];
 function escapeRegExp(str) {
   return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+async function copyAnyText(
+  text,
+  successMsg="コピー完了"
+){
+  if(!text){
+    alert("コピー内容なし");
+    return false;
+  }
+  try{
+    if(
+      navigator.clipboard &&
+      window.isSecureContext
+    ){
+      await navigator.clipboard
+        .writeText(text);
+      alert(successMsg);
+      return true;
+    }
+    const ok =
+      copyTextFallback(text);
+    alert(
+      ok
+      ? successMsg
+      : "コピー失敗"
+    );
+    return ok;
+  }catch(e){
+    const ok =
+      copyTextFallback(text);
+    alert(
+      ok
+      ? successMsg
+      : "コピー失敗"
+    );
+    return ok;
+  }
 }
 
 function findFunctionBlock(functionName){
@@ -3413,39 +3400,10 @@ function diagnoseRepairHtml() {
   );
 }
 
-function copyDiagnoseResult() {
-  const text =
-    window.latestDiagnoseResult || "";
-  if (!text) {
-    alert("コピー内容なし");
-    return;
-  }
-  if (
-    navigator.clipboard &&
-    window.isSecureContext
-  ) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() =>
-        alert("コピー完了")
-      )
-      .catch(() => {
-        const ok =
-          copyTextFallback(text);
-        alert(
-          ok
-            ? "コピー完了"
-            : "コピー失敗"
-        );
-      });
-    return;
-  }
-  const ok =
-    copyTextFallback(text);
-  alert(
-    ok
-      ? "コピー完了"
-      : "コピー失敗"
+async function copyDiagnoseResult() {
+  await copyAnyText(
+    window.latestDiagnoseResult || "",
+    "診断結果コピー完了"
   );
 }
 
