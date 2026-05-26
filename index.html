@@ -746,7 +746,7 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave OFF</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：自動保存データ復元</div>
 
   <label for="repairEditor">
     HTML編集エリア
@@ -2648,8 +2648,7 @@ ${current.dupFuncs.length ? current.dupFuncs.join("\n") : "なし"}
 未定義onclick:
 ${current.undefinedFns.length ? current.undefinedFns.join("\n") : "なし"}
 `;
-        alert(result);
-
+        showDiffResult(result);
       } catch (err) {
         alert(
           "差分確認に失敗しました\n\n" +
@@ -2660,6 +2659,34 @@ ${current.undefinedFns.length ? current.undefinedFns.join("\n") : "なし"}
     reader.readAsText(file);
   };
   input.click();
+}
+
+function showDiffResult(text) {
+  openFloatPanel(
+    "差分確認結果",
+    `
+    <div class="float-panel-actions">
+      <button onclick="copyDiffResult()">📋 コピー</button>
+      <button onclick="clearDiffResult()">🧹 クリア</button>
+    </div>
+    <pre id="diffResultBox" class="code-preview">${escapeHtml(text)}</pre>
+    `
+  );
+  window.latestDiffResult = text;
+}
+function copyDiffResult() {
+  const text = window.latestDiffResult || "";
+  if (!text) {
+    alert("コピーする差分結果がありません");
+    return;
+  }
+  navigator.clipboard.writeText(text)
+    .then(() => alert("差分結果をコピーしました"))
+    .catch(() => alert("コピー失敗"));
+}
+function clearDiffResult() {
+  window.latestDiffResult = "";
+  closeFloatPanel();
 }
 
 function restoreProgramBackup() {
