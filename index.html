@@ -575,17 +575,17 @@ body:not(.dark) #floatPanel{
 
   <div class="small" id="changelogLabel">v5.7.0 AI別レビュー強化<br>v5.7.0 AIプリセット保存/復元<br>v5.7.0 Gemini/Cursor/Copilot評価改善</div>
 
-  <div class="tab-container">    <div id="tab1" class="tab" onclick="switchTab(1)">マニュアル入力
+  <div class="tab-container">    <div id="tab1" class="tab active" onclick="switchTab(1)">マニュアル入力
 
   </div>
 
-    <div id="tab2" class="tab active" onclick="switchTab(2)">ラフから変換
+    <div id="tab2" class="tab" onclick="switchTab(2)">ラフから変換
 
   </div>
 
   </div>
 
-  <div id="mode-normal" style="display: none;">
+  <div id="mode-normal" style="display: block;">
     <label for="role">役割</label>
     <input id="role" placeholder="例：プログラマー、翻訳家、AIオーケストレーター">
     <label for="task">目的</label>
@@ -602,7 +602,7 @@ body:not(.dark) #floatPanel{
 
   </div>
 
-  <div id="mode-auto" style="display: block;">
+  <div id="mode-auto" style="display: none;">
     <label for="raw-input">やりたいことを自由に入力（AIに整理させます）</label>
     <textarea id="raw-input" rows="8" placeholder="例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。"></textarea>
 <button type="button" onclick="toggleCommandMenu()" class="btn-secondary btn-full">
@@ -648,7 +648,7 @@ body:not(.dark) #floatPanel{
   </div>
 
   <div class="btn-group">
-    <button id="main-btn" class="btn-full" onclick="generatePrompt()">🪄 AI整形用プロンプトを作る</button>
+    <button id="main-btn" class="btn-full" onclick="generatePrompt()">⚡ プロンプトを生成する</button>
     <button onclick="copyText()" class="btn-secondary">📋 コピー</button>
     <button onclick="download()" class="btn-secondary">💾 保存</button>
     <button onclick="toggleDark()" class="btn-secondary">🌙 ダークモード</button>
@@ -708,7 +708,7 @@ body:not(.dark) #floatPanel{
 
   </div>
 
-  <div id="pattern-manager" class="section-box" style="display:none;">
+  <div id="pattern-manager" class="section-box" style="display: none;">
     <h3>NGパターン管理</h3>
 
     <div class="small">形式で検出します。正規表現を追加できます。
@@ -733,7 +733,7 @@ body:not(.dark) #floatPanel{
 
   </div>
 
-<div id="ai-preset-manager" class="section-box" style="display:none;">
+<div id="ai-preset-manager" class="section-box" style="display: block;">
   <h3>AIプリセット管理</h3>
 
   <div class="small">AI別の変換方針を編集できます。
@@ -788,11 +788,11 @@ body:not(.dark) #floatPanel{
 
 <div id="repairStatus" class="small" style="margin-top:8px;">状態：自動保存データ復元</div>
 
-<div id="cursorStatus"
-class="small"
-style="margin-top:6px;">
-Ln 1 / Col 1
-</div>
+  <div id="cursorStatus"
+  class="small"
+  style="margin-top:6px;">
+  Ln 1 / Col 1
+  </div>
 
   <label for="repairEditor">
     HTML編集エリア
@@ -801,10 +801,7 @@ Ln 1 / Col 1
   <div class="repair-editor-wrap">
   <div id="lineNumbers">1</div>
 
-    <textarea
-      id="repairEditor"
-        rows="20"
-        placeholder="ここにHTML全文が表示されます"></textarea>
+    <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます" style="width: 100%; max-width: 100%;"></textarea>
 
   </div>
   <button id="previewBtn" onclick="previewRepairHtml()" class="btn-full">
@@ -821,7 +818,9 @@ Ln 1 / Col 1
 
 <button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">⚙</button>
 
-<div id="floatPanel" style="display: none; inset: 20.7167px auto auto 86px;"></div>
+<div id="floatPanel"
+style="display:none;">
+</div>
 
 </div> <!-- card -->
 
@@ -1416,6 +1415,100 @@ function clearRepairSearch(){
   box.focus();
 }
 
+function searchRepairText() {
+  const editor = get("repairEditor");
+  const keyword = get("repairSearch").value;
+  const resultBox = get("repairSearchResult");
+  if (!keyword) {
+    alert("検索文字を入力してください");
+    return;
+  }
+  const text = editor.value;
+  const index = text.indexOf(keyword);
+  if (index === -1) {
+    resultBox.style.display = "block";
+    resultBox.innerText = "検索結果：0件";
+    alert("見つかりませんでした");
+    return;
+  }
+  repairSearchIndex = index + keyword.length;
+  editor.focus();
+  editor.setSelectionRange(index, index + keyword.length);
+  renderRepairSearchResults(keyword);
+  get("repairSearchResult")
+  .style.display="block";
+}
+
+function searchRepairNext() {
+  const editor = get("repairEditor");
+  const keyword = get("repairSearch").value;
+  if (!keyword) {
+    alert("検索文字を入力してください");
+    return;
+  }
+  const text = editor.value;
+  let index = text.indexOf(keyword, repairSearchIndex);
+  if (index === -1) {
+    index = text.indexOf(keyword);
+  }
+  if (index === -1) {
+    alert("見つかりませんでした");
+    return;
+  }
+  repairSearchIndex = index + keyword.length;
+  editor.focus();
+  editor.setSelectionRange(index, index + keyword.length);
+  renderRepairSearchResults(keyword);
+}
+
+function renderRepairSearchResults(keyword) {
+  const editor = get("repairEditor");
+  const resultBox = get("repairSearchResult");
+  const text = editor.value;
+  const lines = text.split("\n");
+  const results = [];
+  lines.forEach((line, index) => {
+    if (line.includes(keyword)) {
+      results.push({
+        lineNumber: index + 1,
+        line
+      });
+    }
+  });
+  resultBox.style.display = "block";
+  if (results.length === 0) {
+    resultBox.innerText = "検索結果：0件";
+    return;
+  }
+  resultBox.innerHTML =
+    `<b>検索結果：${results.length}件</b>` +
+    results.slice(0, 30).map(item => {
+      return `
+        <div class="search-result-line">
+          <b>${item.lineNumber}</b>: ${highlightKeyword(item.line, keyword)}
+        </div>
+      `;
+    }).join("");
+  if (results.length > 30) {
+    resultBox.innerHTML += `
+      <div class="small">
+        ※ 30件まで表示しています
+      </div>
+    `;
+  }
+}
+
+function highlightKeyword(text, keyword) {
+  const safeText = escapeHtml(text);
+  const safeKeyword = escapeHtml(keyword);
+  const regex = new RegExp(escapeRegExp(safeKeyword), "gi");
+  return safeText.replace(regex, match => `<mark>${match}</mark>`);
+}
+
+function escapeRegExp(str) {
+  return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function openFloatPanel(title, bodyHtml){
   const panel = get("floatPanel");
 
@@ -1661,7 +1754,6 @@ function parseCommands(text) {
   };
 }
 
-/* cleanup候補: 未使用function buildCommandInstructions
 function buildCommandInstructions(commands) {
   if (!commands || commands.length === 0) return "";
   const lines = commands.map(cmd => {
@@ -1673,7 +1765,6 @@ function buildCommandInstructions(commands) {
 ${lines.join("\n")}
 `;
 }
-*/
 
 function buildCommandInstructionsFromObject(obj) {
   if (!obj.commands || obj.commands.length === 0) return "";
@@ -2483,7 +2574,6 @@ function saveFromHistory(text) {
   renderTemplateSelect();
 }
 
-/* cleanup候補: 未使用function exportTemplates
 function exportTemplates() {
   const data = localStorage.getItem("templates") || "[]";
   const blob = new Blob([data], { type: "application/json" });
@@ -2492,7 +2582,6 @@ function exportTemplates() {
   a.download = "templates.json";
   a.click();
 }
-*/
 
 function importTemplates() {
   get("fileInput").click();
@@ -2514,10 +2603,17 @@ function importAiPresets() {
 function getCleanProgramHtml() {
   const clone =
     document.documentElement.cloneNode(true);
-  const floatPanel = clone.querySelector("#floatPanel");
+  const floatPanel =
+    clone.querySelector("#floatPanel");
   if (floatPanel) {
     floatPanel.innerHTML = "";
-    floatPanel.style.display = "none";
+    floatPanel.removeAttribute("style");
+    floatPanel.style.display =
+      "none";
+    floatPanel.style.left = "";
+    floatPanel.style.top = "";
+    floatPanel.style.right = "18px";
+    floatPanel.style.bottom = "88px";
   }
   const toolsBtn = clone.querySelector("#toolsBtn");
   if (toolsBtn) {
@@ -2531,11 +2627,13 @@ function getCleanProgramHtml() {
       el.style.display = "none";
     }
   });
-  const output = clone.querySelector("#output");
+  const output =
+  clone.querySelector("#output");
+
   const lineNumbers =
     clone.querySelector("#lineNumbers");
   if (lineNumbers) {
-  lineNumbers.innerHTML = "1";
+    lineNumbers.innerHTML = "1";
   }
   const cursorStatus =
     clone.querySelector("#cursorStatus");
@@ -2660,12 +2758,17 @@ function backupProgram() {
       .replace(/[:.]/g, "-");
   a.download =
     `AIProBackup_${APP_VERSION}_${timestamp}.json`;
-
   a.click();
-
   setTimeout(() => {
     URL.revokeObjectURL(a.href);
   }, 1000);
+  saveBackupHistory(backupData);
+  manageBackupHistory();
+  alert(
+    "フルバックアップ保存完了\n\n" +
+    "メモ: " + note
+  );
+}
 
 function manageBackupHistory() {
   const list = loadJson("backupHistory", []);
@@ -3108,9 +3211,6 @@ function copyTextFallback(text) {
 }
 let repairSearchIndex = 0;
 let repairSearchMatches = [];
-function escapeRegExp(str) {
-  return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
 
 function findFunctionBlock(functionName){
   const editor=get("repairEditor");
@@ -3140,59 +3240,6 @@ function findFunctionBlock(functionName){
     end,
     block:text.slice(start,end)
   };
-}
-
-function highlightKeyword(text, keyword) {
-  const safeText = escapeHtml(text);
-  const safeKeyword = escapeHtml(keyword);
-  const regex = new RegExp(escapeRegExp(safeKeyword), "gi");
-  return safeText.replace(regex, match => `<mark>${match}</mark>`);
-}
-
-function searchRepairText() {
-  const editor = get("repairEditor");
-  const keyword = get("repairSearch").value;
-  const resultBox = get("repairSearchResult");
-  if (!keyword) {
-    alert("検索文字を入力してください");
-    return;
-  }
-  const text = editor.value;
-  const index = text.indexOf(keyword);
-  if (index === -1) {
-    resultBox.style.display = "block";
-    resultBox.innerText = "検索結果：0件";
-    alert("見つかりませんでした");
-    return;
-  }
-  repairSearchIndex = index + keyword.length;
-  editor.focus();
-  editor.setSelectionRange(index, index + keyword.length);
-  renderRepairSearchResults(keyword);
-  get("repairSearchResult")
-  .style.display="block";
-}
-
-function searchRepairNext() {
-  const editor = get("repairEditor");
-  const keyword = get("repairSearch").value;
-  if (!keyword) {
-    alert("検索文字を入力してください");
-    return;
-  }
-  const text = editor.value;
-  let index = text.indexOf(keyword, repairSearchIndex);
-  if (index === -1) {
-    index = text.indexOf(keyword);
-  }
-  if (index === -1) {
-    alert("見つかりませんでした");
-    return;
-  }
-  repairSearchIndex = index + keyword.length;
-  editor.focus();
-  editor.setSelectionRange(index, index + keyword.length);
-  renderRepairSearchResults(keyword);
 }
 
 function selectFunctionBlock(){
@@ -3318,43 +3365,6 @@ function selectFunctionByName(name){
   editor.scrollTop =
     Math.max(0, (line - 3) * lineHeight);
   updateCursorPosition();
-}
-
-function renderRepairSearchResults(keyword) {
-  const editor = get("repairEditor");
-  const resultBox = get("repairSearchResult");
-  const text = editor.value;
-  const lines = text.split("\n");
-  const results = [];
-  lines.forEach((line, index) => {
-    if (line.includes(keyword)) {
-      results.push({
-        lineNumber: index + 1,
-        line
-      });
-    }
-  });
-  resultBox.style.display = "block";
-  if (results.length === 0) {
-    resultBox.innerText = "検索結果：0件";
-    return;
-  }
-  resultBox.innerHTML =
-    `<b>検索結果：${results.length}件</b>` +
-    results.slice(0, 30).map(item => {
-      return `
-        <div class="search-result-line">
-          <b>${item.lineNumber}</b>: ${highlightKeyword(item.line, keyword)}
-        </div>
-      `;
-    }).join("");
-  if (results.length > 30) {
-    resultBox.innerHTML += `
-      <div class="small">
-        ※ 30件まで表示しています
-      </div>
-    `;
-  }
 }
 
 function diagnoseRepairHtml() {
