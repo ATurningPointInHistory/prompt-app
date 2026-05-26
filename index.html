@@ -796,7 +796,7 @@ body:not(.dark) #floatPanel{
 
   <div class="repair-editor-wrap">
 
-    <div id="lineNumbers">1<br>2<br>3<br>4<br>5</div>
+    <div id="lineNumbers">1</div>
 
     <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます" style="width: 100%; max-width: 100%;">    </textarea>
   </div>
@@ -1472,7 +1472,6 @@ function updatePanelButtonStates() {
 console.log("CHANGELOG");
 console.table(CHANGELOG);
 
-/* cleanup候補: 未使用function toggleTemplateManager
 function toggleTemplateManager() {
   const isOpen = get("template-manager").style.display !== "none";
   closeAllManagers();
@@ -1483,9 +1482,7 @@ function toggleTemplateManager() {
   }
   updatePanelButtonStates();
 }
-*/
 
-/* cleanup候補: 未使用function toggleDangerManager
 function toggleDangerManager() {
   const isOpen = get("danger-manager").style.display !== "none";
   closeAllManagers();
@@ -1495,9 +1492,7 @@ function toggleDangerManager() {
   }
   updatePanelButtonStates();
 }
-*/
 
-/* cleanup候補: 未使用function togglePatternManager
 function togglePatternManager() {
   const isOpen = get("pattern-manager").style.display !== "none";
   closeAllManagers();
@@ -1507,9 +1502,7 @@ function togglePatternManager() {
   }
   updatePanelButtonStates();
 }
-*/
 
-/* cleanup候補: 未使用function toggleAiPresetManager
 function toggleAiPresetManager() {
   const isOpen = get("ai-preset-manager").style.display !== "none";
   closeAllManagers();
@@ -1520,7 +1513,6 @@ function toggleAiPresetManager() {
   }
   updatePanelButtonStates();
 }
-*/
 
 function loadAiPresetToEditor() {
   const target = get("aiPresetTarget").value;
