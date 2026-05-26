@@ -538,6 +538,10 @@ body:not(.dark) #floatPanel{
   word-break:break-all;
 }
 
+.repair-btn-group{
+  grid-template-columns:1fr 1fr 1fr;
+}
+
 .code-tag { color: #7ee787; }
 .code-attr { color: #79c0ff; }
 .code-string { color: #a5d6ff; }
@@ -775,7 +779,7 @@ body:not(.dark) #floatPanel{
 
   </div>
 
-<div class="btn-group">
+  <div class="btn-group repair-btn-group">
   <button onclick="loadRepairHtml()">📖 HTML読込</button>
   <button onclick="saveRepairHtml()">💾 修正版保存</button>
   <button onclick="copyRepairHtml()">📋 HTMLコピー</button>
