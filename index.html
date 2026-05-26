@@ -1251,6 +1251,10 @@ function buildRepairToolsHtml() {
 <hr>
 <button class="float-list-btn" onclick="undoRepairEdit()">↩ Undo</button>
 <button class="float-list-btn" onclick="redoRepairEdit()">↪ Redo</button>
+<button class="float-list-btn"
+  onclick="indentRepairSelection()">➡ インデント</button>
+<button class="float-list-btn"
+  onclick="outdentRepairSelection()">⬅ アウトデント</button>
 <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾 AutoSave</button>
 <hr>
 <button class="float-list-btn" onclick="cleanupCandidates()">🧹 削除候補チェック</button>
@@ -4088,33 +4092,32 @@ function initRepairIde() {
 function enableRepairEditorTabIndent() {
   const editor = get("repairEditor");
   if (!editor) return;
-
   editor.addEventListener("keydown", (e) => {
     if (e.key !== "Tab") return;
-
+    if(e.key!=="Tab") return;
     e.preventDefault();
-
+    if(e.shiftKey){
+      outdentRepairSelection();
+      return;
+    }
+    indentRepairSelection();
+    return;
+    e.preventDefault();
     const value = editor.value;
     const start = editor.selectionStart;
     const end = editor.selectionEnd;
     const indent = "  ";
-
     repairUndoStack.push(value);
     repairRedoStack = [];
-
     // Shift + Tab：アウトデント
     if (e.shiftKey) {
       const lineStart =
         value.lastIndexOf("\n", start - 1) + 1;
-
       const before = value.slice(0, lineStart);
       const target = value.slice(lineStart, end);
       const after = value.slice(end);
-
       const lines = target.split("\n");
-
       let removedCount = 0;
-
       const outdented = lines.map(line => {
         if (line.startsWith(indent)) {
           removedCount += indent.length;
@@ -4126,16 +4129,12 @@ function enableRepairEditorTabIndent() {
         }
         return line;
       }).join("\n");
-
       editor.value = before + outdented + after;
-
       editor.selectionStart =
         Math.max(lineStart, start - removedCount);
-
       editor.selectionEnd =
         Math.max(editor.selectionStart, end - removedCount);
     }
-
     // Tab：インデント
     else {
       if (start === end) {
@@ -4143,30 +4142,24 @@ function enableRepairEditorTabIndent() {
           value.slice(0, start) +
           indent +
           value.slice(end);
-
         editor.selectionStart =
           editor.selectionEnd =
           start + indent.length;
       } else {
         const lineStart =
           value.lastIndexOf("\n", start - 1) + 1;
-
         const before = value.slice(0, lineStart);
         const target = value.slice(lineStart, end);
         const after = value.slice(end);
-
         const lines = target.split("\n");
         const indented =
           lines.map(line => indent + line).join("\n");
-
         editor.value = before + indented + after;
-
         editor.selectionStart = lineStart;
         editor.selectionEnd =
           lineStart + indented.length;
       }
     }
-
     repairLastValue = editor.value;
     updateLineNumbers();
     updateCursorPosition();
@@ -4177,6 +4170,7 @@ function enableRepairEditorTabIndent() {
   });
 }
 
+enableRepairEditorTabIndent
 function updateLineNumbers() {
   const editor = get("repairEditor");
   const lineBox = get("lineNumbers");
