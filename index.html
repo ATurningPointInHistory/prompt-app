@@ -3006,7 +3006,6 @@ function replaceFunctionBlock(){
 function showFunctionList(){
   const editor = get("repairEditor");
   const text = editor.value;
-
   if (!text.trim()) {
     alert("HTMLが空です");
     return;
@@ -3029,7 +3028,7 @@ function showFunctionList(){
 <button
   class="float-list-btn"
   onclick="
-    jumpToLine(${line});
+    selectFunctionByName('${name}');
     closeFloatPanel();
   ">
   ${i + 1}. ${name} / L${line}
@@ -3874,6 +3873,7 @@ let repairUndoStack = [];
 let repairRedoStack = [];
 let repairLastValue = "";
 let repairAutoSaveEnabled = false;
+
 function initRepairIde() {
   const editor = get("repairEditor");
   if (!editor) return;
@@ -3902,6 +3902,30 @@ function initRepairIde() {
   loadRepairDraft();
   updateLineNumbers();
   updateCursorPosition();
+  enableRepairEditorTabIndent();
+}
+
+function enableRepairEditorTabIndent() {
+  const editor = get("repairEditor");
+  if (!editor) return;
+  editor.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab") return;
+    e.preventDefault();
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const value = editor.value;
+    const indent = "  ";
+    editor.value =
+      value.slice(0, start) +
+      indent +
+      value.slice(end);
+    editor.selectionStart =
+      editor.selectionEnd =
+      start + indent.length;
+    updateLineNumbers();
+    updateCursorPosition();
+    updateRepairStatus("Tabインデント");
+  });
 }
 
 function updateLineNumbers() {
