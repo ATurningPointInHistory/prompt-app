@@ -289,19 +289,6 @@ body.dark button.active-panel {
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
 }
 
-#repairSearchBtn {
-  position: fixed;
-  right: 18px;
-  bottom: 88px;
-  z-index: 997;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  padding: 0;
-  font-size: 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,.25);
-}
-
 #repairSearch {
   padding: 9px 10px;
   font-size: 14px;
@@ -385,16 +372,60 @@ mark {
   position:fixed;
   right:18px;
   bottom:88px;
+  left:auto;
+  top:auto;
   z-index:998;
-  width:280px;
-  max-width:calc(100vw - 36px);
+  width:min(280px, calc(100vw - 36px));
   max-height:34vh;
   overflow-y:auto;
-  background:var(--card);
-  border:1px solid var(--border);
+  background:rgba(36,37,38,0.88);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.18);
   border-radius:15px;
   padding:12px;
   box-shadow:0 4px 20px rgba(0,0,0,0.25);
+}
+
+.float-panel-header{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:rgba(36,37,38,0.88);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  font-weight:bold;
+  margin-bottom:10px;
+  padding-bottom:8px;
+}
+
+body:not(.dark) .float-panel-header{
+  background:rgba(255,255,255,0.88);
+}
+
+.float-panel-title{
+  flex:1;
+}
+
+.float-drag-btn{
+  width:36px;
+  height:36px;
+  padding:0;
+  border-radius:10px;
+  background:rgba(128,128,128,0.28);
+  color:var(--text);
+  cursor:grab;
+}
+
+.float-drag-btn:active{
+  cursor:grabbing;
+}
+
+body:not(.dark) #floatPanel{
+  background:rgba(255,255,255,0.88);
+  border:1px solid rgba(0,0,0,0.12);
 }
 
 .float-panel-header{
@@ -424,19 +455,6 @@ mark {
   font-size:12px;
 }
 
-#functionListBtn {
-  position: fixed;
-  right: 18px;
-  bottom: 150px;
-  z-index: 997;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  padding: 0;
-  font-size: 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,.25);
-}
-
 #repairSearchBtn {
   bottom: 88px;
 }
@@ -452,6 +470,72 @@ mark {
   font-weight:bold;
   margin-bottom:10px;
   padding-bottom:8px;
+}
+
+#repairEditor{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-x:hidden;
+  white-space:pre-wrap;
+  word-break:break-all;
+  direction:ltr;
+  text-align:left;
+}
+
+.float-panel-header{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  flex-wrap:wrap;
+}
+
+.float-panel-header button{
+  width:34px;
+  height:34px;
+  padding:0;
+  border-radius:9px;
+  font-size:14px;
+}
+
+.float-panel-title{
+  flex:1 1 100%;
+}
+
+.repair-editor-wrap{
+  display:flex;
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:5px;
+}
+
+#lineNumbers{
+  width:44px;
+  padding:12px 6px;
+  background:rgba(128,128,128,0.15);
+  color:var(--text);
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:12px;
+  line-height:1.4;
+  text-align:right;
+  user-select:none;
+  overflow:hidden;
+}
+
+#repairEditor{
+  border:none;
+  border-radius:0;
+  margin-top:0;
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:12px;
+  line-height:1.4;
+  min-height:420px;
+  overflow:auto;
+  white-space:pre-wrap;
+  word-break:break-all;
 }
 
 .code-tag { color: #7ee787; }
@@ -694,43 +778,48 @@ mark {
 <div class="btn-group">
   <button onclick="loadRepairHtml()">📖 HTML読込</button>
   <button onclick="saveRepairHtml()">💾 修正版保存</button>
-  <button onclick="diagnoseRepairHtml()">🩺 編集内容診断</button>
-  <button onclick="selectFunctionBlock()">📦 関数選択</button>
-  <button onclick="replaceFunctionBlock()">✏ 関数置換</button>
-  <button onclick="undoRepairEdit()">↩ Undo</button>
-  <button onclick="redoRepairEdit()">↪ Redo</button>
-  <button onclick="toggleRepairAutoSave()">💾 AutoSave</button>
-  <button onclick="openReplacePanel()">🔁 検索置換</button>
+  <button onclick="copyRepairHtml()">📋 HTMLコピー</button>
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">
-  状態：未変更
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：自動保存データ復元</div>
+
+<div id="cursorStatus" class="small" style="margin-top:6px;">
+  Ln 1 / Col 1
+
 </div>
-
-<button id="functionListBtn" onclick="showFunctionList()" class="btn-secondary">
-  📚
-</button>
-
-<button id="repairSearchBtn" onclick="toggleRepairSearchBox()" class="btn-secondary">
-  🔍
-</button>
 
   <label for="repairEditor">
     HTML編集エリア
   </label>
-  <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます"></textarea>
+
+  <div class="repair-editor-wrap">
+
+    <div id="lineNumbers">
+      1
+    </div>
+
+    <textarea
+      id="repairEditor"
+      rows="20"
+      placeholder="ここにHTML全文が表示されます">
+    </textarea>
+  </div>
   <button id="previewBtn" onclick="previewRepairHtml()" class="btn-full">
     🎨 色分けプレビュー
   </button>
 
 <div id="repairPreview" class="code-preview" style="display:none;"></div>
 
+<div id="functionListBox" class="diagnose-box" style="display:none;">
+
+</div>
+
 </div> <!-- repairPage -->
 
 <button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">⚙</button>
 
-<div id="floatPanel" style="display: none;"></div>
+<div id="floatPanel" style="display: none; inset: 293.317px auto auto 86px;"></div>
 
 </div> <!-- card -->
 
@@ -1122,87 +1211,84 @@ function switchAppPage(mode) {
     "active",
     mode === "repair"
   );
+  if (mode === "repair") {
+    resetRepairEditorView();
+  }
+}
+
+function isRepairMode() {
+  return get("repairPage").style.display !== "none";
+}
+
+function buildNormalToolsHtml() {
+  return `
+<button class="float-list-btn" onclick="backupProgram()">🗂 フルバックアップ</button>
+<button class="float-list-btn" onclick="showBackupHistory()">📚 バックアップ履歴</button>
+<button class="float-list-btn" onclick="saveProgramHtml()">💾 本体HTML保存</button>
+<button class="float-list-btn" onclick="restoreProgramBackup()">♻ フル復元</button>
+<hr>
+<button class="float-list-btn" onclick="reviewPrompt()">🛠 Promptレビュー</button>
+<button class="float-list-btn" onclick="testPromptObject()">🧩 内部JSONテスト</button>
+<button class="float-list-btn" onclick="testJsonFormat()">🧪 JSONテスト</button>
+<button class="float-list-btn" onclick="formatJsonOutput()">📦 JSON整形</button>
+<button class="float-list-btn" onclick="recheckOutput()">🔍 再チェック</button>
+<button class="float-list-btn" onclick="diagnoseHtml()">🩺 HTML診断</button>
+<button class="float-list-btn" onclick="compareBackupSummary()">📊 バックアップ差分確認</button>
+<button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
+<hr>
+<button class="float-list-btn" onclick="importTemplates()">📥 テンプレ復元</button>
+<button class="float-list-btn" onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
+<button class="float-list-btn" onclick="importAiPresets()">🤖 AI設定復元</button>
+<hr>
+<button class="float-list-btn" onclick="clearOutput()">🧹 出力クリア</button>
+<button class="float-list-btn" onclick="clearHistory()">🗑 履歴全削除</button>
+`;
+}
+
+function buildRepairToolsHtml() {
+  return `
+<button class="float-list-btn" onclick="diagnoseRepairHtml()">🩺 編集内容診断</button>
+<button class="float-list-btn" onclick="selectFunctionBlock()">📦 関数選択</button>
+<button class="float-list-btn" onclick="replaceFunctionBlock()">✏ 関数置換</button>
+<button class="float-list-btn" onclick="showFunctionList()">📚 関数一覧</button>
+<button class="float-list-btn" onclick="toggleRepairSearchBox()">🔍 検索</button>
+<button class="float-list-btn" onclick="openReplacePanel()">🔁 検索置換</button>
+<hr>
+<button class="float-list-btn" onclick="undoRepairEdit()">↩ Undo</button>
+<button class="float-list-btn" onclick="redoRepairEdit()">↪ Redo</button>
+<button class="float-list-btn" onclick="toggleRepairAutoSave()">💾 AutoSave</button>
+<hr>
+<button class="float-list-btn" onclick="cleanupCandidates()">🧹 削除候補チェック</button>
+<button class="float-list-btn" onclick="deleteCommentedCleanupBlocks()">🗑 コメント化済みを完全削除</button>
+<button class="float-list-btn" onclick="previewRepairHtml()">🎨 色分けプレビュー</button>
+<button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
+`;
 }
 
 function toggleToolsMenu(){
-  const panel =
-    get("floatPanel");
-  if(
-    panel.style.display !== "none"
-  ){
+  const panel = get("floatPanel");
+  if (panel.style.display !== "none") {
     closeFloatPanel();
-    get("toolsBtn").innerText =
-      "⚙";
     return;
   }
-  get("toolsBtn").innerText =
-    "×";
-  openFloatPanel(
-    "ツール",
-`
-<button class="float-list-btn" onclick="backupProgram()">
-🗂 フルバックアップ</button>
-<button class="float-list-btn" onclick="showBackupHistory()">
-📚 バックアップ履歴</button>
-<button class="float-list-btn" onclick="compareBackupSummary()"
->📊 差分確認</button>
-<button class="float-list-btn"
-onclick="saveProgramHtml()">
-💾 本体HTML保存</button>
-<button class="float-list-btn"
-onclick="restoreProgramBackup()">
-♻ フル復元</button>
-<hr>
-<button class="float-list-btn"
-onclick="reviewPrompt()">
-🛠 Promptレビュー</button>
-<button class="float-list-btn"
-onclick="testPromptObject()">
-🧩 内部JSONテスト</button>
-<button class="float-list-btn"
-onclick="testJsonFormat()">
-🧪 JSONテスト</button>
-<button class="float-list-btn"
-onclick="formatJsonOutput()">
-📦 JSON整形</button>
-<button class="float-list-btn"
-onclick="recheckOutput()">
-🔍 再チェック</button>
-<button class="float-list-btn"
-onclick="diagnoseHtml()">
-🩺 HTML診断</button>
-<button class="float-list-btn"
-onclick="compareBackupSummary()">
-📊 バックアップ差分確認</button>
-<button
-class="float-list-btn"
-onclick="showHtmlHealth()">
-💚 HTML HEALTH
-</button>
-<hr>
-<button class="float-list-btn"
-onclick="importTemplates()">
-📥 テンプレ復元
-</button>
-<button class="float-list-btn"
-onclick="exportAiPresets()">
-🤖 AI設定バックアップ
-</button>
-<button class="float-list-btn"
-onclick="importAiPresets()">
-🤖 AI設定復元
-</button>
-<hr>
-<button class="float-list-btn"
-onclick="clearOutput()">
-🧹 出力クリア
-</button>
-<button class="float-list-btn"
-onclick="clearHistory()">
-🗑 履歴全削除
-</button>
-`
-  );
+  get("toolsBtn").innerText = "×";
+  const repairMode = isRepairMode();
+  const title = repairMode
+    ? "修復ツール"
+    : "通常ツール";
+  const bodyHtml = repairMode
+    ? buildRepairToolsHtml()
+    : buildNormalToolsHtml();
+  openFloatPanel(title, bodyHtml);
+}
+
+function resetRepairEditorView() {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  editor.scrollLeft = 0;
+  editor.style.width = "100%";
+  editor.style.maxWidth = "100%";
 }
 
 function toggleRepairSearchBox(){
@@ -1231,18 +1317,67 @@ function toggleRepairSearchBox(){
 
 function openFloatPanel(title, bodyHtml){
   const panel = get("floatPanel");
+
   panel.innerHTML =
     `<div class="float-panel-header">
-      <span>${title}</span>
+      <span class="float-panel-title">${title}</span>
+      <button onclick="moveFloatPanelBy(0,-60)">↑</button>
+      <button onclick="moveFloatPanelBy(0,60)">↓</button>
+      <button onclick="moveFloatPanelBy(-60,0)">←</button>
+      <button onclick="moveFloatPanelBy(60,0)">→</button>
+      <button onclick="resetFloatPanelPosition()">↘</button>
       <button onclick="closeFloatPanel()">×</button>
     </div>` +
     bodyHtml;
+
   panel.style.display = "block";
+}
+
+function moveFloatPanelBy(dx, dy) {
+  const panel = get("floatPanel");
+  if (!panel) return;
+
+  const rect = panel.getBoundingClientRect();
+
+  let nextLeft = rect.left + dx;
+  let nextTop = rect.top + dy;
+
+  const maxLeft =
+    window.innerWidth - rect.width;
+
+  const maxTop =
+    window.innerHeight - rect.height;
+
+  nextLeft =
+    Math.min(
+      Math.max(0, nextLeft),
+      Math.max(0, maxLeft)
+    );
+
+  nextTop =
+    Math.min(
+      Math.max(0, nextTop),
+      Math.max(0, maxTop)
+    );
+
+  panel.style.left = nextLeft + "px";
+  panel.style.top = nextTop + "px";
+  panel.style.right = "auto";
+  panel.style.bottom = "auto";
+}
+
+function resetFloatPanelPosition() {
+  const panel = get("floatPanel");
+  if (!panel) return;
+
+  panel.style.left = "auto";
+  panel.style.top = "auto";
+  panel.style.right = "18px";
+  panel.style.bottom = "88px";
 }
 
 function closeFloatPanel(){
   get("floatPanel").style.display = "none";
-
   const btn = get("toolsBtn");
   if(btn){
     btn.innerText = "⚙";
@@ -2280,30 +2415,51 @@ function getCleanProgramHtml() {
 }
 
 function validateBackupHtml(html) {
-  const cleanHtml = String(html || "")
+  const source = String(html || "");
+
+  const cleanHtml = source
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "");
+
   const divOpen =
     (cleanHtml.match(/<div\b/gi) || []).length;
+
   const divClose =
     (cleanHtml.match(/<\/div>/gi) || []).length;
+
+  const parser = new DOMParser();
+
+  const doc =
+    parser.parseFromString(
+      source,
+      "text/html"
+    );
+
   const ids =
-    [...String(html || "").matchAll(/id="([^"]+)"/g)]
-      .map(m => m[1]);
+    [...doc.querySelectorAll("[id]")]
+      .map(el => el.id)
+      .filter(Boolean);
+
   const duplicateIds =
     [...new Set(
       ids.filter((id, i) => ids.indexOf(id) !== i)
     )];
+
   let jsOk = true;
   let jsError = "";
+
   try {
-    [...document.scripts].forEach(s => {
+    const scripts =
+      [...doc.querySelectorAll("script")];
+
+    scripts.forEach(s => {
       new Function(s.textContent);
     });
   } catch (e) {
     jsOk = false;
     jsError = e.message;
   }
+
   return {
     div_ok: divOpen === divClose,
     div_open: divOpen,
@@ -2372,7 +2528,15 @@ function backupProgram() {
     URL.revokeObjectURL(a.href);
   }, 1000);
 
-  saveBackupHistory(backupData);
+function manageBackupHistory() {
+  const list = loadJson("backupHistory", []);
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list.slice(0, 10))
+  );
+}
+
+saveBackupHistory(backupData);
 manageBackupHistory();
   alert(
     "フルバックアップ保存完了\n\n" +
@@ -2406,6 +2570,63 @@ function extractFunctionNames(html) {
   ].map(m => m[1]);
 }
 
+function extractIds(html) {
+  const parser = new DOMParser();
+  const doc =
+    parser.parseFromString(
+      String(html || ""),
+      "text/html"
+    );
+
+  return [...doc.querySelectorAll("[id]")]
+    .map(el => el.id)
+    .filter(Boolean);
+}
+
+function calcHealthScore(validation, undefinedFns, dupFuncs) {
+  return Math.max(
+    0,
+    100
+    - (validation.div_ok ? 0 : 20)
+    - (validation.js_ok ? 0 : 25)
+    - (validation.duplicate_ids.length * 5)
+    - (undefinedFns.length * 10)
+    - (dupFuncs.length * 10)
+  );
+}
+
+function getHtmlSummary(html) {
+  const funcs = extractFunctionNames(html);
+  const ids = extractIds(html);
+  const validation = validateBackupHtml(html);
+  const dupFuncs =
+    [...new Set(
+      funcs.filter((f, i) => funcs.indexOf(f) !== i)
+    )];
+  const onclicks =
+    [...String(html || "").matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )].map(x => x[1]);
+  const undefinedFns =
+    [...new Set(
+      onclicks.filter(fn => !funcs.includes(fn))
+    )];
+  const score =
+    calcHealthScore(
+      validation,
+      undefinedFns,
+      dupFuncs
+    );
+  return {
+    funcs,
+    ids,
+    validation,
+    dupFuncs,
+    undefinedFns,
+    score
+  };
+}
+
 function compareBackupSummary() {
   const input =
     document.createElement("input");
@@ -2426,25 +2647,61 @@ function compareBackupSummary() {
           "<!DOCTYPE html>\n" +
           document.documentElement.outerHTML;
         const oldHtml = data.html;
-        const currentFuncs =
-          extractFunctionNames(currentHtml);
-        const oldFuncs =
-          extractFunctionNames(oldHtml);
-        const added =
-          currentFuncs.filter(x => !oldFuncs.includes(x));
-        const removed =
-          oldFuncs.filter(x => !currentFuncs.includes(x));
+        const current =
+          getHtmlSummary(currentHtml);
+        const old =
+          getHtmlSummary(oldHtml);
+        const addedFuncs =
+          current.funcs.filter(x => !old.funcs.includes(x));
+        const removedFuncs =
+          old.funcs.filter(x => !current.funcs.includes(x));
+        const addedIds =
+          current.ids.filter(x => !old.ids.includes(x));
+        const removedIds =
+          old.ids.filter(x => !current.ids.includes(x));
         const result =
-          "バックアップ差分サマリー\n\n" +
-          "比較元: " + (data.app_version || data.version || "不明") + "\n" +
-          "メモ: " + (data.backup_note || "なし") + "\n\n" +
-          "現在の関数数: " + currentFuncs.length + "\n" +
-          "バックアップ関数数: " + oldFuncs.length + "\n\n" +
-          "追加関数:\n" +
-          (added.length ? added.join("\n") : "なし") +
-          "\n\n削除関数:\n" +
-          (removed.length ? removed.join("\n") : "なし");
-        alert(result);
+`バックアップ差分サマリー
+【比較元】
+version:
+${data.app_version || data.version || "不明"}
+created_at:
+${data.created_at || "不明"}
+backup note:
+${data.backup_note || "なし"}
+【Health Score】
+現在:
+${current.score}/100
+バックアップ:
+${old.score}/100
+差:
+${current.score - old.score}
+【Function】
+現在:
+${current.funcs.length}
+バックアップ:
+${old.funcs.length}
+追加function:
+${addedFuncs.length ? addedFuncs.join("\n") : "なし"}
+削除function:
+${removedFuncs.length ? removedFuncs.join("\n") : "なし"}
+【ID】
+現在:
+${current.ids.length}
+バックアップ:
+${old.ids.length}
+追加id:
+${addedIds.length ? addedIds.join("\n") : "なし"}
+削除id:
+${removedIds.length ? removedIds.join("\n") : "なし"}
+【現在の警告】
+重複id:
+${current.validation.duplicate_ids.length ? current.validation.duplicate_ids.join("\n") : "なし"}
+重複function:
+${current.dupFuncs.length ? current.dupFuncs.join("\n") : "なし"}
+未定義onclick:
+${current.undefinedFns.length ? current.undefinedFns.join("\n") : "なし"}
+`;
+        showDiffResult(result);
       } catch (err) {
         alert(
           "差分確認に失敗しました\n\n" +
@@ -2455,6 +2712,34 @@ function compareBackupSummary() {
     reader.readAsText(file);
   };
   input.click();
+}
+
+function showDiffResult(text) {
+  openFloatPanel(
+    "差分確認結果",
+    `
+    <div class="float-panel-actions">
+      <button onclick="copyDiffResult()">📋 コピー</button>
+      <button onclick="clearDiffResult()">🧹 クリア</button>
+    </div>
+    <pre id="diffResultBox" class="code-preview">${escapeHtml(text)}</pre>
+    `
+  );
+  window.latestDiffResult = text;
+}
+function copyDiffResult() {
+  const text = window.latestDiffResult || "";
+  if (!text) {
+    alert("コピーする差分結果がありません");
+    return;
+  }
+  navigator.clipboard.writeText(text)
+    .then(() => alert("差分結果をコピーしました"))
+    .catch(() => alert("コピー失敗"));
+}
+function clearDiffResult() {
+  window.latestDiffResult = "";
+  closeFloatPanel();
 }
 
 function restoreProgramBackup() {
@@ -2524,31 +2809,35 @@ function saveProgramHtml() {
 }
 
 function loadRepairHtml() {
-  const input=document.createElement("input");
-  input.type="file";
-  input.accept=
-  ".html,.json,text/html,application/json";
-  input.onchange=(e)=>{
-    const file=e.target.files[0];
-    if(!file)return;
-    const reader=new FileReader();
-    reader.onload=()=>{
-      try{
-        // JSON判定
-        const parsed=
-        JSON.parse(reader.result);
-        if(parsed.html){
-          get("repairEditor").value=
-          parsed.html;
+  const input =
+    document.createElement("input");
+  input.type = "file";
+  input.accept =
+    ".html,.json,text/html,application/json";
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed =
+          JSON.parse(reader.result);
+        if (parsed.html) {
+          get("repairEditor").value =
+            parsed.html;
+          get("repairEditor").scrollLeft = 0;
+          updateLineNumbers();
           alert(
-          "フルバックアップJSON読込完了"
+            "フルバックアップJSON読込完了"
           );
           return;
         }
-      }catch{}
+      } catch {}
       // 通常HTML
-      get("repairEditor").value=
-      reader.result;
+      get("repairEditor").value =
+        reader.result;
+      get("repairEditor").scrollLeft = 0;
+      updateLineNumbers();
       alert("HTML読込完了");
     };
     reader.readAsText(file);
@@ -2581,7 +2870,63 @@ function saveRepairHtml() {
   a.download =
     `AIPro_Repaired_${timestamp}.html`;
   a.click();
-  alert("修正版保存完了")
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
+  alert("修正版保存完了");
+}
+
+async function copyRepairHtml() {
+  const html =
+    get("repairEditor").value.trim();
+  if (!html) {
+    alert("HTMLが空です");
+    return;
+  }
+  try {
+    if (navigator.clipboard &&
+        window.isSecureContext) {
+      await navigator.clipboard.writeText(html);
+      alert("HTMLコピー完了");
+      return;
+    }
+    const ok =
+      copyTextFallback(html);
+    if (ok) {
+      alert("HTMLコピー完了");
+    } else {
+      alert("コピー失敗");
+    }
+  } catch(e){
+    const ok =
+      copyTextFallback(html);
+    alert(
+      ok
+      ? "HTMLコピー完了"
+      : "コピー失敗"
+    );
+  }
+}
+
+function copyTextFallback(text) {
+  try {
+    const area =
+      document.createElement("textarea");
+    area.value = text;
+    area.style.position = "fixed";
+    area.style.left = "-9999px";
+    area.style.top = "0";
+    document.body.appendChild(area);
+    area.focus();
+    area.select();
+    const ok =
+      document.execCommand("copy");
+    document.body.removeChild(area);
+    return ok;
+  } catch (e) {
+    console.log("copy failed", e);
+    return false;
+  }
 }
 let repairSearchIndex = 0;
 let repairSearchMatches = [];
@@ -2711,10 +3056,9 @@ function replaceFunctionBlock(){
 }
 
 function showFunctionList(){
-  const text =
-    get("repairEditor").value;
-
-  if(!text.trim()){
+  const editor = get("repairEditor");
+  const text = editor.value;
+  if (!text.trim()) {
     alert("HTMLが空です");
     return;
   }
@@ -2722,23 +3066,26 @@ function showFunctionList(){
     [...text.matchAll(
       /function\s+([a-zA-Z0-9_$]+)\s*\(/g
     )];
-  let html="";
-  if(matches.length===0){
-    html="関数なし";
-  }else{
+  let html = "";
+  if (matches.length === 0) {
+    html = "関数なし";
+  } else {
     html =
-      matches.map((m,i)=>{
-        const name=m[1];
+      matches.map((m, i) => {
+        const name = m[1];
+        const line =
+          text.slice(0, m.index)
+            .split("\n").length;
         return `
-        <button
-          class="float-list-btn"
-          onclick="
-            selectFunctionByName('${name}');
-            closeFloatPanel();
-          ">
-          ${i+1}. ${name}
-        </button>
-        `;
+<button
+  class="float-list-btn"
+  onclick="
+    selectFunctionByName('${name}');
+    closeFloatPanel();
+  ">
+  ${i + 1}. ${name} / L${line}
+</button>
+`;
       }).join("");
   }
   openFloatPanel(
@@ -2747,11 +3094,52 @@ function showFunctionList(){
   );
 }
 
+function jumpToLine(lineNumber) {
+  const editor = get("repairEditor");
+  if (!editor) return;
+  const lines = editor.value.split("\n");
+  let pos = 0;
+  for (let i = 0; i < lineNumber - 1; i++) {
+    pos += lines[i].length + 1;
+  }
+  editor.focus();
+  editor.setSelectionRange(pos, pos);
+  const lineHeight = 18;
+  editor.scrollTop =
+    Math.max(0, (lineNumber - 3) * lineHeight);
+  updateCursorPosition();
+}
+function updateCursorPosition() {
+  const editor = get("repairEditor");
+  const box = get("cursorStatus");
+  if (!editor || !box) return;
+  const pos = editor.selectionStart || 0;
+  const before = editor.value.slice(0, pos);
+  const line = before.split("\n").length;
+  const col =
+    before.length -
+    before.lastIndexOf("\n");
+  box.innerText =
+    `Ln ${line} / Col ${col}`;
+}
+
 function selectFunctionByName(name){
   const result = findFunctionBlock(name);
   if(!result)return;
   const editor = get("repairEditor");
-  editor.focus(); editor.setSelectionRange(result.start,result.end);
+  editor.focus();
+  editor.setSelectionRange(
+    result.start,
+    result.end
+  );
+  const line =
+    editor.value
+      .slice(0, result.start)
+      .split("\n").length;
+  const lineHeight = 18;
+  editor.scrollTop =
+    Math.max(0, (line - 3) * lineHeight);
+  updateCursorPosition();
 }
 
 function renderRepairSearchResults(keyword) {
@@ -3267,16 +3655,14 @@ function loadJson(key, fallback) {
 
 function saveCurrentState() {
   if (isLoading) return;
-  if (!get("raw-input")) return;
-  localStorage.setItem("rawInput", get("raw-input").value);
-  localStorage.setItem("roughTone", get("rough-tone").value);
-  localStorage.setItem("roughOutputFormat", get("rough-output-format").value);
-  localStorage.setItem("roleValue", get("role").value);
-  localStorage.setItem("taskValue", get("task").value);
-  localStorage.setItem("detailsValue", get("details").value);
-  localStorage.setItem("toneValue", get("tone").value);
-  localStorage.setItem("currentTab", String(currentTab));
-  localStorage.setItem("aiTarget", get("ai-target").value);
+  if (!get("raw-input")) return; localStorage.setItem("rawInput", get("raw-input").value);
+localStorage.setItem("roughTone", get("rough-tone").value); localStorage.setItem("roughOutputFormat", get("rough-output-format").value);
+localStorage.setItem("roleValue", get("role").value);
+localStorage.setItem("taskValue", get("task").value);
+localStorage.setItem("detailsValue", get("details").value);
+localStorage.setItem("toneValue", get("tone").value);
+localStorage.setItem("currentTab", String(currentTab));
+localStorage.setItem("aiTarget", get("ai-target").value);
 }
 
 function loadSettings() {
@@ -3306,8 +3692,8 @@ function loadSettings() {
   switchTab(savedTab);
   syncCommandButtons();
   updatePanelButtonStates();
-  get("versionLabel").innerText = APP_VERSION;
-  get("changelogLabel").innerHTML =
+ get("versionLabel").innerText = APP_VERSION;
+get("changelogLabel").innerHTML =
   CHANGELOG.map(x =>
 escapeHtml(x)).join("<br>");
   isLoading = false;
@@ -3341,22 +3727,210 @@ ${line}
 column:
 ${col}`;
 };
-
-window.addEventListener(
-  "error",
-  () => {
-    localStorage.setItem(
-      "lastCrash",
-      new Date().toISOString()
-    );
-  }
-);
-
 document.addEventListener("DOMContentLoaded", initRepairIde);
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
 
+function cleanupCandidates() {
+  const editor = get("repairEditor");
+  const html = editor && editor.value.trim()
+    ? editor.value
+    : document.documentElement.outerHTML;
+  const funcs =
+    [...html.matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )].map(x => x[1]);
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )].map(x => x[1]);
+  const parser = new DOMParser();
+  const doc =
+    parser.parseFromString(
+      html,
+      "text/html"
+    );
+  const ids =
+    [...doc.querySelectorAll("[id]")]
+      .map(el => el.id)
+      .filter(Boolean);
+  const safeIgnoreFuncs = [
+    "diagnoseRepairHtml",
+    "diagnoseHtml",
+    "showHtmlHealth",
+    "closeFloatPanel",
+    "loadSettings"
+  ];
+  const unusedFuncs =
+    funcs.filter(fn => {
+      if (safeIgnoreFuncs.includes(fn)) return false;
+      const count =
+        (html.match(
+          new RegExp("\\b" + escapeRegExp(fn) + "\\b", "g")
+        ) || []).length;
+      return count <= 1 && !onclicks.includes(fn);
+    });
+  const orphanIds =
+    ids.filter(id => {
+      if (!id) return false;
+      // 正規表現汚染防止
+      if (
+        /[\$\{\}\(\)\[\]\^\|\\]/.test(id)
+      ){
+        return false;
+      }
+      // 除外対象
+      if([
+        "appPage",
+        "repairPage",
+        "floatPanel",
+        "functionListBox"
+      ].includes(id)){
+        return false;
+      }
+      try{
+        const count =
+          (
+            html.match(
+              new RegExp(
+              `\\b${escapeRegExp(id)}\\b`,
+                "g"
+              )
+            ) || []
+          ).length;
+        return count <= 1;
+      }catch{
+        return false;
+      }
+    });
+  const message =
+    "削除候補チェック\n\n" +
+    "【未使用function】\n" +
+    (unusedFuncs.length ? unusedFuncs.join("\n") : "なし") +
+    "\n\n【孤立id】\n" +
+    (orphanIds.length ? orphanIds.join("\n") : "なし") +
+    "\n\nOKで修復エディタ内の候補をコメント化します。";
+  const ok = confirm(message);
+  if (!ok) return;
+commentOutCleanupCandidates(unusedFuncs, orphanIds);
+}
+
+function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
+  const editor = get("repairEditor");
+  if (!editor || !editor.value.trim()) {
+    alert("修復モードでHTMLを読み込んでから実行してください");
+    return;
+  }
+  let html = editor.value;
+  repairUndoStack.push(html);
+  repairRedoStack = [];
+  unusedFuncs.forEach(fn => {
+    const block = findFunctionBlockInText(html, fn);
+    if (!block) return;
+    if (block.block.includes("cleanup候補")) return;
+    html =
+      html.slice(0, block.start) +
+      "/* cleanup候補: 未使用function " + fn + "\n" +
+      block.block +
+      "\n*/" +
+      html.slice(block.end);
+  });
+  orphanIds.forEach(id => {
+    const reg = new RegExp(
+      `id=(["'])${escapeRegExp(id)}\\1`,
+      "g"
+    );
+    html = html.replace(reg, match => {
+      if (match.includes("data-cleanup-disabled-id")) {
+        return match;
+      }
+      return `data-cleanup-disabled-id="${id}"`;
+    });
+  });
+  editor.value = html;
+  repairLastValue = html;
+  updateRepairStatus(
+    "削除候補をコメント化 / id無効化"
+  );
+  alert(
+    "削除候補を安全処理しました。\n\n" +
+    "未使用function：コメント化\n" +
+    "孤立id：data-cleanup-disabled-id に変更\n\n" +
+    "HTML HEALTH / 編集内容診断で確認してください。"
+  );
+}
+
+function deleteCommentedCleanupBlocks() {
+  const editor = get("repairEditor");
+  if (!editor || !editor.value.trim()) {
+    alert("修復モードでHTMLを読み込んでから実行してください");
+    return;
+  }
+  let html = editor.value;
+  const before = html;
+  const functionBlocks =
+    html.match(
+      /\/\*\s*cleanup候補:\s*未使用function[\s\S]*?\*\//g
+    ) || [];
+  const disabledIds =
+    html.match(
+      /data-cleanup-disabled-id="[^"]+"/g
+    ) || [];
+  const message =
+    "完全削除確認\n\n" +
+    "削除対象:\n" +
+    "・コメント化済みfunction: " + functionBlocks.length + "件\n" +
+    "・無効化済みid属性: " + disabledIds.length + "件\n\n" +
+    "OKで完全削除します。\n" +
+    "事前にバックアップ保存済みか確認してください。";
+  const ok = confirm(message);
+  if (!ok) return;
+  repairUndoStack.push(before);
+  repairRedoStack = [];
+  // コメント化済みfunctionを完全削除
+  html = html.replace(
+    /\/\*\s*cleanup候補:\s*未使用function[\s\S]*?\*\//g,
+    ""
+  );
+  // data-cleanup-disabled-id 属性を完全削除
+  html = html.replace(
+    /\s*data-cleanup-disabled-id="[^"]+"/g,
+    ""
+  );
+  // 空行を軽く整理
+  html = html.replace(/\n{4,}/g, "\n\n\n");
+  editor.value = html;
+  repairLastValue = html;
+  updateRepairStatus(
+    "コメント化済み候補を完全削除"
+  );
+  alert(
+    "完全削除しました。\n\n" +
+    "HTML HEALTH / 編集内容診断で確認してください。"
+  );
+}
+
+function findFunctionBlockInText(text, functionName) {
+  const start =
+    text.indexOf(`function ${functionName}`);
+  if (start === -1) return null;
+  const braceStart =
+    text.indexOf("{", start);
+  if (braceStart === -1) return null;
+  let depth = 1;
+  let end = braceStart + 1;
+  while (end < text.length && depth > 0) {
+    if (text[end] === "{") depth++;
+    if (text[end] === "}") depth--;
+    end++;
+  }
+  return {
+    start,
+    end,
+    block: text.slice(start, end)
+  };
+}
 let repairUndoStack = [];
 let repairRedoStack = [];
 let repairLastValue = "";
@@ -3365,10 +3939,38 @@ let repairAutoSaveEnabled = false;
 function initRepairIde() {
   const editor = get("repairEditor");
   if (!editor) return;
+    repairLastValue = editor.value || "";
+  editor.addEventListener("keydown",(e)=>{
+    const isSearch =
+      (e.ctrlKey || e.metaKey)
+      &&
+      e.key.toLowerCase()==="f";
+    if(!isSearch)return;
+    e.preventDefault();
+    toggleRepairSearchBox();
+    setTimeout(()=>{
+      const box =
+        get("repairSearch");
+      if(box){
+        box.focus();
+        box.select();
+      }
+    },50);
+  });
 
-  repairLastValue = editor.value || "";
+    editor.addEventListener("click", updateCursorPosition);
+    editor.addEventListener("keyup", updateCursorPosition);
+    editor.addEventListener("select", updateCursorPosition);
+    editor.addEventListener("scroll", () => {
+      const lineBox = get("lineNumbers");
+      if (lineBox) {
+        lineBox.scrollTop = editor.scrollTop;
+      }
+    });
+    editor.addEventListener("input", () => {
+    updateLineNumbers();
+    updateCursorPosition();
 
-  editor.addEventListener("input", () => {
     if (repairLastValue !== editor.value) {
       repairUndoStack.push(repairLastValue);
       repairRedoStack = [];
@@ -3377,8 +3979,115 @@ function initRepairIde() {
       autoSaveRepairDraft();
     }
   });
-
   loadRepairDraft();
+  updateLineNumbers();
+  updateCursorPosition();
+  enableRepairEditorTabIndent();
+}
+
+function enableRepairEditorTabIndent() {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  editor.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab") return;
+
+    e.preventDefault();
+
+    const value = editor.value;
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const indent = "  ";
+
+    repairUndoStack.push(value);
+    repairRedoStack = [];
+
+    // Shift + Tab：アウトデント
+    if (e.shiftKey) {
+      const lineStart =
+        value.lastIndexOf("\n", start - 1) + 1;
+
+      const before = value.slice(0, lineStart);
+      const target = value.slice(lineStart, end);
+      const after = value.slice(end);
+
+      const lines = target.split("\n");
+
+      let removedCount = 0;
+
+      const outdented = lines.map(line => {
+        if (line.startsWith(indent)) {
+          removedCount += indent.length;
+          return line.slice(indent.length);
+        }
+        if (line.startsWith(" ")) {
+          removedCount += 1;
+          return line.slice(1);
+        }
+        return line;
+      }).join("\n");
+
+      editor.value = before + outdented + after;
+
+      editor.selectionStart =
+        Math.max(lineStart, start - removedCount);
+
+      editor.selectionEnd =
+        Math.max(editor.selectionStart, end - removedCount);
+    }
+
+    // Tab：インデント
+    else {
+      if (start === end) {
+        editor.value =
+          value.slice(0, start) +
+          indent +
+          value.slice(end);
+
+        editor.selectionStart =
+          editor.selectionEnd =
+          start + indent.length;
+      } else {
+        const lineStart =
+          value.lastIndexOf("\n", start - 1) + 1;
+
+        const before = value.slice(0, lineStart);
+        const target = value.slice(lineStart, end);
+        const after = value.slice(end);
+
+        const lines = target.split("\n");
+        const indented =
+          lines.map(line => indent + line).join("\n");
+
+        editor.value = before + indented + after;
+
+        editor.selectionStart = lineStart;
+        editor.selectionEnd =
+          lineStart + indented.length;
+      }
+    }
+
+    repairLastValue = editor.value;
+    updateLineNumbers();
+    updateCursorPosition();
+    updateRepairStatus(
+      e.shiftKey ? "Shift+Tabアウトデント" : "Tabインデント"
+    );
+    autoSaveRepairDraft();
+  });
+}
+
+function updateLineNumbers() {
+  const editor = get("repairEditor");
+  const lineBox = get("lineNumbers");
+  if (!editor || !lineBox) return;
+  const count =
+    editor.value.split("\n").length || 1;
+  lineBox.innerHTML =
+    Array.from(
+      { length: count },
+      (_, i) => i + 1
+    ).join("<br>");
 }
 
 function updateRepairStatus(text) {
@@ -3597,6 +4306,5 @@ ${info.time || "unknown"}`;
 }
 
 </script>
-
 
 </body></html>
