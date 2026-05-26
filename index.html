@@ -1261,6 +1261,7 @@ function buildRepairToolsHtml() {
 <button class="float-list-btn" onclick="deleteCommentedCleanupBlocks()">🗑 コメント化済みを完全削除</button>
 <button class="float-list-btn" onclick="previewRepairHtml()">🎨 色分けプレビュー</button>
 <button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
+<button class="float-list-btn" onclick="copyRepairHtml()">📋 修復HTMLコピー</button>
 `;
 }
 
@@ -2853,8 +2854,6 @@ function saveRepairHtml() {
     alert("HTMLが空です");
     return;
   }
-  const copied =
-    copyTextFallback(html);
   const blob =
     new Blob(
       [html],
@@ -2874,12 +2873,38 @@ function saveRepairHtml() {
   setTimeout(() => {
     URL.revokeObjectURL(a.href);
   }, 1000);
-  alert(
-    copied
-      ? "修正版保存完了\n保存内容をコピーしました"
-      : "修正版保存完了\nコピー失敗"
-  );
+  alert("修正版保存完了");
+}
 
+function copyRepairHtml() {
+  const html =
+    get("repairEditor")
+      .value
+      .trim();
+  if (!html) {
+    alert("コピーするHTMLがありません");
+    return;
+  }
+  const area =
+    document.createElement("textarea");
+  area.value = html;
+  area.style.position = "fixed";
+  area.style.left = "10px";
+  area.style.top = "10px";
+  area.style.width = "90vw";
+  area.style.height = "40vh";
+  area.style.zIndex = "9999";
+  document.body.appendChild(area);
+  area.focus();
+  area.select();
+  const ok =
+    document.execCommand("copy");
+  document.body.removeChild(area);
+  alert(
+    ok
+      ? "修復HTMLをコピーしました"
+      : "コピー失敗。長文すぎる可能性があります"
+  );
 }
 
 function copyTextFallback(text) {
@@ -2902,6 +2927,7 @@ function copyTextFallback(text) {
     return false;
   }
 }
+
 let repairSearchIndex = 0;
 let repairSearchMatches = [];
 function escapeRegExp(str) {
