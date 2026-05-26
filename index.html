@@ -783,6 +783,11 @@ body:not(.dark) #floatPanel{
 
 <div id="repairStatus" class="small" style="margin-top:8px;">状態：自動保存データ復元</div>
 
+<div id="cursorStatus" class="small" style="margin-top:6px;">
+  Ln 1 / Col 1
+
+</div>
+
   <label for="repairEditor">
     HTML編集エリア
   </label>
@@ -2999,10 +3004,10 @@ function replaceFunctionBlock(){
 }
 
 function showFunctionList(){
-  const text =
-    get("repairEditor").value;
+  const editor = get("repairEditor");
+  const text = editor.value;
 
-  if(!text.trim()){
+  if (!text.trim()) {
     alert("HTMLが空です");
     return;
   }
@@ -3010,23 +3015,26 @@ function showFunctionList(){
     [...text.matchAll(
       /function\s+([a-zA-Z0-9_$]+)\s*\(/g
     )];
-  let html="";
-  if(matches.length===0){
-    html="関数なし";
-  }else{
+  let html = "";
+  if (matches.length === 0) {
+    html = "関数なし";
+  } else {
     html =
-      matches.map((m,i)=>{
-        const name=m[1];
+      matches.map((m, i) => {
+        const name = m[1];
+        const line =
+          text.slice(0, m.index)
+            .split("\n").length;
         return `
-        <button
-          class="float-list-btn"
-          onclick="
-            selectFunctionByName('${name}');
-            closeFloatPanel();
-          ">
-          ${i+1}. ${name}
-        </button>
-        `;
+<button
+  class="float-list-btn"
+  onclick="
+    jumpToLine(${line});
+    closeFloatPanel();
+  ">
+  ${i + 1}. ${name} / L${line}
+</button>
+`;
       }).join("");
   }
   openFloatPanel(
@@ -3035,12 +3043,43 @@ function showFunctionList(){
   );
 }
 
+function jumpToLine(lineNumber) {
+  const editor = get("repairEditor");
+  if (!editor) return;
+  const lines = editor.value.split("\n");
+  let pos = 0;
+  for (let i = 0; i < lineNumber - 1; i++) {
+    pos += lines[i].length + 1;
+  }
+  editor.focus();
+  editor.setSelectionRange(pos, pos);
+  const lineHeight = 18;
+  editor.scrollTop =
+    Math.max(0, (lineNumber - 3) * lineHeight);
+  updateCursorPosition();
+}
+function updateCursorPosition() {
+  const editor = get("repairEditor");
+  const box = get("cursorStatus");
+  if (!editor || !box) return;
+  const pos = editor.selectionStart || 0;
+  const before = editor.value.slice(0, pos);
+  const line = before.split("\n").length;
+  const col =
+    before.length -
+    before.lastIndexOf("\n");
+  box.innerText =
+    `Ln ${line} / Col ${col}`;
+}
+
+/* cleanup候補: 未使用function selectFunctionByName
 function selectFunctionByName(name){
   const result = findFunctionBlock(name);
   if(!result)return;
   const editor = get("repairEditor");
   editor.focus(); editor.setSelectionRange(result.start,result.end);
 }
+*/
 
 function renderRepairSearchResults(keyword) {
   const editor = get("repairEditor");
@@ -3835,19 +3874,23 @@ let repairUndoStack = [];
 let repairRedoStack = [];
 let repairLastValue = "";
 let repairAutoSaveEnabled = false;
-
 function initRepairIde() {
   const editor = get("repairEditor");
   if (!editor) return;
   repairLastValue = editor.value || "";
-  editor.addEventListener("input", () => {
-    updateLineNumbers();
+  editor.addEventListener("click", updateCursorPosition);
+  editor.addEventListener("keyup", updateCursorPosition);
+  editor.addEventListener("select", updateCursorPosition);
   editor.addEventListener("scroll", () => {
     const lineBox = get("lineNumbers");
     if (lineBox) {
       lineBox.scrollTop = editor.scrollTop;
     }
   });
+  editor.addEventListener("input", () => {
+    updateLineNumbers();
+    updateCursorPosition();
+
     if (repairLastValue !== editor.value) {
       repairUndoStack.push(repairLastValue);
       repairRedoStack = [];
@@ -3858,6 +3901,7 @@ function initRepairIde() {
   });
   loadRepairDraft();
   updateLineNumbers();
+  updateCursorPosition();
 }
 
 function updateLineNumbers() {
