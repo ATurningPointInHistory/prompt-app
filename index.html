@@ -826,7 +826,6 @@ style="display:none;">
 
 <script>
 
-const get = (id) => document.getElementById(id);
 let currentTab = 1;
 let isLoading = false;
 const APP_VERSION = "v5.7.2";
@@ -836,6 +835,58 @@ const CHANGELOG = [
   "v5.7.0 AIプリセット保存/復元",
   "v5.7.0 Gemini/Cursor/Copilot評価改善"
 ];
+
+const get = (id) => document.getElementById(id);
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function escapeRegExp(str) {
+  return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function loadJson(key, fallback) {
+  try {
+    return JSON.parse(
+      localStorage.getItem(key) || JSON.stringify(fallback)
+    );
+  } catch {
+    localStorage.removeItem(key);
+    return fallback;
+  }
+}
+
+function copyTextFallback(text) {
+  try {
+    const area =
+      document.createElement("textarea");
+
+    area.value = text;
+    area.style.position = "fixed";
+    area.style.left = "-9999px";
+    area.style.top = "0";
+
+    document.body.appendChild(area);
+    area.focus();
+    area.select();
+
+    const ok =
+      document.execCommand("copy");
+
+    document.body.removeChild(area);
+
+    return ok;
+  } catch (e) {
+    console.log("copy failed", e);
+    return false;
+  }
+}
 
 const defaultTemplates = [
   {
@@ -1503,10 +1554,6 @@ function highlightKeyword(text, keyword) {
   const safeKeyword = escapeHtml(keyword);
   const regex = new RegExp(escapeRegExp(safeKeyword), "gi");
   return safeText.replace(regex, match => `<mark>${match}</mark>`);
-}
-
-function escapeRegExp(str) {
-  return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function openFloatPanel(title, bodyHtml){
@@ -3189,26 +3236,6 @@ async function copyRepairHtml() {
   }
 }
 
-function copyTextFallback(text) {
-  try {
-    const area =
-      document.createElement("textarea");
-    area.value = text;
-    area.style.position = "fixed";
-    area.style.left = "-9999px";
-    area.style.top = "0";
-    document.body.appendChild(area);
-    area.focus();
-    area.select();
-    const ok =
-      document.execCommand("copy");
-    document.body.removeChild(area);
-    return ok;
-  } catch (e) {
-    console.log("copy failed", e);
-    return false;
-  }
-}
 let repairSearchIndex = 0;
 let repairSearchMatches = [];
 
@@ -3873,36 +3900,50 @@ function hideWarning() {
   get("warningBox").innerText = "";
 }
 
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-function loadJson(key, fallback) {
-  try {
-    return JSON.parse(
-      localStorage.getItem(key) || JSON.stringify(fallback)
-    );
-  } catch {
-    localStorage.removeItem(key);
-    return fallback;
-  }
-}
-
 function saveCurrentState() {
+
   if (isLoading) return;
-  if (!get("raw-input")) return; localStorage.setItem("rawInput", get("raw-input").value);
-localStorage.setItem("roughTone", get("rough-tone").value); localStorage.setItem("roughOutputFormat", get("rough-output-format").value);
-localStorage.setItem("roleValue", get("role").value);
-localStorage.setItem("taskValue", get("task").value);
-localStorage.setItem("detailsValue", get("details").value);
-localStorage.setItem("toneValue", get("tone").value);
-localStorage.setItem("currentTab", String(currentTab));
-localStorage.setItem("aiTarget", get("ai-target").value);
+
+  if (!get("raw-input")) return;
+
+  localStorage.setItem(
+    "rawInput",
+    get("raw-input").value
+  );
+
+  localStorage.setItem(
+    "roughTone",
+    get("rough-tone").value
+  );
+
+  localStorage.setItem(
+    "roughOutputFormat",
+    get("rough-output-format").value
+  );
+  localStorage.setItem(
+    "roleValue",
+    get("role").value
+  );
+  localStorage.setItem(
+    "taskValue",
+    get("task").value
+  );
+  localStorage.setItem(
+    "detailsValue",
+    get("details").value
+  );
+  localStorage.setItem(
+    "toneValue",
+    get("tone").value
+  );
+  localStorage.setItem(
+    "currentTab",
+    String(currentTab)
+  );
+  localStorage.setItem(
+    "aiTarget",
+    get("ai-target").value
+  );
 }
 
 function loadSettings() {
