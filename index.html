@@ -1295,7 +1295,7 @@ function resetRepairEditorView() {
   editor.style.maxWidth = "100%";
 }
 
-function toggleRepairSearchBox(){
+function toggleRepairSearchBox() {
   openFloatPanel(
     "検索",
     `
@@ -1304,7 +1304,9 @@ function toggleRepairSearchBox(){
       placeholder="検索">
     <div class="float-panel-actions">
       <button onclick="searchRepairText()">🔍</button>
+      <button onclick="searchRepairPrev()">◀</button>
       <button onclick="searchRepairNext()">▶</button>
+      <button onclick="clearRepairSearch()">✕</button>
 
     </div>
 
@@ -1312,11 +1314,99 @@ function toggleRepairSearchBox(){
       id="repairSearchResult"
       class="diagnose-box"
       style="display:none;">
- 
-   </div>
+
+    </div>
 
     `
   );
+  setTimeout(() => {
+    const box = get("repairSearch");
+    if (!box) return;
+    box.focus();
+    box.select();
+    // PC用
+    box.onkeydown =
+      handleRepairSearchKey;
+    // スマホ用 Enter対応
+    box.addEventListener(
+      "keyup",
+      handleRepairSearchMobile
+    );
+  },50);
+}
+
+function handleRepairSearchKey(e){
+  if(e.key==="Enter"){
+    e.preventDefault();
+    if(e.shiftKey){
+      searchRepairPrev();
+    }else{
+      searchRepairNext();
+    }
+  }
+  if(e.key==="Escape"){
+    e.preventDefault();
+    if(
+      typeof closeFloatPanelKeepEditorSelection
+      === "function"
+    ){
+      closeFloatPanelKeepEditorSelection();
+    }else{
+      closeFloatPanel();
+    }
+  }
+}
+
+function handleRepairSearchMobile(e){
+  if(e.key==="Enter"){
+    e.preventDefault();
+    searchRepairNext();
+  }
+}
+
+function searchRepairPrev(){
+  const editor=get("repairEditor");
+  const keyword=get("repairSearch").value;
+  if(!keyword){
+    alert("検索文字を入力してください");
+    return;
+  }
+  const text=editor.value;
+  let index=
+    text.lastIndexOf(
+      keyword,
+      Math.max(
+        0,
+        editor.selectionStart-1
+      )
+    );
+  if(index===-1){
+    index=text.lastIndexOf(keyword);
+  }
+  if(index===-1){
+    alert("見つかりませんでした");
+    return;
+  }
+  repairSearchIndex=index;
+  editor.focus();
+  editor.setSelectionRange(
+    index,
+    index+keyword.length
+  );
+  renderRepairSearchResults(keyword);
+}
+
+function clearRepairSearch(){
+  const box=get("repairSearch");
+  if(!box)return;
+  box.value="";
+  const result=
+    get("repairSearchResult");
+  if(result){
+    result.innerHTML="";
+    result.style.display="none";
+  }
+  box.focus();
 }
 
 function openFloatPanel(title, bodyHtml){
@@ -1472,6 +1562,7 @@ function updatePanelButtonStates() {
 console.log("CHANGELOG");
 console.table(CHANGELOG);
 
+/* cleanup候補: 未使用function toggleTemplateManager
 function toggleTemplateManager() {
   const isOpen = get("template-manager").style.display !== "none";
   closeAllManagers();
@@ -1482,7 +1573,9 @@ function toggleTemplateManager() {
   }
   updatePanelButtonStates();
 }
+*/
 
+/* cleanup候補: 未使用function toggleDangerManager
 function toggleDangerManager() {
   const isOpen = get("danger-manager").style.display !== "none";
   closeAllManagers();
@@ -1492,7 +1585,9 @@ function toggleDangerManager() {
   }
   updatePanelButtonStates();
 }
+*/
 
+/* cleanup候補: 未使用function togglePatternManager
 function togglePatternManager() {
   const isOpen = get("pattern-manager").style.display !== "none";
   closeAllManagers();
@@ -1502,7 +1597,9 @@ function togglePatternManager() {
   }
   updatePanelButtonStates();
 }
+*/
 
+/* cleanup候補: 未使用function toggleAiPresetManager
 function toggleAiPresetManager() {
   const isOpen = get("ai-preset-manager").style.display !== "none";
   closeAllManagers();
@@ -1513,6 +1610,7 @@ function toggleAiPresetManager() {
   }
   updatePanelButtonStates();
 }
+*/
 
 function loadAiPresetToEditor() {
   const target = get("aiPresetTarget").value;
@@ -2675,8 +2773,12 @@ function compareBackupSummary() {
           return;
         }
         const currentHtml =
-          "<!DOCTYPE html>\n" +
-          document.documentElement.outerHTML;
+          isRepairMode() &&
+          get("repairEditor") &&
+          get("repairEditor").value.trim()
+            ? get("repairEditor").value
+            : "<!DOCTYPE html>\n" +
+              document.documentElement.outerHTML;
         const oldHtml = data.html;
         const current =
           getHtmlSummary(currentHtml);
