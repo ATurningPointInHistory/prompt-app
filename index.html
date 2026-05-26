@@ -1895,6 +1895,9 @@ ${
 )
 }/100
 `;
+
+    window.latestHealthResult =
+      result;
     openFloatPanel(
     "HTML HEALTH",
     `
@@ -1903,7 +1906,6 @@ ${
         📋 コピー
       </button>
     </div>
-
     <pre
       id="healthResultBox"
       class="code-preview">
@@ -1911,9 +1913,6 @@ ${escapeHtml(result)}
     </pre>
     `
   );
-
-  window.latestHealthResult =
-    result;
 }
 
 function formatJsonOutput() {
@@ -2762,14 +2761,33 @@ function copyHealthResult() {
     alert("コピー内容なし");
     return;
   }
-  navigator.clipboard
-    .writeText(text)
-    .then(()=>
-      alert("コピー完了")
-    )
-    .catch(()=>
-      alert("コピー失敗")
-    );
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(()=>
+        alert("コピー完了")
+      )
+      .catch(()=>{
+        const ok =
+          copyTextFallback(text);
+        alert(
+          ok
+          ? "コピー完了"
+          : "コピー失敗"
+        );
+      });
+    return;
+  }
+  const ok =
+    copyTextFallback(text);
+  alert(
+    ok
+    ? "コピー完了"
+    : "コピー失敗"
+  );
 }
 
 function restoreProgramBackup() {
@@ -3372,7 +3390,8 @@ function diagnoseRepairHtml() {
   );
   const result =
     report.join("\n");
-
+  window.latestDiagnoseResult =
+    result;
   openFloatPanel(
     "編集内容診断",
     `
@@ -3388,8 +3407,6 @@ function diagnoseRepairHtml() {
     </pre>
     `
   );
-  window.latestDiagnoseResult =
-    result;
 }
 
 function copyDiagnoseResult() {
@@ -3399,14 +3416,33 @@ function copyDiagnoseResult() {
     alert("コピー内容なし");
     return;
   }
-  navigator.clipboard
-    .writeText(text)
-    .then(()=>
-      alert("コピー完了")
-    )
-    .catch(()=>
-      alert("コピー失敗")
-    );
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =>
+        alert("コピー完了")
+      )
+      .catch(() => {
+        const ok =
+          copyTextFallback(text);
+        alert(
+          ok
+            ? "コピー完了"
+            : "コピー失敗"
+        );
+      });
+    return;
+  }
+  const ok =
+    copyTextFallback(text);
+  alert(
+    ok
+      ? "コピー完了"
+      : "コピー失敗"
+  );
 }
 
 function previewRepairHtml() {
