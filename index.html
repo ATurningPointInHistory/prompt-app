@@ -788,10 +788,7 @@ body:not(.dark) #floatPanel{
 
 <div id="repairStatus" class="small" style="margin-top:8px;">状態：自動保存データ復元</div>
 
-<div id="cursorStatus" class="small" style="margin-top:6px;">
-  Ln 1 / Col 1
-
-</div>
+<div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
 
   <label for="repairEditor">
     HTML編集エリア
@@ -799,15 +796,9 @@ body:not(.dark) #floatPanel{
 
   <div class="repair-editor-wrap">
 
-    <div id="lineNumbers">
-      1
-    </div>
+    <div id="lineNumbers">1</div>
 
-    <textarea
-      id="repairEditor"
-      rows="20"
-      placeholder="ここにHTML全文が表示されます">
-    </textarea>
+    <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます" style="width: 100%; max-width: 100%;">    </textarea>
   </div>
   <button id="previewBtn" onclick="previewRepairHtml()" class="btn-full">
     🎨 色分けプレビュー
@@ -1904,7 +1895,25 @@ ${
 )
 }/100
 `;
-  alert(result);
+    openFloatPanel(
+    "HTML HEALTH",
+    `
+    <div class="float-panel-actions">
+      <button onclick="copyHealthResult()">
+        📋 コピー
+      </button>
+    </div>
+
+    <pre
+      id="healthResultBox"
+      class="code-preview">
+${escapeHtml(result)}
+    </pre>
+    `
+  );
+
+  window.latestHealthResult =
+    result;
 }
 
 function formatJsonOutput() {
@@ -2746,6 +2755,23 @@ function clearDiffResult() {
   closeFloatPanel();
 }
 
+function copyHealthResult() {
+  const text =
+    window.latestHealthResult || "";
+  if (!text) {
+    alert("コピー内容なし");
+    return;
+  }
+  navigator.clipboard
+    .writeText(text)
+    .then(()=>
+      alert("コピー完了")
+    )
+    .catch(()=>
+      alert("コピー失敗")
+    );
+}
+
 function restoreProgramBackup() {
   const input =
     document.createElement("input");
@@ -3344,9 +3370,43 @@ function diagnoseRepairHtml() {
       }`
     : "✔ 孤立idなし"
   );
-  alert(
-    report.join("\n")
+  const result =
+    report.join("\n");
+
+  openFloatPanel(
+    "編集内容診断",
+    `
+    <div class="float-panel-actions">
+      <button onclick="copyDiagnoseResult()">
+        📋 コピー
+      </button>
+    </div>
+    <pre
+      id="diagnoseResultBox"
+      class="code-preview">
+  ${escapeHtml(result)}
+    </pre>
+    `
   );
+  window.latestDiagnoseResult =
+    result;
+}
+
+function copyDiagnoseResult() {
+  const text =
+    window.latestDiagnoseResult || "";
+  if (!text) {
+    alert("コピー内容なし");
+    return;
+  }
+  navigator.clipboard
+    .writeText(text)
+    .then(()=>
+      alert("コピー完了")
+    )
+    .catch(()=>
+      alert("コピー失敗")
+    );
 }
 
 function previewRepairHtml() {
