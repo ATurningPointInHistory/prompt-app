@@ -786,7 +786,7 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">状態：変更あり</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：アウトデント</div>
 
 <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
 
@@ -796,7 +796,7 @@ body:not(.dark) #floatPanel{
 
   <div class="repair-editor-wrap">
 
-    <div id="lineNumbers">1</div>
+    <div id="lineNumbers">1<br>2<br>3<br>4<br>5</div>
 
     <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます" style="width: 100%; max-width: 100%;">    </textarea>
   </div>
@@ -1217,6 +1217,11 @@ function isRepairMode() {
 
 function buildNormalToolsHtml() {
   return `
+<button class="float-list-btn" onclick="toggleTemplateManager()">🧩 テンプレ管理</button>
+<button class="float-list-btn" onclick="toggleDangerManager()">⚠ 危険ワード管理</button>
+<button class="float-list-btn" onclick="togglePatternManager()">🚫 NGパターン管理</button>
+<button class="float-list-btn" onclick="toggleAiPresetManager()">🤖 AIプリセット管理</button>
+<hr>
 <button class="float-list-btn" onclick="backupProgram()">🗂 フルバックアップ</button>
 <button class="float-list-btn" onclick="showBackupHistory()">📚 バックアップ履歴</button>
 <button class="float-list-btn" onclick="saveProgramHtml()">💾 本体HTML保存</button>
@@ -1325,7 +1330,8 @@ function openFloatPanel(title, bodyHtml){
       <button onclick="moveFloatPanelBy(-60,0)">←</button>
       <button onclick="moveFloatPanelBy(60,0)">→</button>
       <button onclick="resetFloatPanelPosition()">↘</button>
-      <button onclick="closeFloatPanel()">×</button>
+      <button onmousedown="event.preventDefault()"
+      onclick="closeFloatPanelKeepEditorSelection()">×</button>
     </div>` +
     bodyHtml;
 
@@ -1373,6 +1379,20 @@ function resetFloatPanelPosition() {
   panel.style.top = "auto";
   panel.style.right = "18px";
   panel.style.bottom = "88px";
+}
+
+function closeFloatPanelKeepEditorSelection() {
+  const editor = get("repairEditor");
+  const start = editor ? editor.selectionStart : null;
+  const end = editor ? editor.selectionEnd : null;
+  closeFloatPanel();
+  if (editor && start !== null && end !== null) {
+    setTimeout(() => {
+      editor.focus();
+      editor.setSelectionRange(start, end);
+      updateCursorPosition();
+    }, 0);
+  }
 }
 
 function closeFloatPanel(){
