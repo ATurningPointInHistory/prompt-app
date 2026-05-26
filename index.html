@@ -746,14 +746,12 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">
-  状態：未変更
-</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave OFF</div>
 
   <label for="repairEditor">
     HTML編集エリア
   </label>
-  <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます"></textarea>
+  <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます" style="width: 100%; max-width: 100%;"></textarea>
   <button id="previewBtn" onclick="previewRepairHtml()" class="btn-full">
     🎨 色分けプレビュー
   </button>
@@ -1208,6 +1206,7 @@ function buildRepairToolsHtml() {
 <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾 AutoSave</button>
 <hr>
 <button class="float-list-btn" onclick="cleanupCandidates()">🧹 削除候補チェック</button>
+<button class="float-list-btn" onclick="deleteCommentedCleanupBlocks()">🗑 コメント化済みを完全削除</button>
 <button class="float-list-btn" onclick="previewRepairHtml()">🎨 色分けプレビュー</button>
 <button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
 `;
@@ -3546,6 +3545,7 @@ function cleanupCandidates() {
   if (!ok) return;
 commentOutCleanupCandidates(unusedFuncs, orphanIds);
 }
+
 function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
   const editor = get("repairEditor");
   if (!editor || !editor.value.trim()) {
@@ -3587,6 +3587,56 @@ function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
     "削除候補を安全処理しました。\n\n" +
     "未使用function：コメント化\n" +
     "孤立id：data-cleanup-disabled-id に変更\n\n" +
+    "HTML HEALTH / 編集内容診断で確認してください。"
+  );
+}
+
+function deleteCommentedCleanupBlocks() {
+  const editor = get("repairEditor");
+  if (!editor || !editor.value.trim()) {
+    alert("修復モードでHTMLを読み込んでから実行してください");
+    return;
+  }
+  let html = editor.value;
+  const before = html;
+  const functionBlocks =
+    html.match(
+      /\/\*\s*cleanup候補:\s*未使用function[\s\S]*?\*\//g
+    ) || [];
+  const disabledIds =
+    html.match(
+      /data-cleanup-disabled-id="[^"]+"/g
+    ) || [];
+  const message =
+    "完全削除確認\n\n" +
+    "削除対象:\n" +
+    "・コメント化済みfunction: " + functionBlocks.length + "件\n" +
+    "・無効化済みid属性: " + disabledIds.length + "件\n\n" +
+    "OKで完全削除します。\n" +
+    "事前にバックアップ保存済みか確認してください。";
+  const ok = confirm(message);
+  if (!ok) return;
+  repairUndoStack.push(before);
+  repairRedoStack = [];
+  // コメント化済みfunctionを完全削除
+  html = html.replace(
+    /\/\*\s*cleanup候補:\s*未使用function[\s\S]*?\*\//g,
+    ""
+  );
+  // data-cleanup-disabled-id 属性を完全削除
+  html = html.replace(
+    /\s*data-cleanup-disabled-id="[^"]+"/g,
+    ""
+  );
+  // 空行を軽く整理
+  html = html.replace(/\n{4,}/g, "\n\n\n");
+  editor.value = html;
+  repairLastValue = html;
+  updateRepairStatus(
+    "コメント化済み候補を完全削除"
+  );
+  alert(
+    "完全削除しました。\n\n" +
     "HTML HEALTH / 編集内容診断で確認してください。"
   );
 }
