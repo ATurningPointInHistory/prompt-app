@@ -289,19 +289,6 @@ body.dark button.active-panel {
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
 }
 
-#repairSearchBtn {
-  position: fixed;
-  right: 18px;
-  bottom: 88px;
-  z-index: 997;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  padding: 0;
-  font-size: 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,.25);
-}
-
 #repairSearch {
   padding: 9px 10px;
   font-size: 14px;
@@ -466,19 +453,6 @@ body:not(.dark) #floatPanel{
   margin-top:6px;
   padding:8px 10px;
   font-size:12px;
-}
-
-#functionListBtn {
-  position: fixed;
-  right: 18px;
-  bottom: 150px;
-  z-index: 997;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  padding: 0;
-  font-size: 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,.25);
 }
 
 #repairSearchBtn {
@@ -776,14 +750,6 @@ body:not(.dark) #floatPanel{
   状態：未変更
 </div>
 
-<button id="functionListBtn" onclick="showFunctionList()" class="btn-secondary">
-  📚
-</button>
-
-<button id="repairSearchBtn" onclick="toggleRepairSearchBox()" class="btn-secondary">
-  🔍
-</button>
-
   <label for="repairEditor">
     HTML編集エリア
   </label>
@@ -802,7 +768,7 @@ body:not(.dark) #floatPanel{
 
 <button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">⚙</button>
 
-<div id="floatPanel" style="display: none;"></div>
+<div id="floatPanel" style="display: none; inset: 293.317px auto auto 86px;"></div>
 
 </div> <!-- card -->
 
@@ -1194,126 +1160,83 @@ function switchAppPage(mode) {
     "active",
     mode === "repair"
   );
+  if (mode === "repair") {
+    resetRepairEditorView();
+  }
+}
+
+function isRepairMode() {
+  return get("repairPage").style.display !== "none";
+}
+
+function buildNormalToolsHtml() {
+  return `
+<button class="float-list-btn" onclick="backupProgram()">🗂 フルバックアップ</button>
+<button class="float-list-btn" onclick="showBackupHistory()">📚 バックアップ履歴</button>
+<button class="float-list-btn" onclick="saveProgramHtml()">💾 本体HTML保存</button>
+<button class="float-list-btn" onclick="restoreProgramBackup()">♻ フル復元</button>
+<hr>
+<button class="float-list-btn" onclick="reviewPrompt()">🛠 Promptレビュー</button>
+<button class="float-list-btn" onclick="testPromptObject()">🧩 内部JSONテスト</button>
+<button class="float-list-btn" onclick="testJsonFormat()">🧪 JSONテスト</button>
+<button class="float-list-btn" onclick="formatJsonOutput()">📦 JSON整形</button>
+<button class="float-list-btn" onclick="recheckOutput()">🔍 再チェック</button>
+<button class="float-list-btn" onclick="diagnoseHtml()">🩺 HTML診断</button>
+<button class="float-list-btn" onclick="compareBackupSummary()">📊 バックアップ差分確認</button>
+<button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
+<hr>
+<button class="float-list-btn" onclick="importTemplates()">📥 テンプレ復元</button>
+<button class="float-list-btn" onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
+<button class="float-list-btn" onclick="importAiPresets()">🤖 AI設定復元</button>
+<hr>
+<button class="float-list-btn" onclick="clearOutput()">🧹 出力クリア</button>
+<button class="float-list-btn" onclick="clearHistory()">🗑 履歴全削除</button>
+`;
+}
+
+function buildRepairToolsHtml() {
+  return `
+<button class="float-list-btn" onclick="diagnoseRepairHtml()">🩺 編集内容診断</button>
+<button class="float-list-btn" onclick="selectFunctionBlock()">📦 関数選択</button>
+<button class="float-list-btn" onclick="replaceFunctionBlock()">✏ 関数置換</button>
+<button class="float-list-btn" onclick="showFunctionList()">📚 関数一覧</button>
+<button class="float-list-btn" onclick="toggleRepairSearchBox()">🔍 検索</button>
+<button class="float-list-btn" onclick="openReplacePanel()">🔁 検索置換</button>
+<hr>
+<button class="float-list-btn" onclick="undoRepairEdit()">↩ Undo</button>
+<button class="float-list-btn" onclick="redoRepairEdit()">↪ Redo</button>
+<button class="float-list-btn" onclick="toggleRepairAutoSave()">💾 AutoSave</button>
+<hr>
+<button class="float-list-btn" onclick="cleanupCandidates()">🧹 削除候補チェック</button>
+<button class="float-list-btn" onclick="previewRepairHtml()">🎨 色分けプレビュー</button>
+<button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
+`;
 }
 
 function toggleToolsMenu(){
-  const panel =
-    get("floatPanel");
-  if(
-    panel.style.display !== "none"
-  ){
+  const panel = get("floatPanel");
+  if (panel.style.display !== "none") {
     closeFloatPanel();
-    get("toolsBtn").innerText =
-      "⚙";
     return;
   }
-  get("toolsBtn").innerText =
-    "×";
-  openFloatPanel(
-    "ツール",
-`
-<button class="float-list-btn" onclick="backupProgram()">
-🗂 フルバックアップ</button>
-<button class="float-list-btn" onclick="showBackupHistory()">
-📚 バックアップ履歴</button>
-<button class="float-list-btn"
-onclick="saveProgramHtml()">
-💾 本体HTML保存</button>
-<button class="float-list-btn"
-onclick="restoreProgramBackup()">
-♻ フル復元</button>
-<hr>
-<button class="float-list-btn"
-onclick="reviewPrompt()">
-🛠 Promptレビュー</button>
-<button class="float-list-btn"
-onclick="testPromptObject()">
-🧩 内部JSONテスト</button>
-<button class="float-list-btn"
-onclick="testJsonFormat()">
-🧪 JSONテスト</button>
-<button class="float-list-btn"
-onclick="formatJsonOutput()">
-📦 JSON整形</button>
-<button class="float-list-btn"
-onclick="recheckOutput()">
-🔍 再チェック</button>
-<button class="float-list-btn"
-onclick="diagnoseHtml()">
-🩺 HTML診断</button>
-<button class="float-list-btn"
-onclick="compareBackupSummary()">
-📊 バックアップ差分確認</button>
-<button
-class="float-list-btn"
-onclick="showHtmlHealth()">
-💚 HTML HEALTH
-</button>
-<hr>
-<button class="float-list-btn"
-onclick="importTemplates()">
-📥 テンプレ復元
-</button>
-<button class="float-list-btn"
-onclick="exportAiPresets()">
-🤖 AI設定バックアップ
-</button>
-<button class="float-list-btn"
-onclick="importAiPresets()">
-🤖 AI設定復元
-</button>
-<hr>
-<button class="float-list-btn"
-onclick="clearOutput()">
-🧹 出力クリア
-</button>
-<button class="float-list-btn"
-onclick="clearHistory()">
-🗑 履歴全削除
-</button>
-<button class="float-list-btn"
-onclick="cleanupCandidates()">
-🧹 削除候補チェック
-</button>
-<hr>
-<button class="float-list-btn"
-onclick="diagnoseRepairHtml()">
-🩺 編集内容診断
-</button>
-<button class="float-list-btn"
-onclick="selectFunctionBlock()">
-📦 関数選択
-</button>
-<button class="float-list-btn"
-onclick="replaceFunctionBlock()">
-✏ 関数置換
-</button>
-<button class="float-list-btn"
-onclick="undoRepairEdit()">
-↩ Undo
-</button>
-<button class="float-list-btn"
-onclick="redoRepairEdit()">
-↪ Redo
-</button>
-<button class="float-list-btn"
-onclick="toggleRepairAutoSave()">
-💾 AutoSave
-</button>
-<button class="float-list-btn"
-onclick="openReplacePanel()">
-🔁 検索置換
-</button>
-<button class="float-list-btn"
-onclick="cleanupCandidates()">
-🧹 削除候補チェック
-</button>
-<button class="float-list-btn"
-onclick="previewRepairHtml()">
-🎨 色分けプレビュー
-</button>
-`
-  );
+  get("toolsBtn").innerText = "×";
+  const repairMode = isRepairMode();
+  const title = repairMode
+    ? "修復ツール"
+    : "通常ツール";
+  const bodyHtml = repairMode
+    ? buildRepairToolsHtml()
+    : buildNormalToolsHtml();
+  openFloatPanel(title, bodyHtml);
+}
+
+function resetRepairEditorView() {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  editor.scrollLeft = 0;
+  editor.style.width = "100%";
+  editor.style.maxWidth = "100%";
 }
 
 function toggleRepairSearchBox(){
