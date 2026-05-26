@@ -788,7 +788,11 @@ body:not(.dark) #floatPanel{
 
 <div id="repairStatus" class="small" style="margin-top:8px;">状態：自動保存データ復元</div>
 
-<div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1298 / Col 10</div>
+<div id="cursorStatus"
+class="small"
+style="margin-top:6px;">
+Ln 1 / Col 1
+</div>
 
   <label for="repairEditor">
     HTML編集エリア
@@ -2532,6 +2536,12 @@ function getCleanProgramHtml() {
     clone.querySelector("#lineNumbers");
   if (lineNumbers) {
   lineNumbers.innerHTML = "1";
+  }
+  const cursorStatus =
+    clone.querySelector("#cursorStatus");
+  if (cursorStatus) {
+    cursorStatus.innerText =
+      "Ln 1 / Col 1";
   }
   if (output) {
     output.innerText = "ここに表示";
