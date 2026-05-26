@@ -862,30 +862,56 @@ function loadJson(key, fallback) {
   }
 }
 
-function copyTextFallback(text) {
-  try {
-    const area =
-      document.createElement("textarea");
+function copyText() {
+  const text =
+    get("output").innerText.trim();
 
-    area.value = text;
-    area.style.position = "fixed";
-    area.style.left = "-9999px";
-    area.style.top = "0";
-
-    document.body.appendChild(area);
-    area.focus();
-    area.select();
-
-    const ok =
-      document.execCommand("copy");
-
-    document.body.removeChild(area);
-
-    return ok;
-  } catch (e) {
-    console.log("copy failed", e);
-    return false;
+  if (!text || text === "ここに表示") {
+    alert("先に生成してください");
+    return;
   }
+
+  const report =
+    detectSensitiveContent(text);
+
+  if (report.hasAny) {
+    const ok =
+      confirm(
+        buildConfirmMessage(report, "コピー")
+      );
+
+    if (!ok) return;
+  }
+
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => alert("コピー完了"))
+      .catch(() => {
+        const ok =
+          copyTextFallback(text);
+
+        alert(
+          ok
+            ? "コピー完了"
+            : "コピー失敗（長押しコピーしてください）"
+        );
+      });
+
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "コピー完了"
+      : "コピー失敗（長押しコピーしてください）"
+  );
 }
 
 const defaultTemplates = [
@@ -1359,37 +1385,32 @@ function toggleRepairSearchBox() {
     <input
       id="repairSearch"
       placeholder="検索">
+
     <div class="float-panel-actions">
       <button onclick="searchRepairText()">🔍</button>
       <button onclick="searchRepairPrev()">◀</button>
       <button onclick="searchRepairNext()">▶</button>
       <button onclick="clearRepairSearch()">✕</button>
-
     </div>
 
     <div
       id="repairSearchResult"
       class="diagnose-box"
       style="display:none;">
-
     </div>
-
     `
   );
+
   setTimeout(() => {
     const box = get("repairSearch");
     if (!box) return;
+
     box.focus();
     box.select();
-    // PC用
+
     box.onkeydown =
       handleRepairSearchKey;
-    // スマホ用 Enter対応
-    box.addEventListener(
-      "keyup",
-      handleRepairSearchMobile
-    );
-  },50);
+  }, 50);
 }
 
 function handleRepairSearchKey(e){
@@ -1977,21 +1998,46 @@ function copyText() {
 }
 
 function download() {
-  const text = get("output").innerText.trim();
+  const text =
+    get("output").innerText.trim();
+
   if (!text || text === "ここに表示") {
     alert("先に生成してください");
     return;
   }
-  const report = detectSensitiveContent(text);
+
+  const report =
+    detectSensitiveContent(text);
+
   if (report.hasAny) {
-    const ok = confirm(buildConfirmMessage(report, "保存"));
+    const ok =
+      confirm(
+        buildConfirmMessage(report, "保存")
+      );
+
     if (!ok) return;
   }
-  const blob = new Blob([text], { type: "text/plain" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "prompt.txt";
+
+  const blob =
+    new Blob(
+      [text],
+      { type: "text/plain" }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  a.download =
+    "prompt.txt";
+
   a.click();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
 }
 
 function clearOutput() {
@@ -2622,12 +2668,29 @@ function saveFromHistory(text) {
 }
 
 function exportTemplates() {
-  const data = localStorage.getItem("templates") || "[]";
-  const blob = new Blob([data], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "templates.json";
+  const data =
+    localStorage.getItem("templates") || "[]";
+
+  const blob =
+    new Blob(
+      [data],
+      { type: "application/json" }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  a.download =
+    "templates.json";
+
   a.click();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
 }
 
 function importTemplates() {
@@ -2635,12 +2698,39 @@ function importTemplates() {
 }
 
 function exportAiPresets() {
-  const data = JSON.stringify(getAiPresets(), null, 2);
-  const blob = new Blob([data], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "ai-presets.json";
+
+  const data =
+    JSON.stringify(
+      getAiPresets(),
+      null,
+      2
+    );
+
+  const blob =
+    new Blob(
+      [data],
+      {
+        type:
+        "application/json"
+      }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  a.download =
+    "ai-presets.json";
+
   a.click();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(
+      a.href
+    );
+  },1000);
 }
 
 function importAiPresets() {
@@ -2650,51 +2740,102 @@ function importAiPresets() {
 function getCleanProgramHtml() {
   const clone =
     document.documentElement.cloneNode(true);
+
   const floatPanel =
     clone.querySelector("#floatPanel");
+
   if (floatPanel) {
     floatPanel.innerHTML = "";
     floatPanel.removeAttribute("style");
-    floatPanel.style.display =
-      "none";
+    floatPanel.style.display = "none";
     floatPanel.style.left = "";
     floatPanel.style.top = "";
     floatPanel.style.right = "18px";
     floatPanel.style.bottom = "88px";
   }
-  const toolsBtn = clone.querySelector("#toolsBtn");
+
+  const toolsBtn =
+    clone.querySelector("#toolsBtn");
+
   if (toolsBtn) {
     toolsBtn.innerText = "⚙";
   }
-  ["debugBox", "diagnoseBox", "warningBox", "repairPreview"].forEach(id => {
-    const el = clone.querySelector("#" + id);
+
+  [
+    "debugBox",
+    "diagnoseBox",
+    "warningBox",
+    "repairPreview"
+  ].forEach(id => {
+    const el =
+      clone.querySelector("#" + id);
+
     if (el) {
       el.innerHTML = "";
       el.innerText = "";
       el.style.display = "none";
     }
   });
-  const output =
-  clone.querySelector("#output");
 
-  const lineNumbers =
-    clone.querySelector("#lineNumbers");
-  if (lineNumbers) {
-    lineNumbers.innerHTML = "1";
-  }
-  const cursorStatus =
-    clone.querySelector("#cursorStatus");
-  if (cursorStatus) {
-    cursorStatus.innerText =
-      "Ln 1 / Col 1";
-  }
+  [
+    "template-manager",
+    "danger-manager",
+    "pattern-manager",
+    "ai-preset-manager"
+  ].forEach(id => {
+    const el =
+      clone.querySelector("#" + id);
+
+    if (el) {
+      el.style.display = "none";
+    }
+  });
+
+  const output =
+    clone.querySelector("#output");
+
   if (output) {
     output.innerText = "ここに表示";
   }
-  ["commandBox", "presetBox", "templateList", "dangerList", "patternList", "history"].forEach(id => {
-    const el = clone.querySelector("#" + id);
-    if (el) el.innerHTML = "";
+
+  const lineNumbers =
+    clone.querySelector("#lineNumbers");
+
+  if (lineNumbers) {
+    lineNumbers.innerHTML = "1";
+  }
+
+  const cursorStatus =
+    clone.querySelector("#cursorStatus");
+
+  if (cursorStatus) {
+    cursorStatus.innerText = "Ln 1 / Col 1";
+  }
+
+  const repairEditor =
+    clone.querySelector("#repairEditor");
+
+  if (repairEditor) {
+    repairEditor.value = "";
+    repairEditor.innerHTML = "";
+  }
+
+  [
+    "commandBox",
+    "presetBox",
+    "templateList",
+    "dangerList",
+    "patternList",
+    "history"
+  ].forEach(id => {
+    const el =
+      clone.querySelector("#" + id);
+
+    if (el) {
+      el.innerHTML = "";
+    }
   });
+
   return "<!DOCTYPE html>\n" + clone.outerHTML;
 }
 
@@ -3025,14 +3166,45 @@ function showDiffResult(text) {
   window.latestDiffResult = text;
 }
 function copyDiffResult() {
-  const text = window.latestDiffResult || "";
+  const text =
+    window.latestDiffResult || "";
+
   if (!text) {
     alert("コピーする差分結果がありません");
     return;
   }
-  navigator.clipboard.writeText(text)
-    .then(() => alert("差分結果をコピーしました"))
-    .catch(() => alert("コピー失敗"));
+
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =>
+        alert("差分結果をコピーしました")
+      )
+      .catch(() => {
+        const ok =
+          copyTextFallback(text);
+
+        alert(
+          ok
+            ? "差分結果をコピーしました"
+            : "コピー失敗"
+        );
+      });
+
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "差分結果をコピーしました"
+      : "コピー失敗"
+  );
 }
 function clearDiffResult() {
   window.latestDiffResult = "";
@@ -3120,124 +3292,222 @@ function restoreProgramBackup() {
 
 function saveProgramHtml() {
   const html =
-  getCleanProgramHtml();
+    getCleanProgramHtml();
+
   const blob =
     new Blob(
       [html],
       { type: "text/html" }
     );
+
   const a =
     document.createElement("a");
+
   a.href =
     URL.createObjectURL(blob);
+
   const timestamp =
     new Date()
       .toISOString()
       .replace(/[:.]/g, "-");
+
   a.download =
     `AIPro_${APP_VERSION}_${timestamp}.html`;
+
   a.click();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
+
   alert("本体HTMLを保存しました");
 }
 
 function loadRepairHtml() {
   const input =
     document.createElement("input");
+
   input.type = "file";
   input.accept =
     ".html,.json,text/html,application/json";
+
   input.onchange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     const reader = new FileReader();
+
     reader.onload = () => {
       try {
         const parsed =
           JSON.parse(reader.result);
+
         if (parsed.html) {
-          get("repairEditor").value =
-            parsed.html;
-          get("repairEditor").scrollLeft = 0;
+          const editor =
+            get("repairEditor");
+
+          editor.value = parsed.html;
+          editor.scrollLeft = 0;
+
+          repairLastValue = editor.value;
+
           updateLineNumbers();
-          alert(
-            "フルバックアップJSON読込完了"
-          );
+          updateCursorPosition();
+          updateRepairStatus("フルバックアップJSON読込");
+
+          alert("フルバックアップJSON読込完了");
           return;
         }
       } catch {}
-      // 通常HTML
-      get("repairEditor").value =
-        reader.result;
-      get("repairEditor").scrollLeft = 0;
+
+      const editor =
+        get("repairEditor");
+
+      editor.value = reader.result;
+      editor.scrollLeft = 0;
+
+      repairLastValue = editor.value;
+
       updateLineNumbers();
+      updateCursorPosition();
+      updateRepairStatus("HTML読込");
+
       alert("HTML読込完了");
     };
+
     reader.readAsText(file);
   };
+
   input.click();
 }
 
 function saveRepairHtml() {
+  const editor =
+    get("repairEditor");
+
   const html =
-    get("repairEditor")
-      .value
-      .trim();
+    editor.value.trim();
+
   if (!html) {
     alert("HTMLが空です");
     return;
   }
+
   const blob =
     new Blob(
       [html],
       { type: "text/html" }
     );
+
   const a =
     document.createElement("a");
+
   a.href =
     URL.createObjectURL(blob);
+
   const timestamp =
     new Date()
       .toISOString()
       .replace(/[:.]/g, "-");
+
   a.download =
     `AIPro_Repaired_${timestamp}.html`;
+
   a.click();
+
   setTimeout(() => {
     URL.revokeObjectURL(a.href);
   }, 1000);
+
+  repairLastValue =
+    editor.value;
+
+  updateRepairStatus(
+    "修正版保存完了"
+  );
+
   alert("修正版保存完了");
 }
 
 async function copyRepairHtml() {
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
   const html =
-    get("repairEditor").value.trim();
+    editor.value.trim();
+
   if (!html) {
     alert("HTMLが空です");
     return;
   }
+
   try {
-    if (navigator.clipboard &&
-        window.isSecureContext) {
+    if (
+      navigator.clipboard &&
+      window.isSecureContext
+    ) {
       await navigator.clipboard.writeText(html);
       alert("HTMLコピー完了");
       return;
     }
+
     const ok =
       copyTextFallback(html);
-    if (ok) {
-      alert("HTMLコピー完了");
-    } else {
-      alert("コピー失敗");
-    }
-  } catch(e){
-    const ok =
-      copyTextFallback(html);
+
     alert(
       ok
-      ? "HTMLコピー完了"
-      : "コピー失敗"
+        ? "HTMLコピー完了"
+        : "コピー失敗"
+    );
+
+  } catch (e) {
+    const ok =
+      copyTextFallback(html);
+
+    alert(
+      ok
+        ? "HTMLコピー完了"
+        : "コピー失敗"
     );
   }
+}
+
+async function exportAiPresets() {
+
+  const data =
+    JSON.stringify(
+      getAiPresets(),
+      null,
+      2
+    );
+
+  const blob =
+    new Blob(
+      [data],
+      {
+        type:
+        "application/json"
+      }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  a.download =
+    "ai-presets.json";
+
+  a.click();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(
+      a.href
+    );
+  },1000);
 }
 
 let repairSearchIndex = 0;
@@ -4361,21 +4631,63 @@ function updateRepairStatus(text) {
 }
 
 function undoRepairEdit() {
-  const editor = get("repairEditor");
-  if (!editor || repairUndoStack.length === 0) return;
-  repairRedoStack.push(editor.value);
-  editor.value = repairUndoStack.pop();
-  repairLastValue = editor.value;
-  updateRepairStatus("Undo実行");
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairUndoStack.length===0
+  ) return;
+
+  repairRedoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairUndoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Undo実行"
+  );
 }
 
 function redoRepairEdit() {
-  const editor = get("repairEditor");
-  if (!editor || repairRedoStack.length === 0) return;
-  repairUndoStack.push(editor.value);
-  editor.value = repairRedoStack.pop();
-  repairLastValue = editor.value;
-  updateRepairStatus("Redo実行");
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairRedoStack.length===0
+  ) return;
+
+  repairUndoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairRedoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Redo実行"
+  );
 }
 
 function toggleRepairAutoSave() {
