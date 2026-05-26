@@ -2756,13 +2756,16 @@ function validateBackupHtml(html) {
 
 function backupProgram() {
   saveCurrentState();
+
   const note =
     prompt(
       "バックアップメモを入力してください",
       "変更内容メモ"
     ) || "";
+
   const html =
     getCleanProgramHtml();
+
   const backupData = {
     backup_type: "AI_PROMPT_PRO_FULL_BACKUP",
     backup_format_version: "1.1",
@@ -2790,27 +2793,36 @@ function backupProgram() {
       darkMode: localStorage.getItem("darkMode")
     }
   };
+
   const blob =
     new Blob(
       [JSON.stringify(backupData, null, 2)],
       { type: "application/json" }
     );
+
   const a =
     document.createElement("a");
+
   a.href =
     URL.createObjectURL(blob);
+
   const timestamp =
     new Date()
       .toISOString()
       .replace(/[:.]/g, "-");
+
   a.download =
     `AIProBackup_${APP_VERSION}_${timestamp}.json`;
+
   a.click();
+
   setTimeout(() => {
     URL.revokeObjectURL(a.href);
   }, 1000);
+
   saveBackupHistory(backupData);
   manageBackupHistory();
+
   alert(
     "フルバックアップ保存完了\n\n" +
     "メモ: " + note
@@ -2822,14 +2834,6 @@ function manageBackupHistory() {
   localStorage.setItem(
     "backupHistory",
     JSON.stringify(list.slice(0, 10))
-  );
-}
-
-saveBackupHistory(backupData);
-manageBackupHistory();
-  alert(
-    "フルバックアップ保存完了\n\n" +
-    "メモ: " + note
   );
 }
 
