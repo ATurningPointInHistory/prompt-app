@@ -503,6 +503,41 @@ body:not(.dark) #floatPanel{
   flex:1 1 100%;
 }
 
+.repair-editor-wrap{
+  display:flex;
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:5px;
+}
+
+#lineNumbers{
+  width:44px;
+  padding:12px 6px;
+  background:rgba(128,128,128,0.15);
+  color:var(--text);
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:12px;
+  line-height:1.4;
+  text-align:right;
+  user-select:none;
+  overflow:hidden;
+}
+
+#repairEditor{
+  border:none;
+  border-radius:0;
+  margin-top:0;
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:12px;
+  line-height:1.4;
+  min-height:420px;
+  overflow:auto;
+  white-space:pre-wrap;
+  word-break:break-all;
+}
+
 .code-tag { color: #7ee787; }
 .code-attr { color: #79c0ff; }
 .code-string { color: #a5d6ff; }
@@ -751,7 +786,19 @@ body:not(.dark) #floatPanel{
   <label for="repairEditor">
     HTML編集エリア
   </label>
-  <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます" style="width: 100%; max-width: 100%;"></textarea>
+
+  <div class="repair-editor-wrap">
+
+    <div id="lineNumbers">
+      1
+    </div>
+
+    <textarea
+      id="repairEditor"
+      rows="20"
+      placeholder="ここにHTML全文が表示されます">
+    </textarea>
+  </div>
   <button id="previewBtn" onclick="previewRepairHtml()" class="btn-full">
     🎨 色分けプレビュー
   </button>
@@ -2756,33 +2803,35 @@ function saveProgramHtml() {
 }
 
 function loadRepairHtml() {
-  const input=document.createElement("input");
-  input.type="file";
-  input.accept=
-  ".html,.json,text/html,application/json";
-  input.onchange=(e)=>{
-    const file=e.target.files[0];
-    if(!file)return;
-    const reader=new FileReader();
-    reader.onload=()=>{
-      try{
-        // JSON判定
-        const parsed=
-        JSON.parse(reader.result);
-        if(parsed.html){
-          get("repairEditor").value=
-          parsed.html;
+  const input =
+    document.createElement("input");
+  input.type = "file";
+  input.accept =
+    ".html,.json,text/html,application/json";
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed =
+          JSON.parse(reader.result);
+        if (parsed.html) {
+          get("repairEditor").value =
+            parsed.html;
           get("repairEditor").scrollLeft = 0;
+          updateLineNumbers();
           alert(
-          "フルバックアップJSON読込完了"
+            "フルバックアップJSON読込完了"
           );
           return;
         }
-      }catch{}
+      } catch {}
       // 通常HTML
-      get("repairEditor").value=
-      reader.result;
+      get("repairEditor").value =
+        reader.result;
       get("repairEditor").scrollLeft = 0;
+      updateLineNumbers();
       alert("HTML読込完了");
     };
     reader.readAsText(file);
@@ -3782,7 +3831,6 @@ function findFunctionBlockInText(text, functionName) {
     block: text.slice(start, end)
   };
 }
-
 let repairUndoStack = [];
 let repairRedoStack = [];
 let repairLastValue = "";
@@ -3791,10 +3839,15 @@ let repairAutoSaveEnabled = false;
 function initRepairIde() {
   const editor = get("repairEditor");
   if (!editor) return;
-
   repairLastValue = editor.value || "";
-
   editor.addEventListener("input", () => {
+    updateLineNumbers();
+  editor.addEventListener("scroll", () => {
+    const lineBox = get("lineNumbers");
+    if (lineBox) {
+      lineBox.scrollTop = editor.scrollTop;
+    }
+  });
     if (repairLastValue !== editor.value) {
       repairUndoStack.push(repairLastValue);
       repairRedoStack = [];
@@ -3803,8 +3856,21 @@ function initRepairIde() {
       autoSaveRepairDraft();
     }
   });
-
   loadRepairDraft();
+  updateLineNumbers();
+}
+
+function updateLineNumbers() {
+  const editor = get("repairEditor");
+  const lineBox = get("lineNumbers");
+  if (!editor || !lineBox) return;
+  const count =
+    editor.value.split("\n").length || 1;
+  lineBox.innerHTML =
+    Array.from(
+      { length: count },
+      (_, i) => i + 1
+    ).join("<br>");
 }
 
 function updateRepairStatus(text) {
