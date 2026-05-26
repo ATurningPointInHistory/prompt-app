@@ -1400,55 +1400,6 @@ function updatePanelButtonStates() {
 console.log("CHANGELOG");
 console.table(CHANGELOG);
 
-/* cleanup候補: 未使用function toggleTemplateManager
-function toggleTemplateManager() {
-  const isOpen = get("template-manager").style.display !== "none";
-  closeAllManagers();
-  if (!isOpen) {
-    get("template-manager").style.display = "block";
-    renderTemplates();
-    renderTemplateSelect();
-  }
-  updatePanelButtonStates();
-}
-*/
-
-/* cleanup候補: 未使用function toggleDangerManager
-function toggleDangerManager() {
-  const isOpen = get("danger-manager").style.display !== "none";
-  closeAllManagers();
-  if (!isOpen) {
-    get("danger-manager").style.display = "block";
-    renderDangerWords();
-  }
-  updatePanelButtonStates();
-}
-*/
-
-/* cleanup候補: 未使用function togglePatternManager
-function togglePatternManager() {
-  const isOpen = get("pattern-manager").style.display !== "none";
-  closeAllManagers();
-  if (!isOpen) {
-    get("pattern-manager").style.display = "block";
-    renderPatterns();
-  }
-  updatePanelButtonStates();
-}
-*/
-
-/* cleanup候補: 未使用function toggleAiPresetManager
-function toggleAiPresetManager() {
-  const isOpen = get("ai-preset-manager").style.display !== "none";
-  closeAllManagers();
-
-  if (!isOpen) {
-    get("ai-preset-manager").style.display = "block";
-    loadAiPresetToEditor();
-  }
-  updatePanelButtonStates();
-}
-*/
 
 function loadAiPresetToEditor() {
   const target = get("aiPresetTarget").value;
@@ -1500,19 +1451,6 @@ function parseCommands(text) {
   };
 }
 
-/* cleanup候補: 未使用function buildCommandInstructions
-function buildCommandInstructions(commands) {
-  if (!commands || commands.length === 0) return "";
-  const lines = commands.map(cmd => {
-    return `・${cmd}: ${commandDefinitions[cmd]}`;
-  });
-  return `
-# 追加変換モード
-以下の変換モードを反映してください。
-${lines.join("\n")}
-`;
-}
-*/
 
 function buildCommandInstructionsFromObject(obj) {
   if (!obj.commands || obj.commands.length === 0) return "";
@@ -2302,16 +2240,6 @@ function saveFromHistory(text) {
   renderTemplateSelect();
 }
 
-/* cleanup候補: 未使用function exportTemplates
-function exportTemplates() {
-  const data = localStorage.getItem("templates") || "[]";
-  const blob = new Blob([data], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "templates.json";
-  a.click();
-}
-*/
 
 function importTemplates() {
   get("fileInput").click();
@@ -3561,9 +3489,7 @@ function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
     if (block.block.includes("cleanup候補")) return;
     html =
       html.slice(0, block.start) +
-      "/* cleanup候補: 未使用function " + fn + "\n" +
-      block.block +
-      "\n*/" +
+      "" +
       html.slice(block.end);
   });
   orphanIds.forEach(id => {
@@ -3575,7 +3501,7 @@ function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
       if (match.includes("data-cleanup-disabled-id")) {
         return match;
       }
-      return `data-cleanup-disabled-id="${id}"`;
+      return ``;
     });
   });
   editor.value = html;
@@ -3605,7 +3531,7 @@ function deleteCommentedCleanupBlocks() {
     ) || [];
   const disabledIds =
     html.match(
-      /data-cleanup-disabled-id="[^"]+"/g
+      /]+"/g
     ) || [];
   const message =
     "完全削除確認\n\n" +
@@ -3625,7 +3551,7 @@ function deleteCommentedCleanupBlocks() {
   );
   // data-cleanup-disabled-id 属性を完全削除
   html = html.replace(
-    /\s*data-cleanup-disabled-id="[^"]+"/g,
+    /\s*]+"/g,
     ""
   );
   // 空行を軽く整理
