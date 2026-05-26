@@ -786,7 +786,7 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">状態：自動保存データ復元</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：変更あり</div>
 
 <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
 
@@ -814,7 +814,7 @@ body:not(.dark) #floatPanel{
 
 <button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">⚙</button>
 
-<div id="floatPanel" style="display: none; inset: 293.317px auto auto 86px;"></div>
+<div id="floatPanel" style="display: none; inset: 20.7167px auto auto 86px;"></div>
 
 </div> <!-- card -->
 
@@ -1817,8 +1817,11 @@ function diagnoseHtml() {
 function showHtmlHealth() {
 
   const html =
-    "<!DOCTYPE html>\n" +
-    document.documentElement.outerHTML;
+    isRepairMode() &&
+    get("repairEditor") &&
+    get("repairEditor").value.trim()
+      ? get("repairEditor").value
+      : "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
   const validation =
     validateBackupHtml(html);
   const funcs =
@@ -4074,7 +4077,6 @@ function initRepairIde() {
     editor.addEventListener("input", () => {
     updateLineNumbers();
     updateCursorPosition();
-
     if (repairLastValue !== editor.value) {
       repairUndoStack.push(repairLastValue);
       repairRedoStack = [];
@@ -4092,43 +4094,42 @@ function initRepairIde() {
 function applyRepairIndent(isOutdent) {
   const editor = get("repairEditor");
   if (!editor) return;
-
   const value = editor.value;
   const start = editor.selectionStart;
   const end = editor.selectionEnd;
   const indent = "  ";
-
   repairUndoStack.push(value);
   repairRedoStack = [];
-
-  const lineStart =
-    value.lastIndexOf("\n", start - 1) + 1;
-
-  const before = value.slice(0, lineStart);
-  const target = value.slice(lineStart, end);
-  const after = value.slice(end);
-  const lines = target.split("\n");
-
-  let changed = "";
-
-  if (isOutdent) {
-    changed = lines.map(line => {
-      if (line.startsWith(indent)) {
-        return line.slice(indent.length);
-      }
-      if (line.startsWith(" ")) {
-        return line.slice(1);
-      }
-      return line;
-    }).join("\n");
+  // 単一カーソルでTabの場合
+  if (start === end && !isOutdent) {
+    editor.value =
+      value.slice(0, start) +
+      indent +
+      value.slice(end);
+    const pos = start + indent.length;
+    editor.selectionStart = pos;
+    editor.selectionEnd = pos;
   } else {
-    changed = lines.map(line => indent + line).join("\n");
+    const lineStart =
+      value.lastIndexOf("\n", start - 1) + 1;
+    const before = value.slice(0, lineStart);
+    const target = value.slice(lineStart, end);
+    const after = value.slice(end);
+    const lines = target.split("\n");
+    const changed = isOutdent
+      ? lines.map(line => {
+          if (line.startsWith(indent)) return line.slice(indent.length);
+          if (line.startsWith(" ")) return line.slice(1);
+          return line;
+        }).join("\n")
+      : lines.map(line => indent + line).join("\n");
+    editor.value = before + changed + after;
+    const delta =
+      editor.value.length - value.length;
+    editor.selectionStart = start;
+    editor.selectionEnd = end + delta;
   }
-
-  editor.value = before + changed + after;
-  editor.selectionStart = lineStart;
-  editor.selectionEnd = lineStart + changed.length;
-
+  editor.focus();
   repairLastValue = editor.value;
   updateLineNumbers();
   updateCursorPosition();
