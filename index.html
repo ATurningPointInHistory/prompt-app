@@ -1319,6 +1319,7 @@ function buildNormalToolsHtml() {
 <button class="float-list-btn" onclick="compareBackupSummary()">📊 バックアップ差分確認</button>
 <button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
 <hr>
+<button class="float-list-btn" onclick="exportTemplates()">📤 テンプレ保存</button>
 <button class="float-list-btn" onclick="importTemplates()">📥 テンプレ復元</button>
 <button class="float-list-btn" onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
 <button class="float-list-btn" onclick="importAiPresets()">🤖 AI設定復元</button>
@@ -1435,13 +1436,6 @@ function handleRepairSearchKey(e){
   }
 }
 
-function handleRepairSearchMobile(e){
-  if(e.key==="Enter"){
-    e.preventDefault();
-    searchRepairNext();
-  }
-}
-
 function searchRepairPrev(){
   const editor=get("repairEditor");
   const keyword=get("repairSearch").value;
@@ -1534,11 +1528,20 @@ function searchRepairNext() {
 }
 
 function renderRepairSearchResults(keyword) {
-  const editor = get("repairEditor");
-  const resultBox = get("repairSearchResult");
-  const text = editor.value;
-  const lines = text.split("\n");
+  const editor =
+    get("repairEditor");
+
+  const resultBox =
+    get("repairSearchResult");
+
+  const text =
+    editor.value;
+
+  const lines =
+    text.split("\n");
+
   const results = [];
+
   lines.forEach((line, index) => {
     if (line.includes(keyword)) {
       results.push({
@@ -1547,20 +1550,28 @@ function renderRepairSearchResults(keyword) {
       });
     }
   });
+
   resultBox.style.display = "block";
+
   if (results.length === 0) {
-    resultBox.innerText = "検索結果：0件";
+    resultBox.innerText =
+      "検索結果：0件";
     return;
   }
+
   resultBox.innerHTML =
     `<b>検索結果：${results.length}件</b>` +
     results.slice(0, 30).map(item => {
       return `
-        <div class="search-result-line">
-          <b>${item.lineNumber}</b>: ${highlightKeyword(item.line, keyword)}
+        <div
+          class="search-result-line"
+          onclick="jumpToLine(${item.lineNumber})">
+          <b>${item.lineNumber}</b>:
+          ${highlightKeyword(item.line, keyword)}
         </div>
       `;
     }).join("");
+
   if (results.length > 30) {
     resultBox.innerHTML += `
       <div class="small">
@@ -1822,18 +1833,6 @@ function parseCommands(text) {
   };
 }
 
-function buildCommandInstructions(commands) {
-  if (!commands || commands.length === 0) return "";
-  const lines = commands.map(cmd => {
-    return `・${cmd}: ${commandDefinitions[cmd]}`;
-  });
-  return `
-# 追加変換モード
-以下の変換モードを反映してください。
-${lines.join("\n")}
-`;
-}
-
 function buildCommandInstructionsFromObject(obj) {
   if (!obj.commands || obj.commands.length === 0) return "";
   const lines = obj.commands.map(cmd => {
@@ -1979,22 +1978,6 @@ ${tone}
   saveHistory(p);
   checkSensitiveContent(p);
   saveCurrentState();
-}
-
-function copyText() {
-  const text = get("output").innerText.trim();
-  if (!text || text === "ここに表示") {
-    alert("先に生成してください");
-    return;
-  }
-  const report = detectSensitiveContent(text);
-  if (report.hasAny) {
-    const ok = confirm(buildConfirmMessage(report, "コピー"));
-    if (!ok) return;
-  }
-  navigator.clipboard.writeText(text)
-    .then(() => alert("コピー完了"))
-    .catch(() => alert("コピー失敗（長押しコピーしてください）"));
 }
 
 function download() {
@@ -3472,42 +3455,6 @@ async function copyRepairHtml() {
         : "コピー失敗"
     );
   }
-}
-
-async function exportAiPresets() {
-
-  const data =
-    JSON.stringify(
-      getAiPresets(),
-      null,
-      2
-    );
-
-  const blob =
-    new Blob(
-      [data],
-      {
-        type:
-        "application/json"
-      }
-    );
-
-  const a =
-    document.createElement("a");
-
-  a.href =
-    URL.createObjectURL(blob);
-
-  a.download =
-    "ai-presets.json";
-
-  a.click();
-
-  setTimeout(() => {
-    URL.revokeObjectURL(
-      a.href
-    );
-  },1000);
 }
 
 let repairSearchIndex = 0;
