@@ -347,11 +347,38 @@ mark {
 }
 
 .search-result-line {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
-  padding: 6px;
-  border-bottom: 1px solid var(--border);
-  white-space: pre-wrap;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+
+  font-size:12px;
+
+  padding:8px;
+
+  border-bottom:
+    1px solid
+    var(--border);
+
+  white-space:
+    pre-wrap;
+
+  cursor:pointer;
+
+  transition:0.15s;
+
+  border-radius:6px;
+}
+
+.search-result-line:hover{
+  background:
+    rgba(
+      0,
+      122,
+      255,
+      0.12
+    );
 }
 
 .code-preview {
@@ -826,6 +853,20 @@ style="display:none;">
 
 <script>
 
+/* ===============================
+   AIプロンプト生成Pro v5.7.2
+   SECTION INDEX
+
+   01. Core / Utility
+   02. Prompt Builder
+   03. Template / Preset / Danger
+   04. Tools / Backup / Health
+   05. Repair IDE
+   06. Search / Replace
+   07. Safe Mode / AutoSave
+   08. Init / Event
+=============================== */
+
 let currentTab = 1;
 let isLoading = false;
 const APP_VERSION = "v5.7.2";
@@ -835,6 +876,10 @@ const CHANGELOG = [
   "v5.7.0 AIプリセット保存/復元",
   "v5.7.0 Gemini/Cursor/Copilot評価改善"
 ];
+
+/* ===============================
+   01. Core / Utility
+=============================== */
 
 const get = (id) => document.getElementById(id);
 
@@ -1049,6 +1094,10 @@ function getAiPreset(aiTarget) {
 const presets = getAiPresets();
 return presets[aiTarget] || presets.chatgpt;
 }
+
+/* ===============================
+   02. Prompt Builder
+=============================== */
 
 function buildPromptObject(raw, tone, commands) {
   const safeRaw = String(raw || "").trim();
@@ -1379,6 +1428,10 @@ function resetRepairEditorView() {
   editor.style.maxWidth = "100%";
 }
 
+/* ===============================
+   06. Search / Replace
+=============================== */
+
 function toggleRepairSearchBox() {
   openFloatPanel(
     "検索",
@@ -1551,7 +1604,8 @@ function renderRepairSearchResults(keyword) {
     }
   });
 
-  resultBox.style.display = "block";
+  resultBox.style.display =
+    "block";
 
   if (results.length === 0) {
     resultBox.innerText =
@@ -1565,7 +1619,10 @@ function renderRepairSearchResults(keyword) {
       return `
         <div
           class="search-result-line"
-          onclick="jumpToLine(${item.lineNumber})">
+          onclick="
+            jumpToLine(${item.lineNumber});
+            closeFloatPanelKeepEditorSelection();
+          ">
           <b>${item.lineNumber}</b>:
           ${highlightKeyword(item.line, keyword)}
         </div>
@@ -2559,6 +2616,11 @@ function clearHistory() {
   renderHistory();
 }
 
+/* ===============================
+   03. Template / Preset / Danger
+=============================== */
+
+
 function saveTemplate() {
   const name = get("tempName").value.trim();
   const role = get("tempRole").value.trim();
@@ -2878,6 +2940,10 @@ function validateBackupHtml(html) {
   };
 }
 
+/* ===============================
+   04. Tools / Backup / Health
+=============================== */
+
 function backupProgram() {
   saveCurrentState();
 
@@ -2889,6 +2955,10 @@ function backupProgram() {
 
   const html =
     getCleanProgramHtml();
+
+  if (!preSaveCheck(html)) {
+    return;
+  }
 
   const backupData = {
     backup_type: "AI_PROMPT_PRO_FULL_BACKUP",
@@ -3042,6 +3112,82 @@ function getHtmlSummary(html) {
     undefinedFns,
     score
   };
+}
+
+function preSaveCheck(html) {
+
+  const source =
+    html ||
+    (
+      isRepairMode() &&
+      get("repairEditor") &&
+      get("repairEditor").value.trim()
+    )
+      ? get("repairEditor").value
+      : "<!DOCTYPE html>\n" +
+        document.documentElement.outerHTML;
+
+  const summary =
+    getHtmlSummary(source);
+
+  const warnings = [];
+
+  if (!summary.validation.div_ok) {
+    warnings.push(
+      "div整合性NG"
+    );
+  }
+
+  if (!summary.validation.js_ok) {
+    warnings.push(
+      "JS構文エラー"
+    );
+  }
+
+  if (
+    summary.validation
+      .duplicate_ids.length
+  ) {
+    warnings.push(
+      "id重複"
+    );
+  }
+
+  if (
+    summary.dupFuncs.length
+  ) {
+    warnings.push(
+      "function重複"
+    );
+  }
+
+  if (
+    summary.undefinedFns.length
+  ) {
+    warnings.push(
+      "未定義onclick"
+    );
+  }
+
+  if (
+    summary.score < 80
+  ) {
+    warnings.push(
+      `Health Score低下 (${summary.score}/100)`
+    );
+  }
+
+  if (
+    warnings.length === 0
+  ) {
+    return true;
+  }
+
+  return confirm(
+    "保存前チェック警告\n\n" +
+    warnings.join("\n") +
+    "\n\n続行しますか？"
+  );
 }
 
 function compareBackupSummary() {
@@ -3277,6 +3423,10 @@ function saveProgramHtml() {
   const html =
     getCleanProgramHtml();
 
+  if (!preSaveCheck(html)) {
+    return;
+  }
+
   const blob =
     new Blob(
       [html],
@@ -3305,6 +3455,9 @@ function saveProgramHtml() {
 
   alert("本体HTMLを保存しました");
 }
+
+/* ===============================   05. Repair IDE
+=============================== */
 
 function loadRepairHtml() {
   const input =
@@ -4229,6 +4382,11 @@ ${line}
 column:
 ${col}`;
 };
+
+/* ===============================
+   08. Init / Event
+=============================== */
+
 document.addEventListener("DOMContentLoaded", initRepairIde);
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
@@ -4662,6 +4820,13 @@ function autoSaveRepairDraft() {
 function loadRepairDraft() {
   repairAutoSaveEnabled =
     localStorage.getItem("repairAutoSaveEnabled") === "1";
+
+  updateRepairStatus(
+    repairAutoSaveEnabled
+      ? "AutoSave ON"
+      : "AutoSave OFF"
+  );
+
   const draft = localStorage.getItem("repairDraftHtml");
   if (!draft) return;
   const ok = confirm("修復モードの自動保存データを復元しますか？");
@@ -4783,49 +4948,100 @@ function restoreBackupHistory(index) {
   location.reload();
 }
 
+/* ===============================
+   07. Safe Mode / AutoSave
+=============================== */
+
 function checkSafeMode() {
   const crash =
-    localStorage.getItem(
-      "lastCrash"
-    );
+    localStorage.getItem("lastCrash");
+
   if (!crash) return;
+
   let info = {};
+
   try {
-    info =
-      JSON.parse(crash);
-  } catch {}
+    info = JSON.parse(crash);
+  } catch {
+    info = {
+      message: String(crash),
+      time: "unknown"
+    };
+  }
+
   const msg =
 `SAFE MODE
 前回エラー終了を検出しました。
+
 message:
 ${info.message || "unknown"}
+
+line:
+${info.line || "unknown"}
+
+column:
+${info.column || "unknown"}
+
 time:
 ${info.time || "unknown"}
+
 修復モードで起動しますか？`;
-  const ok = confirm(msg);
+
+  const ok =
+    confirm(msg);
+
   if (!ok) {
-    localStorage.removeItem(
-      "lastCrash"
-    );
+    localStorage.removeItem("lastCrash");
     return;
   }
+
   switchAppPage("repair");
+
+  const draft =
+    localStorage.getItem(
+      "repairDraftHtml"
+    );
+  
+  if (
+    draft &&
+    !get("repairEditor").value.trim()
+  ) {
+    get("repairEditor").value =
+      draft;
+  
+    repairLastValue =
+      draft;
+  
+    updateLineNumbers();
+    updateCursorPosition();
+    updateRepairStatus(
+      "SAFE MODE復元"
+    );
+  }
+
   const debugBox =
     get("debugBox");
+
   if (debugBox) {
-    debugBox.style.display =
-      "block";
+    debugBox.style.display = "block";
     debugBox.innerText =
 `SAFE MODE
 前回クラッシュ情報
+
 message:
 ${info.message || "unknown"}
+
+line:
+${info.line || "unknown"}
+
+column:
+${info.column || "unknown"}
+
 time:
 ${info.time || "unknown"}`;
   }
-  localStorage.removeItem(
-    "lastCrash"
-  );
+
+  localStorage.removeItem("lastCrash");
 }
 
 </script>
