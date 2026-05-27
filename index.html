@@ -879,6 +879,16 @@ const CHANGELOG = [
 
 /* ===============================
    01. Core / Utility
+    get
+    escapeHtml
+    escapeRegExp
+    loadJson
+    copyTextFallback
+    validateBackupHtml
+    extractFunctionNames
+    extractIds
+    calcHealthScore
+    preSaveCheck
 =============================== */
 
 const get = (id) => document.getElementById(id);
@@ -905,58 +915,6 @@ function loadJson(key, fallback) {
     localStorage.removeItem(key);
     return fallback;
   }
-}
-
-function copyText() {
-  const text =
-    get("output").innerText.trim();
-
-  if (!text || text === "ここに表示") {
-    alert("先に生成してください");
-    return;
-  }
-
-  const report =
-    detectSensitiveContent(text);
-
-  if (report.hasAny) {
-    const ok =
-      confirm(
-        buildConfirmMessage(report, "コピー")
-      );
-
-    if (!ok) return;
-  }
-
-  if (
-    navigator.clipboard &&
-    window.isSecureContext
-  ) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => alert("コピー完了"))
-      .catch(() => {
-        const ok =
-          copyTextFallback(text);
-
-        alert(
-          ok
-            ? "コピー完了"
-            : "コピー失敗（長押しコピーしてください）"
-        );
-      });
-
-    return;
-  }
-
-  const ok =
-    copyTextFallback(text);
-
-  alert(
-    ok
-      ? "コピー完了"
-      : "コピー失敗（長押しコピーしてください）"
-  );
 }
 
 const defaultTemplates = [
@@ -1097,6 +1055,16 @@ return presets[aiTarget] || presets.chatgpt;
 
 /* ===============================
    02. Prompt Builder
+    buildPromptObject
+    convertForAI
+    convertForChatGPT
+    convertForClaude
+    convertForGemini
+    convertForCursor
+    convertForCopilot
+    parseCommands
+    generatePrompt
+    reviewPrompt
 =============================== */
 
 function buildPromptObject(raw, tone, commands) {
@@ -1136,6 +1104,58 @@ function buildPromptObject(raw, tone, commands) {
       app_version: APP_VERSION
     }
   };
+}
+
+function copyText() {
+  const text =
+    get("output").innerText.trim();
+
+  if (!text || text === "ここに表示") {
+    alert("先に生成してください");
+    return;
+  }
+
+  const report =
+    detectSensitiveContent(text);
+
+  if (report.hasAny) {
+    const ok =
+      confirm(
+        buildConfirmMessage(report, "コピー")
+      );
+
+    if (!ok) return;
+  }
+
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => alert("コピー完了"))
+      .catch(() => {
+        const ok =
+          copyTextFallback(text);
+
+        alert(
+          ok
+            ? "コピー完了"
+            : "コピー失敗（長押しコピーしてください）"
+        );
+      });
+
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "コピー完了"
+      : "コピー失敗（長押しコピーしてください）"
+  );
 }
 
 function convertForAI(obj, aiTarget, outputFormat) {
@@ -1428,9 +1448,12 @@ function resetRepairEditorView() {
   editor.style.maxWidth = "100%";
 }
 
+
 /* ===============================
    06. Search / Replace
 =============================== */
+
+/* ===== Repair Search ===== */
 
 function toggleRepairSearchBox() {
   openFloatPanel(
@@ -1461,76 +1484,49 @@ function toggleRepairSearchBox() {
 
     box.focus();
     box.select();
-
-    box.onkeydown =
-      handleRepairSearchKey;
+    box.onkeydown = handleRepairSearchKey;
   }, 50);
 }
 
-function handleRepairSearchKey(e){
-  if(e.key==="Enter"){
+function handleRepairSearchKey(e) {
+  if (e.key === "Enter") {
     e.preventDefault();
-    if(e.shiftKey){
+
+    if (e.shiftKey) {
       searchRepairPrev();
-    }else{
+    } else {
       searchRepairNext();
     }
   }
-  if(e.key==="Escape"){
+
+  if (e.key === "Escape") {
     e.preventDefault();
-    if(
-      typeof closeFloatPanelKeepEditorSelection
-      === "function"
-    ){
+
+    if (
+      typeof closeFloatPanelKeepEditorSelection ===
+      "function"
+    ) {
       closeFloatPanelKeepEditorSelection();
-    }else{
+    } else {
       closeFloatPanel();
     }
   }
 }
 
-function searchRepairPrev(){
-  const editor=get("repairEditor");
-  const keyword=get("repairSearch").value;
-  if(!keyword){
-    alert("検索文字を入力してください");
-    return;
-  }
-  const text=editor.value;
-  let index=
-    text.lastIndexOf(
-      keyword,
-      Math.max(
-        0,
-        editor.selectionStart-1
-      )
-    );
-  if(index===-1){
-    index=text.lastIndexOf(keyword);
-  }
-  if(index===-1){
-    alert("見つかりませんでした");
-    return;
-  }
-  repairSearchIndex=index;
-  editor.focus();
-  editor.setSelectionRange(
-    index,
-    index+keyword.length
-  );
-  renderRepairSearchResults(keyword);
-}
+function clearRepairSearch() {
+  const box = get("repairSearch");
+  if (!box) return;
 
-function clearRepairSearch(){
-  const box=get("repairSearch");
-  if(!box)return;
-  box.value="";
-  const result=
+  box.value = "";
+
+  const result =
     get("repairSearchResult");
-  if(result){
-    result.innerHTML="";
-    result.style.display="none";
+
+  if (result) {
+    result.innerHTML = "";
+    result.style.display = "none";
   }
+
   box.focus();
 }
 
@@ -1538,61 +1534,118 @@ function searchRepairText() {
   const editor = get("repairEditor");
   const keyword = get("repairSearch").value;
   const resultBox = get("repairSearchResult");
+
   if (!keyword) {
     alert("検索文字を入力してください");
     return;
   }
+
   const text = editor.value;
   const index = text.indexOf(keyword);
+
   if (index === -1) {
     resultBox.style.display = "block";
     resultBox.innerText = "検索結果：0件";
     alert("見つかりませんでした");
     return;
   }
-  repairSearchIndex = index + keyword.length;
+
+  repairSearchIndex =
+    index + keyword.length;
+
   editor.focus();
-  editor.setSelectionRange(index, index + keyword.length);
+  editor.setSelectionRange(
+    index,
+    index + keyword.length
+  );
+
   renderRepairSearchResults(keyword);
-  get("repairSearchResult")
-  .style.display="block";
+  resultBox.style.display = "block";
+}
+
+function searchRepairPrev() {
+  const editor = get("repairEditor");
+  const keyword = get("repairSearch").value;
+
+  if (!keyword) {
+    alert("検索文字を入力してください");
+    return;
+  }
+
+  const text = editor.value;
+
+  let index =
+    text.lastIndexOf(
+      keyword,
+      Math.max(
+        0,
+        editor.selectionStart - 1
+      )
+    );
+
+  if (index === -1) {
+    index = text.lastIndexOf(keyword);
+  }
+
+  if (index === -1) {
+    alert("見つかりませんでした");
+    return;
+  }
+
+  repairSearchIndex = index;
+
+  editor.focus();
+  editor.setSelectionRange(
+    index,
+    index + keyword.length
+  );
+
+  renderRepairSearchResults(keyword);
 }
 
 function searchRepairNext() {
   const editor = get("repairEditor");
   const keyword = get("repairSearch").value;
+
   if (!keyword) {
     alert("検索文字を入力してください");
     return;
   }
+
   const text = editor.value;
-  let index = text.indexOf(keyword, repairSearchIndex);
+
+  let index =
+    text.indexOf(
+      keyword,
+      repairSearchIndex
+    );
+
   if (index === -1) {
     index = text.indexOf(keyword);
   }
+
   if (index === -1) {
     alert("見つかりませんでした");
     return;
   }
-  repairSearchIndex = index + keyword.length;
+
+  repairSearchIndex =
+    index + keyword.length;
+
   editor.focus();
-  editor.setSelectionRange(index, index + keyword.length);
+  editor.setSelectionRange(
+    index,
+    index + keyword.length
+  );
+
   renderRepairSearchResults(keyword);
 }
 
 function renderRepairSearchResults(keyword) {
-  const editor =
-    get("repairEditor");
-
-  const resultBox =
-    get("repairSearchResult");
-
-  const text =
-    editor.value;
-
-  const lines =
-    text.split("\n");
-
+  const editor = get("repairEditor");
+  const resultBox = get("repairSearchResult");
+  const text = editor.value;
+  const lines = text.split("\n");
   const results = [];
 
   lines.forEach((line, index) => {
@@ -1604,12 +1657,10 @@ function renderRepairSearchResults(keyword) {
     }
   });
 
-  resultBox.style.display =
-    "block";
+  resultBox.style.display = "block";
 
   if (results.length === 0) {
-    resultBox.innerText =
-      "検索結果：0件";
+    resultBox.innerText = "検索結果：0件";
     return;
   }
 
@@ -1641,9 +1692,46 @@ function renderRepairSearchResults(keyword) {
 function highlightKeyword(text, keyword) {
   const safeText = escapeHtml(text);
   const safeKeyword = escapeHtml(keyword);
-  const regex = new RegExp(escapeRegExp(safeKeyword), "gi");
-  return safeText.replace(regex, match => `<mark>${match}</mark>`);
+
+  const regex =
+    new RegExp(
+      escapeRegExp(safeKeyword),
+      "gi"
+    );
+
+  return safeText.replace(
+    regex,
+    match => `<mark>${match}</mark>`
+  );
 }
+
+function jumpToLine(lineNumber) {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  const lines =
+    editor.value.split("\n");
+
+  let pos = 0;
+
+  for (let i = 0; i < lineNumber - 1; i++) {
+    pos += lines[i].length + 1;
+  }
+
+  editor.focus();
+  editor.setSelectionRange(pos, pos);
+
+  const lineHeight = 18;
+
+  editor.scrollTop =
+    Math.max(
+      0,
+      (lineNumber - 3) * lineHeight
+    );
+
+  updateCursorPosition();
+}
+
 
 function openFloatPanel(title, bodyHtml){
   const panel = get("floatPanel");
@@ -2618,6 +2706,11 @@ function clearHistory() {
 
 /* ===============================
    03. Template / Preset / Danger
+    Template
+    AI Preset
+    DangerWord
+    Pattern
+    History
 =============================== */
 
 
@@ -2942,6 +3035,13 @@ function validateBackupHtml(html) {
 
 /* ===============================
    04. Tools / Backup / Health
+    backupProgram
+    restoreProgramBackup
+    showHtmlHealth
+    compareBackupSummary
+    saveProgramHtml
+    saveBackupHistory
+    showBackupHistory
 =============================== */
 
 function backupProgram() {
@@ -3456,7 +3556,17 @@ function saveProgramHtml() {
   alert("本体HTMLを保存しました");
 }
 
-/* ===============================   05. Repair IDE
+/* ===============================                          
+   05. Repair IDE
+    repairUndoStack
+    loadRepairHtml
+    saveRepairHtml
+    copyRepairHtml
+    undoRepairEdit
+    redoRepairEdit
+    indentRepairSelection
+    previewRepairHtml
+    cleanupCandidates
 =============================== */
 
 function loadRepairHtml() {
@@ -3720,21 +3830,6 @@ function showFunctionList(){
   );
 }
 
-function jumpToLine(lineNumber) {
-  const editor = get("repairEditor");
-  if (!editor) return;
-  const lines = editor.value.split("\n");
-  let pos = 0;
-  for (let i = 0; i < lineNumber - 1; i++) {
-    pos += lines[i].length + 1;
-  }
-  editor.focus();
-  editor.setSelectionRange(pos, pos);
-  const lineHeight = 18;
-  editor.scrollTop =
-    Math.max(0, (lineNumber - 3) * lineHeight);
-  updateCursorPosition();
-}
 function updateCursorPosition() {
   const editor = get("repairEditor");
   const box = get("cursorStatus");
@@ -4595,6 +4690,8 @@ let repairUndoStack = [];
 let repairRedoStack = [];
 let repairLastValue = "";
 let repairAutoSaveEnabled = false;
+
+/* ===== Repair Editor ===== */
 
 function initRepairIde() {
   const editor = get("repairEditor");
