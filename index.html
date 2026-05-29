@@ -813,7 +813,7 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave OFF</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：フルバックアップJSON読込</div>
 
   <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
 
@@ -3819,10 +3819,9 @@ function showFunctionList() {
   }
 
   const blocks =
-    extractFunctionBlocksFromText(
+    extractCodeBlocksFromText(
       text
     );
-
   let html = "";
 
   if (blocks.length === 0) {
@@ -3853,11 +3852,12 @@ function showFunctionList() {
     );
     closeFloatPanel();
   ">
-  ${i + 1}.
-  ${item.name}
-  / L${line}
-</button>
-`;
+      [${item.type}]
+      ${i + 1}.
+      ${item.name}
+      / L${line}
+      </button>
+      `;
       }).join("");
   }
 
@@ -4140,8 +4140,14 @@ function diagnoseRepairHtml() {
     : "✔ id重複なし"
   );
   // function重複
+  const htmlForFunctionCheck =
+    html
+      .replace(/\/\/.*$/gm, "")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/`[\s\S]*?`/g, "");
+  
   const funcs =
-    [...html.matchAll(
+    [...htmlForFunctionCheck.matchAll(
       /function\s+([a-zA-Z0-9_$]+)\s*\(/g
     )]
     .map(x=>x[1]);
@@ -4987,6 +4993,84 @@ function extractFunctionBlocksFromText(text) {
   }
 
   return blocks;
+}
+
+function extractCodeBlocksFromText(text) {
+
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  // section comment
+  const sectionRegex =
+    /\/\*[\s\S]*?={10,}[\s\S]*?\*\//g;
+
+  [...source.matchAll(sectionRegex)]
+    .forEach(match => {
+
+      blocks.push({
+        type: "section",
+        name:
+          match[0]
+            .split("\n")[1]
+            ?.trim() ||
+          "Section",
+        start: match.index,
+        end:
+          match.index +
+          match[0].length,
+        block: match[0]
+      });
+
+    });
+
+  // let const var
+  const variableRegex =
+    /(?:let|const|var)\s+([a-zA-Z0-9_$]+)/g;
+
+  [...source.matchAll(variableRegex)]
+    .forEach(match => {
+
+      const lineEnd =
+        source.indexOf(
+          "\n",
+          match.index
+        );
+
+      blocks.push({
+        type: "variable",
+        name: match[1],
+        start: match.index,
+        end:
+          lineEnd === -1
+          ? source.length
+          : lineEnd,
+        block:
+          source.slice(
+            match.index,
+            lineEnd
+          )
+      });
+
+    });
+
+  // function
+  extractFunctionBlocksFromText(
+    source
+  ).forEach(item => {
+
+    blocks.push({
+      type: "function",
+      ...item
+    });
+
+  });
+
+  return blocks.sort(
+    (a,b)=>
+    a.start-b.start
+  );
 }
 
 function applyRepairIndent(isOutdent) {
