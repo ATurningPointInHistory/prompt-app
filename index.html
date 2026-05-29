@@ -5067,27 +5067,6 @@ function extractCodeBlocksFromText(text) {
 
     });
 
-  // section comment: 1行見出し
-  const shortSectionRegex =
-    /\/\*\s*=+\s*([^*\n]+?)\s*=+\s*\*\//g;
-
-  [...source.matchAll(shortSectionRegex)]
-    .forEach(match => {
-
-      blocks.push({
-        type: "section",
-        name:
-          match[1].trim() ||
-          "Section",
-        start: match.index,
-        end:
-          match.index +
-          match[0].length,
-        block: match[0]
-      });
-
-    });
-
   // top-level let const var only
   const variableRegex =
     /^(let|const|var)\s+([a-zA-Z0-9_$]+)/gm;
