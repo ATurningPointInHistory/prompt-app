@@ -813,7 +813,7 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave OFF</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave ON</div>
 
   <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
 
@@ -5026,9 +5026,12 @@ function extractCodeBlocksFromText(text) {
 
   const blocks = [];
 
-  // section comment
+  const functionBlocks =
+    extractFunctionBlocksFromText(source);
+
+  // section comment: 複数行見出し
   const sectionRegex =
-    /\/\*[\s\S]*?={10,}[\s\S]*?\*\//g;
+    /\/\*\s*=+\s*\n([\s\S]*?)\n\s*=+\s*\*\//g;
 
   [...source.matchAll(sectionRegex)]
     .forEach(match => {
@@ -5036,9 +5039,32 @@ function extractCodeBlocksFromText(text) {
       blocks.push({
         type: "section",
         name:
-          match[0]
-            .split("\n")[1]
-            ?.trim() ||
+          match[1]
+            .split("\n")
+            .map(x => x.trim())
+            .filter(Boolean)
+            .join(" / ") ||
+          "Section",
+        start: match.index,
+        end:
+          match.index +
+          match[0].length,
+        block: match[0]
+      });
+
+    });
+
+  // section comment: 1行見出し
+  const shortSectionRegex =
+    /\/\*\s*=+\s*([^*\n]+?)\s*=+\s*\*\//g;
+
+  [...source.matchAll(shortSectionRegex)]
+    .forEach(match => {
+
+      blocks.push({
+        type: "section",
+        name:
+          match[1].trim() ||
           "Section",
         start: match.index,
         end:
@@ -5056,11 +5082,21 @@ function extractCodeBlocksFromText(text) {
   [...source.matchAll(variableRegex)]
     .forEach(match => {
 
-      const name =
-        match[2];
-
       const start =
         match.index;
+
+      const insideFunction =
+        functionBlocks.some(fn =>
+          start > fn.start &&
+          start < fn.end
+        );
+
+      if (insideFunction) {
+        return;
+      }
+
+      const name =
+        match[2];
 
       let end =
         source.indexOf(
@@ -5095,10 +5131,7 @@ function extractCodeBlocksFromText(text) {
 
     });
 
-  // function
-  extractFunctionBlocksFromText(
-    source
-  ).forEach(item => {
+  functionBlocks.forEach(item => {
 
     blocks.push({
       type: "function",
