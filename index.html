@@ -813,7 +813,7 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">状態：フルバックアップJSON読込</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave OFF</div>
 
   <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
 
@@ -4143,12 +4143,11 @@ function diagnoseRepairHtml() {
   const htmlForFunctionCheck =
     html
       .replace(/\/\/.*$/gm, "")
-      .replace(/\/\*[\s\S]*?\*\//g, "")
-      .replace(/`[\s\S]*?`/g, "");
+      .replace(/\/\*[\s\S]*?\*\//g, "");
   
   const funcs =
     [...htmlForFunctionCheck.matchAll(
-      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+      /^\s*function\s+([a-zA-Z0-9_$]+)\s*\(/gm
     )]
     .map(x=>x[1]);
   const dupFuncs =
