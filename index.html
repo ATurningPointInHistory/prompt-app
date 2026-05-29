@@ -4144,10 +4144,9 @@ function diagnoseRepairHtml() {
     html
       .replace(/\/\/.*$/gm, "")
       .replace(/\/\*[\s\S]*?\*\//g, "");
-  
   const funcs =
     [...htmlForFunctionCheck.matchAll(
-      /^\s*function\s+([a-zA-Z0-9_$]+)\s*\(/gm
+      /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm
     )]
     .map(x=>x[1]);
   const dupFuncs =
