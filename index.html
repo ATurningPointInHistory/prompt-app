@@ -1404,6 +1404,7 @@ function buildRepairToolsHtml() {
 <button class="float-list-btn" onclick="selectFunctionBlock()">📦 関数選択</button>
 <button class="float-list-btn" onclick="replaceFunctionBlock()">✏ 関数置換</button>
 <button class="float-list-btn" onclick="showFunctionList()">📚 関数一覧</button>
+<button class="float-list-btn" onclick="showFunctionSortList()">↕ 関数並べ替え</button>
 <button class="float-list-btn" onclick="toggleRepairSearchBox()">🔍 検索</button>
 <button class="float-list-btn" onclick="openReplacePanel()">🔁 検索置換</button>
 <hr>
@@ -1703,6 +1704,67 @@ function highlightKeyword(text, keyword) {
     regex,
     match => `<mark>${match}</mark>`
   );
+}
+
+Ĺ">
+
+<button
+onclick="
+moveFunctionSortItem(
+${i},
+-1
+)
+">
+↑
+</button>
+
+<button
+onclick="
+moveFunctionSortItem(
+${i},
+1
+)
+">
+↓
+</button>
+
+</div>
+
+</div>
+
+`).join("");
+
+  openFloatPanel(
+    `関数並べ替え (${functionSortList.length})`,
+    html
+  );
+}
+
+function moveFunctionSortItem(
+  index,
+  direction
+){
+
+  const next =
+    index + direction;
+
+  if(
+    next<0 ||
+    next>=functionSortList.length
+  ){
+    return;
+  }
+
+  const temp =
+    functionSortList[index];
+
+  functionSortList[index] =
+    functionSortList[next];
+
+  functionSortList[next] =
+    temp;
+
+  renderFunctionSortList();
 }
 
 function jumpToLine(lineNumber) {
@@ -3791,43 +3853,142 @@ function replaceFunctionBlock(){
   alert("置換完了");
 }
 
-function showFunctionList(){
-  const editor = get("repairEditor");
-  const text = editor.value;
+function showFunctionList() {
+
+  const editor =
+    get("repairEditor");
+
+  const text =
+    editor.value;
+
   if (!text.trim()) {
     alert("HTMLが空です");
     return;
   }
-  const matches =
-    [...text.matchAll(
-      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
-    )];
+
+  const blocks =
+    extractFunctionBlocksFromText(
+      text
+    );
+
   let html = "";
-  if (matches.length === 0) {
+
+  if (blocks.length === 0) {
+
     html = "関数なし";
+
   } else {
+
     html =
-      matches.map((m, i) => {
-        const name = m[1];
+      blocks.map(
+        (item, i) => {
+
         const line =
-          text.slice(0, m.index)
-            .split("\n").length;
+          text
+            .slice(
+              0,
+              item.start
+            )
+            .split("\n")
+            .length;
+
         return `
 <button
   class="float-list-btn"
   onclick="
-    selectFunctionByName('${name}');
+    selectFunctionByName(
+      '${item.name}'
+    );
     closeFloatPanel();
   ">
-  ${i + 1}. ${name} / L${line}
+  ${i + 1}.
+  ${item.name}
+  / L${line}
 </button>
 `;
       }).join("");
   }
+
   openFloatPanel(
-    `関数一覧 (${matches.length})`,
+    `関数一覧 (${blocks.length})`,
     html
   );
+}
+
+let functionSortList = [];
+
+function showFunctionSortList() {
+  const editor =
+    get("repairEditor");
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  functionSortList =
+    extractFunctionBlocksFromText(text);
+
+  if (functionSortList.length === 0) {
+    openFloatPanel(
+      "関数並べ替え",
+      "関数なし"
+    );
+    return;
+  }
+
+  renderFunctionSortList();
+}
+
+function renderFunctionSortList() {
+  const html =
+    functionSortList.map((item, i) => {
+      return `
+<div class="function-sort-item">
+  <button
+    class="float-list-btn"
+    onclick="selectFunctionByName('${item.name}')">
+    ${i + 1}. ${item.name}
+  </button>
+
+  <div class="float-panel-actions">
+    <button onclick="moveFunctionSortItem(${i}, -1)">↑</button>
+    <button onclick="moveFunctionSortItem(${i}, 1)">↓</button>
+  </div>
+</div>
+`;
+    }).join("");
+
+  openFloatPanel(
+    `関数並べ替え (${functionSortList.length})`,
+    html
+  );
+}
+
+function moveFunctionSortItem(index, direction) {
+  const next =
+    index + direction;
+
+  if (
+    next < 0 ||
+    next >= functionSortList.length
+  ) {
+    return;
+  }
+
+  const temp =
+    functionSortList[index];
+
+  functionSortList[index] =
+    functionSortList[next];
+
+  functionSortList[next] =
+    temp;
+
+  renderFunctionSortList();
 }
 
 function updateCursorPosition() {
@@ -4739,6 +4900,41 @@ function initRepairIde() {
   updateLineNumbers();
   updateCursorPosition();
   enableRepairEditorTabIndent();
+}
+
+function extractFunctionBlocksFromText(text) {
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  const regex =
+    /function\s+([a-zA-Z0-9_$]+)\s*\(/g;
+
+  let match;
+
+  while (
+    (match = regex.exec(source)) !== null
+  ) {
+    const name = match[1];
+
+    const block =
+      findFunctionBlockInText(
+        source,
+        name
+      );
+
+    if (!block) continue;
+
+    blocks.push({
+      name,
+      start: block.start,
+      end: block.end,
+      block: block.block
+    });
+  }
+
+  return blocks;
 }
 
 function applyRepairIndent(isOutdent) {
