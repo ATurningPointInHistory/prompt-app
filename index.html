@@ -5052,33 +5052,48 @@ function extractCodeBlocksFromText(text) {
   // let const var
   const variableRegex =
     /(?:let|const|var)\s+([a-zA-Z0-9_$]+)/g;
-
+  
   [...source.matchAll(variableRegex)]
     .forEach(match => {
-
-      const lineEnd =
+  
+      const name =
+        match[1];
+  
+      const start =
+        match.index;
+  
+      let end =
         source.indexOf(
-          "\n",
-          match.index
+          ";",
+          start
         );
-
+  
+      if (end === -1) {
+        end =
+          source.indexOf(
+            "\n",
+            start
+          );
+      }
+  
+      if (end === -1) {
+        end =
+          source.length;
+      }
+  
       blocks.push({
         type: "variable",
-        name: match[1],
-        start: match.index,
-        end:
-          lineEnd === -1
-          ? source.length
-          : lineEnd,
+        name,
+        start,
+        end: end + 1,
         block:
           source.slice(
-            match.index,
-            lineEnd
+            start,
+            end + 1
           )
       });
-
+  
     });
-
   // function
   extractFunctionBlocksFromText(
     source
