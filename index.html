@@ -1702,21 +1702,6 @@ function highlightKeyword(text, keyword) {
 
 /* ===============================
    Repair Function Sort
-
-1
-1
-1
-1
-1
-1
-1
-1
-1
-1
-
-
-
-
 =============================== */
 
 function jumpToLine(lineNumber) {
@@ -1746,6 +1731,49 @@ function jumpToLine(lineNumber) {
   updateCursorPosition();
 }
 
+function selectCodeBlockByIndex(index) {
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const text =
+    editor.value;
+
+  const blocks =
+    extractCodeBlocksFromText(text);
+
+  const item =
+    blocks[index];
+
+  if (!item) {
+    alert("コードブロックが見つかりません");
+    return;
+  }
+
+  editor.focus();
+
+  editor.setSelectionRange(
+    item.start,
+    item.end
+  );
+
+  const line =
+    text
+      .slice(0, item.start)
+      .split("\n")
+      .length;
+
+  const lineHeight = 18;
+
+  editor.scrollTop =
+    Math.max(
+      0,
+      (line - 3) * lineHeight
+    );
+
+  updateCursorPosition();
+}
 
 function openFloatPanel(title, bodyHtml){
   const panel = get("floatPanel");
@@ -3822,17 +3850,17 @@ function showFunctionList() {
     extractCodeBlocksFromText(
       text
     );
+
   let html = "";
 
   if (blocks.length === 0) {
 
-    html = "関数なし";
+    html = "コードブロックなし";
 
   } else {
 
     html =
-      blocks.map(
-        (item, i) => {
+      blocks.map((item, i) => {
 
         const line =
           text
@@ -3847,22 +3875,20 @@ function showFunctionList() {
 <button
   class="float-list-btn"
   onclick="
-    selectFunctionByName(
-      '${item.name}'
-    );
-    closeFloatPanel();
+    selectCodeBlockByIndex(${i});
+    closeFloatPanelKeepEditorSelection();
   ">
-      [${item.type}]
-      ${i + 1}.
-      ${item.name}
-      / L${line}
-      </button>
-      `;
+  [${item.type}]
+  ${i + 1}.
+  ${item.name}
+  / L${line}
+</button>
+`;
       }).join("");
   }
 
   openFloatPanel(
-    `関数一覧 (${blocks.length})`,
+    `コードブロック一覧 (${blocks.length})`,
     html
   );
 }
