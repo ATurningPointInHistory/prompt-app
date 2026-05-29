@@ -3897,6 +3897,13 @@ function showFunctionSortList() {
 
 function renderFunctionSortList() {
   const html =
+    `
+<div class="float-panel-actions">
+  <button onclick="applyFunctionSortList()">
+    ✅ 適用
+  </button>
+</div>
+` +
     functionSortList.map((item, i) => {
       return `
 <div class="function-sort-item">
@@ -3941,6 +3948,13 @@ function moveFunctionSortItem(index, direction) {
     temp;
 
   renderFunctionSortList();
+}
+
+function applyFunctionSortList() {
+  alert(
+    "適用機能は次の段階で接続します。\n\n" +
+    "今は並べ替え順の確認までです。"
+  );
 }
 
 function updateCursorPosition() {
