@@ -5049,25 +5049,25 @@ function extractCodeBlocksFromText(text) {
 
     });
 
-  // let const var
+  // top-level let const var only
   const variableRegex =
-    /(?:let|const|var)\s+([a-zA-Z0-9_$]+)/g;
-  
+    /^(let|const|var)\s+([a-zA-Z0-9_$]+)/gm;
+
   [...source.matchAll(variableRegex)]
     .forEach(match => {
-  
+
       const name =
-        match[1];
-  
+        match[2];
+
       const start =
         match.index;
-  
+
       let end =
         source.indexOf(
           ";",
           start
         );
-  
+
       if (end === -1) {
         end =
           source.indexOf(
@@ -5075,12 +5075,12 @@ function extractCodeBlocksFromText(text) {
             start
           );
       }
-  
+
       if (end === -1) {
         end =
           source.length;
       }
-  
+
       blocks.push({
         type: "variable",
         name,
@@ -5092,8 +5092,9 @@ function extractCodeBlocksFromText(text) {
             end + 1
           )
       });
-  
+
     });
+
   // function
   extractFunctionBlocksFromText(
     source
