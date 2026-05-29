@@ -602,17 +602,17 @@ body:not(.dark) #floatPanel{
 
   <div class="small" id="changelogLabel">v5.7.0 AI別レビュー強化<br>v5.7.0 AIプリセット保存/復元<br>v5.7.0 Gemini/Cursor/Copilot評価改善</div>
 
-  <div class="tab-container">    <div id="tab1" class="tab active" onclick="switchTab(1)">マニュアル入力
+  <div class="tab-container">    <div id="tab1" class="tab" onclick="switchTab(1)">マニュアル入力
 
   </div>
 
-    <div id="tab2" class="tab" onclick="switchTab(2)">ラフから変換
+    <div id="tab2" class="tab active" onclick="switchTab(2)">ラフから変換
 
   </div>
 
   </div>
 
-  <div id="mode-normal" style="display: block;">
+  <div id="mode-normal" style="display: none;">
     <label for="role">役割</label>
     <input id="role" placeholder="例：プログラマー、翻訳家、AIオーケストレーター">
     <label for="task">目的</label>
@@ -629,7 +629,7 @@ body:not(.dark) #floatPanel{
 
   </div>
 
-  <div id="mode-auto" style="display: none;">
+  <div id="mode-auto" style="display: block;">
     <label for="raw-input">やりたいことを自由に入力（AIに整理させます）</label>
     <textarea id="raw-input" rows="8" placeholder="例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。"></textarea>
 <button type="button" onclick="toggleCommandMenu()" class="btn-secondary btn-full">
@@ -675,7 +675,7 @@ body:not(.dark) #floatPanel{
   </div>
 
   <div class="btn-group">
-    <button id="main-btn" class="btn-full" onclick="generatePrompt()">⚡ プロンプトを生成する</button>
+    <button id="main-btn" class="btn-full" onclick="generatePrompt()">🪄 AI整形用プロンプトを作る</button>
     <button onclick="copyText()" class="btn-secondary">📋 コピー</button>
     <button onclick="download()" class="btn-secondary">💾 保存</button>
     <button onclick="toggleDark()" class="btn-secondary">🌙 ダークモード</button>
@@ -760,7 +760,7 @@ body:not(.dark) #floatPanel{
 
   </div>
 
-<div id="ai-preset-manager" class="section-box" style="display: block;">
+<div id="ai-preset-manager" class="section-box" style="display: none;">
   <h3>AIプリセット管理</h3>
 
   <div class="small">AI別の変換方針を編集できます。
@@ -813,13 +813,9 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">状態：自動保存データ復元</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave OFF</div>
 
-  <div id="cursorStatus"
-  class="small"
-  style="margin-top:6px;">
-  Ln 1 / Col 1
-  </div>
+  <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
 
   <label for="repairEditor">
     HTML編集エリア
@@ -845,9 +841,7 @@ body:not(.dark) #floatPanel{
 
 <button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">⚙</button>
 
-<div id="floatPanel"
-style="display:none;">
-</div>
+<div id="floatPanel" style="display: none; right: 18px; bottom: 88px;"></div>
 
 </div> <!-- card -->
 
@@ -1724,54 +1718,6 @@ function highlightKeyword(text, keyword) {
 
 
 =============================== */
-
-function renderFunctionSortList() {
-  const html =
-    functionSortList.map((item, i) => {
-      return `
-<div class="function-sort-item">
-  <button
-    class="float-list-btn"
-    onclick="selectFunctionByName('${item.name}')">
-    ${i + 1}. ${item.name}
-  </button>
-
-  <div class="float-panel-actions">
-    <button onclick="moveFunctionSortItem(${i}, -1)">↑</button>
-    <button onclick="moveFunctionSortItem(${i}, 1)">↓</button>
-  </div>
-</div>
-`;
-    }).join("");
-
-  openFloatPanel(
-    `関数並べ替え (${functionSortList.length})`,
-    html
-  );
-}
-
-function moveFunctionSortItem(index, direction) {
-  const next =
-    index + direction;
-
-  if (
-    next < 0 ||
-    next >= functionSortList.length
-  ) {
-    return;
-  }
-
-  const temp =
-    functionSortList[index];
-
-  functionSortList[index] =
-    functionSortList[next];
-
-  functionSortList[next] =
-    temp;
-
-  renderFunctionSortList();
-}
 
 function jumpToLine(lineNumber) {
   const editor = get("repairEditor");
