@@ -1708,35 +1708,22 @@ function highlightKeyword(text, keyword) {
 
 /* ===============================
    Repair Function Sort
+
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+
+
+
+
 =============================== */
-
-let functionSortList = [];
-
-function showFunctionSortList() {
-  const editor =
-    get("repairEditor");
-
-  const text =
-    editor.value;
-
-  if (!text.trim()) {
-    alert("HTMLが空です");
-    return;
-  }
-
-  functionSortList =
-    extractFunctionBlocksFromText(text);
-
-  if (functionSortList.length === 0) {
-    openFloatPanel(
-      "関数並べ替え",
-      "関数なし"
-    );
-    return;
-  }
-
-  renderFunctionSortList();
-}
 
 function renderFunctionSortList() {
   const html =
