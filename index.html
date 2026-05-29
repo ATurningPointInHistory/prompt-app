@@ -1043,7 +1043,7 @@ function saveAiPresets(presets) {
 }
 
 function getAiPreset(aiTarget) {
-const presets = getAiPresets();
+  const presets = getAiPresets();
 return presets[aiTarget] || presets.chatgpt;
 }
 
@@ -4991,28 +4991,41 @@ function extractFunctionBlocksFromText(text) {
   const blocks = [];
 
   const regex =
-    /function\s+([a-zA-Z0-9_$]+)\s*\(/g;
+    /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm;
 
   let match;
 
-  while (
-    (match = regex.exec(source)) !== null
-  ) {
-    const name = match[1];
+  while ((match = regex.exec(source)) !== null) {
+    const name =
+      match[1];
 
-    const block =
-      findFunctionBlockInText(
-        source,
-        name
-      );
+    const start =
+      match.index;
 
-    if (!block) continue;
+    const braceStart =
+      source.indexOf("{", start);
+
+    if (braceStart === -1) continue;
+
+    let depth = 1;
+    let end = braceStart + 1;
+
+    while (
+      end < source.length &&
+      depth > 0
+    ) {
+      if (source[end] === "{") depth++;
+      if (source[end] === "}") depth--;
+      end++;
+    }
 
     blocks.push({
+      type: "function",
       name,
-      start: block.start,
-      end: block.end,
-      block: block.block
+      start,
+      end,
+      block:
+        source.slice(start, end)
     });
   }
 
