@@ -4004,20 +4004,28 @@ function renderFunctionSortList() {
       return `
 <div
   class="function-sort-row"
+
   draggable="true"
+
+  data-index="
+    ${originalIndex}
+  "
+
   ondragstart="
     handleFunctionSortDragStart(
-      ${originalIndex}
+      event
     )
   "
+
   ondragover="
     handleFunctionSortDragOver(
       event
     )
   "
+
   ondrop="
     handleFunctionSortDrop(
-      ${originalIndex}
+      event
     )
   "
 >
@@ -4095,53 +4103,6 @@ function moveFunctionSortItem(index, direction) {
 
   functionSortList[next] =
     temp;
-
-  renderFunctionSortList();
-}
-
-function handleFunctionSortDragStart(
-  index
-){
-  dragSortIndex = index;
-}
-
-function handleFunctionSortDragOver(
-  e
-){
-  e.preventDefault();
-}
-
-function handleFunctionSortDrop(
-  targetIndex
-){
-
-  if(
-    dragSortIndex===null
-  ){
-    return;
-  }
-
-  if(
-    dragSortIndex===
-    targetIndex
-  ){
-    return;
-  }
-
-  const moved =
-    functionSortList.splice(
-      dragSortIndex,
-      1
-    )[0];
-
-  functionSortList.splice(
-    targetIndex,
-    0,
-    moved
-  );
-
-  dragSortIndex =
-    null;
 
   renderFunctionSortList();
 }
