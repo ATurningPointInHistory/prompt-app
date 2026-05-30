@@ -839,7 +839,7 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave ON</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：フルバックアップJSON読込</div>
 
   <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
 
@@ -3922,6 +3922,8 @@ function showFunctionList() {
 
 let functionSortList = [];
 
+let functionSortFilter = "all";
+
 function showFunctionSortList() {
 
   const editor =
@@ -3955,16 +3957,31 @@ function showFunctionSortList() {
 
 function renderFunctionSortList() {
 
+  const filteredList =
+    getFilteredFunctionSortList();
+
   const html =
     `
+<div class="float-panel-actions">
+  <button onclick="setFunctionSortFilter('all')">ALL</button>
+  <button onclick="setFunctionSortFilter('section')">SECTION</button>
+  <button onclick="setFunctionSortFilter('variable')">VAR</button>
+  <button onclick="setFunctionSortFilter('function')">FUNC</button>
+</div>
+
 <div class="float-panel-actions">
   <button onclick="applyFunctionSortList()">
     ✅ 並べ替えを適用
   </button>
 </div>
 ` +
-    functionSortList.map(
-      (item, i) => {
+    filteredList.map(entry => {
+
+      const item =
+        entry.item;
+
+      const originalIndex =
+        entry.index;
 
       return `
 <div class="function-sort-row">
@@ -3976,15 +3993,13 @@ function renderFunctionSortList() {
     "
     onclick="
       selectCodeBlockByIndex(
-        ${i}
+        ${originalIndex}
       );
       closeFloatPanelKeepEditorSelection();
     ">
-
     [${item.type}]
-    ${i + 1}.
+    ${originalIndex + 1}.
     ${escapeHtml(item.name)}
-
   </button>
 
   <div class="function-sort-actions">
@@ -3992,7 +4007,7 @@ function renderFunctionSortList() {
     <button
       onclick="
         moveFunctionSortItem(
-          ${i},
+          ${originalIndex},
           -1
         )
       ">
@@ -4002,7 +4017,7 @@ function renderFunctionSortList() {
     <button
       onclick="
         moveFunctionSortItem(
-          ${i},
+          ${originalIndex},
           1
         )
       ">
@@ -4042,6 +4057,29 @@ function moveFunctionSortItem(index, direction) {
     temp;
 
   renderFunctionSortList();
+}
+
+function setFunctionSortFilter(filter) {
+  functionSortFilter = filter;
+  renderFunctionSortList();
+}
+
+function getFilteredFunctionSortList() {
+  if (functionSortFilter === "all") {
+    return functionSortList.map((item, index) => ({
+      item,
+      index
+    }));
+  }
+
+  return functionSortList
+    .map((item, index) => ({
+      item,
+      index
+    }))
+    .filter(entry =>
+      entry.item.type === functionSortFilter
+    );
 }
 
 function moveFunctionSortItemToTop(index) {
