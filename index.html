@@ -3979,31 +3979,74 @@ function renderFunctionSortList() {
     getFilteredFunctionSortList();
 
   const html =
-    `
+`
 <div class="float-panel-actions">
-  <button onclick="setFunctionSortFilter('all')">ALL</button>
-  <button onclick="setFunctionSortFilter('section')">SECTION</button>
-  <button onclick="setFunctionSortFilter('variable')">VAR</button>
-  <button onclick="setFunctionSortFilter('function')">FUNC</button>
+
+  <button
+    onclick="
+      setFunctionSortFilter(
+        'all'
+      )
+    ">
+    ALL
+  </button>
+
+  <button
+    onclick="
+      setFunctionSortFilter(
+        'section'
+      )
+    ">
+    SECTION
+  </button>
+
+  <button
+    onclick="
+      setFunctionSortFilter(
+        'variable'
+      )
+    ">
+    VAR
+  </button>
+
+  <button
+    onclick="
+      setFunctionSortFilter(
+        'function'
+      )
+    ">
+    FUNC
+  </button>
+
 </div>
 
 <div class="float-panel-actions">
-  <button onclick="applyFunctionSortList()">
+
+  <button
+    onclick="
+      applyFunctionSortList()
+    ">
     ✅ 並べ替えを適用
   </button>
+
 </div>
-` +
-    filteredList.map(entry => {
+`
++
+filteredList.map(
+(entry)=>{
 
-      const item =
-        entry.item;
+const item =
+  entry.item;
 
-      const originalIndex =
-        entry.index;
+const originalIndex =
+  entry.index;
 
-      return `
+return `
 <div
-  class="function-sort-row"
+
+  class="
+    function-sort-row
+  "
 
   draggable="true"
 
@@ -4030,27 +4073,42 @@ function renderFunctionSortList() {
   "
 >
 
-  <div class="function-drag-handle">
+  <div
+    class="
+      function-drag-handle
+    ">
     ≡
   </div>
 
   <button
+
     class="
       float-list-btn
       function-sort-select
     "
+
     onclick="
       selectCodeBlockByIndex(
         ${originalIndex}
       );
+
       closeFloatPanelKeepEditorSelection();
-    ">
+    "
+
+  >
+
     [${item.type}]
     ${originalIndex + 1}.
-    ${escapeHtml(item.name)}
+    ${escapeHtml(
+      item.name
+    )}
+
   </button>
 
-  <div class="function-sort-actions">
+  <div
+    class="
+      function-sort-actions
+    ">
 
     <button
       onclick="
@@ -4076,14 +4134,14 @@ function renderFunctionSortList() {
 
 </div>
 `;
-    }).join("");
+})
+.join("");
 
   openFloatPanel(
     `コードブロック並べ替え (${functionSortList.length})`,
     html
   );
 }
-
 function moveFunctionSortItem(index, direction) {
   const next =
     index + direction;
