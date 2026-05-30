@@ -914,17 +914,8 @@ const CHANGELOG = [
 ];
 
 /* ===============================
-   01. Core / Utility
-    get
-    escapeHtml
-    escapeRegExp
-    loadJson
-    copyTextFallback
-    validateBackupHtml
-    extractFunctionNames
-    extractIds
-    calcHealthScore
-    preSaveCheck
+   FILE: 01_core.js
+   Core / Utility / Constants
 =============================== */
 
 const get = (id) => document.getElementById(id);
@@ -1090,17 +1081,8 @@ return presets[aiTarget] || presets.chatgpt;
 }
 
 /* ===============================
-   02. Prompt Builder
-    buildPromptObject
-    convertForAI
-    convertForChatGPT
-    convertForClaude
-    convertForGemini
-    convertForCursor
-    convertForCopilot
-    parseCommands
-    generatePrompt
-    reviewPrompt
+   FILE: 02_prompt.js
+   Prompt Builder
 =============================== */
 
 function buildPromptObject(raw, tone, commands) {
@@ -1487,10 +1469,9 @@ function resetRepairEditorView() {
 
 
 /* ===============================
-   06. Search / Replace
+   FILE: 06_search.js
+   Search / Replace
 =============================== */
-
-/* ===== Repair Search ===== */
 
 function toggleRepairSearchBox() {
   openFloatPanel(
@@ -2789,12 +2770,8 @@ function clearHistory() {
 }
 
 /* ===============================
-   03. Template / Preset / Danger
-    Template
-    AI Preset
-    DangerWord
-    Pattern
-    History
+   FILE: 03_data.js
+   Template / Preset / Danger
 =============================== */
 
 
@@ -3118,14 +3095,8 @@ function validateBackupHtml(html) {
 }
 
 /* ===============================
-   04. Tools / Backup / Health
-    backupProgram
-    restoreProgramBackup
-    showHtmlHealth
-    compareBackupSummary
-    saveProgramHtml
-    saveBackupHistory
-    showBackupHistory
+   FILE: 04_tools.js
+   Tools
 =============================== */
 
 function backupProgram() {
@@ -3640,17 +3611,9 @@ function saveProgramHtml() {
   alert("本体HTMLを保存しました");
 }
 
-/* ===============================                          
-   05. Repair IDE
-    repairUndoStack
-    loadRepairHtml
-    saveRepairHtml
-    copyRepairHtml
-    undoRepairEdit
-    redoRepairEdit
-    indentRepairSelection
-    previewRepairHtml
-    cleanupCandidates
+/* ===============================
+   FILE: 05_repair.js
+   Repair IDE
 =============================== */
 
 function loadRepairHtml() {
@@ -4939,7 +4902,8 @@ ${col}`;
 };
 
 /* ===============================
-   08. Init / Event
+   FILE: 08_init.js
+   Init / Event
 =============================== */
 
 document.addEventListener("DOMContentLoaded", initRepairIde);
@@ -5659,7 +5623,8 @@ function restoreBackupHistory(index) {
 }
 
 /* ===============================
-   07. Safe Mode / AutoSave
+   FILE: 07_backup_health.js
+   Backup / Health / Safe Mode
 =============================== */
 
 function checkSafeMode() {
