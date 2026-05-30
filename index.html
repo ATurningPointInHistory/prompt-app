@@ -855,7 +855,7 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave ON</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：自動保存データ復元</div>
 
   <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
 
@@ -4232,38 +4232,6 @@ function getFilteredFunctionSortList() {
     );
 }
 
-function moveFunctionSortItemToTop(index) {
-  if (
-    index <= 0 ||
-    index >= functionSortList.length
-  ) {
-    return;
-  }
-
-  const item =
-    functionSortList.splice(index, 1)[0];
-
-  functionSortList.unshift(item);
-
-  renderFunctionSortList();
-}
-
-function moveFunctionSortItemToBottom(index) {
-  if (
-    index < 0 ||
-    index >= functionSortList.length - 1
-  ) {
-    return;
-  }
-
-  const item =
-    functionSortList.splice(index, 1)[0];
-
-  functionSortList.push(item);
-
-  renderFunctionSortList();
-}
-
 let functionSortDragIndex = null;
 
 function handleFunctionSortDragStart(event) {
@@ -4392,25 +4360,6 @@ function updateCursorPosition() {
     before.lastIndexOf("\n");
   box.innerText =
     `Ln ${line} / Col ${col}`;
-}
-
-function selectFunctionByName(name){
-  const result = findFunctionBlock(name);
-  if(!result)return;
-  const editor = get("repairEditor");
-  editor.focus();
-  editor.setSelectionRange(
-    result.start,
-    result.end
-  );
-  const line =
-    editor.value
-      .slice(0, result.start)
-      .split("\n").length;
-  const lineHeight = 18;
-  editor.scrollTop =
-    Math.max(0, (line - 3) * lineHeight);
-  updateCursorPosition();
 }
 
 function diagnoseRepairHtml() {
