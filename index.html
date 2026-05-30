@@ -5056,8 +5056,7 @@ function extractCodeBlocksFromText(text) {
           match[1]
             .split("\n")
             .map(x => x.trim())
-            .filter(Boolean)
-            .join(" / ") ||
+            .filter(Boolean)[0] ||
           "Section",
         start: match.index,
         end:
