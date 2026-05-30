@@ -595,6 +595,22 @@ body:not(.dark) #floatPanel{
   grid-template-columns:1fr 1fr 1fr;
 }
 
+.function-drag-handle{
+  cursor:grab;
+  user-select:none;
+  padding:8px;
+  font-size:18px;
+}
+
+.function-sort-row.dragging{
+  opacity:0.5;
+  background:#2b3d52;
+}
+
+.function-sort-row.drag-over{
+  outline:2px solid #4da3ff;
+}
+
 .code-tag { color: #7ee787; }
 .code-attr { color: #79c0ff; }
 .code-string { color: #a5d6ff; }
@@ -839,7 +855,7 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">状態：フルバックアップJSON読込</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave ON</div>
 
   <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
 
@@ -3924,6 +3940,8 @@ let functionSortList = [];
 
 let functionSortFilter = "all";
 
+let dragSortIndex = null;
+
 function showFunctionSortList() {
 
   const editor =
@@ -3984,7 +4002,29 @@ function renderFunctionSortList() {
         entry.index;
 
       return `
-<div class="function-sort-row">
+<div
+  class="function-sort-row"
+  draggable="true"
+  ondragstart="
+    handleFunctionSortDragStart(
+      ${originalIndex}
+    )
+  "
+  ondragover="
+    handleFunctionSortDragOver(
+      event
+    )
+  "
+  ondrop="
+    handleFunctionSortDrop(
+      ${originalIndex}
+    )
+  "
+>
+
+  <div class="function-drag-handle">
+    ≡
+  </div>
 
   <button
     class="
@@ -4055,6 +4095,53 @@ function moveFunctionSortItem(index, direction) {
 
   functionSortList[next] =
     temp;
+
+  renderFunctionSortList();
+}
+
+function handleFunctionSortDragStart(
+  index
+){
+  dragSortIndex = index;
+}
+
+function handleFunctionSortDragOver(
+  e
+){
+  e.preventDefault();
+}
+
+function handleFunctionSortDrop(
+  targetIndex
+){
+
+  if(
+    dragSortIndex===null
+  ){
+    return;
+  }
+
+  if(
+    dragSortIndex===
+    targetIndex
+  ){
+    return;
+  }
+
+  const moved =
+    functionSortList.splice(
+      dragSortIndex,
+      1
+    )[0];
+
+  functionSortList.splice(
+    targetIndex,
+    0,
+    moved
+  );
+
+  dragSortIndex =
+    null;
 
   renderFunctionSortList();
 }
