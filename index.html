@@ -482,6 +482,32 @@ body:not(.dark) #floatPanel{
   font-size:12px;
 }
 
+.function-sort-row{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:6px;
+}
+
+.function-sort-select{
+  flex:1;
+  text-align:left;
+  padding:8px 10px;
+  font-size:12px;
+}
+
+.function-sort-actions{
+  display:flex;
+  gap:4px;
+}
+
+.function-sort-actions button{
+  width:36px;
+  height:36px;
+  padding:0;
+  font-size:14px;
+}
+
 #repairSearchBtn {
   bottom: 88px;
 }
@@ -3935,14 +3961,18 @@ function renderFunctionSortList() {
       (item, i) => {
 
       return `
-<div class="function-sort-item">
+<div class="function-sort-row">
 
   <button
-    class="float-list-btn"
+    class="
+      float-list-btn
+      function-sort-select
+    "
     onclick="
       selectCodeBlockByIndex(
         ${i}
-      )
+      );
+      closeFloatPanelKeepEditorSelection();
     ">
 
     [${item.type}]
@@ -3951,7 +3981,7 @@ function renderFunctionSortList() {
 
   </button>
 
-  <div class="float-panel-actions">
+  <div class="function-sort-actions">
 
     <button
       onclick="
