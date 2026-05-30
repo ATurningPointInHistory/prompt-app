@@ -4024,6 +4024,13 @@ function renderFunctionSortList() {
 
   <button
     onclick="
+      autoSortFunctionSortList()
+    ">
+    🧹 自動整理
+  </button>
+
+  <button
+    onclick="
       applyFunctionSortList()
     ">
     ✅ 並べ替えを適用
@@ -4162,6 +4169,42 @@ function moveFunctionSortItem(index, direction) {
 
   functionSortList[next] =
     temp;
+
+  renderFunctionSortList();
+}
+
+function autoSortFunctionSortList() {
+
+  const ok =
+    confirm(
+      "コードブロックを自動整理します。\n\n" +
+      "順番：section → variable → function\n\n" +
+      "※まだHTML本体には反映しません。"
+    );
+
+  if (!ok) return;
+
+  const order = {
+    section: 1,
+    variable: 2,
+    function: 3
+  };
+
+  functionSortList.sort((a, b) => {
+    const typeA =
+      order[a.type] || 99;
+
+    const typeB =
+      order[b.type] || 99;
+
+    if (typeA !== typeB) {
+      return typeA - typeB;
+    }
+
+    return a.start - b.start;
+  });
+
+  functionSortFilter = "all";
 
   renderFunctionSortList();
 }
