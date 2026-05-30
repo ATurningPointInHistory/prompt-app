@@ -3880,8 +3880,9 @@ function showFunctionList() {
   ">
   [${item.type}]
   ${i + 1}.
-  ${item.name}
+  ${escapeHtml(item.name)}
   / L${line}
+
 </button>
 `;
       }).join("");
