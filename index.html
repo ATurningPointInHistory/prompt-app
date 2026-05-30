@@ -1397,8 +1397,8 @@ function buildRepairToolsHtml() {
 <button class="float-list-btn" onclick="diagnoseRepairHtml()">🩺 編集内容診断</button>
 <button class="float-list-btn" onclick="selectFunctionBlock()">📦 関数選択</button>
 <button class="float-list-btn" onclick="replaceFunctionBlock()">✏ 関数置換</button>
-<button class="float-list-btn" onclick="showFunctionList()">📚 関数一覧</button>
-<button class="float-list-btn" onclick="showFunctionSortList()">↕ 関数並べ替え</button>
+<button class="float-list-btn" onclick="showFunctionList()">📚 コードブロック一覧</button>
+<button class="float-list-btn" onclick="showFunctionSortList()">↕コードブロック並べ替え</button>
 <button class="float-list-btn" onclick="toggleRepairSearchBox()">🔍 検索</button>
 <button class="float-list-btn" onclick="openReplacePanel()">🔁 検索置換</button>
 <hr>
@@ -3897,6 +3897,7 @@ function showFunctionList() {
 let functionSortList = [];
 
 function showFunctionSortList() {
+
   const editor =
     get("repairEditor");
 
@@ -3909,12 +3910,16 @@ function showFunctionSortList() {
   }
 
   functionSortList =
-    extractFunctionBlocksFromText(text);
+    extractCodeBlocksFromText(
+      text
+    );
 
-  if (functionSortList.length === 0) {
+  if (
+    functionSortList.length === 0
+  ) {
     openFloatPanel(
-      "関数並べ替え",
-      "関数なし"
+      "コードブロック並べ替え",
+      "コードブロックなし"
     );
     return;
   }
@@ -3923,42 +3928,59 @@ function showFunctionSortList() {
 }
 
 function renderFunctionSortList() {
+
   const html =
-    `
-<div class="float-panel-actions">
-  <button onclick="applyFunctionSortList()">
-    ✅ 適用
-  </button>
-</div>
-` +
-    functionSortList.map((item, i) => {
+
+    functionSortList.map(
+      (item, i) => {
+
       return `
-<div
-  class="function-sort-item"
-  draggable="true"
-  data-index="${i}"
-  ondragstart="handleFunctionSortDragStart(event)"
-  ondragover="handleFunctionSortDragOver(event)"
-  ondrop="handleFunctionSortDrop(event)"
->
+<div class="function-sort-item">
+
   <button
     class="float-list-btn"
-    onclick="selectFunctionByName('${item.name}')">
-    ☰ ${i + 1}. ${item.name}
+    onclick="
+      selectCodeBlockByIndex(
+        ${i}
+      )
+    ">
+
+    [${item.type}]
+    ${i + 1}.
+    ${escapeHtml(item.name)}
+
   </button>
 
   <div class="float-panel-actions">
-    <button onclick="moveFunctionSortItemToTop(${i})">⏫</button>
-    <button onclick="moveFunctionSortItem(${i}, -1)">↑</button>
-    <button onclick="moveFunctionSortItem(${i}, 1)">↓</button>
-    <button onclick="moveFunctionSortItemToBottom(${i})">⏬</button>
+
+    <button
+      onclick="
+        moveFunctionSortItem(
+          ${i},
+          -1
+        )
+      ">
+      ↑
+    </button>
+
+    <button
+      onclick="
+        moveFunctionSortItem(
+          ${i},
+          1
+        )
+      ">
+      ↓
+    </button>
+
   </div>
+
 </div>
 `;
     }).join("");
 
   openFloatPanel(
-    `関数並べ替え (${functionSortList.length})`,
+    `コードブロック並べ替え (${functionSortList.length})`,
     html
   );
 }
