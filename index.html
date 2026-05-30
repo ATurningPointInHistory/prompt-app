@@ -3956,7 +3956,13 @@ function showFunctionSortList() {
 function renderFunctionSortList() {
 
   const html =
-
+    `
+<div class="float-panel-actions">
+  <button onclick="applyFunctionSortList()">
+    ✅ 並べ替えを適用
+  </button>
+</div>
+` +
     functionSortList.map(
       (item, i) => {
 
@@ -4116,10 +4122,74 @@ function handleFunctionSortDrop(event) {
 }
 
 function applyFunctionSortList() {
-  alert(
-    "適用機能は次の段階で接続します。\n\n" +
-    "今は並べ替え順の確認までです。"
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  const originalBlocks =
+    extractCodeBlocksFromText(text);
+
+  if (
+    originalBlocks.length !==
+    functionSortList.length
+  ) {
+    alert(
+      "コードブロック数が一致しません。\n" +
+      "再度一覧を開き直してください。"
+    );
+    return;
+  }
+
+  const ok =
+    confirm(
+      "現在の並び順をHTMLへ反映します。\n\n" +
+      "事前に保存・バックアップ済みですか？"
+    );
+
+  if (!ok) return;
+
+  repairUndoStack.push(text);
+  repairRedoStack = [];
+
+  let result = "";
+  let cursor = 0;
+
+  originalBlocks.forEach((block, index) => {
+    result += text.slice(
+      cursor,
+      block.start
+    );
+
+    result +=
+      functionSortList[index].block;
+
+    cursor = block.end;
+  });
+
+  result += text.slice(cursor);
+
+  editor.value = result;
+  repairLastValue = result;
+
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(
+    "コードブロック並べ替え適用"
   );
+
+  autoSaveRepairDraft();
+
+  alert("並べ替えを適用しました");
 }
 
 function updateCursorPosition() {
