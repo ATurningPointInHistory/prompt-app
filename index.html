@@ -1553,6 +1553,7 @@ function applyPresetByName(name) {
   if (!commands) return;
   applyPreset(commands);
 }
+
 function applyPreset(commands) {
   const input = get("raw-input");
   // 既存コマンド削除
@@ -1973,18 +1974,34 @@ function clearOutput() {
   hideWarning();
 }
 
+function testJsonFormat() {
+  get("output").innerText = '{"a":1,"b":2}';
+}
+
+function testPromptObject() {
+  const rawOriginal =
+    get("raw-input").value.trim();
+
   if (!rawOriginal) {
     alert("ラフ入力欄にテスト用の文章を入力してください");
     return;
   }
-  const tone = get("rough-tone").value;
-  const parsed = parseCommands(rawOriginal);
-  const obj = buildPromptObject(
-    parsed.cleanedText,
-    tone,
-    parsed.commands
-  );
-  get("output").innerText = JSON.stringify(obj, null, 2);
+
+  const tone =
+    get("rough-tone").value;
+
+  const parsed =
+    parseCommands(rawOriginal);
+
+  const obj =
+    buildPromptObject(
+      parsed.cleanedText,
+      tone,
+      parsed.commands
+    );
+
+  get("output").innerText =
+    JSON.stringify(obj, null, 2);
 }
 
 function recheckOutput() {
