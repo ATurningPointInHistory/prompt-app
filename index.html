@@ -2711,68 +2711,118 @@ function importAiPresets() {
 /* ===== Import File Events ===== */
 
 function initImportFileEvents() {
-  get("fileInput").addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(reader.result);
-        if (!Array.isArray(parsed)) {
-          alert("テンプレファイルの形式が正しくありません");
-          return;
-        }
-        localStorage.setItem("templates", JSON.stringify(parsed));
-        renderTemplates();
-        renderTemplateSelect();
-        alert("復元完了");
-      } catch {
-        alert("読み込みに失敗しました");
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = "";
-  });
 
-  get("aiPresetFileInput").addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(reader.result);
-        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-          alert("AIプリセットファイルの形式が正しくありません");
-          return;
-        }
-        const validKeys = ["chatgpt", "claude", "gemini", "cursor", "copilot"];
-  
-        for (const key of Object.keys(parsed)) {
-          if (!validKeys.includes(key)) {
-            alert(`不明なAI設定が含まれています: ${key}`);
+  const fileInput =
+    get("fileInput");
+
+  const aiPresetFileInput =
+    get("aiPresetFileInput");
+
+  if (fileInput) {
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        try {
+          const parsed =
+            JSON.parse(reader.result);
+
+          if (!Array.isArray(parsed)) {
+            alert("テンプレファイルの形式が正しくありません");
             return;
           }
+
+          localStorage.setItem(
+            "templates",
+            JSON.stringify(parsed)
+          );
+
+          renderTemplates();
+          renderTemplateSelect();
+
+          alert("復元完了");
+
+        } catch {
+          alert("読み込みに失敗しました");
+        }
+      };
+
+      reader.readAsText(file);
+      e.target.value = "";
+    });
+  }
+
+  if (aiPresetFileInput) {
+    aiPresetFileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        try {
+          const parsed =
+            JSON.parse(reader.result);
+
           if (
-            !parsed[key] ||
-            typeof parsed[key].name !== "string" ||
-            typeof parsed[key].instruction !== "string"
+            !parsed ||
+            typeof parsed !== "object" ||
+            Array.isArray(parsed)
           ) {
-            alert(`AI設定の形式が正しくありません: ${key}`);
+            alert("AIプリセットファイルの形式が正しくありません");
             return;
           }
+
+          const validKeys = [
+            "chatgpt",
+            "claude",
+            "gemini",
+            "cursor",
+            "copilot"
+          ];
+
+          for (const key of Object.keys(parsed)) {
+            if (!validKeys.includes(key)) {
+              alert(`不明なAI設定が含まれています: ${key}`);
+              return;
+            }
+
+            if (
+              !parsed[key] ||
+              typeof parsed[key].name !== "string" ||
+              typeof parsed[key].instruction !== "string"
+            ) {
+              alert(`AI設定の形式が正しくありません: ${key}`);
+              return;
+            }
+          }
+
+          saveAiPresets(parsed);
+
+          if (
+            get("ai-preset-manager") &&
+            get("ai-preset-manager").style.display !== "none"
+          ) {
+            loadAiPresetToEditor();
+          }
+
+          alert("AIプリセットを復元しました");
+
+        } catch (e) {
+          alert(
+            "AIプリセットの読み込みに失敗しました\n\n" +
+            e.message
+          );
         }
-        saveAiPresets(parsed);
-        if (get("ai-preset-manager").style.display !== "none") {
-          loadAiPresetToEditor();
-        }
-        alert("AIプリセットを復元しました");
-      } catch (e) {
-        alert("AIプリセットの読み込みに失敗しました\n\n" + e.message);
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = "";
-  });
+      };
+
+      reader.readAsText(file);
+      e.target.value = "";
+    });
+  }
 }
 
 /* ===============================
@@ -6370,7 +6420,7 @@ function initRepairIde() {
 
 document.addEventListener("DOMContentLoaded", initRepairIde);
 document.addEventListener("DOMContentLoaded", loadSettings);
-document.addEventListener("DOMContentLoaded", initImportFileEvents);
+document.addEventListener("DOMContentLoaded",initImportFileEvents);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
 </script>
