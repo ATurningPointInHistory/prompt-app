@@ -611,17 +611,6 @@ body:not(.dark) #floatPanel{
   outline:2px solid #4da3ff;
 }
 
-.function-list-row{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:8px;
-}
-
-.function-list-select{
-  flex:1;
-}
-
 .code-tag { color: #7ee787; }
 .code-attr { color: #79c0ff; }
 .code-string { color: #a5d6ff; }
@@ -1096,6 +1085,569 @@ return presets[aiTarget] || presets.chatgpt;
    Prompt Builder
 =============================== */
 
+function formatJsonOutput() {
+  const output = get("output");
+  let text = output.innerText.trim();
+  if (!text || text === "ここに表示") {
+    alert("JSONがありません");
+    return;
+  }
+  try {
+    // ```json 除去
+    text = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+    // JSON化
+    const parsed = JSON.parse(text);
+    // 整形
+    const formatted = JSON.stringify(parsed, null, 2);
+    output.innerText = formatted;
+    alert("JSON整形完了");
+  } catch (e) {
+    alert("JSON形式が不正です\n\n" + e.message);
+  }
+}
+
+function reviewPrompt() {
+  const text = get("output").innerText.trim();
+  if (!text || text === "ここに表示") {
+    alert("先に生成してください");
+    return;
+  }
+  let score = 100;
+  const goodPoints = [];
+  const warnings = [];
+  const suggestions = [];
+  const hasJsonLike = text.startsWith("{") || text.startsWith("[");
+  let parsedJson = null;
+  if (hasJsonLike) {
+    try {
+      parsedJson = JSON.parse(text);
+      goodPoints.push("JSONとして解析可能");
+    } catch (e) {
+      score -= 25;
+      warnings.push("JSON形式が不正です");
+      suggestions.push("JSON整形ボタンで確認し、余計な説明文やMarkdownを除去してください。");
+    }
+  }
+  const selectedAi = get("ai-target")
+      ? get("ai-target").value || "chatgpt"
+      : "chatgpt";
+    let aiSpecificChecks = [];
+    switch (selectedAi) {
+      case "chatgpt":
+        aiSpecificChecks = [
+          {
+            ok:
+              text.includes("役割") ||
+              text.includes('"role"'),
+            warning: "ChatGPT向けの役割整理が不足しています"
+          },
+          {
+            ok:
+              text.includes("目的") ||
+              text.includes('"purpose"'),
+            warning: "ChatGPT向けの目的整理が不足しています"
+          },
+          {
+            ok:
+              text.includes("出力形式") ||               text.includes('"output_format"'),
+            warning: "ChatGPT向けの出力形式整理が不足しています"
+          }
+        ];
+        break;
+      case "claude":
+        aiSpecificChecks = [
+          {
+            ok: text.includes("背景"),
+            warning: "Claude向けの背景整理が不足しています"
+          },
+          {
+            ok: text.includes("意図"),
+            warning: "Claude向けの意図整理が不足しています"
+          },
+          {
+            ok: text.includes("考慮点"),
+            warning: "Claude向けの考慮点整理が不足しています"
+          }
+        ];
+        break;
+      case "gemini":
+        aiSpecificChecks = [
+          {
+            ok: text.includes("目的"),
+            warning: "Gemini向けの目的整理が不足しています"
+          },
+          {
+            ok:
+              text.includes("必要な出力") ||
+              text.includes("出力"),
+            warning: "Gemini向けの必要な出力整理が不足しています"
+          },
+          {
+            ok:
+              text.includes("条件") ||
+              text.includes("制約"),
+            warning: "Gemini向けの条件整理が不足しています"
+          },
+          {
+            ok:
+              text.includes("優先") ||
+              text.includes("重要"),
+            warning: "Gemini向けの優先順位整理が不足しています"
+          },
+          {
+            ok:
+              text.includes("成功条件") ||
+              text.includes("期待結果"),
+            warning: "Gemini向けの成功条件整理が不足しています"
+          }
+        ];
+        break;
+      case "cursor":
+        aiSpecificChecks = [
+          {
+            ok: text.includes("現状"),
+            warning: "Cursor向けの現状整理が不足しています"
+          },
+          {
+            ok: text.includes("問題"),
+            warning: "Cursor向けの問題整理が不足しています"
+          },
+          {
+            ok: text.includes("期待動作"),
+            warning: "Cursor向けの期待動作整理が不足しています"
+          },
+          {
+            ok: text.includes("修正方針"),
+            warning: "Cursor向けの修正方針整理が不足しています"
+          }
+        ];
+        break;
+
+      case "copilot":
+        aiSpecificChecks = [
+          {
+            ok: text.includes("Goal"),
+            warning: "Copilot向けのGoal整理が不足しています"
+          },
+          {
+            ok: text.includes("Context"),
+            warning: "Copilot向けのContext整理が不足しています"
+          },
+          {
+            ok: text.includes("Expected behavior"),
+            warning: "Copilot向けのExpected behavior整理が不足しています"
+          },
+          {
+            ok: text.includes("Constraints"),
+            warning: "Copilot向けのConstraints整理が不足しています"
+          }
+        ];
+        break;
+    }
+    aiSpecificChecks.forEach(check => {
+      if (check.ok) {
+        goodPoints.push(`AI別評価OK：${selectedAi}`);
+      } else {
+        score -= 6;
+        warnings.push(check.warning);
+      }
+    });
+  const checks = [
+    ...(!["claude", "cursor", "copilot", "gemini"].includes(selectedAi)
+      ? [{
+          name: "役割",
+          ok: text.includes("役割") || text.includes('"role"'),
+          penalty: 12,
+          warning: "役割が不明です",
+          suggestion: "誰として回答するかを明記してください。例：あなたはHTML/JavaScriptに詳しい設計者です。"
+        }]
+      : []),
+    {
+      name: "目的",
+      ok:
+        text.includes("目的") ||
+        text.includes('"purpose"') ||
+        text.includes("Goal") ||
+        text.includes("意図"),
+      penalty: 12,
+      warning: "目的が不明です",
+      suggestion: "何を達成したいのかを1文で明記してください。"
+    },
+    {
+      name: "背景・条件",
+      ok:
+        text.includes("背景") ||
+        text.includes("条件") ||
+        text.includes('"conditions"') ||
+        text.includes("Context") ||
+        text.includes("現状"),
+      penalty: 10,
+      warning: "背景・条件が不足しています",
+      suggestion: "前提、対象範囲、現在の状況を追加してください。"
+    },
+    ...(!["claude", "gemini"].includes(selectedAi)
+      ? [{
+          name: "制約",
+          ok:
+            text.includes("制約") ||
+            text.includes("禁止") ||
+            text.includes("注意") ||
+            text.includes('"constraints"'),
+          penalty: 10,
+          warning: "制約・禁止事項が不足しています",
+          suggestion: "既存仕様を壊さない、API直送しない、出力形式を守るなどを追加してください。"
+        }]
+      : []),
+    ...(!["claude", "cursor", "gemini"].includes(selectedAi)
+      ? [{
+          name: "出力形式",
+          ok:
+            text.includes("出力形式") ||
+            text.includes('"output_format"') ||
+            text.includes("Output"),
+          penalty: 12,
+          warning: "出力形式が曖昧です",
+          suggestion: "箇条書き、表、JSON、修正コードなど、期待する出力形式を指定してください。"
+        }]
+      : []),
+    ...(!["cursor", "copilot"].includes(selectedAi)
+      ? [{
+          name: "トーン",
+          ok:
+            text.includes("トーン") ||
+            text.includes('"tone"'),
+          penalty: 8,
+          warning: "トーン指定がありません",
+          suggestion: "プロフェッショナル、簡潔、初心者向けなどの文体を指定してください。"
+        }]
+      : []),
+    {
+      name: "不足情報",
+      ok:
+        text.includes("不足") ||
+        text.includes("確認") ||        
+         text.includes('"missing_information"'),
+      penalty: 8,
+      warning: "不足情報への対応指示がありません",
+      suggestion: "不明点がある場合は、確認するか仮定として明示する指示を追加してください。"
+    },
+    {
+      name: "追加指示",
+      ok:
+        text.includes("追加変換モード") ||
+        text.includes('"commands"'),
+      penalty: 5,
+      warning: "追加指示・コマンドが反映されていません",
+      suggestion: "必要に応じて /step /enemy /schema などを追加してください。"
+    }
+  ];
+  checks.forEach(check => {
+    if (check.ok) {
+      goodPoints.push(`${check.name}あり`);
+    } else {
+      score -= check.penalty;
+      warnings.push(check.warning);
+      suggestions.push(check.suggestion);
+    }
+  });
+  const vagueWords = ["いい感じ", "なんとか", "適当に", "わかりやすく", "詳しく"];
+  const foundVague = vagueWords.filter(word => text.includes(word));
+  if (foundVague.length > 0) {
+    score -= 10;
+    warnings.push(`曖昧な表現があります：${foundVague.join("、")}`);
+    suggestions.push("曖昧語を、具体的な完了条件・対象範囲・評価基準に置き換えてください。");
+  }
+  if (text.length < 120) {
+    score -= 10;
+    warnings.push("内容が短く、情報不足の可能性があります");
+    suggestions.push("背景、目的、条件、期待する完成形を追加してください。");
+  } else {
+    goodPoints.push("一定の情報量あり");
+  }
+  if (parsedJson) {
+    if (parsedJson.version) goodPoints.push("バージョン情報あり");
+    if (parsedJson.prompt && parsedJson.prompt.purpose) goodPoints.push("内部JSONの目的あり");
+    if (Array.isArray(parsedJson.commands)) goodPoints.push("commands配列あり");
+    if (!parsedJson.prompt) {
+      score -= 10;
+      warnings.push("内部JSONに prompt オブジェクトがありません");
+      suggestions.push("buildPromptObject() の構造を確認してください。");
+    }
+  }
+  score = Math.max(0, Math.min(100, score));
+  let rank = "C";
+  if (score >= 90) rank = "S";
+  else if (score >= 80) rank = "A";
+  else if (score >= 65) rank = "B";
+  let result =
+`AIプロンプト生成Pro ${APP_VERSION}
+  Prompt Score : ${score} / 100
+  Rank : ${rank}
+  `;
+  if (goodPoints.length > 0) {
+    result += "良い点:\n";
+    result += [...new Set(goodPoints)].map(x => `✔ ${x}`).join("\n");
+    result += "\n\n";
+  }
+  if (warnings.length > 0) {
+    result += "改善候補:\n";
+    result += [...new Set(warnings)].map(x => `⚠ ${x}`).join("\n");
+    result += "\n\n";
+  }
+  if (suggestions.length > 0) {
+    result += "改善案:\n";
+    result += [...new Set(suggestions)].map(x => `・${x}`).join("\n");
+  } else {
+    result += "大きな改善点は見つかりません。";
+  }
+  alert(result);
+}
+
+function parseCommands(text) {
+  const commandKeys = Object.keys(commandDefinitions);
+  const found = [];
+  const matches = text.match(/\/[a-zA-Z0-9]+/g) || [];
+  matches.forEach(m => {
+    const cmd = m.replace("/", "").toLowerCase();
+    if (commandKeys.includes(cmd)) {
+      found.push(cmd);
+    }
+  });
+  const cleaned = text.replace(/\/[a-zA-Z0-9]+/g, "").trim();
+  return {
+    cleanedText: cleaned,
+    commands: [...new Set(found)]
+  };
+}
+
+function buildCommandInstructionsFromObject(obj) {
+  if (!obj.commands || obj.commands.length === 0) return "";
+  const lines = obj.commands.map(cmd => {
+    return `・${cmd.key}: ${cmd.instruction}`;
+  });
+  return `
+# 追加変換モード
+以下の変換モードを反映してください。
+${lines.join("\n")}
+`;
+}
+
+function renderCommandChips() {
+  const box = get("commandBox");
+  if (!box) return;
+  box.innerHTML = Object.keys(commandDefinitions).map(cmd => {
+    return `<button
+      type="button"
+      class="command-chip"
+      data-cmd="${cmd}"
+      onclick="addCommand('${cmd}')">
+      /${cmd}
+    </button>`;
+  }).join("");
+  syncCommandButtons();
+}
+
+function renderPresetChips() {
+  const box = get("presetBox");
+  if (!box) return;
+  box.innerHTML = Object.keys(presetDefinitions).map(name => {
+    return `<button
+      type="button"
+      class="preset-chip"
+      onclick="applyPresetByName('${name}')">
+      ${name}
+    </button>`;
+  }).join("");
+}
+
+function applyPresetByName(name) {
+  const commands = presetDefinitions[name];
+  if (!commands) return;
+  applyPreset(commands);
+}
+function applyPreset(commands) {
+  const input = get("raw-input");
+  // 既存コマンド削除
+  let text = input.value.replace(/\/[a-zA-Z0-9]+/g, "").trim();
+  // プリセット追加
+  const commandText = commands.map(c => `/${c}`).join(" ");
+  input.value = `${text} ${commandText}`.trim();
+  syncCommandButtons();
+  saveCurrentState();
+  input.focus();
+}
+
+function addCommand(cmd) {
+  const input = get("raw-input");
+  let current = input.value;
+  const commandText = `/${cmd}`;
+  const commands = current.match(/\/[a-zA-Z0-9]+/g) || [];
+  const exists = commands.includes(commandText);
+  if (exists) {
+    current = current
+      .split(/\s+/)
+      .filter(part => part !== commandText)
+      .join(" ")
+      .trim();
+  } else {
+    current = `${current.trim()} ${commandText}`.trim();
+  }
+  input.value = current;
+  syncCommandButtons();
+  saveCurrentState();
+  input.focus();
+}
+
+function syncCommandButtons() {
+  const input = get("raw-input");
+  const text = input.value;
+  const commands = text.match(/\/[a-zA-Z0-9]+/g) || [];
+  document.querySelectorAll(".command-chip").forEach(btn => {
+    const cmd = btn.dataset.cmd;
+    btn.classList.toggle("active", commands.includes(`/${cmd}`));
+  });
+}
+
+function generatePrompt() {
+  let p = "";
+  if (currentTab === 1) {
+    const role = get("role").value.trim() || "AIアシスタント";
+    const task = get("task").value.trim();
+    const details = get("details").value.trim();
+    const tone = get("tone").value;
+    if (!task) {
+      alert("目的を入力してください");
+      return;
+    }
+    p = `あなたは「${role}」として振る舞ってください。
+
+# 目的
+${task}
+`;
+
+    if (details) {
+      p += `
+# 詳細・条件
+${details}
+`;
+    }
+
+    p += `
+# トーン
+${tone}
+
+上記に基づき、具体的かつ最適な回答を出力してください。`;
+
+  } else {
+    const rawOriginal = get("raw-input").value.trim();
+    const tone = get("rough-tone").value;
+    const outputFormat = get("rough-output-format").value;
+    const aiTarget = get("ai-target").value || "chatgpt";
+    const parsed = parseCommands(rawOriginal);
+    const raw = parsed.cleanedText;
+    if (!raw) {
+      alert("内容を入力してください");
+      return;
+    }
+    const obj = buildPromptObject(
+      raw,
+      tone,
+      parsed.commands
+    );
+    p = convertForAI(
+      obj,
+      aiTarget,
+      outputFormat
+    );
+  }
+
+  get("output").innerText = p;
+  saveHistory(p);
+  checkSensitiveContent(p);
+  saveCurrentState();
+}
+
+function download() {
+  const text =
+    get("output").innerText.trim();
+
+  if (!text || text === "ここに表示") {
+    alert("先に生成してください");
+    return;
+  }
+
+  const report =
+    detectSensitiveContent(text);
+
+  if (report.hasAny) {
+    const ok =
+      confirm(
+        buildConfirmMessage(report, "保存")
+      );
+
+    if (!ok) return;
+  }
+
+  const blob =
+    new Blob(
+      [text],
+      { type: "text/plain" }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  a.download =
+    "prompt.txt";
+
+  a.click();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
+}
+
+function clearOutput() {
+  get("output").innerText = "ここに表示";
+  hideWarning();
+}
+
+function testJsonFormat() {
+  get("output").innerText = '{"a":1,"b":2}';
+}
+
+function testPromptObject() {
+  const rawOriginal = get("raw-input").value.trim();
+
+  if (!rawOriginal) {
+    alert("ラフ入力欄にテスト用の文章を入力してください");
+    return;
+  }
+  const tone = get("rough-tone").value;
+  const parsed = parseCommands(rawOriginal);
+  const obj = buildPromptObject(
+    parsed.cleanedText,
+    tone,
+    parsed.commands
+  );
+  get("output").innerText = JSON.stringify(obj, null, 2);
+}
+
+function recheckOutput() {
+  const text = get("output").innerText.trim();
+  if (!text || text === "ここに表示") {
+    alert("先に生成してください");
+    return;
+  }
+  checkSensitiveContent(text);
+}
+
 function buildPromptObject(raw, tone, commands) {
   const safeRaw = String(raw || "").trim();
   const safeTone = tone || "プロフェッショナル";
@@ -1479,488 +2031,11 @@ function resetRepairEditorView() {
 }
 
 
-/* ===============================
-   FILE: 06_search.js
-   Search / Replace
-=============================== */
-
-function toggleRepairSearchBox() {
-  openFloatPanel(
-    "検索",
-    `
-    <input
-      id="repairSearch"
-      placeholder="検索">
-
-    <div class="float-panel-actions">
-      <button onclick="searchRepairText()">🔍</button>
-      <button onclick="searchRepairPrev()">◀</button>
-      <button onclick="searchRepairNext()">▶</button>
-      <button onclick="clearRepairSearch()">✕</button>
-    </div>
-
-    <div
-      id="repairSearchResult"
-      class="diagnose-box"
-      style="display:none;">
-    </div>
-    `
-  );
-
-  setTimeout(() => {
-    const box = get("repairSearch");
-    if (!box) return;
-
-    box.focus();
-    box.select();
-    box.onkeydown = handleRepairSearchKey;
-  }, 50);
-}
-
-function handleRepairSearchKey(e) {
-  if (e.key === "Enter") {
-    e.preventDefault();
-
-    if (e.shiftKey) {
-      searchRepairPrev();
-    } else {
-      searchRepairNext();
-    }
-  }
-
-  if (e.key === "Escape") {
-    e.preventDefault();
-
-    if (
-      typeof closeFloatPanelKeepEditorSelection ===
-      "function"
-    ) {
-      closeFloatPanelKeepEditorSelection();
-    } else {
-      closeFloatPanel();
-    }
-  }
-}
-
-function clearRepairSearch() {
-  const box = get("repairSearch");
-  if (!box) return;
-
-  box.value = "";
-
-  const result =
-    get("repairSearchResult");
-
-  if (result) {
-    result.innerHTML = "";
-    result.style.display = "none";
-  }
-
-  box.focus();
-}
-
-function searchRepairText() {
-  const editor = get("repairEditor");
-  const keyword = get("repairSearch").value;
-  const resultBox = get("repairSearchResult");
-
-  if (!keyword) {
-    alert("検索文字を入力してください");
-    return;
-  }
-
-  const text = editor.value;
-  const index = text.indexOf(keyword);
-
-  if (index === -1) {
-    resultBox.style.display = "block";
-    resultBox.innerText = "検索結果：0件";
-    alert("見つかりませんでした");
-    return;
-  }
-
-  repairSearchIndex =
-    index + keyword.length;
-
-  editor.focus();
-  editor.setSelectionRange(
-    index,
-    index + keyword.length
-  );
-
-  renderRepairSearchResults(keyword);
-  resultBox.style.display = "block";
-}
-
-function searchRepairPrev() {
-  const editor = get("repairEditor");
-  const keyword = get("repairSearch").value;
-
-  if (!keyword) {
-    alert("検索文字を入力してください");
-    return;
-  }
-
-  const text = editor.value;
-
-  let index =
-    text.lastIndexOf(
-      keyword,
-      Math.max(
-        0,
-        editor.selectionStart - 1
-      )
-    );
-
-  if (index === -1) {
-    index = text.lastIndexOf(keyword);
-  }
-
-  if (index === -1) {
-    alert("見つかりませんでした");
-    return;
-  }
-
-  repairSearchIndex = index;
-
-  editor.focus();
-  editor.setSelectionRange(
-    index,
-    index + keyword.length
-  );
-
-  renderRepairSearchResults(keyword);
-}
-
-function searchRepairNext() {
-  const editor = get("repairEditor");
-  const keyword = get("repairSearch").value;
-
-  if (!keyword) {
-    alert("検索文字を入力してください");
-    return;
-  }
-
-  const text = editor.value;
-
-  let index =
-    text.indexOf(
-      keyword,
-      repairSearchIndex
-    );
-
-  if (index === -1) {
-    index = text.indexOf(keyword);
-  }
-
-  if (index === -1) {
-    alert("見つかりませんでした");
-    return;
-  }
-
-  repairSearchIndex =
-    index + keyword.length;
-
-  editor.focus();
-  editor.setSelectionRange(
-    index,
-    index + keyword.length
-  );
-
-  renderRepairSearchResults(keyword);
-}
-
-function renderRepairSearchResults(keyword) {
-  const editor = get("repairEditor");
-  const resultBox = get("repairSearchResult");
-  const text = editor.value;
-  const lines = text.split("\n");
-  const results = [];
-
-  lines.forEach((line, index) => {
-    if (line.includes(keyword)) {
-      results.push({
-        lineNumber: index + 1,
-        line
-      });
-    }
-  });
-
-  resultBox.style.display = "block";
-
-  if (results.length === 0) {
-    resultBox.innerText = "検索結果：0件";
-    return;
-  }
-
-  resultBox.innerHTML =
-    `<b>検索結果：${results.length}件</b>` +
-    results.slice(0, 30).map(item => {
-      return `
-        <div
-          class="search-result-line"
-          onclick="
-            jumpToLine(${item.lineNumber});
-            closeFloatPanelKeepEditorSelection();
-          ">
-          <b>${item.lineNumber}</b>:
-          ${highlightKeyword(item.line, keyword)}
-        </div>
-      `;
-    }).join("");
-
-  if (results.length > 30) {
-    resultBox.innerHTML += `
-      <div class="small">
-        ※ 30件まで表示しています
-      </div>
-    `;
-  }
-}
-
-function highlightKeyword(text, keyword) {
-  const safeText = escapeHtml(text);
-  const safeKeyword = escapeHtml(keyword);
-
-  const regex =
-    new RegExp(
-      escapeRegExp(safeKeyword),
-      "gi"
-    );
-
-  return safeText.replace(
-    regex,
-    match => `<mark>${match}</mark>`
-  );
-}
 
 /* ===============================
-   Repair Function Sort
+   FILE: 03_data.js
+   Template / Preset / Danger
 =============================== */
-
-function jumpToLine(lineNumber) {
-  const editor = get("repairEditor");
-  if (!editor) return;
-
-  const lines =
-    editor.value.split("\n");
-
-  let pos = 0;
-
-  for (let i = 0; i < lineNumber - 1; i++) {
-    pos += lines[i].length + 1;
-  }
-
-  editor.focus();
-  editor.setSelectionRange(pos, pos);
-
-  const lineHeight = 18;
-
-  editor.scrollTop =
-    Math.max(
-      0,
-      (lineNumber - 3) * lineHeight
-    );
-
-  updateCursorPosition();
-}
-
-function selectCodeBlockByIndex(index) {
-  const editor =
-    get("repairEditor");
-
-  if (!editor) return;
-
-  const text =
-    editor.value;
-
-  const blocks =
-    extractCodeBlocksFromText(text);
-
-  const item =
-    blocks[index];
-
-  if (!item) {
-    alert("コードブロックが見つかりません");
-    return;
-  }
-
-  editor.focus();
-
-  editor.setSelectionRange(
-    item.start,
-    item.end
-  );
-
-  const line =
-    text
-      .slice(0, item.start)
-      .split("\n")
-      .length;
-
-  const lineHeight = 18;
-
-  editor.scrollTop =
-    Math.max(
-      0,
-      (line - 3) * lineHeight
-    );
-
-  updateCursorPosition();
-}
-
-function openFloatPanel(title, bodyHtml){
-  const panel = get("floatPanel");
-
-  panel.innerHTML =
-    `<div class="float-panel-header">
-      <span class="float-panel-title">${title}</span>
-      <button onclick="moveFloatPanelBy(0,-60)">↑</button>
-      <button onclick="moveFloatPanelBy(0,60)">↓</button>
-      <button onclick="moveFloatPanelBy(-60,0)">←</button>
-      <button onclick="moveFloatPanelBy(60,0)">→</button>
-      <button onclick="resetFloatPanelPosition()">↘</button>
-      <button onmousedown="event.preventDefault()"
-      onclick="closeFloatPanelKeepEditorSelection()">×</button>
-    </div>` +
-    bodyHtml;
-
-  panel.style.display = "block";
-}
-
-function moveFloatPanelBy(dx, dy) {
-  const panel = get("floatPanel");
-  if (!panel) return;
-
-  const rect = panel.getBoundingClientRect();
-
-  let nextLeft = rect.left + dx;
-  let nextTop = rect.top + dy;
-
-  const maxLeft =
-    window.innerWidth - rect.width;
-
-  const maxTop =
-    window.innerHeight - rect.height;
-
-  nextLeft =
-    Math.min(
-      Math.max(0, nextLeft),
-      Math.max(0, maxLeft)
-    );
-
-  nextTop =
-    Math.min(
-      Math.max(0, nextTop),
-      Math.max(0, maxTop)
-    );
-
-  panel.style.left = nextLeft + "px";
-  panel.style.top = nextTop + "px";
-  panel.style.right = "auto";
-  panel.style.bottom = "auto";
-}
-
-function resetFloatPanelPosition() {
-  const panel = get("floatPanel");
-  if (!panel) return;
-
-  panel.style.left = "auto";
-  panel.style.top = "auto";
-  panel.style.right = "18px";
-  panel.style.bottom = "88px";
-}
-
-function closeFloatPanelKeepEditorSelection() {
-  const editor = get("repairEditor");
-  const start = editor ? editor.selectionStart : null;
-  const end = editor ? editor.selectionEnd : null;
-  closeFloatPanel();
-  if (editor && start !== null && end !== null) {
-    setTimeout(() => {
-      editor.focus();
-      editor.setSelectionRange(start, end);
-      updateCursorPosition();
-    }, 0);
-  }
-}
-
-function closeFloatPanel(){
-  get("floatPanel").style.display = "none";
-  const btn = get("toolsBtn");
-  if(btn){
-    btn.innerText = "⚙";
-  }
-}
-
-function toggleToolCategory(id) {
-  const box = get(id);
-  const btn =
-    document.querySelector(
-      `[onclick="toggleToolCategory('${id}')"]`
-    );
-  const isOpen =
-    getComputedStyle(box).display !== "none";
-  box.style.display =
-    isOpen ? "none" : "grid";
-  if (btn) {
-    btn.innerText =
-      btn.innerText.replace(
-        isOpen ? "▲" : "▼",
-        isOpen ? "▼" : "▲"
-      );
-  }
-}
-
-function toggleCommandMenu() {
-  const menu =
-    get("commandMenu");
-  menu.style.display =
-    menu.style.display === "none"
-      ? "block"
-      : "none";
-}
-
-function closeAllManagers() {
-  get("template-manager").style.display = "none";
-  get("danger-manager").style.display = "none";
-  get("pattern-manager").style.display = "none";
-  get("ai-preset-manager").style.display = "none";
-}
-
-function updatePanelButtonStates() {
-  const templateBtn = get("templateBtn");
-  const dangerBtn = get("dangerBtn");
-  const patternBtn = get("patternBtn");
-  const aiPresetBtn = get("aiPresetBtn");
-  if (templateBtn) {
-    templateBtn.classList.toggle(
-      "active-panel",
-      get("template-manager").style.display !== "none"
-    );
-  }
-  if (dangerBtn) {
-    dangerBtn.classList.toggle(
-      "active-panel",
-      get("danger-manager").style.display !== "none"
-    );
-  }
-  if (patternBtn) {
-    patternBtn.classList.toggle(
-      "active-panel",
-      get("pattern-manager").style.display !== "none"
-    );
-  }
-  if (aiPresetBtn) {
-    aiPresetBtn.classList.toggle(
-      "active-panel",
-    get("ai-preset-manager").style.display !== "none"
-    );
-  }
-}
-
-console.log("CHANGELOG");
-console.table(CHANGELOG);
 
 function toggleTemplateManager() {
   const isOpen = get("template-manager").style.display !== "none";
@@ -2037,708 +2112,292 @@ function resetAiPreset() {
   alert("初期値に戻しました");
 }
 
-function parseCommands(text) {
-  const commandKeys = Object.keys(commandDefinitions);
-  const found = [];
-  const matches = text.match(/\/[a-zA-Z0-9]+/g) || [];
-  matches.forEach(m => {
-    const cmd = m.replace("/", "").toLowerCase();
-    if (commandKeys.includes(cmd)) {
-      found.push(cmd);
-    }
-  });
-  const cleaned = text.replace(/\/[a-zA-Z0-9]+/g, "").trim();
+function saveDangerWord() {
+  const word = get("dangerWord").value.trim();
+  if (!word) {
+    alert("危険ワードを入力してください");
+    return;
+  }
+  let list = loadJson("dangerWords", []);
+  if (defaultDangerWords.includes(word) || list.includes(word)) {
+    alert("すでに登録されています");
+    return;
+  }
+  list.push(word);
+  localStorage.setItem("dangerWords", JSON.stringify(list));
+  get("dangerWord").value = "";
+  renderDangerWords();
+}
+
+function renderDangerWords() {
+  const local = loadJson("dangerWords", []);
+  const all = [...defaultDangerWords, ...local];
+  get("dangerList").innerHTML = all.map((word, i) => `
+    <div class="danger-item">
+      <b>${escapeHtml(word)}</b>
+      <div class="item-actions">
+        ${
+          i >= defaultDangerWords.length
+            ? `<button onclick="deleteDangerWord(${i - defaultDangerWords.length})">削除</button>`
+            : `<span class="small">固定ワード</span>`
+        }
+      </div>
+    </div>
+  `).join("");
+}
+
+function deleteDangerWord(index) {
+  let list = loadJson("dangerWords", []);
+  list.splice(index, 1);
+  localStorage.setItem("dangerWords", JSON.stringify(list));
+  renderDangerWords();
+}
+
+function getAllDangerWords() {
+  const local = loadJson("dangerWords", []);
+  return [...defaultDangerWords, ...local];
+}
+
+function savePattern() {
+  const name = get("patternName").value.trim();
+  const regex = get("patternRegex").value.trim();
+  const flags = get("patternFlags").value.trim() || "g";
+  if (!name || !regex) {
+    alert("パターン名と正規表現を入力してください");
+    return;
+  }
+  try {
+    new RegExp(regex, flags);
+  } catch {
+    alert("正規表現が正しくありません");
+    return;
+  }
+  let list = loadJson("dangerPatterns", []);
+  list.push({ name, regex, flags });
+  localStorage.setItem("dangerPatterns", JSON.stringify(list));
+  get("patternName").value = "";
+  get("patternRegex").value = "";
+  get("patternFlags").value = "";
+  alert("NGパターンを追加しました");
+  renderPatterns();
+}
+
+function renderPatterns() {
+  const local = loadJson("dangerPatterns", []);
+  const all = [...defaultPatterns, ...local];
+
+  get("patternList").innerHTML = all.map((p, i) => `
+    <div class="pattern-item">
+      <b>${escapeHtml(p.name)}</b>
+      <div class="code-like">/${escapeHtml(p.regex)}/${escapeHtml(p.flags || "")}</div>
+      <div class="item-actions">
+        ${
+          i >= defaultPatterns.length
+            ? `<button onclick="deletePattern(${i - defaultPatterns.length})">削除</button>`
+            : `<span class="small">固定パターン</span>`
+        }
+      </div>
+    </div>
+  `).join("");
+}
+
+function deletePattern(index) {
+  let list = loadJson("dangerPatterns", []);
+  list.splice(index, 1);
+  localStorage.setItem("dangerPatterns", JSON.stringify(list));
+  renderPatterns();
+}
+
+function getAllPatterns() {
+  const local = loadJson("dangerPatterns", []);
+  return [...defaultPatterns, ...local];
+}
+
+function detectSensitiveContent(text) {
+  const source = String(text || "");
+  const foundWords = getAllDangerWords().filter(word => word && source.includes(word));
+  const foundPatterns = [];
+  for (const p of getAllPatterns()) {
+    try {
+      const regex = new RegExp(p.regex, p.flags || "g");
+      const matches = source.match(regex);
+      if (matches && matches.length > 0) {
+        foundPatterns.push({
+          name: p.name,
+          count: matches.length,
+          samples: [...new Set(matches)].slice(0, 3)
+        });
+      }
+    } catch {}
+  }
   return {
-    cleanedText: cleaned,
-    commands: [...new Set(found)]
+    hasAny: foundWords.length > 0 || foundPatterns.length > 0,
+    foundWords,
+    foundPatterns
   };
 }
 
-function buildCommandInstructionsFromObject(obj) {
-  if (!obj.commands || obj.commands.length === 0) return "";
-  const lines = obj.commands.map(cmd => {
-    return `・${cmd.key}: ${cmd.instruction}`;
-  });
-  return `
-# 追加変換モード
-以下の変換モードを反映してください。
-${lines.join("\n")}
-`;
-}
-
-function renderCommandChips() {
-  const box = get("commandBox");
-  if (!box) return;
-  box.innerHTML = Object.keys(commandDefinitions).map(cmd => {
-    return `<button
-      type="button"
-      class="command-chip"
-      data-cmd="${cmd}"
-      onclick="addCommand('${cmd}')">
-      /${cmd}
-    </button>`;
-  }).join("");
-  syncCommandButtons();
-}
-
-function renderPresetChips() {
-  const box = get("presetBox");
-  if (!box) return;
-  box.innerHTML = Object.keys(presetDefinitions).map(name => {
-    return `<button
-      type="button"
-      class="preset-chip"
-      onclick="applyPresetByName('${name}')">
-      ${name}
-    </button>`;
-  }).join("");
-}
-
-function applyPresetByName(name) {
-  const commands = presetDefinitions[name];
-  if (!commands) return;
-  applyPreset(commands);
-}
-function applyPreset(commands) {
-  const input = get("raw-input");
-  // 既存コマンド削除
-  let text = input.value.replace(/\/[a-zA-Z0-9]+/g, "").trim();
-  // プリセット追加
-  const commandText = commands.map(c => `/${c}`).join(" ");
-  input.value = `${text} ${commandText}`.trim();
-  syncCommandButtons();
-  saveCurrentState();
-  input.focus();
-}
-
-function addCommand(cmd) {
-  const input = get("raw-input");
-  let current = input.value;
-  const commandText = `/${cmd}`;
-  const commands = current.match(/\/[a-zA-Z0-9]+/g) || [];
-  const exists = commands.includes(commandText);
-  if (exists) {
-    current = current
-      .split(/\s+/)
-      .filter(part => part !== commandText)
-      .join(" ")
-      .trim();
-  } else {
-    current = `${current.trim()} ${commandText}`.trim();
-  }
-  input.value = current;
-  syncCommandButtons();
-  saveCurrentState();
-  input.focus();
-}
-
-function syncCommandButtons() {
-  const input = get("raw-input");
-  const text = input.value;
-  const commands = text.match(/\/[a-zA-Z0-9]+/g) || [];
-  document.querySelectorAll(".command-chip").forEach(btn => {
-    const cmd = btn.dataset.cmd;
-    btn.classList.toggle("active", commands.includes(`/${cmd}`));
-  });
-}
-
-function generatePrompt() {
-  let p = "";
-  if (currentTab === 1) {
-    const role = get("role").value.trim() || "AIアシスタント";
-    const task = get("task").value.trim();
-    const details = get("details").value.trim();
-    const tone = get("tone").value;
-    if (!task) {
-      alert("目的を入力してください");
-      return;
-    }
-    p = `あなたは「${role}」として振る舞ってください。
-
-# 目的
-${task}
-`;
-
-    if (details) {
-      p += `
-# 詳細・条件
-${details}
-`;
-    }
-
-    p += `
-# トーン
-${tone}
-
-上記に基づき、具体的かつ最適な回答を出力してください。`;
-
-  } else {
-    const rawOriginal = get("raw-input").value.trim();
-    const tone = get("rough-tone").value;
-    const outputFormat = get("rough-output-format").value;
-    const aiTarget = get("ai-target").value || "chatgpt";
-    const parsed = parseCommands(rawOriginal);
-    const raw = parsed.cleanedText;
-    if (!raw) {
-      alert("内容を入力してください");
-      return;
-    }
-    const obj = buildPromptObject(
-      raw,
-      tone,
-      parsed.commands
-    );
-    p = convertForAI(
-      obj,
-      aiTarget,
-      outputFormat
-    );
-  }
-
-  get("output").innerText = p;
-  saveHistory(p);
-  checkSensitiveContent(p);
-  saveCurrentState();
-}
-
-function download() {
-  const text =
-    get("output").innerText.trim();
-
-  if (!text || text === "ここに表示") {
-    alert("先に生成してください");
+function checkSensitiveContent(text) {
+  const report = detectSensitiveContent(text);
+  if (!report.hasAny) {
+    hideWarning();
     return;
   }
-
-  const report =
-    detectSensitiveContent(text);
-
-  if (report.hasAny) {
-    const ok =
-      confirm(
-        buildConfirmMessage(report, "保存")
-      );
-
-    if (!ok) return;
+  const lines = [];
+  lines.push("警告：個人情報・認証情報が含まれている可能性があります。");
+  lines.push("");
+  if (report.foundWords.length > 0) {
+    lines.push("【危険ワード】");
+    lines.push(report.foundWords.join("、"));
+    lines.push("");
   }
-
-  const blob =
-    new Blob(
-      [text],
-      { type: "text/plain" }
-    );
-
-  const a =
-    document.createElement("a");
-
-  a.href =
-    URL.createObjectURL(blob);
-
-  a.download =
-    "prompt.txt";
-
-  a.click();
-
-  setTimeout(() => {
-    URL.revokeObjectURL(a.href);
-  }, 1000);
-}
-
-function clearOutput() {
-  get("output").innerText = "ここに表示";
-  hideWarning();
-}
-
-function testJsonFormat() {
-  get("output").innerText = '{"a":1,"b":2}';
-}
-
-function testPromptObject() {
-  const rawOriginal = get("raw-input").value.trim();
-
-  if (!rawOriginal) {
-    alert("ラフ入力欄にテスト用の文章を入力してください");
-    return;
-  }
-  const tone = get("rough-tone").value;
-  const parsed = parseCommands(rawOriginal);
-  const obj = buildPromptObject(
-    parsed.cleanedText,
-    tone,
-    parsed.commands
-  );
-  get("output").innerText = JSON.stringify(obj, null, 2);
-}
-
-function recheckOutput() {
-  const text = get("output").innerText.trim();
-  if (!text || text === "ここに表示") {
-    alert("先に生成してください");
-    return;
-  }
-  checkSensitiveContent(text);
-}
-
-function diagnoseHtml() {
-  let html =
-    "<!DOCTYPE html>\n" +
-    document.documentElement.outerHTML;
-  html = html
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "");
-  const report = [];
-  report.push("AIプロンプト生成Pro HTML診断");
-  report.push("v5.7.2 Diagnose Fixed\n");
-  const tags = ["div", "section", "article", "main", "header", "footer"];
-  tags.forEach(tag => {
-    const open = (html.match(new RegExp(`<${tag}\\b`, "gi")) || []).length;
-    const close = (html.match(new RegExp(`</${tag}>`, "gi")) || []).length;
-    report.push(open === close ? `✔ ${tag}: ${open}/${close}` : `⚠ ${tag}: ${open}/${close}`);
-  });
-  const ids =
-  [...document.querySelectorAll("[id]")]
-    .map(el=>el.id);
-  const dupIds = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))];
-  report.push(dupIds.length ? `⚠ id重複\n${dupIds.join("\n")}` : "✔ id重複なし");
-  try {
-    [...document.scripts].forEach(s => new Function(s.textContent));
-    report.push("✔ JS構文OK");
-  } catch (e) {
-    report.push(`⚠ JS構文エラー\n${e.message}`);
-  }
-  const box = get("diagnoseBox");
-  box.style.display = "block";
-  box.innerText = report.join("\n");
-}
-
-function showHtmlHealth() {
-
-  const html =
-    isRepairMode() &&
-    get("repairEditor") &&
-    get("repairEditor").value.trim()
-      ? get("repairEditor").value
-      : "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-  const validation =
-    validateBackupHtml(html);
-  const funcs =
-    [...html.matchAll(
-      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
-    )]
-    .map(x => x[1]);
-  const dupFuncs =
-    [...new Set(
-      funcs.filter(
-        (f,i)=>
-        funcs.indexOf(f)!==i
-      )
-    )];
-  const onclicks =
-    [...html.matchAll(
-      /onclick="([a-zA-Z0-9_$]+)\(/g
-    )]
-    .map(x=>x[1]);
-  const undefinedFns =
-    [...new Set(
-      onclicks.filter(
-        fn =>
-        !funcs.includes(fn)
-      )
-    )];
-  const result =
-`HTML HEALTH REPORT
-=== HTML ===
-div:
-${validation.div_ok ? "✔ OK" : "⚠ NG"}
-open:
-${validation.div_open}
-close:
-${validation.div_close}
-=== ID ===
-duplicate ids:
-${
-validation.duplicate_ids.length
-? validation.duplicate_ids.join("\n")
-: "✔ none"
-}
-=== JavaScript ===
-JS syntax:
-${validation.js_ok ? "✔ OK" : "⚠ NG"}
-${validation.js_error || ""}
-=== Function ===
-function count:
-${funcs.length}
-duplicate functions:
-${
-dupFuncs.length
-? dupFuncs.join("\n")
-: "✔ none"
-}
-undefined onclick:
-${
-undefinedFns.length
-? undefinedFns.join("\n")
-: "✔ none"
-}
-onclick count:
-${onclicks.length}
-=== Health Score ===
-${
-(
-100
--
-(validation.div_ok ? 0 : 20)
--
-(validation.js_ok ? 0 : 25)
--
-(validation.duplicate_ids.length * 5)
--
-(undefinedFns.length * 10)
--
-(dupFuncs.length * 10)
-)
-}/100
-`;
-
-    window.latestHealthResult =
-      result;
-    openFloatPanel(
-    "HTML HEALTH",
-    `
-    <div class="float-panel-actions">
-      <button onclick="copyHealthResult()">
-        📋 コピー
-      </button>
-    </div>
-    <pre
-      id="healthResultBox"
-      class="code-preview">
-${escapeHtml(result)}
-    </pre>
-    `
-  );
-}
-
-function formatJsonOutput() {
-  const output = get("output");
-  let text = output.innerText.trim();
-  if (!text || text === "ここに表示") {
-    alert("JSONがありません");
-    return;
-  }
-  try {
-    // ```json 除去
-    text = text
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
-    // JSON化
-    const parsed = JSON.parse(text);
-    // 整形
-    const formatted = JSON.stringify(parsed, null, 2);
-    output.innerText = formatted;
-    alert("JSON整形完了");
-  } catch (e) {
-    alert("JSON形式が不正です\n\n" + e.message);
-  }
-}
-
-function reviewPrompt() {
-  const text = get("output").innerText.trim();
-  if (!text || text === "ここに表示") {
-    alert("先に生成してください");
-    return;
-  }
-  let score = 100;
-  const goodPoints = [];
-  const warnings = [];
-  const suggestions = [];
-  const hasJsonLike = text.startsWith("{") || text.startsWith("[");
-  let parsedJson = null;
-  if (hasJsonLike) {
-    try {
-      parsedJson = JSON.parse(text);
-      goodPoints.push("JSONとして解析可能");
-    } catch (e) {
-      score -= 25;
-      warnings.push("JSON形式が不正です");
-      suggestions.push("JSON整形ボタンで確認し、余計な説明文やMarkdownを除去してください。");
-    }
-  }
-  const selectedAi = get("ai-target")
-      ? get("ai-target").value || "chatgpt"
-      : "chatgpt";
-    let aiSpecificChecks = [];
-    switch (selectedAi) {
-      case "chatgpt":
-        aiSpecificChecks = [
-          {
-            ok:
-              text.includes("役割") ||
-              text.includes('"role"'),
-            warning: "ChatGPT向けの役割整理が不足しています"
-          },
-          {
-            ok:
-              text.includes("目的") ||
-              text.includes('"purpose"'),
-            warning: "ChatGPT向けの目的整理が不足しています"
-          },
-          {
-            ok:
-              text.includes("出力形式") ||               text.includes('"output_format"'),
-            warning: "ChatGPT向けの出力形式整理が不足しています"
-          }
-        ];
-        break;
-      case "claude":
-        aiSpecificChecks = [
-          {
-            ok: text.includes("背景"),
-            warning: "Claude向けの背景整理が不足しています"
-          },
-          {
-            ok: text.includes("意図"),
-            warning: "Claude向けの意図整理が不足しています"
-          },
-          {
-            ok: text.includes("考慮点"),
-            warning: "Claude向けの考慮点整理が不足しています"
-          }
-        ];
-        break;
-      case "gemini":
-        aiSpecificChecks = [
-          {
-            ok: text.includes("目的"),
-            warning: "Gemini向けの目的整理が不足しています"
-          },
-          {
-            ok:
-              text.includes("必要な出力") ||
-              text.includes("出力"),
-            warning: "Gemini向けの必要な出力整理が不足しています"
-          },
-          {
-            ok:
-              text.includes("条件") ||
-              text.includes("制約"),
-            warning: "Gemini向けの条件整理が不足しています"
-          },
-          {
-            ok:
-              text.includes("優先") ||
-              text.includes("重要"),
-            warning: "Gemini向けの優先順位整理が不足しています"
-          },
-          {
-            ok:
-              text.includes("成功条件") ||
-              text.includes("期待結果"),
-            warning: "Gemini向けの成功条件整理が不足しています"
-          }
-        ];
-        break;
-      case "cursor":
-        aiSpecificChecks = [
-          {
-            ok: text.includes("現状"),
-            warning: "Cursor向けの現状整理が不足しています"
-          },
-          {
-            ok: text.includes("問題"),
-            warning: "Cursor向けの問題整理が不足しています"
-          },
-          {
-            ok: text.includes("期待動作"),
-            warning: "Cursor向けの期待動作整理が不足しています"
-          },
-          {
-            ok: text.includes("修正方針"),
-            warning: "Cursor向けの修正方針整理が不足しています"
-          }
-        ];
-        break;
-
-      case "copilot":
-        aiSpecificChecks = [
-          {
-            ok: text.includes("Goal"),
-            warning: "Copilot向けのGoal整理が不足しています"
-          },
-          {
-            ok: text.includes("Context"),
-            warning: "Copilot向けのContext整理が不足しています"
-          },
-          {
-            ok: text.includes("Expected behavior"),
-            warning: "Copilot向けのExpected behavior整理が不足しています"
-          },
-          {
-            ok: text.includes("Constraints"),
-            warning: "Copilot向けのConstraints整理が不足しています"
-          }
-        ];
-        break;
-    }
-    aiSpecificChecks.forEach(check => {
-      if (check.ok) {
-        goodPoints.push(`AI別評価OK：${selectedAi}`);
-      } else {
-        score -= 6;
-        warnings.push(check.warning);
-      }
+  if (report.foundPatterns.length > 0) {
+    lines.push("【NGパターン検出】");
+    report.foundPatterns.forEach(item => {
+      const sampleText = item.samples.length > 0 ? ` 例: ${item.samples.join(" / ")}` : "";
+      lines.push(`・${item.name}（${item.count}件）${sampleText}`);
     });
-  const checks = [
-    ...(!["claude", "cursor", "copilot", "gemini"].includes(selectedAi)
-      ? [{
-          name: "役割",
-          ok: text.includes("役割") || text.includes('"role"'),
-          penalty: 12,
-          warning: "役割が不明です",
-          suggestion: "誰として回答するかを明記してください。例：あなたはHTML/JavaScriptに詳しい設計者です。"
-        }]
-      : []),
-    {
-      name: "目的",
-      ok:
-        text.includes("目的") ||
-        text.includes('"purpose"') ||
-        text.includes("Goal") ||
-        text.includes("意図"),
-      penalty: 12,
-      warning: "目的が不明です",
-      suggestion: "何を達成したいのかを1文で明記してください。"
-    },
-    {
-      name: "背景・条件",
-      ok:
-        text.includes("背景") ||
-        text.includes("条件") ||
-        text.includes('"conditions"') ||
-        text.includes("Context") ||
-        text.includes("現状"),
-      penalty: 10,
-      warning: "背景・条件が不足しています",
-      suggestion: "前提、対象範囲、現在の状況を追加してください。"
-    },
-    ...(!["claude", "gemini"].includes(selectedAi)
-      ? [{
-          name: "制約",
-          ok:
-            text.includes("制約") ||
-            text.includes("禁止") ||
-            text.includes("注意") ||
-            text.includes('"constraints"'),
-          penalty: 10,
-          warning: "制約・禁止事項が不足しています",
-          suggestion: "既存仕様を壊さない、API直送しない、出力形式を守るなどを追加してください。"
-        }]
-      : []),
-    ...(!["claude", "cursor", "gemini"].includes(selectedAi)
-      ? [{
-          name: "出力形式",
-          ok:
-            text.includes("出力形式") ||
-            text.includes('"output_format"') ||
-            text.includes("Output"),
-          penalty: 12,
-          warning: "出力形式が曖昧です",
-          suggestion: "箇条書き、表、JSON、修正コードなど、期待する出力形式を指定してください。"
-        }]
-      : []),
-    ...(!["cursor", "copilot"].includes(selectedAi)
-      ? [{
-          name: "トーン",
-          ok:
-            text.includes("トーン") ||
-            text.includes('"tone"'),
-          penalty: 8,
-          warning: "トーン指定がありません",
-          suggestion: "プロフェッショナル、簡潔、初心者向けなどの文体を指定してください。"
-        }]
-      : []),
-    {
-      name: "不足情報",
-      ok:
-        text.includes("不足") ||
-        text.includes("確認") ||        
-         text.includes('"missing_information"'),
-      penalty: 8,
-      warning: "不足情報への対応指示がありません",
-      suggestion: "不明点がある場合は、確認するか仮定として明示する指示を追加してください。"
-    },
-    {
-      name: "追加指示",
-      ok:
-        text.includes("追加変換モード") ||
-        text.includes('"commands"'),
-      penalty: 5,
-      warning: "追加指示・コマンドが反映されていません",
-      suggestion: "必要に応じて /step /enemy /schema などを追加してください。"
-    }
-  ];
-  checks.forEach(check => {
-    if (check.ok) {
-      goodPoints.push(`${check.name}あり`);
-    } else {
-      score -= check.penalty;
-      warnings.push(check.warning);
-      suggestions.push(check.suggestion);
-    }
-  });
-  const vagueWords = ["いい感じ", "なんとか", "適当に", "わかりやすく", "詳しく"];
-  const foundVague = vagueWords.filter(word => text.includes(word));
-  if (foundVague.length > 0) {
-    score -= 10;
-    warnings.push(`曖昧な表現があります：${foundVague.join("、")}`);
-    suggestions.push("曖昧語を、具体的な完了条件・対象範囲・評価基準に置き換えてください。");
+    lines.push("");
   }
-  if (text.length < 120) {
-    score -= 10;
-    warnings.push("内容が短く、情報不足の可能性があります");
-    suggestions.push("背景、目的、条件、期待する完成形を追加してください。");
-  } else {
-    goodPoints.push("一定の情報量あり");
-  }
-  if (parsedJson) {
-    if (parsedJson.version) goodPoints.push("バージョン情報あり");
-    if (parsedJson.prompt && parsedJson.prompt.purpose) goodPoints.push("内部JSONの目的あり");
-    if (Array.isArray(parsedJson.commands)) goodPoints.push("commands配列あり");
-    if (!parsedJson.prompt) {
-      score -= 10;
-      warnings.push("内部JSONに prompt オブジェクトがありません");
-      suggestions.push("buildPromptObject() の構造を確認してください。");
-    }
-  }
-  score = Math.max(0, Math.min(100, score));
-  let rank = "C";
-  if (score >= 90) rank = "S";
-  else if (score >= 80) rank = "A";
-  else if (score >= 65) rank = "B";
-  let result =
-`AIプロンプト生成Pro ${APP_VERSION}
-  Prompt Score : ${score} / 100
-  Rank : ${rank}
-  `;
-  if (goodPoints.length > 0) {
-    result += "良い点:\n";
-    result += [...new Set(goodPoints)].map(x => `✔ ${x}`).join("\n");
-    result += "\n\n";
-  }
-  if (warnings.length > 0) {
-    result += "改善候補:\n";
-    result += [...new Set(warnings)].map(x => `⚠ ${x}`).join("\n");
-    result += "\n\n";
-  }
-  if (suggestions.length > 0) {
-    result += "改善案:\n";
-    result += [...new Set(suggestions)].map(x => `・${x}`).join("\n");
-  } else {
-    result += "大きな改善点は見つかりません。";
-  }
-  alert(result);
+  lines.push("外部に送る前に、本当に問題ないか確認してください。");
+  get("warningBox").style.display = "block";
+  get("warningBox").innerText = lines.join("\n");
 }
+
+function buildConfirmMessage(report, actionName) {
+  const lines = [];
+  lines.push(`警告：${actionName}前に確認してください。`);
+  lines.push("");
+  if (report.foundWords.length > 0) {
+    lines.push("【危険ワード】");
+    lines.push(report.foundWords.join("、"));
+    lines.push("");
+  }
+  if (report.foundPatterns.length > 0) {
+    lines.push("【NGパターン検出】");
+    report.foundPatterns.forEach(item => {
+      const sampleText = item.samples.length > 0 ? ` 例: ${item.samples.join(" / ")}` : "";
+      lines.push(`・${item.name}（${item.count}件）${sampleText}`);
+    });
+    lines.push("");
+  }
+  lines.push(`それでも${actionName}しますか？`);
+  return lines.join("\n");
+}
+
+function hideWarning() {
+  get("warningBox").style.display = "none";
+  get("warningBox").innerText = "";
+}
+
+function saveCurrentState() {
+
+  if (isLoading) return;
+
+  if (!get("raw-input")) return;
+
+  localStorage.setItem(
+    "rawInput",
+    get("raw-input").value
+  );
+
+  localStorage.setItem(
+    "roughTone",
+    get("rough-tone").value
+  );
+
+  localStorage.setItem(
+    "roughOutputFormat",
+    get("rough-output-format").value
+  );
+  localStorage.setItem(
+    "roleValue",
+    get("role").value
+  );
+  localStorage.setItem(
+    "taskValue",
+    get("task").value
+  );
+  localStorage.setItem(
+    "detailsValue",
+    get("details").value
+  );
+  localStorage.setItem(
+    "toneValue",
+    get("tone").value
+  );
+  localStorage.setItem(
+    "currentTab",
+    String(currentTab)
+  );
+  localStorage.setItem(
+    "aiTarget",
+    get("ai-target").value
+  );
+}
+
+function loadSettings() {
+  isLoading = true;
+  checkSafeMode();
+  if (localStorage.getItem("darkMode") === "1") {
+    document.body.classList.add("dark");
+  }
+  closeAllManagers();
+  renderHistory();
+  renderTemplates();
+  renderTemplateSelect();
+  renderDangerWords();
+  renderPatterns();
+  renderCommandChips();
+  renderPresetChips();
+  get("raw-input").value = localStorage.getItem("rawInput") || "";
+  get("rough-tone").value = localStorage.getItem("roughTone") || "プロフェッショナル";
+  get("rough-output-format").value = localStorage.getItem("roughOutputFormat") || "prompt";
+  get("role").value = localStorage.getItem("roleValue") || "";
+  get("task").value = localStorage.getItem("taskValue") || "";
+  get("details").value = localStorage.getItem("detailsValue") || "";
+  get("tone").value = localStorage.getItem("toneValue") || "プロフェッショナル";
+  get("ai-target").value = localStorage.getItem("aiTarget") || "chatgpt";
+  const savedTab = Number(localStorage.getItem("currentTab") || "1");
+  currentTab = savedTab;
+  switchTab(savedTab);
+  syncCommandButtons();
+  updatePanelButtonStates();
+ get("versionLabel").innerText = APP_VERSION;
+get("changelogLabel").innerHTML =
+  CHANGELOG.map(x =>
+escapeHtml(x)).join("<br>");
+  isLoading = false;
+  }
+window.onerror = function(
+  message,
+  source,
+  line,
+  col,
+  error
+) {
+  localStorage.setItem(
+    "lastCrash",
+    JSON.stringify({
+      time: new Date().toISOString(),
+      message,
+      line,
+      column: col
+    })
+  );
+  if (!DEBUG_MODE) return;
+  const box = get("debugBox");
+  if (!box) return;
+  box.style.display = "block";
+  box.innerText =
+`JS Error
+message:
+${message}
+line:
+${line}
+column:
+${col}`;
+};
 
 function saveHistory(text) {
   let h = loadJson("h", []);
@@ -2779,12 +2438,6 @@ function clearHistory() {
   localStorage.removeItem("h");
   renderHistory();
 }
-
-/* ===============================
-   FILE: 03_data.js
-   Template / Preset / Danger
-=============================== */
-
 
 function saveTemplate() {
   const name = get("tempName").value.trim();
@@ -2951,6 +2604,229 @@ function importAiPresets() {
    FILE: 04_tools.js
    Tools
 =============================== */
+function selectCodeBlockByIndex(index) {
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const text =
+    editor.value;
+
+  const blocks =
+    extractCodeBlocksFromText(text);
+
+  const item =
+    blocks[index];
+
+  if (!item) {
+    alert("コードブロックが見つかりません");
+    return;
+  }
+
+  editor.focus();
+
+  editor.setSelectionRange(
+    item.start,
+    item.end
+  );
+
+  const line =
+    text
+      .slice(0, item.start)
+      .split("\n")
+      .length;
+
+  const lineHeight = 18;
+
+  editor.scrollTop =
+    Math.max(
+      0,
+      (line - 3) * lineHeight
+    );
+
+  updateCursorPosition();
+}
+
+function jumpToLine(lineNumber) {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  const lines =
+    editor.value.split("\n");
+
+  let pos = 0;
+
+  for (let i = 0; i < lineNumber - 1; i++) {
+    pos += lines[i].length + 1;
+  }
+
+  editor.focus();
+  editor.setSelectionRange(pos, pos);
+
+  const lineHeight = 18;
+
+  editor.scrollTop =
+    Math.max(
+      0,
+      (lineNumber - 3) * lineHeight
+    );
+
+  updateCursorPosition();
+}
+
+function openFloatPanel(title, bodyHtml){
+  const panel = get("floatPanel");
+
+  panel.innerHTML =
+    `<div class="float-panel-header">
+      <span class="float-panel-title">${title}</span>
+      <button onclick="moveFloatPanelBy(0,-60)">↑</button>
+      <button onclick="moveFloatPanelBy(0,60)">↓</button>
+      <button onclick="moveFloatPanelBy(-60,0)">←</button>
+      <button onclick="moveFloatPanelBy(60,0)">→</button>
+      <button onclick="resetFloatPanelPosition()">↘</button>
+      <button onmousedown="event.preventDefault()"
+      onclick="closeFloatPanelKeepEditorSelection()">×</button>
+    </div>` +
+    bodyHtml;
+
+  panel.style.display = "block";
+}
+
+function moveFloatPanelBy(dx, dy) {
+  const panel = get("floatPanel");
+  if (!panel) return;
+
+  const rect = panel.getBoundingClientRect();
+
+  let nextLeft = rect.left + dx;
+  let nextTop = rect.top + dy;
+
+  const maxLeft =
+    window.innerWidth - rect.width;
+
+  const maxTop =
+    window.innerHeight - rect.height;
+
+  nextLeft =
+    Math.min(
+      Math.max(0, nextLeft),
+      Math.max(0, maxLeft)
+    );
+
+  nextTop =
+    Math.min(
+      Math.max(0, nextTop),
+      Math.max(0, maxTop)
+    );
+
+  panel.style.left = nextLeft + "px";
+  panel.style.top = nextTop + "px";
+  panel.style.right = "auto";
+  panel.style.bottom = "auto";
+}
+
+function resetFloatPanelPosition() {
+  const panel = get("floatPanel");
+  if (!panel) return;
+
+  panel.style.left = "auto";
+  panel.style.top = "auto";
+  panel.style.right = "18px";
+  panel.style.bottom = "88px";
+}
+
+function closeFloatPanelKeepEditorSelection() {
+  const editor = get("repairEditor");
+  const start = editor ? editor.selectionStart : null;
+  const end = editor ? editor.selectionEnd : null;
+  closeFloatPanel();
+  if (editor && start !== null && end !== null) {
+    setTimeout(() => {
+      editor.focus();
+      editor.setSelectionRange(start, end);
+      updateCursorPosition();
+    }, 0);
+  }
+}
+
+function closeFloatPanel(){
+  get("floatPanel").style.display = "none";
+  const btn = get("toolsBtn");
+  if(btn){
+    btn.innerText = "⚙";
+  }
+}
+
+function toggleToolCategory(id) {
+  const box = get(id);
+  const btn =
+    document.querySelector(
+      `[onclick="toggleToolCategory('${id}')"]`
+    );
+  const isOpen =
+    getComputedStyle(box).display !== "none";
+  box.style.display =
+    isOpen ? "none" : "grid";
+  if (btn) {
+    btn.innerText =
+      btn.innerText.replace(
+        isOpen ? "▲" : "▼",
+        isOpen ? "▼" : "▲"
+      );
+  }
+}
+
+function toggleCommandMenu() {
+  const menu =
+    get("commandMenu");
+  menu.style.display =
+    menu.style.display === "none"
+      ? "block"
+      : "none";
+}
+
+function closeAllManagers() {
+  get("template-manager").style.display = "none";
+  get("danger-manager").style.display = "none";
+  get("pattern-manager").style.display = "none";
+  get("ai-preset-manager").style.display = "none";
+}
+
+function updatePanelButtonStates() {
+  const templateBtn = get("templateBtn");
+  const dangerBtn = get("dangerBtn");
+  const patternBtn = get("patternBtn");
+  const aiPresetBtn = get("aiPresetBtn");
+  if (templateBtn) {
+    templateBtn.classList.toggle(
+      "active-panel",
+      get("template-manager").style.display !== "none"
+    );
+  }
+  if (dangerBtn) {
+    dangerBtn.classList.toggle(
+      "active-panel",
+      get("danger-manager").style.display !== "none"
+    );
+  }
+  if (patternBtn) {
+    patternBtn.classList.toggle(
+      "active-panel",
+      get("pattern-manager").style.display !== "none"
+    );
+  }
+  if (aiPresetBtn) {
+    aiPresetBtn.classList.toggle(
+      "active-panel",
+    get("ai-preset-manager").style.display !== "none"
+    );
+  }
+}
+
+console.log("CHANGELOG");
+console.table(CHANGELOG);
 
 /* ===============================
    FILE: 05_repair.js
@@ -4098,292 +3974,1170 @@ get("aiPresetFileInput").addEventListener("change", (e) => {
   e.target.value = "";
 });
 
-function saveDangerWord() {
-  const word = get("dangerWord").value.trim();
-  if (!word) {
-    alert("危険ワードを入力してください");
-    return;
-  }
-  let list = loadJson("dangerWords", []);
-  if (defaultDangerWords.includes(word) || list.includes(word)) {
-    alert("すでに登録されています");
-    return;
-  }
-  list.push(word);
-  localStorage.setItem("dangerWords", JSON.stringify(list));
-  get("dangerWord").value = "";
-  renderDangerWords();
-}
+/* ===============================
+   FILE: 06_search.js
+   Search / Replace
+=============================== */
 
-function renderDangerWords() {
-  const local = loadJson("dangerWords", []);
-  const all = [...defaultDangerWords, ...local];
-  get("dangerList").innerHTML = all.map((word, i) => `
-    <div class="danger-item">
-      <b>${escapeHtml(word)}</b>
-      <div class="item-actions">
-        ${
-          i >= defaultDangerWords.length
-            ? `<button onclick="deleteDangerWord(${i - defaultDangerWords.length})">削除</button>`
-            : `<span class="small">固定ワード</span>`
-        }
-      </div>
+function toggleRepairSearchBox() {
+  openFloatPanel(
+    "検索",
+    `
+    <input
+      id="repairSearch"
+      placeholder="検索">
+
+    <div class="float-panel-actions">
+      <button onclick="searchRepairText()">🔍</button>
+      <button onclick="searchRepairPrev()">◀</button>
+      <button onclick="searchRepairNext()">▶</button>
+      <button onclick="clearRepairSearch()">✕</button>
     </div>
-  `).join("");
+
+    <div
+      id="repairSearchResult"
+      class="diagnose-box"
+      style="display:none;">
+    </div>
+    `
+  );
+
+  setTimeout(() => {
+    const box = get("repairSearch");
+    if (!box) return;
+
+    box.focus();
+    box.select();
+    box.onkeydown = handleRepairSearchKey;
+  }, 50);
 }
 
-function deleteDangerWord(index) {
-  let list = loadJson("dangerWords", []);
-  list.splice(index, 1);
-  localStorage.setItem("dangerWords", JSON.stringify(list));
-  renderDangerWords();
+function handleRepairSearchKey(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+
+    if (e.shiftKey) {
+      searchRepairPrev();
+    } else {
+      searchRepairNext();
+    }
+  }
+
+  if (e.key === "Escape") {
+    e.preventDefault();
+
+    if (
+      typeof closeFloatPanelKeepEditorSelection ===
+      "function"
+    ) {
+      closeFloatPanelKeepEditorSelection();
+    } else {
+      closeFloatPanel();
+    }
+  }
 }
 
-function getAllDangerWords() {
-  const local = loadJson("dangerWords", []);
-  return [...defaultDangerWords, ...local];
+function clearRepairSearch() {
+  const box = get("repairSearch");
+  if (!box) return;
+
+  box.value = "";
+
+  const result =
+    get("repairSearchResult");
+
+  if (result) {
+    result.innerHTML = "";
+    result.style.display = "none";
+  }
+
+  box.focus();
 }
 
-function savePattern() {
-  const name = get("patternName").value.trim();
-  const regex = get("patternRegex").value.trim();
-  const flags = get("patternFlags").value.trim() || "g";
-  if (!name || !regex) {
-    alert("パターン名と正規表現を入力してください");
+function searchRepairText() {
+  const editor = get("repairEditor");
+  const keyword = get("repairSearch").value;
+  const resultBox = get("repairSearchResult");
+
+  if (!keyword) {
+    alert("検索文字を入力してください");
     return;
   }
+
+  const text = editor.value;
+  const index = text.indexOf(keyword);
+
+  if (index === -1) {
+    resultBox.style.display = "block";
+    resultBox.innerText = "検索結果：0件";
+    alert("見つかりませんでした");
+    return;
+  }
+
+  repairSearchIndex =
+    index + keyword.length;
+
+  editor.focus();
+  editor.setSelectionRange(
+    index,
+    index + keyword.length
+  );
+
+  renderRepairSearchResults(keyword);
+  resultBox.style.display = "block";
+}
+
+function searchRepairPrev() {
+  const editor = get("repairEditor");
+  const keyword = get("repairSearch").value;
+
+  if (!keyword) {
+    alert("検索文字を入力してください");
+    return;
+  }
+
+  const text = editor.value;
+
+  let index =
+    text.lastIndexOf(
+      keyword,
+      Math.max(
+        0,
+        editor.selectionStart - 1
+      )
+    );
+
+  if (index === -1) {
+    index = text.lastIndexOf(keyword);
+  }
+
+  if (index === -1) {
+    alert("見つかりませんでした");
+    return;
+  }
+
+  repairSearchIndex = index;
+
+  editor.focus();
+  editor.setSelectionRange(
+    index,
+    index + keyword.length
+  );
+
+  renderRepairSearchResults(keyword);
+}
+
+function searchRepairNext() {
+  const editor = get("repairEditor");
+  const keyword = get("repairSearch").value;
+
+  if (!keyword) {
+    alert("検索文字を入力してください");
+    return;
+  }
+
+  const text = editor.value;
+
+  let index =
+    text.indexOf(
+      keyword,
+      repairSearchIndex
+    );
+
+  if (index === -1) {
+    index = text.indexOf(keyword);
+  }
+
+  if (index === -1) {
+    alert("見つかりませんでした");
+    return;
+  }
+
+  repairSearchIndex =
+    index + keyword.length;
+
+  editor.focus();
+  editor.setSelectionRange(
+    index,
+    index + keyword.length
+  );
+
+  renderRepairSearchResults(keyword);
+}
+
+function renderRepairSearchResults(keyword) {
+  const editor = get("repairEditor");
+  const resultBox = get("repairSearchResult");
+  const text = editor.value;
+  const lines = text.split("\n");
+  const results = [];
+
+  lines.forEach((line, index) => {
+    if (line.includes(keyword)) {
+      results.push({
+        lineNumber: index + 1,
+        line
+      });
+    }
+  });
+
+  resultBox.style.display = "block";
+
+  if (results.length === 0) {
+    resultBox.innerText = "検索結果：0件";
+    return;
+  }
+
+  resultBox.innerHTML =
+    `<b>検索結果：${results.length}件</b>` +
+    results.slice(0, 30).map(item => {
+      return `
+        <div
+          class="search-result-line"
+          onclick="
+            jumpToLine(${item.lineNumber});
+            closeFloatPanelKeepEditorSelection();
+          ">
+          <b>${item.lineNumber}</b>:
+          ${highlightKeyword(item.line, keyword)}
+        </div>
+      `;
+    }).join("");
+
+  if (results.length > 30) {
+    resultBox.innerHTML += `
+      <div class="small">
+        ※ 30件まで表示しています
+      </div>
+    `;
+  }
+}
+
+function highlightKeyword(text, keyword) {
+  const safeText = escapeHtml(text);
+  const safeKeyword = escapeHtml(keyword);
+
+  const regex =
+    new RegExp(
+      escapeRegExp(safeKeyword),
+      "gi"
+    );
+
+  return safeText.replace(
+    regex,
+    match => `<mark>${match}</mark>`
+  );
+}
+
+
+/* ===============================
+   FILE: 07_backup_health.js
+   Backup / Health / Safe Mode
+=============================== */
+
+function showHtmlHealth() {
+
+  const html =
+    isRepairMode() &&
+    get("repairEditor") &&
+    get("repairEditor").value.trim()
+      ? get("repairEditor").value
+      : "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+  const validation =
+    validateBackupHtml(html);
+  const funcs =
+    [...html.matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )]
+    .map(x => x[1]);
+  const dupFuncs =
+    [...new Set(
+      funcs.filter(
+        (f,i)=>
+        funcs.indexOf(f)!==i
+      )
+    )];
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )]
+    .map(x=>x[1]);
+  const undefinedFns =
+    [...new Set(
+      onclicks.filter(
+        fn =>
+        !funcs.includes(fn)
+      )
+    )];
+  const result =
+`HTML HEALTH REPORT
+=== HTML ===
+div:
+${validation.div_ok ? "✔ OK" : "⚠ NG"}
+open:
+${validation.div_open}
+close:
+${validation.div_close}
+=== ID ===
+duplicate ids:
+${
+validation.duplicate_ids.length
+? validation.duplicate_ids.join("\n")
+: "✔ none"
+}
+=== JavaScript ===
+JS syntax:
+${validation.js_ok ? "✔ OK" : "⚠ NG"}
+${validation.js_error || ""}
+=== Function ===
+function count:
+${funcs.length}
+duplicate functions:
+${
+dupFuncs.length
+? dupFuncs.join("\n")
+: "✔ none"
+}
+undefined onclick:
+${
+undefinedFns.length
+? undefinedFns.join("\n")
+: "✔ none"
+}
+onclick count:
+${onclicks.length}
+=== Health Score ===
+${
+(
+100
+-
+(validation.div_ok ? 0 : 20)
+-
+(validation.js_ok ? 0 : 25)
+-
+(validation.duplicate_ids.length * 5)
+-
+(undefinedFns.length * 10)
+-
+(dupFuncs.length * 10)
+)
+}/100
+`;
+
+    window.latestHealthResult =
+      result;
+    openFloatPanel(
+    "HTML HEALTH",
+    `
+    <div class="float-panel-actions">
+      <button onclick="copyHealthResult()">
+        📋 コピー
+      </button>
+    </div>
+    <pre
+      id="healthResultBox"
+      class="code-preview">
+${escapeHtml(result)}
+    </pre>
+    `
+  );
+}
+
+function diagnoseHtml() {
+  let html =
+    "<!DOCTYPE html>\n" +
+    document.documentElement.outerHTML;
+  html = html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "");
+  const report = [];
+  report.push("AIプロンプト生成Pro HTML診断");
+  report.push("v5.7.2 Diagnose Fixed\n");
+  const tags = ["div", "section", "article", "main", "header", "footer"];
+  tags.forEach(tag => {
+    const open = (html.match(new RegExp(`<${tag}\\b`, "gi")) || []).length;
+    const close = (html.match(new RegExp(`</${tag}>`, "gi")) || []).length;
+    report.push(open === close ? `✔ ${tag}: ${open}/${close}` : `⚠ ${tag}: ${open}/${close}`);
+  });
+  const ids =
+  [...document.querySelectorAll("[id]")]
+    .map(el=>el.id);
+  const dupIds = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))];
+  report.push(dupIds.length ? `⚠ id重複\n${dupIds.join("\n")}` : "✔ id重複なし");
   try {
-    new RegExp(regex, flags);
-  } catch {
-    alert("正規表現が正しくありません");
-    return;
+    [...document.scripts].forEach(s => new Function(s.textContent));
+    report.push("✔ JS構文OK");
+  } catch (e) {
+    report.push(`⚠ JS構文エラー\n${e.message}`);
   }
-  let list = loadJson("dangerPatterns", []);
-  list.push({ name, regex, flags });
-  localStorage.setItem("dangerPatterns", JSON.stringify(list));
-  get("patternName").value = "";
-  get("patternRegex").value = "";
-  get("patternFlags").value = "";
-  alert("NGパターンを追加しました");
-  renderPatterns();
+  const box = get("diagnoseBox");
+  box.style.display = "block";
+  box.innerText = report.join("\n");
 }
 
-function renderPatterns() {
-  const local = loadJson("dangerPatterns", []);
-  const all = [...defaultPatterns, ...local];
 
-  get("patternList").innerHTML = all.map((p, i) => `
-    <div class="pattern-item">
-      <b>${escapeHtml(p.name)}</b>
-      <div class="code-like">/${escapeHtml(p.regex)}/${escapeHtml(p.flags || "")}</div>
-      <div class="item-actions">
-        ${
-          i >= defaultPatterns.length
-            ? `<button onclick="deletePattern(${i - defaultPatterns.length})">削除</button>`
-            : `<span class="small">固定パターン</span>`
-        }
-      </div>
-    </div>
-  `).join("");
-}
+function getCleanProgramHtml() {
+  const clone =
+    document.documentElement.cloneNode(true);
 
-function deletePattern(index) {
-  let list = loadJson("dangerPatterns", []);
-  list.splice(index, 1);
-  localStorage.setItem("dangerPatterns", JSON.stringify(list));
-  renderPatterns();
-}
+  const floatPanel =
+    clone.querySelector("#floatPanel");
 
-function getAllPatterns() {
-  const local = loadJson("dangerPatterns", []);
-  return [...defaultPatterns, ...local];
-}
-
-function detectSensitiveContent(text) {
-  const source = String(text || "");
-  const foundWords = getAllDangerWords().filter(word => word && source.includes(word));
-  const foundPatterns = [];
-  for (const p of getAllPatterns()) {
-    try {
-      const regex = new RegExp(p.regex, p.flags || "g");
-      const matches = source.match(regex);
-      if (matches && matches.length > 0) {
-        foundPatterns.push({
-          name: p.name,
-          count: matches.length,
-          samples: [...new Set(matches)].slice(0, 3)
-        });
-      }
-    } catch {}
+  if (floatPanel) {
+    floatPanel.innerHTML = "";
+    floatPanel.removeAttribute("style");
+    floatPanel.style.display = "none";
+    floatPanel.style.left = "";
+    floatPanel.style.top = "";
+    floatPanel.style.right = "18px";
+    floatPanel.style.bottom = "88px";
   }
+
+  const toolsBtn =
+    clone.querySelector("#toolsBtn");
+
+  if (toolsBtn) {
+    toolsBtn.innerText = "⚙";
+  }
+
+  [
+    "debugBox",
+    "diagnoseBox",
+    "warningBox",
+    "repairPreview"
+  ].forEach(id => {
+    const el =
+      clone.querySelector("#" + id);
+
+    if (el) {
+      el.innerHTML = "";
+      el.innerText = "";
+      el.style.display = "none";
+    }
+  });
+
+  [
+    "template-manager",
+    "danger-manager",
+    "pattern-manager",
+    "ai-preset-manager"
+  ].forEach(id => {
+    const el =
+      clone.querySelector("#" + id);
+
+    if (el) {
+      el.style.display = "none";
+    }
+  });
+
+  const output =
+    clone.querySelector("#output");
+
+  if (output) {
+    output.innerText = "ここに表示";
+  }
+
+  const lineNumbers =
+    clone.querySelector("#lineNumbers");
+
+  if (lineNumbers) {
+    lineNumbers.innerHTML = "1";
+  }
+
+  const cursorStatus =
+    clone.querySelector("#cursorStatus");
+
+  if (cursorStatus) {
+    cursorStatus.innerText = "Ln 1 / Col 1";
+  }
+
+  const repairEditor =
+    clone.querySelector("#repairEditor");
+
+  if (repairEditor) {
+    repairEditor.value = "";
+    repairEditor.innerHTML = "";
+  }
+
+  [
+    "commandBox",
+    "presetBox",
+    "templateList",
+    "dangerList",
+    "patternList",
+    "history"
+  ].forEach(id => {
+    const el =
+      clone.querySelector("#" + id);
+
+    if (el) {
+      el.innerHTML = "";
+    }
+  });
+
+  return "<!DOCTYPE html>\n" + clone.outerHTML;
+}
+
+
+function validateBackupHtml(html) {
+  const source = String(html || "");
+
+  const cleanHtml = source
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "");
+
+  const divOpen =
+    (cleanHtml.match(/<div\b/gi) || []).length;
+
+  const divClose =
+    (cleanHtml.match(/<\/div>/gi) || []).length;
+
+  const parser = new DOMParser();
+
+  const doc =
+    parser.parseFromString(
+      source,
+      "text/html"
+    );
+
+  const ids =
+    [...doc.querySelectorAll("[id]")]
+      .map(el => el.id)
+      .filter(Boolean);
+
+  const duplicateIds =
+    [...new Set(
+      ids.filter((id, i) => ids.indexOf(id) !== i)
+    )];
+
+  let jsOk = true;
+  let jsError = "";
+
+  try {
+    const scripts =
+      [...doc.querySelectorAll("script")];
+
+    scripts.forEach(s => {
+      new Function(s.textContent);
+    });
+  } catch (e) {
+    jsOk = false;
+    jsError = e.message;
+  }
+
   return {
-    hasAny: foundWords.length > 0 || foundPatterns.length > 0,
-    foundWords,
-    foundPatterns
+    div_ok: divOpen === divClose,
+    div_open: divOpen,
+    div_close: divClose,
+    duplicate_ids: duplicateIds,
+    js_ok: jsOk,
+    js_error: jsError
   };
 }
 
-function checkSensitiveContent(text) {
-  const report = detectSensitiveContent(text);
-  if (!report.hasAny) {
-    hideWarning();
+function backupProgram() {
+  saveCurrentState();
+
+  const note =
+    prompt(
+      "バックアップメモを入力してください",
+      "変更内容メモ"
+    ) || "";
+
+  const html =
+    getCleanProgramHtml();
+
+  if (!preSaveCheck(html)) {
     return;
   }
-  const lines = [];
-  lines.push("警告：個人情報・認証情報が含まれている可能性があります。");
-  lines.push("");
-  if (report.foundWords.length > 0) {
-    lines.push("【危険ワード】");
-    lines.push(report.foundWords.join("、"));
-    lines.push("");
-  }
-  if (report.foundPatterns.length > 0) {
-    lines.push("【NGパターン検出】");
-    report.foundPatterns.forEach(item => {
-      const sampleText = item.samples.length > 0 ? ` 例: ${item.samples.join(" / ")}` : "";
-      lines.push(`・${item.name}（${item.count}件）${sampleText}`);
+
+  const backupData = {
+    backup_type: "AI_PROMPT_PRO_FULL_BACKUP",
+    backup_format_version: "1.1",
+    version: APP_VERSION,
+    created_at: new Date().toISOString(),
+    backup_note: note,
+    changelog: CHANGELOG,
+    validation: validateBackupHtml(html),
+    html: html,
+    localStorageData: {
+      templates: loadJson("templates", []),
+      aiPresets: loadJson("aiPresets", {}),
+      dangerWords: loadJson("dangerWords", []),
+      dangerPatterns: loadJson("dangerPatterns", []),
+      history: loadJson("h", []),
+      rawInput: localStorage.getItem("rawInput"),
+      roleValue: localStorage.getItem("roleValue"),
+      taskValue: localStorage.getItem("taskValue"),
+      detailsValue: localStorage.getItem("detailsValue"),
+      toneValue: localStorage.getItem("toneValue"),
+      roughTone: localStorage.getItem("roughTone"),
+      roughOutputFormat: localStorage.getItem("roughOutputFormat"),
+      aiTarget: localStorage.getItem("aiTarget"),
+      currentTab: localStorage.getItem("currentTab"),
+      darkMode: localStorage.getItem("darkMode")
+    }
+  };
+
+  const blob =
+    new Blob(
+      [JSON.stringify(backupData, null, 2)],
+      { type: "application/json" }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-");
+
+  a.download =
+    `AIProBackup_${APP_VERSION}_${timestamp}.json`;
+
+  a.click();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
+
+  saveBackupHistory(backupData);
+  manageBackupHistory();
+
+  alert(
+    "フルバックアップ保存完了\n\n" +
+    "メモ: " + note
+  );
+}
+
+function manageBackupHistory() {
+  const list = loadJson("backupHistory", []);
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list.slice(0, 10))
+  );
+}
+
+function restoreLocalStorageOnly(localStorageData) {
+  Object.entries(localStorageData)
+    .forEach(([key, value]) => {
+      if (value === null || value === undefined) {
+        localStorage.removeItem(key);
+        return;
+      }
+      if (typeof value === "string") {
+        localStorage.setItem(key, value);
+      } else {
+        localStorage.setItem(
+          key,
+          JSON.stringify(value)
+        );
+      }
     });
-    lines.push("");
-  }
-  lines.push("外部に送る前に、本当に問題ないか確認してください。");
-  get("warningBox").style.display = "block";
-  get("warningBox").innerText = lines.join("\n");
 }
 
-function buildConfirmMessage(report, actionName) {
-  const lines = [];
-  lines.push(`警告：${actionName}前に確認してください。`);
-  lines.push("");
-  if (report.foundWords.length > 0) {
-    lines.push("【危険ワード】");
-    lines.push(report.foundWords.join("、"));
-    lines.push("");
-  }
-  if (report.foundPatterns.length > 0) {
-    lines.push("【NGパターン検出】");
-    report.foundPatterns.forEach(item => {
-      const sampleText = item.samples.length > 0 ? ` 例: ${item.samples.join(" / ")}` : "";
-      lines.push(`・${item.name}（${item.count}件）${sampleText}`);
-    });
-    lines.push("");
-  }
-  lines.push(`それでも${actionName}しますか？`);
-  return lines.join("\n");
+function extractFunctionNames(html) {
+  return [
+    ...String(html || "").matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )
+  ].map(m => m[1]);
 }
 
-function hideWarning() {
-  get("warningBox").style.display = "none";
-  get("warningBox").innerText = "";
+function extractIds(html) {
+  const parser = new DOMParser();
+  const doc =
+    parser.parseFromString(
+      String(html || ""),
+      "text/html"
+    );
+
+  return [...doc.querySelectorAll("[id]")]
+    .map(el => el.id)
+    .filter(Boolean);
 }
 
-function saveCurrentState() {
-
-  if (isLoading) return;
-
-  if (!get("raw-input")) return;
-
-  localStorage.setItem(
-    "rawInput",
-    get("raw-input").value
-  );
-
-  localStorage.setItem(
-    "roughTone",
-    get("rough-tone").value
-  );
-
-  localStorage.setItem(
-    "roughOutputFormat",
-    get("rough-output-format").value
-  );
-  localStorage.setItem(
-    "roleValue",
-    get("role").value
-  );
-  localStorage.setItem(
-    "taskValue",
-    get("task").value
-  );
-  localStorage.setItem(
-    "detailsValue",
-    get("details").value
-  );
-  localStorage.setItem(
-    "toneValue",
-    get("tone").value
-  );
-  localStorage.setItem(
-    "currentTab",
-    String(currentTab)
-  );
-  localStorage.setItem(
-    "aiTarget",
-    get("ai-target").value
+function calcHealthScore(validation, undefinedFns, dupFuncs) {
+  return Math.max(
+    0,
+    100
+    - (validation.div_ok ? 0 : 20)
+    - (validation.js_ok ? 0 : 25)
+    - (validation.duplicate_ids.length * 5)
+    - (undefinedFns.length * 10)
+    - (dupFuncs.length * 10)
   );
 }
 
-function loadSettings() {
-  isLoading = true;
-  checkSafeMode();
-  if (localStorage.getItem("darkMode") === "1") {
-    document.body.classList.add("dark");
+function getHtmlSummary(html) {
+  const funcs = extractFunctionNames(html);
+  const ids = extractIds(html);
+  const validation = validateBackupHtml(html);
+  const dupFuncs =
+    [...new Set(
+      funcs.filter((f, i) => funcs.indexOf(f) !== i)
+    )];
+  const onclicks =
+    [...String(html || "").matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )].map(x => x[1]);
+  const undefinedFns =
+    [...new Set(
+      onclicks.filter(fn => !funcs.includes(fn))
+    )];
+  const score =
+    calcHealthScore(
+      validation,
+      undefinedFns,
+      dupFuncs
+    );
+  return {
+    funcs,
+    ids,
+    validation,
+    dupFuncs,
+    undefinedFns,
+    score
+  };
+}
+
+function preSaveCheck(html) {
+
+  const source =
+    html ||
+    (
+      isRepairMode() &&
+      get("repairEditor") &&
+      get("repairEditor").value.trim()
+    )
+      ? get("repairEditor").value
+      : "<!DOCTYPE html>\n" +
+        document.documentElement.outerHTML;
+
+  const summary =
+    getHtmlSummary(source);
+
+  const warnings = [];
+
+  if (!summary.validation.div_ok) {
+    warnings.push(
+      "div整合性NG"
+    );
   }
-  closeAllManagers();
-  renderHistory();
-  renderTemplates();
-  renderTemplateSelect();
-  renderDangerWords();
-  renderPatterns();
-  renderCommandChips();
-  renderPresetChips();
-  get("raw-input").value = localStorage.getItem("rawInput") || "";
-  get("rough-tone").value = localStorage.getItem("roughTone") || "プロフェッショナル";
-  get("rough-output-format").value = localStorage.getItem("roughOutputFormat") || "prompt";
-  get("role").value = localStorage.getItem("roleValue") || "";
-  get("task").value = localStorage.getItem("taskValue") || "";
-  get("details").value = localStorage.getItem("detailsValue") || "";
-  get("tone").value = localStorage.getItem("toneValue") || "プロフェッショナル";
-  get("ai-target").value = localStorage.getItem("aiTarget") || "chatgpt";
-  const savedTab = Number(localStorage.getItem("currentTab") || "1");
-  currentTab = savedTab;
-  switchTab(savedTab);
-  syncCommandButtons();
-  updatePanelButtonStates();
- get("versionLabel").innerText = APP_VERSION;
-get("changelogLabel").innerHTML =
-  CHANGELOG.map(x =>
-escapeHtml(x)).join("<br>");
-  isLoading = false;
+
+  if (!summary.validation.js_ok) {
+    warnings.push(
+      "JS構文エラー"
+    );
   }
-window.onerror = function(
-  message,
-  source,
-  line,
-  col,
-  error
-) {
-  localStorage.setItem(
-    "lastCrash",
-    JSON.stringify({
-      time: new Date().toISOString(),
-      message,
-      line,
-      column: col
-    })
+
+  if (
+    summary.validation
+      .duplicate_ids.length
+  ) {
+    warnings.push(
+      "id重複"
+    );
+  }
+
+  if (
+    summary.dupFuncs.length
+  ) {
+    warnings.push(
+      "function重複"
+    );
+  }
+
+  if (
+    summary.undefinedFns.length
+  ) {
+    warnings.push(
+      "未定義onclick"
+    );
+  }
+
+  if (
+    summary.score < 80
+  ) {
+    warnings.push(
+      `Health Score低下 (${summary.score}/100)`
+    );
+  }
+
+  if (
+    warnings.length === 0
+  ) {
+    return true;
+  }
+
+  return confirm(
+    "保存前チェック警告\n\n" +
+    warnings.join("\n") +
+    "\n\n続行しますか？"
   );
-  if (!DEBUG_MODE) return;
-  const box = get("debugBox");
-  if (!box) return;
-  box.style.display = "block";
-  box.innerText =
-`JS Error
+}
+
+function compareBackupSummary() {
+  const input =
+    document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!data || !data.html) {
+          alert("比較できるバックアップ形式ではありません");
+          return;
+        }
+        const currentHtml =
+          isRepairMode() &&
+          get("repairEditor") &&
+          get("repairEditor").value.trim()
+            ? get("repairEditor").value
+            : "<!DOCTYPE html>\n" +
+              document.documentElement.outerHTML;
+        const oldHtml = data.html;
+        const current =
+          getHtmlSummary(currentHtml);
+        const old =
+          getHtmlSummary(oldHtml);
+        const addedFuncs =
+          current.funcs.filter(x => !old.funcs.includes(x));
+        const removedFuncs =
+          old.funcs.filter(x => !current.funcs.includes(x));
+        const addedIds =
+          current.ids.filter(x => !old.ids.includes(x));
+        const removedIds =
+          old.ids.filter(x => !current.ids.includes(x));
+        const result =
+`バックアップ差分サマリー
+【比較元】
+version:
+${data.app_version || data.version || "不明"}
+created_at:
+${data.created_at || "不明"}
+backup note:
+${data.backup_note || "なし"}
+【Health Score】
+現在:
+${current.score}/100
+バックアップ:
+${old.score}/100
+差:
+${current.score - old.score}
+【Function】
+現在:
+${current.funcs.length}
+バックアップ:
+${old.funcs.length}
+追加function:
+${addedFuncs.length ? addedFuncs.join("\n") : "なし"}
+削除function:
+${removedFuncs.length ? removedFuncs.join("\n") : "なし"}
+【ID】
+現在:
+${current.ids.length}
+バックアップ:
+${old.ids.length}
+追加id:
+${addedIds.length ? addedIds.join("\n") : "なし"}
+削除id:
+${removedIds.length ? removedIds.join("\n") : "なし"}
+【現在の警告】
+重複id:
+${current.validation.duplicate_ids.length ? current.validation.duplicate_ids.join("\n") : "なし"}
+重複function:
+${current.dupFuncs.length ? current.dupFuncs.join("\n") : "なし"}
+未定義onclick:
+${current.undefinedFns.length ? current.undefinedFns.join("\n") : "なし"}
+`;
+        showDiffResult(result);
+      } catch (err) {
+        alert(
+          "差分確認に失敗しました\n\n" +
+          err.message
+        );
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function showDiffResult(text) {
+  openFloatPanel(
+    "差分確認結果",
+    `
+    <div class="float-panel-actions">
+      <button onclick="copyDiffResult()">📋 コピー</button>
+      <button onclick="clearDiffResult()">🧹 クリア</button>
+    </div>
+    <pre id="diffResultBox" class="code-preview">${escapeHtml(text)}</pre>
+    `
+  );
+  window.latestDiffResult = text;
+}
+function copyDiffResult() {
+  const text =
+    window.latestDiffResult || "";
+
+  if (!text) {
+    alert("コピーする差分結果がありません");
+    return;
+  }
+
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =>
+        alert("差分結果をコピーしました")
+      )
+      .catch(() => {
+        const ok =
+          copyTextFallback(text);
+
+        alert(
+          ok
+            ? "差分結果をコピーしました"
+            : "コピー失敗"
+        );
+      });
+
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "差分結果をコピーしました"
+      : "コピー失敗"
+  );
+}
+function clearDiffResult() {
+  window.latestDiffResult = "";
+  closeFloatPanel();
+}
+
+function copyHealthResult() {
+  const text =
+    window.latestHealthResult || "";
+  if (!text) {
+    alert("コピー内容なし");
+    return;
+  }
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(()=>
+        alert("コピー完了")
+      )
+      .catch(()=>{
+        const ok =
+          copyTextFallback(text);
+        alert(
+          ok
+          ? "コピー完了"
+          : "コピー失敗"
+        );
+      });
+    return;
+  }
+  const ok =
+    copyTextFallback(text);
+  alert(
+    ok
+    ? "コピー完了"
+    : "コピー失敗"
+  );
+}
+
+function restoreProgramBackup() {
+  const input =
+    document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!data || !data.localStorageData) {
+          alert("フルバックアップ形式ではありません");
+          return;
+        }
+        const info =
+          "バックアップ情報\n\n" +
+          "version: " + (data.app_version || data.version || "不明") + "\n" +
+          "created_at: " + (data.created_at || "不明") + "\n" +
+          "note: " + (data.backup_note || "なし") + "\n\n" +
+          "復元方法を選んでください。\n\n" +
+          "OK：設定のみ復元\n" +
+          "キャンセル：中止\n\n" +
+          "※HTML本体は修復モードで読み込んで保存してください。";
+        const ok = confirm(info);
+        if (!ok) return;
+        restoreLocalStorageOnly(data.localStorageData);
+
+        alert("設定のみ復元完了。再読み込みします。");
+        location.reload();
+      } catch (err) {
+        alert(
+          "フル復元に失敗しました\n\n" +
+          err.message
+        );
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function saveProgramHtml() {
+  const html =
+    getCleanProgramHtml();
+
+  if (!preSaveCheck(html)) {
+    return;
+  }
+
+  const blob =
+    new Blob(
+      [html],
+      { type: "text/html" }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-");
+
+  a.download =
+    `AIPro_${APP_VERSION}_${timestamp}.html`;
+
+  a.click();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
+
+  alert("本体HTMLを保存しました");
+}
+
+function checkSafeMode() {
+  const crash =
+    localStorage.getItem("lastCrash");
+
+  if (!crash) return;
+
+  let info = {};
+
+  try {
+    info = JSON.parse(crash);
+  } catch {
+    info = {
+      message: String(crash),
+      time: "unknown"
+    };
+  }
+
+  const msg =
+`SAFE MODE
+前回エラー終了を検出しました。
+
 message:
-${message}
+${info.message || "unknown"}
+
 line:
-${line}
+${info.line || "unknown"}
+
 column:
-${col}`;
-};
+${info.column || "unknown"}
+
+time:
+${info.time || "unknown"}
+
+修復モードで起動しますか？`;
+
+  const ok =
+    confirm(msg);
+
+  if (!ok) {
+    localStorage.removeItem("lastCrash");
+    return;
+  }
+
+  switchAppPage("repair");
+
+  const draft =
+    localStorage.getItem(
+      "repairDraftHtml"
+    );
+  
+  if (
+    draft &&
+    !get("repairEditor").value.trim()
+  ) {
+    get("repairEditor").value =
+      draft;
+  
+    repairLastValue =
+      draft;
+  
+    updateLineNumbers();
+    updateCursorPosition();
+    updateRepairStatus(
+      "SAFE MODE復元"
+    );
+  }
+
+  const debugBox =
+    get("debugBox");
+
+  if (debugBox) {
+    debugBox.style.display = "block";
+    debugBox.innerText =
+`SAFE MODE
+前回クラッシュ情報
+
+message:
+${info.message || "unknown"}
+
+line:
+${info.line || "unknown"}
+
+column:
+${info.column || "unknown"}
+
+time:
+${info.time || "unknown"}`;
+  }
+
+  localStorage.removeItem("lastCrash");
+}
 
 /* ===============================
    FILE: 08_init.js
@@ -5290,774 +6044,6 @@ function restoreBackupHistory(index) {
   });
   alert("履歴から復元しました。再読み込みします。");
   location.reload();
-}
-
-/* ===============================
-   FILE: 07_backup_health.js
-   Backup / Health / Safe Mode
-=============================== */
-
-function getCleanProgramHtml() {
-  const clone =
-    document.documentElement.cloneNode(true);
-
-  const floatPanel =
-    clone.querySelector("#floatPanel");
-
-  if (floatPanel) {
-    floatPanel.innerHTML = "";
-    floatPanel.removeAttribute("style");
-    floatPanel.style.display = "none";
-    floatPanel.style.left = "";
-    floatPanel.style.top = "";
-    floatPanel.style.right = "18px";
-    floatPanel.style.bottom = "88px";
-  }
-
-  const toolsBtn =
-    clone.querySelector("#toolsBtn");
-
-  if (toolsBtn) {
-    toolsBtn.innerText = "⚙";
-  }
-
-  [
-    "debugBox",
-    "diagnoseBox",
-    "warningBox",
-    "repairPreview"
-  ].forEach(id => {
-    const el =
-      clone.querySelector("#" + id);
-
-    if (el) {
-      el.innerHTML = "";
-      el.innerText = "";
-      el.style.display = "none";
-    }
-  });
-
-  [
-    "template-manager",
-    "danger-manager",
-    "pattern-manager",
-    "ai-preset-manager"
-  ].forEach(id => {
-    const el =
-      clone.querySelector("#" + id);
-
-    if (el) {
-      el.style.display = "none";
-    }
-  });
-
-  const output =
-    clone.querySelector("#output");
-
-  if (output) {
-    output.innerText = "ここに表示";
-  }
-
-  const lineNumbers =
-    clone.querySelector("#lineNumbers");
-
-  if (lineNumbers) {
-    lineNumbers.innerHTML = "1";
-  }
-
-  const cursorStatus =
-    clone.querySelector("#cursorStatus");
-
-  if (cursorStatus) {
-    cursorStatus.innerText = "Ln 1 / Col 1";
-  }
-
-  const repairEditor =
-    clone.querySelector("#repairEditor");
-
-  if (repairEditor) {
-    repairEditor.value = "";
-    repairEditor.innerHTML = "";
-  }
-
-  [
-    "commandBox",
-    "presetBox",
-    "templateList",
-    "dangerList",
-    "patternList",
-    "history"
-  ].forEach(id => {
-    const el =
-      clone.querySelector("#" + id);
-
-    if (el) {
-      el.innerHTML = "";
-    }
-  });
-
-  return "<!DOCTYPE html>\n" + clone.outerHTML;
-}
-
-
-function validateBackupHtml(html) {
-  const source = String(html || "");
-
-  const cleanHtml = source
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "");
-
-  const divOpen =
-    (cleanHtml.match(/<div\b/gi) || []).length;
-
-  const divClose =
-    (cleanHtml.match(/<\/div>/gi) || []).length;
-
-  const parser = new DOMParser();
-
-  const doc =
-    parser.parseFromString(
-      source,
-      "text/html"
-    );
-
-  const ids =
-    [...doc.querySelectorAll("[id]")]
-      .map(el => el.id)
-      .filter(Boolean);
-
-  const duplicateIds =
-    [...new Set(
-      ids.filter((id, i) => ids.indexOf(id) !== i)
-    )];
-
-  let jsOk = true;
-  let jsError = "";
-
-  try {
-    const scripts =
-      [...doc.querySelectorAll("script")];
-
-    scripts.forEach(s => {
-      new Function(s.textContent);
-    });
-  } catch (e) {
-    jsOk = false;
-    jsError = e.message;
-  }
-
-  return {
-    div_ok: divOpen === divClose,
-    div_open: divOpen,
-    div_close: divClose,
-    duplicate_ids: duplicateIds,
-    js_ok: jsOk,
-    js_error: jsError
-  };
-}
-
-function backupProgram() {
-  saveCurrentState();
-
-  const note =
-    prompt(
-      "バックアップメモを入力してください",
-      "変更内容メモ"
-    ) || "";
-
-  const html =
-    getCleanProgramHtml();
-
-  if (!preSaveCheck(html)) {
-    return;
-  }
-
-  const backupData = {
-    backup_type: "AI_PROMPT_PRO_FULL_BACKUP",
-    backup_format_version: "1.1",
-    version: APP_VERSION,
-    created_at: new Date().toISOString(),
-    backup_note: note,
-    changelog: CHANGELOG,
-    validation: validateBackupHtml(html),
-    html: html,
-    localStorageData: {
-      templates: loadJson("templates", []),
-      aiPresets: loadJson("aiPresets", {}),
-      dangerWords: loadJson("dangerWords", []),
-      dangerPatterns: loadJson("dangerPatterns", []),
-      history: loadJson("h", []),
-      rawInput: localStorage.getItem("rawInput"),
-      roleValue: localStorage.getItem("roleValue"),
-      taskValue: localStorage.getItem("taskValue"),
-      detailsValue: localStorage.getItem("detailsValue"),
-      toneValue: localStorage.getItem("toneValue"),
-      roughTone: localStorage.getItem("roughTone"),
-      roughOutputFormat: localStorage.getItem("roughOutputFormat"),
-      aiTarget: localStorage.getItem("aiTarget"),
-      currentTab: localStorage.getItem("currentTab"),
-      darkMode: localStorage.getItem("darkMode")
-    }
-  };
-
-  const blob =
-    new Blob(
-      [JSON.stringify(backupData, null, 2)],
-      { type: "application/json" }
-    );
-
-  const a =
-    document.createElement("a");
-
-  a.href =
-    URL.createObjectURL(blob);
-
-  const timestamp =
-    new Date()
-      .toISOString()
-      .replace(/[:.]/g, "-");
-
-  a.download =
-    `AIProBackup_${APP_VERSION}_${timestamp}.json`;
-
-  a.click();
-
-  setTimeout(() => {
-    URL.revokeObjectURL(a.href);
-  }, 1000);
-
-  saveBackupHistory(backupData);
-  manageBackupHistory();
-
-  alert(
-    "フルバックアップ保存完了\n\n" +
-    "メモ: " + note
-  );
-}
-
-function manageBackupHistory() {
-  const list = loadJson("backupHistory", []);
-  localStorage.setItem(
-    "backupHistory",
-    JSON.stringify(list.slice(0, 10))
-  );
-}
-
-function restoreLocalStorageOnly(localStorageData) {
-  Object.entries(localStorageData)
-    .forEach(([key, value]) => {
-      if (value === null || value === undefined) {
-        localStorage.removeItem(key);
-        return;
-      }
-      if (typeof value === "string") {
-        localStorage.setItem(key, value);
-      } else {
-        localStorage.setItem(
-          key,
-          JSON.stringify(value)
-        );
-      }
-    });
-}
-
-function extractFunctionNames(html) {
-  return [
-    ...String(html || "").matchAll(
-      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
-    )
-  ].map(m => m[1]);
-}
-
-function extractIds(html) {
-  const parser = new DOMParser();
-  const doc =
-    parser.parseFromString(
-      String(html || ""),
-      "text/html"
-    );
-
-  return [...doc.querySelectorAll("[id]")]
-    .map(el => el.id)
-    .filter(Boolean);
-}
-
-function calcHealthScore(validation, undefinedFns, dupFuncs) {
-  return Math.max(
-    0,
-    100
-    - (validation.div_ok ? 0 : 20)
-    - (validation.js_ok ? 0 : 25)
-    - (validation.duplicate_ids.length * 5)
-    - (undefinedFns.length * 10)
-    - (dupFuncs.length * 10)
-  );
-}
-
-function getHtmlSummary(html) {
-  const funcs = extractFunctionNames(html);
-  const ids = extractIds(html);
-  const validation = validateBackupHtml(html);
-  const dupFuncs =
-    [...new Set(
-      funcs.filter((f, i) => funcs.indexOf(f) !== i)
-    )];
-  const onclicks =
-    [...String(html || "").matchAll(
-      /onclick="([a-zA-Z0-9_$]+)\(/g
-    )].map(x => x[1]);
-  const undefinedFns =
-    [...new Set(
-      onclicks.filter(fn => !funcs.includes(fn))
-    )];
-  const score =
-    calcHealthScore(
-      validation,
-      undefinedFns,
-      dupFuncs
-    );
-  return {
-    funcs,
-    ids,
-    validation,
-    dupFuncs,
-    undefinedFns,
-    score
-  };
-}
-
-function preSaveCheck(html) {
-
-  const source =
-    html ||
-    (
-      isRepairMode() &&
-      get("repairEditor") &&
-      get("repairEditor").value.trim()
-    )
-      ? get("repairEditor").value
-      : "<!DOCTYPE html>\n" +
-        document.documentElement.outerHTML;
-
-  const summary =
-    getHtmlSummary(source);
-
-  const warnings = [];
-
-  if (!summary.validation.div_ok) {
-    warnings.push(
-      "div整合性NG"
-    );
-  }
-
-  if (!summary.validation.js_ok) {
-    warnings.push(
-      "JS構文エラー"
-    );
-  }
-
-  if (
-    summary.validation
-      .duplicate_ids.length
-  ) {
-    warnings.push(
-      "id重複"
-    );
-  }
-
-  if (
-    summary.dupFuncs.length
-  ) {
-    warnings.push(
-      "function重複"
-    );
-  }
-
-  if (
-    summary.undefinedFns.length
-  ) {
-    warnings.push(
-      "未定義onclick"
-    );
-  }
-
-  if (
-    summary.score < 80
-  ) {
-    warnings.push(
-      `Health Score低下 (${summary.score}/100)`
-    );
-  }
-
-  if (
-    warnings.length === 0
-  ) {
-    return true;
-  }
-
-  return confirm(
-    "保存前チェック警告\n\n" +
-    warnings.join("\n") +
-    "\n\n続行しますか？"
-  );
-}
-
-function compareBackupSummary() {
-  const input =
-    document.createElement("input");
-  input.type = "file";
-  input.accept = ".json,application/json";
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(reader.result);
-        if (!data || !data.html) {
-          alert("比較できるバックアップ形式ではありません");
-          return;
-        }
-        const currentHtml =
-          isRepairMode() &&
-          get("repairEditor") &&
-          get("repairEditor").value.trim()
-            ? get("repairEditor").value
-            : "<!DOCTYPE html>\n" +
-              document.documentElement.outerHTML;
-        const oldHtml = data.html;
-        const current =
-          getHtmlSummary(currentHtml);
-        const old =
-          getHtmlSummary(oldHtml);
-        const addedFuncs =
-          current.funcs.filter(x => !old.funcs.includes(x));
-        const removedFuncs =
-          old.funcs.filter(x => !current.funcs.includes(x));
-        const addedIds =
-          current.ids.filter(x => !old.ids.includes(x));
-        const removedIds =
-          old.ids.filter(x => !current.ids.includes(x));
-        const result =
-`バックアップ差分サマリー
-【比較元】
-version:
-${data.app_version || data.version || "不明"}
-created_at:
-${data.created_at || "不明"}
-backup note:
-${data.backup_note || "なし"}
-【Health Score】
-現在:
-${current.score}/100
-バックアップ:
-${old.score}/100
-差:
-${current.score - old.score}
-【Function】
-現在:
-${current.funcs.length}
-バックアップ:
-${old.funcs.length}
-追加function:
-${addedFuncs.length ? addedFuncs.join("\n") : "なし"}
-削除function:
-${removedFuncs.length ? removedFuncs.join("\n") : "なし"}
-【ID】
-現在:
-${current.ids.length}
-バックアップ:
-${old.ids.length}
-追加id:
-${addedIds.length ? addedIds.join("\n") : "なし"}
-削除id:
-${removedIds.length ? removedIds.join("\n") : "なし"}
-【現在の警告】
-重複id:
-${current.validation.duplicate_ids.length ? current.validation.duplicate_ids.join("\n") : "なし"}
-重複function:
-${current.dupFuncs.length ? current.dupFuncs.join("\n") : "なし"}
-未定義onclick:
-${current.undefinedFns.length ? current.undefinedFns.join("\n") : "なし"}
-`;
-        showDiffResult(result);
-      } catch (err) {
-        alert(
-          "差分確認に失敗しました\n\n" +
-          err.message
-        );
-      }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
-function showDiffResult(text) {
-  openFloatPanel(
-    "差分確認結果",
-    `
-    <div class="float-panel-actions">
-      <button onclick="copyDiffResult()">📋 コピー</button>
-      <button onclick="clearDiffResult()">🧹 クリア</button>
-    </div>
-    <pre id="diffResultBox" class="code-preview">${escapeHtml(text)}</pre>
-    `
-  );
-  window.latestDiffResult = text;
-}
-function copyDiffResult() {
-  const text =
-    window.latestDiffResult || "";
-
-  if (!text) {
-    alert("コピーする差分結果がありません");
-    return;
-  }
-
-  if (
-    navigator.clipboard &&
-    window.isSecureContext
-  ) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() =>
-        alert("差分結果をコピーしました")
-      )
-      .catch(() => {
-        const ok =
-          copyTextFallback(text);
-
-        alert(
-          ok
-            ? "差分結果をコピーしました"
-            : "コピー失敗"
-        );
-      });
-
-    return;
-  }
-
-  const ok =
-    copyTextFallback(text);
-
-  alert(
-    ok
-      ? "差分結果をコピーしました"
-      : "コピー失敗"
-  );
-}
-function clearDiffResult() {
-  window.latestDiffResult = "";
-  closeFloatPanel();
-}
-
-function copyHealthResult() {
-  const text =
-    window.latestHealthResult || "";
-  if (!text) {
-    alert("コピー内容なし");
-    return;
-  }
-  if (
-    navigator.clipboard &&
-    window.isSecureContext
-  ) {
-    navigator.clipboard
-      .writeText(text)
-      .then(()=>
-        alert("コピー完了")
-      )
-      .catch(()=>{
-        const ok =
-          copyTextFallback(text);
-        alert(
-          ok
-          ? "コピー完了"
-          : "コピー失敗"
-        );
-      });
-    return;
-  }
-  const ok =
-    copyTextFallback(text);
-  alert(
-    ok
-    ? "コピー完了"
-    : "コピー失敗"
-  );
-}
-
-function restoreProgramBackup() {
-  const input =
-    document.createElement("input");
-  input.type = "file";
-  input.accept = ".json,application/json";
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(reader.result);
-        if (!data || !data.localStorageData) {
-          alert("フルバックアップ形式ではありません");
-          return;
-        }
-        const info =
-          "バックアップ情報\n\n" +
-          "version: " + (data.app_version || data.version || "不明") + "\n" +
-          "created_at: " + (data.created_at || "不明") + "\n" +
-          "note: " + (data.backup_note || "なし") + "\n\n" +
-          "復元方法を選んでください。\n\n" +
-          "OK：設定のみ復元\n" +
-          "キャンセル：中止\n\n" +
-          "※HTML本体は修復モードで読み込んで保存してください。";
-        const ok = confirm(info);
-        if (!ok) return;
-        restoreLocalStorageOnly(data.localStorageData);
-
-        alert("設定のみ復元完了。再読み込みします。");
-        location.reload();
-      } catch (err) {
-        alert(
-          "フル復元に失敗しました\n\n" +
-          err.message
-        );
-      }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
-function saveProgramHtml() {
-  const html =
-    getCleanProgramHtml();
-
-  if (!preSaveCheck(html)) {
-    return;
-  }
-
-  const blob =
-    new Blob(
-      [html],
-      { type: "text/html" }
-    );
-
-  const a =
-    document.createElement("a");
-
-  a.href =
-    URL.createObjectURL(blob);
-
-  const timestamp =
-    new Date()
-      .toISOString()
-      .replace(/[:.]/g, "-");
-
-  a.download =
-    `AIPro_${APP_VERSION}_${timestamp}.html`;
-
-  a.click();
-
-  setTimeout(() => {
-    URL.revokeObjectURL(a.href);
-  }, 1000);
-
-  alert("本体HTMLを保存しました");
-}
-
-function checkSafeMode() {
-  const crash =
-    localStorage.getItem("lastCrash");
-
-  if (!crash) return;
-
-  let info = {};
-
-  try {
-    info = JSON.parse(crash);
-  } catch {
-    info = {
-      message: String(crash),
-      time: "unknown"
-    };
-  }
-
-  const msg =
-`SAFE MODE
-前回エラー終了を検出しました。
-
-message:
-${info.message || "unknown"}
-
-line:
-${info.line || "unknown"}
-
-column:
-${info.column || "unknown"}
-
-time:
-${info.time || "unknown"}
-
-修復モードで起動しますか？`;
-
-  const ok =
-    confirm(msg);
-
-  if (!ok) {
-    localStorage.removeItem("lastCrash");
-    return;
-  }
-
-  switchAppPage("repair");
-
-  const draft =
-    localStorage.getItem(
-      "repairDraftHtml"
-    );
-  
-  if (
-    draft &&
-    !get("repairEditor").value.trim()
-  ) {
-    get("repairEditor").value =
-      draft;
-  
-    repairLastValue =
-      draft;
-  
-    updateLineNumbers();
-    updateCursorPosition();
-    updateRepairStatus(
-      "SAFE MODE復元"
-    );
-  }
-
-  const debugBox =
-    get("debugBox");
-
-  if (debugBox) {
-    debugBox.style.display = "block";
-    debugBox.innerText =
-`SAFE MODE
-前回クラッシュ情報
-
-message:
-${info.message || "unknown"}
-
-line:
-${info.line || "unknown"}
-
-column:
-${info.column || "unknown"}
-
-time:
-${info.time || "unknown"}`;
-  }
-
-  localStorage.removeItem("lastCrash");
 }
 
 </script>
