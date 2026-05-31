@@ -897,13 +897,6 @@ body:not(.dark) #floatPanel{
 
   </div>
 
-  <div class="btn-group repair-btn-group">
-  <button onclick="loadRepairHtml()">📖 HTML読込</button>
-  <button onclick="saveRepairHtml()">💾 修正版保存</button>
-  <button onclick="copyRepairHtml()">📋 HTMLコピー</button>
-
-</div>
-
 <div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave ON</div>
 
   <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
@@ -918,9 +911,6 @@ body:not(.dark) #floatPanel{
     <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます" style="width: 100%; max-width: 100%;"></textarea>
 
   </div>
-  <button id="previewBtn" onclick="previewRepairHtml()" class="btn-full">
-    🎨 色分けプレビュー
-  </button>
 
 <div id="repairPreview" class="code-preview" style="display:none;"></div>
 
@@ -2079,6 +2069,8 @@ function buildNormalToolsHtml() {
 <button class="float-list-btn" onclick="recheckOutput()">🔍 再チェック</button>
 <button class="float-list-btn" onclick="diagnoseHtml()">🩺 HTML診断</button>
 <button class="float-list-btn" onclick="compareBackupSummary()">📊 バックアップ差分確認</button>
+<button class="float-list-btn"
+  onclick="previewRepairHtml()">🎨 色分けプレビュー</button>
 <button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
 <hr>
 <button class="float-list-btn" onclick="exportTemplates()">📤 テンプレ保存</button>
@@ -2093,6 +2085,13 @@ function buildNormalToolsHtml() {
 
 function buildRepairToolsHtml() {
   return `
+<button class="float-list-btn"
+  onclick="loadRepairHtml()">📖 HTML読込</button>
+<button class="float-list-btn"
+  onclick="saveRepairHtml()">💾 修正版保存</button>
+<button class="float-list-btn"
+  onclick="copyRepairHtml()">📋 HTMLコピー</button>
+<hr>
 <button class="float-list-btn" onclick="diagnoseRepairHtml()">🩺 編集内容診断</button>
 <button class="float-list-btn" onclick="selectFunctionBlock()">📦 関数選択</button>
 <button class="float-list-btn" onclick="replaceFunctionBlock()">✏ 関数置換</button>
