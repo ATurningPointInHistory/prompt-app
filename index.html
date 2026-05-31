@@ -629,6 +629,17 @@ body:not(.dark) #floatPanel{
   overflow-x: auto;
 }
 
+.line-number{
+  padding:0 6px;
+}
+
+.line-number.active{
+  background:#2d7dff;
+  color:#fff;
+  font-weight:bold;
+  border-radius:4px;
+}
+
 .code-tag { color: #7ee787; }
 .code-attr { color: #79c0ff; }
 .code-string { color: #a5d6ff; }
@@ -4364,16 +4375,51 @@ function enableRepairEditorTabIndent() {
 }
 
 function updateLineNumbers() {
-  const editor = get("repairEditor");
-  const lineBox = get("lineNumbers");
+
+  const editor =
+    get("repairEditor");
+
+  const lineBox =
+    get("lineNumbers");
+
   if (!editor || !lineBox) return;
+
+  const currentLine =
+    editor.value
+      .slice(
+        0,
+        editor.selectionStart
+      )
+      .split("\n")
+      .length;
+
   const count =
-    editor.value.split("\n").length || 1;
+    editor.value
+      .split("\n")
+      .length || 1;
+
   lineBox.innerHTML =
     Array.from(
       { length: count },
-      (_, i) => i + 1
-    ).join("<br>");
+      (_, i) => {
+
+        const lineNo =
+          i + 1;
+
+        return `
+<div class="
+line-number
+${
+lineNo===currentLine
+? "active"
+: ""
+}
+">
+${lineNo}
+</div>
+`;
+      })
+      .join("");
 }
 
 function updateRepairStatus(text) {
@@ -4473,6 +4519,7 @@ function updateCursorPosition() {
     before.lastIndexOf("\n");
   box.innerText =
     `Ln ${line} / Col ${col}`;
+  updateLineNumbers();
 }
 
 function toggleRepairAutoSave() {
@@ -5106,60 +5153,52 @@ function replaceAllRepairText() {
    Backup / Health / Safe Mode
 =============================== */
 
-function saveBackupHistory(backupData) {
-  const list = loadJson("backupHistory", []);
-  list.unshift({
-    version: backupData.version,
-    created_at: backupData.created_at,
-    backup_note: backupData.backup_note || "",
-    validation: backupData.validation || null,
-    html: backupData.html,
-    localStorageData: backupData.localStorageData
-  });
-  localStorage.setItem(
-    "backupHistory",
-    JSON.stringify(list.slice(0, 10))
+/* ===============================
+   Health Check
+=============================== */
+
+function calcHealthScore(validation, undefinedFns, dupFuncs) {
+  return Math.max(
+    0,
+    100
+    - (validation.div_ok ? 0 : 20)
+    - (validation.js_ok ? 0 : 25)
+    - (validation.duplicate_ids.length * 5)
+    - (undefinedFns.length * 10)
+    - (dupFuncs.length * 10)
   );
 }
 
-function showBackupHistory() {
-  const list = loadJson("backupHistory", []);
-  if (list.length === 0) {
-    alert("バックアップ履歴はありません");
-    return;
-  }
-  openFloatPanel(
-    "バックアップ履歴",
-    list.map((b, i) => `
-      <button
-        class="float-list-btn"
-        onclick="restoreBackupHistory(${i})">
-        ${i + 1}. ${b.version} / ${b.backup_note || "メモなし"}
-      </button>
-    `).join("")
-  );
-}
-
-function restoreBackupHistory(index) {
-  const list = loadJson("backupHistory", []);
-  const item = list[index];
-  if (!item) {
-    alert("履歴が見つかりません");
-    return;
-  }
-  const ok = confirm("このバックアップ履歴を復元しますか？");
-  if (!ok) return;
-  Object.entries(item.localStorageData || {}).forEach(([key, value]) => {
-    if (value === null || value === undefined) {
-      localStorage.removeItem(key);
-    } else if (typeof value === "string") {
-      localStorage.setItem(key, value);
-    } else {
-      localStorage.setItem(key, JSON.stringify(value));
-    }
-  });
-  alert("履歴から復元しました。再読み込みします。");
-  location.reload();
+function getHtmlSummary(html) {
+  const funcs = extractFunctionNames(html);
+  const ids = extractIds(html);
+  const validation = validateBackupHtml(html);
+  const dupFuncs =
+    [...new Set(
+      funcs.filter((f, i) => funcs.indexOf(f) !== i)
+    )];
+  const onclicks =
+    [...String(html || "").matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )].map(x => x[1]);
+  const undefinedFns =
+    [...new Set(
+      onclicks.filter(fn => !funcs.includes(fn))
+    )];
+  const score =
+    calcHealthScore(
+      validation,
+      undefinedFns,
+      dupFuncs
+    );
+  return {
+    funcs,
+    ids,
+    validation,
+    dupFuncs,
+    undefinedFns,
+    score
+  };
 }
 
 function showHtmlHealth() {
@@ -5302,6 +5341,46 @@ function diagnoseHtml() {
   box.innerText = report.join("\n");
 }
 
+
+function copyHealthResult() {
+  const text =
+    window.latestHealthResult || "";
+  if (!text) {
+    alert("コピー内容なし");
+    return;
+  }
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(()=>
+        alert("コピー完了")
+      )
+      .catch(()=>{
+        const ok =
+          copyTextFallback(text);
+        alert(
+          ok
+          ? "コピー完了"
+          : "コピー失敗"
+        );
+      });
+    return;
+  }
+  const ok =
+    copyTextFallback(text);
+  alert(
+    ok
+    ? "コピー完了"
+    : "コピー失敗"
+  );
+}
+
+/* ===============================
+   Backup Core
+=============================== */
 
 function getCleanProgramHtml() {
   const clone =
@@ -5462,6 +5541,82 @@ function validateBackupHtml(html) {
   };
 }
 
+function preSaveCheck(html) {
+
+  const source =
+    html ||
+    (
+      isRepairMode() &&
+      get("repairEditor") &&
+      get("repairEditor").value.trim()
+    )
+      ? get("repairEditor").value
+      : "<!DOCTYPE html>\n" +
+        document.documentElement.outerHTML;
+
+  const summary =
+    getHtmlSummary(source);
+
+  const warnings = [];
+
+  if (!summary.validation.div_ok) {
+    warnings.push(
+      "div整合性NG"
+    );
+  }
+
+  if (!summary.validation.js_ok) {
+    warnings.push(
+      "JS構文エラー"
+    );
+  }
+
+  if (
+    summary.validation
+      .duplicate_ids.length
+  ) {
+    warnings.push(
+      "id重複"
+    );
+  }
+
+  if (
+    summary.dupFuncs.length
+  ) {
+    warnings.push(
+      "function重複"
+    );
+  }
+
+  if (
+    summary.undefinedFns.length
+  ) {
+    warnings.push(
+      "未定義onclick"
+    );
+  }
+
+  if (
+    summary.score < 80
+  ) {
+    warnings.push(
+      `Health Score低下 (${summary.score}/100)`
+    );
+  }
+
+  if (
+    warnings.length === 0
+  ) {
+    return true;
+  }
+
+  return confirm(
+    "保存前チェック警告\n\n" +
+    warnings.join("\n") +
+    "\n\n続行しますか？"
+  );
+}
+
 function backupProgram() {
   saveCurrentState();
 
@@ -5541,12 +5696,84 @@ function backupProgram() {
   );
 }
 
-function manageBackupHistory() {
-  const list = loadJson("backupHistory", []);
-  localStorage.setItem(
-    "backupHistory",
-    JSON.stringify(list.slice(0, 10))
-  );
+function saveProgramHtml() {
+  const html =
+    getCleanProgramHtml();
+
+  if (!preSaveCheck(html)) {
+    return;
+  }
+
+  const blob =
+    new Blob(
+      [html],
+      { type: "text/html" }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-");
+
+  a.download =
+    `AIPro_${APP_VERSION}_${timestamp}.html`;
+
+  a.click();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
+
+  alert("本体HTMLを保存しました");
+}
+
+function restoreProgramBackup() {
+  const input =
+    document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!data || !data.localStorageData) {
+          alert("フルバックアップ形式ではありません");
+          return;
+        }
+        const info =
+          "バックアップ情報\n\n" +
+          "version: " + (data.app_version || data.version || "不明") + "\n" +
+          "created_at: " + (data.created_at || "不明") + "\n" +
+          "note: " + (data.backup_note || "なし") + "\n\n" +
+          "復元方法を選んでください。\n\n" +
+          "OK：設定のみ復元\n" +
+          "キャンセル：中止\n\n" +
+          "※HTML本体は修復モードで読み込んで保存してください。";
+        const ok = confirm(info);
+        if (!ok) return;
+        restoreLocalStorageOnly(data.localStorageData);
+
+        alert("設定のみ復元完了。再読み込みします。");
+        location.reload();
+      } catch (err) {
+        alert(
+          "フル復元に失敗しました\n\n" +
+          err.message
+        );
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
 
 function restoreLocalStorageOnly(localStorageData) {
@@ -5567,146 +5794,77 @@ function restoreLocalStorageOnly(localStorageData) {
     });
 }
 
-function extractFunctionNames(html) {
-  return [
-    ...String(html || "").matchAll(
-      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
-    )
-  ].map(m => m[1]);
-}
+/* ===============================
+   Backup History
+=============================== */
 
-function extractIds(html) {
-  const parser = new DOMParser();
-  const doc =
-    parser.parseFromString(
-      String(html || ""),
-      "text/html"
-    );
-
-  return [...doc.querySelectorAll("[id]")]
-    .map(el => el.id)
-    .filter(Boolean);
-}
-
-function calcHealthScore(validation, undefinedFns, dupFuncs) {
-  return Math.max(
-    0,
-    100
-    - (validation.div_ok ? 0 : 20)
-    - (validation.js_ok ? 0 : 25)
-    - (validation.duplicate_ids.length * 5)
-    - (undefinedFns.length * 10)
-    - (dupFuncs.length * 10)
+function saveBackupHistory(backupData) {
+  const list = loadJson("backupHistory", []);
+  list.unshift({
+    version: backupData.version,
+    created_at: backupData.created_at,
+    backup_note: backupData.backup_note || "",
+    validation: backupData.validation || null,
+    html: backupData.html,
+    localStorageData: backupData.localStorageData
+  });
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list.slice(0, 10))
   );
 }
 
-function getHtmlSummary(html) {
-  const funcs = extractFunctionNames(html);
-  const ids = extractIds(html);
-  const validation = validateBackupHtml(html);
-  const dupFuncs =
-    [...new Set(
-      funcs.filter((f, i) => funcs.indexOf(f) !== i)
-    )];
-  const onclicks =
-    [...String(html || "").matchAll(
-      /onclick="([a-zA-Z0-9_$]+)\(/g
-    )].map(x => x[1]);
-  const undefinedFns =
-    [...new Set(
-      onclicks.filter(fn => !funcs.includes(fn))
-    )];
-  const score =
-    calcHealthScore(
-      validation,
-      undefinedFns,
-      dupFuncs
-    );
-  return {
-    funcs,
-    ids,
-    validation,
-    dupFuncs,
-    undefinedFns,
-    score
-  };
-}
-
-function preSaveCheck(html) {
-
-  const source =
-    html ||
-    (
-      isRepairMode() &&
-      get("repairEditor") &&
-      get("repairEditor").value.trim()
-    )
-      ? get("repairEditor").value
-      : "<!DOCTYPE html>\n" +
-        document.documentElement.outerHTML;
-
-  const summary =
-    getHtmlSummary(source);
-
-  const warnings = [];
-
-  if (!summary.validation.div_ok) {
-    warnings.push(
-      "div整合性NG"
-    );
+function showBackupHistory() {
+  const list = loadJson("backupHistory", []);
+  if (list.length === 0) {
+    alert("バックアップ履歴はありません");
+    return;
   }
-
-  if (!summary.validation.js_ok) {
-    warnings.push(
-      "JS構文エラー"
-    );
-  }
-
-  if (
-    summary.validation
-      .duplicate_ids.length
-  ) {
-    warnings.push(
-      "id重複"
-    );
-  }
-
-  if (
-    summary.dupFuncs.length
-  ) {
-    warnings.push(
-      "function重複"
-    );
-  }
-
-  if (
-    summary.undefinedFns.length
-  ) {
-    warnings.push(
-      "未定義onclick"
-    );
-  }
-
-  if (
-    summary.score < 80
-  ) {
-    warnings.push(
-      `Health Score低下 (${summary.score}/100)`
-    );
-  }
-
-  if (
-    warnings.length === 0
-  ) {
-    return true;
-  }
-
-  return confirm(
-    "保存前チェック警告\n\n" +
-    warnings.join("\n") +
-    "\n\n続行しますか？"
+  openFloatPanel(
+    "バックアップ履歴",
+    list.map((b, i) => `
+      <button
+        class="float-list-btn"
+        onclick="restoreBackupHistory(${i})">
+        ${i + 1}. ${b.version} / ${b.backup_note || "メモなし"}
+      </button>
+    `).join("")
   );
 }
+
+function restoreBackupHistory(index) {
+  const list = loadJson("backupHistory", []);
+  const item = list[index];
+  if (!item) {
+    alert("履歴が見つかりません");
+    return;
+  }
+  const ok = confirm("このバックアップ履歴を復元しますか？");
+  if (!ok) return;
+  Object.entries(item.localStorageData || {}).forEach(([key, value]) => {
+    if (value === null || value === undefined) {
+      localStorage.removeItem(key);
+    } else if (typeof value === "string") {
+      localStorage.setItem(key, value);
+    } else {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  });
+  alert("履歴から復元しました。再読み込みします。");
+  location.reload();
+}
+
+function manageBackupHistory() {
+  const list = loadJson("backupHistory", []);
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list.slice(0, 10))
+  );
+}
+
+/* ===============================
+   Backup Compare / Diff
+=============================== */
 
 function compareBackupSummary() {
   const input =
@@ -5812,6 +5970,7 @@ function showDiffResult(text) {
   );
   window.latestDiffResult = text;
 }
+
 function copyDiffResult() {
   const text =
     window.latestDiffResult || "";
@@ -5853,126 +6012,40 @@ function copyDiffResult() {
       : "コピー失敗"
   );
 }
+
 function clearDiffResult() {
   window.latestDiffResult = "";
   closeFloatPanel();
 }
 
-function copyHealthResult() {
-  const text =
-    window.latestHealthResult || "";
-  if (!text) {
-    alert("コピー内容なし");
-    return;
-  }
-  if (
-    navigator.clipboard &&
-    window.isSecureContext
-  ) {
-    navigator.clipboard
-      .writeText(text)
-      .then(()=>
-        alert("コピー完了")
-      )
-      .catch(()=>{
-        const ok =
-          copyTextFallback(text);
-        alert(
-          ok
-          ? "コピー完了"
-          : "コピー失敗"
-        );
-      });
-    return;
-  }
-  const ok =
-    copyTextFallback(text);
-  alert(
-    ok
-    ? "コピー完了"
-    : "コピー失敗"
-  );
+/* ===============================
+   Backup Helpers
+=============================== */
+
+function extractFunctionNames(html) {
+  return [
+    ...String(html || "").matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )
+  ].map(m => m[1]);
 }
 
-function restoreProgramBackup() {
-  const input =
-    document.createElement("input");
-  input.type = "file";
-  input.accept = ".json,application/json";
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(reader.result);
-        if (!data || !data.localStorageData) {
-          alert("フルバックアップ形式ではありません");
-          return;
-        }
-        const info =
-          "バックアップ情報\n\n" +
-          "version: " + (data.app_version || data.version || "不明") + "\n" +
-          "created_at: " + (data.created_at || "不明") + "\n" +
-          "note: " + (data.backup_note || "なし") + "\n\n" +
-          "復元方法を選んでください。\n\n" +
-          "OK：設定のみ復元\n" +
-          "キャンセル：中止\n\n" +
-          "※HTML本体は修復モードで読み込んで保存してください。";
-        const ok = confirm(info);
-        if (!ok) return;
-        restoreLocalStorageOnly(data.localStorageData);
-
-        alert("設定のみ復元完了。再読み込みします。");
-        location.reload();
-      } catch (err) {
-        alert(
-          "フル復元に失敗しました\n\n" +
-          err.message
-        );
-      }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
-function saveProgramHtml() {
-  const html =
-    getCleanProgramHtml();
-
-  if (!preSaveCheck(html)) {
-    return;
-  }
-
-  const blob =
-    new Blob(
-      [html],
-      { type: "text/html" }
+function extractIds(html) {
+  const parser = new DOMParser();
+  const doc =
+    parser.parseFromString(
+      String(html || ""),
+      "text/html"
     );
 
-  const a =
-    document.createElement("a");
-
-  a.href =
-    URL.createObjectURL(blob);
-
-  const timestamp =
-    new Date()
-      .toISOString()
-      .replace(/[:.]/g, "-");
-
-  a.download =
-    `AIPro_${APP_VERSION}_${timestamp}.html`;
-
-  a.click();
-
-  setTimeout(() => {
-    URL.revokeObjectURL(a.href);
-  }, 1000);
-
-  alert("本体HTMLを保存しました");
+  return [...doc.querySelectorAll("[id]")]
+    .map(el => el.id)
+    .filter(Boolean);
 }
+
+/* ===============================
+   Safe Mode
+=============================== */
 
 function checkSafeMode() {
   const crash =
@@ -6071,6 +6144,10 @@ ${info.time || "unknown"}`;
    Init / Event
 =============================== */
 
+/* ===============================
+   Error Handler
+=============================== */
+
 window.onerror = function(
   message,
   source,
@@ -6104,7 +6181,9 @@ column:
 ${col}`;
 };
 
-/* ===== Repair Editor Init ===== */
+/* ===============================
+   Repair IDE Init
+=============================== */
 
 function initRepairIde() {
   const editor = get("repairEditor");
@@ -6161,13 +6240,14 @@ function initRepairIde() {
   enableRepairEditorTabIndent();
 }
 
-/* ===== App Events ===== */
+/* ===============================
+   App Events
+=============================== */
 
 document.addEventListener("DOMContentLoaded", initRepairIde);
 document.addEventListener("DOMContentLoaded", loadSettings);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
-
 </script>
 
 
