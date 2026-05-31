@@ -866,7 +866,7 @@ body:not(.dark) #floatPanel{
 
 </div>
 
-<div id="repairStatus" class="small" style="margin-top:8px;">状態：自動保存データ復元</div>
+<div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave ON</div>
 
   <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
 
@@ -2041,13 +2041,77 @@ function resetRepairEditorView() {
   editor.style.maxWidth = "100%";
 }
 
-
-
 /* ===============================
    FILE: 03_data.js
    Template / Preset / Danger
 =============================== */
 
+get("fileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      if (!Array.isArray(parsed)) {
+        alert("テンプレファイルの形式が正しくありません");
+        return;
+      }
+      localStorage.setItem("templates", JSON.stringify(parsed));
+      renderTemplates();
+      renderTemplateSelect();
+      alert("復元完了");
+    } catch {
+      alert("読み込みに失敗しました");
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+get("aiPresetFileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        alert("AIプリセットファイルの形式が正しくありません");
+        return;
+      }
+      const validKeys = ["chatgpt", "claude", "gemini", "cursor", "copilot"];
+
+      for (const key of Object.keys(parsed)) {
+        if (!validKeys.includes(key)) {
+          alert(`不明なAI設定が含まれています: ${key}`);
+          return;
+        }
+        if (
+          !parsed[key] ||
+          typeof parsed[key].name !== "string" ||
+          typeof parsed[key].instruction !== "string"
+        ) {
+          alert(`AI設定の形式が正しくありません: ${key}`);
+          return;
+        }
+      }
+      saveAiPresets(parsed);
+      if (get("ai-preset-manager").style.display !== "none") {
+        loadAiPresetToEditor();
+      }
+      alert("AIプリセットを復元しました");
+    } catch (e) {
+      alert("AIプリセットの読み込みに失敗しました\n\n" + e.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+/* ===============================
+   Manager Toggle
+=============================== */
 function toggleTemplateManager() {
   const isOpen = get("template-manager").style.display !== "none";
   closeAllManagers();
@@ -2090,6 +2154,10 @@ function toggleAiPresetManager() {
   updatePanelButtonStates();
 }
 
+/* ===============================
+   AI Preset Management
+=============================== */
+
 function loadAiPresetToEditor() {
   const target = get("aiPresetTarget").value;
   const preset = getAiPreset(target);
@@ -2122,6 +2190,11 @@ function resetAiPreset() {
   loadAiPresetToEditor();
   alert("初期値に戻しました");
 }
+
+
+/* ===============================
+   Danger Word Management
+=============================== */
 
 function saveDangerWord() {
   const word = get("dangerWord").value.trim();
@@ -2168,6 +2241,10 @@ function getAllDangerWords() {
   const local = loadJson("dangerWords", []);
   return [...defaultDangerWords, ...local];
 }
+
+/* ===============================
+   Danger Pattern Management
+=============================== */
 
 function savePattern() {
   const name = get("patternName").value.trim();
@@ -2223,6 +2300,10 @@ function getAllPatterns() {
   const local = loadJson("dangerPatterns", []);
   return [...defaultPatterns, ...local];
 }
+
+/* ===============================
+   Sensitive Content Check
+=============================== */
 
 function detectSensitiveContent(text) {
   const source = String(text || "");
@@ -2300,6 +2381,10 @@ function hideWarning() {
   get("warningBox").style.display = "none";
   get("warningBox").innerText = "";
 }
+
+/* ===============================
+   State Save / Load
+=============================== */
 
 function saveCurrentState() {
 
@@ -2381,6 +2466,10 @@ escapeHtml(x)).join("<br>");
   isLoading = false;
 }
 
+/* ===============================
+   History Management
+=============================== */
+
 function saveHistory(text) {
   let h = loadJson("h", []);
   h.unshift(text);
@@ -2420,6 +2509,10 @@ function clearHistory() {
   localStorage.removeItem("h");
   renderHistory();
 }
+
+/* ===============================
+   Template Management
+=============================== */
 
 function saveTemplate() {
   const name = get("tempName").value.trim();
@@ -2815,12 +2908,177 @@ console.table(CHANGELOG);
    Repair IDE
 =============================== */
 
+/* ===============================
+   Repair State
+=============================== */
+
 let repairUndoStack = [];
 let repairRedoStack = [];
 let repairLastValue = "";
 let repairAutoSaveEnabled = false;
-let repairSearchIndex = 0;
-let repairSearchMatches = [];
+
+let functionSortList = [];
+let functionSortFilter = "all";
+let dragSortIndex = null;
+
+/* ===============================
+   Repair File I/O
+=============================== */
+
+function loadRepairHtml() {
+  const input =
+    document.createElement("input");
+
+  input.type = "file";
+  input.accept =
+    ".html,.json,text/html,application/json";
+
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      try {
+        const parsed =
+          JSON.parse(reader.result);
+
+        if (parsed.html) {
+          const editor =
+            get("repairEditor");
+
+          editor.value = parsed.html;
+          editor.scrollLeft = 0;
+
+          repairLastValue = editor.value;
+
+          updateLineNumbers();
+          updateCursorPosition();
+          updateRepairStatus("フルバックアップJSON読込");
+
+          alert("フルバックアップJSON読込完了");
+          return;
+        }
+      } catch {}
+
+      const editor =
+        get("repairEditor");
+
+      editor.value = reader.result;
+      editor.scrollLeft = 0;
+
+      repairLastValue = editor.value;
+
+      updateLineNumbers();
+      updateCursorPosition();
+      updateRepairStatus("HTML読込");
+
+      alert("HTML読込完了");
+    };
+
+    reader.readAsText(file);
+  };
+
+  input.click();
+}
+
+function saveRepairHtml() {
+  const editor =
+    get("repairEditor");
+
+  const html =
+    editor.value.trim();
+
+  if (!html) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  const blob =
+    new Blob(
+      [html],
+      { type: "text/html" }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-");
+
+  a.download =
+    `AIPro_Repaired_${timestamp}.html`;
+
+  a.click();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
+
+  repairLastValue =
+    editor.value;
+
+  updateRepairStatus(
+    "修正版保存完了"
+  );
+
+  alert("修正版保存完了");
+}
+
+async function copyRepairHtml() {
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const html =
+    editor.value.trim();
+
+  if (!html) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  try {
+    if (
+      navigator.clipboard &&
+      window.isSecureContext
+    ) {
+      await navigator.clipboard.writeText(html);
+      alert("HTMLコピー完了");
+      return;
+    }
+
+    const ok =
+      copyTextFallback(html);
+
+    alert(
+      ok
+        ? "HTMLコピー完了"
+        : "コピー失敗"
+    );
+
+  } catch (e) {
+    const ok =
+      copyTextFallback(html);
+
+    alert(
+      ok
+        ? "HTMLコピー完了"
+        : "コピー失敗"
+    );
+  }
+}
+
+/* ===============================
+   Repair Cleanup Tools
+=============================== */
 
 function cleanupCandidates() {
   const editor = get("repairEditor");
@@ -3001,6 +3259,78 @@ function deleteCommentedCleanupBlocks() {
   );
 }
 
+/* ===============================
+   Code Block / Function Tools
+=============================== */
+
+function findFunctionBlock(functionName){
+  const editor=get("repairEditor");
+  const text=editor.value;
+  const start=
+    text.indexOf(
+      `function ${functionName}`
+    );
+  if(start===-1){
+    alert("関数が見つかりません");
+    return null;
+  }
+  const braceStart=
+    text.indexOf("{",start);
+  let depth=1;
+  let end=braceStart+1;
+  while(
+    end<text.length &&
+    depth>0
+  ){
+    if(text[end]==="{") depth++;
+    if(text[end]==="}") depth--;
+    end++;
+  }
+  return{
+    start,
+    end,
+    block:text.slice(start,end)
+  };
+}
+
+function selectFunctionBlock(){
+  const name=
+    prompt("関数名");
+  if(!name)return;
+  const result=
+    findFunctionBlock(name);
+  if(!result)return;
+  const editor=
+    get("repairEditor");
+  editor.focus();
+  editor.setSelectionRange(
+    result.start,
+    result.end
+  );
+}
+
+function replaceFunctionBlock(){
+  const name=
+    prompt("置換する関数名");
+  if(!name)return;
+  const result=
+    findFunctionBlock(name);
+  if(!result)return;
+  const newCode=
+    prompt(
+      "新コード",
+      result.block
+    );
+  if(newCode===null)return;
+  const editor=
+    get("repairEditor");
+  editor.value=
+    editor.value.slice(0,result.start)+
+    newCode+
+    editor.value.slice(result.end);
+  alert("置換完了");
+}
+
 function findFunctionBlockInText(text, functionName) {
   const start =
     text.indexOf(`function ${functionName}`);
@@ -3020,6 +3350,382 @@ function findFunctionBlockInText(text, functionName) {
     end,
     block: text.slice(start, end)
   };
+}
+
+
+function extractFunctionBlocksFromText(text) {
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  const regex =
+    /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm;
+
+  let match;
+
+  while ((match = regex.exec(source)) !== null) {
+    const name =
+      match[1];
+
+    const start =
+      match.index;
+
+    const braceStart =
+      source.indexOf("{", start);
+
+    if (braceStart === -1) continue;
+
+    let depth = 1;
+    let end = braceStart + 1;
+
+    while (
+      end < source.length &&
+      depth > 0
+    ) {
+      if (source[end] === "{") depth++;
+      if (source[end] === "}") depth--;
+      end++;
+    }
+
+    blocks.push({
+      type: "function",
+      name,
+      start,
+      end,
+      block:
+        source.slice(start, end)
+    });
+  }
+
+  return blocks;
+}
+
+function extractCodeBlocksFromText(text) {
+
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  const functionBlocks =
+    extractFunctionBlocksFromText(source);
+
+  // section comment: 複数行見出し
+  const sectionRegex =
+    /\/\*\s*=+\s*\n([\s\S]*?)\n\s*=+\s*\*\//g;
+
+  [...source.matchAll(sectionRegex)]
+    .forEach(match => {
+
+      blocks.push({
+        type: "section",
+        name:
+          match[1]
+            .split("\n")
+            .map(x => x.trim())
+            .filter(Boolean)[0] ||
+          "Section",
+        start: match.index,
+        end:
+          match.index +
+          match[0].length,
+        block: match[0]
+      });
+
+    });
+
+  // top-level let const var only
+  const variableRegex =
+    /^(let|const|var)\s+([a-zA-Z0-9_$]+)/gm;
+
+  [...source.matchAll(variableRegex)]
+    .forEach(match => {
+
+      const start =
+        match.index;
+
+      const insideFunction =
+        functionBlocks.some(fn =>
+          start > fn.start &&
+          start < fn.end
+        );
+
+      if (insideFunction) {
+        return;
+      }
+
+      const name =
+        match[2];
+
+      let end =
+        source.indexOf(
+          ";",
+          start
+        );
+
+      if (end === -1) {
+        end =
+          source.indexOf(
+            "\n",
+            start
+          );
+      }
+
+      if (end === -1) {
+        end =
+          source.length;
+      }
+
+      blocks.push({
+        type: "variable",
+        name,
+        start,
+        end: end + 1,
+        block:
+          source.slice(
+            start,
+            end + 1
+          )
+      });
+
+    });
+
+  functionBlocks.forEach(item => {
+
+    blocks.push({
+      type: "function",
+      ...item
+    });
+
+  });
+
+  return blocks.sort(
+    (a,b)=>
+    a.start-b.start
+  );
+}
+
+/* ===============================
+   Code Block List / Move
+=============================== */
+
+function showFunctionList() {
+
+  const editor =
+    get("repairEditor");
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  console.log(
+    "editor total:",
+    text.split(/\r?\n/).length
+  );
+
+  console.log(
+    "has CR:",
+    text.includes("\r")
+  );
+
+  const blocks =
+    extractCodeBlocksFromText(
+      text
+    );
+
+  let html = "";
+
+  if (blocks.length === 0) {
+
+    html = "コードブロックなし";
+
+  } else {
+
+    html =
+      blocks.map((item, i) => {
+
+        const line =
+          text
+            .slice(
+              0,
+              item.start
+            )
+            .split(/\r?\n/)
+            .length;
+
+        console.log(
+          `[${item.type}] ${item.name} / L${line}`
+        );
+
+        const moveButton =
+          item.type === "function"
+            ? `
+<div class="float-panel-actions">
+  <button
+    onclick="
+      moveFunctionPrompt(
+        '${item.name}'
+      )
+    ">
+    📦 Move
+  </button>
+</div>
+`
+            : "";
+
+return `
+
+<div class="function-list-row">
+
+  <button
+    class="
+      float-list-btn
+      function-list-select
+    "
+    onclick="
+      selectCodeBlockByIndex(${i});
+      closeFloatPanelKeepEditorSelection();
+    ">
+
+    [${item.type}]
+    ${i + 1}.
+    ${escapeHtml(item.name)}
+    / L${line}
+
+  </button>
+
+  ${moveButton}
+
+</div>
+`;
+
+      }).join("");
+  }
+
+  openFloatPanel(
+    `コードブロック一覧 (${blocks.length})`,
+    `
+    <div class="float-panel-actions">
+      <button onclick="copyCodeBlockList()">
+        📋 一覧コピー
+      </button>
+    </div>
+    ` + html
+  );
+}
+
+function buildCodeBlockListText() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return "";
+
+  const text =
+    editor.value;
+
+  const blocks =
+    extractCodeBlocksFromText(text);
+
+  return blocks.map((item, i) => {
+
+    const line =
+      text
+        .slice(0, item.start)
+        .split("\n")
+        .length;
+
+    return `[${item.type}] ${i + 1}. ${item.name} / L${line}`;
+
+  }).join("\n");
+}
+
+function copyCodeBlockList() {
+
+  const text =
+    buildCodeBlockListText();
+
+  if (!text) {
+    alert("コピーする一覧がありません");
+    return;
+  }
+
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =>
+        alert("コードブロック一覧をコピーしました")
+      )
+      .catch(() => {
+        const ok =
+          copyTextFallback(text);
+
+        alert(
+          ok
+            ? "コードブロック一覧をコピーしました"
+            : "コピー失敗"
+        );
+      });
+
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "コードブロック一覧をコピーしました"
+      : "コピー失敗"
+  );
+}
+
+function moveFunctionPrompt(functionName) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const sections =
+    extractCodeBlocksFromText(editor.value)
+      .filter(item =>
+        item.type === "section"
+      );
+
+  if (sections.length === 0) {
+    alert("移動先セクションが見つかりません");
+    return;
+  }
+
+  const html =
+    sections.map(item => {
+      return `
+<button
+  class="float-list-btn"
+  onclick="
+    moveFunctionToSectionByStart(
+      '${functionName}',
+      ${item.start}
+    );
+  ">
+  ${escapeHtml(item.name)}
+</button>
+`;
+    }).join("");
+
+  openFloatPanel(
+    `移動先を選択：${functionName}`,
+    html
+  );
 }
 
 function moveFunctionToSection(
@@ -3207,794 +3913,9 @@ function moveFunctionToSectionByStart(
   alert("移動完了");
 }
 
-
-function extractFunctionBlocksFromText(text) {
-  const source =
-    String(text || "");
-
-  const blocks = [];
-
-  const regex =
-    /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm;
-
-  let match;
-
-  while ((match = regex.exec(source)) !== null) {
-    const name =
-      match[1];
-
-    const start =
-      match.index;
-
-    const braceStart =
-      source.indexOf("{", start);
-
-    if (braceStart === -1) continue;
-
-    let depth = 1;
-    let end = braceStart + 1;
-
-    while (
-      end < source.length &&
-      depth > 0
-    ) {
-      if (source[end] === "{") depth++;
-      if (source[end] === "}") depth--;
-      end++;
-    }
-
-    blocks.push({
-      type: "function",
-      name,
-      start,
-      end,
-      block:
-        source.slice(start, end)
-    });
-  }
-
-  return blocks;
-}
-
-function extractCodeBlocksFromText(text) {
-
-  const source =
-    String(text || "");
-
-  const blocks = [];
-
-  const functionBlocks =
-    extractFunctionBlocksFromText(source);
-
-  // section comment: 複数行見出し
-  const sectionRegex =
-    /\/\*\s*=+\s*\n([\s\S]*?)\n\s*=+\s*\*\//g;
-
-  [...source.matchAll(sectionRegex)]
-    .forEach(match => {
-
-      blocks.push({
-        type: "section",
-        name:
-          match[1]
-            .split("\n")
-            .map(x => x.trim())
-            .filter(Boolean)[0] ||
-          "Section",
-        start: match.index,
-        end:
-          match.index +
-          match[0].length,
-        block: match[0]
-      });
-
-    });
-
-  // top-level let const var only
-  const variableRegex =
-    /^(let|const|var)\s+([a-zA-Z0-9_$]+)/gm;
-
-  [...source.matchAll(variableRegex)]
-    .forEach(match => {
-
-      const start =
-        match.index;
-
-      const insideFunction =
-        functionBlocks.some(fn =>
-          start > fn.start &&
-          start < fn.end
-        );
-
-      if (insideFunction) {
-        return;
-      }
-
-      const name =
-        match[2];
-
-      let end =
-        source.indexOf(
-          ";",
-          start
-        );
-
-      if (end === -1) {
-        end =
-          source.indexOf(
-            "\n",
-            start
-          );
-      }
-
-      if (end === -1) {
-        end =
-          source.length;
-      }
-
-      blocks.push({
-        type: "variable",
-        name,
-        start,
-        end: end + 1,
-        block:
-          source.slice(
-            start,
-            end + 1
-          )
-      });
-
-    });
-
-  functionBlocks.forEach(item => {
-
-    blocks.push({
-      type: "function",
-      ...item
-    });
-
-  });
-
-  return blocks.sort(
-    (a,b)=>
-    a.start-b.start
-  );
-}
-
-function applyRepairIndent(isOutdent) {
-  const editor = get("repairEditor");
-  if (!editor) return;
-  const value = editor.value;
-  const start = editor.selectionStart;
-  const end = editor.selectionEnd;
-  const indent = "  ";
-  repairUndoStack.push(value);
-  repairRedoStack = [];
-  // 単一カーソルでTabの場合
-  if (start === end && !isOutdent) {
-    editor.value =
-      value.slice(0, start) +
-      indent +
-      value.slice(end);
-    const pos = start + indent.length;
-    editor.selectionStart = pos;
-    editor.selectionEnd = pos;
-  } else {
-    const lineStart =
-      value.lastIndexOf("\n", start - 1) + 1;
-    const before = value.slice(0, lineStart);
-    const target = value.slice(lineStart, end);
-    const after = value.slice(end);
-    const lines = target.split("\n");
-    const changed = isOutdent
-      ? lines.map(line => {
-          if (line.startsWith(indent)) return line.slice(indent.length);
-          if (line.startsWith(" ")) return line.slice(1);
-          return line;
-        }).join("\n")
-      : lines.map(line => indent + line).join("\n");
-    editor.value = before + changed + after;
-    const delta =
-      editor.value.length - value.length;
-    editor.selectionStart = start;
-    editor.selectionEnd = end + delta;
-  }
-  editor.focus();
-  repairLastValue = editor.value;
-  updateLineNumbers();
-  updateCursorPosition();
-  updateRepairStatus(isOutdent ? "アウトデント" : "インデント");
-  autoSaveRepairDraft();
-}
-
-function indentRepairSelection() {
-  applyRepairIndent(false);
-}
-
-function outdentRepairSelection() {
-  applyRepairIndent(true);
-}
-
-function enableRepairEditorTabIndent() {
-  const editor = get("repairEditor");
-  if (!editor) return;
-
-  editor.addEventListener("keydown", (e) => {
-    if (e.key !== "Tab") return;
-
-    e.preventDefault();
-
-    if (e.shiftKey) {
-      outdentRepairSelection();
-      return;
-    }
-
-    indentRepairSelection();
-  });
-}
-
-function updateLineNumbers() {
-  const editor = get("repairEditor");
-  const lineBox = get("lineNumbers");
-  if (!editor || !lineBox) return;
-  const count =
-    editor.value.split("\n").length || 1;
-  lineBox.innerHTML =
-    Array.from(
-      { length: count },
-      (_, i) => i + 1
-    ).join("<br>");
-}
-
-function updateRepairStatus(text) {
-  const box = get("repairStatus");
-  if (!box) return;
-  box.innerText = "状態：" + text;
-}
-
-function undoRepairEdit() {
-
-  const editor =
-    get("repairEditor");
-
-  if (
-    !editor ||
-    repairUndoStack.length===0
-  ) return;
-
-  repairRedoStack.push(
-    editor.value
-  );
-
-  editor.value =
-    repairUndoStack.pop();
-
-  repairLastValue =
-    editor.value;
-
-  updateLineNumbers();
-  updateCursorPosition();
-
-  autoSaveRepairDraft();
-
-  updateRepairStatus(
-    "Undo実行"
-  );
-}
-
-function redoRepairEdit() {
-
-  const editor =
-    get("repairEditor");
-
-  if (
-    !editor ||
-    repairRedoStack.length===0
-  ) return;
-
-  repairUndoStack.push(
-    editor.value
-  );
-
-  editor.value =
-    repairRedoStack.pop();
-
-  repairLastValue =
-    editor.value;
-
-  updateLineNumbers();
-  updateCursorPosition();
-
-  autoSaveRepairDraft();
-
-  updateRepairStatus(
-    "Redo実行"
-  );
-}
-
-function toggleRepairAutoSave() {
-  repairAutoSaveEnabled = !repairAutoSaveEnabled;
-  localStorage.setItem(
-    "repairAutoSaveEnabled",
-    repairAutoSaveEnabled ? "1" : "0"
-  );
-  updateRepairStatus(
-    repairAutoSaveEnabled ? "AutoSave ON" : "AutoSave OFF"
-  );
-}
-
-function autoSaveRepairDraft() {
-  if (!repairAutoSaveEnabled) return;
-  const editor = get("repairEditor");
-  if (!editor) return;
-  localStorage.setItem("repairDraftHtml", editor.value);
-  localStorage.setItem(
-    "repairDraftSavedAt",
-    new Date().toISOString()
-  );
-}
-
-function loadRepairDraft() {
-  repairAutoSaveEnabled =
-    localStorage.getItem("repairAutoSaveEnabled") === "1";
-
-  updateRepairStatus(
-    repairAutoSaveEnabled
-      ? "AutoSave ON"
-      : "AutoSave OFF"
-  );
-
-  const draft = localStorage.getItem("repairDraftHtml");
-  if (!draft) return;
-  const ok = confirm("修復モードの自動保存データを復元しますか？");
-  if (!ok) return;
-  get("repairEditor").value = draft;
-  repairLastValue = draft;
-  updateRepairStatus("自動保存データ復元");
-}
-
-function openReplacePanel() {
-  openFloatPanel(
-    "検索置換",
-    `
-    <input id="repairFindText" placeholder="検索文字">
-    <input id="repairReplaceText" placeholder="置換後文字">
-    <div class="float-panel-actions">
-      <button onclick="replaceRepairText()">置換</button>
-      <button onclick="replaceAllRepairText()">全置換</button>
-    </div>
-    `
-  );
-}
-
-function loadRepairHtml() {
-  const input =
-    document.createElement("input");
-
-  input.type = "file";
-  input.accept =
-    ".html,.json,text/html,application/json";
-
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      try {
-        const parsed =
-          JSON.parse(reader.result);
-
-        if (parsed.html) {
-          const editor =
-            get("repairEditor");
-
-          editor.value = parsed.html;
-          editor.scrollLeft = 0;
-
-          repairLastValue = editor.value;
-
-          updateLineNumbers();
-          updateCursorPosition();
-          updateRepairStatus("フルバックアップJSON読込");
-
-          alert("フルバックアップJSON読込完了");
-          return;
-        }
-      } catch {}
-
-      const editor =
-        get("repairEditor");
-
-      editor.value = reader.result;
-      editor.scrollLeft = 0;
-
-      repairLastValue = editor.value;
-
-      updateLineNumbers();
-      updateCursorPosition();
-      updateRepairStatus("HTML読込");
-
-      alert("HTML読込完了");
-    };
-
-    reader.readAsText(file);
-  };
-
-  input.click();
-}
-
-function saveRepairHtml() {
-  const editor =
-    get("repairEditor");
-
-  const html =
-    editor.value.trim();
-
-  if (!html) {
-    alert("HTMLが空です");
-    return;
-  }
-
-  const blob =
-    new Blob(
-      [html],
-      { type: "text/html" }
-    );
-
-  const a =
-    document.createElement("a");
-
-  a.href =
-    URL.createObjectURL(blob);
-
-  const timestamp =
-    new Date()
-      .toISOString()
-      .replace(/[:.]/g, "-");
-
-  a.download =
-    `AIPro_Repaired_${timestamp}.html`;
-
-  a.click();
-
-  setTimeout(() => {
-    URL.revokeObjectURL(a.href);
-  }, 1000);
-
-  repairLastValue =
-    editor.value;
-
-  updateRepairStatus(
-    "修正版保存完了"
-  );
-
-  alert("修正版保存完了");
-}
-
-async function copyRepairHtml() {
-  const editor =
-    get("repairEditor");
-
-  if (!editor) return;
-
-  const html =
-    editor.value.trim();
-
-  if (!html) {
-    alert("HTMLが空です");
-    return;
-  }
-
-  try {
-    if (
-      navigator.clipboard &&
-      window.isSecureContext
-    ) {
-      await navigator.clipboard.writeText(html);
-      alert("HTMLコピー完了");
-      return;
-    }
-
-    const ok =
-      copyTextFallback(html);
-
-    alert(
-      ok
-        ? "HTMLコピー完了"
-        : "コピー失敗"
-    );
-
-  } catch (e) {
-    const ok =
-      copyTextFallback(html);
-
-    alert(
-      ok
-        ? "HTMLコピー完了"
-        : "コピー失敗"
-    );
-  }
-}
-
-function findFunctionBlock(functionName){
-  const editor=get("repairEditor");
-  const text=editor.value;
-  const start=
-    text.indexOf(
-      `function ${functionName}`
-    );
-  if(start===-1){
-    alert("関数が見つかりません");
-    return null;
-  }
-  const braceStart=
-    text.indexOf("{",start);
-  let depth=1;
-  let end=braceStart+1;
-  while(
-    end<text.length &&
-    depth>0
-  ){
-    if(text[end]==="{") depth++;
-    if(text[end]==="}") depth--;
-    end++;
-  }
-  return{
-    start,
-    end,
-    block:text.slice(start,end)
-  };
-}
-
-function selectFunctionBlock(){
-  const name=
-    prompt("関数名");
-  if(!name)return;
-  const result=
-    findFunctionBlock(name);
-  if(!result)return;
-  const editor=
-    get("repairEditor");
-  editor.focus();
-  editor.setSelectionRange(
-    result.start,
-    result.end
-  );
-}
-
-function replaceFunctionBlock(){
-  const name=
-    prompt("置換する関数名");
-  if(!name)return;
-  const result=
-    findFunctionBlock(name);
-  if(!result)return;
-  const newCode=
-    prompt(
-      "新コード",
-      result.block
-    );
-  if(newCode===null)return;
-  const editor=
-    get("repairEditor");
-  editor.value=
-    editor.value.slice(0,result.start)+
-    newCode+
-    editor.value.slice(result.end);
-  alert("置換完了");
-}
-
-function showFunctionList() {
-
-  const editor =
-    get("repairEditor");
-
-  const text =
-    editor.value;
-
-  if (!text.trim()) {
-    alert("HTMLが空です");
-    return;
-  }
-
-  const blocks =
-    extractCodeBlocksFromText(
-      text
-    );
-
-  let html = "";
-
-  if (blocks.length === 0) {
-
-    html = "コードブロックなし";
-
-  } else {
-
-    html =
-      blocks.map((item, i) => {
-
-        const line =
-          text
-            .slice(
-              0,
-              item.start
-            )
-            .split("\n")
-            .length;
-
-        const moveButton =
-          item.type === "function"
-            ? `
-<div class="float-panel-actions">
-  <button
-    onclick="
-      moveFunctionPrompt(
-        '${item.name}'
-      )
-    ">
-    📦 Move
-  </button>
-</div>
-`
-            : "";
-
-return `
-
-<div class="function-list-row">
-
-  <button
-    class="
-      float-list-btn
-      function-list-select
-    "
-    onclick="
-      selectCodeBlockByIndex(${i});
-      closeFloatPanelKeepEditorSelection();
-    ">
-
-    [${item.type}]
-    ${i + 1}.
-    ${escapeHtml(item.name)}
-    / L${line}
-
-  </button>
-
-  ${moveButton}
-
-</div>
-`;
-
-      }).join("");
-  }
-
-  openFloatPanel(
-    `コードブロック一覧 (${blocks.length})`,
-    `
-    <div class="float-panel-actions">
-      <button onclick="copyCodeBlockList()">
-        📋 一覧コピー
-      </button>
-    </div>
-    ` + html
-  );
-}
-
-function buildCodeBlockListText() {
-
-  const editor =
-    get("repairEditor");
-
-  if (!editor) return "";
-
-  const text =
-    editor.value;
-
-  const blocks =
-    extractCodeBlocksFromText(text);
-
-  return blocks.map((item, i) => {
-
-    const line =
-      text
-        .slice(0, item.start)
-        .split("\n")
-        .length;
-
-    return `[${item.type}] ${i + 1}. ${item.name} / L${line}`;
-
-  }).join("\n");
-}
-
-function copyCodeBlockList() {
-
-  const text =
-    buildCodeBlockListText();
-
-  if (!text) {
-    alert("コピーする一覧がありません");
-    return;
-  }
-
-  if (
-    navigator.clipboard &&
-    window.isSecureContext
-  ) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() =>
-        alert("コードブロック一覧をコピーしました")
-      )
-      .catch(() => {
-        const ok =
-          copyTextFallback(text);
-
-        alert(
-          ok
-            ? "コードブロック一覧をコピーしました"
-            : "コピー失敗"
-        );
-      });
-
-    return;
-  }
-
-  const ok =
-    copyTextFallback(text);
-
-  alert(
-    ok
-      ? "コードブロック一覧をコピーしました"
-      : "コピー失敗"
-  );
-}
-
-function moveFunctionPrompt(functionName) {
-
-  const editor =
-    get("repairEditor");
-
-  if (!editor) return;
-
-  const sections =
-    extractCodeBlocksFromText(editor.value)
-      .filter(item =>
-        item.type === "section"
-      );
-
-  if (sections.length === 0) {
-    alert("移動先セクションが見つかりません");
-    return;
-  }
-
-  const html =
-    sections.map(item => {
-      return `
-<button
-  class="float-list-btn"
-  onclick="
-    moveFunctionToSectionByStart(
-      '${functionName}',
-      ${item.start}
-    );
-  ">
-  ${escapeHtml(item.name)}
-</button>
-`;
-    }).join("");
-
-  openFloatPanel(
-    `移動先を選択：${functionName}`,
-    html
-  );
-}
-
-let functionSortList = [];
-
-let functionSortFilter = "all";
-
-let dragSortIndex = null;
+/* ===============================
+   Code Block Sort
+=============================== */
 
 function showFunctionSortList() {
 
@@ -4359,6 +4280,180 @@ function applyFunctionSortList() {
   alert("並べ替えを適用しました");
 }
 
+/* ===============================
+   Repair Editor Core
+=============================== */
+
+function applyRepairIndent(isOutdent) {
+  const editor = get("repairEditor");
+  if (!editor) return;
+  const value = editor.value;
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  const indent = "  ";
+  repairUndoStack.push(value);
+  repairRedoStack = [];
+  // 単一カーソルでTabの場合
+  if (start === end && !isOutdent) {
+    editor.value =
+      value.slice(0, start) +
+      indent +
+      value.slice(end);
+    const pos = start + indent.length;
+    editor.selectionStart = pos;
+    editor.selectionEnd = pos;
+  } else {
+    const lineStart =
+      value.lastIndexOf("\n", start - 1) + 1;
+    const before = value.slice(0, lineStart);
+    const target = value.slice(lineStart, end);
+    const after = value.slice(end);
+    const lines = target.split("\n");
+    const changed = isOutdent
+      ? lines.map(line => {
+          if (line.startsWith(indent)) return line.slice(indent.length);
+          if (line.startsWith(" ")) return line.slice(1);
+          return line;
+        }).join("\n")
+      : lines.map(line => indent + line).join("\n");
+    editor.value = before + changed + after;
+    const delta =
+      editor.value.length - value.length;
+    editor.selectionStart = start;
+    editor.selectionEnd = end + delta;
+  }
+  editor.focus();
+  repairLastValue = editor.value;
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(isOutdent ? "アウトデント" : "インデント");
+  autoSaveRepairDraft();
+}
+
+function indentRepairSelection() {
+  applyRepairIndent(false);
+}
+
+function outdentRepairSelection() {
+  applyRepairIndent(true);
+}
+
+function enableRepairEditorTabIndent() {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  editor.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab") return;
+
+    e.preventDefault();
+
+    if (e.shiftKey) {
+      outdentRepairSelection();
+      return;
+    }
+
+    indentRepairSelection();
+  });
+}
+
+function updateLineNumbers() {
+  const editor = get("repairEditor");
+  const lineBox = get("lineNumbers");
+  if (!editor || !lineBox) return;
+  const count =
+    editor.value.split("\n").length || 1;
+  lineBox.innerHTML =
+    Array.from(
+      { length: count },
+      (_, i) => i + 1
+    ).join("<br>");
+}
+
+function updateRepairStatus(text) {
+  const box = get("repairStatus");
+  if (!box) return;
+  box.innerText = "状態：" + text;
+}
+
+function undoRepairEdit() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairUndoStack.length===0
+  ) return;
+
+  repairRedoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairUndoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Undo実行"
+  );
+}
+
+function redoRepairEdit() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairRedoStack.length===0
+  ) return;
+
+  repairUndoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairRedoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Redo実行"
+  );
+}
+
+function loadRepairDraft() {
+  repairAutoSaveEnabled =
+    localStorage.getItem("repairAutoSaveEnabled") === "1";
+
+  updateRepairStatus(
+    repairAutoSaveEnabled
+      ? "AutoSave ON"
+      : "AutoSave OFF"
+  );
+
+  const draft = localStorage.getItem("repairDraftHtml");
+  if (!draft) return;
+  const ok = confirm("修復モードの自動保存データを復元しますか？");
+  if (!ok) return;
+  get("repairEditor").value = draft;
+  repairLastValue = draft;
+  updateRepairStatus("自動保存データ復元");
+}
+
 function updateCursorPosition() {
   const editor = get("repairEditor");
   const box = get("cursorStatus");
@@ -4372,6 +4467,33 @@ function updateCursorPosition() {
   box.innerText =
     `Ln ${line} / Col ${col}`;
 }
+
+function toggleRepairAutoSave() {
+  repairAutoSaveEnabled = !repairAutoSaveEnabled;
+  localStorage.setItem(
+    "repairAutoSaveEnabled",
+    repairAutoSaveEnabled ? "1" : "0"
+  );
+  updateRepairStatus(
+    repairAutoSaveEnabled ? "AutoSave ON" : "AutoSave OFF"
+  );
+}
+
+function autoSaveRepairDraft() {
+  if (!repairAutoSaveEnabled) return;
+  const editor = get("repairEditor");
+  if (!editor) return;
+  localStorage.setItem("repairDraftHtml", editor.value);
+  localStorage.setItem(
+    "repairDraftSavedAt",
+    new Date().toISOString()
+  );
+}
+
+
+/* ===============================
+   Repair Diagnose / Preview
+=============================== */
 
 function diagnoseRepairHtml() {
   let html =
@@ -4642,115 +4764,21 @@ function previewRepairHtml() {
     "❌ プレビュー閉じる";
 }
 
-get("fileInput").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const parsed = JSON.parse(reader.result);
-      if (!Array.isArray(parsed)) {
-        alert("テンプレファイルの形式が正しくありません");
-        return;
-      }
-      localStorage.setItem("templates", JSON.stringify(parsed));
-      renderTemplates();
-      renderTemplateSelect();
-      alert("復元完了");
-    } catch {
-      alert("読み込みに失敗しました");
-    }
-  };
-  reader.readAsText(file);
-  e.target.value = "";
-});
-
-get("aiPresetFileInput").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const parsed = JSON.parse(reader.result);
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        alert("AIプリセットファイルの形式が正しくありません");
-        return;
-      }
-      const validKeys = ["chatgpt", "claude", "gemini", "cursor", "copilot"];
-
-      for (const key of Object.keys(parsed)) {
-        if (!validKeys.includes(key)) {
-          alert(`不明なAI設定が含まれています: ${key}`);
-          return;
-        }
-        if (
-          !parsed[key] ||
-          typeof parsed[key].name !== "string" ||
-          typeof parsed[key].instruction !== "string"
-        ) {
-          alert(`AI設定の形式が正しくありません: ${key}`);
-          return;
-        }
-      }
-      saveAiPresets(parsed);
-      if (get("ai-preset-manager").style.display !== "none") {
-        loadAiPresetToEditor();
-      }
-      alert("AIプリセットを復元しました");
-    } catch (e) {
-      alert("AIプリセットの読み込みに失敗しました\n\n" + e.message);
-    }
-  };
-  reader.readAsText(file);
-  e.target.value = "";
-});
-
 /* ===============================
    FILE: 06_search.js
    Search / Replace
 =============================== */
 
-function replaceRepairText() {
-  const editor = get("repairEditor");
-  const findText = get("repairFindText").value;
-  const replaceText = get("repairReplaceText").value;
-  if (!findText) {
-    alert("検索文字を入力してください");
-    return;
-  }
-  const index = editor.value.indexOf(findText);
-  if (index === -1) {
-    alert("見つかりませんでした");
-    return;
-  }
-  repairUndoStack.push(editor.value);
-  editor.value =
-    editor.value.slice(0, index) +
-    replaceText +
-    editor.value.slice(index + findText.length);
-  repairLastValue = editor.value;
-  updateRepairStatus("1件置換");
-}
+/* ===============================
+   Search State
+=============================== */
 
-function replaceAllRepairText() {
-  const editor = get("repairEditor");
-  const findText = get("repairFindText").value;
-  const replaceText = get("repairReplaceText").value;
-  if (!findText) {
-    alert("検索文字を入力してください");
-    return;
-  }
-  const count = editor.value.split(findText).length - 1;
-  if (count <= 0) {
-    alert("見つかりませんでした");
-    return;
-  }
-  repairUndoStack.push(editor.value);
-  editor.value = editor.value.split(findText).join(replaceText);
-  repairLastValue = editor.value;
-  updateRepairStatus(`${count}件置換`);
-  alert(`${count}件置換しました`);
-}
+let repairSearchIndex = 0;
+let repairSearchMatches = [];
+
+/* ===============================
+   Search Panel
+=============================== */
 
 function toggleRepairSearchBox() {
   openFloatPanel(
@@ -4826,6 +4854,10 @@ function clearRepairSearch() {
 
   box.focus();
 }
+
+/* ===============================
+   Search Action
+=============================== */
 
 function searchRepairText() {
   const editor = get("repairEditor");
@@ -5002,6 +5034,65 @@ function highlightKeyword(text, keyword) {
   );
 }
 
+/* ===============================
+   Replace Panel / Action
+=============================== */
+
+function openReplacePanel() {
+  openFloatPanel(
+    "検索置換",
+    `
+    <input id="repairFindText" placeholder="検索文字">
+    <input id="repairReplaceText" placeholder="置換後文字">
+    <div class="float-panel-actions">
+      <button onclick="replaceRepairText()">置換</button>
+      <button onclick="replaceAllRepairText()">全置換</button>
+    </div>
+    `
+  );
+}
+
+function replaceRepairText() {
+  const editor = get("repairEditor");
+  const findText = get("repairFindText").value;
+  const replaceText = get("repairReplaceText").value;
+  if (!findText) {
+    alert("検索文字を入力してください");
+    return;
+  }
+  const index = editor.value.indexOf(findText);
+  if (index === -1) {
+    alert("見つかりませんでした");
+    return;
+  }
+  repairUndoStack.push(editor.value);
+  editor.value =
+    editor.value.slice(0, index) +
+    replaceText +
+    editor.value.slice(index + findText.length);
+  repairLastValue = editor.value;
+  updateRepairStatus("1件置換");
+}
+
+function replaceAllRepairText() {
+  const editor = get("repairEditor");
+  const findText = get("repairFindText").value;
+  const replaceText = get("repairReplaceText").value;
+  if (!findText) {
+    alert("検索文字を入力してください");
+    return;
+  }
+  const count = editor.value.split(findText).length - 1;
+  if (count <= 0) {
+    alert("見つかりませんでした");
+    return;
+  }
+  repairUndoStack.push(editor.value);
+  editor.value = editor.value.split(findText).join(replaceText);
+  repairLastValue = editor.value;
+  updateRepairStatus(`${count}件置換`);
+  alert(`${count}件置換しました`);
+}
 
 /* ===============================
    FILE: 07_backup_health.js
@@ -6072,6 +6163,6 @@ document.addEventListener("change", saveCurrentState);
 
 </script>
 
-</body>
 
-</html>
+
+</body></html>
