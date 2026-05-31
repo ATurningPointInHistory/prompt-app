@@ -3222,21 +3222,32 @@ function showFunctionList() {
 `
             : "";
 
-        return `
-<button
-  class="float-list-btn"
-  onclick="
-    selectCodeBlockByIndex(${i});
-    closeFloatPanelKeepEditorSelection();
-  ">
-  [${item.type}]
-  ${i + 1}.
-  ${escapeHtml(item.name)}
-  / L${line}
-</button>
+return `
 
-${moveButton}
+<div class="function-list-row">
+
+  <button
+    class="
+      float-list-btn
+      function-list-select
+    "
+    onclick="
+      selectCodeBlockByIndex(${i});
+      closeFloatPanelKeepEditorSelection();
+    ">
+
+    [${item.type}]
+    ${i + 1}.
+    ${escapeHtml(item.name)}
+    / L${line}
+
+  </button>
+
+  ${moveButton}
+
+</div>
 `;
+
       }).join("");
   }
 
