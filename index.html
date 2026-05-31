@@ -3321,27 +3321,43 @@ function copyCodeBlockList() {
   );
 }
 
-function moveFunctionPrompt(
-  functionName
-){
+function moveFunctionPrompt(functionName) {
 
-  const sectionName =
-    prompt(
-`移動先FILE名
+  const editor =
+    get("repairEditor");
 
-例:
-FILE: 07_backup_health.js`
-    );
+  if (!editor) return;
 
-  if(
-    !sectionName
-  ){
+  const sections =
+    extractCodeBlocksFromText(editor.value)
+      .filter(item =>
+        item.type === "section"
+      );
+
+  if (sections.length === 0) {
+    alert("移動先セクションが見つかりません");
     return;
   }
 
-  moveFunctionToSection(
-    functionName,
-    sectionName
+  const html =
+    sections.map(item => {
+      return `
+<button
+  class="float-list-btn"
+  onclick="
+    moveFunctionToSectionByStart(
+      '${functionName}',
+      ${item.start}
+    );
+  ">
+  ${escapeHtml(item.name)}
+</button>
+`;
+    }).join("");
+
+  openFloatPanel(
+    `移動先を選択：${functionName}`,
+    html
   );
 }
 
@@ -4653,6 +4669,93 @@ function moveFunctionToSection(
   alert(
     "移動完了"
   );
+}
+
+function moveFunctionToSectionByStart(
+  functionName,
+  sectionStart
+) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  let html =
+    editor.value;
+
+  const block =
+    findFunctionBlockInText(
+      html,
+      functionName
+    );
+
+  if (!block) {
+    alert("関数が見つかりません");
+    return;
+  }
+
+  const sections =
+    extractCodeBlocksFromText(html)
+      .filter(item =>
+        item.type === "section"
+      );
+
+  const target =
+    sections.find(item =>
+      item.start === sectionStart
+    );
+
+  if (!target) {
+    alert("移動先セクションが見つかりません");
+    return;
+  }
+
+  const ok =
+    confirm(
+      `${functionName}\n\nを\n\n${target.name}\n\nへ移動しますか？`
+    );
+
+  if (!ok) return;
+
+  repairUndoStack.push(html);
+  repairRedoStack = [];
+
+  html =
+    html.slice(0, block.start) +
+    html.slice(block.end);
+
+  let insertPos =
+    target.end;
+
+  if (block.start < target.end) {
+    insertPos =
+      target.end -
+      (block.end - block.start);
+  }
+
+  html =
+    html.slice(0, insertPos) +
+    "\n\n" +
+    block.block +
+    "\n" +
+    html.slice(insertPos);
+
+  editor.value =
+    html;
+
+  repairLastValue =
+    html;
+
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(
+    `${functionName} → ${target.name}`
+  );
+
+  closeFloatPanel();
+
+  alert("移動完了");
 }
 
 let repairUndoStack = [];
