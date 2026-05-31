@@ -640,6 +640,26 @@ body:not(.dark) #floatPanel{
   border-radius:4px;
 }
 
+.line-number {
+  cursor:pointer;
+  padding:0 6px;
+}
+
+.line-number.active{
+  background:#2d7dff;
+  color:#fff;
+}
+
+.line-number.pinned{
+  background:#f0b400;
+  color:#000;
+}
+
+.line-number.active.pinned{
+  background:#9b59ff;
+  color:#fff;
+}
+
 .code-tag { color: #7ee787; }
 .code-attr { color: #79c0ff; }
 .code-string { color: #a5d6ff; }
@@ -2938,6 +2958,7 @@ let repairAutoSaveEnabled = false;
 let functionSortList = [];
 let functionSortFilter = "all";
 let dragSortIndex = null;
+let pinnedLine = null;
 
 /* ===============================
    Repair File I/O
@@ -4406,20 +4427,34 @@ function updateLineNumbers() {
         const lineNo =
           i + 1;
 
+        let cls =
+          "line-number";
+
+        if (
+          lineNo === currentLine
+        ){
+          cls += " active";
+        }
+
+        if (
+          lineNo === pinnedLine
+        ){
+          cls += " pinned";
+        }
+
         return `
-<div class="
-line-number
-${
-lineNo===currentLine
-? "active"
-: ""
-}
-">
+<div
+  class="${cls}"
+  onclick="
+    togglePinnedLine(
+      ${lineNo}
+    )
+  "
+>
 ${lineNo}
 </div>
 `;
-      })
-      .join("");
+      }).join("");
 }
 
 function updateRepairStatus(text) {
@@ -4544,6 +4579,17 @@ function autoSaveRepairDraft() {
   );
 }
 
+function togglePinnedLine(
+  line
+){
+
+  pinnedLine =
+    pinnedLine === line
+      ? null
+      : line;
+
+  updateLineNumbers();
+}
 
 /* ===============================
    Repair Diagnose / Preview
