@@ -952,6 +952,15 @@ body:not(.dark) #floatPanel{
    08. Init / Event
 =============================== */
 
+/* ===============================
+   FILE: 01_core.js
+   Core / Utility / Constants
+=============================== */
+
+/* ===============================
+   Core State / Constants
+=============================== */
+
 let currentTab = 1;
 let isLoading = false;
 const APP_VERSION = "v5.7.2";
@@ -963,11 +972,14 @@ const CHANGELOG = [
 ];
 
 /* ===============================
-   FILE: 01_core.js
-   Core / Utility / Constants
+   Core DOM Helpers
 =============================== */
 
 const get = (id) => document.getElementById(id);
+
+/* ===============================
+   Core Escape Helpers
+=============================== */
 
 function escapeHtml(str) {
   return String(str)
@@ -982,6 +994,10 @@ function escapeRegExp(str) {
   return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/* ===============================
+   Core Storage Helpers
+=============================== */
+
 function loadJson(key, fallback) {
   try {
     return JSON.parse(
@@ -992,6 +1008,10 @@ function loadJson(key, fallback) {
     return fallback;
   }
 }
+
+/* ===============================
+   Default Data
+=============================== */
 
 const defaultTemplates = [
   {
@@ -1107,6 +1127,10 @@ const aiPresetDefinitions = {
 
 };
 
+/* ===============================
+   AI Preset Core
+=============================== */
+
 function getAiPresets() {
   const saved = loadJson("aiPresets", null);
 
@@ -1132,6 +1156,10 @@ return presets[aiTarget] || presets.chatgpt;
 /* ===============================
    FILE: 02_prompt.js
    Prompt Builder
+=============================== */
+
+/* ===============================
+   Prompt Output Helpers
 =============================== */
 
 function formatJsonOutput() {
@@ -1455,6 +1483,10 @@ function reviewPrompt() {
   alert(result);
 }
 
+/* ===============================
+   Command / Preset Parser
+=============================== */
+
 function parseCommands(text) {
   const commandKeys = Object.keys(commandDefinitions);
   const found = [];
@@ -1483,6 +1515,10 @@ function buildCommandInstructionsFromObject(obj) {
 ${lines.join("\n")}
 `;
 }
+
+/* ===============================
+   Command / Preset UI
+=============================== */
 
 function renderCommandChips() {
   const box = get("commandBox");
@@ -1560,6 +1596,49 @@ function syncCommandButtons() {
   });
 }
 
+/* ===============================
+   Prompt Builder
+=============================== */
+
+function buildPromptObject(raw, tone, commands) {
+  const safeRaw = String(raw || "").trim();
+  const safeTone = tone || "プロフェッショナル";
+  const safeCommands = Array.isArray(commands) ? commands : [];
+
+  return {
+    version: APP_VERSION,
+    source: {
+      input_type: "rough",
+      raw_text: safeRaw
+    },
+
+    prompt: {
+      role: "AIアシスタント",
+      purpose: safeRaw,
+      background: [],
+      conditions: [],
+      constraints: [],
+      output_format: "目的に合った最適な形式で出力する",
+      tone: safeTone,
+      additional_instructions: []
+    },
+
+    commands: safeCommands.map(cmd => ({
+      key: cmd,
+      instruction: commandDefinitions[cmd] || ""
+    })),
+
+    assumptions: [],
+    missing_information: [],
+
+    metadata: {
+      created_at: new Date().toISOString(),
+      app_name: "AIプロンプト生成Pro",
+      app_version: APP_VERSION
+    }
+  };
+}
+
 function generatePrompt() {
   let p = "";
   if (currentTab === 1) {
@@ -1619,174 +1698,9 @@ ${tone}
   saveCurrentState();
 }
 
-function download() {
-  const text =
-    get("output").innerText.trim();
-
-  if (!text || text === "ここに表示") {
-    alert("先に生成してください");
-    return;
-  }
-
-  const report =
-    detectSensitiveContent(text);
-
-  if (report.hasAny) {
-    const ok =
-      confirm(
-        buildConfirmMessage(report, "保存")
-      );
-
-    if (!ok) return;
-  }
-
-  const blob =
-    new Blob(
-      [text],
-      { type: "text/plain" }
-    );
-
-  const a =
-    document.createElement("a");
-
-  a.href =
-    URL.createObjectURL(blob);
-
-  a.download =
-    "prompt.txt";
-
-  a.click();
-
-  setTimeout(() => {
-    URL.revokeObjectURL(a.href);
-  }, 1000);
-}
-
-function clearOutput() {
-  get("output").innerText = "ここに表示";
-  hideWarning();
-}
-
-function testJsonFormat() {
-  get("output").innerText = '{"a":1,"b":2}';
-}
-
-function testPromptObject() {
-  const rawOriginal = get("raw-input").value.trim();
-
-  if (!rawOriginal) {
-    alert("ラフ入力欄にテスト用の文章を入力してください");
-    return;
-  }
-  const tone = get("rough-tone").value;
-  const parsed = parseCommands(rawOriginal);
-  const obj = buildPromptObject(
-    parsed.cleanedText,
-    tone,
-    parsed.commands
-  );
-  get("output").innerText = JSON.stringify(obj, null, 2);
-}
-
-function recheckOutput() {
-  const text = get("output").innerText.trim();
-  if (!text || text === "ここに表示") {
-    alert("先に生成してください");
-    return;
-  }
-  checkSensitiveContent(text);
-}
-
-function buildPromptObject(raw, tone, commands) {
-  const safeRaw = String(raw || "").trim();
-  const safeTone = tone || "プロフェッショナル";
-  const safeCommands = Array.isArray(commands) ? commands : [];
-
-  return {
-    version: APP_VERSION,
-    source: {
-      input_type: "rough",
-      raw_text: safeRaw
-    },
-
-    prompt: {
-      role: "AIアシスタント",
-      purpose: safeRaw,
-      background: [],
-      conditions: [],
-      constraints: [],
-      output_format: "目的に合った最適な形式で出力する",
-      tone: safeTone,
-      additional_instructions: []
-    },
-
-    commands: safeCommands.map(cmd => ({
-      key: cmd,
-      instruction: commandDefinitions[cmd] || ""
-    })),
-
-    assumptions: [],
-    missing_information: [],
-
-    metadata: {
-      created_at: new Date().toISOString(),
-      app_name: "AIプロンプト生成Pro",
-      app_version: APP_VERSION
-    }
-  };
-}
-
-function copyText() {
-  const text =
-    get("output").innerText.trim();
-
-  if (!text || text === "ここに表示") {
-    alert("先に生成してください");
-    return;
-  }
-
-  const report =
-    detectSensitiveContent(text);
-
-  if (report.hasAny) {
-    const ok =
-      confirm(
-        buildConfirmMessage(report, "コピー")
-      );
-
-    if (!ok) return;
-  }
-
-  if (
-    navigator.clipboard &&
-    window.isSecureContext
-  ) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => alert("コピー完了"))
-      .catch(() => {
-        const ok =
-          copyTextFallback(text);
-
-        alert(
-          ok
-            ? "コピー完了"
-            : "コピー失敗（長押しコピーしてください）"
-        );
-      });
-
-    return;
-  }
-
-  const ok =
-    copyTextFallback(text);
-
-  alert(
-    ok
-      ? "コピー完了"
-      : "コピー失敗（長押しコピーしてください）"
-  );
-}
+/* ===============================
+   AI Converter
+=============================== */
 
 function convertForAI(obj, aiTarget, outputFormat) {
   if (outputFormat === "json") {
@@ -1863,6 +1777,7 @@ ${buildCommandInstructionsFromObject(obj)}
 トーン：
 ${obj.prompt.tone}`;
 }
+
 function convertForGemini(obj) {
   const preset = obj.ai_preset || {};
   return `目的：
@@ -1953,6 +1868,144 @@ ${buildCommandInstructionsFromObject(obj)}
 // Output:
 // 必要なコード、修正方針、簡潔な説明を出力してください。`;
 }
+
+/* ===============================
+   Output Actions
+=============================== */
+
+function copyText() {
+  const text =
+    get("output").innerText.trim();
+
+  if (!text || text === "ここに表示") {
+    alert("先に生成してください");
+    return;
+  }
+
+  const report =
+    detectSensitiveContent(text);
+
+  if (report.hasAny) {
+    const ok =
+      confirm(
+        buildConfirmMessage(report, "コピー")
+      );
+
+    if (!ok) return;
+  }
+
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => alert("コピー完了"))
+      .catch(() => {
+        const ok =
+          copyTextFallback(text);
+
+        alert(
+          ok
+            ? "コピー完了"
+            : "コピー失敗（長押しコピーしてください）"
+        );
+      });
+
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "コピー完了"
+      : "コピー失敗（長押しコピーしてください）"
+  );
+}
+
+function download() {
+  const text =
+    get("output").innerText.trim();
+
+  if (!text || text === "ここに表示") {
+    alert("先に生成してください");
+    return;
+  }
+
+  const report =
+    detectSensitiveContent(text);
+
+  if (report.hasAny) {
+    const ok =
+      confirm(
+        buildConfirmMessage(report, "保存")
+      );
+
+    if (!ok) return;
+  }
+
+  const blob =
+    new Blob(
+      [text],
+      { type: "text/plain" }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  a.download =
+    "prompt.txt";
+
+  a.click();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
+}
+
+function clearOutput() {
+  get("output").innerText = "ここに表示";
+  hideWarning();
+}
+
+  if (!rawOriginal) {
+    alert("ラフ入力欄にテスト用の文章を入力してください");
+    return;
+  }
+  const tone = get("rough-tone").value;
+  const parsed = parseCommands(rawOriginal);
+  const obj = buildPromptObject(
+    parsed.cleanedText,
+    tone,
+    parsed.commands
+  );
+  get("output").innerText = JSON.stringify(obj, null, 2);
+}
+
+function recheckOutput() {
+  const text = get("output").innerText.trim();
+  if (!text || text === "ここに表示") {
+    alert("先に生成してください");
+    return;
+  }
+  checkSensitiveContent(text);
+}
+
+function testJsonFormat() {
+  get("output").innerText = '{"a":1,"b":2}';
+}
+
+function testPromptObject() {
+  const rawOriginal = get("raw-input").value.trim();
+
+/* ===============================
+   UI Navigation
+=============================== */
 
 function switchTab(tabNum) {
   currentTab = tabNum;
@@ -2084,72 +2137,10 @@ function resetRepairEditorView() {
    Template / Preset / Danger
 =============================== */
 
-get("fileInput").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const parsed = JSON.parse(reader.result);
-      if (!Array.isArray(parsed)) {
-        alert("テンプレファイルの形式が正しくありません");
-        return;
-      }
-      localStorage.setItem("templates", JSON.stringify(parsed));
-      renderTemplates();
-      renderTemplateSelect();
-      alert("復元完了");
-    } catch {
-      alert("読み込みに失敗しました");
-    }
-  };
-  reader.readAsText(file);
-  e.target.value = "";
-});
-
-get("aiPresetFileInput").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const parsed = JSON.parse(reader.result);
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        alert("AIプリセットファイルの形式が正しくありません");
-        return;
-      }
-      const validKeys = ["chatgpt", "claude", "gemini", "cursor", "copilot"];
-
-      for (const key of Object.keys(parsed)) {
-        if (!validKeys.includes(key)) {
-          alert(`不明なAI設定が含まれています: ${key}`);
-          return;
-        }
-        if (
-          !parsed[key] ||
-          typeof parsed[key].name !== "string" ||
-          typeof parsed[key].instruction !== "string"
-        ) {
-          alert(`AI設定の形式が正しくありません: ${key}`);
-          return;
-        }
-      }
-      saveAiPresets(parsed);
-      if (get("ai-preset-manager").style.display !== "none") {
-        loadAiPresetToEditor();
-      }
-      alert("AIプリセットを復元しました");
-    } catch (e) {
-      alert("AIプリセットの読み込みに失敗しました\n\n" + e.message);
-    }
-  };
-  reader.readAsText(file);
-  e.target.value = "";
-});
-
 /* ===============================
    Manager Toggle
 =============================== */
+
 function toggleTemplateManager() {
   const isOpen = get("template-manager").style.display !== "none";
   closeAllManagers();
@@ -2643,6 +2634,10 @@ function saveFromHistory(text) {
   renderTemplateSelect();
 }
 
+/* ===============================
+   Import / Export
+=============================== */
+
 function exportTemplates() {
   const data =
     localStorage.getItem("templates") || "[]";
@@ -2713,80 +2708,81 @@ function importAiPresets() {
   get("aiPresetFileInput").click();
 }
 
+/* ===== Import File Events ===== */
+
+function initImportFileEvents() {
+  get("fileInput").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (!Array.isArray(parsed)) {
+          alert("テンプレファイルの形式が正しくありません");
+          return;
+        }
+        localStorage.setItem("templates", JSON.stringify(parsed));
+        renderTemplates();
+        renderTemplateSelect();
+        alert("復元完了");
+      } catch {
+        alert("読み込みに失敗しました");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  get("aiPresetFileInput").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          alert("AIプリセットファイルの形式が正しくありません");
+          return;
+        }
+        const validKeys = ["chatgpt", "claude", "gemini", "cursor", "copilot"];
+  
+        for (const key of Object.keys(parsed)) {
+          if (!validKeys.includes(key)) {
+            alert(`不明なAI設定が含まれています: ${key}`);
+            return;
+          }
+          if (
+            !parsed[key] ||
+            typeof parsed[key].name !== "string" ||
+            typeof parsed[key].instruction !== "string"
+          ) {
+            alert(`AI設定の形式が正しくありません: ${key}`);
+            return;
+          }
+        }
+        saveAiPresets(parsed);
+        if (get("ai-preset-manager").style.display !== "none") {
+          loadAiPresetToEditor();
+        }
+        alert("AIプリセットを復元しました");
+      } catch (e) {
+        alert("AIプリセットの読み込みに失敗しました\n\n" + e.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+}
+
 /* ===============================
    FILE: 04_tools.js
    Tools
 =============================== */
-function selectCodeBlockByIndex(index) {
-  const editor =
-    get("repairEditor");
 
-  if (!editor) return;
-
-  const text =
-    editor.value;
-
-  const blocks =
-    extractCodeBlocksFromText(text);
-
-  const item =
-    blocks[index];
-
-  if (!item) {
-    alert("コードブロックが見つかりません");
-    return;
-  }
-
-  editor.focus();
-
-  editor.setSelectionRange(
-    item.start,
-    item.end
-  );
-
-  const line =
-    text
-      .slice(0, item.start)
-      .split("\n")
-      .length;
-
-  const lineHeight = 18;
-
-  editor.scrollTop =
-    Math.max(
-      0,
-      (line - 3) * lineHeight
-    );
-
-  updateCursorPosition();
-}
-
-function jumpToLine(lineNumber) {
-  const editor = get("repairEditor");
-  if (!editor) return;
-
-  const lines =
-    editor.value.split("\n");
-
-  let pos = 0;
-
-  for (let i = 0; i < lineNumber - 1; i++) {
-    pos += lines[i].length + 1;
-  }
-
-  editor.focus();
-  editor.setSelectionRange(pos, pos);
-
-  const lineHeight = 18;
-
-  editor.scrollTop =
-    Math.max(
-      0,
-      (lineNumber - 3) * lineHeight
-    );
-
-  updateCursorPosition();
-}
+/* ===============================
+   Float Panel Core
+=============================== */
 
 function openFloatPanel(title, bodyHtml){
   const panel = get("floatPanel");
@@ -2872,6 +2868,10 @@ function closeFloatPanel(){
   }
 }
 
+/* ===============================
+   Tool Menu / Category
+=============================== */
+
 function toggleToolCategory(id) {
   const box = get(id);
   const btn =
@@ -2899,6 +2899,84 @@ function toggleCommandMenu() {
       ? "block"
       : "none";
 }
+
+/* ===============================
+   Manager Control
+=============================== */
+
+function selectCodeBlockByIndex(index) {
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const text =
+    editor.value;
+
+  const blocks =
+    extractCodeBlocksFromText(text);
+
+  const item =
+    blocks[index];
+
+  if (!item) {
+    alert("コードブロックが見つかりません");
+    return;
+  }
+
+  editor.focus();
+
+  editor.setSelectionRange(
+    item.start,
+    item.end
+  );
+
+  const line =
+    text
+      .slice(0, item.start)
+      .split("\n")
+      .length;
+
+  const lineHeight = 18;
+
+  editor.scrollTop =
+    Math.max(
+      0,
+      (line - 3) * lineHeight
+    );
+
+  updateCursorPosition();
+}
+
+function jumpToLine(lineNumber) {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  const lines =
+    editor.value.split("\n");
+
+  let pos = 0;
+
+  for (let i = 0; i < lineNumber - 1; i++) {
+    pos += lines[i].length + 1;
+  }
+
+  editor.focus();
+  editor.setSelectionRange(pos, pos);
+
+  const lineHeight = 18;
+
+  editor.scrollTop =
+    Math.max(
+      0,
+      (lineNumber - 3) * lineHeight
+    );
+
+  updateCursorPosition();
+}
+
+
+
 
 function closeAllManagers() {
   get("template-manager").style.display = "none";
@@ -6292,6 +6370,7 @@ function initRepairIde() {
 
 document.addEventListener("DOMContentLoaded", initRepairIde);
 document.addEventListener("DOMContentLoaded", loadSettings);
+document.addEventListener("DOMContentLoaded", initImportFileEvents);
 document.addEventListener("input", saveCurrentState);
 document.addEventListener("change", saveCurrentState);
 </script>
