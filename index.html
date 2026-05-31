@@ -3206,21 +3206,18 @@ function showFunctionList() {
             .split("\n")
             .length;
 
-        const moveButton =
-          item.type === "function"
-            ? `
-<div class="float-panel-actions">
-  <button
-    onclick="
-      moveFunctionPrompt(
-        '${item.name}'
-      )
-    ">
-    📦 Move
-  </button>
-</div>
-`
-            : "";
+        const moveButton = `
+        <div class="float-panel-actions">
+          <button
+            onclick="
+              moveFunctionPrompt(
+                '${item.name}'
+              )
+            ">
+            📦 Move
+          </button>
+        </div>
+        `;
 
         return `
 <button
