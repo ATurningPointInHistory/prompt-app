@@ -611,6 +611,17 @@ body:not(.dark) #floatPanel{
   outline:2px solid #4da3ff;
 }
 
+.function-list-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+.function-list-select{
+  flex:1;
+}
+
 .code-tag { color: #7ee787; }
 .code-attr { color: #79c0ff; }
 .code-string { color: #a5d6ff; }
@@ -2368,36 +2379,7 @@ get("changelogLabel").innerHTML =
   CHANGELOG.map(x =>
 escapeHtml(x)).join("<br>");
   isLoading = false;
-  }
-window.onerror = function(
-  message,
-  source,
-  line,
-  col,
-  error
-) {
-  localStorage.setItem(
-    "lastCrash",
-    JSON.stringify({
-      time: new Date().toISOString(),
-      message,
-      line,
-      column: col
-    })
-  );
-  if (!DEBUG_MODE) return;
-  const box = get("debugBox");
-  if (!box) return;
-  box.style.display = "block";
-  box.innerText =
-`JS Error
-message:
-${message}
-line:
-${line}
-column:
-${col}`;
-};
+}
 
 function saveHistory(text) {
   let h = loadJson("h", []);
@@ -2833,6 +2815,758 @@ console.table(CHANGELOG);
    Repair IDE
 =============================== */
 
+let repairUndoStack = [];
+let repairRedoStack = [];
+let repairLastValue = "";
+let repairAutoSaveEnabled = false;
+let repairSearchIndex = 0;
+let repairSearchMatches = [];
+
+function cleanupCandidates() {
+  const editor = get("repairEditor");
+  const html = editor && editor.value.trim()
+    ? editor.value
+    : document.documentElement.outerHTML;
+  const funcs =
+    [...html.matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )].map(x => x[1]);
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )].map(x => x[1]);
+  const parser = new DOMParser();
+  const doc =
+    parser.parseFromString(
+      html,
+      "text/html"
+    );
+  const ids =
+    [...doc.querySelectorAll("[id]")]
+      .map(el => el.id)
+      .filter(Boolean);
+  const safeIgnoreFuncs = [
+    "diagnoseRepairHtml",
+    "diagnoseHtml",
+    "showHtmlHealth",
+    "closeFloatPanel",
+    "loadSettings"
+  ];
+  const unusedFuncs =
+    funcs.filter(fn => {
+      if (safeIgnoreFuncs.includes(fn)) return false;
+      const count =
+        (html.match(
+          new RegExp("\\b" + escapeRegExp(fn) + "\\b", "g")
+        ) || []).length;
+      return count <= 1 && !onclicks.includes(fn);
+    });
+  const orphanIds =
+    ids.filter(id => {
+      if (!id) return false;
+      // 正規表現汚染防止
+      if (
+        /[\$\{\}\(\)\[\]\^\|\\]/.test(id)
+      ){
+        return false;
+      }
+      // 除外対象
+      if([
+        "appPage",
+        "repairPage",
+        "floatPanel",
+        "functionListBox"
+      ].includes(id)){
+        return false;
+      }
+      try{
+        const count =
+          (
+            html.match(
+              new RegExp(
+              `\\b${escapeRegExp(id)}\\b`,
+                "g"
+              )
+            ) || []
+          ).length;
+        return count <= 1;
+      }catch{
+        return false;
+      }
+    });
+  const message =
+    "削除候補チェック\n\n" +
+    "【未使用function】\n" +
+    (unusedFuncs.length ? unusedFuncs.join("\n") : "なし") +
+    "\n\n【孤立id】\n" +
+    (orphanIds.length ? orphanIds.join("\n") : "なし") +
+    "\n\nOKで修復エディタ内の候補をコメント化します。";
+  const ok = confirm(message);
+  if (!ok) return;
+commentOutCleanupCandidates(unusedFuncs, orphanIds);
+}
+
+function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
+  const editor = get("repairEditor");
+  if (!editor || !editor.value.trim()) {
+    alert("修復モードでHTMLを読み込んでから実行してください");
+    return;
+  }
+  let html = editor.value;
+  repairUndoStack.push(html);
+  repairRedoStack = [];
+  unusedFuncs.forEach(fn => {
+    const block = findFunctionBlockInText(html, fn);
+    if (!block) return;
+    if (block.block.includes("cleanup候補")) return;
+    html =
+      html.slice(0, block.start) +
+      "/* cleanup候補: 未使用function " + fn + "\n" +
+      block.block +
+      "\n*/" +
+      html.slice(block.end);
+  });
+  orphanIds.forEach(id => {
+    const reg = new RegExp(
+      `id=(["'])${escapeRegExp(id)}\\1`,
+      "g"
+    );
+    html = html.replace(reg, match => {
+      if (match.includes("data-cleanup-disabled-id")) {
+        return match;
+      }
+      return `data-cleanup-disabled-id="${id}"`;
+    });
+  });
+  editor.value = html;
+  repairLastValue = html;
+  updateRepairStatus(
+    "削除候補をコメント化 / id無効化"
+  );
+  alert(
+    "削除候補を安全処理しました。\n\n" +
+    "未使用function：コメント化\n" +
+    "孤立id：data-cleanup-disabled-id に変更\n\n" +
+    "HTML HEALTH / 編集内容診断で確認してください。"
+  );
+}
+
+function deleteCommentedCleanupBlocks() {
+  const editor = get("repairEditor");
+  if (!editor || !editor.value.trim()) {
+    alert("修復モードでHTMLを読み込んでから実行してください");
+    return;
+  }
+  let html = editor.value;
+  const before = html;
+  const functionBlocks =
+    html.match(
+      /\/\*\s*cleanup候補:\s*未使用function[\s\S]*?\*\//g
+    ) || [];
+  const disabledIds =
+    html.match(
+      /data-cleanup-disabled-id="[^"]+"/g
+    ) || [];
+  const message =
+    "完全削除確認\n\n" +
+    "削除対象:\n" +
+    "・コメント化済みfunction: " + functionBlocks.length + "件\n" +
+    "・無効化済みid属性: " + disabledIds.length + "件\n\n" +
+    "OKで完全削除します。\n" +
+    "事前にバックアップ保存済みか確認してください。";
+  const ok = confirm(message);
+  if (!ok) return;
+  repairUndoStack.push(before);
+  repairRedoStack = [];
+  // コメント化済みfunctionを完全削除
+  html = html.replace(
+    /\/\*\s*cleanup候補:\s*未使用function[\s\S]*?\*\//g,
+    ""
+  );
+  // data-cleanup-disabled-id 属性を完全削除
+  html = html.replace(
+    /\s*data-cleanup-disabled-id="[^"]+"/g,
+    ""
+  );
+  // 空行を軽く整理
+  html = html.replace(/\n{4,}/g, "\n\n\n");
+  editor.value = html;
+  repairLastValue = html;
+  updateRepairStatus(
+    "コメント化済み候補を完全削除"
+  );
+  alert(
+    "完全削除しました。\n\n" +
+    "HTML HEALTH / 編集内容診断で確認してください。"
+  );
+}
+
+function findFunctionBlockInText(text, functionName) {
+  const start =
+    text.indexOf(`function ${functionName}`);
+  if (start === -1) return null;
+  const braceStart =
+    text.indexOf("{", start);
+  if (braceStart === -1) return null;
+  let depth = 1;
+  let end = braceStart + 1;
+  while (end < text.length && depth > 0) {
+    if (text[end] === "{") depth++;
+    if (text[end] === "}") depth--;
+    end++;
+  }
+  return {
+    start,
+    end,
+    block: text.slice(start, end)
+  };
+}
+
+function moveFunctionToSection(
+  functionName,
+  sectionName
+){
+
+  const editor =
+    get("repairEditor");
+
+  if(!editor)return;
+
+  let html =
+    editor.value;
+
+  const block =
+    findFunctionBlockInText(
+      html,
+      functionName
+    );
+
+  if(!block){
+    alert("関数が見つかりません");
+    return;
+  }
+
+  const sectionRegex =
+    new RegExp(
+      escapeRegExp(
+        sectionName
+      )
+    );
+
+  const sectionMatch =
+    html.match(
+      sectionRegex
+    );
+
+  if(!sectionMatch){
+    alert(
+      "移動先FILEが見つかりません"
+    );
+    return;
+  }
+
+  repairUndoStack.push(
+    html
+  );
+
+  repairRedoStack = [];
+
+  html =
+    html.slice(
+      0,
+      block.start
+    )
+    +
+    html.slice(
+      block.end
+    );
+
+  const insertPos =
+    html.indexOf(
+      sectionMatch[0]
+    )
+    +
+    sectionMatch[0].length;
+
+  html =
+    html.slice(
+      0,
+      insertPos
+    )
+    +
+    "\n\n" +
+    block.block +
+    "\n" +
+    html.slice(
+      insertPos
+    );
+
+  editor.value =
+    html;
+
+  repairLastValue =
+    html;
+
+  updateLineNumbers();
+
+  updateCursorPosition();
+
+  updateRepairStatus(
+    `${functionName} → ${sectionName}`
+  );
+
+  alert(
+    "移動完了"
+  );
+}
+
+function moveFunctionToSectionByStart(
+  functionName,
+  sectionStart
+) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  let html =
+    editor.value;
+
+  const block =
+    findFunctionBlockInText(
+      html,
+      functionName
+    );
+
+  if (!block) {
+    alert("関数が見つかりません");
+    return;
+  }
+
+  const sections =
+    extractCodeBlocksFromText(html)
+      .filter(item =>
+        item.type === "section"
+      );
+
+  const target =
+    sections.find(item =>
+      item.start === sectionStart
+    );
+
+  if (!target) {
+    alert("移動先セクションが見つかりません");
+    return;
+  }
+
+  const ok =
+    confirm(
+      `${functionName}\n\nを\n\n${target.name}\n\nへ移動しますか？`
+    );
+
+  if (!ok) return;
+
+  repairUndoStack.push(html);
+  repairRedoStack = [];
+
+  html =
+    html.slice(0, block.start) +
+    html.slice(block.end);
+
+  let insertPos =
+    target.end;
+
+  if (block.start < target.end) {
+    insertPos =
+      target.end -
+      (block.end - block.start);
+  }
+
+  html =
+    html.slice(0, insertPos) +
+    "\n\n" +
+    block.block +
+    "\n" +
+    html.slice(insertPos);
+
+  editor.value =
+    html;
+
+  repairLastValue =
+    html;
+
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(
+    `${functionName} → ${target.name}`
+  );
+
+  closeFloatPanel();
+
+  alert("移動完了");
+}
+
+
+function extractFunctionBlocksFromText(text) {
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  const regex =
+    /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm;
+
+  let match;
+
+  while ((match = regex.exec(source)) !== null) {
+    const name =
+      match[1];
+
+    const start =
+      match.index;
+
+    const braceStart =
+      source.indexOf("{", start);
+
+    if (braceStart === -1) continue;
+
+    let depth = 1;
+    let end = braceStart + 1;
+
+    while (
+      end < source.length &&
+      depth > 0
+    ) {
+      if (source[end] === "{") depth++;
+      if (source[end] === "}") depth--;
+      end++;
+    }
+
+    blocks.push({
+      type: "function",
+      name,
+      start,
+      end,
+      block:
+        source.slice(start, end)
+    });
+  }
+
+  return blocks;
+}
+
+function extractCodeBlocksFromText(text) {
+
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  const functionBlocks =
+    extractFunctionBlocksFromText(source);
+
+  // section comment: 複数行見出し
+  const sectionRegex =
+    /\/\*\s*=+\s*\n([\s\S]*?)\n\s*=+\s*\*\//g;
+
+  [...source.matchAll(sectionRegex)]
+    .forEach(match => {
+
+      blocks.push({
+        type: "section",
+        name:
+          match[1]
+            .split("\n")
+            .map(x => x.trim())
+            .filter(Boolean)[0] ||
+          "Section",
+        start: match.index,
+        end:
+          match.index +
+          match[0].length,
+        block: match[0]
+      });
+
+    });
+
+  // top-level let const var only
+  const variableRegex =
+    /^(let|const|var)\s+([a-zA-Z0-9_$]+)/gm;
+
+  [...source.matchAll(variableRegex)]
+    .forEach(match => {
+
+      const start =
+        match.index;
+
+      const insideFunction =
+        functionBlocks.some(fn =>
+          start > fn.start &&
+          start < fn.end
+        );
+
+      if (insideFunction) {
+        return;
+      }
+
+      const name =
+        match[2];
+
+      let end =
+        source.indexOf(
+          ";",
+          start
+        );
+
+      if (end === -1) {
+        end =
+          source.indexOf(
+            "\n",
+            start
+          );
+      }
+
+      if (end === -1) {
+        end =
+          source.length;
+      }
+
+      blocks.push({
+        type: "variable",
+        name,
+        start,
+        end: end + 1,
+        block:
+          source.slice(
+            start,
+            end + 1
+          )
+      });
+
+    });
+
+  functionBlocks.forEach(item => {
+
+    blocks.push({
+      type: "function",
+      ...item
+    });
+
+  });
+
+  return blocks.sort(
+    (a,b)=>
+    a.start-b.start
+  );
+}
+
+function applyRepairIndent(isOutdent) {
+  const editor = get("repairEditor");
+  if (!editor) return;
+  const value = editor.value;
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  const indent = "  ";
+  repairUndoStack.push(value);
+  repairRedoStack = [];
+  // 単一カーソルでTabの場合
+  if (start === end && !isOutdent) {
+    editor.value =
+      value.slice(0, start) +
+      indent +
+      value.slice(end);
+    const pos = start + indent.length;
+    editor.selectionStart = pos;
+    editor.selectionEnd = pos;
+  } else {
+    const lineStart =
+      value.lastIndexOf("\n", start - 1) + 1;
+    const before = value.slice(0, lineStart);
+    const target = value.slice(lineStart, end);
+    const after = value.slice(end);
+    const lines = target.split("\n");
+    const changed = isOutdent
+      ? lines.map(line => {
+          if (line.startsWith(indent)) return line.slice(indent.length);
+          if (line.startsWith(" ")) return line.slice(1);
+          return line;
+        }).join("\n")
+      : lines.map(line => indent + line).join("\n");
+    editor.value = before + changed + after;
+    const delta =
+      editor.value.length - value.length;
+    editor.selectionStart = start;
+    editor.selectionEnd = end + delta;
+  }
+  editor.focus();
+  repairLastValue = editor.value;
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(isOutdent ? "アウトデント" : "インデント");
+  autoSaveRepairDraft();
+}
+
+function indentRepairSelection() {
+  applyRepairIndent(false);
+}
+
+function outdentRepairSelection() {
+  applyRepairIndent(true);
+}
+
+function enableRepairEditorTabIndent() {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  editor.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab") return;
+
+    e.preventDefault();
+
+    if (e.shiftKey) {
+      outdentRepairSelection();
+      return;
+    }
+
+    indentRepairSelection();
+  });
+}
+
+function updateLineNumbers() {
+  const editor = get("repairEditor");
+  const lineBox = get("lineNumbers");
+  if (!editor || !lineBox) return;
+  const count =
+    editor.value.split("\n").length || 1;
+  lineBox.innerHTML =
+    Array.from(
+      { length: count },
+      (_, i) => i + 1
+    ).join("<br>");
+}
+
+function updateRepairStatus(text) {
+  const box = get("repairStatus");
+  if (!box) return;
+  box.innerText = "状態：" + text;
+}
+
+function undoRepairEdit() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairUndoStack.length===0
+  ) return;
+
+  repairRedoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairUndoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Undo実行"
+  );
+}
+
+function redoRepairEdit() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairRedoStack.length===0
+  ) return;
+
+  repairUndoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairRedoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Redo実行"
+  );
+}
+
+function toggleRepairAutoSave() {
+  repairAutoSaveEnabled = !repairAutoSaveEnabled;
+  localStorage.setItem(
+    "repairAutoSaveEnabled",
+    repairAutoSaveEnabled ? "1" : "0"
+  );
+  updateRepairStatus(
+    repairAutoSaveEnabled ? "AutoSave ON" : "AutoSave OFF"
+  );
+}
+
+function autoSaveRepairDraft() {
+  if (!repairAutoSaveEnabled) return;
+  const editor = get("repairEditor");
+  if (!editor) return;
+  localStorage.setItem("repairDraftHtml", editor.value);
+  localStorage.setItem(
+    "repairDraftSavedAt",
+    new Date().toISOString()
+  );
+}
+
+function loadRepairDraft() {
+  repairAutoSaveEnabled =
+    localStorage.getItem("repairAutoSaveEnabled") === "1";
+
+  updateRepairStatus(
+    repairAutoSaveEnabled
+      ? "AutoSave ON"
+      : "AutoSave OFF"
+  );
+
+  const draft = localStorage.getItem("repairDraftHtml");
+  if (!draft) return;
+  const ok = confirm("修復モードの自動保存データを復元しますか？");
+  if (!ok) return;
+  get("repairEditor").value = draft;
+  repairLastValue = draft;
+  updateRepairStatus("自動保存データ復元");
+}
+
+function openReplacePanel() {
+  openFloatPanel(
+    "検索置換",
+    `
+    <input id="repairFindText" placeholder="検索文字">
+    <input id="repairReplaceText" placeholder="置換後文字">
+    <div class="float-panel-actions">
+      <button onclick="replaceRepairText()">置換</button>
+      <button onclick="replaceAllRepairText()">全置換</button>
+    </div>
+    `
+  );
+}
+
 function loadRepairHtml() {
   const input =
     document.createElement("input");
@@ -2983,9 +3717,6 @@ async function copyRepairHtml() {
     );
   }
 }
-
-let repairSearchIndex = 0;
-let repairSearchMatches = [];
 
 function findFunctionBlock(functionName){
   const editor=get("repairEditor");
@@ -3979,6 +4710,48 @@ get("aiPresetFileInput").addEventListener("change", (e) => {
    Search / Replace
 =============================== */
 
+function replaceRepairText() {
+  const editor = get("repairEditor");
+  const findText = get("repairFindText").value;
+  const replaceText = get("repairReplaceText").value;
+  if (!findText) {
+    alert("検索文字を入力してください");
+    return;
+  }
+  const index = editor.value.indexOf(findText);
+  if (index === -1) {
+    alert("見つかりませんでした");
+    return;
+  }
+  repairUndoStack.push(editor.value);
+  editor.value =
+    editor.value.slice(0, index) +
+    replaceText +
+    editor.value.slice(index + findText.length);
+  repairLastValue = editor.value;
+  updateRepairStatus("1件置換");
+}
+
+function replaceAllRepairText() {
+  const editor = get("repairEditor");
+  const findText = get("repairFindText").value;
+  const replaceText = get("repairReplaceText").value;
+  if (!findText) {
+    alert("検索文字を入力してください");
+    return;
+  }
+  const count = editor.value.split(findText).length - 1;
+  if (count <= 0) {
+    alert("見つかりませんでした");
+    return;
+  }
+  repairUndoStack.push(editor.value);
+  editor.value = editor.value.split(findText).join(replaceText);
+  repairLastValue = editor.value;
+  updateRepairStatus(`${count}件置換`);
+  alert(`${count}件置換しました`);
+}
+
 function toggleRepairSearchBox() {
   openFloatPanel(
     "検索",
@@ -4234,6 +5007,62 @@ function highlightKeyword(text, keyword) {
    FILE: 07_backup_health.js
    Backup / Health / Safe Mode
 =============================== */
+
+function saveBackupHistory(backupData) {
+  const list = loadJson("backupHistory", []);
+  list.unshift({
+    version: backupData.version,
+    created_at: backupData.created_at,
+    backup_note: backupData.backup_note || "",
+    validation: backupData.validation || null,
+    html: backupData.html,
+    localStorageData: backupData.localStorageData
+  });
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list.slice(0, 10))
+  );
+}
+
+function showBackupHistory() {
+  const list = loadJson("backupHistory", []);
+  if (list.length === 0) {
+    alert("バックアップ履歴はありません");
+    return;
+  }
+  openFloatPanel(
+    "バックアップ履歴",
+    list.map((b, i) => `
+      <button
+        class="float-list-btn"
+        onclick="restoreBackupHistory(${i})">
+        ${i + 1}. ${b.version} / ${b.backup_note || "メモなし"}
+      </button>
+    `).join("")
+  );
+}
+
+function restoreBackupHistory(index) {
+  const list = loadJson("backupHistory", []);
+  const item = list[index];
+  if (!item) {
+    alert("履歴が見つかりません");
+    return;
+  }
+  const ok = confirm("このバックアップ履歴を復元しますか？");
+  if (!ok) return;
+  Object.entries(item.localStorageData || {}).forEach(([key, value]) => {
+    if (value === null || value === undefined) {
+      localStorage.removeItem(key);
+    } else if (typeof value === "string") {
+      localStorage.setItem(key, value);
+    } else {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  });
+  alert("履歴から復元しました。再読み込みします。");
+  location.reload();
+}
 
 function showHtmlHealth() {
 
@@ -5144,437 +5973,81 @@ ${info.time || "unknown"}`;
    Init / Event
 =============================== */
 
-document.addEventListener("DOMContentLoaded", initRepairIde);
-document.addEventListener("DOMContentLoaded", loadSettings);
-document.addEventListener("input", saveCurrentState);
-document.addEventListener("change", saveCurrentState);
-
-function cleanupCandidates() {
-  const editor = get("repairEditor");
-  const html = editor && editor.value.trim()
-    ? editor.value
-    : document.documentElement.outerHTML;
-  const funcs =
-    [...html.matchAll(
-      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
-    )].map(x => x[1]);
-  const onclicks =
-    [...html.matchAll(
-      /onclick="([a-zA-Z0-9_$]+)\(/g
-    )].map(x => x[1]);
-  const parser = new DOMParser();
-  const doc =
-    parser.parseFromString(
-      html,
-      "text/html"
-    );
-  const ids =
-    [...doc.querySelectorAll("[id]")]
-      .map(el => el.id)
-      .filter(Boolean);
-  const safeIgnoreFuncs = [
-    "diagnoseRepairHtml",
-    "diagnoseHtml",
-    "showHtmlHealth",
-    "closeFloatPanel",
-    "loadSettings"
-  ];
-  const unusedFuncs =
-    funcs.filter(fn => {
-      if (safeIgnoreFuncs.includes(fn)) return false;
-      const count =
-        (html.match(
-          new RegExp("\\b" + escapeRegExp(fn) + "\\b", "g")
-        ) || []).length;
-      return count <= 1 && !onclicks.includes(fn);
-    });
-  const orphanIds =
-    ids.filter(id => {
-      if (!id) return false;
-      // 正規表現汚染防止
-      if (
-        /[\$\{\}\(\)\[\]\^\|\\]/.test(id)
-      ){
-        return false;
-      }
-      // 除外対象
-      if([
-        "appPage",
-        "repairPage",
-        "floatPanel",
-        "functionListBox"
-      ].includes(id)){
-        return false;
-      }
-      try{
-        const count =
-          (
-            html.match(
-              new RegExp(
-              `\\b${escapeRegExp(id)}\\b`,
-                "g"
-              )
-            ) || []
-          ).length;
-        return count <= 1;
-      }catch{
-        return false;
-      }
-    });
-  const message =
-    "削除候補チェック\n\n" +
-    "【未使用function】\n" +
-    (unusedFuncs.length ? unusedFuncs.join("\n") : "なし") +
-    "\n\n【孤立id】\n" +
-    (orphanIds.length ? orphanIds.join("\n") : "なし") +
-    "\n\nOKで修復エディタ内の候補をコメント化します。";
-  const ok = confirm(message);
-  if (!ok) return;
-commentOutCleanupCandidates(unusedFuncs, orphanIds);
-}
-
-function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
-  const editor = get("repairEditor");
-  if (!editor || !editor.value.trim()) {
-    alert("修復モードでHTMLを読み込んでから実行してください");
-    return;
-  }
-  let html = editor.value;
-  repairUndoStack.push(html);
-  repairRedoStack = [];
-  unusedFuncs.forEach(fn => {
-    const block = findFunctionBlockInText(html, fn);
-    if (!block) return;
-    if (block.block.includes("cleanup候補")) return;
-    html =
-      html.slice(0, block.start) +
-      "/* cleanup候補: 未使用function " + fn + "\n" +
-      block.block +
-      "\n*/" +
-      html.slice(block.end);
-  });
-  orphanIds.forEach(id => {
-    const reg = new RegExp(
-      `id=(["'])${escapeRegExp(id)}\\1`,
-      "g"
-    );
-    html = html.replace(reg, match => {
-      if (match.includes("data-cleanup-disabled-id")) {
-        return match;
-      }
-      return `data-cleanup-disabled-id="${id}"`;
-    });
-  });
-  editor.value = html;
-  repairLastValue = html;
-  updateRepairStatus(
-    "削除候補をコメント化 / id無効化"
-  );
-  alert(
-    "削除候補を安全処理しました。\n\n" +
-    "未使用function：コメント化\n" +
-    "孤立id：data-cleanup-disabled-id に変更\n\n" +
-    "HTML HEALTH / 編集内容診断で確認してください。"
-  );
-}
-
-function deleteCommentedCleanupBlocks() {
-  const editor = get("repairEditor");
-  if (!editor || !editor.value.trim()) {
-    alert("修復モードでHTMLを読み込んでから実行してください");
-    return;
-  }
-  let html = editor.value;
-  const before = html;
-  const functionBlocks =
-    html.match(
-      /\/\*\s*cleanup候補:\s*未使用function[\s\S]*?\*\//g
-    ) || [];
-  const disabledIds =
-    html.match(
-      /data-cleanup-disabled-id="[^"]+"/g
-    ) || [];
-  const message =
-    "完全削除確認\n\n" +
-    "削除対象:\n" +
-    "・コメント化済みfunction: " + functionBlocks.length + "件\n" +
-    "・無効化済みid属性: " + disabledIds.length + "件\n\n" +
-    "OKで完全削除します。\n" +
-    "事前にバックアップ保存済みか確認してください。";
-  const ok = confirm(message);
-  if (!ok) return;
-  repairUndoStack.push(before);
-  repairRedoStack = [];
-  // コメント化済みfunctionを完全削除
-  html = html.replace(
-    /\/\*\s*cleanup候補:\s*未使用function[\s\S]*?\*\//g,
-    ""
-  );
-  // data-cleanup-disabled-id 属性を完全削除
-  html = html.replace(
-    /\s*data-cleanup-disabled-id="[^"]+"/g,
-    ""
-  );
-  // 空行を軽く整理
-  html = html.replace(/\n{4,}/g, "\n\n\n");
-  editor.value = html;
-  repairLastValue = html;
-  updateRepairStatus(
-    "コメント化済み候補を完全削除"
-  );
-  alert(
-    "完全削除しました。\n\n" +
-    "HTML HEALTH / 編集内容診断で確認してください。"
-  );
-}
-
-function findFunctionBlockInText(text, functionName) {
-  const start =
-    text.indexOf(`function ${functionName}`);
-  if (start === -1) return null;
-  const braceStart =
-    text.indexOf("{", start);
-  if (braceStart === -1) return null;
-  let depth = 1;
-  let end = braceStart + 1;
-  while (end < text.length && depth > 0) {
-    if (text[end] === "{") depth++;
-    if (text[end] === "}") depth--;
-    end++;
-  }
-  return {
-    start,
-    end,
-    block: text.slice(start, end)
-  };
-}
-
-function moveFunctionToSection(
-  functionName,
-  sectionName
-){
-
-  const editor =
-    get("repairEditor");
-
-  if(!editor)return;
-
-  let html =
-    editor.value;
-
-  const block =
-    findFunctionBlockInText(
-      html,
-      functionName
-    );
-
-  if(!block){
-    alert("関数が見つかりません");
-    return;
-  }
-
-  const sectionRegex =
-    new RegExp(
-      escapeRegExp(
-        sectionName
-      )
-    );
-
-  const sectionMatch =
-    html.match(
-      sectionRegex
-    );
-
-  if(!sectionMatch){
-    alert(
-      "移動先FILEが見つかりません"
-    );
-    return;
-  }
-
-  repairUndoStack.push(
-    html
-  );
-
-  repairRedoStack = [];
-
-  html =
-    html.slice(
-      0,
-      block.start
-    )
-    +
-    html.slice(
-      block.end
-    );
-
-  const insertPos =
-    html.indexOf(
-      sectionMatch[0]
-    )
-    +
-    sectionMatch[0].length;
-
-  html =
-    html.slice(
-      0,
-      insertPos
-    )
-    +
-    "\n\n" +
-    block.block +
-    "\n" +
-    html.slice(
-      insertPos
-    );
-
-  editor.value =
-    html;
-
-  repairLastValue =
-    html;
-
-  updateLineNumbers();
-
-  updateCursorPosition();
-
-  updateRepairStatus(
-    `${functionName} → ${sectionName}`
-  );
-
-  alert(
-    "移動完了"
-  );
-}
-
-function moveFunctionToSectionByStart(
-  functionName,
-  sectionStart
+window.onerror = function(
+  message,
+  source,
+  line,
+  col,
+  error
 ) {
-
-  const editor =
-    get("repairEditor");
-
-  if (!editor) return;
-
-  let html =
-    editor.value;
-
-  const block =
-    findFunctionBlockInText(
-      html,
-      functionName
-    );
-
-  if (!block) {
-    alert("関数が見つかりません");
-    return;
-  }
-
-  const sections =
-    extractCodeBlocksFromText(html)
-      .filter(item =>
-        item.type === "section"
-      );
-
-  const target =
-    sections.find(item =>
-      item.start === sectionStart
-    );
-
-  if (!target) {
-    alert("移動先セクションが見つかりません");
-    return;
-  }
-
-  const ok =
-    confirm(
-      `${functionName}\n\nを\n\n${target.name}\n\nへ移動しますか？`
-    );
-
-  if (!ok) return;
-
-  repairUndoStack.push(html);
-  repairRedoStack = [];
-
-  html =
-    html.slice(0, block.start) +
-    html.slice(block.end);
-
-  let insertPos =
-    target.end;
-
-  if (block.start < target.end) {
-    insertPos =
-      target.end -
-      (block.end - block.start);
-  }
-
-  html =
-    html.slice(0, insertPos) +
-    "\n\n" +
-    block.block +
-    "\n" +
-    html.slice(insertPos);
-
-  editor.value =
-    html;
-
-  repairLastValue =
-    html;
-
-  updateLineNumbers();
-  updateCursorPosition();
-  updateRepairStatus(
-    `${functionName} → ${target.name}`
+  localStorage.setItem(
+    "lastCrash",
+    JSON.stringify({
+      time: new Date().toISOString(),
+      message,
+      line,
+      column: col
+    })
   );
 
-  closeFloatPanel();
+  if (!DEBUG_MODE) return;
 
-  alert("移動完了");
-}
+  const box = get("debugBox");
+  if (!box) return;
 
-let repairUndoStack = [];
-let repairRedoStack = [];
-let repairLastValue = "";
-let repairAutoSaveEnabled = false;
+  box.style.display = "block";
+  box.innerText =
+`JS Error
+message:
+${message}
+line:
+${line}
+column:
+${col}`;
+};
 
-/* ===== Repair Editor ===== */
+/* ===== Repair Editor Init ===== */
 
 function initRepairIde() {
   const editor = get("repairEditor");
   if (!editor) return;
-    repairLastValue = editor.value || "";
-  editor.addEventListener("keydown",(e)=>{
+
+  repairLastValue = editor.value || "";
+
+  editor.addEventListener("keydown", (e) => {
     const isSearch =
-      (e.ctrlKey || e.metaKey)
-      &&
-      e.key.toLowerCase()==="f";
-    if(!isSearch)return;
+      (e.ctrlKey || e.metaKey) &&
+      e.key.toLowerCase() === "f";
+
+    if (!isSearch) return;
+
     e.preventDefault();
     toggleRepairSearchBox();
-    setTimeout(()=>{
-      const box =
-        get("repairSearch");
-      if(box){
+
+    setTimeout(() => {
+      const box = get("repairSearch");
+      if (box) {
         box.focus();
         box.select();
       }
-    },50);
+    }, 50);
   });
 
-    editor.addEventListener("click", updateCursorPosition);
-    editor.addEventListener("keyup", updateCursorPosition);
-    editor.addEventListener("select", updateCursorPosition);
-    editor.addEventListener("scroll", () => {
-      const lineBox = get("lineNumbers");
-      if (lineBox) {
-        lineBox.scrollTop = editor.scrollTop;
-      }
-    });
-    editor.addEventListener("input", () => {
+  editor.addEventListener("click", updateCursorPosition);
+  editor.addEventListener("keyup", updateCursorPosition);
+  editor.addEventListener("select", updateCursorPosition);
+
+  editor.addEventListener("scroll", () => {
+    const lineBox = get("lineNumbers");
+    if (lineBox) {
+      lineBox.scrollTop = editor.scrollTop;
+    }
+  });
+
+  editor.addEventListener("input", () => {
     updateLineNumbers();
     updateCursorPosition();
+
     if (repairLastValue !== editor.value) {
       repairUndoStack.push(repairLastValue);
       repairRedoStack = [];
@@ -5583,469 +6056,22 @@ function initRepairIde() {
       autoSaveRepairDraft();
     }
   });
+
   loadRepairDraft();
   updateLineNumbers();
   updateCursorPosition();
   enableRepairEditorTabIndent();
 }
 
-function extractFunctionBlocksFromText(text) {
-  const source =
-    String(text || "");
-
-  const blocks = [];
-
-  const regex =
-    /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm;
-
-  let match;
-
-  while ((match = regex.exec(source)) !== null) {
-    const name =
-      match[1];
-
-    const start =
-      match.index;
-
-    const braceStart =
-      source.indexOf("{", start);
-
-    if (braceStart === -1) continue;
-
-    let depth = 1;
-    let end = braceStart + 1;
-
-    while (
-      end < source.length &&
-      depth > 0
-    ) {
-      if (source[end] === "{") depth++;
-      if (source[end] === "}") depth--;
-      end++;
-    }
-
-    blocks.push({
-      type: "function",
-      name,
-      start,
-      end,
-      block:
-        source.slice(start, end)
-    });
-  }
-
-  return blocks;
-}
-
-function extractCodeBlocksFromText(text) {
-
-  const source =
-    String(text || "");
-
-  const blocks = [];
-
-  const functionBlocks =
-    extractFunctionBlocksFromText(source);
-
-  // section comment: 複数行見出し
-  const sectionRegex =
-    /\/\*\s*=+\s*\n([\s\S]*?)\n\s*=+\s*\*\//g;
-
-  [...source.matchAll(sectionRegex)]
-    .forEach(match => {
-
-      blocks.push({
-        type: "section",
-        name:
-          match[1]
-            .split("\n")
-            .map(x => x.trim())
-            .filter(Boolean)[0] ||
-          "Section",
-        start: match.index,
-        end:
-          match.index +
-          match[0].length,
-        block: match[0]
-      });
-
-    });
-
-  // top-level let const var only
-  const variableRegex =
-    /^(let|const|var)\s+([a-zA-Z0-9_$]+)/gm;
-
-  [...source.matchAll(variableRegex)]
-    .forEach(match => {
-
-      const start =
-        match.index;
-
-      const insideFunction =
-        functionBlocks.some(fn =>
-          start > fn.start &&
-          start < fn.end
-        );
-
-      if (insideFunction) {
-        return;
-      }
-
-      const name =
-        match[2];
-
-      let end =
-        source.indexOf(
-          ";",
-          start
-        );
-
-      if (end === -1) {
-        end =
-          source.indexOf(
-            "\n",
-            start
-          );
-      }
-
-      if (end === -1) {
-        end =
-          source.length;
-      }
-
-      blocks.push({
-        type: "variable",
-        name,
-        start,
-        end: end + 1,
-        block:
-          source.slice(
-            start,
-            end + 1
-          )
-      });
-
-    });
-
-  functionBlocks.forEach(item => {
-
-    blocks.push({
-      type: "function",
-      ...item
-    });
-
-  });
-
-  return blocks.sort(
-    (a,b)=>
-    a.start-b.start
-  );
-}
-
-function applyRepairIndent(isOutdent) {
-  const editor = get("repairEditor");
-  if (!editor) return;
-  const value = editor.value;
-  const start = editor.selectionStart;
-  const end = editor.selectionEnd;
-  const indent = "  ";
-  repairUndoStack.push(value);
-  repairRedoStack = [];
-  // 単一カーソルでTabの場合
-  if (start === end && !isOutdent) {
-    editor.value =
-      value.slice(0, start) +
-      indent +
-      value.slice(end);
-    const pos = start + indent.length;
-    editor.selectionStart = pos;
-    editor.selectionEnd = pos;
-  } else {
-    const lineStart =
-      value.lastIndexOf("\n", start - 1) + 1;
-    const before = value.slice(0, lineStart);
-    const target = value.slice(lineStart, end);
-    const after = value.slice(end);
-    const lines = target.split("\n");
-    const changed = isOutdent
-      ? lines.map(line => {
-          if (line.startsWith(indent)) return line.slice(indent.length);
-          if (line.startsWith(" ")) return line.slice(1);
-          return line;
-        }).join("\n")
-      : lines.map(line => indent + line).join("\n");
-    editor.value = before + changed + after;
-    const delta =
-      editor.value.length - value.length;
-    editor.selectionStart = start;
-    editor.selectionEnd = end + delta;
-  }
-  editor.focus();
-  repairLastValue = editor.value;
-  updateLineNumbers();
-  updateCursorPosition();
-  updateRepairStatus(isOutdent ? "アウトデント" : "インデント");
-  autoSaveRepairDraft();
-}
-
-function indentRepairSelection() {
-  applyRepairIndent(false);
-}
-
-function outdentRepairSelection() {
-  applyRepairIndent(true);
-}
-
-function enableRepairEditorTabIndent() {
-  const editor = get("repairEditor");
-  if (!editor) return;
-
-  editor.addEventListener("keydown", (e) => {
-    if (e.key !== "Tab") return;
-
-    e.preventDefault();
-
-    if (e.shiftKey) {
-      outdentRepairSelection();
-      return;
-    }
-
-    indentRepairSelection();
-  });
-}
-
-function updateLineNumbers() {
-  const editor = get("repairEditor");
-  const lineBox = get("lineNumbers");
-  if (!editor || !lineBox) return;
-  const count =
-    editor.value.split("\n").length || 1;
-  lineBox.innerHTML =
-    Array.from(
-      { length: count },
-      (_, i) => i + 1
-    ).join("<br>");
-}
-
-function updateRepairStatus(text) {
-  const box = get("repairStatus");
-  if (!box) return;
-  box.innerText = "状態：" + text;
-}
-
-function undoRepairEdit() {
-
-  const editor =
-    get("repairEditor");
-
-  if (
-    !editor ||
-    repairUndoStack.length===0
-  ) return;
-
-  repairRedoStack.push(
-    editor.value
-  );
-
-  editor.value =
-    repairUndoStack.pop();
-
-  repairLastValue =
-    editor.value;
-
-  updateLineNumbers();
-  updateCursorPosition();
-
-  autoSaveRepairDraft();
-
-  updateRepairStatus(
-    "Undo実行"
-  );
-}
-
-function redoRepairEdit() {
-
-  const editor =
-    get("repairEditor");
-
-  if (
-    !editor ||
-    repairRedoStack.length===0
-  ) return;
-
-  repairUndoStack.push(
-    editor.value
-  );
-
-  editor.value =
-    repairRedoStack.pop();
-
-  repairLastValue =
-    editor.value;
-
-  updateLineNumbers();
-  updateCursorPosition();
-
-  autoSaveRepairDraft();
-
-  updateRepairStatus(
-    "Redo実行"
-  );
-}
-
-function toggleRepairAutoSave() {
-  repairAutoSaveEnabled = !repairAutoSaveEnabled;
-  localStorage.setItem(
-    "repairAutoSaveEnabled",
-    repairAutoSaveEnabled ? "1" : "0"
-  );
-  updateRepairStatus(
-    repairAutoSaveEnabled ? "AutoSave ON" : "AutoSave OFF"
-  );
-}
-
-function autoSaveRepairDraft() {
-  if (!repairAutoSaveEnabled) return;
-  const editor = get("repairEditor");
-  if (!editor) return;
-  localStorage.setItem("repairDraftHtml", editor.value);
-  localStorage.setItem(
-    "repairDraftSavedAt",
-    new Date().toISOString()
-  );
-}
-
-function loadRepairDraft() {
-  repairAutoSaveEnabled =
-    localStorage.getItem("repairAutoSaveEnabled") === "1";
-
-  updateRepairStatus(
-    repairAutoSaveEnabled
-      ? "AutoSave ON"
-      : "AutoSave OFF"
-  );
-
-  const draft = localStorage.getItem("repairDraftHtml");
-  if (!draft) return;
-  const ok = confirm("修復モードの自動保存データを復元しますか？");
-  if (!ok) return;
-  get("repairEditor").value = draft;
-  repairLastValue = draft;
-  updateRepairStatus("自動保存データ復元");
-}
-
-function openReplacePanel() {
-  openFloatPanel(
-    "検索置換",
-    `
-    <input id="repairFindText" placeholder="検索文字">
-    <input id="repairReplaceText" placeholder="置換後文字">
-    <div class="float-panel-actions">
-      <button onclick="replaceRepairText()">置換</button>
-      <button onclick="replaceAllRepairText()">全置換</button>
-    </div>
-    `
-  );
-}
-
-function replaceRepairText() {
-  const editor = get("repairEditor");
-  const findText = get("repairFindText").value;
-  const replaceText = get("repairReplaceText").value;
-  if (!findText) {
-    alert("検索文字を入力してください");
-    return;
-  }
-  const index = editor.value.indexOf(findText);
-  if (index === -1) {
-    alert("見つかりませんでした");
-    return;
-  }
-  repairUndoStack.push(editor.value);
-  editor.value =
-    editor.value.slice(0, index) +
-    replaceText +
-    editor.value.slice(index + findText.length);
-  repairLastValue = editor.value;
-  updateRepairStatus("1件置換");
-}
-
-function replaceAllRepairText() {
-  const editor = get("repairEditor");
-  const findText = get("repairFindText").value;
-  const replaceText = get("repairReplaceText").value;
-  if (!findText) {
-    alert("検索文字を入力してください");
-    return;
-  }
-  const count = editor.value.split(findText).length - 1;
-  if (count <= 0) {
-    alert("見つかりませんでした");
-    return;
-  }
-  repairUndoStack.push(editor.value);
-  editor.value = editor.value.split(findText).join(replaceText);
-  repairLastValue = editor.value;
-  updateRepairStatus(`${count}件置換`);
-  alert(`${count}件置換しました`);
-}
-
-function saveBackupHistory(backupData) {
-  const list = loadJson("backupHistory", []);
-  list.unshift({
-    version: backupData.version,
-    created_at: backupData.created_at,
-    backup_note: backupData.backup_note || "",
-    validation: backupData.validation || null,
-    html: backupData.html,
-    localStorageData: backupData.localStorageData
-  });
-  localStorage.setItem(
-    "backupHistory",
-    JSON.stringify(list.slice(0, 10))
-  );
-}
-
-function showBackupHistory() {
-  const list = loadJson("backupHistory", []);
-  if (list.length === 0) {
-    alert("バックアップ履歴はありません");
-    return;
-  }
-  openFloatPanel(
-    "バックアップ履歴",
-    list.map((b, i) => `
-      <button
-        class="float-list-btn"
-        onclick="restoreBackupHistory(${i})">
-        ${i + 1}. ${b.version} / ${b.backup_note || "メモなし"}
-      </button>
-    `).join("")
-  );
-}
-
-function restoreBackupHistory(index) {
-  const list = loadJson("backupHistory", []);
-  const item = list[index];
-  if (!item) {
-    alert("履歴が見つかりません");
-    return;
-  }
-  const ok = confirm("このバックアップ履歴を復元しますか？");
-  if (!ok) return;
-  Object.entries(item.localStorageData || {}).forEach(([key, value]) => {
-    if (value === null || value === undefined) {
-      localStorage.removeItem(key);
-    } else if (typeof value === "string") {
-      localStorage.setItem(key, value);
-    } else {
-      localStorage.setItem(key, JSON.stringify(value));
-    }
-  });
-  alert("履歴から復元しました。再読み込みします。");
-  location.reload();
-}
+/* ===== App Events ===== */
+
+document.addEventListener("DOMContentLoaded", initRepairIde);
+document.addEventListener("DOMContentLoaded", loadSettings);
+document.addEventListener("input", saveCurrentState);
+document.addEventListener("change", saveCurrentState);
 
 </script>
 
-</body></html>
+</body>
+
+</html>
