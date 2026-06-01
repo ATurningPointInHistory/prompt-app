@@ -9,14 +9,28 @@
 
 async function collectExternalScriptText(html) {
 
-  const srcList =
-    [...html.matchAll(
-      /<script\s+src="([^"]+)"\s*><\/script>/g
-    )].map(x => x[1]);
+  const parser =
+    new DOMParser();
+
+  const doc =
+    parser.parseFromString(
+      html,
+      "text/html"
+    );
+
+  const scripts =
+    [...doc.querySelectorAll(
+      'script[src]'
+    )];
 
   const texts = [];
 
-  for (const src of srcList) {
+  for (const script of scripts) {
+
+    const src =
+      script.getAttribute("src");
+
+    if (!src) continue;
 
     try {
 
@@ -24,16 +38,27 @@ async function collectExternalScriptText(html) {
         await fetch(src);
 
       if (res.ok) {
+
         texts.push(
-          await res.text()
+`/* ===== ${src} ===== */
+
+${await res.text()}`
         );
+
       }
 
-    } catch {}
+    } catch (e) {
+
+      console.warn(
+        "JS load failed:",
+        src
+      );
+
+    }
 
   }
 
-  return texts.join("\n");
+  return texts.join("\n\n");
 }
 
 function calcHealthScore(validation, undefinedFns, dupFuncs) {
