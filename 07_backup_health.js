@@ -397,15 +397,21 @@ async function getCleanProgramHtml() {
     }
   });
 
-  const html =
+const html =
     "<!DOCTYPE html>\n" +
     clone.outerHTML;
 
   const externalJs =
     await collectExternalScriptText(html);
 
-  const mergedHtml =
+  const htmlWithoutExternalScripts =
     html.replace(
+      /<script\s+src="[^"]+"\s*><\/script>\s*/g,
+      ""
+    );
+
+  const mergedHtml =
+    htmlWithoutExternalScripts.replace(
       /<\/body>/i,
       `
 <script>
