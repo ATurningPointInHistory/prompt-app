@@ -935,5 +935,10 @@ body:not(.dark) #floatPanel{
 <script src="./07_backup_health.js"></script>
 <script src="./08_init.js"></script>
 
+console.log(
+  getExternalScriptSrcList(
+    document.documentElement.outerHTML
+  )
+);
 </body>
 </html>
