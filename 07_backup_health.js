@@ -982,6 +982,30 @@ function extractIds(html) {
 }
 
 /* ===============================
+   External Script Helpers
+=============================== */
+
+function getExternalScriptSrcList(html) {
+
+  const parser =
+    new DOMParser();
+
+  const doc =
+    parser.parseFromString(
+      html,
+      "text/html"
+    );
+
+  return [...doc.querySelectorAll(
+    "script[src]"
+  )]
+    .map(script =>
+      script.getAttribute("src")
+    )
+    .filter(Boolean);
+}
+
+/* ===============================
    Safe Mode
 =============================== */
 
