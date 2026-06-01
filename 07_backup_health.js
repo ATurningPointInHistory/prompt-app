@@ -603,7 +603,7 @@ async function backupProgram() {
   );
 }
 
-function saveProgramHtml() {
+async function saveProgramHtml() {
   const html =
     await getCleanProgramHtml();
 
@@ -629,7 +629,7 @@ function saveProgramHtml() {
       .replace(/[:.]/g, "-");
 
   a.download =
-    `AIPro_${APP_VERSION}_${timestamp}.html`;
+    `AIPromptPro_${APP_VERSION}_${timestamp}.html`;
 
   a.click();
 
