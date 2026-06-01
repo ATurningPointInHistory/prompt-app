@@ -4080,6 +4080,35 @@ function replaceAllRepairText() {
    Health Check
 =============================== */
 
+async function collectExternalScriptText(html) {
+
+  const srcList =
+    [...html.matchAll(
+      /<script\s+src="([^"]+)"\s*><\/script>/g
+    )].map(x => x[1]);
+
+  const texts = [];
+
+  for (const src of srcList) {
+
+    try {
+
+      const res =
+        await fetch(src);
+
+      if (res.ok) {
+        texts.push(
+          await res.text()
+        );
+      }
+
+    } catch {}
+
+  }
+
+  return texts.join("\n");
+}
+
 function calcHealthScore(validation, undefinedFns, dupFuncs) {
   return Math.max(
     0,
