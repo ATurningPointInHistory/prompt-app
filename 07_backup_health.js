@@ -273,7 +273,7 @@ function copyHealthResult() {
    Backup Core
 =============================== */
 
-function getCleanProgramHtml() {
+async function getCleanProgramHtml() {
   const clone =
     document.documentElement.cloneNode(true);
 
@@ -372,9 +372,25 @@ function getCleanProgramHtml() {
     }
   });
 
-  return "<!DOCTYPE html>\n" + clone.outerHTML;
-}
+  const html =
+    "<!DOCTYPE html>\n" +
+    clone.outerHTML;
 
+  const externalJs =
+    await collectExternalScriptText(html);
+
+  const mergedHtml =
+    html.replace(
+      /<\/body>/i,
+      `
+<script>
+${externalJs}
+</script>
+</body>`
+    );
+
+  return mergedHtml;
+}
 
 function validateBackupHtml(html) {
   const source = String(html || "");
