@@ -524,7 +524,7 @@ function preSaveCheck(html) {
   );
 }
 
-function backupProgram() {
+async function backupProgram() {
   saveCurrentState();
 
   const note =
@@ -534,7 +534,7 @@ function backupProgram() {
     ) || "";
 
   const html =
-    getCleanProgramHtml();
+    await getCleanProgramHtml();
 
   if (!preSaveCheck(html)) {
     return;
@@ -605,7 +605,7 @@ function backupProgram() {
 
 function saveProgramHtml() {
   const html =
-    getCleanProgramHtml();
+    await getCleanProgramHtml();
 
   if (!preSaveCheck(html)) {
     return;
