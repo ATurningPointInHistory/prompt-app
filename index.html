@@ -3402,20 +3402,29 @@ function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
 
 function deleteCommentedCleanupBlocks() {
   const editor = get("repairEditor");
+
   if (!editor || !editor.value.trim()) {
     alert("修復モードでHTMLを読み込んでから実行してください");
     return;
   }
+
   let html = editor.value;
   const before = html;
+
+  const cleanupBlockRegex =
+    /\/\*\s*cleanup候補:\s*未使用function\s+[a-zA-Z0-9_$]+[\s\S]*?\*\//g;
+
   const functionBlocks =
-    html.match(
-      /\/\*\s*cleanup候補:\s*未使用function[\s\S]*?\*\//g
-    ) || [];
+    (html.match(cleanupBlockRegex) || [])
+      .filter(block =>
+        /function\s+[a-zA-Z0-9_$]+\s*\(/.test(block)
+      );
+
   const disabledIds =
     html.match(
-      /data-cleanup-disabled-id="[^"]+"/g
+      /\sdata-cleanup-disabled-id="[^"]+"/g
     ) || [];
+
   const message =
     "完全削除確認\n\n" +
     "削除対象:\n" +
@@ -3423,27 +3432,39 @@ function deleteCommentedCleanupBlocks() {
     "・無効化済みid属性: " + disabledIds.length + "件\n\n" +
     "OKで完全削除します。\n" +
     "事前にバックアップ保存済みか確認してください。";
+
   const ok = confirm(message);
   if (!ok) return;
+
+  if (
+    functionBlocks.length === 0 &&
+    disabledIds.length === 0
+  ) {
+    alert("削除対象はありません");
+    return;
+  }
+
   repairUndoStack.push(before);
   repairRedoStack = [];
-  // コメント化済みfunctionを完全削除
+
+  functionBlocks.forEach(block => {
+    html = html.replace(block, "");
+  });
+
   html = html.replace(
-    /\/\*\s*cleanup候補:\s*未使用function[\s\S]*?\*\//g,
+    /\sdata-cleanup-disabled-id="[^"]+"/g,
     ""
   );
-  // data-cleanup-disabled-id 属性を完全削除
-  html = html.replace(
-    /\s*data-cleanup-disabled-id="[^"]+"/g,
-    ""
-  );
-  // 空行を軽く整理
+
   html = html.replace(/\n{4,}/g, "\n\n\n");
+
   editor.value = html;
   repairLastValue = html;
+
   updateRepairStatus(
     "コメント化済み候補を完全削除"
   );
+
   alert(
     "完全削除しました。\n\n" +
     "HTML HEALTH / 編集内容診断で確認してください。"
@@ -3916,104 +3937,6 @@ function moveFunctionPrompt(functionName) {
   openFloatPanel(
     `移動先を選択：${functionName}`,
     html
-  );
-}
-
-function moveFunctionToSection(
-  functionName,
-  sectionName
-){
-
-  const editor =
-    get("repairEditor");
-
-  if(!editor)return;
-
-  let html =
-    editor.value;
-
-  const block =
-    findFunctionBlockInText(
-      html,
-      functionName
-    );
-
-  if(!block){
-    alert("関数が見つかりません");
-    return;
-  }
-
-  const sectionRegex =
-    new RegExp(
-      escapeRegExp(
-        sectionName
-      )
-    );
-
-  const sectionMatch =
-    html.match(
-      sectionRegex
-    );
-
-  if(!sectionMatch){
-    alert(
-      "移動先FILEが見つかりません"
-    );
-    return;
-  }
-
-  repairUndoStack.push(
-    html
-  );
-
-  repairRedoStack = [];
-
-  html =
-    html.slice(
-      0,
-      block.start
-    )
-    +
-    html.slice(
-      block.end
-    );
-
-  const insertPos =
-    html.indexOf(
-      sectionMatch[0]
-    )
-    +
-    sectionMatch[0].length;
-
-  html =
-    html.slice(
-      0,
-      insertPos
-    )
-    +
-    "\n\n" +
-    block.block +
-    "\n" +
-    html.slice(
-      insertPos
-    );
-
-  editor.value =
-    html;
-
-  repairLastValue =
-    html;
-
-  updateLineNumbers();
-
-  updateCursorPosition();
-
-  updateRepairStatus(
-    `${functionName} → ${sectionName}`
-  );
-
-  alert(
-    "移動完了"
   );
 }
 
