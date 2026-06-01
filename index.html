@@ -4153,7 +4153,7 @@ function getHtmlSummary(html) {
   };
 }
 
-function showHtmlHealth() {
+async function showHtmlHealth() {
 
   const html =
     isRepairMode() &&
@@ -4161,25 +4161,36 @@ function showHtmlHealth() {
     get("repairEditor").value.trim()
       ? get("repairEditor").value
       : "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+
+  const externalJs =
+    await collectExternalScriptText(html);
+
+  const jsForCheck =
+    html + "\n" + externalJs;
+
   const validation =
     validateBackupHtml(html);
+
   const funcs =
-    [...html.matchAll(
+    [...jsForCheck.matchAll(
       /function\s+([a-zA-Z0-9_$]+)\s*\(/g
     )]
     .map(x => x[1]);
+
   const dupFuncs =
     [...new Set(
       funcs.filter(
-        (f,i)=>
-        funcs.indexOf(f)!==i
+        (f, i) =>
+        funcs.indexOf(f) !== i
       )
     )];
+
   const onclicks =
     [...html.matchAll(
       /onclick="([a-zA-Z0-9_$]+)\(/g
     )]
-    .map(x=>x[1]);
+    .map(x => x[1]);
+
   const undefinedFns =
     [...new Set(
       onclicks.filter(
@@ -4187,6 +4198,20 @@ function showHtmlHealth() {
         !funcs.includes(fn)
       )
     )];
+
+  const score =
+    100
+    -
+    (validation.div_ok ? 0 : 20)
+    -
+    (validation.js_ok ? 0 : 25)
+    -
+    (validation.duplicate_ids.length * 5)
+    -
+    (undefinedFns.length * 10)
+    -
+    (dupFuncs.length * 10);
+
   const result =
 `HTML HEALTH REPORT
 === HTML ===
@@ -4225,26 +4250,13 @@ undefinedFns.length
 onclick count:
 ${onclicks.length}
 === Health Score ===
-${
-(
-100
--
-(validation.div_ok ? 0 : 20)
--
-(validation.js_ok ? 0 : 25)
--
-(validation.duplicate_ids.length * 5)
--
-(undefinedFns.length * 10)
--
-(dupFuncs.length * 10)
-)
-}/100
+${score}/100
 `;
 
-    window.latestHealthResult =
-      result;
-    openFloatPanel(
+  window.latestHealthResult =
+    result;
+
+  openFloatPanel(
     "HTML HEALTH",
     `
     <div class="float-panel-actions">
