@@ -1220,6 +1220,32 @@ ${text}`;
 
 }
 
+function loadCurrentIndexToRepair() {
+
+  switchAppPage("repair");
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    alert("修復エディタが見つかりません");
+    return;
+  }
+
+  editor.value =
+    "<!DOCTYPE html>\n" +
+    document.documentElement.outerHTML;
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus("読込: index.html");
+
+  closeFloatPanel();
+}
+
 function getExternalScriptSrcList(html) {
 
   const parser =
