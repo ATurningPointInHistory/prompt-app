@@ -229,8 +229,16 @@ function renderRepairSearchResults(
   const resultBox =
     get("repairSearchResult");
 
+  if (!resultBox) return;
+
+  const safeText =
+    String(sourceText || "");
+
+  const safeKeyword =
+    String(keyword || "");
+
   const lines =
-    sourceText.split("\n");
+    safeText.split("\n");
 
   const results = [];
 
@@ -250,7 +258,8 @@ function renderRepairSearchResults(
     }
 
     if (
-      line.includes(keyword)
+      safeKeyword &&
+      line.includes(safeKeyword)
     ) {
 
       results.push({
@@ -282,8 +291,7 @@ function renderRepairSearchResults(
       .map(item => {
 
         return `
-        <div
-          class="search-result-line">
+        <div class="search-result-line">
 
           <div class="small">
             [${escapeHtml(item.file)}]
@@ -292,7 +300,7 @@ function renderRepairSearchResults(
 
           ${highlightKeyword(
             item.line,
-            keyword
+            safeKeyword
           )}
 
         </div>
@@ -311,6 +319,7 @@ function renderRepairSearchResults(
       </div>
     `;
   }
+}
 }
 
 function highlightKeyword(text, keyword) {
