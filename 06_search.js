@@ -15,6 +15,7 @@ let repairSearchMatches = [];
 =============================== */
 
 function toggleRepairSearchBox() {
+
   openFloatPanel(
     "検索",
     `
@@ -22,29 +23,41 @@ function toggleRepairSearchBox() {
       id="repairSearch"
       placeholder="検索">
 
+    <div
+      id="repairSearchResult"
+      class="diagnose-box"
+      style="
+        display:none;
+        max-height:35vh;
+        overflow-y:auto;
+        margin-top:10px;
+      ">
+    </div>
+
     <div class="float-panel-actions">
       <button onclick="searchRepairText()">🔍</button>
       <button onclick="searchRepairPrev()">◀</button>
       <button onclick="searchRepairNext()">▶</button>
       <button onclick="clearRepairSearch()">✕</button>
     </div>
-
-    <div
-      id="repairSearchResult"
-      class="diagnose-box"
-      style="display:none;">
-    </div>
     `
   );
 
   setTimeout(() => {
-    const box = get("repairSearch");
+
+    const box =
+      get("repairSearch");
+
     if (!box) return;
 
     box.focus();
     box.select();
-    box.onkeydown = handleRepairSearchKey;
+
+    box.onkeydown =
+      handleRepairSearchKey;
+
   }, 50);
+
 }
 
 function handleRepairSearchKey(e) {
