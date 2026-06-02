@@ -1033,16 +1033,6 @@ function clearDiffResult() {
    Backup Helpers
 =============================== */
 
-function testExternalScriptList() {
-
-  alert(
-    getExternalScriptSrcList(
-      document.documentElement.outerHTML
-    ).join("\n")
-  );
-
-}
-
 function extractFunctionNames(html) {
   return [
     ...String(html || "").matchAll(
