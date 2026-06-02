@@ -235,6 +235,10 @@ function searchRepairPrev() {
   repairSearchIndex =
     index;
 
+  editor.focus({
+    preventScroll: true
+  });
+
   editor.setSelectionRange(
     index,
     index + keyword.length
@@ -296,6 +300,10 @@ function searchRepairNext() {
 
   repairSearchIndex =
     index + keyword.length;
+
+  editor.focus({
+    preventScroll: true
+  });
 
   editor.setSelectionRange(
     index,
