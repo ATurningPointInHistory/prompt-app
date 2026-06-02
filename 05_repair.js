@@ -1575,16 +1575,34 @@ function togglePinnedLine(
    Repair Diagnose / Preview
 =============================== */
 
-function diagnoseRepairHtml() {
+async function diagnoseRepairHtml() {
   let html =
     get("repairEditor").value;
+
+  const externalJs =
+    await collectExternalScriptText(html);
+
+  const jsForCheck =
+    html + "\n" + externalJs;
+
+  const scripts =
+    getExternalScriptSrcList(html);
+
+  const scriptInfo =
+    scripts.length
+      ? "✔ external scripts:\n" +
+        scripts.join("\n")
+      : "✔ external scripts:none";
+
   const parser =
     new DOMParser();
+
   const doc =
     parser.parseFromString(
       html,
       "text/html"
     );
+
   let cleanHtml = html
     .replace(
       /<script[\s\S]*?<\/script>/gi,
@@ -1594,156 +1612,208 @@ function diagnoseRepairHtml() {
       /<style[\s\S]*?<\/style>/gi,
       ""
     );
-  const report=[];
+
+  const report = [];
+
   report.push(
     "Repair HTML Diagnose\n"
   );
+
   // div整合性
   const open =
     (cleanHtml.match(
       /<div\b/g
-    )||[]).length;
+    ) || []).length;
+
   const close =
     (cleanHtml.match(
       /<\/div>/g
-    )||[]).length;
+    ) || []).length;
+
   report.push(
-    open===close
-    ? `✔ div: ${open}/${close}`
-    : `⚠ div: ${open}/${close}`
+    open === close
+      ? `✔ div: ${open}/${close}`
+      : `⚠ div: ${open}/${close}`
   );
+
   // DOM
   const parserError =
     doc.querySelector(
       "parsererror"
     );
+
   report.push(
     parserError
-    ? "⚠ DOM解析エラー"
-    : "✔ DOM解析OK"
+      ? "⚠ DOM解析エラー"
+      : "✔ DOM解析OK"
   );
+
   // id重複
   const ids =
     [...doc.querySelectorAll("[id]")]
-      .map(el=>el.id);
+      .map(el => el.id);
+
   const dupIds =
     [...new Set(
       ids.filter(
-        (id,i)=>
-        ids.indexOf(id)!==i
+        (id, i) =>
+        ids.indexOf(id) !== i
       )
     )];
+
   report.push(
     dupIds.length
-    ? `⚠ id重複\n${dupIds.join("\n")}`
-    : "✔ id重複なし"
+      ? `⚠ id重複\n${dupIds.join("\n")}`
+      : "✔ id重複なし"
   );
+
+  report.push("");
+  report.push(scriptInfo);
+
+  // JS構文
+  try {
+    const scriptBlocks =
+      [...doc.querySelectorAll("script")];
+
+    scriptBlocks.forEach(s => {
+      if (s.src) return;
+      new Function(
+        s.textContent
+      );
+    });
+
+    report.push("✔ JS構文OK");
+
+  } catch (e) {
+    report.push(
+      `⚠ JS構文エラー\n${e.message}`
+    );
+  }
+
   // function重複
   const htmlForFunctionCheck =
-    html
+    jsForCheck
       .replace(/\/\/.*$/gm, "")
       .replace(/\/\*[\s\S]*?\*\//g, "");
+
   const funcs =
     [...htmlForFunctionCheck.matchAll(
       /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm
     )]
-    .map(x=>x[1]);
+    .map(x => x[1]);
+
   const dupFuncs =
     [...new Set(
       funcs.filter(
-        (f,i)=>
-        funcs.indexOf(f)!==i
+        (f, i) =>
+        funcs.indexOf(f) !== i
       )
     )];
+
   report.push(
     dupFuncs.length
-    ? `⚠ function重複\n${dupFuncs.join("\n")}`
-    : "✔ function重複なし"
+      ? `⚠ function重複\n${dupFuncs.join("\n")}`
+      : "✔ function重複なし"
   );
+
   // onclick未定義
   const onclicks =
     [...html.matchAll(
       /onclick="([a-zA-Z0-9_$]+)\(/g
     )]
-    .map(x=>x[1]);
+    .map(x => x[1]);
+
   const undefinedFns =
     [...new Set(
       onclicks.filter(
-        fn=>
+        fn =>
         !funcs.includes(fn)
       )
     )];
+
   report.push(
     undefinedFns.length
-    ? `⚠ 未定義onclick\n${undefinedFns.join("\n")}`
-    : "✔ onclick定義OK"
+      ? `⚠ 未定義onclick\n${undefinedFns.join("\n")}`
+      : "✔ onclick定義OK"
   );
+
   // 未使用function
   const unusedFns =
-    funcs.filter(fn=>{
-      if(
-        fn==="diagnoseRepairHtml" ||
-        fn==="closeFloatPanel"
-      ){
+    funcs.filter(fn => {
+      if (
+        fn === "diagnoseRepairHtml" ||
+        fn === "closeFloatPanel"
+      ) {
         return false;
       }
+
       const useCount =
-        (html.match(
+        (jsForCheck.match(
           new RegExp(
-            "\\b"+fn+"\\b",
+            "\\b" + fn + "\\b",
             "g"
           )
-        )||[]).length;
-      return useCount<=1;
+        ) || []).length;
+
+      return useCount <= 1;
     });
+
   report.push(
     unusedFns.length
-    ? `⚠ 未使用function\n${
-        unusedFns
-          .slice(0,15)
-          .join("\n")
-      }`
-    : "✔ 未使用functionなし"
+      ? `⚠ 未使用function\n${
+          unusedFns
+            .slice(0, 15)
+            .join("\n")
+        }`
+      : "✔ 未使用functionなし"
   );
+
   // 孤立id
   const orphanIds =
-    ids.filter(id=>{
-      if(
+    ids.filter(id => {
+      if (
         !id ||
         /[()[\]^]/.test(id)
-      ){
+      ) {
         return false;
       }
-      try{
+
+      try {
         const useCount =
           (
-            html.match(
+            jsForCheck.match(
               new RegExp(
-                "\\b"+
-                escapeRegExp(id)+
+                "\\b" +
+                escapeRegExp(id) +
                 "\\b",
                 "g"
               )
-            )||[]
+            ) || []
           ).length;
-        return useCount<=1;
-      }catch{
+
+        return useCount <= 1;
+
+      } catch {
         return false;
       }
     });
+
   report.push(
     orphanIds.length
-    ? `⚠ 孤立id\n${
-        orphanIds
-          .slice(0,15)
-          .join("\n")
-      }`
-    : "✔ 孤立idなし"
+      ? `⚠ 孤立id\n${
+          orphanIds
+            .slice(0, 15)
+            .join("\n")
+        }`
+      : "✔ 孤立idなし"
   );
+
   const result =
     report.join("\n");
+
   window.latestDiagnoseResult =
     result;
+
   openFloatPanel(
     "編集内容診断",
     `
@@ -1755,7 +1825,7 @@ function diagnoseRepairHtml() {
     <pre
       id="diagnoseResultBox"
       class="code-preview">
-  ${escapeHtml(result)}
+${escapeHtml(result)}
     </pre>
     `
   );
