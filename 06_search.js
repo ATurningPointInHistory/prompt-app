@@ -259,7 +259,7 @@ function renderRepairSearchResults(
   lines.forEach((line, index) => {
     const fileMatch =
       line.match(
-        /^\/\*\s*=====\s*(.+?)\s*=====\s*\*$/
+        /^\/\*\s*=====\s*(.+?)\s*=====\s*\*\/$/
       );
 
     if (fileMatch) {
