@@ -9,53 +9,24 @@
 
 let repairSearchIndex = 0;
 let repairSearchMatches = [];
-let repairSearchKeyword = "";
-let repairSearchSourceText = "";
-let repairSearchResultOpen =
-  false;
 
 /* ===============================
    Search Panel
 =============================== */
 
 function toggleRepairSearchBox() {
-
   openFloatPanel(
     "検索",
     `
+    <input
+      id="repairSearch"
+      placeholder="検索">
+
     <div class="float-panel-actions">
-
-    <button onclick="
-    toggleRepairSearchInput()
-    ">
-    🔍
-    </button>
-
-    <button onclick="
-    searchRepairPrev()
-    ">
-    ◀
-    </button>
-
-    <button onclick="
-    searchRepairNext()
-    ">
-    ▶
-    </button>
-
-    <button onclick="
-    toggleSearchResultBox()
-    ">
-    結果
-    </button>
-
-</div>
-    <div
-      id="repairSearchInputRow"
-      class="search-input-row">
-      <input
-        id="repairSearch"
-        placeholder="検索">
+      <button onclick="searchRepairText()">🔍</button>
+      <button onclick="searchRepairPrev()">◀</button>
+      <button onclick="searchRepairNext()">▶</button>
+      <button onclick="clearRepairSearch()">✕</button>
     </div>
 
     <div
@@ -65,40 +36,22 @@ function toggleRepairSearchBox() {
     </div>
     `
   );
-}
 
-function toggleRepairSearchInput() {
-  const row =
-    get("repairSearchInputRow");
+  setTimeout(() => {
+    const box = get("repairSearch");
+    if (!box) return;
 
-  const box =
-    get("repairSearch");
-
-  if (!row || !box) return;
-
-  row.classList.toggle("open");
-
-  if (row.classList.contains("open")) {
-    setTimeout(() => {
-      box.focus();
-      box.select();
-      box.onkeydown =
-        handleRepairSearchKey;
-    }, 50);
-  } else {
-    box.blur();
-  }
+    box.focus();
+    box.select();
+    box.onkeydown = handleRepairSearchKey;
+  }, 50);
 }
 
 function handleRepairSearchKey(e) {
   if (e.key === "Enter") {
     e.preventDefault();
 
-    if (e.shiftKey) {
-      searchRepairPrev();
-    } else {
-      searchRepairText();
-    }
+    searchRepairText();
   }
 
   if (e.key === "Escape") {
@@ -115,44 +68,14 @@ function handleRepairSearchKey(e) {
   }
 }
 
-function toggleRepairSearchInput() {
-  const row = get("repairSearchInputRow");
-  const box = get("repairSearch");
-
-  if (!row || !box) return;
-
-  row.classList.toggle("open");
-
-  if (row.classList.contains("open")) {
-    setTimeout(() => {
-      box.focus();
-      box.select();
-      box.onkeydown = handleRepairSearchKey;
-    }, 50);
-  }
-}
-
-function toggleSearchResultBox() {
-
-  repairSearchResultOpen =
-    !repairSearchResultOpen;
-
-  const box =
-    get("repairSearchResult");
-
-  if (!box) return;
-
-  box.style.display =
-    repairSearchResultOpen
-      ? "block"
-      : "none";
-}
-
 function clearRepairSearch() {
   const box = get("repairSearch");
   if (!box) return;
 
   box.value = "";
+
+  repairSearchIndex = 0;
+  repairSearchMatches = [];
 
   const result =
     get("repairSearchResult");
@@ -204,31 +127,22 @@ async function searchRepairText() {
     [...sourceText.matchAll(regex)];
 
   repairSearchMatches =
-    matches.map(m => m.index);
+    [...html.matchAll(regex)]
+      .map(m => m.index);
 
-  repairSearchIndex = -1;
+  repairSearchIndex = 0;
 
   renderRepairSearchResults(
     keyword,
-    matches,
     sourceText
   );
 
-  const resultBox =
-      get("repairSearchResult");
-
-    if (resultBox) {
-      resultBox.style.display = "block";
-      resultBox.scrollIntoView({
-        block: "nearest"
-      });
-    }
-
-  console.log(
-    "repair search",
-    keyword,
-    matches.length
-  );
+  if (repairSearchMatches.length > 0) {
+    moveRepairSearchSelection(
+      repairSearchMatches[0],
+      keyword.length
+    );
+  }
 
   updateRepairStatus(
     `検索結果 ${matches.length}件`
@@ -241,67 +155,30 @@ function searchRepairPrev() {
 
   const keyword =
     get("repairSearch")
-      ?.value;
+      ?.value
+      .trim();
 
   if (!editor || !keyword) {
     alert("検索文字を入力してください");
     return;
   }
 
-  const text =
-    editor.value;
-
-  let index =
-    text.lastIndexOf(
-      keyword,
-      Math.max(
-        0,
-        editor.selectionStart - 1
-      )
-    );
-
-  if (index === -1) {
-    index =
-      text.lastIndexOf(keyword);
-  }
-
-  if (index === -1) {
-    alert("修復エディタ内では見つかりませんでした");
+  if (repairSearchMatches.length === 0) {
+    searchRepairText();
     return;
   }
 
-  repairSearchIndex =
-    index;
+  repairSearchIndex--;
 
-  editor.focus({
-    preventScroll: true
-  });
+  if (repairSearchIndex < 0) {
+    repairSearchIndex =
+      repairSearchMatches.length - 1;
+  }
 
-  editor.setSelectionRange(
-    index,
-    index + keyword.length
+  moveRepairSearchSelection(
+    repairSearchMatches[repairSearchIndex],
+    keyword.length
   );
-
-  if (
-    repairSearchKeyword &&
-    repairSearchSourceText
-  ) {
-    renderRepairSearchResults(
-      repairSearchKeyword,
-      [],
-      repairSearchSourceText
-    );
-  }
-
-  const box =
-    get("repairSearch");
-
-  if (box) {
-    box.blur();
-  }
-
-  updateCursorPosition();
-  updateLineNumbers();
 }
 
 function searchRepairNext() {
@@ -310,34 +187,39 @@ function searchRepairNext() {
 
   const keyword =
     get("repairSearch")
-      ?.value;
+      ?.value
+      .trim();
 
   if (!editor || !keyword) {
     alert("検索文字を入力してください");
     return;
   }
 
-  const text =
-    editor.value;
-
-  let index =
-    text.indexOf(
-      keyword,
-      repairSearchIndex
-    );
-
-  if (index === -1) {
-    index =
-      text.indexOf(keyword);
-  }
-
-  if (index === -1) {
-    alert("修復エディタ内では見つかりませんでした");
+  if (repairSearchMatches.length === 0) {
+    searchRepairText();
     return;
   }
 
-  repairSearchIndex =
-    index + keyword.length;
+  repairSearchIndex++;
+
+  if (
+    repairSearchIndex >=
+    repairSearchMatches.length
+  ) {
+    repairSearchIndex = 0;
+  }
+
+  moveRepairSearchSelection(
+    repairSearchMatches[repairSearchIndex],
+    keyword.length
+  );
+}
+
+function moveRepairSearchSelection(index, length) {
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
 
   editor.focus({
     preventScroll: true
@@ -345,26 +227,8 @@ function searchRepairNext() {
 
   editor.setSelectionRange(
     index,
-    index + keyword.length
+    index + length
   );
-
-  if (
-    repairSearchKeyword &&
-    repairSearchSourceText
-  ) {
-    renderRepairSearchResults(
-      repairSearchKeyword,
-      [],
-      repairSearchSourceText
-    );
-  }
-
-  const box =
-    get("repairSearch");
-
-  if (box) {
-    box.blur();
-  }
 
   updateCursorPosition();
   updateLineNumbers();
@@ -372,7 +236,6 @@ function searchRepairNext() {
 
 function renderRepairSearchResults(
   keyword,
-  matches,
   sourceText
 ) {
   const resultBox =
@@ -419,12 +282,7 @@ function renderRepairSearchResults(
   });
 
   resultBox.style.display =
-    repairSearchResultOpen
-      ? "block"
-      : "none";
-  resultBox.style.maxHeight = "45vh";
-  resultBox.style.overflowY = "auto";
-  resultBox.style.marginTop = "10px";
+    "block";
 
   if (results.length === 0) {
     resultBox.innerText =
@@ -438,15 +296,11 @@ function renderRepairSearchResults(
       .slice(0, 30)
       .map(item => {
         return `
-        <div class="search-result-line">
-          <div class="small">
-            [${escapeHtml(item.file)}]
-            line ${item.lineNumber}
-          </div>
-          ${highlightKeyword(
-            item.line,
-            safeKeyword
-          )}
+        <div
+          class="search-result-line"
+          title="${escapeHtml(item.file)} line ${item.lineNumber}">
+          [${escapeHtml(item.file)} L${item.lineNumber}]
+          ${highlightKeyword(item.line, safeKeyword)}
         </div>
         `;
       })
