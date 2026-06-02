@@ -94,7 +94,6 @@ function clearRepairSearch() {
 =============================== */
 
 async function searchRepairText() {
-
   const editor =
     get("repairEditor");
 
@@ -103,10 +102,7 @@ async function searchRepairText() {
       ?.value
       .trim();
 
-  if (
-    !editor ||
-    !keyword
-  ) {
+  if (!editor || !keyword) {
     return;
   }
 
@@ -115,10 +111,11 @@ async function searchRepairText() {
 
   const externalJs =
     await collectExternalScriptText(
-      html
+      "<!DOCTYPE html>\n" +
+      document.documentElement.outerHTML
     );
 
-  const jsForSearch =
+  const sourceText =
     html + "\n" + externalJs;
 
   const regex =
@@ -128,32 +125,23 @@ async function searchRepairText() {
     );
 
   const matches =
-    [...jsForSearch.matchAll(regex)];
+    [...sourceText.matchAll(regex)];
 
-  window.repairSearchResults =
-    matches.map(
-      m => m.index
-    );
+  repairSearchMatches =
+    matches.map(m => m.index);
 
-  window.repairSearchIndex = 0;
+  repairSearchIndex = -1;
 
   renderRepairSearchResults(
     keyword,
     matches,
-    jsForSearch
+    sourceText
   );
 
-  if (
-    matches.length
-  ) {
-    searchRepairNext();
-  } else {
-    updateRepairStatus(
-      "検索結果なし"
-    );
-  }
+  updateRepairStatus(
+    `検索結果 ${matches.length}件`
+  );
 }
-
 function searchRepairPrev() {
   const editor = get("repairEditor");
   const keyword = get("repairSearch").value;
