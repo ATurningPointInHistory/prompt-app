@@ -388,21 +388,18 @@ mark {
 
 #floatPanel{
   position:fixed;
-  right:12px;
+  right:10px;
   bottom:88px;
   left:auto;
   top:auto;
   z-index:998;
-  width:320px;
-  max-width:42vw;
-  max-height:72vh;
+  width:min(250px, 42vw);
+  max-height:66vh;
   overflow-y:auto;
   background:rgba(36,37,38,0.94);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
   border:1px solid rgba(255,255,255,0.16);
   border-radius:16px;
-  padding:12px;
+  padding:10px;
   box-shadow:0 8px 28px rgba(0,0,0,0.35);
 }
 
@@ -455,17 +452,17 @@ body:not(.dark) #floatPanel{
   margin-bottom:10px;
 }
 
-.float-panel-actions {
-  position: sticky;
-  bottom: 0;
-  z-index: 3;
-  background: var(--card);
-  padding-top: 8px;
+.float-panel-actions{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-top:8px;
 }
 
 .float-panel-actions button{
-  flex:1;
-  padding:10px;
+  width:100%;
+  padding:10px 0;
+  font-size:14px;
 }
 
 .float-list-btn{
@@ -474,6 +471,28 @@ body:not(.dark) #floatPanel{
   margin-top:6px;
   padding:8px 10px;
   font-size:12px;
+}
+
+.search-input-row{
+  display:none;
+  margin-top:8px;
+}
+
+.search-input-row.open{
+  display:block;
+}
+
+#repairSearchResult{
+  display:none;
+  max-height:34vh;
+  overflow-y:auto;
+  margin-top:10px;
+  padding:8px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:rgba(0,122,255,0.06);
+  font-size:11px;
+  white-space:normal;
 }
 
 .function-sort-row{
