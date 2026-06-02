@@ -21,9 +21,9 @@ function toggleRepairSearchBox() {
     `
     <div class="float-panel-actions">
       <button onclick="toggleRepairSearchInput()">🔎入力</button>
-      <button onclick="searchRepairPrev()">◀</button>
-      <button onclick="searchRepairNext()">▶</button>
-      <button onclick="clearRepairSearch()">✕</button>
+      <button onclick="this.blur();searchRepairPrev()">◀</button>
+      <button onclick="this.blur();searchRepairNext()">▶</button>
+      <button onclick="this.blur();clearRepairSearch()">✕</button>
     </div>
 
     <div
@@ -239,6 +239,14 @@ function searchRepairPrev() {
     index,
     index + keyword.length
   );
+
+  const box =
+    get("repairSearch");
+
+  if (box) {
+    box.blur();
+}
+
 }
 
 function searchRepairNext() {
@@ -282,6 +290,14 @@ function searchRepairNext() {
     index,
     index + keyword.length
   );
+
+  const box =
+    get("repairSearch");
+
+  if (box) {
+    box.blur();
+}
+
 }
 
 function renderRepairSearchResults(
