@@ -418,7 +418,10 @@ function renderRepairSearchResults(
     }
   });
 
-  resultBox.style.display = "block";
+  resultBox.style.display =
+    repairSearchResultOpen
+      ? "block"
+      : "none";
   resultBox.style.maxHeight = "45vh";
   resultBox.style.overflowY = "auto";
   resultBox.style.marginTop = "10px";
