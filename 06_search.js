@@ -93,37 +93,65 @@ function clearRepairSearch() {
    Search Action
 =============================== */
 
-function searchRepairText() {
-  const editor = get("repairEditor");
-  const keyword = get("repairSearch").value;
-  const resultBox = get("repairSearchResult");
+async function searchRepairText() {
 
-  if (!keyword) {
-    alert("検索文字を入力してください");
+  const editor =
+    get("repairEditor");
+
+  const keyword =
+    get("repairSearch")
+      ?.value
+      .trim();
+
+  if (
+    !editor ||
+    !keyword
+  ) {
     return;
   }
 
-  const text = editor.value;
-  const index = text.indexOf(keyword);
+  const html =
+    editor.value;
 
-  if (index === -1) {
-    resultBox.style.display = "block";
-    resultBox.innerText = "検索結果：0件";
-    alert("見つかりませんでした");
-    return;
-  }
+  const externalJs =
+    await collectExternalScriptText(
+      html
+    );
 
-  repairSearchIndex =
-    index + keyword.length;
+  const jsForSearch =
+    html + "\n" + externalJs;
 
-  editor.focus();
-  editor.setSelectionRange(
-    index,
-    index + keyword.length
+  const regex =
+    new RegExp(
+      escapeRegExp(keyword),
+      "gi"
+    );
+
+  const matches =
+    [...jsForSearch.matchAll(regex)];
+
+  window.repairSearchResults =
+    matches.map(
+      m => m.index
+    );
+
+  window.repairSearchIndex = 0;
+
+  renderRepairSearchResults(
+    keyword,
+    matches,
+    jsForSearch
   );
 
-  renderRepairSearchResults(keyword);
-  resultBox.style.display = "block";
+  if (
+    matches.length
+  ) {
+    searchRepairNext();
+  } else {
+    updateRepairStatus(
+      "検索結果なし"
+    );
+  }
 }
 
 function searchRepairPrev() {
@@ -204,16 +232,21 @@ function searchRepairNext() {
   renderRepairSearchResults(keyword);
 }
 
-function renderRepairSearchResults(keyword) {
+function renderRepairSearchResults(
+  keyword,
+  matches,
+  sourceText
+) {
   const editor = get("repairEditor");
   const resultBox = get("repairSearchResult");
-  const text = editor.value;
+  const text = sourceText;
   const lines = text.split("\n");
   const results = [];
 
   lines.forEach((line, index) => {
     if (line.includes(keyword)) {
       results.push({
+        file: currentFile,
         lineNumber: index + 1,
         line
       });
