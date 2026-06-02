@@ -7,20 +7,28 @@
    Error Handler
 =============================== */
 
-window.onerror = function(
-  message,
-  source,
-  line,
-  col,
-  error
-) {
+window.onerror =
+  function(
+    message,
+    source,
+    line,
+    column,
+    error
+  ) {
+
   localStorage.setItem(
     "lastCrash",
     JSON.stringify({
-      time: new Date().toISOString(),
       message,
       line,
-      column: col
+      column,
+      source,
+      stack:
+        error?.stack ||
+        "no stack",
+      time:
+        new Date()
+          .toISOString()
     })
   );
 
@@ -37,7 +45,11 @@ ${message}
 line:
 ${line}
 column:
-${col}`;
+${column}
+source:
+${source}
+stack:
+${error?.stack || "no stack"}`;
 };
 
 /* ===============================
