@@ -943,6 +943,7 @@ function buildRepairToolsHtml() {
   return `
 <button class="float-list-btn"
   onclick="loadRepairHtml()">📖 HTML読込</button>
+<button class="float-list-btn" onclick="backupPartialScript()">📦 JS部分読込</button>
 <button class="float-list-btn"
   onclick="saveRepairHtml()">💾 修正版保存</button>
 <button class="float-list-btn"
