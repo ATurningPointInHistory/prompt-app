@@ -138,6 +138,12 @@ async function searchRepairText() {
     sourceText
   );
 
+  console.log(
+    "repair search",
+    keyword,
+    matches.length
+  );
+
   updateRepairStatus(
     `検索結果 ${matches.length}件`
   );
@@ -280,8 +286,10 @@ function renderRepairSearchResults(
     }
   });
 
-  resultBox.style.display =
-    "block";
+  resultBox.style.display = "block";
+  resultBox.style.maxHeight = "45vh";
+  resultBox.style.overflowY = "auto";
+  resultBox.style.marginTop = "10px";
 
   if (results.length === 0) {
     resultBox.innerText =
