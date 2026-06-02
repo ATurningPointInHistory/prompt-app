@@ -19,54 +19,25 @@ function toggleRepairSearchBox() {
   openFloatPanel(
     "検索",
     `
-    <input
-      id="repairSearch"
-      placeholder="検索">
-
-    <div
-      id="repairSearchResult"
-      class="diagnose-box"
-      style="
-        display:none;
-        max-height:35vh;
-        overflow-y:auto;
-        margin-top:10px;
-      ">
-    </div>
-
     <div class="float-panel-actions">
-      <button onclick="searchRepairText()">🔍</button>
+      <button onclick="toggleRepairSearchInput()">🔎</button>
       <button onclick="searchRepairPrev()">◀</button>
       <button onclick="searchRepairNext()">▶</button>
       <button onclick="clearRepairSearch()">✕</button>
     </div>
+
+    <div id="repairSearchInputRow" class="search-input-row">
+      <input
+        id="repairSearch"
+        placeholder="検索">
+    </div>
+
+    <div
+      id="repairSearchResult"
+      class="diagnose-box">
+    </div>
     `
   );
-
-  setTimeout(() => {
-
-    const box =
-      get("repairSearch");
-
-    if (!box) return;
-
-    box.focus();
-    box.select();
-
-    box.onkeydown =
-      handleRepairSearchKey;
-
-    box.oninput = () => {
-      clearTimeout(window.repairSearchTimer);
-
-      window.repairSearchTimer =
-        setTimeout(() => {
-          searchRepairText();
-        }, 300);
-    };
-
-  }, 50);
-
 }
 
 function handleRepairSearchKey(e) {
@@ -91,6 +62,23 @@ function handleRepairSearchKey(e) {
     } else {
       closeFloatPanel();
     }
+  }
+}
+
+function toggleRepairSearchInput() {
+  const row = get("repairSearchInputRow");
+  const box = get("repairSearch");
+
+  if (!row || !box) return;
+
+  row.classList.toggle("open");
+
+  if (row.classList.contains("open")) {
+    setTimeout(() => {
+      box.focus();
+      box.select();
+      box.onkeydown = handleRepairSearchKey;
+    }, 50);
   }
 }
 
