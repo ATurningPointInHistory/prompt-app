@@ -9,6 +9,8 @@
 
 let repairSearchIndex = 0;
 let repairSearchMatches = [];
+let repairSearchKeyword = "";
+let repairSearchSourceText = "";
 
 /* ===============================
    Search Panel
@@ -233,20 +235,31 @@ function searchRepairPrev() {
   repairSearchIndex =
     index;
 
-  editor.focus();
-
   editor.setSelectionRange(
     index,
     index + keyword.length
   );
+
+  if (
+    repairSearchKeyword &&
+    repairSearchSourceText
+  ) {
+    renderRepairSearchResults(
+      repairSearchKeyword,
+      [],
+      repairSearchSourceText
+    );
+  }
 
   const box =
     get("repairSearch");
 
   if (box) {
     box.blur();
-}
+  }
 
+  updateCursorPosition();
+  updateLineNumbers();
 }
 
 function searchRepairNext() {
@@ -284,20 +297,31 @@ function searchRepairNext() {
   repairSearchIndex =
     index + keyword.length;
 
-  editor.focus();
-
   editor.setSelectionRange(
     index,
     index + keyword.length
   );
+
+  if (
+    repairSearchKeyword &&
+    repairSearchSourceText
+  ) {
+    renderRepairSearchResults(
+      repairSearchKeyword,
+      [],
+      repairSearchSourceText
+    );
+  }
 
   const box =
     get("repairSearch");
 
   if (box) {
     box.blur();
-}
+  }
 
+  updateCursorPosition();
+  updateLineNumbers();
 }
 
 function renderRepairSearchResults(
