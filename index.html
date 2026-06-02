@@ -295,21 +295,17 @@ body.dark button.active-panel {
   margin-top: 0;
 }
 
-.search-input-row{
-  display:none;
-  margin-top:8px;
-}
-
-.search-input-row.open{
-  display:block;
-}
-
 #repairSearchResult{
-
-  max-height:18vh;
-
+  display:none;
+  max-height:58px;
   overflow-y:auto;
-
+  margin-top:8px;
+  padding:6px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:rgba(0,122,255,0.08);
+  font-size:11px;
+  white-space:normal;
 }
 
 #commandMenu {
@@ -356,14 +352,17 @@ mark {
 }
 
 .search-result-line{
-  padding:6px;
-  margin-bottom:6px;
+  display:block;
+  height:24px;
+  line-height:24px;
+  padding:0 6px;
+  margin:0;
   font-size:11px;
-  line-height:1.35;
-  border-radius:8px;
-  overflow:hidden;
   border-bottom:1px solid var(--border);
-  white-space:pre-wrap;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  cursor:pointer;
 }
 
 .search-result-line:hover{
@@ -391,11 +390,22 @@ mark {
 }
 
 #floatPanel{
-
-  width:260px;
-
-  max-height:30vh;
-
+  position:fixed;
+  right:18px;
+  bottom:88px;
+  left:auto;
+  top:auto;
+  z-index:998;
+  width:min(280px, calc(100vw - 36px));
+  max-height:34vh;
+  overflow-y:auto;
+  background:rgba(36,37,38,0.88);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.18);
+  border-radius:15px;
+  padding:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.25);
 }
 
 .float-panel-header{
@@ -651,17 +661,6 @@ body:not(.dark) #floatPanel{
 .code-string { color: #a5d6ff; }
 .code-comment { color: #8b949e; }
 .code-keyword { color: #ff7b72; }
-
-@media (max-width:700px){
-  #floatPanel{
-    width:46vw;
-    min-width:250px;
-    right:10px;
-    bottom:80px;
-    max-height:68vh;
-    font-size:12px;
-  }
-}
 
 </style>
 </head>
