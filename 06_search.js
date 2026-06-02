@@ -11,6 +11,8 @@ let repairSearchIndex = 0;
 let repairSearchMatches = [];
 let repairSearchKeyword = "";
 let repairSearchSourceText = "";
+let repairSearchResultOpen =
+  false;
 
 /* ===============================
    Search Panel
@@ -22,12 +24,32 @@ function toggleRepairSearchBox() {
     "検索",
     `
     <div class="float-panel-actions">
-      <button onclick="toggleRepairSearchInput()">🔎入力</button>
-      <button onclick="this.blur();searchRepairPrev()">◀</button>
-      <button onclick="this.blur();searchRepairNext()">▶</button>
-      <button onclick="this.blur();clearRepairSearch()">✕</button>
-    </div>
 
+    <button onclick="
+    toggleRepairSearchInput()
+    ">
+    🔍
+    </button>
+
+    <button onclick="
+    searchRepairPrev()
+    ">
+    ◀
+    </button>
+
+    <button onclick="
+    searchRepairNext()
+    ">
+    ▶
+    </button>
+
+    <button onclick="
+    toggleSearchResultBox()
+    ">
+    結果
+    </button>
+
+</div>
     <div
       id="repairSearchInputRow"
       class="search-input-row">
@@ -108,6 +130,22 @@ function toggleRepairSearchInput() {
       box.onkeydown = handleRepairSearchKey;
     }, 50);
   }
+}
+
+function toggleSearchResultBox() {
+
+  repairSearchResultOpen =
+    !repairSearchResultOpen;
+
+  const box =
+    get("repairSearchResult");
+
+  if (!box) return;
+
+  box.style.display =
+    repairSearchResultOpen
+      ? "block"
+      : "none";
 }
 
 function clearRepairSearch() {
