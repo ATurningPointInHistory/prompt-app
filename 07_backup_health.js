@@ -1123,6 +1123,89 @@ function extractIds(html) {
    External Script Helpers
 =============================== */
 
+async function backupPartialScript() {
+
+  const html =
+    document.documentElement.outerHTML;
+
+  const scripts =
+    getExternalScriptSrcList(html);
+
+  if (!scripts.length) {
+    alert("外部JSなし");
+    return;
+  }
+
+  openFloatPanel(
+    "部分バックアップ",
+    scripts.map(src=>`
+
+      <button
+        class="float-list-btn"
+        onclick="
+        loadExternalScriptToRepair(
+        '${src}'
+        )">
+
+        ${src}
+
+      </button>
+
+    `).join("")
+  );
+}
+
+async function loadExternalScriptToRepair(src){
+
+  try{
+
+    const res =
+      await fetch(src);
+
+    if(!res.ok){
+      throw new Error(
+        "load failed"
+      );
+    }
+
+    const text =
+      await res.text();
+
+    switchAppPage(
+      "repair"
+    );
+
+    const editor =
+      get("repairEditor");
+
+    editor.value =
+`/* ===== ${src} ===== */
+
+${text}`;
+
+    repairLastValue =
+      editor.value;
+
+    updateLineNumbers();
+    updateCursorPosition();
+
+    updateRepairStatus(
+      `読込: ${src}`
+    );
+
+    closeFloatPanel();
+
+  }catch(err){
+
+    alert(
+      "読込失敗\n\n"+
+      err.message
+    );
+
+  }
+
+}
+
 function getExternalScriptSrcList(html) {
 
   const parser =
