@@ -579,6 +579,10 @@ async function backupProgram() {
     backup_note: note,
     changelog: CHANGELOG,
     validation: validateBackupHtml(html),
+    external_scripts:
+      getExternalScriptSrcList(
+        document.documentElement.outerHTML
+      ),
     html: html,
     localStorageData: {
       templates: loadJson("templates", []),
