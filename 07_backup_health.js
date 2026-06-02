@@ -415,7 +415,7 @@ const html =
       /<\/body>/i,
       `
 <script>
-${externalJs}
+${externalJs.replace(/<\/script>/gi, "<\\/script>")}
 </script>
 </body>`
     );
@@ -578,11 +578,13 @@ async function backupProgram() {
     created_at: new Date().toISOString(),
     backup_note: note,
     changelog: CHANGELOG,
-    validation: validateBackupHtml(html),
-    external_scripts:
-      getExternalScriptSrcList(
-        document.documentElement.outerHTML
-      ),
+    validation: {
+      ...validateBackupHtml(html),
+      external_scripts:
+        getExternalScriptSrcList(
+          document.documentElement.outerHTML
+        )
+    },
     html: html,
     localStorageData: {
       templates: loadJson("templates", []),
