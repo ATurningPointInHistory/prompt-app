@@ -237,46 +237,86 @@ function renderRepairSearchResults(
   matches,
   sourceText
 ) {
-  const editor = get("repairEditor");
-  const resultBox = get("repairSearchResult");
-  const text = sourceText;
-  const lines = text.split("\n");
+
+  const resultBox =
+    get("repairSearchResult");
+
+  const lines =
+    sourceText.split("\n");
+
   const results = [];
 
+  let currentFile =
+    "repairEditor";
+
   lines.forEach((line, index) => {
-    if (line.includes(keyword)) {
+
+    const fileMatch =
+      line.match(
+        /^\/\*\s*=====\s*(.+?)\s*=====\s*\*\/$/
+      );
+
+    if (fileMatch) {
+      currentFile =
+        fileMatch[1];
+    }
+
+    if (
+      line.includes(keyword)
+    ) {
+
       results.push({
         file: currentFile,
         lineNumber: index + 1,
         line
       });
+
     }
+
   });
 
-  resultBox.style.display = "block";
+  resultBox.style.display =
+    "block";
 
-  if (results.length === 0) {
-    resultBox.innerText = "検索結果：0件";
+  if (
+    results.length === 0
+  ) {
+    resultBox.innerText =
+      "検索結果：0件";
     return;
   }
 
   resultBox.innerHTML =
     `<b>検索結果：${results.length}件</b>` +
-    results.slice(0, 30).map(item => {
-      return `
-        <div
-          class="search-result-line"
-          onclick="
-            jumpToLine(${item.lineNumber});
-            closeFloatPanelKeepEditorSelection();
-          ">
-          <b>${item.lineNumber}</b>:
-          ${highlightKeyword(item.line, keyword)}
-        </div>
-      `;
-    }).join("");
 
-  if (results.length > 30) {
+    results
+      .slice(0, 30)
+      .map(item => {
+
+        return `
+        <div
+          class="search-result-line">
+
+          <div class="small">
+            [${escapeHtml(item.file)}]
+            line ${item.lineNumber}
+          </div>
+
+          ${highlightKeyword(
+            item.line,
+            keyword
+          )}
+
+        </div>
+        `;
+
+      })
+      .join("");
+
+  if (
+    results.length > 30
+  ) {
+
     resultBox.innerHTML += `
       <div class="small">
         ※ 30件まで表示しています
