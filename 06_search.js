@@ -54,7 +54,7 @@ function handleRepairSearchKey(e) {
     if (e.shiftKey) {
       searchRepairPrev();
     } else {
-      searchRepairNext();
+      searchRepairText();
     }
   }
 
