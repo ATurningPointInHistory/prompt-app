@@ -1137,8 +1137,21 @@ async function backupPartialScript() {
   }
 
   openFloatPanel(
-    "部分バックアップ",
-    scripts.map(src=>`
+    "部分読込",
+
+    `
+    <button
+      class="float-list-btn"
+      onclick="
+      loadCurrentIndexToRepair()
+      ">
+      index.html
+    </button>
+    `
+
+    +
+
+    scripts.map(src => `
 
       <button
         class="float-list-btn"
@@ -1152,6 +1165,7 @@ async function backupPartialScript() {
       </button>
 
     `).join("")
+
   );
 }
 
