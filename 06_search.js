@@ -20,13 +20,15 @@ function toggleRepairSearchBox() {
     "検索",
     `
     <div class="float-panel-actions">
-      <button onclick="toggleRepairSearchInput()">🔎</button>
+      <button onclick="toggleRepairSearchInput()">🔎入力</button>
       <button onclick="searchRepairPrev()">◀</button>
       <button onclick="searchRepairNext()">▶</button>
       <button onclick="clearRepairSearch()">✕</button>
     </div>
 
-    <div id="repairSearchInputRow" class="search-input-row">
+    <div
+      id="repairSearchInputRow"
+      class="search-input-row">
       <input
         id="repairSearch"
         placeholder="検索">
@@ -34,10 +36,34 @@ function toggleRepairSearchBox() {
 
     <div
       id="repairSearchResult"
-      class="diagnose-box">
+      class="diagnose-box"
+      style="display:none;">
     </div>
     `
   );
+}
+
+function toggleRepairSearchInput() {
+  const row =
+    get("repairSearchInputRow");
+
+  const box =
+    get("repairSearch");
+
+  if (!row || !box) return;
+
+  row.classList.toggle("open");
+
+  if (row.classList.contains("open")) {
+    setTimeout(() => {
+      box.focus();
+      box.select();
+      box.onkeydown =
+        handleRepairSearchKey;
+    }, 50);
+  } else {
+    box.blur();
+  }
 }
 
 function handleRepairSearchKey(e) {
