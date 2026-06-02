@@ -968,12 +968,6 @@ function buildRepairToolsHtml() {
 <button class="float-list-btn" onclick="deleteCommentedCleanupBlocks()">🗑 コメント化済みを完全削除</button>
 <button class="float-list-btn" onclick="previewRepairHtml()">🎨 色分けプレビュー</button>
 <button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
-
-<button class="float-list-btn"
-onclick="testExternalScriptList()">
-🧪 JS一覧テスト
-</button>
-
 <button class="float-list-btn" onclick="reloadAppPage()">🔄 ページ更新</button>
 `;
 }
