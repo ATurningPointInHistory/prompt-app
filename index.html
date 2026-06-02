@@ -295,20 +295,17 @@ body.dark button.active-panel {
   margin-top: 0;
 }
 
-#repairSearchResult {
-  display: none;
-  max-height: 38vh;
-  overflow-y: auto;
-  margin-top: 8px;
-  margin-bottom: 10px;
-  font-size: 11px;
-  background: var(--card);
-  color: var(--text);
-  border: 1px solid var(--border);
-  padding: 10px;
-  white-space: normal;
-  position: relative;
-  z-index: 1;
+#repairSearchResult{
+  display:none;
+  max-height:40vh;
+  overflow-y:auto;
+  margin-top:10px;
+  padding:8px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:rgba(0,122,255,0.06);
+  font-size:11px;
+  white-space:normal;
 }
 
 #commandMenu {
@@ -354,29 +351,15 @@ mark {
   border-radius: 4px;
 }
 
-.search-result-line {
-  font-family:
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    monospace;
-
-  font-size:12px;
-
-  padding:8px;
-
-  border-bottom:
-    1px solid
-    var(--border);
-
-  white-space:
-    pre-wrap;
-
-  cursor:pointer;
-
-  transition:0.15s;
-
-  border-radius:6px;
+.search-result-line{
+  padding:6px;
+  margin-bottom:6px;
+  font-size:11px;
+  line-height:1.35;
+  border-radius:8px;
+  overflow:hidden;
+  border-bottom:1px solid var(--border);
+  white-space:pre-wrap;
 }
 
 .search-result-line:hover{
@@ -405,21 +388,22 @@ mark {
 
 #floatPanel{
   position:fixed;
-  right:18px;
+  right:12px;
   bottom:88px;
   left:auto;
   top:auto;
   z-index:998;
-  width:min(280px, calc(100vw - 36px));
-  max-height:70vh;
+  width:320px;
+  max-width:42vw;
+  max-height:72vh;
   overflow-y:auto;
-  background:rgba(36,37,38,0.88);
+  background:rgba(36,37,38,0.94);
   backdrop-filter:blur(8px);
   -webkit-backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,0.18);
-  border-radius:15px;
+  border:1px solid rgba(255,255,255,0.16);
+  border-radius:16px;
   padding:12px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.25);
+  box-shadow:0 8px 28px rgba(0,0,0,0.35);
 }
 
 .float-panel-header{
@@ -675,6 +659,17 @@ body:not(.dark) #floatPanel{
 .code-string { color: #a5d6ff; }
 .code-comment { color: #8b949e; }
 .code-keyword { color: #ff7b72; }
+
+@media (max-width:700px){
+  #floatPanel{
+    width:46vw;
+    min-width:250px;
+    right:10px;
+    bottom:80px;
+    max-height:68vh;
+    font-size:12px;
+  }
+}
 
 </style>
 </head>
