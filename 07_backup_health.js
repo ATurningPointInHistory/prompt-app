@@ -579,7 +579,10 @@ async function backupProgram() {
     backup_note: note,
     changelog: CHANGELOG,
     validation: {
-      ...validateBackupHtml(html),
+      ...validateBackupHtml(
+        "<!DOCTYPE html>\n" +
+        document.documentElement.outerHTML
+      ),
       external_scripts:
         getExternalScriptSrcList(
           document.documentElement.outerHTML
