@@ -683,34 +683,96 @@ async function saveProgramHtml() {
 function restoreProgramBackup() {
   const input =
     document.createElement("input");
+
   input.type = "file";
   input.accept = ".json,application/json";
+
   input.onchange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
+
+    const reader =
+      new FileReader();
+
     reader.onload = () => {
       try {
-        const data = JSON.parse(reader.result);
+        const data =
+          JSON.parse(reader.result);
+
         if (!data || !data.localStorageData) {
           alert("フルバックアップ形式ではありません");
           return;
         }
+
+        const scripts =
+          data.validation?.external_scripts || [];
+
         const info =
           "バックアップ情報\n\n" +
-          "version: " + (data.app_version || data.version || "不明") + "\n" +
-          "created_at: " + (data.created_at || "不明") + "\n" +
-          "note: " + (data.backup_note || "なし") + "\n\n" +
-          "復元方法を選んでください。\n\n" +
+
+          "version: " +
+          (
+            data.app_version ||
+            data.version ||
+            "不明"
+          ) +
+          "\n" +
+
+          "created_at: " +
+          (data.created_at || "不明") +
+          "\n" +
+
+          "note: " +
+          (data.backup_note || "なし") +
+          "\n\n" +
+
+          "validation:\n" +
+
+          "div: " +
+          (
+            data.validation?.div_ok
+              ? "OK"
+              : "NG"
+          ) +
+          "\n" +
+
+          "js: " +
+          (
+            data.validation?.js_ok
+              ? "OK"
+              : "NG"
+          ) +
+          "\n\n" +
+
+          "External Scripts:\n" +
+          (
+            scripts.length
+              ? scripts.join("\n")
+              : "なし"
+          ) +
+
+          "\n\n復元方法を選んでください。\n\n" +
+
           "OK：設定のみ復元\n" +
           "キャンセル：中止\n\n" +
-          "※HTML本体は修復モードで読み込んで保存してください。";
-        const ok = confirm(info);
-        if (!ok) return;
-        restoreLocalStorageOnly(data.localStorageData);
 
-        alert("設定のみ復元完了。再読み込みします。");
+          "※HTML本体は修復モードで読み込んで保存してください。";
+
+        const ok =
+          confirm(info);
+
+        if (!ok) return;
+
+        restoreLocalStorageOnly(
+          data.localStorageData
+        );
+
+        alert(
+          "設定のみ復元完了。再読み込みします。"
+        );
+
         location.reload();
+
       } catch (err) {
         alert(
           "フル復元に失敗しました\n\n" +
@@ -718,8 +780,10 @@ function restoreProgramBackup() {
         );
       }
     };
+
     reader.readAsText(file);
   };
+
   input.click();
 }
 
