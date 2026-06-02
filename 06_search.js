@@ -56,6 +56,15 @@ function toggleRepairSearchBox() {
     box.onkeydown =
       handleRepairSearchKey;
 
+    box.oninput = () => {
+      clearTimeout(window.repairSearchTimer);
+
+      window.repairSearchTimer =
+        setTimeout(() => {
+          searchRepairText();
+        }, 300);
+    };
+
   }, 50);
 
 }
@@ -150,6 +159,16 @@ async function searchRepairText() {
     matches,
     sourceText
   );
+
+  const resultBox =
+      get("repairSearchResult");
+
+    if (resultBox) {
+      resultBox.style.display = "block";
+      resultBox.scrollIntoView({
+        block: "nearest"
+      });
+    }
 
   console.log(
     "repair search",
