@@ -142,16 +142,22 @@ async function searchRepairText() {
     `検索結果 ${matches.length}件`
   );
 }
-function searchRepairPrev() {
-  const editor = get("repairEditor");
-  const keyword = get("repairSearch").value;
 
-  if (!keyword) {
+function searchRepairPrev() {
+  const editor =
+    get("repairEditor");
+
+  const keyword =
+    get("repairSearch")
+      ?.value;
+
+  if (!editor || !keyword) {
     alert("検索文字を入力してください");
     return;
   }
 
-  const text = editor.value;
+  const text =
+    editor.value;
 
   let index =
     text.lastIndexOf(
@@ -163,35 +169,41 @@ function searchRepairPrev() {
     );
 
   if (index === -1) {
-    index = text.lastIndexOf(keyword);
+    index =
+      text.lastIndexOf(keyword);
   }
 
   if (index === -1) {
-    alert("見つかりませんでした");
+    alert("修復エディタ内では見つかりませんでした");
     return;
   }
 
-  repairSearchIndex = index;
+  repairSearchIndex =
+    index;
 
   editor.focus();
+
   editor.setSelectionRange(
     index,
     index + keyword.length
   );
-
-  renderRepairSearchResults(keyword);
 }
 
 function searchRepairNext() {
-  const editor = get("repairEditor");
-  const keyword = get("repairSearch").value;
+  const editor =
+    get("repairEditor");
 
-  if (!keyword) {
+  const keyword =
+    get("repairSearch")
+      ?.value;
+
+  if (!editor || !keyword) {
     alert("検索文字を入力してください");
     return;
   }
 
-  const text = editor.value;
+  const text =
+    editor.value;
 
   let index =
     text.indexOf(
@@ -200,11 +212,12 @@ function searchRepairNext() {
     );
 
   if (index === -1) {
-    index = text.indexOf(keyword);
+    index =
+      text.indexOf(keyword);
   }
 
   if (index === -1) {
-    alert("見つかりませんでした");
+    alert("修復エディタ内では見つかりませんでした");
     return;
   }
 
@@ -212,12 +225,11 @@ function searchRepairNext() {
     index + keyword.length;
 
   editor.focus();
+
   editor.setSelectionRange(
     index,
     index + keyword.length
   );
-
-  renderRepairSearchResults(keyword);
 }
 
 function renderRepairSearchResults(
@@ -225,7 +237,6 @@ function renderRepairSearchResults(
   matches,
   sourceText
 ) {
-
   const resultBox =
     get("repairSearchResult");
 
@@ -246,38 +257,33 @@ function renderRepairSearchResults(
     "repairEditor";
 
   lines.forEach((line, index) => {
-
     const fileMatch =
       line.match(
-        /^\/\*\s*=====\s*(.+?)\s*=====\s*\*\/$/
+        /^\/\*\s*=====\s*(.+?)\s*=====\s*\*$/
       );
 
     if (fileMatch) {
       currentFile =
         fileMatch[1];
+      return;
     }
 
     if (
       safeKeyword &&
       line.includes(safeKeyword)
     ) {
-
       results.push({
         file: currentFile,
         lineNumber: index + 1,
         line
       });
-
     }
-
   });
 
   resultBox.style.display =
     "block";
 
-  if (
-    results.length === 0
-  ) {
+  if (results.length === 0) {
     resultBox.innerText =
       "検索結果：0件";
     return;
@@ -285,34 +291,25 @@ function renderRepairSearchResults(
 
   resultBox.innerHTML =
     `<b>検索結果：${results.length}件</b>` +
-
     results
       .slice(0, 30)
       .map(item => {
-
         return `
         <div class="search-result-line">
-
           <div class="small">
             [${escapeHtml(item.file)}]
             line ${item.lineNumber}
           </div>
-
           ${highlightKeyword(
             item.line,
             safeKeyword
           )}
-
         </div>
         `;
-
       })
       .join("");
 
-  if (
-    results.length > 30
-  ) {
-
+  if (results.length > 30) {
     resultBox.innerHTML += `
       <div class="small">
         ※ 30件まで表示しています
@@ -320,11 +317,13 @@ function renderRepairSearchResults(
     `;
   }
 }
-}
 
 function highlightKeyword(text, keyword) {
-  const safeText = escapeHtml(text);
-  const safeKeyword = escapeHtml(keyword);
+  const safeText =
+    escapeHtml(text);
+
+  const safeKeyword =
+    escapeHtml(keyword);
 
   const regex =
     new RegExp(
