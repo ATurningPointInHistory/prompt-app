@@ -227,19 +227,37 @@ function moveRepairSearchSelection(index, length) {
   const editor =
     get("repairEditor");
 
-  if (!editor) return;
+  if (
+    !editor ||
+    index === undefined ||
+    index === null
+  ) return;
 
-  editor.focus({
-    preventScroll: true
-  });
+  editor.focus();
 
   editor.setSelectionRange(
     index,
     index + length
   );
 
+  const line =
+    editor.value
+      .slice(0, index)
+      .split("\n")
+      .length;
+
+  editor.scrollTop =
+    Math.max(
+      0,
+      (line - 4) * 18
+    );
+
   updateCursorPosition();
   updateLineNumbers();
+
+  updateRepairStatus(
+    `検索移動: ${repairSearchIndex + 1}/${repairSearchMatches.length}`
+  );
 }
 
 function renderRepairSearchResults(
