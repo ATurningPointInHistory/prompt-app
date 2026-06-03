@@ -27,32 +27,34 @@ function closeAllManagers() {
 }
 
 function updatePanelButtonStates() {
-
-  const pairs = [
-    ["templateBtn", "template-manager"],
-    ["dangerBtn", "danger-manager"],
-    ["patternBtn", "pattern-manager"],
-    ["aiPresetBtn", "ai-preset-manager"]
-  ];
-
-  pairs.forEach(([btnId, panelId]) => {
-
-    const btn =
-      get(btnId);
-
-    const panel =
-      get(panelId);
-
-    if (!btn || !panel) {
-      return;
-    }
-
-    btn.classList.toggle(
+  const templateBtn = get("templateBtn");
+  const dangerBtn = get("dangerBtn");
+  const patternBtn = get("patternBtn");
+  const aiPresetBtn = get("aiPresetBtn");
+  if (templateBtn) {
+    templateBtn.classList.toggle(
       "active-panel",
-      panel.style.display !== "none"
+      get("template-manager").style.display !== "none"
     );
-
-  });
+  }
+  if (dangerBtn) {
+    dangerBtn.classList.toggle(
+      "active-panel",
+      get("danger-manager").style.display !== "none"
+    );
+  }
+  if (patternBtn) {
+    patternBtn.classList.toggle(
+      "active-panel",
+      get("pattern-manager").style.display !== "none"
+    );
+  }
+  if (aiPresetBtn) {
+    aiPresetBtn.classList.toggle(
+      "active-panel",
+    get("ai-preset-manager").style.display !== "none"
+    );
+  }
 }
 
 /* ===============================
