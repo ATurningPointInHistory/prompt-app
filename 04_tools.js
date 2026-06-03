@@ -381,37 +381,6 @@ function closeAllManagers() {
   get("ai-preset-manager").style.display = "none";
 }
 
-function updatePanelButtonStates() {
-  const templateBtn = get("templateBtn");
-  const dangerBtn = get("dangerBtn");
-  const patternBtn = get("patternBtn");
-  const aiPresetBtn = get("aiPresetBtn");
-  if (templateBtn) {
-    templateBtn.classList.toggle(
-      "active-panel",
-      get("template-manager").style.display !== "none"
-    );
-  }
-  if (dangerBtn) {
-    dangerBtn.classList.toggle(
-      "active-panel",
-      get("danger-manager").style.display !== "none"
-    );
-  }
-  if (patternBtn) {
-    patternBtn.classList.toggle(
-      "active-panel",
-      get("pattern-manager").style.display !== "none"
-    );
-  }
-  if (aiPresetBtn) {
-    aiPresetBtn.classList.toggle(
-      "active-panel",
-    get("ai-preset-manager").style.display !== "none"
-    );
-  }
-}
-
 /* ===============================
    Tool Actions
 =============================== */
