@@ -885,9 +885,43 @@ async function backupProgram() {
       .toISOString()
       .replace(/[:.]/g, "-");
 
-  a.download =
-    `AIProBackup_${APP_VERSION}_${timestamp}.json`;
+  const saveType =
+    prompt(
+      "保存種類を入力\n\n" +
+      "TEST = 動作確認\n" +
+      "ADD = 機能追加\n" +
+      "FIX = 修正\n" +
+      "SNAPSHOT = 区切り保存",
+      "ADD"
+    );
 
+  if (saveType === null) {
+    return;
+  }
+
+  const comment =
+    prompt(
+      "コメント（任意）",
+      ""
+    );
+
+  const safeComment =
+    String(comment || "")
+      .trim()
+      .replace(
+        /[\\/:*?\"<>|]/g,
+        "_"
+      )
+      .replace(/\s+/g, "_")
+      .slice(0, 20);
+
+  const suffix =
+    safeComment
+      ? `${saveType}_${safeComment}`
+      : saveType;
+
+  a.download =
+    `AIProBackup_${APP_VERSION}_${timestamp}_${suffix}.json`;
   a.click();
 
   setTimeout(() => {
