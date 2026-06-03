@@ -105,6 +105,156 @@ function getHtmlSummary(html) {
   };
 }
 
+/* ===============================
+   Function Dependency Diagnose
+=============================== */
+
+function buildFunctionDependencyReport(
+  source
+){
+
+  const funcs =
+
+    [...String(source || "")
+      .matchAll(
+        /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+      )]
+
+    .map(x=>x[1]);
+
+  const onclicks =
+
+    [...String(source || "")
+      .matchAll(
+        /onclick="([a-zA-Z0-9_$]+)\(/g
+      )]
+
+    .map(x=>x[1]);
+
+  const result = [];
+
+  funcs.forEach(fn=>{
+
+    const block =
+      findFunctionBlockInText(
+        source,
+        fn
+      );
+
+    const body =
+      block?.block || "";
+
+    const calls =
+
+      funcs.filter(other=>{
+
+        if(
+          other===fn
+        ) return false;
+
+        return new RegExp(
+
+          "\\b"+
+          escapeRegExp(other)+
+          "\\s*\\(",
+
+          "g"
+
+        ).test(body);
+
+      });
+
+    const usedCount =
+
+      (
+        String(source || "")
+        .match(
+
+          new RegExp(
+
+            "\\b"+
+            escapeRegExp(fn)+
+            "\\s*\\(",
+
+            "g"
+
+          )
+
+        ) || []
+
+      ).length;
+
+    result.push(
+
+`${fn}
+
+calls:
+${
+calls.length
+? calls.join(", ")
+: "none"
+}
+
+used:
+${usedCount}
+
+onclick:
+${
+onclicks.includes(fn)
+? "YES"
+: "NO"
+}`
+
+    );
+
+  });
+
+  const unused =
+
+    funcs.filter(fn=>{
+
+      const count =
+
+        (
+          String(source || "")
+          .match(
+
+            new RegExp(
+
+              "\\b"+
+              escapeRegExp(fn)+
+              "\\s*\\(",
+
+              "g"
+
+            )
+
+          ) || []
+
+        ).length;
+
+      return count<=1;
+
+    });
+
+  return `
+
+=== Function Dependency ===
+
+${result.join("\n\n")}
+
+=== Unused Candidate ===
+
+${
+unused.length
+? unused.join("\n")
+: "none"
+}
+
+`;
+
+}
+
 async function showHtmlHealth() {
 
   const html =
@@ -204,6 +354,15 @@ ${onclicks.length}
 === Health Score ===
 ${score}/100
 `;
+
+  const dependencyReport =
+
+    buildFunctionDependencyReport(
+      jsForCheck
+    );
+
+  result +=
+    dependencyReport;
 
   window.latestHealthResult =
     result;
