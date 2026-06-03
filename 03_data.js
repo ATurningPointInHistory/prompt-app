@@ -328,12 +328,21 @@ function saveCurrentState() {
 }
 
 function loadSettings() {
+
   isLoading = true;
-  checkSafeMode();
-  if (localStorage.getItem("darkMode") === "1") {
-    document.body.classList.add("dark");
+
+  if (
+    localStorage.getItem(
+      "darkMode"
+    ) === "1"
+  ) {
+    document.body
+      .classList
+      .add("dark");
   }
+
   closeAllManagers();
+
   renderHistory();
   renderTemplates();
   renderTemplateSelect();
@@ -341,23 +350,86 @@ function loadSettings() {
   renderPatterns();
   renderCommandChips();
   renderPresetChips();
-  get("raw-input").value = localStorage.getItem("rawInput") || "";
-  get("rough-tone").value = localStorage.getItem("roughTone") || "プロフェッショナル";
-  get("rough-output-format").value = localStorage.getItem("roughOutputFormat") || "prompt";
-  get("role").value = localStorage.getItem("roleValue") || "";
-  get("task").value = localStorage.getItem("taskValue") || "";
-  get("details").value = localStorage.getItem("detailsValue") || "";
-  get("tone").value = localStorage.getItem("toneValue") || "プロフェッショナル";
-  get("ai-target").value = localStorage.getItem("aiTarget") || "chatgpt";
-  const savedTab = Number(localStorage.getItem("currentTab") || "1");
-  currentTab = savedTab;
-  switchTab(savedTab);
+
+  get("raw-input").value =
+    localStorage.getItem(
+      "rawInput"
+    ) || "";
+
+  get("rough-tone").value =
+    localStorage.getItem(
+      "roughTone"
+    ) ||
+    "プロフェッショナル";
+
+  get(
+    "rough-output-format"
+  ).value =
+    localStorage.getItem(
+      "roughOutputFormat"
+    ) ||
+    "prompt";
+
+  get("role").value =
+    localStorage.getItem(
+      "roleValue"
+    ) || "";
+
+  get("task").value =
+    localStorage.getItem(
+      "taskValue"
+    ) || "";
+
+  get("details").value =
+    localStorage.getItem(
+      "detailsValue"
+    ) || "";
+
+  get("tone").value =
+    localStorage.getItem(
+      "toneValue"
+    ) ||
+    "プロフェッショナル";
+
+  get("ai-target").value =
+    localStorage.getItem(
+      "aiTarget"
+    ) ||
+    "chatgpt";
+
+  const savedTab =
+    Number(
+      localStorage.getItem(
+        "currentTab"
+      ) || "1"
+    );
+
+  currentTab =
+    savedTab;
+
+  switchTab(
+    savedTab
+  );
+
   syncCommandButtons();
+
   updatePanelButtonStates();
- get("versionLabel").innerText = APP_VERSION;
-get("changelogLabel").innerHTML =
-  CHANGELOG.map(x =>
-escapeHtml(x)).join("<br>");
+
+  get(
+    "versionLabel"
+  ).innerText =
+    APP_VERSION;
+
+  get(
+    "changelogLabel"
+  ).innerHTML =
+
+    CHANGELOG
+      .map(
+        x => escapeHtml(x)
+      )
+      .join("<br>");
+
   isLoading = false;
 }
 
