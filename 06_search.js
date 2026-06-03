@@ -233,7 +233,9 @@ function moveRepairSearchSelection(index, length) {
     index === null
   ) return;
 
-  editor.focus();
+  editor.focus({
+    preventScroll:true
+  });
 
   editor.setSelectionRange(
     index,
