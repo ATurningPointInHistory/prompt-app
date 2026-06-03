@@ -239,6 +239,7 @@ function renderRepairSearchResults(
   keyword,
   sourceText
 ) {
+
   const resultBox =
     get("repairSearchResult");
 
@@ -255,65 +256,85 @@ function renderRepairSearchResults(
 
   const results = [];
 
-  let currentFile =
-    "repairEditor";
+  lines.forEach((line,index)=>{
 
-  lines.forEach((line, index) => {
-    const fileMatch =
-      line.match(
-        /^\/\*\s*=====\s*(.+?)\s*=====\s*\*\/$/
-      );
-
-    if (fileMatch) {
-      currentFile =
-        fileMatch[1];
-      return;
-    }
-
-    if (
+    if(
       safeKeyword &&
       line.includes(safeKeyword)
-    ) {
+    ){
+
       results.push({
-        file: currentFile,
-        lineNumber: index + 1,
+        lineNumber:
+          index+1,
         line
       });
+
     }
+
   });
 
   resultBox.style.display =
     "block";
 
-  if (results.length === 0) {
+  if(results.length===0){
+
     resultBox.innerText =
       "検索結果：0件";
+
     return;
   }
 
   resultBox.innerHTML =
-    `<b>検索結果：${results.length}件</b>` +
+
+    `<b>検索結果：${results.length}件</b>`
+
+    +
+
     results
-      .slice(0, 30)
-      .map(item => {
+      .slice(0,30)
+      .map(item=>{
+
         return `
+
         <div
           class="search-result-line"
-          title="${escapeHtml(item.file)} line ${item.lineNumber}">
-          [${escapeHtml(item.file)} L${item.lineNumber}]
-          ${highlightKeyword(item.line, safeKeyword)}
+
+          onclick="
+            jumpToLine(
+              ${item.lineNumber}
+            )
+          "
+
+          title="
+            line
+            ${item.lineNumber}
+          ">
+
+          [L${item.lineNumber}]
+
+          ${highlightKeyword(
+            item.line,
+            safeKeyword
+          )}
+
         </div>
+
         `;
+
       })
       .join("");
 
-  if (results.length > 30) {
-    resultBox.innerHTML += `
-      <div class="small">
-        ※ 30件まで表示しています
-      </div>
+  if(results.length>30){
+
+    resultBox.innerHTML +=
+
+    `
+    <div class="small">
+      ※30件まで表示
+    </div>
     `;
   }
+
 }
 
 function highlightKeyword(text, keyword) {
