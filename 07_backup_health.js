@@ -214,6 +214,29 @@ ${usedByDomReady ? "YES" : "NO"}`
 
   });
 
+  const protectedFunctions = new Set([
+      "loadSettings",
+      "initImportFileEvents",
+      "handleRepairSearchKey",
+      "initRepairIde",
+      "toggleTemplateManager",
+      "toggleDangerManager",
+      "togglePatternManager",
+      "saveCurrentState",
+      "saveHistory",
+      "saveTemplate",
+      "exportTemplates",
+      "importTemplates",
+      "exportAiPresets",
+      "importAiPresets",
+      "saveAiPresetFromEditor",
+      "resetAiPreset",
+      "saveDangerWord",
+      "savePattern",
+      "applyTemplateFromSelect",
+      "clearHistory"
+    ]);
+
   const unused =
     uniqueFuncs.filter(fn => {
 
@@ -240,12 +263,13 @@ ${usedByDomReady ? "YES" : "NO"}`
         domReadyRefs.includes(fn);
 
       return (
-        directCallCount <= 1 &&
-        !usedByOnclick &&
-        !usedByEvent &&
-        !usedByWindow &&
-        !usedByDomReady
-      );
+              directCallCount <= 1 &&
+              !usedByOnclick &&
+              !usedByEvent &&
+              !usedByWindow &&
+              !usedByDomReady &&
+              !protectedFunctions.has(fn)
+            );
 
     });
 
