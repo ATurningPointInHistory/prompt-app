@@ -945,11 +945,11 @@ function buildRepairToolsHtml() {
   onclick="loadRepairHtml()">📖 HTML読込</button>
 <button class="float-list-btn" onclick="backupPartialScript()">📦 JS部分読込</button>
 <button class="float-list-btn"
-  onclick="saveRepairHtml()">💾 修正版保存</button>
-<button class="float-list-btn"
   onclick="copyRepairHtml()">📋 HTMLコピー</button>
 <button class="float-list-btn"onclick="
 saveRepairEditorAsFile()">💾 repair保存</button>
+<button class="float-list-btn"
+  onclick="saveRepairHtml()">💾 修正版保存</button>
 <hr>
 
 
