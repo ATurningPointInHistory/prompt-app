@@ -1236,12 +1236,18 @@ function loadCurrentIndexToRepair() {
     "<!DOCTYPE html>\n" +
     document.documentElement.outerHTML;
 
+  currentRepairFile =
+    "index.html";
+
   repairLastValue =
     editor.value;
 
   updateLineNumbers();
   updateCursorPosition();
-  updateRepairStatus("読込: index.html");
+
+  updateRepairStatus(
+    "読込: index.html"
+  );
 
   closeFloatPanel();
 }
