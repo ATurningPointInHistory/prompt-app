@@ -827,6 +827,13 @@ async function backupProgram() {
   const html =
     await getCleanProgramHtml();
 
+  const suffix =
+    getSaveFileLabel();
+
+  if (!suffix) {
+    return;
+  }
+
   if (!preSaveCheck(html)) {
     return;
   }
@@ -921,7 +928,7 @@ async function backupProgram() {
       : saveType;
 
   a.download =
-    `AIProBackup_${APP_VERSION}_${timestamp}_${suffix}.json`;
+  `${suffix}_AIProBackup_${APP_VERSION}_${timestamp}.json`;
   a.click();
 
   setTimeout(() => {
