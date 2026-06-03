@@ -1095,6 +1095,89 @@ function clearDiffResult() {
 }
 
 /* ===============================
+   Function Dependency Diagnose
+=============================== */
+
+function showFunctionDependencyList() {
+  const editor =
+    get("repairEditor");
+
+  const html =
+    editor && editor.value.trim()
+      ? editor.value
+      : document.documentElement.outerHTML;
+
+  const funcs =
+    [...html.matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )].map(m => m[1]);
+
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )].map(m => m[1]);
+
+  const lines =
+    funcs.map(fn => {
+      const called =
+        funcs.filter(other => {
+          if (other === fn) return false;
+
+          const block =
+            findFunctionBlockInText(
+              html,
+              fn
+            );
+
+          return block &&
+            new RegExp(
+              "\\b" + escapeRegExp(other) + "\\s*\\(",
+              "g"
+            ).test(block.block);
+        });
+
+      const usedCount =
+        (
+          html.match(
+            new RegExp(
+              "\\b" + escapeRegExp(fn) + "\\s*\\(",
+              "g"
+            )
+          ) || []
+        ).length;
+
+      return (
+        fn +
+        "\n  called: " +
+        (called.length ? called.join(", ") : "なし") +
+        "\n  usedCount: " +
+        usedCount +
+        "\n  onclick: " +
+        (onclicks.includes(fn) ? "YES" : "NO")
+      );
+    });
+
+  const result =
+    "FUNCTION DEPENDENCY LIST\n\n" +
+    lines.join("\n\n");
+
+  openFloatPanel(
+    "関数依存リスト",
+    `
+    <div class="float-panel-actions">
+      <button onclick="copyTextFallback(window.latestDependencyList)">
+        📋 コピー
+      </button>
+    </div>
+    <pre class="code-preview">${escapeHtml(result)}</pre>
+    `
+  );
+
+  window.latestDependencyList =
+    result;
+}
+
+/* ===============================
    Backup Helpers
 =============================== */
 
