@@ -816,13 +816,8 @@ function preSaveCheck(html) {
 }
 
 async function backupProgram() {
-  saveCurrentState();
 
-  const note =
-    prompt(
-      "バックアップメモを入力してください",
-      "変更内容メモ"
-    ) || "";
+  saveCurrentState();
 
   const html =
     await getCleanProgramHtml();
@@ -843,7 +838,7 @@ async function backupProgram() {
     backup_format_version: "1.1",
     version: APP_VERSION,
     created_at: new Date().toISOString(),
-    backup_note: note,
+    backup_note: suffix,
     changelog: CHANGELOG,
     validation: {
       ...validateBackupHtml(
@@ -892,43 +887,9 @@ async function backupProgram() {
       .toISOString()
       .replace(/[:.]/g, "-");
 
-  const saveType =
-    prompt(
-      "保存種類を入力\n\n" +
-      "TEST = 動作確認\n" +
-      "ADD = 機能追加\n" +
-      "FIX = 修正\n" +
-      "SNAPSHOT = 区切り保存",
-      "ADD"
-    );
-
-  if (saveType === null) {
-    return;
-  }
-
-  const comment =
-    prompt(
-      "コメント（任意）",
-      ""
-    );
-
-  const safeComment =
-    String(comment || "")
-      .trim()
-      .replace(
-        /[\\/:*?\"<>|]/g,
-        "_"
-      )
-      .replace(/\s+/g, "_")
-      .slice(0, 20);
-
-  const suffix =
-    safeComment
-      ? `${saveType}_${safeComment}`
-      : saveType;
-
   a.download =
-  `${suffix}_AIProBackup_${APP_VERSION}_${timestamp}.json`;
+    `${suffix}_AIProBackup_${APP_VERSION}_${timestamp}.json`;
+
   a.click();
 
   setTimeout(() => {
@@ -940,10 +901,9 @@ async function backupProgram() {
 
   alert(
     "フルバックアップ保存完了\n\n" +
-    "メモ: " + note
+    suffix
   );
 }
-
 function sanitizeFileNamePart(text) {
   return String(text || "")
     .trim()
