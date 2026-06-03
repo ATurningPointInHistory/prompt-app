@@ -53,27 +53,45 @@ function selectCodeBlockByIndex(index) {
 }
 
 function jumpToLine(lineNumber) {
-  const editor = get("repairEditor");
+  const editor =
+    get("repairEditor");
+
   if (!editor) return;
 
   const lines =
-    editor.value.split("\n");
+    String(editor.value || "")
+      .split("\n");
+
+  const targetLine =
+    Math.min(
+      Math.max(1, Number(lineNumber) || 1),
+      lines.length
+    );
 
   let pos = 0;
 
-  for (let i = 0; i < lineNumber - 1; i++) {
-    pos += lines[i].length + 1;
+  for (
+    let i = 0;
+    i < targetLine - 1;
+    i++
+  ) {
+    pos +=
+      (lines[i] || "").length + 1;
   }
 
   editor.focus();
-  editor.setSelectionRange(pos, pos);
+
+  editor.setSelectionRange(
+    pos,
+    pos
+  );
 
   const lineHeight = 18;
 
   editor.scrollTop =
     Math.max(
       0,
-      (lineNumber - 3) * lineHeight
+      (targetLine - 3) * lineHeight
     );
 
   updateCursorPosition();
