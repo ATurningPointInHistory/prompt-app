@@ -1137,7 +1137,7 @@ async function backupPartialScript() {
   }
 
   openFloatPanel(
-    "部分読込",
+    "部分読込 / 保存",
 
     `
     <button
