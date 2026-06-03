@@ -1288,6 +1288,8 @@ async function saveRepairEditorAsFile() {
   }
 
   const filename =
+    currentRepairFile ||
+
     prompt(
       "保存ファイル名",
       "repair_output.js"
@@ -1321,7 +1323,7 @@ async function saveRepairEditorAsFile() {
   },1000);
 
   updateRepairStatus(
-    `保存: ${filename}`
+    `保存:${filename}`
   );
 }
 
