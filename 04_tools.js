@@ -5,7 +5,71 @@
 
 let selectedTodoIndexes = new Set();
 
+function renderTodoList() {
 
+  const list =
+    getTodoList();
+
+  openFloatPanel(
+    "開発TODO",
+
+    `
+<div class="float-panel-actions">
+
+<button onclick="
+const text=
+prompt('TODO追加');
+
+if(text){
+saveTodoItem(text);
+}">
+➕ 追加
+</button>
+
+</div>
+
+<div>
+
+${
+list.length
+? list.map((x,i)=>`
+
+<div class="backup-history-item">
+
+<div>
+
+<button
+onclick="toggleTodo(${i})">
+
+${x.done?"✔":"□"}
+
+</button>
+
+${escapeHtml(x.text)}
+
+</div>
+
+<div>
+
+<button
+onclick="deleteTodo(${i})">
+
+🗑
+</button>
+
+</div>
+
+</div>
+
+`).join("")
+: "TODOなし"
+}
+
+</div>
+`
+  );
+
+}
 
 function isTodoHeadingLine(line) {
   const text = String(line || "").trim();
