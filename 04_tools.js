@@ -3,6 +3,22 @@
    Tools
 =============================== */
 
+let selectedTodoIndexes = new Set();
+
+function isTodoHeadingLine(line) {
+  const text = String(line || "").trim();
+
+  if (!text) return true;
+
+  return (
+    /^#+\s*/.test(text) ||
+    /^[-=]{3,}$/.test(text) ||
+    /^【.*】$/.test(text) ||
+    /^\[.*\]$/.test(text) ||
+    /^(完了|実装済|進行中|TODO|次やること|候補)/.test(text)
+  );
+}
+
 function getTodoList() {
   return loadJson(
     "todoList",
@@ -30,43 +46,33 @@ function promptAddTodoItems() {
   saveTodoItems(text);
 }
 
-function saveTodoItems(text){
+function saveTodoItems(text) {
 
-  if(!text.trim()){
+  if (!String(text || "").trim()) {
     return;
   }
 
   const list =
     getTodoList();
 
-  text
+  String(text)
     .split("\n")
+    .map(x => x.trim())
+    .filter(x => !isTodoHeadingLine(x))
     .map(x =>
-
-      x
-      .trim()
-
-      .replace(
+      x.replace(
         /^[✔✓☑□■・\-\*]\s*/,
         ""
       )
-
     )
-
     .filter(Boolean)
-
-    .forEach(item=>{
+    .forEach(item => {
 
       list.push({
-
-        text:item,
-
-        done:false,
-
+        text: item,
+        done: false,
         created_at:
-          new Date()
-            .toISOString()
-
+          new Date().toISOString()
       });
 
     });
@@ -77,7 +83,6 @@ function saveTodoItems(text){
   );
 
   renderTodoList();
-
 }
 
 function toggleTodo(index) {
@@ -98,6 +103,62 @@ function toggleTodo(index) {
   );
 
   renderTodoList();
+}
+
+function toggleTodoSelect(index) {
+
+  if (selectedTodoIndexes.has(index)) {
+    selectedTodoIndexes.delete(index);
+  } else {
+    selectedTodoIndexes.add(index);
+  }
+
+  renderTodoList();
+}
+
+function deleteSelectedTodos() {
+
+  const list =
+    getTodoList();
+
+  if (selectedTodoIndexes.size === 0) {
+    alert("削除するTODOを選択してください");
+    return;
+  }
+
+  const ok =
+    confirm(
+      selectedTodoIndexes.size +
+      "件のTODOを削除しますか？"
+    );
+
+  if (!ok) return;
+
+  const next =
+    list.filter((_, index) =>
+      !selectedTodoIndexes.has(index)
+    );
+
+  selectedTodoIndexes.clear();
+
+  localStorage.setItem(
+    "todoList",
+    JSON.stringify(next)
+  );
+
+  renderTodoList();
+}
+
+function showTodoDetail(index) {
+  const list =
+    getTodoList();
+
+  const item =
+    list[index];
+
+  if (!item) return;
+
+  alert(item.text);
 }
 
 function deleteTodo(index) {
@@ -124,34 +185,39 @@ function renderTodoList() {
     "開発TODO",
 
     `
-<div class="float-panel-actions">
-
-  <button onclick="promptAddTodoItems()">
-    ➕ 追加
-  </button>
-
+<div class="todo-header">
+  <button onclick="promptAddTodoItems()">➕</button>
+  <button onclick="deleteSelectedTodos()">🗑</button>
 </div>
 
-<div>
+<div class="todo-list">
 
 ${
 list.length
-? list.map((x,i)=>`
+? list.map((x, i) => `
 
-<div class="backup-history-item">
+<div class="todo-row">
 
-  <div>
-    <button onclick="toggleTodo(${i})">
-      ${x.done ? "✔" : "□"}
-    </button>
+  <input
+    type="checkbox"
+    class="todo-select"
+    ${selectedTodoIndexes.has(i) ? "checked" : ""}
+    onchange="toggleTodoSelect(${i})"
+  >
 
+  <button
+    class="todo-check"
+    onclick="toggleTodo(${i})">
+    ${x.done ? "✔" : "□"}
+  </button>
+
+  <div
+    class="todo-text ${x.done ? "todo-done" : ""}"
+    oncontextmenu="event.preventDefault();showTodoDetail(${i})"
+    ontouchstart="this._pressTimer=setTimeout(()=>showTodoDetail(${i}),600)"
+    ontouchend="clearTimeout(this._pressTimer)"
+    ontouchmove="clearTimeout(this._pressTimer)">
     ${escapeHtml(x.text)}
-  </div>
-
-  <div>
-    <button onclick="deleteTodo(${i})">
-      🗑
-    </button>
   </div>
 
 </div>
@@ -163,7 +229,6 @@ list.length
 </div>
 `
   );
-
 }
 
 /* ===============================
