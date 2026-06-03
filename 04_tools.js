@@ -10,22 +10,46 @@ function getTodoList() {
   );
 }
 
-function saveTodoItem(text) {
+function saveTodoItems(text){
 
-  if (!text.trim()) {
+  if(!text.trim()){
     return;
   }
 
   const list =
     getTodoList();
 
-  list.push({
-    text,
-    done:false,
-    created_at:
-      new Date()
-        .toISOString()
-  });
+  text
+    .split("\n")
+    .map(x =>
+
+      x
+      .trim()
+
+      .replace(
+        /^[✔✓☑□■・\-\*]\s*/,
+        ""
+      )
+
+    )
+
+    .filter(Boolean)
+
+    .forEach(item=>{
+
+      list.push({
+
+        text:item,
+
+        done:false,
+
+        created_at:
+          new Date()
+            .toISOString()
+
+      });
+
+    });
 
   localStorage.setItem(
     "todoList",
@@ -33,6 +57,7 @@ function saveTodoItem(text) {
   );
 
   renderTodoList();
+
 }
 
 function toggleTodo(index) {
@@ -82,8 +107,20 @@ function renderTodoList() {
 <div class="float-panel-actions">
 
 <button onclick="
-const text=
-prompt('TODO追加');
+const text =
+  prompt(
+`TODO追加
+(改行で複数追加可)
+
+例:
+AI回答保存
+引き継ぎ生成
+CSS整理`
+  );
+
+if(text){
+  saveTodoItems(text);
+}
 
 if(text){
 saveTodoItem(text);
