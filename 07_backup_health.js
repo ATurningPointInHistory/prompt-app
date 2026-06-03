@@ -937,7 +937,7 @@ async function saveProgramHtml() {
     URL.revokeObjectURL(a.href);
   }, 1000);
 
-  alert("本体HTMLを保存しました");
+  alert("結合HTML保存完了");
 }
 
 function restoreProgramBackup() {
