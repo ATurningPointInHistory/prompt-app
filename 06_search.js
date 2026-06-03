@@ -179,6 +179,50 @@ function searchRepairPrev() {
   );
 }
 
+function searchRepairNext() {
+
+  const keyword =
+    get("repairSearch")
+      ?.value
+      ?.trim();
+
+  if (!keyword) {
+    alert("検索文字を入力してください");
+    return;
+  }
+
+  if (
+    !Array.isArray(
+      repairSearchMatches
+    )
+  ) {
+    repairSearchMatches = [];
+  }
+
+  if (
+    repairSearchMatches.length === 0
+  ) {
+    searchRepairText();
+    return;
+  }
+
+  repairSearchIndex++;
+
+  if (
+    repairSearchIndex >=
+    repairSearchMatches.length
+  ) {
+    repairSearchIndex = 0;
+  }
+
+  moveRepairSearchSelection(
+    repairSearchMatches[
+      repairSearchIndex
+    ],
+    keyword.length
+  );
+}
+
 function moveRepairSearchSelection(index, length) {
   const editor =
     get("repairEditor");
