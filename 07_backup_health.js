@@ -314,7 +314,7 @@ async function showHtmlHealth() {
     -
     (dupFuncs.length * 10);
 
-  const result =
+  let result =
 `HTML HEALTH REPORT
 === HTML ===
 div:
