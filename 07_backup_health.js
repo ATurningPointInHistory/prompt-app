@@ -946,20 +946,26 @@ function sanitizeFileNamePart(text) {
 }
 
 function getSaveFileLabel() {
-  const type = prompt(
-    "保存区分を入力してください\n\n" +
-    "1: TEST 確認用\n" +
-    "2: ADD 機能追加\n" +
-    "3: FIX 修正\n" +
-    "4: KEEP 区切り保存",
-    "1"
-  );
+
+  const type =
+    prompt(
+      "保存区分を選択\n\n" +
+      "1: TEST 確認用\n" +
+      "2: ADD 機能追加\n" +
+      "3: FIX 修正\n" +
+      "4: KEEP 区切り保存",
+      "2"
+    );
+
+  if (type === null) {
+    return null;
+  }
 
   const labelMap = {
-    "1": "TEST",
-    "2": "ADD",
-    "3": "FIX",
-    "4": "KEEP"
+    "1":"TEST",
+    "2":"ADD",
+    "3":"FIX",
+    "4":"KEEP"
   };
 
   const label =
@@ -967,9 +973,13 @@ function getSaveFileLabel() {
 
   const note =
     prompt(
-      "ファイル名に付ける短いメモを入力してください",
+      "変更内容 / メモ",
       ""
     );
+
+  if (note === null) {
+    return null;
+  }
 
   const safeNote =
     sanitizeFileNamePart(note);
@@ -985,6 +995,13 @@ async function saveProgramHtml() {
     await getCleanProgramHtml();
 
   if (!preSaveCheck(html)) {
+    return;
+  }
+
+  const suffix =
+    getSaveFileLabel();
+
+  if (!suffix) {
     return;
   }
 
@@ -1005,43 +1022,8 @@ async function saveProgramHtml() {
       .toISOString()
       .replace(/[:.]/g, "-");
 
-  const saveType =
-    prompt(
-      "保存種類を入力\n\n" +
-      "TEST = 動作確認\n" +
-      "ADD = 機能追加\n" +
-      "FIX = 修正\n" +
-      "SNAPSHOT = 区切り保存",
-      "TEST"
-    );
-
-  if (saveType === null) {
-    return;
-  }
-
-  const comment =
-    prompt(
-      "コメント（任意）",
-      ""
-    );
-
-  const safeComment =
-    String(comment || "")
-      .trim()
-      .replace(
-        /[\\/:*?\"<>|]/g,
-        "_"
-      )
-      .replace(/\s+/g, "_")
-      .slice(0, 20);
-
-  const suffix =
-    safeComment
-      ? `${saveType}_${safeComment}`
-      : saveType;
-
   a.download =
-    `AIPromptPro_${APP_VERSION}_${timestamp}_${suffix}.html`;
+`${suffix}_AIPromptPro_${APP_VERSION}_${timestamp}.html`;
 
   a.click();
 
@@ -1054,16 +1036,10 @@ async function saveProgramHtml() {
   }, 1000);
 
   alert(
-    "結合HTML保存完了\n\n" +
-    "種類: " + saveType +
-    (
-      safeComment
-      ? "\nコメント: " + safeComment
-      : ""
-    )
+    "本体HTML保存完了\n\n" +
+    suffix
   );
 }
-
 function restoreProgramBackup() {
   const input =
     document.createElement("input");
