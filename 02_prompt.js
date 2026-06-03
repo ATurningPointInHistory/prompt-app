@@ -912,7 +912,7 @@ function buildNormalToolsHtml() {
 <button class="float-list-btn" onclick="togglePatternManager()">🚫 NGパターン管理</button>
 <button class="float-list-btn" onclick="toggleAiPresetManager()">🤖 AIプリセット管理</button>
 <hr>
-<button class="float-list-btn" onclick="backupProgram()">🗂 フルバックアップ</button>
+<button class="float-list-btn" onclick="backupProgram()">💾 結合HTML出力</button>
 <button class="float-list-btn" onclick="showBackupHistory()">📚 バックアップ履歴</button>
 <button class="float-list-btn" onclick="saveProgramHtml()">💾 本体HTML保存</button>
 <button class="float-list-btn" onclick="restoreProgramBackup()">♻ フル復元</button>
