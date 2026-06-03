@@ -5,6 +5,8 @@
 
 let selectedTodoIndexes = new Set();
 
+
+
 function isTodoHeadingLine(line) {
   const text = String(line || "").trim();
 
@@ -176,58 +178,74 @@ function deleteTodo(index) {
   renderTodoList();
 }
 
-function renderTodoList() {
+<div class="todo-header">
+
+  <button onclick="promptAddTodoItems()">
+    ➕
+  </button>
+
+  <button onclick="toggleSelectAllTodos()">
+    ☑
+  </button>
+
+  <button onclick="copySelectedTodos()">
+    📋
+  </button>
+
+  <button onclick="deleteSelectedTodos()">
+    🗑
+  </button>
+
+</div>
+
+function toggleSelectAllTodos() {
 
   const list =
     getTodoList();
 
-  openFloatPanel(
-    "開発TODO",
+  if (
+    selectedTodoIndexes.size ===
+    list.length
+  ) {
+    selectedTodoIndexes.clear();
+  } else {
+    selectedTodoIndexes =
+      new Set(
+        list.map((_, i) => i)
+      );
+  }
 
-    `
-<div class="todo-header">
-  <button onclick="promptAddTodoItems()">➕</button>
-  <button onclick="deleteSelectedTodos()">🗑</button>
-</div>
-
-<div class="todo-list">
-
-${
-list.length
-? list.map((x, i) => `
-
-<div class="todo-row">
-
-  <input
-    type="checkbox"
-    class="todo-select"
-    ${selectedTodoIndexes.has(i) ? "checked" : ""}
-    onchange="toggleTodoSelect(${i})"
-  >
-
-  <button
-    class="todo-check"
-    onclick="toggleTodo(${i})">
-    ${x.done ? "✔" : "□"}
-  </button>
-
-  <div
-    class="todo-text ${x.done ? "todo-done" : ""}"
-    oncontextmenu="event.preventDefault();showTodoDetail(${i})"
-    ontouchstart="this._pressTimer=setTimeout(()=>showTodoDetail(${i}),600)"
-    ontouchend="clearTimeout(this._pressTimer)"
-    ontouchmove="clearTimeout(this._pressTimer)">
-    ${escapeHtml(x.text)}
-  </div>
-
-</div>
-
-`).join("")
-: "TODOなし"
+  renderTodoList();
 }
 
-</div>
-`
+function copySelectedTodos() {
+
+  const list =
+    getTodoList();
+
+  const targets =
+    list.filter((_, i) =>
+      selectedTodoIndexes.has(i)
+    );
+
+  if (!targets.length) {
+    alert("コピーするTODOを選択してください");
+    return;
+  }
+
+  const text =
+    targets.map(item =>
+      (item.done ? "✔ " : "□ ") +
+      item.text
+    ).join("\n");
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "選択TODOをコピーしました"
+      : "コピー失敗"
   );
 }
 
