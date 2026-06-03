@@ -75,7 +75,7 @@ function clearRepairSearch() {
 
   box.value = "";
 
-  repairSearchIndex = 0;
+  repairSearchIndex = -1;
   repairSearchMatches = [];
 
   const result =
@@ -212,7 +212,7 @@ function searchRepairNext() {
     repairSearchIndex >=
     repairSearchMatches.length
   ) {
-    repairSearchIndex = 0;
+    repairSearchIndex = -1;
   }
 
   moveRepairSearchSelection(
