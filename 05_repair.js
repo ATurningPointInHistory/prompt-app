@@ -492,26 +492,115 @@ function replaceFunctionBlock(){
 }
 
 function findFunctionBlockInText(text, functionName) {
+
+  const src = String(text || "");
+
+  const name =
+    escapeRegExp(functionName);
+
+  const fnRegex =
+    new RegExp(
+      "\\bfunction\\s+" + name + "\\s*\\(",
+      "g"
+    );
+
+  const match =
+    fnRegex.exec(src);
+
+  if (!match) return null;
+
   const start =
-    text.indexOf(`function ${functionName}`);
-  if (start === -1) return null;
+    match.index;
+
   const braceStart =
-    text.indexOf("{", start);
+    src.indexOf("{", fnRegex.lastIndex);
+
   if (braceStart === -1) return null;
-  let depth = 1;
-  let end = braceStart + 1;
-  while (end < text.length && depth > 0) {
-    if (text[end] === "{") depth++;
-    if (text[end] === "}") depth--;
+
+  let depth = 0;
+  let end = braceStart;
+
+  let inString = false;
+  let stringQuote = "";
+  let inLineComment = false;
+  let inBlockComment = false;
+  let escaped = false;
+
+  while (end < src.length) {
+
+    const ch = src[end];
+    const next = src[end + 1];
+
+    if (inLineComment) {
+      if (ch === "\n") inLineComment = false;
+      end++;
+      continue;
+    }
+
+    if (inBlockComment) {
+      if (ch === "*" && next === "/") {
+        inBlockComment = false;
+        end += 2;
+        continue;
+      }
+      end++;
+      continue;
+    }
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === stringQuote) {
+        inString = false;
+        stringQuote = "";
+      }
+      end++;
+      continue;
+    }
+
+    if (ch === "/" && next === "/") {
+      inLineComment = true;
+      end += 2;
+      continue;
+    }
+
+    if (ch === "/" && next === "*") {
+      inBlockComment = true;
+      end += 2;
+      continue;
+    }
+
+    if (ch === "\"" || ch === "'" || ch === "`") {
+      inString = true;
+      stringQuote = ch;
+      end++;
+      continue;
+    }
+
+    if (ch === "{") depth++;
+
+    if (ch === "}") {
+      depth--;
+      if (depth === 0) {
+        end++;
+        break;
+      }
+    }
+
     end++;
   }
+
+  if (depth !== 0) return null;
+
   return {
     start,
     end,
-    block: text.slice(start, end)
+    block: src.slice(start, end)
   };
-}
 
+}
 
 function extractFunctionBlocksFromText(text) {
   const source =
