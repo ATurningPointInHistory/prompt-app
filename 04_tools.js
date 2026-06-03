@@ -3,7 +3,138 @@
    Tools
 =============================== */
 
+function getTodoList() {
+  return loadJson(
+    "todoList",
+    []
+  );
+}
 
+function saveTodoItem(text) {
+
+  if (!text.trim()) {
+    return;
+  }
+
+  const list =
+    getTodoList();
+
+  list.push({
+    text,
+    done:false,
+    created_at:
+      new Date()
+        .toISOString()
+  });
+
+  localStorage.setItem(
+    "todoList",
+    JSON.stringify(list)
+  );
+
+  renderTodoList();
+}
+
+function toggleTodo(index) {
+
+  const list =
+    getTodoList();
+
+  if (!list[index]) {
+    return;
+  }
+
+  list[index].done =
+    !list[index].done;
+
+  localStorage.setItem(
+    "todoList",
+    JSON.stringify(list)
+  );
+
+  renderTodoList();
+}
+
+function deleteTodo(index) {
+
+  const list =
+    getTodoList();
+
+  list.splice(index,1);
+
+  localStorage.setItem(
+    "todoList",
+    JSON.stringify(list)
+  );
+
+  renderTodoList();
+}
+
+function renderTodoList() {
+
+  const list =
+    getTodoList();
+
+  openFloatPanel(
+    "開発TODO",
+
+    `
+<div class="float-panel-actions">
+
+<button onclick="
+const text=
+prompt('TODO追加');
+
+if(text){
+saveTodoItem(text);
+}">
+➕ 追加
+</button>
+
+</div>
+
+<div>
+
+${
+list.length
+? list.map((x,i)=>`
+
+<div class="backup-history-item">
+
+<div>
+
+<button
+onclick="toggleTodo(${i})">
+
+${x.done?"✔":"□"}
+
+</button>
+
+${escapeHtml(x.text)}
+
+</div>
+
+<div>
+
+<button
+onclick="deleteTodo(${i})">
+
+🗑
+</button>
+
+</div>
+
+</div>
+
+`).join("")
+: "TODOなし"
+}
+
+</div>
+`
+  );
+
+}
 /* ===============================
    Code Navigation
 =============================== */
