@@ -2,6 +2,58 @@
    FILE: 00_bootstrap.js
    Bootstrap / Shared Core
 =============================== */
+/* ===============================
+   Manager Panel Core
+=============================== */
+
+function closeAllManagers() {
+
+  [
+    "template-manager",
+    "danger-manager",
+    "pattern-manager",
+    "ai-preset-manager"
+  ].forEach(id => {
+
+    const el =
+      get(id);
+
+    if (el) {
+      el.style.display =
+        "none";
+    }
+
+  });
+}
+
+function updatePanelButtonStates() {
+
+  const pairs = [
+    ["templateBtn", "template-manager"],
+    ["dangerBtn", "danger-manager"],
+    ["patternBtn", "pattern-manager"],
+    ["aiPresetBtn", "ai-preset-manager"]
+  ];
+
+  pairs.forEach(([btnId, panelId]) => {
+
+    const btn =
+      get(btnId);
+
+    const panel =
+      get(panelId);
+
+    if (!btn || !panel) {
+      return;
+    }
+
+    btn.classList.toggle(
+      "active-panel",
+      panel.style.display !== "none"
+    );
+
+  });
+}
 
 /* ===============================
    App Navigation / Tools Menu
