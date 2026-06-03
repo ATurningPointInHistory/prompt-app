@@ -494,56 +494,77 @@ function replaceFunctionBlock(){
 function findFunctionBlockInText(text, functionName) {
 
   const src = String(text || "");
+  const name = escapeRegExp(functionName);
 
-  const name =
-    escapeRegExp(functionName);
+  const fnRegex = new RegExp(
+    "\\bfunction\\s+" + name + "\\s*\\(",
+    "g"
+  );
 
-  const fnRegex =
-    new RegExp(
-      "\\bfunction\\s+" + name + "\\s*\\(",
-      "g"
-    );
-
-  const match =
-    fnRegex.exec(src);
-
+  const match = fnRegex.exec(src);
   if (!match) return null;
 
-  const start =
-    match.index;
-
-  const braceStart =
-    src.indexOf("{", fnRegex.lastIndex);
-
+  const start = match.index;
+  const braceStart = src.indexOf("{", fnRegex.lastIndex);
   if (braceStart === -1) return null;
 
   let depth = 0;
-  let end = braceStart;
+  let i = braceStart;
 
   let inString = false;
-  let stringQuote = "";
+  let quote = "";
   let inLineComment = false;
   let inBlockComment = false;
+  let inRegex = false;
   let escaped = false;
 
-  while (end < src.length) {
+  function prevMeaningfulChar(pos) {
+    for (let j = pos - 1; j >= 0; j--) {
+      const c = src[j];
+      if (/\s/.test(c)) continue;
+      return c;
+    }
+    return "";
+  }
 
-    const ch = src[end];
-    const next = src[end + 1];
+  function isRegexStart(pos) {
+    const prev = prevMeaningfulChar(pos);
+    return (
+      !prev ||
+      "({[=:+-!?,;<>*&|^~".includes(prev)
+    );
+  }
+
+  while (i < src.length) {
+
+    const ch = src[i];
+    const next = src[i + 1];
 
     if (inLineComment) {
       if (ch === "\n") inLineComment = false;
-      end++;
+      i++;
       continue;
     }
 
     if (inBlockComment) {
       if (ch === "*" && next === "/") {
         inBlockComment = false;
-        end += 2;
+        i += 2;
         continue;
       }
-      end++;
+      i++;
+      continue;
+    }
+
+    if (inRegex) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === "/") {
+        inRegex = false;
+      }
+      i++;
       continue;
     }
 
@@ -552,53 +573,59 @@ function findFunctionBlockInText(text, functionName) {
         escaped = false;
       } else if (ch === "\\") {
         escaped = true;
-      } else if (ch === stringQuote) {
+      } else if (ch === quote) {
         inString = false;
-        stringQuote = "";
+        quote = "";
       }
-      end++;
+      i++;
       continue;
     }
 
     if (ch === "/" && next === "/") {
       inLineComment = true;
-      end += 2;
+      i += 2;
       continue;
     }
 
     if (ch === "/" && next === "*") {
       inBlockComment = true;
-      end += 2;
+      i += 2;
+      continue;
+    }
+
+    if (ch === "/" && isRegexStart(i)) {
+      inRegex = true;
+      i++;
       continue;
     }
 
     if (ch === "\"" || ch === "'" || ch === "`") {
       inString = true;
-      stringQuote = ch;
-      end++;
+      quote = ch;
+      i++;
       continue;
     }
 
-    if (ch === "{") depth++;
+    if (ch === "{") {
+      depth++;
+    }
 
     if (ch === "}") {
       depth--;
       if (depth === 0) {
-        end++;
-        break;
+        i++;
+        return {
+          start,
+          end: i,
+          block: src.slice(start, i)
+        };
       }
     }
 
-    end++;
+    i++;
   }
 
-  if (depth !== 0) return null;
-
-  return {
-    start,
-    end,
-    block: src.slice(start, end)
-  };
+  return null;
 
 }
 
