@@ -7,7 +7,7 @@
    Search State
 =============================== */
 
-let repairSearchIndex = 0;
+let repairSearchIndex = -1;
 let repairSearchMatches = [];
 let currentRepairFile = "";
 
@@ -151,17 +151,28 @@ async function searchRepairText() {
 }
 
 function searchRepairPrev() {
+
   const keyword =
     get("repairSearch")
       ?.value
-      .trim();
+      ?.trim();
 
   if (!keyword) {
     alert("検索文字を入力してください");
     return;
   }
 
-  if (!repairSearchMatches.length) {
+  if (
+    !Array.isArray(
+      repairSearchMatches
+    )
+  ) {
+    repairSearchMatches = [];
+  }
+
+  if (
+    repairSearchMatches.length === 0
+  ) {
     searchRepairText();
     return;
   }
@@ -174,12 +185,12 @@ function searchRepairPrev() {
   }
 
   moveRepairSearchSelection(
-    repairSearchMatches[repairSearchIndex],
+    repairSearchMatches[
+      repairSearchIndex
+    ],
     keyword.length
   );
 }
-
-searchRepairNext
 
 function moveRepairSearchSelection(index, length) {
   const editor =
