@@ -115,8 +115,27 @@ function initRepairIde() {
    App Events
 =============================== */
 
-document.addEventListener("DOMContentLoaded", initRepairIde);
-document.addEventListener("DOMContentLoaded", loadSettings);
-document.addEventListener("DOMContentLoaded",initImportFileEvents);
-document.addEventListener("input", saveCurrentState);
-document.addEventListener("change", saveCurrentState);
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    loadSettings();
+
+    checkSafeMode();
+
+    initRepairIde();
+
+    initImportFileEvents();
+
+  }
+);
+
+document.addEventListener(
+  "input",
+  saveCurrentState
+);
+
+document.addEventListener(
+  "change",
+  saveCurrentState
+);
