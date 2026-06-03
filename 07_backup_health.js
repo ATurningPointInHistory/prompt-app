@@ -109,80 +109,80 @@ function getHtmlSummary(html) {
    Function Dependency Diagnose
 =============================== */
 
-function buildFunctionDependencyReport(
-  source
-){
+function buildFunctionDependencyReport(source) {
+
+  const text = String(source || "");
 
   const funcs =
+    [...text.matchAll(
+      /function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g
+    )].map(x => x[1]);
 
-    [...String(source || "")
-      .matchAll(
-        /function\s+([a-zA-Z0-9_$]+)\s*\(/g
-      )]
-
-    .map(x=>x[1]);
+  const uniqueFuncs = [...new Set(funcs)];
 
   const onclicks =
+    [...text.matchAll(
+      /onclick\s*=\s*["']\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g
+    )].map(x => x[1]);
 
-    [...String(source || "")
-      .matchAll(
-        /onclick="([a-zA-Z0-9_$]+)\(/g
-      )]
+  const eventRefs =
+    [...text.matchAll(
+      /addEventListener\s*\(\s*["'][^"']+["']\s*,\s*([a-zA-Z_$][a-zA-Z0-9_$]*)/g
+    )].map(x => x[1]);
 
-    .map(x=>x[1]);
+  const windowRefs =
+    [...text.matchAll(
+      /window\.([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g
+    )].map(x => x[1]);
+
+  const domReadyRefs =
+    [...text.matchAll(
+      /DOMContentLoaded[\s\S]{0,500}?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g
+    )].map(x => x[1]);
 
   const result = [];
 
-  funcs.forEach(fn=>{
+  uniqueFuncs.forEach(fn => {
 
     const block =
-      findFunctionBlockInText(
-        source,
-        fn
-      );
+      findFunctionBlockInText(text, fn);
 
     const body =
       block?.block || "";
 
     const calls =
+      uniqueFuncs.filter(other => {
 
-      funcs.filter(other=>{
-
-        if(
-          other===fn
-        ) return false;
+        if (other === fn) return false;
 
         return new RegExp(
-
-          "\\b"+
-          escapeRegExp(other)+
-          "\\s*\\(",
-
+          "\\b" + escapeRegExp(other) + "\\s*\\(",
           "g"
-
         ).test(body);
 
       });
 
-    const usedCount =
-
+    const directCallCount =
       (
-        String(source || "")
-        .match(
-
+        text.match(
           new RegExp(
-
-            "\\b"+
-            escapeRegExp(fn)+
-            "\\s*\\(",
-
+            "\\b" + escapeRegExp(fn) + "\\s*\\(",
             "g"
-
           )
-
         ) || []
-
       ).length;
+
+    const usedByOnclick =
+      onclicks.includes(fn);
+
+    const usedByEvent =
+      eventRefs.includes(fn);
+
+    const usedByWindow =
+      windowRefs.includes(fn);
+
+    const usedByDomReady =
+      domReadyRefs.includes(fn);
 
     result.push(
 
@@ -196,44 +196,56 @@ calls.length
 }
 
 used:
-${usedCount}
+${directCallCount}
 
 onclick:
-${
-onclicks.includes(fn)
-? "YES"
-: "NO"
-}`
+${usedByOnclick ? "YES" : "NO"}
+
+event:
+${usedByEvent ? "YES" : "NO"}
+
+window:
+${usedByWindow ? "YES" : "NO"}
+
+domReady:
+${usedByDomReady ? "YES" : "NO"}`
 
     );
 
   });
 
   const unused =
+    uniqueFuncs.filter(fn => {
 
-    funcs.filter(fn=>{
-
-      const count =
-
+      const directCallCount =
         (
-          String(source || "")
-          .match(
-
+          text.match(
             new RegExp(
-
-              "\\b"+
-              escapeRegExp(fn)+
-              "\\s*\\(",
-
+              "\\b" + escapeRegExp(fn) + "\\s*\\(",
               "g"
-
             )
-
           ) || []
-
         ).length;
 
-      return count<=1;
+      const usedByOnclick =
+        onclicks.includes(fn);
+
+      const usedByEvent =
+        eventRefs.includes(fn);
+
+      const usedByWindow =
+        windowRefs.includes(fn);
+
+      const usedByDomReady =
+        domReadyRefs.includes(fn);
+
+      return (
+        directCallCount <= 1 &&
+        !usedByOnclick &&
+        !usedByEvent &&
+        !usedByWindow &&
+        !usedByDomReady
+      );
 
     });
 
