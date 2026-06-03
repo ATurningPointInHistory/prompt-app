@@ -948,7 +948,11 @@ function buildRepairToolsHtml() {
   onclick="saveRepairHtml()">💾 修正版保存</button>
 <button class="float-list-btn"
   onclick="copyRepairHtml()">📋 HTMLコピー</button>
+<button class="float-list-btn"onclick="
+saveRepairEditorAsFile()">💾 repair保存</button>
 <hr>
+
+
 <button class="float-list-btn" onclick="diagnoseRepairHtml()">🩺 編集内容診断</button>
 <button class="float-list-btn" onclick="selectFunctionBlock()">📦 関数選択</button>
 <button class="float-list-btn" onclick="replaceFunctionBlock()">✏ 関数置換</button>
