@@ -1193,9 +1193,10 @@ async function loadExternalScriptToRepair(src){
       get("repairEditor");
 
     editor.value =
-`/* ===== ${src} ===== */
+      text;
 
-${text}`;
+    currentRepairFile =
+      src;
 
     repairLastValue =
       editor.value;
@@ -1251,6 +1252,7 @@ function loadCurrentIndexToRepair() {
 
   closeFloatPanel();
 }
+
 
 function getExternalScriptSrcList(html) {
 
