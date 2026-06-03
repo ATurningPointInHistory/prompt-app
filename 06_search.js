@@ -151,20 +151,17 @@ async function searchRepairText() {
 }
 
 function searchRepairPrev() {
-  const editor =
-    get("repairEditor");
-
   const keyword =
     get("repairSearch")
       ?.value
       .trim();
 
-  if (!editor || !keyword) {
+  if (!keyword) {
     alert("検索文字を入力してください");
     return;
   }
 
-  if (repairSearchMatches.length === 0) {
+  if (!repairSearchMatches.length) {
     searchRepairText();
     return;
   }
@@ -182,39 +179,7 @@ function searchRepairPrev() {
   );
 }
 
-function searchRepairNext() {
-  const editor =
-    get("repairEditor");
-
-  const keyword =
-    get("repairSearch")
-      ?.value
-      .trim();
-
-  if (!editor || !keyword) {
-    alert("検索文字を入力してください");
-    return;
-  }
-
-  if (repairSearchMatches.length === 0) {
-    searchRepairText();
-    return;
-  }
-
-  repairSearchIndex++;
-
-  if (
-    repairSearchIndex >=
-    repairSearchMatches.length
-  ) {
-    repairSearchIndex = 0;
-  }
-
-  moveRepairSearchSelection(
-    repairSearchMatches[repairSearchIndex],
-    keyword.length
-  );
-}
+searchRepairNext
 
 function moveRepairSearchSelection(index, length) {
   const editor =
