@@ -1223,19 +1223,58 @@ async function loadExternalScriptToRepair(src){
 
 function loadCurrentIndexToRepair() {
 
-  switchAppPage("repair");
+  switchAppPage(
+    "repair"
+  );
 
   const editor =
     get("repairEditor");
 
   if (!editor) {
-    alert("修復エディタが見つかりません");
+
+    alert(
+      "修復エディタが見つかりません"
+    );
+
     return;
   }
 
+  const clone =
+    document.documentElement
+      .cloneNode(true);
+
+  const lineNumbers =
+    clone.querySelector(
+      "#lineNumbers"
+    );
+
+  if (lineNumbers) {
+
+    lineNumbers.innerHTML =
+      "1";
+  }
+
+  const repairEditor =
+    clone.querySelector(
+      "#repairEditor"
+    );
+
+  if (repairEditor) {
+
+    repairEditor.value =
+      "";
+
+    repairEditor.innerHTML =
+      "";
+  }
+
   editor.value =
-    "<!DOCTYPE html>\n" +
-    document.documentElement.outerHTML;
+
+    "<!DOCTYPE html>\n"
+
+    +
+
+    clone.outerHTML;
 
   currentRepairFile =
     "index.html";
@@ -1244,6 +1283,7 @@ function loadCurrentIndexToRepair() {
     editor.value;
 
   updateLineNumbers();
+
   updateCursorPosition();
 
   updateRepairStatus(
@@ -1252,7 +1292,6 @@ function loadCurrentIndexToRepair() {
 
   closeFloatPanel();
 }
-
 
 function getExternalScriptSrcList(html) {
 
