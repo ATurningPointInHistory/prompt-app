@@ -1071,6 +1071,7 @@ function restoreLocalStorageOnly(localStorageData) {
 
 function saveBackupHistory(backupData) {
   const list = loadJson("backupHistory", []);
+
   list.unshift({
     version: backupData.version,
     created_at: backupData.created_at,
@@ -1079,6 +1080,7 @@ function saveBackupHistory(backupData) {
     html: backupData.html,
     localStorageData: backupData.localStorageData
   });
+
   localStorage.setItem(
     "backupHistory",
     JSON.stringify(list.slice(0, 10))
@@ -1087,31 +1089,119 @@ function saveBackupHistory(backupData) {
 
 function showBackupHistory() {
   const list = loadJson("backupHistory", []);
+
   if (list.length === 0) {
     alert("バックアップ履歴はありません");
     return;
   }
+
   openFloatPanel(
     "バックアップ履歴",
     list.map((b, i) => `
-      <button
-        class="float-list-btn"
-        onclick="restoreBackupHistory(${i})">
-        ${i + 1}. ${b.version} / ${b.backup_note || "メモなし"}
-      </button>
+      <div class="backup-history-item">
+        <div>
+          <b>${i + 1}. ${escapeHtml(b.version || "-")}</b>
+        </div>
+        <div>
+          ${escapeHtml(b.created_at || "-")}
+        </div>
+        <div>
+          メモ: ${escapeHtml(b.backup_note || "メモなし")}
+        </div>
+        <div class="float-panel-actions">
+          <button onclick="restoreBackupHistory(${i})">
+            復元
+          </button>
+          <button onclick="markBackupUnused(${i})">
+            ⚠ 不要
+          </button>
+          <button onclick="deleteBackupHistory(${i})">
+            🗑 削除
+          </button>
+        </div>
+      </div>
     `).join("")
   );
+}
+
+function markBackupUnused(index) {
+  const list = loadJson("backupHistory", []);
+  const item = list[index];
+
+  if (!item) return;
+
+  if (
+    !confirm(
+      "このバックアップを不要候補にしますか？\n\n" +
+      "Version: " + (item.version || "-") + "\n" +
+      "メモ: " + (item.backup_note || "メモなし")
+    )
+  ) {
+    return;
+  }
+
+  if (
+    !String(item.backup_note || "")
+      .startsWith("[不要候補]")
+  ) {
+    item.backup_note =
+      "[不要候補] " +
+      (item.backup_note || "");
+  }
+
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list)
+  );
+
+  showBackupHistory();
+}
+
+function deleteBackupHistory(index) {
+  const list = loadJson("backupHistory", []);
+  const item = list[index];
+
+  if (!item) return;
+
+  if (
+    !confirm(
+      "バックアップを完全削除しますか？\n\n" +
+      "Version: " + (item.version || "-") + "\n" +
+      "作成日時: " + (item.created_at || "-") + "\n\n" +
+      "メモ:\n" + (item.backup_note || "メモなし")
+    )
+  ) {
+    return;
+  }
+
+  list.splice(index, 1);
+
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list)
+  );
+
+  showBackupHistory();
 }
 
 function restoreBackupHistory(index) {
   const list = loadJson("backupHistory", []);
   const item = list[index];
+
   if (!item) {
     alert("履歴が見つかりません");
     return;
   }
-  const ok = confirm("このバックアップ履歴を復元しますか？");
+
+  const ok =
+    confirm(
+      "このバックアップ履歴を復元しますか？\n\n" +
+      "Version: " + (item.version || "-") + "\n" +
+      "メモ: " + (item.backup_note || "メモなし")
+    );
+
   if (!ok) return;
+
   Object.entries(item.localStorageData || {}).forEach(([key, value]) => {
     if (value === null || value === undefined) {
       localStorage.removeItem(key);
@@ -1121,12 +1211,14 @@ function restoreBackupHistory(index) {
       localStorage.setItem(key, JSON.stringify(value));
     }
   });
+
   alert("履歴から復元しました。再読み込みします。");
   location.reload();
 }
 
 function manageBackupHistory() {
   const list = loadJson("backupHistory", []);
+
   localStorage.setItem(
     "backupHistory",
     JSON.stringify(list.slice(0, 10))
