@@ -932,9 +932,8 @@ function buildNormalToolsHtml() {
 <button class="float-list-btn" onclick="importTemplates()">📥 テンプレ復元</button>
 <button class="float-list-btn" onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
 <button class="float-list-btn" onclick="importAiPresets()">🤖 AI設定復元</button>
-<buttonclass="float-list-btn"
+<button class="float-list-btn"
 onclick="renderTodoList()">☑ 開発TODO</button>
-
 
 <hr>
 <button class="float-list-btn" onclick="clearOutput()">🧹 出力クリア</button>
