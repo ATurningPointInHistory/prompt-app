@@ -10,6 +10,26 @@ function getTodoList() {
   );
 }
 
+function promptAddTodoItems() {
+
+  const text =
+    prompt(
+      "TODO追加\n\n" +
+      "改行で複数追加できます。\n\n" +
+      "例:\n" +
+      "AI回答保存\n" +
+      "引き継ぎ生成\n" +
+      "CSS整理",
+      ""
+    );
+
+  if (!text) {
+    return;
+  }
+
+  saveTodoItems(text);
+}
+
 function saveTodoItems(text){
 
   if(!text.trim()){
@@ -106,27 +126,9 @@ function renderTodoList() {
     `
 <div class="float-panel-actions">
 
-<button onclick="
-const text =
-  prompt(
-`TODO追加
-(改行で複数追加可)
-
-例:
-AI回答保存
-引き継ぎ生成
-CSS整理`
-  );
-
-if(text){
-  saveTodoItems(text);
-}
-
-if(text){
-saveTodoItem(text);
-}">
-➕ 追加
-</button>
+  <button onclick="promptAddTodoItems()">
+    ➕ 追加
+  </button>
 
 </div>
 
@@ -138,28 +140,19 @@ list.length
 
 <div class="backup-history-item">
 
-<div>
+  <div>
+    <button onclick="toggleTodo(${i})">
+      ${x.done ? "✔" : "□"}
+    </button>
 
-<button
-onclick="toggleTodo(${i})">
+    ${escapeHtml(x.text)}
+  </div>
 
-${x.done?"✔":"□"}
-
-</button>
-
-${escapeHtml(x.text)}
-
-</div>
-
-<div>
-
-<button
-onclick="deleteTodo(${i})">
-
-🗑
-</button>
-
-</div>
+  <div>
+    <button onclick="deleteTodo(${i})">
+      🗑
+    </button>
+  </div>
 
 </div>
 
@@ -172,6 +165,7 @@ onclick="deleteTodo(${i})">
   );
 
 }
+
 /* ===============================
    Code Navigation
 =============================== */
