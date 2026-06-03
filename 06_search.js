@@ -93,7 +93,7 @@ function clearRepairSearch() {
    Search Action
 =============================== */
 
-async function searchRepairText() {
+function searchRepairText() {
   const editor =
     get("repairEditor");
 
@@ -106,17 +106,8 @@ async function searchRepairText() {
     return;
   }
 
-  const html =
-    editor.value;
-
-  const externalJs =
-    await collectExternalScriptText(
-      "<!DOCTYPE html>\n" +
-      document.documentElement.outerHTML
-    );
-
   const sourceText =
-    html + "\n" + externalJs;
+    editor.value;
 
   const regex =
     new RegExp(
@@ -128,10 +119,9 @@ async function searchRepairText() {
     [...sourceText.matchAll(regex)];
 
   repairSearchMatches =
-    [...html.matchAll(regex)]
-      .map(m => m.index);
+    matches.map(m => m.index);
 
-  repairSearchIndex = 0;
+  repairSearchIndex = -1;
 
   renderRepairSearchResults(
     keyword,
@@ -139,10 +129,7 @@ async function searchRepairText() {
   );
 
   if (repairSearchMatches.length > 0) {
-    moveRepairSearchSelection(
-      repairSearchMatches[0],
-      keyword.length
-    );
+    searchRepairNext();
   }
 
   updateRepairStatus(
