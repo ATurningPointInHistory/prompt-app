@@ -9,7 +9,6 @@
 
 let repairSearchIndex = -1;
 let repairSearchMatches = [];
-let currentRepairFile = "";
 
 /* ===============================
    Search Panel
