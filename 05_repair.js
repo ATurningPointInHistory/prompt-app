@@ -83,6 +83,8 @@ function saveRepairHtml() {
   const editor =
     get("repairEditor");
 
+  if (!editor) return;
+
   const text =
     editor.value.trim();
 
@@ -91,13 +93,14 @@ function saveRepairHtml() {
     return;
   }
 
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-");
+
   const filename =
     currentRepairFile ||
-    `AIPro_Repaired_${
-      new Date()
-        .toISOString()
-        .replace(/[:.]/g, "-")
-    }.html`;
+    `AIPro_Repaired_${timestamp}.html`;
 
   const type =
     filename.endsWith(".js")
