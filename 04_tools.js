@@ -9,7 +9,45 @@
 
 let selectedTodoIndexes = new Set();
 
-const normalized =
+function mergeSelectedTodos() {
+
+  const list =
+    getTodoList();
+
+  const selectedIndexes =
+    [...selectedTodoIndexes];
+
+  const selected =
+    selectedIndexes.map(
+      index => list[index]
+    );
+
+  if (selected.length < 2) {
+
+    alert(
+      "統合するTODOを2件以上選択してください"
+    );
+
+    return;
+
+  }
+
+  const defaultText =
+    selected
+      .map(item => item.text)
+      .join(" / ");
+
+  const mergedText =
+    prompt(
+      "統合後のTODO名を入力してください",
+      defaultText
+    );
+
+  if (!mergedText) {
+    return;
+  }
+
+  const normalized =
     normalizeTodoText(
       mergedText
     );
@@ -23,7 +61,9 @@ const normalized =
       "選択したTODOを統合しますか？\n\n"
       +
       selected
-        .map(x => "・" + x.text)
+        .map(
+          x => "・" + x.text
+        )
         .join("\n")
       +
       "\n\n↓\n\n"
@@ -47,28 +87,31 @@ const normalized =
 
     done: false,
 
+    selected: false,
+
     created_at:
       new Date()
         .toISOString(),
 
     merged_from:
 
-      selected.flatMap(item =>
+      selected.flatMap(
+        item =>
 
-        item.merged_from
-        ? item.merged_from
-        : [item.text]
+          item.merged_from
+          ? item.merged_from
+          : [item.text]
 
       )
 
   });
 
-  selectedTodoIndexes.clear();
-
   localStorage.setItem(
     "todoList",
     JSON.stringify(next)
   );
+
+  selectedTodoIndexes.clear();
 
   renderTodoList();
 
