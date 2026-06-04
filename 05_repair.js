@@ -27,13 +27,21 @@ function loadRepairHtml() {
 
   input.type = "file";
   input.accept =
-    ".html,.json,text/html,application/json";
+    ".html,.js,.json,text/html,text/javascript,application/json";
 
   input.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file =
+      e.target.files[0];
 
-    const reader = new FileReader();
+    if (!file) {
+      return;
+    }
+
+    currentRepairFile =
+      file.name || "";
+
+    const reader =
+      new FileReader();
 
     reader.onload = () => {
       try {
@@ -44,16 +52,28 @@ function loadRepairHtml() {
           const editor =
             get("repairEditor");
 
-          editor.value = parsed.html;
-          editor.scrollLeft = 0;
+          editor.value =
+            parsed.html;
 
-          repairLastValue = editor.value;
+          editor.scrollLeft =
+            0;
+
+          repairLastValue =
+            editor.value;
 
           updateLineNumbers();
           updateCursorPosition();
-          updateRepairStatus("フルバックアップJSON読込");
 
-          alert("フルバックアップJSON読込完了");
+          updateRepairStatus(
+            "フルバックアップJSON読込: " +
+            currentRepairFile
+          );
+
+          alert(
+            "フルバックアップJSON読込完了\n\n" +
+            currentRepairFile
+          );
+
           return;
         }
       } catch {}
@@ -61,16 +81,27 @@ function loadRepairHtml() {
       const editor =
         get("repairEditor");
 
-      editor.value = reader.result;
-      editor.scrollLeft = 0;
+      editor.value =
+        reader.result;
 
-      repairLastValue = editor.value;
+      editor.scrollLeft =
+        0;
+
+      repairLastValue =
+        editor.value;
 
       updateLineNumbers();
       updateCursorPosition();
-      updateRepairStatus("HTML読込");
 
-      alert("HTML読込完了");
+      updateRepairStatus(
+        "読込: " +
+        currentRepairFile
+      );
+
+      alert(
+        "読込完了\n\n" +
+        currentRepairFile
+      );
     };
 
     reader.readAsText(file);
@@ -80,17 +111,25 @@ function loadRepairHtml() {
 }
 
 function saveRepairHtml() {
+
   const editor =
     get("repairEditor");
 
-  if (!editor) return;
+  if (!editor) {
+    return;
+  }
 
   const text =
     editor.value.trim();
 
   if (!text) {
-    alert("保存内容が空です");
+
+    alert(
+      "保存内容が空です"
+    );
+
     return;
+
   }
 
   const timestamp =
@@ -99,12 +138,26 @@ function saveRepairHtml() {
       .replace(/[:.]/g, "-");
 
   const filename =
-    currentRepairFile ||
-    `AIPro_Repaired_${timestamp}.html`;
+
+    (
+      typeof currentRepairFile !==
+      "undefined"
+
+      &&
+
+      currentRepairFile
+    )
+
+    ? currentRepairFile
+
+    : `AIPro_Repaired_${timestamp}.html`;
 
   const type =
+
     filename.endsWith(".js")
+
       ? "text/javascript"
+
       : "text/html";
 
   const blob =
@@ -117,7 +170,9 @@ function saveRepairHtml() {
     document.createElement("a");
 
   a.href =
-    URL.createObjectURL(blob);
+    URL.createObjectURL(
+      blob
+    );
 
   a.download =
     filename;
@@ -125,20 +180,30 @@ function saveRepairHtml() {
   a.click();
 
   setTimeout(() => {
-    URL.revokeObjectURL(a.href);
+
+    URL.revokeObjectURL(
+      a.href
+    );
+
   }, 1000);
 
   repairLastValue =
     editor.value;
 
   updateRepairStatus(
+
     `保存完了: ${filename}`
+
   );
 
   alert(
+
     "保存完了\n\n" +
+
     filename
+
   );
+
 }
 
 async function copyRepairHtml() {
