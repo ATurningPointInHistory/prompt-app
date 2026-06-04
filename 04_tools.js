@@ -7,6 +7,8 @@
    TODO Management
 =============================== */
 
+let todoDetailOpening = false;
+
 let selectedTodoIndexes = new Set();
 
 function getPriorityIcon(priority) {
@@ -427,48 +429,46 @@ function deleteSelectedTodos() {
 
 function showTodoDetail(index) {
 
+  if (todoDetailOpening) {
+    return;
+  }
+
+  todoDetailOpening = true;
+
   const list =
     getTodoList();
 
   const item =
     list[index];
 
-  if (!item) return;
+  if (!item) {
+    todoDetailOpening = false;
+    return;
+  }
 
   let detail =
     item.text;
 
   detail +=
-
-    "\n\n優先度: "
-
-    +
-
+    "\n\n優先度: " +
     (item.priority || "middle");
 
   if (
-    Array.isArray(
-      item.merged_from
-    ) &&
+    Array.isArray(item.merged_from) &&
     item.merged_from.length
   ) {
-
     detail +=
-
-      "\n\n統合元:\n"
-
-      +
-
+      "\n\n統合元:\n" +
       item.merged_from
-        .map(
-          x => "・" + x
-        )
+        .map(x => "・" + x)
         .join("\n");
-
   }
 
   alert(detail);
 
+  setTimeout(() => {
+    todoDetailOpening = false;
+  }, 500);
 }
 
 function toggleSelectAllTodos() {
