@@ -209,36 +209,58 @@ reloadAppPage()">
 function buildRepairToolsHtml() {
   return `
 <button class="float-list-btn"
-  onclick="loadRepairHtml()">📖 HTML読込</button>
-<button class="float-list-btn" onclick="backupPartialScript()">📦 JS部分読込</button>
+  onclick="loadRepairHtml()">
+📖 HTML読込</button>
+<button class="float-list-btn" onclick="toggleRepairReadOnly()">
+👁 閲覧/編集切替
+</button>
+<button class="float-list-btn" onclick="backupPartialScript()">
+📦 JS部分読込</button>
 <button class="float-list-btn"
-  onclick="copyRepairHtml()">📋 HTMLコピー</button>
+  onclick="copyRepairHtml()">
+📋 HTMLコピー</button>
 <button class="float-list-btn"
-  onclick="saveRepairHtml()">💾 現在ファイル保存</button>
+  onclick="saveRepairHtml()">
+💾 現在ファイル保存</button>
 <hr>
-
-
-<button class="float-list-btn" onclick="diagnoseRepairHtml()">🩺 編集内容診断</button>
-<button class="float-list-btn" onclick="selectFunctionBlock()">📦 関数選択</button>
-<button class="float-list-btn" onclick="replaceFunctionBlock()">✏ 関数置換</button>
-<button class="float-list-btn" onclick="showFunctionList()">📚 コードブロック一覧</button>
-<button class="float-list-btn" onclick="showFunctionSortList()">↕コードブロック並べ替え</button>
-<button class="float-list-btn" onclick="toggleRepairSearchBox()">🔍 検索</button>
-<button class="float-list-btn" onclick="openReplacePanel()">🔁 検索置換</button>
+<button class="float-list-btn" onclick="diagnoseRepairHtml()">
+🩺 編集内容診断</button>
+<button class="float-list-btn" onclick="selectFunctionBlock()">
+📦 関数選択</button>
+<button class="float-list-btn" onclick="replaceFunctionBlock()">
+✏ 関数置換</button>
+<button class="float-list-btn" onclick="showFunctionList()">
+📚 コードブロック一覧</button>
+<button class="float-list-btn" onclick="showFunctionSortList()">
+↕コードブロック並べ替え</button>
+<button class="float-list-btn" onclick="toggleRepairSearchBox()">
+🔍 検索</button>
+<button class="float-list-btn" onclick="openReplacePanel()">
+🔁 検索置換</button>
 <hr>
-<button class="float-list-btn" onclick="undoRepairEdit()">↩ Undo</button>
-<button class="float-list-btn" onclick="redoRepairEdit()">↪ Redo</button>
+<button class="float-list-btn" onclick="undoRepairEdit()">
+↩ Undo</button>
+<button class="float-list-btn" onclick="redoRepairEdit()">
+↪ Redo</button>
 <button class="float-list-btn"
-  onclick="indentRepairSelection()">➡ インデント</button>
+  onclick="indentRepairSelection()">
+➡ インデント</button>
 <button class="float-list-btn"
-  onclick="outdentRepairSelection()">⬅ アウトデント</button>
-<button class="float-list-btn" onclick="toggleRepairAutoSave()">💾 AutoSave</button>
+  onclick="outdentRepairSelection()">
+⬅ アウトデント</button>
+<button class="float-list-btn" onclick="toggleRepairAutoSave()">
+💾 AutoSave</button>
 <hr>
-<button class="float-list-btn" onclick="cleanupCandidates()">🧹 削除候補チェック</button>
-<button class="float-list-btn" onclick="deleteCommentedCleanupBlocks()">🗑 コメント化済みを完全削除</button>
-<button class="float-list-btn" onclick="previewRepairHtml()">🎨 色分けプレビュー</button>
-<button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
-<button class="float-list-btn" onclick="reloadAppPage()">🔄 ページ更新</button>
+<button class="float-list-btn" onclick="cleanupCandidates()">
+🧹 削除候補チェック</button>
+<button class="float-list-btn" onclick="deleteCommentedCleanupBlocks()">
+🗑 コメント化済みを完全削除</button>
+<button class="float-list-btn" onclick="previewRepairHtml()">
+🎨 色分けプレビュー</button>
+<button class="float-list-btn" onclick="showHtmlHealth()">
+💚 HTML HEALTH</button>
+<button class="float-list-btn" onclick="reloadAppPage()">
+🔄 ページ更新</button>
 `;
 }
 
