@@ -23,6 +23,48 @@ const CHANGELOG = [
 
 const get = (id) => document.getElementById(id);
 
+function copyTextFallback(text) {
+
+  const textarea =
+    document.createElement("textarea");
+
+  textarea.value =
+    String(text || "");
+
+  textarea.style.position =
+    "fixed";
+
+  textarea.style.left =
+    "-9999px";
+
+  textarea.style.top =
+    "0";
+
+  document.body.appendChild(
+    textarea
+  );
+
+  textarea.focus();
+  textarea.select();
+
+  let ok = false;
+
+  try {
+    ok =
+      document.execCommand(
+        "copy"
+      );
+  } catch {
+    ok = false;
+  }
+
+  document.body.removeChild(
+    textarea
+  );
+
+  return ok;
+}
+
 /* ===============================
    Core Escape Helpers
 =============================== */
