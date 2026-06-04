@@ -158,19 +158,27 @@ function getSortedTodoList(list) {
 
   };
 
-  return [...list].sort((a,b)=>{
+  return list
+    .map((item,index)=>({
 
-    if (a.done !== b.done) {
-      return a.done ? 1 : -1;
-    }
+      ...item,
 
-    return (
-      (priorityOrder[a.priority] ?? 1)
-      -
-      (priorityOrder[b.priority] ?? 1)
-    );
+      _index:index
 
-  });
+    }))
+    .sort((a,b)=>{
+
+      if (a.done !== b.done) {
+        return a.done ? 1 : -1;
+      }
+
+      return (
+        (priorityOrder[a.priority] ?? 1)
+        -
+        (priorityOrder[b.priority] ?? 1)
+      );
+
+    });
 
 }
 
