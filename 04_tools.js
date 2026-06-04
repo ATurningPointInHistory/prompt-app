@@ -11,6 +11,80 @@ let todoDetailOpening = false;
 
 let selectedTodoIndexes = new Set();
 
+function getAiMemoryList() {
+
+  return loadJson(
+    "aiMemoryList",
+    []
+  );
+
+}
+
+function saveAiMemory(
+  title,
+  content
+) {
+
+  const list =
+    getAiMemoryList();
+
+  list.unshift({
+
+    title,
+
+    content,
+
+    created_at:
+      new Date()
+        .toISOString()
+
+  });
+
+  localStorage.setItem(
+    "aiMemoryList",
+    JSON.stringify(list)
+  );
+
+}
+
+function saveCurrentAiAnswer() {
+
+  const output =
+    get("output")
+      ?.value
+      ?.trim();
+
+  if (!output) {
+
+    alert(
+      "保存する回答がありません"
+    );
+
+    return;
+
+  }
+
+  const title =
+    prompt(
+      "保存名",
+      "AI回答"
+    );
+
+  if (!title) {
+    return;
+  }
+
+  saveAiMemory(
+    title,
+    output
+  );
+
+  alert(
+    "保存しました"
+  );
+
+}
+
 function getProjectState() {
 
   return loadJson(
