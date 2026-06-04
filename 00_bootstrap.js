@@ -188,10 +188,6 @@ onclick="renderDevLogList()">
 📚 開発履歴
 </button>
 
-<button class="float-list-btn" onclick="saveDevLogFromInput()">
-📝 開発ログ保存
-</button>
-
 <hr>
 
 <button class="float-list-btn" onclick="clearOutput()">
