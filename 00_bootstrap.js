@@ -176,6 +176,8 @@ function buildNormalToolsHtml() {
 🤖 AI設定復元
 </button>
 
+<hr>
+
 <button class="float-list-btn" onclick="renderTodoList()">
 ☑ 開発TODO
 </button>
