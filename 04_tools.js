@@ -11,6 +11,71 @@ let todoDetailOpening = false;
 
 let selectedTodoIndexes = new Set();
 
+function changeSelectedTodoPriority() {
+
+  const list =
+    getTodoList();
+
+  const selected =
+    [...selectedTodoIndexes];
+
+  if (!selected.length) {
+    alert("優先度を変更するTODOを選択してください");
+    return;
+  }
+
+  const value =
+    prompt(
+      "優先度を入力してください\n\n" +
+      "1: high（高）\n" +
+      "2: middle（中）\n" +
+      "3: low（低）",
+      "2"
+    );
+
+  if (value === null) {
+    return;
+  }
+
+  const map = {
+    "1": "high",
+    "2": "middle",
+    "3": "low",
+    high: "high",
+    middle: "middle",
+    low: "low"
+  };
+
+  const priority =
+    map[String(value).trim()];
+
+  if (!priority) {
+    alert("優先度が正しくありません");
+    return;
+  }
+
+  selected.forEach(index => {
+    if (list[index]) {
+      list[index].priority =
+        priority;
+    }
+  });
+
+  localStorage.setItem(
+    "todoList",
+    JSON.stringify(list)
+  );
+
+  selectedTodoIndexes.clear();
+
+  renderTodoList();
+
+  alert(
+    selected.length +
+    "件の優先度を変更しました"
+  );
+}
+
 function completeTodosFromInput() {
 
   const box =
@@ -265,6 +330,10 @@ function renderTodoList() {
 
   <button onclick="promptAddTodoItems()">
     ➕
+  </button>
+
+  <button onclick="changeSelectedTodoPriority()">
+    🔥
   </button>
 
   <button onclick="toggleSelectAllTodos()">
