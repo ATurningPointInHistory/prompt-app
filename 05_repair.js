@@ -1761,31 +1761,7 @@ function updateCursorPosition() {
   updateLineNumbers();
 }
 
-function toggleRepairReadOnly() {
-
-  const editor =
-    get("repairEditor");
-
-  if (!editor) {
-    return;
-  }
-
-  editor.readOnly =
-    !editor.readOnly;
-
-  editor.classList.toggle(
-    "repair-readonly",
-    editor.readOnly
-  );
-
-  updateRepairStatus(
-    editor.readOnly
-      ? "閲覧モード：キーボード抑制"
-      : "編集モード"
-  );
-
-}
-
+toggleRepairReadOnly
 function toggleRepairAutoSave() {
   repairAutoSaveEnabled = !repairAutoSaveEnabled;
   localStorage.setItem(
@@ -2117,23 +2093,41 @@ function copyDiagnoseResult() {
 }
 
 function previewRepairHtml() {
-  const box = get("repairPreview");
-  const btn = get("previewBtn");
-  // OFF処理
-  if (box.style.display === "block") {
-    box.style.display = "none";
-    btn.innerText =
-      "🎨 色分けプレビュー";
+
+  const box =
+    get("repairPreview");
+
+  const btn =
+    get("previewBtn");
+
+  if (!box) {
     return;
   }
+
+  if (box.style.display === "block") {
+
+    box.style.display =
+      "none";
+
+    if (btn) {
+      btn.innerText =
+        "🎨 色分けプレビュー";
+    }
+
+    return;
+  }
+
   const html =
     get("repairEditor").value;
+
   if (!html.trim()) {
     alert("HTMLが空です");
     return;
   }
+
   let escaped =
     escapeHtml(html);
+
   escaped = escaped
     .replace(
       /(&lt;!--[\s\S]*?--&gt;)/g,
@@ -2155,10 +2149,15 @@ function previewRepairHtml() {
       /\b(function|const|let|var|return|if|else|try|catch|for|while|switch|case|break|new)\b/g,
       '<span class="code-keyword">$1</span>'
     );
+
   box.innerHTML =
     escaped;
+
   box.style.display =
     "block";
-  btn.innerText =
-    "❌ プレビュー閉じる";
+
+  if (btn) {
+    btn.innerText =
+      "❌ プレビュー閉じる";
+  }
 }
