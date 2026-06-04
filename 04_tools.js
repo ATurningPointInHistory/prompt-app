@@ -921,25 +921,17 @@ function renderTodoList() {
     ...
   </div>
 
-  <div
-    id="todoActionMenu"
-    class="todo-menu-grid"
-    style="display:none;">
+<div class="todo-header">
 
-    ...
-  </div>
+  <button
+    onclick="toggleTodoMenu('manage')">
+    管理 ▼
+  </button>
 
-  <div class="todo-toolbar-right">
-
-    <button onclick="toggleTodoMenu('manage')">
-      管理 ▼
-    </button>
-
-    <button onclick="toggleTodoMenu('action')">
-      操作 ▼
-    </button>
-
-  </div>
+  <button
+    onclick="toggleTodoMenu('action')">
+    操作 ▼
+  </button>
 
 </div>
 
