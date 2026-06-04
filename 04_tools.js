@@ -775,6 +775,117 @@ function copySelectedTodos() {
   );
 }
 
+function generateHandoffPrompt() {
+
+  const list =
+    getTodoList();
+
+  const done =
+    list.filter(
+      item => item.done
+    );
+
+  const undone =
+    getSortedTodoList(
+      list.filter(
+        item => !item.done
+      )
+    );
+
+  const topPriority =
+    undone.filter(
+      x => x.priority === "high"
+    );
+
+  const text =
+
+`AIプロンプト生成Pro 引き継ぎ
+
+現在状態
+
+未完了TODO
+${undone.length}
+
+完了TODO
+${done.length}
+
+--------------------------------
+
+最優先
+
+${
+topPriority.length
+? topPriority
+    .map(
+      x =>
+      "🔥 " + x.text
+    )
+    .join("\n")
+: "なし"
+}
+
+--------------------------------
+
+未完了
+
+${
+undone.length
+? undone
+    .map(x => {
+
+      const icon =
+        getPriorityIcon(
+          x.priority
+        );
+
+      return (
+        icon +
+        " " +
+        x.text
+      );
+
+    })
+    .join("\n")
+: "なし"
+}
+
+--------------------------------
+
+完了
+
+${
+done.length
+? done
+    .map(
+      x =>
+      "✔ " +
+      x.text
+    )
+    .join("\n")
+: "なし"
+}
+
+--------------------------------
+
+次の作業
+
+・最優先TODOから着手
+・既存機能を壊さない
+・function単位で変更
+・HTML HEALTH確認
+
+`;
+
+  copyTextFallback(
+    text
+  );
+
+  alert(
+    "引き継ぎ内容をコピーしました"
+  );
+
+}
+
 /* ===============================
    Code Navigation
 =============================== */
