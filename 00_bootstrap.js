@@ -180,6 +180,18 @@ function buildNormalToolsHtml() {
 ☑ 開発TODO
 </button>
 
+<button
+class="float-list-btn"
+onclick="saveDevLogFromInput()">
+📝 開発ログ
+</button>
+
+<button
+class="float-list-btn"
+onclick="renderDevLogList()">
+📚 開発履歴
+</button>
+
 <button class="float-list-btn" onclick="saveDevLogFromInput()">
 📝 開発ログ保存
 </button>
