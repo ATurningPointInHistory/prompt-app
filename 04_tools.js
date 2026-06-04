@@ -11,20 +11,53 @@ let todoDetailOpening = false;
 
 let selectedTodoIndexes = new Set();
 
-function completeTodosFromInput() {
+function completeTodosByText(text) {
 
-  const box =
-    get("todoCompleteInput");
-
-  if (!box) {
+  if (!String(text || "").trim()) {
+    alert("完了したTODOを入力してください");
     return;
   }
 
-  completeTodosByText(
-    box.value
+  const targets =
+    String(text)
+      .split("\n")
+      .map(line =>
+        normalizeTodoText(line)
+      )
+      .filter(Boolean);
+
+  const list =
+    getTodoList();
+
+  let count = 0;
+
+  list.forEach(todo => {
+
+    const todoText =
+      normalizeTodoText(todo.text);
+
+    const matched =
+      targets.some(target =>
+        todoText === target ||
+        todoText.includes(target) ||
+        target.includes(todoText)
+      );
+
+    if (matched && !todo.done) {
+      todo.done = true;
+      count++;
+    }
+
+  });
+
+  localStorage.setItem(
+    "todoList",
+    JSON.stringify(list)
   );
 
-  box.value = "";
+  renderTodoList();
+
+  alert(count + "件を完了にしました");
 }
 
 function getPriorityIcon(priority) {
