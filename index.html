@@ -41,6 +41,57 @@ body {
   transition: 0.3s;
 }
 
+.todo-menu-grid{
+  margin-top:8px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+  padding-top:8px;
+  border-top:1px solid rgba(255,255,255,0.18);
+}
+
+.todo-menu-grid button{
+  height:34px;
+  padding:0;
+  font-size:11px;
+  border-radius:8px;
+  text-align:center;
+}
+
+.todo-complete-box{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,0.18);
+}
+
+.todo-complete-box textarea{
+  min-height:64px;
+  font-size:12px;
+  padding:8px;
+  background:rgba(0,0,0,0.18);
+}
+
+.todo-complete-box button{
+  width:100%;
+  margin-top:6px;
+  padding:8px;
+  font-size:12px;
+}
+
+.todo-header button{
+  height:34px;
+  padding:0 10px;
+  font-size:12px;
+  border-radius:8px;
+}
+
+.todo-header{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-bottom:8px;
+}
+
 .todo-complete-box{
   margin:8px 0;
 }
