@@ -11,7 +11,7 @@ let repairUndoStack = [];
 let repairRedoStack = [];
 let repairLastValue = "";
 let repairAutoSaveEnabled = false;
-
+let currentRepairFile = "";
 let functionSortList = [];
 let functionSortFilter = "all";
 let dragSortIndex = null;
