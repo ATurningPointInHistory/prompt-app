@@ -861,42 +861,25 @@ function toggleTodoMenu(type) {
   const action =
     get("todoActionMenu");
 
-  if (
-    type === "manage"
-  ) {
+  if (type === "manage") {
 
     manage.style.display =
+      manage.style.display === "flex"
+        ? "none"
+        : "flex";
 
-      manage.style.display ===
-      "block"
-
-      ? "none"
-
-      : "block";
-
-    action.style.display =
-      "none";
-
+    action.style.display = "none";
   }
 
-  if (
-    type === "action"
-  ) {
+  if (type === "action") {
 
     action.style.display =
+      action.style.display === "flex"
+        ? "none"
+        : "flex";
 
-      action.style.display ===
-      "block"
-
-      ? "none"
-
-      : "block";
-
-    manage.style.display =
-      "none";
-
+    manage.style.display = "none";
   }
-
 }
 
 function renderTodoList() {
