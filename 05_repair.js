@@ -1761,7 +1761,49 @@ function updateCursorPosition() {
   updateLineNumbers();
 }
 
-toggleRepairReadOnly
+function toggleRepairReadOnly() {
+
+  const editor =
+    get("repairEditor");
+
+  const preview =
+    get("repairPreview");
+
+  if (!editor || !preview) {
+    return;
+  }
+
+  const readonly =
+    !editor.readOnly;
+
+  editor.readOnly =
+    readonly;
+
+  if (readonly) {
+
+    previewRepairHtml();
+
+    editor.style.display =
+      "none";
+
+    updateRepairStatus(
+      "閲覧モード：色分けプレビュー"
+    );
+
+  } else {
+
+    preview.style.display =
+      "none";
+
+    editor.style.display =
+      "block";
+
+    updateRepairStatus(
+      "編集モード"
+    );
+  }
+}
+
 function toggleRepairAutoSave() {
   repairAutoSaveEnabled = !repairAutoSaveEnabled;
   localStorage.setItem(
