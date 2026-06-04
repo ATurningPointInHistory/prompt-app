@@ -1761,6 +1761,31 @@ function updateCursorPosition() {
   updateLineNumbers();
 }
 
+function toggleRepairReadOnly() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  editor.readOnly =
+    !editor.readOnly;
+
+  editor.classList.toggle(
+    "repair-readonly",
+    editor.readOnly
+  );
+
+  updateRepairStatus(
+    editor.readOnly
+      ? "閲覧モード：キーボード抑制"
+      : "編集モード"
+  );
+
+}
+
 function toggleRepairAutoSave() {
   repairAutoSaveEnabled = !repairAutoSaveEnabled;
   localStorage.setItem(
