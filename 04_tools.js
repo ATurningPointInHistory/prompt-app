@@ -11,66 +11,20 @@ let todoDetailOpening = false;
 
 let selectedTodoIndexes = new Set();
 
-function completeTodosByText() {
+function completeTodosFromInput() {
 
-  const text =
-    prompt(
-      "完了したTODOを貼り付けてください\n\n" +
-      "改行で複数指定できます。",
-      ""
-    );
+  const box =
+    get("todoCompleteInput");
 
-  if (!text) {
+  if (!box) {
     return;
   }
 
-  const targets =
-    String(text)
-      .split("\n")
-      .map(line =>
-        normalizeTodoText(line)
-      )
-      .filter(Boolean);
-
-  if (!targets.length) {
-    return;
-  }
-
-  const list =
-    getTodoList();
-
-  let count = 0;
-
-  list.forEach(todo => {
-
-    const todoText =
-      normalizeTodoText(todo.text);
-
-    const matched =
-      targets.some(target =>
-        todoText === target ||
-        todoText.includes(target) ||
-        target.includes(todoText)
-      );
-
-    if (matched && !todo.done) {
-      todo.done = true;
-      count++;
-    }
-
-  });
-
-  localStorage.setItem(
-    "todoList",
-    JSON.stringify(list)
+  completeTodosByText(
+    box.value
   );
 
-  renderTodoList();
-
-  alert(
-    count +
-    "件を完了にしました"
-  );
+  box.value = "";
 }
 
 function getPriorityIcon(priority) {
@@ -276,12 +230,22 @@ function renderTodoList() {
     🔗
   </button>
 
-  <button onclick="completeTodosByText()">
-    ✅
-  </button>
-
   <button onclick="deleteSelectedTodos()">
     🗑
+  </button>
+
+</div>
+
+<div class="todo-complete-box">
+
+  <textarea
+    id="todoCompleteInput"
+    rows="3"
+    placeholder="完了したTODOを貼り付け"
+  ></textarea>
+
+  <button onclick="completeTodosFromInput()">
+    ✅ 貼り付け分を完了
   </button>
 
 </div>
