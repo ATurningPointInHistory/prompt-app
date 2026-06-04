@@ -11,6 +11,140 @@ let todoDetailOpening = false;
 
 let selectedTodoIndexes = new Set();
 
+function getDevLogList() {
+
+  return loadJson(
+    "devLogList",
+    []
+  );
+
+}
+
+function saveDevLog(log) {
+
+  const list =
+    getDevLogList();
+
+  list.unshift(log);
+
+  localStorage.setItem(
+    "devLogList",
+    JSON.stringify(list.slice(0, 50))
+  );
+
+}
+
+function saveDevLogFromInput() {
+
+  const raw =
+    prompt(
+      "開発ログを入力してください\n\n" +
+      "例:\n" +
+      "TODO統合を追加。renderTodoListを更新。HTML HEALTH 100。次はAI回答保存。",
+      ""
+    );
+
+  if (!raw) {
+    return;
+  }
+
+  const text =
+    String(raw).trim();
+
+  const log = {
+    title:
+      guessDevLogTitle(text),
+
+    changes:
+      extractDevLogChanges(text),
+
+    result:
+      extractDevLogResult(text),
+
+    next:
+      extractDevLogNext(text),
+
+    raw_text:
+      text,
+
+    created_at:
+      new Date()
+        .toISOString()
+  };
+
+  saveDevLog(log);
+
+  alert(
+    "開発ログを保存しました\n\n" +
+    "作業名: " + log.title
+  );
+
+}
+
+function guessDevLogTitle(text) {
+
+  const firstLine =
+    String(text || "")
+      .split("\n")
+      .map(x => x.trim())
+      .find(Boolean);
+
+  if (!firstLine) {
+    return "開発ログ";
+  }
+
+  return firstLine
+    .replace(/[。\.].*$/, "")
+    .slice(0, 30);
+
+}
+
+function extractDevLogChanges(text) {
+
+  return String(text || "")
+    .split(/[。\n]/)
+    .map(x => x.trim())
+    .filter(x =>
+      x.includes("追加") ||
+      x.includes("変更") ||
+      x.includes("更新") ||
+      x.includes("修正") ||
+      x.includes("削除")
+    )
+    .join("\n") || "未整理";
+
+}
+
+function extractDevLogResult(text) {
+
+  return String(text || "")
+    .split(/[。\n]/)
+    .map(x => x.trim())
+    .filter(x =>
+      x.includes("OK") ||
+      x.includes("正常") ||
+      x.includes("100") ||
+      x.includes("確認") ||
+      x.includes("エラーなし")
+    )
+    .join("\n") || "未記録";
+
+}
+
+function extractDevLogNext(text) {
+
+  return String(text || "")
+    .split(/[。\n]/)
+    .map(x => x.trim())
+    .filter(x =>
+      x.includes("次") ||
+      x.includes("次は") ||
+      x.includes("次に")
+    )
+    .join("\n") || "未設定";
+
+}
+
 function getAiMemoryList() {
 
   return loadJson(
