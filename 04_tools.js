@@ -791,63 +791,63 @@ function renderTodoList() {
     "開発TODO",
 
     `
-<div class="todo-header">
+<div class="todo-toolbar-top">
 
   <button
     onclick="toggleTodoMenu('manage')">
     管理 ▼
   </button>
 
-  <div
-    id="todoManageMenu"
-    class="todo-menu-inline"
-    style="display:none;">
-
-    <button onclick="promptAddTodoItems()">
-      TODO
-    </button>
-
-    <button onclick="changeSelectedTodoPriority()">
-      優先度
-    </button>
-
-    <button onclick="toggleSelectAllTodos()">
-      全選択
-    </button>
-
-    <button onclick="deleteSelectedTodos()">
-      削除
-    </button>
-
-  </div>
-
   <button
     onclick="toggleTodoMenu('action')">
     操作 ▼
   </button>
 
-  <div
-    id="todoActionMenu"
-    class="todo-menu-inline"
-    style="display:none;">
+</div>
 
-    <button onclick="copySelectedTodos()">
-      コピー
-    </button>
+<div
+  id="todoManageMenu"
+  class="todo-menu-grid"
+  style="display:none;">
 
-    <button onclick="mergeSelectedTodos()">
-      統合
-    </button>
+  <button onclick="promptAddTodoItems()">
+    TODO
+  </button>
 
-    <button onclick="saveDevLogFromInput()">
-      ログ
-    </button>
+  <button onclick="changeSelectedTodoPriority()">
+    優先度
+  </button>
 
-    <button onclick="generateHandoffPrompt()">
-      引継
-    </button>
+  <button onclick="toggleSelectAllTodos()">
+    全選択
+  </button>
 
-  </div>
+  <button onclick="deleteSelectedTodos()">
+    削除
+  </button>
+
+</div>
+
+<div
+  id="todoActionMenu"
+  class="todo-menu-grid"
+  style="display:none;">
+
+  <button onclick="copySelectedTodos()">
+    コピー
+  </button>
+
+  <button onclick="mergeSelectedTodos()">
+    統合
+  </button>
+
+  <button onclick="saveDevLogFromInput()">
+    ログ
+  </button>
+
+  <button onclick="generateHandoffPrompt()">
+    引継
+  </button>
 
 </div>
 
