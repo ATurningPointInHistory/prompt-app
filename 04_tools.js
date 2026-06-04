@@ -3,12 +3,45 @@
    Tools
 =============================== */
 
+/* ===============================
+   TODO Management
+=============================== */
+
 let selectedTodoIndexes = new Set();
+
+function normalizeTodoText(text) {
+
+  return String(text || "")
+    .trim()
+    .replace(
+      /^[✔✓☑□■・\-\*]\s*/,
+      ""
+    )
+    .trim();
+
+}
+
+function getSortedTodoList(list) {
+
+  return list
+    .map((item, index) => ({
+      ...item,
+      _index: index
+    }))
+    .sort((a, b) =>
+      Number(a.done) -
+      Number(b.done)
+    );
+
+}
 
 function renderTodoList() {
 
   const list =
     getTodoList();
+
+  const sortedList =
+    getSortedTodoList(list);
 
   openFloatPanel(
     "開発TODO",
@@ -37,28 +70,28 @@ function renderTodoList() {
 <div class="todo-list">
 
 ${
-list.length
-? list.map((x, i) => `
+sortedList.length
+? sortedList.map((x) => `
 
 <div class="todo-row">
 
   <input
     type="checkbox"
     class="todo-select"
-    ${selectedTodoIndexes.has(i) ? "checked" : ""}
-    onchange="toggleTodoSelect(${i})"
+    ${selectedTodoIndexes.has(x._index) ? "checked" : ""}
+    onchange="toggleTodoSelect(${x._index})"
   >
 
   <button
     class="todo-check"
-    onclick="toggleTodo(${i})">
+    onclick="toggleTodo(${x._index})">
     ${x.done ? "✔" : "□"}
   </button>
 
   <div
     class="todo-text ${x.done ? "todo-done" : ""}"
-    oncontextmenu="event.preventDefault();showTodoDetail(${i})"
-    ontouchstart="this._pressTimer=setTimeout(()=>showTodoDetail(${i}),600)"
+    oncontextmenu="event.preventDefault();showTodoDetail(${x._index})"
+    ontouchstart="this._pressTimer=setTimeout(()=>showTodoDetail(${x._index}),600)"
     ontouchend="clearTimeout(this._pressTimer)"
     ontouchmove="clearTimeout(this._pressTimer)">
     ${escapeHtml(x.text)}
@@ -73,6 +106,7 @@ list.length
 </div>
 `
   );
+
 }
 
 function isTodoHeadingLine(line) {
@@ -125,25 +159,39 @@ function saveTodoItems(text) {
   const list =
     getTodoList();
 
+  const existingTexts =
+    new Set(
+      list.map(item =>
+        normalizeTodoText(item.text)
+      )
+    );
+
   String(text)
     .split("\n")
-    .map(x => x.trim())
-    .filter(x => !isTodoHeadingLine(x))
-    .map(x =>
-      x.replace(
-        /^[✔✓☑□■・\-\*]\s*/,
-        ""
-      )
+    .map(line =>
+      normalizeTodoText(line)
     )
-    .filter(Boolean)
-    .forEach(item => {
+    .filter(line =>
+      line &&
+      !isTodoHeadingLine(line)
+    )
+    .forEach(itemText => {
+
+      if (
+        existingTexts.has(itemText)
+      ) {
+        return;
+      }
 
       list.push({
-        text: item,
+        text: itemText,
         done: false,
         created_at:
-          new Date().toISOString()
+          new Date()
+            .toISOString()
       });
+
+      existingTexts.add(itemText);
 
     });
 
@@ -153,6 +201,7 @@ function saveTodoItems(text) {
   );
 
   renderTodoList();
+
 }
 
 function toggleTodo(index) {
@@ -229,63 +278,6 @@ function showTodoDetail(index) {
   if (!item) return;
 
   alert(item.text);
-}
-
-function renderTodoList() {
-
-  const list =
-    getTodoList();
-
-  openFloatPanel(
-    "開発TODO",
-    `
-<div class="todo-header">
-
-  <button onclick="promptAddTodoItems()">➕</button>
-  <button onclick="toggleSelectAllTodos()">☑</button>
-  <button onclick="copySelectedTodos()">📋</button>
-  <button onclick="deleteSelectedTodos()">🗑</button>
-
-</div>
-
-<div class="todo-list">
-
-${
-list.length
-? list.map((x, i) => `
-
-<div class="todo-row">
-
-  <input
-    type="checkbox"
-    class="todo-select"
-    ${selectedTodoIndexes.has(i) ? "checked" : ""}
-    onchange="toggleTodoSelect(${i})"
-  >
-
-  <button
-    class="todo-check"
-    onclick="toggleTodo(${i})">
-    ${x.done ? "✔" : "□"}
-  </button>
-
-  <div
-    class="todo-text ${x.done ? "todo-done" : ""}"
-    ontouchstart="this._pressTimer=setTimeout(()=>showTodoDetail(${i}),600)"
-    ontouchend="clearTimeout(this._pressTimer)"
-    ontouchmove="clearTimeout(this._pressTimer)">
-    ${escapeHtml(x.text)}
-  </div>
-
-</div>
-
-`).join("")
-: "TODOなし"
-}
-
-</div>
-`
-  );
 }
 
 function toggleSelectAllTodos() {
