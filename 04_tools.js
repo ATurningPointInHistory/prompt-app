@@ -51,17 +51,17 @@ function saveCurrentAiAnswer() {
 
   const output =
     get("output")
-      ?.value
+      ?.innerText
       ?.trim();
 
-  if (!output) {
-
+  if (
+    !output ||
+    output === "ここに表示"
+  ) {
     alert(
       "保存する回答がありません"
     );
-
     return;
-
   }
 
   const title =
@@ -80,9 +80,8 @@ function saveCurrentAiAnswer() {
   );
 
   alert(
-    "保存しました"
+    "AI回答を保存しました"
   );
-
 }
 
 function getProjectState() {
