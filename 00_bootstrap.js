@@ -180,9 +180,8 @@ function buildNormalToolsHtml() {
 ☑ 開発TODO
 </button>
 
-<button class="float-list-btn"
-onclick="saveCurrentAiAnswer()">
-💾 AI回答保存
+<button class="float-list-btn" onclick="saveDevLogFromInput()">
+📝 開発ログ保存
 </button>
 
 <hr>
