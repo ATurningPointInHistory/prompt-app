@@ -9,6 +9,79 @@
 
 let selectedTodoIndexes = new Set();
 
+function mergeSelectedTodos() {
+
+  const list =
+    getTodoList();
+
+  const selected =
+    list.filter((_, index) =>
+      selectedTodoIndexes.has(index)
+    );
+
+  if (selected.length < 2) {
+    alert("統合するTODOを2件以上選択してください");
+    return;
+  }
+
+  const defaultText =
+    selected
+      .map(item => item.text)
+      .join(" / ");
+
+  const mergedText =
+    prompt(
+      "統合後のTODO名を入力してください",
+      defaultText
+    );
+
+  if (!mergedText) {
+    return;
+  }
+
+  const normalized =
+    normalizeTodoText(mergedText);
+
+  if (!normalized) {
+    return;
+  }
+
+  const ok =
+    confirm(
+      "選択したTODOを統合しますか？\n\n" +
+      selected.map(x => "・" + x.text).join("\n") +
+      "\n\n↓\n\n" +
+      normalized
+    );
+
+  if (!ok) {
+    return;
+  }
+
+  const next =
+    list.filter((_, index) =>
+      !selectedTodoIndexes.has(index)
+    );
+
+  next.unshift({
+    text: normalized,
+    done: false,
+    created_at:
+      new Date().toISOString(),
+    merged_from:
+      selected.map(x => x.text)
+  });
+
+  selectedTodoIndexes.clear();
+
+  localStorage.setItem(
+    "todoList",
+    JSON.stringify(next)
+  );
+
+  renderTodoList();
+}
+
 function normalizeTodoText(text) {
 
   return String(text || "")
@@ -59,6 +132,10 @@ function renderTodoList() {
 
   <button onclick="copySelectedTodos()">
     📋
+  </button>
+
+  <button onclick="mergeSelectedTodos()">
+    🔗
   </button>
 
   <button onclick="deleteSelectedTodos()">
