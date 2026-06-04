@@ -85,36 +85,120 @@ function isRepairMode() {
 
 function buildNormalToolsHtml() {
   return `
-<button class="float-list-btn" onclick="toggleTemplateManager()">🧩 テンプレ管理</button>
-<button class="float-list-btn" onclick="toggleDangerManager()">⚠ 危険ワード管理</button>
-<button class="float-list-btn" onclick="togglePatternManager()">🚫 NGパターン管理</button>
-<button class="float-list-btn" onclick="toggleAiPresetManager()">🤖 AIプリセット管理</button>
+<button class="float-list-btn" onclick="toggleTemplateManager()">
+🧩 テンプレ管理
+</button>
+
+<button class="float-list-btn" onclick="toggleDangerManager()">
+⚠ 危険ワード管理
+</button>
+
+<button class="float-list-btn" onclick="togglePatternManager()">
+🚫 NGパターン管理
+</button>
+
+<button class="float-list-btn" onclick="toggleAiPresetManager()">
+🤖 AIプリセット管理
+</button>
+
 <hr>
-<button class="float-list-btn" onclick="backupProgram()">💾 結合HTML出力</button>
-<button class="float-list-btn" onclick="showBackupHistory()">📚 バックアップ履歴</button>
-<button class="float-list-btn" onclick="saveProgramHtml()">💾 本体HTML保存</button>
-<button class="float-list-btn" onclick="restoreProgramBackup()">♻ フル復元</button>
+
+<button class="float-list-btn" onclick="backupProgram()">
+💾 結合HTML出力
+</button>
+
+<button class="float-list-btn" onclick="showBackupHistory()">
+📚 バックアップ履歴
+</button>
+
+<button class="float-list-btn" onclick="saveProgramHtml()">
+💾 本体HTML保存
+</button>
+
+<button class="float-list-btn" onclick="restoreProgramBackup()">
+♻ フル復元
+</button>
+
 <hr>
-<button class="float-list-btn" onclick="reviewPrompt()">🛠 Promptレビュー</button>
-<button class="float-list-btn" onclick="testPromptObject()">🧩 内部JSONテスト</button>
-<button class="float-list-btn" onclick="testJsonFormat()">🧪 JSONテスト</button>
-<button class="float-list-btn" onclick="formatJsonOutput()">📦 JSON整形</button>
-<button class="float-list-btn" onclick="recheckOutput()">🔍 再チェック</button>
-<button class="float-list-btn" onclick="diagnoseHtml()">🩺 HTML診断</button>
-<button class="float-list-btn" onclick="compareBackupSummary()">📊 バックアップ差分確認</button>
+
+<button class="float-list-btn" onclick="reviewPrompt()">
+🛠 Promptレビュー
+</button>
+
+<button class="float-list-btn" onclick="testPromptObject()">
+🧩 内部JSONテスト
+</button>
+
+<button class="float-list-btn" onclick="testJsonFormat()">
+🧪 JSONテスト
+</button>
+
+<button class="float-list-btn" onclick="formatJsonOutput()">
+📦 JSON整形
+</button>
+
+<button class="float-list-btn" onclick="recheckOutput()">
+🔍 再チェック
+</button>
+
+<button class="float-list-btn" onclick="diagnoseHtml()">
+🩺 HTML診断
+</button>
+
+<button class="float-list-btn" onclick="compareBackupSummary()">
+📊 バックアップ差分確認
+</button>
+
 <button class="float-list-btn"
-  onclick="previewRepairHtml()">🎨 色分けプレビュー</button>
-<button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
+  onclick="previewRepairHtml()">
+🎨 色分けプレビュー
+</button>
+
+<button class="float-list-btn" onclick="showHtmlHealth()">
+💚 HTML HEALTH
+</button>
+
 <hr>
-<button class="float-list-btn" onclick="exportTemplates()">📤 テンプレ保存</button>
-<button class="float-list-btn" onclick="importTemplates()">📥 テンプレ復元</button>
-<button class="float-list-btn" onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
-<button class="float-list-btn" onclick="importAiPresets()">🤖 AI設定復元</button>
-<button class="float-list-btn" onclick="renderTodoList()">☑ 開発TODO</button>
+
+<button class="float-list-btn" onclick="exportTemplates()">
+📤 テンプレ保存
+</button>
+
+<button class="float-list-btn" onclick="importTemplates()">
+📥 テンプレ復元
+</button>
+
+<button class="float-list-btn" onclick="exportAiPresets()">
+🤖 AI設定バックアップ
+</button>
+
+<button class="float-list-btn" onclick="importAiPresets()">
+🤖 AI設定復元
+</button>
+
+<button class="float-list-btn" onclick="renderTodoList()">
+☑ 開発TODO
+</button>
+
+<button onclick="saveCurrentAiAnswer()">
+AI回答保存
+</button>
+
 <hr>
-<button class="float-list-btn" onclick="clearOutput()">🧹 出力クリア</button>
-<button class="float-list-btn" onclick="clearHistory()">🗑 履歴全削除</button>
-<button class="float-list-btn"onclick="reloadAppPage()">🔄 ページ更新</button>
+
+<button class="float-list-btn" onclick="clearOutput()">
+🧹 出力クリア
+</button>
+
+<button class="float-list-btn" onclick="clearHistory()">
+🗑 履歴全削除
+</button>
+
+<button class="float-list-btn"onclick="
+reloadAppPage()">
+🔄 ページ更新
+</button>
+
 `;
 }
 
