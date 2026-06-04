@@ -9,6 +9,23 @@
 
 let selectedTodoIndexes = new Set();
 
+function getPriorityIcon(priority) {
+
+  switch (priority) {
+
+    case "high":
+      return "🔥";
+
+    case "low":
+      return "📝";
+
+    default:
+      return "⚡";
+
+  }
+
+}
+
 function mergeSelectedTodos() {
 
   const list =
@@ -87,6 +104,8 @@ function mergeSelectedTodos() {
 
     done: false,
 
+    priority: "middle",
+
     selected: false,
 
     created_at:
@@ -131,15 +150,27 @@ function normalizeTodoText(text) {
 
 function getSortedTodoList(list) {
 
-  return list
-    .map((item, index) => ({
-      ...item,
-      _index: index
-    }))
-    .sort((a, b) =>
-      Number(a.done) -
-      Number(b.done)
+  const priorityOrder = {
+
+    high: 0,
+    middle: 1,
+    low: 2
+
+  };
+
+  return [...list].sort((a,b)=>{
+
+    if (a.done !== b.done) {
+      return a.done ? 1 : -1;
+    }
+
+    return (
+      (priorityOrder[a.priority] ?? 1)
+      -
+      (priorityOrder[b.priority] ?? 1)
     );
+
+  });
 
 }
 
@@ -206,7 +237,7 @@ sortedList.length
     ontouchstart="this._pressTimer=setTimeout(()=>showTodoDetail(${x._index}),600)"
     ontouchend="clearTimeout(this._pressTimer)"
     ontouchmove="clearTimeout(this._pressTimer)">
-    ${x.merged_from ? "🔗 " : ""}${escapeHtml(x.text)}
+    ${getPriorityIcon(x.priority)}${x.merged_from ? "🔗 " : ""}${escapeHtml(x.text)}
   </div>
 
 </div>
@@ -296,11 +327,17 @@ function saveTodoItems(text) {
       }
 
       list.push({
+
         text: itemText,
+
         done: false,
+
+        priority: "middle",
+
         created_at:
           new Date()
             .toISOString()
+
       });
 
       existingTexts.add(itemText);
@@ -392,6 +429,14 @@ function showTodoDetail(index) {
 
   let detail =
     item.text;
+
+  detail +=
+
+    "\n\n優先度: "
+
+    +
+
+    (item.priority || "middle");
 
   if (
     Array.isArray(
