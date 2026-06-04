@@ -799,34 +799,35 @@ function generateHandoffPrompt() {
 
   const text =
 
-`AIプロンプト生成Pro 引き継ぎ
+`以下の内容をもとに、
+次チャットへ引き継ぐための
+開発プロンプトを作成したい。
 
-現在状態
+【プロジェクト】
 
-未完了TODO
-${undone.length}
+AIプロンプト生成Pro
 
-完了TODO
-${done.length}
+【現在の状態】
 
---------------------------------
+・HTML HEALTH 100/100
+・JS Syntax OK
+・duplicate function none
+・undefined onclick none
 
-最優先
+【完了済み】
 
 ${
-topPriority.length
-? topPriority
+done.length
+? done
     .map(
       x =>
-      "🔥 " + x.text
+      "✔ " + x.text
     )
     .join("\n")
 : "なし"
 }
 
---------------------------------
-
-未完了
+【未完了】
 
 ${
 undone.length
@@ -849,31 +850,48 @@ undone.length
 : "なし"
 }
 
---------------------------------
-
-完了
+【最優先】
 
 ${
-done.length
-? done
+topPriority.length
+? topPriority
     .map(
       x =>
-      "✔ " +
-      x.text
+      "🔥 " + x.text
     )
     .join("\n")
 : "なし"
 }
 
---------------------------------
+【やりたいこと】
 
-次の作業
+未完了TODOの中から
+優先度の高いものを順に実装したい。
 
-・最優先TODOから着手
-・既存機能を壊さない
-・function単位で変更
-・HTML HEALTH確認
+既存機能は壊したくない。
 
+function単位で
+追加・削除・更新内容を
+明示してほしい。
+
+実装後は
+HTML HEALTHで確認したい。
+
+【出力してほしい内容】
+
+・現状整理
+・次にやるべきこと
+・修正対象function
+・追加内容
+・削除内容
+・更新内容
+・動作確認方法
+
+【トーン】
+
+プロフェッショナル
+実務的
+簡潔
 `;
 
   copyTextFallback(
