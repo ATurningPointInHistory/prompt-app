@@ -51,17 +51,19 @@ body {
   padding:8px;
 }
 
-#todoManageMenu,
-#todoActionMenu {
+.todo-menu-grid{
+  margin-top:8px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
 
-  margin-top: 8px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 4px;
-
+.todo-menu-grid button{
+  height:34px;
+  padding:0;
+  font-size:11px;
+  border-radius:8px;
+  text-align:center;
 }
 
 .todo-complete-box button{
@@ -69,6 +71,21 @@ body {
   margin-top:6px;
   padding:8px;
   font-size:12px;
+}
+
+.todo-header{
+  display:flex;
+  justify-content:flex-end;
+  gap:4px;
+  margin-bottom:8px;
+}
+
+.todo-header button{
+  width:28px;
+  height:28px;
+  padding:0;
+  font-size:12px;
+  border-radius:7px;
 }
 
 .card {
@@ -228,21 +245,6 @@ body.dark button.active-panel {
   color: var(--warn-text);
   border: 1px solid var(--warn-border);
   white-space: pre-wrap;
-}
-
-.todo-header{
-  display:flex;
-  justify-content:flex-end;
-  gap:4px;
-  margin-bottom:8px;
-}
-
-.todo-header button{
-  width:28px;
-  height:28px;
-  padding:0;
-  font-size:12px;
-  border-radius:7px;
 }
 
 .diagnose-box {
