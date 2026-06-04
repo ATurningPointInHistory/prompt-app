@@ -2134,6 +2134,95 @@ function copyDiagnoseResult() {
   );
 }
 
+function renderFunctionViewer() {
+
+  const box =
+    get("functionViewer");
+
+  const editor =
+    get("repairEditor");
+
+  if (!box || !editor) {
+    return;
+  }
+
+  const blocks =
+    extractCodeBlocksFromText(
+      editor.value
+    );
+
+  const functions =
+    blocks.filter(
+      item =>
+        item.type === "function"
+    );
+
+  box.innerHTML =
+
+    functions.length
+    ? functions.map((f,index)=>`
+
+<div class="function-view-item">
+
+  <div class="function-view-title">
+
+    <button onclick="selectCodeBlockByIndex(${blocks.indexOf(f)})">
+      ↗
+    </button>
+
+    <button onclick="toggleFunctionView(${index})">
+      ▶
+    </button>
+
+    <span>
+      ${escapeHtml(f.name)}
+    </span>
+
+  </div>
+
+  <pre
+    id="functionView${index}"
+    class="function-view-code"
+    style="display:none;">${escapeHtml(f.block)}</pre>
+
+</div>
+
+`).join("")
+    : "関数なし";
+
+}
+
+function toggleFunctionView(index) {
+
+  const el =
+    get(
+      "functionView" + index
+    );
+
+  if (!el) {
+    return;
+  }
+
+  el.style.display =
+    el.style.display === "block"
+      ? "none"
+      : "block";
+}
+
+function openViewerMode() {
+
+  previewRepairHtml();
+
+  renderFunctionViewer();
+
+  get("functionViewer").style.display =
+    "block";
+
+  updateRepairStatus(
+    "閲覧モード：関数ビュー表示"
+  );
+}
+
 function previewRepairHtml() {
 
   const box =
