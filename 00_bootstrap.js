@@ -211,9 +211,6 @@ function buildRepairToolsHtml() {
 <button class="float-list-btn"
   onclick="loadRepairHtml()">
 📖 HTML読込</button>
-<button class="float-list-btn" onclick="toggleRepairReadOnly()">
-👁 閲覧/編集切替
-</button>
 <button class="float-list-btn" onclick="backupPartialScript()">
 📦 JS部分読込</button>
 <button class="float-list-btn"
@@ -256,7 +253,7 @@ function buildRepairToolsHtml() {
 <button class="float-list-btn" onclick="deleteCommentedCleanupBlocks()">
 🗑 コメント化済みを完全削除</button>
 <button class="float-list-btn" onclick="previewRepairHtml()">
-🎨 色分けプレビュー</button>
+👁 閲覧モード</button>
 <button class="float-list-btn" onclick="showHtmlHealth()">
 💚 HTML HEALTH</button>
 <button class="float-list-btn" onclick="reloadAppPage()">
