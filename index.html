@@ -5,6 +5,15 @@
 <title>AIプロンプト生成Pro v5.8.0</title>
 <style>
 
+
+/* ===============================
+   CSS 
+=============================== */
+
+/* ===============================
+   THEME
+=============================== */
+
 :root {
   --bg: #f0f2f5;
   --text: #1c1e21;
@@ -27,6 +36,10 @@ body.dark {
   --warn-border: #7a6400;
 }
 
+/* ===============================
+   BASE
+=============================== */
+
 * {
   box-sizing: border-box;
 }
@@ -41,113 +54,53 @@ body {
   transition: 0.3s;
 }
 
-.todo-menu-grid{
-
-  margin-top:6px;
-
-  display:grid;
-
-  grid-template-columns:repeat(4,1fr);
-
-  gap:4px;
-
+h2 {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-top: 0;
 }
 
-.todo-menu-grid button{
-
-  height:30px;
-
-  font-size:10px;
-
-  padding:0;
-
+h3,
+h4 {
+  margin-bottom: 8px;
 }
 
-.todo-complete-box{
-  margin-top:10px;
-  padding-top:10px;
-  border-top:1px solid rgba(255,255,255,0.18);
+label {
+  display: block;
+  margin-top: 12px;
+  font-weight: bold;
+  font-size: 0.85rem;
 }
 
-.todo-complete-box textarea{
-  min-height:64px;
-  font-size:12px;
-  padding:8px;
-  background:rgba(0,0,0,0.18);
+input,
+textarea,
+select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-top: 5px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 16px;
 }
 
-.todo-complete-box button{
-  width:100%;
-  margin-top:6px;
-  padding:8px;
-  font-size:12px;
+button {
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
 }
 
-.todo-header{
-
-  display:flex;
-
-  align-items:center;
-
-  gap:4px;
-
-  flex-wrap:wrap;
-
-  margin-bottom:6px;
-
-}
-
-.todo-menu-inline{
-
-  display:flex;
-
-  gap:4px;
-
-}
-
-.todo-header button{
-
-  height:28px;
-
-  font-size:10px;
-
-  padding:0 8px;
-
-  border-radius:6px;
-
-}
-
-.todo-complete-box{
-  margin:8px 0;
-}
-
-.todo-complete-box textarea{
-  min-height:64px;
-  font-size:12px;
-  padding:8px;
-}
-
-.todo-menu-grid{
-  margin-top:8px;
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:6px;
-}
-
-.todo-menu-grid button{
-  height:34px;
-  padding:0;
-  font-size:11px;
-  border-radius:8px;
-  text-align:center;
-}
-
-.todo-complete-box button{
-  width:100%;
-  margin-top:6px;
-  padding:8px;
-  font-size:12px;
-}
+/* ===============================
+   LAYOUT
+=============================== */
 
 .card {
   background: var(--card);
@@ -156,15 +109,18 @@ body {
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-h2 {
-  text-align: center;
-  font-size: 1.2rem;
-  margin-top: 0;
+.section-box {
+  margin-top: 15px;
 }
 
-h3, h4 {
-  margin-bottom: 8px;
+.small {
+  font-size: 12px;
+  opacity: 0.8;
 }
+
+/* ===============================
+   TAB
+=============================== */
 
 .tab-container {
   display: flex;
@@ -187,43 +143,15 @@ h3, h4 {
   color: var(--accent);
 }
 
-label {
-  display: block;
-  margin-top: 12px;
-  font-weight: bold;
-  font-size: 0.85rem;
-  opacity: 0.9;
-}
-
-input, textarea, select {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  margin-top: 5px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--card);
-  color: var(--text);
-  font-size: 16px;
-}
+/* ===============================
+   BUTTON
+=============================== */
 
 .btn-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-top: 20px;
-}
-
-button {
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  background: var(--accent);
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 0.9rem;
 }
 
 .btn-full {
@@ -244,6 +172,10 @@ body.dark button.active-panel {
   color: #1c1c1c;
 }
 
+/* ===============================
+   OUTPUT
+=============================== */
+
 #output {
   white-space: pre-wrap;
   border: 1px dashed var(--border);
@@ -253,40 +185,6 @@ body.dark button.active-panel {
   border-radius: 10px;
   font-size: 0.9rem;
   min-height: 80px;
-}
-
-.history,
-.template-item,
-.danger-item,
-.pattern-item {
-  font-size: 12px;
-  border: 1px solid var(--border);
-  margin-top: 6px;
-  padding: 8px;
-  border-radius: 8px;
-}
-
-.section-box {
-  margin-top: 15px;
-}
-
-.small {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.history-actions,
-.item-actions {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-
-.history-actions button,
-.item-actions button {
-  padding: 8px 10px;
-  font-size: 12px;
 }
 
 .warning-box {
@@ -311,12 +209,38 @@ body.dark button.active-panel {
   font-size: 13px;
 }
 
-.code-like {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
-  opacity: 0.9;
-  word-break: break-all;
+/* ===============================
+   HISTORY
+=============================== */
+
+.history,
+.template-item,
+.danger-item,
+.pattern-item {
+  font-size: 12px;
+  border: 1px solid var(--border);
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 8px;
 }
+
+.history-actions,
+.item-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.history-actions button,
+.item-actions button {
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+/* ===============================
+   COMMAND
+=============================== */
 
 .command-box {
   display: flex;
@@ -346,6 +270,10 @@ body.dark button.active-panel {
   color: white;
 }
 
+/* ===============================
+   PRESET
+=============================== */
+
 .preset-box {
   display: flex;
   flex-wrap: wrap;
@@ -368,6 +296,10 @@ body.dark button.active-panel {
   background: #ff9500;
   color: white;
 }
+
+/* ===============================
+   TOOLS MENU
+=============================== */
 
 #toolsBtn {
   position: fixed;
@@ -395,33 +327,6 @@ body.dark button.active-panel {
   border-radius: 15px;
   padding: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-}
-
-#repairSearch {
-  padding: 9px 10px;
-  font-size: 14px;
-  margin-top: 0;
-}
-
-#repairSearchResult{
-  display:none;
-  max-height:58px;
-  overflow-y:auto;
-  margin-top:8px;
-  padding:6px;
-  border:1px solid var(--border);
-  border-radius:8px;
-  background:rgba(0,122,255,0.08);
-  font-size:11px;
-  white-space:normal;
-}
-
-#commandMenu {
-  margin-top: 8px;
-  padding: 10px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: rgba(128,128,128,0.06);
 }
 
 .tool-section-title {
@@ -452,50 +357,9 @@ body.dark button.active-panel {
   margin-bottom: 6px;
 }
 
-mark {
-  background: #fff176;
-  color: #000;
-  padding: 1px 3px;
-  border-radius: 4px;
-}
-
-.search-result-line{
-  display:block;
-  height:24px;
-  line-height:24px;
-  padding:0 6px;
-  margin:0;
-  font-size:11px;
-  border-bottom:1px solid var(--border);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  cursor:pointer;
-}
-
-.search-result-line:hover{
-  background:
-    rgba(
-      0,
-      122,
-      255,
-      0.12
-    );
-}
-
-.code-preview {
-  margin-top: 12px;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: #0d1117;
-  color: #c9d1d9;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  overflow-x: auto;
-}
+/* ===============================
+   FLOAT PANEL
+=============================== */
 
 #floatPanel{
   position:fixed;
@@ -516,53 +380,35 @@ mark {
   box-shadow:0 4px 20px rgba(0,0,0,0.25);
 }
 
-.float-panel-header{
-  position:sticky;
-  top:0;
-  z-index:2;
-  background:rgba(36,37,38,0.88);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
-  font-weight:bold;
-  margin-bottom:10px;
-  padding-bottom:8px;
-}
-
-body:not(.dark) .float-panel-header{
-  background:rgba(255,255,255,0.88);
-}
-
-.float-panel-title{
-  flex:1;
-}
-
-.float-drag-btn{
-  width:36px;
-  height:36px;
-  padding:0;
-  border-radius:10px;
-  background:rgba(128,128,128,0.28);
-  color:var(--text);
-  cursor:grab;
-}
-
-.float-drag-btn:active{
-  cursor:grabbing;
-}
-
 body:not(.dark) #floatPanel{
   background:rgba(255,255,255,0.88);
   border:1px solid rgba(0,0,0,0.12);
 }
 
 .float-panel-header{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:var(--card);
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  gap:4px;
+  flex-wrap:wrap;
   font-weight:bold;
   margin-bottom:10px;
+  padding-bottom:8px;
+}
+
+.float-panel-title{
+  flex:1 1 100%;
+}
+
+.float-panel-header button{
+  width:34px;
+  height:34px;
+  padding:0;
+  border-radius:9px;
+  font-size:14px;
 }
 
 .float-panel-actions{
@@ -586,197 +432,70 @@ body:not(.dark) #floatPanel{
   font-size:12px;
 }
 
-.function-sort-row{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  margin-top:6px;
-}
-
-.function-sort-select{
-  flex:1;
-  text-align:left;
-  padding:8px 10px;
-  font-size:12px;
-}
-
-.function-sort-actions{
-  display:flex;
-  gap:4px;
-}
-
-.function-sort-actions button{
+.float-drag-btn{
   width:36px;
   height:36px;
   padding:0;
-  font-size:14px;
+  border-radius:10px;
+  background:rgba(128,128,128,0.28);
+  color:var(--text);
+  cursor:grab;
 }
 
-#repairSearchBtn {
-  bottom: 88px;
+.float-drag-btn:active{
+  cursor:grabbing;
 }
 
-.float-panel-header{
-  position:sticky;
-  top:0;
-  z-index:2;
-  background:var(--card);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-weight:bold;
-  margin-bottom:10px;
-  padding-bottom:8px;
-}
+/* ===============================
+   TODO UI
+=============================== */
 
-#repairEditor{
-  display:block;
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  overflow-x:hidden;
-  white-space:pre-wrap;
-  word-break:break-all;
-  direction:ltr;
-  text-align:left;
-}
-
-.float-panel-header{
+.todo-header{
   display:flex;
   align-items:center;
   gap:4px;
   flex-wrap:wrap;
-}
-
-.float-panel-header button{
-  width:34px;
-  height:34px;
-  padding:0;
-  border-radius:9px;
-  font-size:14px;
-}
-
-.float-panel-title{
-  flex:1 1 100%;
-}
-
-.repair-editor-wrap{
-  display:flex;
-  width:100%;
-  border:1px solid var(--border);
-  border-radius:10px;
-  overflow:hidden;
-  margin-top:5px;
-}
-
-#lineNumbers{
-  width:44px;
-  padding:12px 6px;
-  background:rgba(128,128,128,0.15);
-  color:var(--text);
-  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size:12px;
-  line-height:1.4;
-  text-align:right;
-  user-select:none;
-  overflow:hidden;
-}
-
-#repairEditor{
-  border:none;
-  border-radius:0;
-  margin-top:0;
-  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size:12px;
-  line-height:1.4;
-  min-height:420px;
-  overflow:auto;
-  white-space:pre-wrap;
-  word-break:break-all;
-}
-
-.repair-btn-group{
-  grid-template-columns:1fr 1fr 1fr;
-}
-
-.function-drag-handle{
-  cursor:grab;
-  user-select:none;
-  padding:8px;
-  font-size:18px;
-}
-
-.function-sort-row.dragging{
-  opacity:0.5;
-  background:#2b3d52;
-}
-
-.function-sort-row.drag-over{
-  outline:2px solid #4da3ff;
-}
-
-.function-list-row{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:8px;
-}
-
-.function-list-select{
-  flex:1;
-}
-
-#repairEditor {
-  white-space: pre;
-  overflow-wrap: normal;
-  word-break: normal;
-  overflow-x: auto;
-}
-
-.line-number{
-  padding:0 6px;
-}
-
-.line-number.active{
-  background:#2d7dff;
-  color:#fff;
-  font-weight:bold;
-  border-radius:4px;
-}
-
-.line-number {
-  cursor:pointer;
-  padding:0 6px;
-}
-
-.line-number.active{
-  background:#2d7dff;
-  color:#fff;
-}
-
-.line-number.pinned{
-  background:#f0b400;
-  color:#000;
-}
-
-.line-number.active.pinned{
-  background:#9b59ff;
-  color:#fff;
-}
-
-.todo-header{
-  display:flex;
-  justify-content:flex-end;
-  gap:6px;
-  margin-bottom:8px;
+  margin-bottom:6px;
 }
 
 .todo-header button{
-  width:36px;
-  height:32px;
-  padding:0;
-  font-size:13px;
-  border-radius:8px;
+  height:28px;
+  font-size:10px;
+  padding:0 8px;
+  border-radius:6px;
+}
+
+.todo-menu-inline{
+  display:flex;
+  gap:4px;
+  flex-wrap:wrap;
+}
+
+.todo-menu-inline button{
+  height:28px;
+  font-size:10px;
+  padding:0 8px;
+  border-radius:6px;
+}
+
+.todo-complete-box{
+  margin:8px 0;
+  padding-top:8px;
+  border-top:1px solid rgba(255,255,255,0.18);
+}
+
+.todo-complete-box textarea{
+  min-height:64px;
+  font-size:12px;
+  padding:8px;
+  background:rgba(0,0,0,0.18);
+}
+
+.todo-complete-box button{
+  width:100%;
+  margin-top:6px;
+  padding:8px;
+  font-size:12px;
 }
 
 .todo-list{
@@ -823,11 +542,224 @@ body:not(.dark) #floatPanel{
   text-decoration:line-through;
 }
 
+/* ===============================
+   REPAIR SEARCH
+=============================== */
+
+#repairSearch {
+  padding: 9px 10px;
+  font-size: 14px;
+  margin-top: 0;
+}
+
+#repairSearchResult{
+  display:none;
+  max-height:58px;
+  overflow-y:auto;
+  margin-top:8px;
+  padding:6px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:rgba(0,122,255,0.08);
+  font-size:11px;
+  white-space:normal;
+}
+
+.search-result-line{
+  display:block;
+  height:24px;
+  line-height:24px;
+  padding:0 6px;
+  margin:0;
+  font-size:11px;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  cursor:pointer;
+}
+
+.search-result-line:hover{
+  background:rgba(0,122,255,0.12);
+}
+
+mark {
+  background: #fff176;
+  color: #000;
+  padding: 1px 3px;
+  border-radius: 4px;
+}
+
+/* ===============================
+   REPAIR EDITOR
+=============================== */
+
+.repair-editor-wrap{
+  display:flex;
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:5px;
+}
+
+#lineNumbers{
+  width:44px;
+  padding:12px 6px;
+  background:rgba(128,128,128,0.15);
+  color:var(--text);
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:12px;
+  line-height:1.4;
+  text-align:right;
+  user-select:none;
+  overflow:hidden;
+}
+
+.line-number{
+  cursor:pointer;
+  padding:0 6px;
+}
+
+.line-number.active{
+  background:#2d7dff;
+  color:#fff;
+  font-weight:bold;
+  border-radius:4px;
+}
+
+.line-number.pinned{
+  background:#f0b400;
+  color:#000;
+}
+
+.line-number.active.pinned{
+  background:#9b59ff;
+  color:#fff;
+}
+
+#repairEditor{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  border:none;
+  border-radius:0;
+  margin-top:0;
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:12px;
+  line-height:1.4;
+  min-height:420px;
+  direction:ltr;
+  text-align:left;
+  white-space:pre;
+  overflow-wrap:normal;
+  word-break:normal;
+  overflow:auto;
+  overflow-x:auto;
+}
+
+.repair-btn-group{
+  grid-template-columns:1fr 1fr 1fr;
+}
+
+/* ===============================
+   FUNCTION LIST
+=============================== */
+
+.function-list-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+.function-list-select{
+  flex:1;
+}
+
+/* ===============================
+   FUNCTION SORT
+=============================== */
+
+.function-sort-row{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:6px;
+}
+
+.function-sort-select{
+  flex:1;
+  text-align:left;
+  padding:8px 10px;
+  font-size:12px;
+}
+
+.function-sort-actions{
+  display:flex;
+  gap:4px;
+}
+
+.function-sort-actions button{
+  width:36px;
+  height:36px;
+  padding:0;
+  font-size:14px;
+}
+
+.function-drag-handle{
+  cursor:grab;
+  user-select:none;
+  padding:8px;
+  font-size:18px;
+}
+
+.function-sort-row.dragging{
+  opacity:0.5;
+  background:#2b3d52;
+}
+
+.function-sort-row.drag-over{
+  outline:2px solid #4da3ff;
+}
+
+/* ===============================
+   CODE PREVIEW
+=============================== */
+
+.code-preview {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #0d1117;
+  color: #c9d1d9;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.code-like {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  opacity: 0.9;
+  word-break: break-all;
+}
+
 .code-tag { color: #7ee787; }
 .code-attr { color: #79c0ff; }
 .code-string { color: #a5d6ff; }
 .code-comment { color: #8b949e; }
 .code-keyword { color: #ff7b72; }
+
+
+
+
+
+
 
 </style>
 </head>
