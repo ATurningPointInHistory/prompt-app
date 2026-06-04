@@ -11,6 +11,107 @@ let todoDetailOpening = false;
 
 let selectedTodoIndexes = new Set();
 
+function getProjectState() {
+
+  return loadJson(
+    "projectState",
+    {
+
+      projectName:
+        "AIプロンプト生成Pro",
+
+      version:
+        "5.8.0",
+
+      currentWork:
+        "",
+
+      nextTask:
+        "",
+
+      note:
+        ""
+
+    }
+  );
+
+}
+
+function saveProjectState(
+  state
+) {
+
+  localStorage.setItem(
+    "projectState",
+    JSON.stringify(state)
+  );
+
+}
+
+function editProjectState() {
+
+  const state =
+    getProjectState();
+
+  const currentWork =
+    prompt(
+      "現在作業中",
+      state.currentWork
+    );
+
+  if (
+    currentWork === null
+  ) {
+    return;
+  }
+
+  const nextTask =
+    prompt(
+      "次にやること",
+      state.nextTask
+    );
+
+  if (
+    nextTask === null
+  ) {
+    return;
+  }
+
+  const note =
+    prompt(
+      "メモ",
+      state.note
+    );
+
+  if (
+    note === null
+  ) {
+    return;
+  }
+
+  state.currentWork =
+    currentWork;
+
+  state.nextTask =
+    nextTask;
+
+  state.note =
+    note;
+
+  state.updatedAt =
+    new Date()
+      .toISOString();
+
+  saveProjectState(
+    state
+  );
+
+  alert(
+    "Project State保存完了"
+  );
+
+}
+
 function changeSelectedTodoPriority() {
 
   const list =
@@ -347,6 +448,11 @@ function renderTodoList() {
   <button onclick="mergeSelectedTodos()">
     🔗
   </button>
+
+  <button onclick="editProjectState()">
+    📊
+  </button>
+
 
   <button onclick="deleteSelectedTodos()">
     🗑
