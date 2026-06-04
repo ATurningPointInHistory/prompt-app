@@ -9,38 +9,10 @@
 
 let selectedTodoIndexes = new Set();
 
-function mergeSelectedTodos() {
-
-  const list =
-    getTodoList();
-
-  const selected =
-    list.filter((_, index) =>
-      selectedTodoIndexes.has(index)
+const normalized =
+    normalizeTodoText(
+      mergedText
     );
-
-  if (selected.length < 2) {
-    alert("統合するTODOを2件以上選択してください");
-    return;
-  }
-
-  const defaultText =
-    selected
-      .map(item => item.text)
-      .join(" / ");
-
-  const mergedText =
-    prompt(
-      "統合後のTODO名を入力してください",
-      defaultText
-    );
-
-  if (!mergedText) {
-    return;
-  }
-
-  const normalized =
-    normalizeTodoText(mergedText);
 
   if (!normalized) {
     return;
@@ -48,9 +20,14 @@ function mergeSelectedTodos() {
 
   const ok =
     confirm(
-      "選択したTODOを統合しますか？\n\n" +
-      selected.map(x => "・" + x.text).join("\n") +
-      "\n\n↓\n\n" +
+      "選択したTODOを統合しますか？\n\n"
+      +
+      selected
+        .map(x => "・" + x.text)
+        .join("\n")
+      +
+      "\n\n↓\n\n"
+      +
       normalized
     );
 
@@ -59,17 +36,31 @@ function mergeSelectedTodos() {
   }
 
   const next =
-    list.filter((_, index) =>
-      !selectedTodoIndexes.has(index)
+    list.filter(
+      (_, index) =>
+        !selectedTodoIndexes.has(index)
     );
 
   next.unshift({
+
     text: normalized,
+
     done: false,
+
     created_at:
-      new Date().toISOString(),
+      new Date()
+        .toISOString(),
+
     merged_from:
-      selected.map(x => x.text)
+
+      selected.flatMap(item =>
+
+        item.merged_from
+        ? item.merged_from
+        : [item.text]
+
+      )
+
   });
 
   selectedTodoIndexes.clear();
@@ -80,6 +71,7 @@ function mergeSelectedTodos() {
   );
 
   renderTodoList();
+
 }
 
 function normalizeTodoText(text) {
@@ -171,7 +163,7 @@ sortedList.length
     ontouchstart="this._pressTimer=setTimeout(()=>showTodoDetail(${x._index}),600)"
     ontouchend="clearTimeout(this._pressTimer)"
     ontouchmove="clearTimeout(this._pressTimer)">
-    ${escapeHtml(x.text)}
+    ${x.merged_from ? "🔗 " : ""}${escapeHtml(x.text)}
   </div>
 
 </div>
@@ -346,6 +338,7 @@ function deleteSelectedTodos() {
 }
 
 function showTodoDetail(index) {
+
   const list =
     getTodoList();
 
@@ -354,7 +347,32 @@ function showTodoDetail(index) {
 
   if (!item) return;
 
-  alert(item.text);
+  let detail =
+    item.text;
+
+  if (
+    Array.isArray(
+      item.merged_from
+    ) &&
+    item.merged_from.length
+  ) {
+
+    detail +=
+
+      "\n\n統合元:\n"
+
+      +
+
+      item.merged_from
+        .map(
+          x => "・" + x
+        )
+        .join("\n");
+
+  }
+
+  alert(detail);
+
 }
 
 function toggleSelectAllTodos() {
