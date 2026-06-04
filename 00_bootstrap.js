@@ -208,56 +208,102 @@ reloadAppPage()">
 
 function buildRepairToolsHtml() {
   return `
+
 <button class="float-list-btn"
   onclick="loadRepairHtml()">
-📖 HTML読込</button>
+📖 HTML読込
+</button>
+
 <button class="float-list-btn" onclick="backupPartialScript()">
-📦 JS部分読込</button>
+📦 JS部分読込
+</button>
+
 <button class="float-list-btn"
   onclick="copyRepairHtml()">
-📋 HTMLコピー</button>
+📋 HTMLコピー
+</button>
+
 <button class="float-list-btn"
   onclick="saveRepairHtml()">
-💾 現在ファイル保存</button>
+💾 現在ファイル保存
+</button>
+
 <hr>
+
 <button class="float-list-btn" onclick="diagnoseRepairHtml()">
-🩺 編集内容診断</button>
+🩺 編集内容診断
+</button>
+
 <button class="float-list-btn" onclick="selectFunctionBlock()">
-📦 関数選択</button>
+📦 関数選択
+</button>
+
 <button class="float-list-btn" onclick="replaceFunctionBlock()">
-✏ 関数置換</button>
+✏ 関数置換
+</button>
+
 <button class="float-list-btn" onclick="showFunctionList()">
-📚 コードブロック一覧</button>
+📚 コードブロック一覧
+</button>
+
 <button class="float-list-btn" onclick="showFunctionSortList()">
-↕コードブロック並べ替え</button>
+↕コードブロック並べ替え
+</button>
+
 <button class="float-list-btn" onclick="toggleRepairSearchBox()">
-🔍 検索</button>
+🔍 検索
+</button>
+
 <button class="float-list-btn" onclick="openReplacePanel()">
-🔁 検索置換</button>
+🔁 検索置換
+</button>
+
 <hr>
+
 <button class="float-list-btn" onclick="undoRepairEdit()">
-↩ Undo</button>
+↩ Undo
+</button>
+
 <button class="float-list-btn" onclick="redoRepairEdit()">
-↪ Redo</button>
+↪ Redo
+</button>
+
 <button class="float-list-btn"
   onclick="indentRepairSelection()">
-➡ インデント</button>
+➡ インデント
+</button>
+
 <button class="float-list-btn"
   onclick="outdentRepairSelection()">
-⬅ アウトデント</button>
+⬅ アウトデント
+</button>
+
 <button class="float-list-btn" onclick="toggleRepairAutoSave()">
-💾 AutoSave</button>
+💾 AutoSave
+</button>
+
 <hr>
+
 <button class="float-list-btn" onclick="cleanupCandidates()">
-🧹 削除候補チェック</button>
+🧹 削除候補チェック
+</button>
+
 <button class="float-list-btn" onclick="deleteCommentedCleanupBlocks()">
-🗑 コメント化済みを完全削除</button>
-<button class="float-list-btn" onclick="previewRepairHtml()">
-👁 閲覧モード</button>
+🗑 コメント化済みを完全削除
+</button>
+
+<button class="float-list-btn" onclick="openViewerMode()">
+👁 閲覧モード
+</button>
+
 <button class="float-list-btn" onclick="showHtmlHealth()">
-💚 HTML HEALTH</button>
+💚 HTML HEALTH
+</button>
+
 <button class="float-list-btn" onclick="reloadAppPage()">
-🔄 ページ更新</button>
+🔄 ページ更新
+</button>
+
 `;
 }
 
