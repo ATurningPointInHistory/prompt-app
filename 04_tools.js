@@ -11,6 +11,22 @@ let todoDetailOpening = false;
 
 let selectedTodoIndexes = new Set();
 
+function completeTodosFromInput() {
+
+  const box =
+    get("todoCompleteInput");
+
+  if (!box) {
+    return;
+  }
+
+  completeTodosByText(
+    box.value
+  );
+
+  box.value = "";
+}
+
 function completeTodosByText(text) {
 
   if (!String(text || "").trim()) {
