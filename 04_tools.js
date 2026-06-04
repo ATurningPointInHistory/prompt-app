@@ -231,40 +231,62 @@ function showTodoDetail(index) {
   alert(item.text);
 }
 
-function deleteTodo(index) {
+function renderTodoList() {
 
   const list =
     getTodoList();
 
-  list.splice(index,1);
-
-  localStorage.setItem(
-    "todoList",
-    JSON.stringify(list)
-  );
-
-  renderTodoList();
-}
-
+  openFloatPanel(
+    "開発TODO",
+    `
 <div class="todo-header">
 
-  <button onclick="promptAddTodoItems()">
-    ➕
-  </button>
-
-  <button onclick="toggleSelectAllTodos()">
-    ☑
-  </button>
-
-  <button onclick="copySelectedTodos()">
-    📋
-  </button>
-
-  <button onclick="deleteSelectedTodos()">
-    🗑
-  </button>
+  <button onclick="promptAddTodoItems()">➕</button>
+  <button onclick="toggleSelectAllTodos()">☑</button>
+  <button onclick="copySelectedTodos()">📋</button>
+  <button onclick="deleteSelectedTodos()">🗑</button>
 
 </div>
+
+<div class="todo-list">
+
+${
+list.length
+? list.map((x, i) => `
+
+<div class="todo-row">
+
+  <input
+    type="checkbox"
+    class="todo-select"
+    ${selectedTodoIndexes.has(i) ? "checked" : ""}
+    onchange="toggleTodoSelect(${i})"
+  >
+
+  <button
+    class="todo-check"
+    onclick="toggleTodo(${i})">
+    ${x.done ? "✔" : "□"}
+  </button>
+
+  <div
+    class="todo-text ${x.done ? "todo-done" : ""}"
+    ontouchstart="this._pressTimer=setTimeout(()=>showTodoDetail(${i}),600)"
+    ontouchend="clearTimeout(this._pressTimer)"
+    ontouchmove="clearTimeout(this._pressTimer)">
+    ${escapeHtml(x.text)}
+  </div>
+
+</div>
+
+`).join("")
+: "TODOなし"
+}
+
+</div>
+`
+  );
+}
 
 function toggleSelectAllTodos() {
 
