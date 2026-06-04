@@ -57,39 +57,6 @@ function saveDevLog(log) {
 
 }
 
-function getSelectedTodoTitle() {
-
-  const list =
-    getTodoList();
-
-  const selected =
-
-    [...selectedTodoIndexes]
-
-      .map(
-        index => list[index]
-      )
-
-      .filter(Boolean);
-
-  if (!selected.length) {
-
-    return "開発ログ";
-
-  }
-
-  return selected
-
-    .map(
-      item => item.text
-    )
-
-    .join(" / ")
-
-    .slice(0,50);
-
-}
-
 function saveDevLogFromInput() {
 
   const title =
@@ -239,76 +206,6 @@ function deleteDevLog(index) {
   );
 
   renderDevLogList();
-
-}
-
-function getDevLogList() {
-
-  return loadJson(
-    "devLogList",
-    []
-  );
-
-}
-
-function saveDevLog(log) {
-
-  const list =
-    getDevLogList();
-
-  list.unshift(log);
-
-  localStorage.setItem(
-    "devLogList",
-    JSON.stringify(list.slice(0, 50))
-  );
-
-}
-
-function saveDevLogFromInput() {
-
-  const raw =
-    prompt(
-      "開発ログを入力してください\n\n" +
-      "例:\n" +
-      "TODO統合を追加。renderTodoListを更新。HTML HEALTH 100。次はAI回答保存。",
-      ""
-    );
-
-  if (!raw) {
-    return;
-  }
-
-  const text =
-    String(raw).trim();
-
-  const log = {
-    title:
-      guessDevLogTitle(text),
-
-    changes:
-      extractDevLogChanges(text),
-
-    result:
-      extractDevLogResult(text),
-
-    next:
-      extractDevLogNext(text),
-
-    raw_text:
-      text,
-
-    created_at:
-      new Date()
-        .toISOString()
-  };
-
-  saveDevLog(log);
-
-  alert(
-    "開発ログを保存しました\n\n" +
-    "作業名: " + log.title
-  );
 
 }
 
@@ -894,16 +791,6 @@ function renderTodoList() {
     "開発TODO",
 
     `
-<div class="todo-toolbar">
-
-  <div
-    id="todoManageMenu"
-    class="todo-menu-grid"
-    style="display:none;">
-
-    ...
-  </div>
-
 <div class="todo-header">
 
   <button
