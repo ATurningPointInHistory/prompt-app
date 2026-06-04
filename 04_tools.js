@@ -11,6 +11,68 @@ let todoDetailOpening = false;
 
 let selectedTodoIndexes = new Set();
 
+function completeTodosByText() {
+
+  const text =
+    prompt(
+      "完了したTODOを貼り付けてください\n\n" +
+      "改行で複数指定できます。",
+      ""
+    );
+
+  if (!text) {
+    return;
+  }
+
+  const targets =
+    String(text)
+      .split("\n")
+      .map(line =>
+        normalizeTodoText(line)
+      )
+      .filter(Boolean);
+
+  if (!targets.length) {
+    return;
+  }
+
+  const list =
+    getTodoList();
+
+  let count = 0;
+
+  list.forEach(todo => {
+
+    const todoText =
+      normalizeTodoText(todo.text);
+
+    const matched =
+      targets.some(target =>
+        todoText === target ||
+        todoText.includes(target) ||
+        target.includes(todoText)
+      );
+
+    if (matched && !todo.done) {
+      todo.done = true;
+      count++;
+    }
+
+  });
+
+  localStorage.setItem(
+    "todoList",
+    JSON.stringify(list)
+  );
+
+  renderTodoList();
+
+  alert(
+    count +
+    "件を完了にしました"
+  );
+}
+
 function getPriorityIcon(priority) {
 
   switch (priority) {
@@ -212,6 +274,10 @@ function renderTodoList() {
 
   <button onclick="mergeSelectedTodos()">
     🔗
+  </button>
+
+  <button onclick="completeTodosByText()">
+    ✅
   </button>
 
   <button onclick="deleteSelectedTodos()">
