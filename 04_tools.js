@@ -14,50 +14,55 @@ function renderTodoList() {
     "開発TODO",
 
     `
-<div class="float-panel-actions">
+<div class="todo-header">
 
-<button onclick="
-const text=
-prompt('TODO追加');
+  <button onclick="promptAddTodoItems()">
+    ➕
+  </button>
 
-if(text){
-saveTodoItem(text);
-}">
-➕ 追加
-</button>
+  <button onclick="toggleSelectAllTodos()">
+    ☑
+  </button>
+
+  <button onclick="copySelectedTodos()">
+    📋
+  </button>
+
+  <button onclick="deleteSelectedTodos()">
+    🗑
+  </button>
 
 </div>
 
-<div>
+<div class="todo-list">
 
 ${
 list.length
-? list.map((x,i)=>`
+? list.map((x, i) => `
 
-<div class="backup-history-item">
+<div class="todo-row">
 
-<div>
+  <input
+    type="checkbox"
+    class="todo-select"
+    ${selectedTodoIndexes.has(i) ? "checked" : ""}
+    onchange="toggleTodoSelect(${i})"
+  >
 
-<button
-onclick="toggleTodo(${i})">
+  <button
+    class="todo-check"
+    onclick="toggleTodo(${i})">
+    ${x.done ? "✔" : "□"}
+  </button>
 
-${x.done?"✔":"□"}
-
-</button>
-
-${escapeHtml(x.text)}
-
-</div>
-
-<div>
-
-<button
-onclick="deleteTodo(${i})">
-
-🗑
-</button>
-
-</div>
+  <div
+    class="todo-text ${x.done ? "todo-done" : ""}"
+    oncontextmenu="event.preventDefault();showTodoDetail(${i})"
+    ontouchstart="this._pressTimer=setTimeout(()=>showTodoDetail(${i}),600)"
+    ontouchend="clearTimeout(this._pressTimer)"
+    ontouchmove="clearTimeout(this._pressTimer)">
+    ${escapeHtml(x.text)}
+  </div>
 
 </div>
 
@@ -68,7 +73,6 @@ onclick="deleteTodo(${i})">
 </div>
 `
   );
-
 }
 
 function isTodoHeadingLine(line) {
