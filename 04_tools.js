@@ -911,17 +911,35 @@ function renderTodoList() {
     "開発TODO",
 
     `
-<div class="todo-header">
+<div class="todo-toolbar">
 
-  <button
-    onclick="toggleTodoMenu('manage')">
-    管理
-  </button>
+  <div
+    id="todoManageMenu"
+    class="todo-menu-grid"
+    style="display:none;">
 
-  <button
-    onclick="toggleTodoMenu('action')">
-    操作
-  </button>
+    ...
+  </div>
+
+  <div
+    id="todoActionMenu"
+    class="todo-menu-grid"
+    style="display:none;">
+
+    ...
+  </div>
+
+  <div class="todo-toolbar-right">
+
+    <button onclick="toggleTodoMenu('manage')">
+      管理 ▼
+    </button>
+
+    <button onclick="toggleTodoMenu('action')">
+      操作 ▼
+    </button>
+
+  </div>
 
 </div>
 
