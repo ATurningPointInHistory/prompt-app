@@ -449,10 +449,9 @@ function renderTodoList() {
     🔗
   </button>
 
-  <button onclick="editProjectState()">
-    📊
+  <button onclick="generateHandoffPrompt()">
+  📄
   </button>
-
 
   <button onclick="deleteSelectedTodos()">
     🗑
