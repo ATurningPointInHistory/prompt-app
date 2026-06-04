@@ -582,13 +582,13 @@ function getPriorityIcon(priority) {
   switch (priority) {
 
     case "high":
-      return "🔥";
+      return "[1]";
 
     case "low":
-      return "📝";
+      return "[2]";
 
     default:
-      return "⚡";
+      return "[3]";
 
   }
 
@@ -1072,13 +1072,7 @@ function deleteSelectedTodos() {
   renderTodoList();
 }
 
-function showTodoDetail(index) {
-
-  if (todoDetailOpening) {
-    return;
-  }
-
-  todoDetailOpening = true;
+function editTodoItem(index) {
 
   const list =
     getTodoList();
@@ -1087,33 +1081,140 @@ function showTodoDetail(index) {
     list[index];
 
   if (!item) {
-    todoDetailOpening = false;
     return;
   }
 
-  let detail =
-    item.text;
-
-  detail +=
-    "\n\n優先度: " +
-    (item.priority || "middle");
+  const newText =
+    prompt(
+      "TODO内容を編集",
+      item.text
+    );
 
   if (
-    Array.isArray(item.merged_from) &&
-    item.merged_from.length
+    newText === null
   ) {
-    detail +=
-      "\n\n統合元:\n" +
-      item.merged_from
-        .map(x => "・" + x)
-        .join("\n");
+    return;
   }
 
-  alert(detail);
+  const normalized =
+    normalizeTodoText(
+      newText
+    );
 
-  setTimeout(() => {
-    todoDetailOpening = false;
-  }, 500);
+  if (!normalized) {
+    alert("TODO内容が空です");
+    return;
+  }
+
+  item.text =
+    normalized;
+
+  if (
+    Array.isArray(
+      item.merged_from
+    )
+  ) {
+
+    const mergedText =
+      prompt(
+        "統合元を編集\n\n改行で複数入力",
+        item.merged_from.join("\n")
+      );
+
+    if (
+      mergedText !== null
+    ) {
+
+      item.merged_from =
+        mergedText
+          .split("\n")
+          .map(x =>
+            normalizeTodoText(x)
+          )
+          .filter(Boolean);
+
+    }
+
+  }
+
+  localStorage.setItem(
+    "todoList",
+    JSON.stringify(list)
+  );
+
+  renderTodoList();
+
+  alert("TODOを更新しました");
+
+}
+
+function editTodoItem(index) {
+
+  const list =
+    getTodoList();
+
+  const item =
+    list[index];
+
+  if (!item) {
+    return;
+  }
+
+  const newText =
+    prompt(
+      "TODO内容を編集",
+      item.text
+    );
+
+  if (newText === null) {
+    return;
+  }
+
+  const normalized =
+    normalizeTodoText(
+      newText
+    );
+
+  if (!normalized) {
+    alert("TODO内容が空です");
+    return;
+  }
+
+  item.text =
+    normalized;
+
+  if (
+    Array.isArray(item.merged_from)
+  ) {
+
+    const mergedText =
+      prompt(
+        "統合元を編集\n\n改行で複数入力",
+        item.merged_from.join("\n")
+      );
+
+    if (mergedText !== null) {
+
+      item.merged_from =
+        mergedText
+          .split("\n")
+          .map(x =>
+            normalizeTodoText(x)
+          )
+          .filter(Boolean);
+
+    }
+
+  }
+
+  localStorage.setItem(
+    "todoList",
+    JSON.stringify(list)
+  );
+
+  renderTodoList();
+
+  alert("TODOを更新しました");
 }
 
 function toggleSelectAllTodos() {
@@ -1249,7 +1350,7 @@ topPriority.length
 ? topPriority
     .map(
       x =>
-      "🔥 " + x.text
+      "[1]" + x.text
     )
     .join("\n")
 : "なし"
