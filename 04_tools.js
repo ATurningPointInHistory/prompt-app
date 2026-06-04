@@ -11,6 +11,237 @@ let todoDetailOpening = false;
 
 let selectedTodoIndexes = new Set();
 
+function getSelectedTodoTitle() {
+
+  const list =
+    getTodoList();
+
+  const selected =
+    [...selectedTodoIndexes]
+      .map(index => list[index])
+      .filter(Boolean);
+
+  if (!selected.length) {
+    return "開発ログ";
+  }
+
+  return selected
+    .map(item => item.text)
+    .join(" / ")
+    .slice(0, 40);
+
+}
+
+function getDevLogList() {
+
+  return loadJson(
+    "devLogList",
+    []
+  );
+
+}
+
+function saveDevLog(log) {
+
+  const list =
+    getDevLogList();
+
+  list.unshift(log);
+
+  localStorage.setItem(
+    "devLogList",
+    JSON.stringify(
+      list.slice(0,100)
+    )
+  );
+
+}
+
+function getSelectedTodoTitle() {
+
+  const list =
+    getTodoList();
+
+  const selected =
+
+    [...selectedTodoIndexes]
+
+      .map(
+        index => list[index]
+      )
+
+      .filter(Boolean);
+
+  if (!selected.length) {
+
+    return "開発ログ";
+
+  }
+
+  return selected
+
+    .map(
+      item => item.text
+    )
+
+    .join(" / ")
+
+    .slice(0,50);
+
+}
+
+function saveDevLogFromInput() {
+
+  const title =
+
+    prompt(
+      "作業名",
+      getSelectedTodoTitle()
+    );
+
+  if (!title) {
+    return;
+  }
+
+  const content =
+
+    prompt(
+      "変更内容・結果・次やること",
+      ""
+    );
+
+  if (!content) {
+    return;
+  }
+
+  saveDevLog({
+
+    title,
+
+    content,
+
+    created_at:
+      new Date()
+        .toISOString()
+
+  });
+
+  alert(
+    "開発ログを保存しました"
+  );
+
+}
+
+function renderDevLogList() {
+
+  const list =
+    getDevLogList();
+
+  openFloatPanel(
+
+    "開発ログ履歴",
+
+    `
+<div>
+
+${
+list.length
+
+? list.map((x,i)=>`
+
+<div class="backup-history-item">
+
+<div>
+
+<b>
+${escapeHtml(x.title)}
+</b>
+
+<br>
+
+<small>
+${escapeHtml(
+  x.created_at || ""
+)}
+</small>
+
+</div>
+
+<div>
+
+<button
+onclick="copyDevLog(${i})">
+📋
+</button>
+
+<button
+onclick="deleteDevLog(${i})">
+🗑
+</button>
+
+</div>
+
+</div>
+
+`).join("")
+
+: "履歴なし"
+
+}
+
+</div>
+`
+
+  );
+
+}
+
+function copyDevLog(index) {
+
+  const list =
+    getDevLogList();
+
+  const item =
+    list[index];
+
+  if (!item) {
+    return;
+  }
+
+  copyTextFallback(
+
+`作業名
+${item.title}
+
+内容
+${item.content}`
+
+  );
+
+}
+
+function deleteDevLog(index) {
+
+  const list =
+    getDevLogList();
+
+  list.splice(
+    index,
+    1
+  );
+
+  localStorage.setItem(
+
+    "devLogList",
+
+    JSON.stringify(list)
+
+  );
+
+  renderDevLogList();
+
+}
+
 function getDevLogList() {
 
   return loadJson(
