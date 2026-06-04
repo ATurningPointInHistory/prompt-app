@@ -73,14 +73,6 @@ body {
   border-radius:8px;
 }
 
-.todo-header button{
-  width:30px;
-  height:30px;
-  padding:0;
-  font-size:12px;
-  border-radius:8px;
-}
-
 h2 {
   text-align: center;
   font-size: 1.2rem;
@@ -223,6 +215,21 @@ body.dark button.active-panel {
   color: var(--warn-text);
   border: 1px solid var(--warn-border);
   white-space: pre-wrap;
+}
+
+.todo-header{
+  display:flex;
+  justify-content:flex-end;
+  gap:4px;
+  margin-bottom:8px;
+}
+
+.todo-header button{
+  width:28px;
+  height:28px;
+  padding:0;
+  font-size:12px;
+  border-radius:7px;
 }
 
 .diagnose-box {
