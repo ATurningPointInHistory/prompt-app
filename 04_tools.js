@@ -438,13 +438,6 @@ function toggleCommandMenu() {
       : "none";
 }
 
-function closeAllManagers() {
-  get("template-manager").style.display = "none";
-  get("danger-manager").style.display = "none";
-  get("pattern-manager").style.display = "none";
-  get("ai-preset-manager").style.display = "none";
-}
-
 /* ===============================
    Tool Actions
 =============================== */
