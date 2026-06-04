@@ -853,6 +853,52 @@ function getSortedTodoList(list) {
 
 }
 
+function toggleTodoMenu(type) {
+
+  const manage =
+    get("todoManageMenu");
+
+  const action =
+    get("todoActionMenu");
+
+  if (
+    type === "manage"
+  ) {
+
+    manage.style.display =
+
+      manage.style.display ===
+      "block"
+
+      ? "none"
+
+      : "block";
+
+    action.style.display =
+      "none";
+
+  }
+
+  if (
+    type === "action"
+  ) {
+
+    action.style.display =
+
+      action.style.display ===
+      "block"
+
+      ? "none"
+
+      : "block";
+
+    manage.style.display =
+      "none";
+
+  }
+
+}
+
 function renderTodoList() {
 
   const list =
@@ -867,32 +913,58 @@ function renderTodoList() {
     `
 <div class="todo-header">
 
+  <button
+    onclick="toggleTodoMenu('manage')">
+    管理 ▼
+  </button>
+
+  <button
+    onclick="toggleTodoMenu('action')">
+    操作 ▼
+  </button>
+
+</div>
+
+<div
+  id="todoManageMenu"
+  style="display:none;">
+
   <button onclick="promptAddTodoItems()">
-    ➕
+    ➕ TODO追加
   </button>
 
   <button onclick="changeSelectedTodoPriority()">
-    🔥
+    🔥 優先度
   </button>
 
   <button onclick="toggleSelectAllTodos()">
-    ☑
-  </button>
-
-  <button onclick="copySelectedTodos()">
-    📋
-  </button>
-
-  <button onclick="mergeSelectedTodos()">
-    🔗
-  </button>
-
-  <button onclick="generateHandoffPrompt()">
-  📄
+    ☑ 全選択
   </button>
 
   <button onclick="deleteSelectedTodos()">
-    🗑
+    🗑 一括削除
+  </button>
+
+</div>
+
+<div
+  id="todoActionMenu"
+  style="display:none;">
+
+  <button onclick="copySelectedTodos()">
+    📋 コピー
+  </button>
+
+  <button onclick="mergeSelectedTodos()">
+    🔗 統合
+  </button>
+
+  <button onclick="saveDevLogFromInput()">
+    📝 開発ログ
+  </button>
+
+  <button onclick="generateHandoffPrompt()">
+    📄 引き継ぎ
   </button>
 
 </div>
