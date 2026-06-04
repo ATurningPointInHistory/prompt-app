@@ -915,56 +915,58 @@ function renderTodoList() {
 
   <button
     onclick="toggleTodoMenu('manage')">
-    管理 ▼
+    管理
   </button>
 
   <button
     onclick="toggleTodoMenu('action')">
-    操作 ▼
+    操作
   </button>
 
 </div>
 
 <div
   id="todoManageMenu"
+  class="todo-menu-grid"
   style="display:none;">
 
   <button onclick="promptAddTodoItems()">
-    ➕ TODO追加
+    TODO
   </button>
 
   <button onclick="changeSelectedTodoPriority()">
-    🔥 優先度
+    優先度
   </button>
 
   <button onclick="toggleSelectAllTodos()">
-    ☑ 全選択
+    全選択
   </button>
 
   <button onclick="deleteSelectedTodos()">
-    🗑 一括削除
+    削除
   </button>
 
 </div>
 
 <div
   id="todoActionMenu"
+  class="todo-menu-grid"
   style="display:none;">
 
   <button onclick="copySelectedTodos()">
-    📋 コピー
+    コピー
   </button>
 
   <button onclick="mergeSelectedTodos()">
-    🔗 統合
+    統合
   </button>
 
   <button onclick="saveDevLogFromInput()">
-    📝 開発ログ
+    ログ
   </button>
 
   <button onclick="generateHandoffPrompt()">
-    📄 引き継ぎ
+    引継
   </button>
 
 </div>
