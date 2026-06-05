@@ -1575,76 +1575,60 @@ async function loadExternalScriptToRepair(src){
 
 }
 
-function loadCurrentIndexToRepair() {
+async function loadCurrentIndexToRepair() {
 
-  switchAppPage(
-    "repair"
-  );
+  try {
 
-  const editor =
-    get("repairEditor");
+    const res =
+      await fetch("./index.html");
 
-  if (!editor) {
+    if (!res.ok) {
+
+      alert(
+        "index.htmlを取得できません"
+      );
+
+      return;
+    }
+
+    const html =
+      await res.text();
+
+    switchAppPage(
+      "repair"
+    );
+
+    const editor =
+      get("repairEditor");
+
+    editor.value =
+      html;
+
+    currentRepairFile =
+      "index.html";
+
+    repairLastValue =
+      html;
+
+    updateLineNumbers();
+
+    updateCursorPosition();
+
+    updateRepairStatus(
+      "読込: index.html"
+    );
+
+    closeFloatPanel();
+
+  } catch (e) {
 
     alert(
-      "修復エディタが見つかりません"
+      "読込失敗\n\n" +
+      e.message
     );
 
-    return;
   }
 
-  const clone =
-    document.documentElement
-      .cloneNode(true);
-
-  const lineNumbers =
-    clone.querySelector(
-      "#lineNumbers"
-    );
-
-  if (lineNumbers) {
-
-    lineNumbers.innerHTML =
-      "1";
-  }
-
-  const repairEditor =
-    clone.querySelector(
-      "#repairEditor"
-    );
-
-  if (repairEditor) {
-
-    repairEditor.value =
-      "";
-
-    repairEditor.innerHTML =
-      "";
-  }
-
-  editor.value =
-
-    "<!DOCTYPE html>\n"
-
-    +
-
-    clone.outerHTML;
-
-  currentRepairFile =
-    "index.html";
-
-  repairLastValue =
-    editor.value;
-
-  updateLineNumbers();
-
-  updateCursorPosition();
-
-  updateRepairStatus(
-    "読込: index.html"
-  );
-
-  closeFloatPanel();
 }
 
 function getExternalScriptSrcList(html) {
