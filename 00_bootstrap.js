@@ -103,7 +103,7 @@ function buildNormalToolsHtml() {
 
 <hr>
 
-<button
+<button class="float-list-btn"
 onclick="saveProjectPackage()">
 📦 プロジェクト保存
 </button>
