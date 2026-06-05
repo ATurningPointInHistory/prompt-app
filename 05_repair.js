@@ -2110,28 +2110,28 @@ function renderFunctionViewer() {
 
   const functions =
     blocks.filter(
-      item =>
-        item.type === "function"
+      item => item.type === "function"
     );
 
   box.innerHTML =
-
     functions.length
-    ? functions.map((f,index)=>`
+      ? functions.map((f,index)=>`
 
 <div class="function-view-item">
 
-  <div class="function-view-title">
+  <div
+    class="function-view-line"
+    onclick="toggleFunctionView(${index})"
+    oncontextmenu="event.preventDefault();selectCodeBlockByIndex(${blocks.indexOf(f)})"
+    ontouchstart="this._pressTimer=setTimeout(()=>selectCodeBlockByIndex(${blocks.indexOf(f)}),600)"
+    ontouchend="clearTimeout(this._pressTimer)"
+    ontouchmove="clearTimeout(this._pressTimer)">
 
-    <button onclick="selectCodeBlockByIndex(${blocks.indexOf(f)})">
-      ↗
-    </button>
-
-    <button onclick="toggleFunctionView(${index})">
+    <span class="function-view-mark">
       ▶
-    </button>
+    </span>
 
-    <span>
+    <span class="function-view-name">
       ${escapeHtml(f.name)}
     </span>
 
@@ -2145,8 +2145,7 @@ function renderFunctionViewer() {
 </div>
 
 `).join("")
-    : "関数なし";
-
+      : "関数なし";
 }
 
 function toggleFunctionView(index) {
