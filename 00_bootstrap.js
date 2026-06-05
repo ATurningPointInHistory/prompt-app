@@ -235,10 +235,6 @@ function buildRepairToolsHtml() {
 
 <hr>
 
-<button class="float-list-btn" onclick="diagnoseRepairHtml()">
-🩺 編集内容診断
-</button>
-
 <button class="float-list-btn" onclick="selectFunctionBlock()">
 📦 関数選択
 </button>
@@ -297,13 +293,33 @@ function buildRepairToolsHtml() {
 🗑 コメント化済みを完全削除
 </button>
 
+<hr>
+
 <button class="float-list-btn" onclick="openViewerMode()">
 👁 閲覧モード
+</button>
+
+<button
+onclick="scrollRepairTop()">
+⏫ 最上部
+</button>
+
+<button
+onclick="scrollRepairBottom()">
+⏬ 最下部
+</button>
+
+<hr>
+
+<button class="float-list-btn" onclick="diagnoseRepairHtml()">
+🩺 編集内容診断
 </button>
 
 <button class="float-list-btn" onclick="showHtmlHealth()">
 💚 HTML HEALTH
 </button>
+
+<hr>
 
 <button class="float-list-btn" onclick="reloadAppPage()">
 🔄 ページ更新
