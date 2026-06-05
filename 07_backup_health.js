@@ -1746,3 +1746,163 @@ ${info.time || "unknown"}`;
 
   localStorage.removeItem("lastCrash");
 }
+
+/* ===============================
+   Health full
+=============================== */
+
+async function saveProjectPackage() {
+
+  try {
+
+    if (typeof JSZip === "undefined") {
+
+      alert(
+        "JSZipが読み込まれていません"
+      );
+
+      return;
+    }
+
+    const zip =
+      new JSZip();
+
+    const timestamp =
+      new Date()
+        .toISOString()
+        .replace(/[:.]/g,"-");
+
+    // index.html
+
+    const html =
+
+      "<!DOCTYPE html>\n" +
+
+      document.documentElement
+        .outerHTML;
+
+    zip.file(
+      "index.html",
+      html
+    );
+
+    // 分割JS
+
+    const files = [
+
+      "00_bootstrap.js",
+      "01_core.js",
+      "02_prompt.js",
+      "03_data.js",
+      "04_tools.js",
+      "05_repair.js",
+      "06_search.js",
+      "07_backup_health.js",
+      "08_init.js"
+
+    ];
+
+    for (const file of files) {
+
+      try {
+
+        const res =
+          await fetch(file);
+
+        if (!res.ok) {
+          continue;
+        }
+
+        const text =
+          await res.text();
+
+        zip.file(
+          file,
+          text
+        );
+
+      } catch {}
+
+    }
+
+    // 情報
+
+    zip.file(
+
+      "project_info.json",
+
+      JSON.stringify({
+
+        project:
+          "AIプロンプト生成Pro",
+
+        version:
+          get("versionLabel")
+            ?.innerText ||
+
+          "unknown",
+
+        savedAt:
+          new Date()
+            .toISOString(),
+
+        functionCount:
+          (
+            document.body.innerHTML
+              .match(
+                /function\s+[a-zA-Z0-9_$]+\s*\(/g
+              ) || []
+          ).length
+
+      },
+
+      null,
+
+      2)
+
+    );
+
+    const blob =
+      await zip.generateAsync({
+
+        type:"blob"
+
+      });
+
+    const a =
+      document.createElement("a");
+
+    a.href =
+      URL.createObjectURL(blob);
+
+    a.download =
+
+      `AIPro_Project_${timestamp}.zip`;
+
+    a.click();
+
+    setTimeout(()=>{
+
+      URL.revokeObjectURL(
+        a.href
+      );
+
+    },1000);
+
+    alert(
+      "プロジェクト保存完了"
+    );
+
+  } catch(e) {
+
+    alert(
+
+      "保存失敗\n\n" +
+
+      e.message
+
+    );
+
+  }
+
+}
