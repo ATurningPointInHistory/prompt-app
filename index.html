@@ -570,20 +570,31 @@ body:not(.dark) #floatPanel{
   text-decoration:line-through;
 }
 
+
 /* ===============================
-   function view
+   FUNCTION VIEW
 =============================== */
 
+#functionViewer{
+  display:none;
+  margin:6px 0;
+  padding:0;
+  max-height:90px;
+  overflow-y:auto;
+}
+
 .function-view-item{
+  margin:0;
+  padding:0;
   border-bottom:1px solid var(--border);
-  padding:4px 0;
 }
 
 .function-view-line{
+  height:24px;
+  padding:0 4px;
   display:flex;
   align-items:center;
-  gap:6px;
-  padding:6px 4px;
+  gap:4px;
   font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size:12px;
   cursor:pointer;
@@ -594,19 +605,21 @@ body:not(.dark) #floatPanel{
 }
 
 .function-view-mark{
-  width:16px;
+  width:14px;
   opacity:.8;
+  line-height:1;
 }
 
 .function-view-name{
+  line-height:1;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
 .function-view-code{
-  margin:4px 0 8px 20px;
-  padding:8px;
+  margin:2px 0 6px 18px;
+  padding:6px;
   border-left:2px solid var(--accent);
   font-size:11px;
   white-space:pre;
@@ -750,58 +763,49 @@ mark {
 }
 
 /* ===============================
-   FUNCTION VIEW
+   FUNCTION SORT
 =============================== */
 
-#functionViewer{
-  display:none;
-  margin:6px 0;
-  padding:0;
-  max-height:90px;
-  overflow-y:auto;
-}
-
-.function-view-item{
-  margin:0;
-  padding:0;
-  border-bottom:1px solid var(--border);
-}
-
-.function-view-line{
-  height:24px;
-  padding:0 4px;
+.function-sort-row{
   display:flex;
   align-items:center;
-  gap:4px;
-  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  gap:6px;
+  margin-top:6px;
+}
+
+.function-sort-select{
+  flex:1;
+  text-align:left;
+  padding:8px 10px;
   font-size:12px;
-  cursor:pointer;
 }
 
-.function-view-line:hover{
-  background:rgba(0,122,255,0.12);
+.function-sort-actions{
+  display:flex;
+  gap:4px;
 }
 
-.function-view-mark{
-  width:14px;
-  opacity:.8;
-  line-height:1;
+.function-sort-actions button{
+  width:36px;
+  height:36px;
+  padding:0;
+  font-size:14px;
 }
 
-.function-view-name{
-  line-height:1;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+.function-drag-handle{
+  cursor:grab;
+  user-select:none;
+  padding:8px;
+  font-size:18px;
 }
 
-.function-view-code{
-  margin:2px 0 6px 18px;
-  padding:6px;
-  border-left:2px solid var(--accent);
-  font-size:11px;
-  white-space:pre;
-  overflow-x:auto;
+.function-sort-row.dragging{
+  opacity:0.5;
+  background:#2b3d52;
+}
+
+.function-sort-row.drag-over{
+  outline:2px solid #4da3ff;
 }
 
 /* ===============================
@@ -835,18 +839,348 @@ mark {
 .code-comment { color: #8b949e; }
 .code-keyword { color: #ff7b72; }
 
+
+
+
+
+
+
 </style>
 </head>
+<body class="dark">
 
-\n<body class=\"dark\">\n\n<div class=\"card\">\n  <h2>AIプロンプト生成Pro</h2>\n\n  <div class=\"tab-container\">\n\n    <div class=\"tab active\" id=\"appPageTab\" onclick=\"switchAppPage('app')\">\n      通常モード\n\n    </div>\n\n    <div class=\"tab\" id=\"repairPageTab\" onclick=\"switchAppPage('repair')\">\n      修復モード\n\n    </div>\n\n  </div>\n\n  <div id=\"appPage\" style=\"display: block;\">\n\n  <div class=\"small\" id=\"versionLabel\">v5.7.2</div>\n\n  <div class=\"small\" id=\"changelogLabel\">v5.7.0 AI別レビュー強化<br>v5.7.0 AIプリセット保存/復元<br>v5.7.0 Gemini/Cursor/Copilot評価改善</div>\n\n  <div class=\"tab-container\">    <div id=\"tab1\" class=\"tab\" onclick=\"switchTab(1)\">マニュアル入力\n\n  </div>\n\n    <div id=\"tab2\" class=\"tab active\" onclick=\"switchTab(2)\">ラフから変換\n\n  </div>\n\n  </div>\n\n  <div id=\"mode-normal\" style=\"display: none;\">\n    <label for=\"role\">役割</label>\n    <input id=\"role\" placeholder=\"例：プログラマー、翻訳家、AIオーケストレーター\">\n    <label for=\"task\">目的</label>\n    <input id=\"task\" placeholder=\"何をしたいですか？\">\n    <label for=\"details\">詳細（背景・条件など）</label>\n    <textarea id=\"details\" rows=\"5\" placeholder=\"具体的な指示や制約があれば入力\"></textarea>\n    <label for=\"tone\">トーン</label>\n    <select id=\"tone\">\n      <option>プロフェッショナル</option>\n      <option>丁寧</option>\n      <option>カジュアル</option>\n      <option>簡潔に</option>\n    </select>\n\n  </div>\n\n  <div id=\"mode-auto\" style=\"display: block;\">\n    <label for=\"raw-input\">やりたいことを自由に入力（AIに整理させます）</label>\n    <textarea id=\"raw-input\" rows=\"8\" placeholder=\"例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。\"></textarea>\n<button type=\"button\" onclick=\"toggleCommandMenu()\" class=\"btn-secondary btn-full\">\n  🧩 変換モード\n</button>\n\n<div id=\"commandMenu\" style=\"display:none;\">\n\n  <div class=\"small\">\n    変換モードをクリックすると入力欄に追加されます。\n\n  </div>\n\n  <div id=\"commandBox\" class=\"command-box\"></div>\n\n</div>\n\n<div class=\"small\">用途別プリセット</div>\n\n<div id=\"presetBox\" class=\"preset-box\"></div>\n\n    <label for=\"rough-tone\">トーン</label>\n    <select id=\"rough-tone\">\n      <option>プロフェッショナル</option>\n      <option>丁寧</option>\n      <option>カジュアル</option>\n      <option>簡潔に</option>\n    </select>\n    <label for=\"ai-target\">AI向け最適化</label>\n    <select id=\"ai-target\">\n      <option value=\"chatgpt\">ChatGPT</option>\n      <option value=\"claude\">Claude</option>\n      <option value=\"gemini\">Gemini</option>\n      <option value=\"cursor\">Cursor</option>\n      <option value=\"copilot\">Copilot</option>\n    </select>\n    <label for=\"rough-output-format\">出力形式</label>\n    <select id=\"rough-output-format\">\n      <option value=\"prompt\">通常プロンプト</option>\n      <option value=\"json\">JSON</option>\n    </select>\n\n  </div>\n\n  <div class=\"btn-group\">\n    <button id=\"main-btn\" class=\"btn-full\" onclick=\"generatePrompt()\">🪄 AI整形用プロンプトを作る</button>\n    <button onclick=\"copyText()\" class=\"btn-secondary\">📋 コピー</button>\n    <button onclick=\"download()\" class=\"btn-secondary\">💾 保存</button>\n    <button onclick=\"toggleDark()\" class=\"btn-secondary\">🌙 ダークモード</button>\n\n  </div>\n\n  <input type=\"file\" id=\"fileInput\" accept=\".json,application/json\" style=\"display:none;\">\n  <input type=\"file\" id=\"aiPresetFileInput\" accept=\".json,application/json\" style=\"display:none;\">\n  <label>生成結果</label>\n  <div id=\"output\">ここに表示</div>\n  <div id=\"warningBox\" class=\"warning-box\" style=\"display: none;\"></div>\n\n  <div id=\"debugBox\" class=\"warning-box\" style=\"display: none;\"></div>\n  <div id=\"diagnoseBox\" class=\"diagnose-box\" style=\"display: none;\"></div>\n\n  <div id=\"template-manager\" class=\"section-box\" style=\"display: none;\">\n    <h3>テンプレ管理</h3>\n    <label for=\"templateSelect\">固定テンプレ / 保存テンプレ</label>\n    <select id=\"templateSelect\" onchange=\"applyTemplateFromSelect()\"><option value=\"\">テンプレを選択</option><option value=\"0\">AIオーケストレーター</option><option value=\"1\">テスト</option></select>\n\n    <div class=\"small\">下の入力欄から新しいテンプレも追加できます。</div>\n    <label for=\"tempName\">テンプレ名</label>\n    <input id=\"tempName\" placeholder=\"例：バグ修正用、営業文作成\">\n    <label for=\"tempRole\">役割</label>\n    <input id=\"tempRole\" placeholder=\"例：シニアエンジニア\">\n    <label for=\"tempTask\">目的</label>\n    <input id=\"tempTask\" placeholder=\"例：JavaScriptの不具合修正\">\n    <label for=\"tempDetails\">詳細</label>\n    <textarea id=\"tempDetails\" rows=\"5\" placeholder=\"テンプレの詳細内容\"></textarea>\n    <label for=\"tempTone\">トーン</label>\n    <select id=\"tempTone\">\n      <option>プロフェッショナル</option>\n      <option>丁寧</option>\n      <option>カジュアル</option>\n      <option>簡潔に</option>\n    </select>\n    <button onclick=\"saveTemplate()\" class=\"btn-full\">テンプレ保存</button>\n    <h4>保存済みテンプレ一覧</h4>\n\n    <div id=\"templateList\"></div>\n\n  </div>\n\n  <div id=\"danger-manager\" class=\"section-box\" style=\"display: none;\">\n    <h3>危険ワード管理</h3>\n\n    <div class=\"small\">単語が含まれていたら警告します。\n\n</div>\n\n    <label for=\"dangerWord\">危険ワード</label>\n    <input id=\"dangerWord\" placeholder=\"例：パスワード、住所、電話番号\">\n    <button onclick=\"saveDangerWord()\" class=\"btn-full\">危険ワード追加</button>\n    <h4>固定危険ワード + 追加危険ワード</h4>\n\n    <div id=\"dangerList\"></div>\n\n  </div>\n\n  <div id=\"pattern-manager\" class=\"section-box\" style=\"display: none;\">\n    <h3>NGパターン管理</h3>\n\n    <div class=\"small\">形式で検出します。正規表現を追加できます。\n\n  </div>\n\n    <label for=\"patternName\">パターン名</label>\n    <input id=\"patternName\" placeholder=\"例：社員番号、会員ID\">\n    <label for=\"patternRegex\">正規表現</label>\n    <input id=\"patternRegex\" placeholder=\"例：\\\\b[A-Z]{2}\\\\d{6}\\\\b\">\n    <label for=\"patternFlags\">フラグ</label>\n    <input id=\"patternFlags\" placeholder=\"例：g または gi\">\n\n    <div class=\"small\">よく分からなければ、まずは g を入れてください。\n\n  </div>\n\n    <button onclick=\"savePattern()\" class=\"btn-full\">NGパターン追加</button>\n    <h4>固定NGパターン + 追加NGパターン</h4>\n\n    <div id=\"patternList\"></div>\n\n  </div>\n\n<div id=\"ai-preset-manager\" class=\"section-box\" style=\"display: none;\">\n  <h3>AIプリセット管理</h3>\n\n  <div class=\"small\">AI別の変換方針を編集できます。\n\n</div>\n\n  <label for=\"aiPresetTarget\">対象AI</label>\n  <select id=\"aiPresetTarget\" onchange=\"loadAiPresetToEditor()\">\n    <option value=\"chatgpt\">ChatGPT</option>\n    <option value=\"claude\">Claude</option>\n    <option value=\"gemini\">Gemini</option>\n    <option value=\"cursor\">Cursor</option>\n    <option value=\"copilot\">Copilot</option>\n  </select>\n  <label for=\"aiPresetName\">表示名</label>\n  <input id=\"aiPresetName\" placeholder=\"例：ChatGPT\">\n  <label for=\"aiPresetInstruction\">変換方針</label>\n  <textarea id=\"aiPresetInstruction\" rows=\"6\" placeholder=\"このAI向けの変換方針を入力\"></textarea>\n  <div class=\"btn-group\">\n    <button onclick=\"saveAiPresetFromEditor()\">保存</button>\n    <button onclick=\"resetAiPreset()\">初期値に戻す</button>\n\n  </div>\n\n</div>\n\n<div class=\"section-box\">\n  <label>履歴（最新5件）</label>\n\n  <div id=\"history\"></div>\n\n</div>\n\n</div>\n\n<div id=\"repairPage\" style=\"display: none;\">\n\n  <h3>🛠 修復モード</h3>\n\n  <div class=\"small\">\n    HTMLファイルを文字列として読み込み、\n    編集して保存できます。\n\n  </div>\n\n<div id=\"repairStatus\" class=\"small\" style=\"margin-top:8px;\">状態：閲覧モード：関数ビュー表示</div>\n\n  <div id=\"cursorStatus\" class=\"small\" style=\"margin-top:6px;\">Ln 1 / Col 1</div>\n\n  <label for=\"repairEditor\">\n    HTML編集エリア\n  </label>\n\n  <div class=\"repair-editor-wrap\">\n  <div id=\"lineNumbers\">1</div>\n\n    <textarea id=\"repairEditor\" rows=\"20\" placeholder=\"ここにHTML全文が表示されます\" style=\"width: 100%; max-width: 100%;\"></textarea>\n\n  </div>\n\n<div id=\"repairPreview\" class=\"code-preview\" style=\"display: none;\"></div>\n\n<div id=\"functionViewer\" class=\"diagnose-box\" style=\"display: block;\">関数なし</div>\n\n<div id=\"functionListBox\" class=\"diagnose-box\" style=\"display:none;\">\n\n</div>\n\n</div> <!-- repairPage -->\n\n<button id=\"toolsBtn\" onclick=\"toggleToolsMenu()\" class=\"btn-secondary\">⚙</button>\n\n<div id=\"floatPanel\" style=\"display: none; right: 18px; bottom: 88px;\"></div>\n\n</div> <!-- card -->\n\n<!-- 
+<div class="card">
+  <h2>AIプロンプト生成Pro</h2>
+
+  <div class="tab-container">
+
+    <div class="tab active" id="appPageTab" onclick="switchAppPage('app')">
+      通常モード
+
+    </div>
+
+    <div class="tab" id="repairPageTab" onclick="switchAppPage('repair')">
+      修復モード
+
+    </div>
+
+  </div>
+
+  <div id="appPage" style="display: block;">
+
+  <div class="small" id="versionLabel">v5.7.2</div>
+
+  <div class="small" id="changelogLabel">v5.7.0 AI別レビュー強化<br>v5.7.0 AIプリセット保存/復元<br>v5.7.0 Gemini/Cursor/Copilot評価改善</div>
+
+  <div class="tab-container">    <div id="tab1" class="tab" onclick="switchTab(1)">マニュアル入力
+
+  </div>
+
+    <div id="tab2" class="tab active" onclick="switchTab(2)">ラフから変換
+
+  </div>
+
+  </div>
+
+  <div id="mode-normal" style="display: none;">
+    <label for="role">役割</label>
+    <input id="role" placeholder="例：プログラマー、翻訳家、AIオーケストレーター">
+    <label for="task">目的</label>
+    <input id="task" placeholder="何をしたいですか？">
+    <label for="details">詳細（背景・条件など）</label>
+    <textarea id="details" rows="5" placeholder="具体的な指示や制約があれば入力"></textarea>
+    <label for="tone">トーン</label>
+    <select id="tone">
+      <option>プロフェッショナル</option>
+      <option>丁寧</option>
+      <option>カジュアル</option>
+      <option>簡潔に</option>
+    </select>
+
+  </div>
+
+  <div id="mode-auto" style="display: block;">
+    <label for="raw-input">やりたいことを自由に入力（AIに整理させます）</label>
+    <textarea id="raw-input" rows="8" placeholder="例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。"></textarea>
+<button type="button" onclick="toggleCommandMenu()" class="btn-secondary btn-full">
+  🧩 変換モード
+</button>
+
+<div id="commandMenu" style="display:none;">
+
+  <div class="small">
+    変換モードをクリックすると入力欄に追加されます。
+
+  </div>
+
+  <div id="commandBox" class="command-box"></div>
+
+</div>
+
+<div class="small">用途別プリセット</div>
+
+<div id="presetBox" class="preset-box"></div>
+
+    <label for="rough-tone">トーン</label>
+    <select id="rough-tone">
+      <option>プロフェッショナル</option>
+      <option>丁寧</option>
+      <option>カジュアル</option>
+      <option>簡潔に</option>
+    </select>
+    <label for="ai-target">AI向け最適化</label>
+    <select id="ai-target">
+      <option value="chatgpt">ChatGPT</option>
+      <option value="claude">Claude</option>
+      <option value="gemini">Gemini</option>
+      <option value="cursor">Cursor</option>
+      <option value="copilot">Copilot</option>
+    </select>
+    <label for="rough-output-format">出力形式</label>
+    <select id="rough-output-format">
+      <option value="prompt">通常プロンプト</option>
+      <option value="json">JSON</option>
+    </select>
+
+  </div>
+
+  <div class="btn-group">
+    <button id="main-btn" class="btn-full" onclick="generatePrompt()">🪄 AI整形用プロンプトを作る</button>
+    <button onclick="copyText()" class="btn-secondary">📋 コピー</button>
+    <button onclick="download()" class="btn-secondary">💾 保存</button>
+    <button onclick="toggleDark()" class="btn-secondary">🌙 ダークモード</button>
+
+  </div>
+
+  <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
+  <input type="file" id="aiPresetFileInput" accept=".json,application/json" style="display:none;">
+  <label>生成結果</label>
+  <div id="output">ここに表示</div>
+  <div id="warningBox" class="warning-box" style="display: none;"></div>
+
+  <div id="debugBox" class="warning-box" style="display: none;"></div>
+  <div id="diagnoseBox" class="diagnose-box" style="display: none;"></div>
+
+  <div id="template-manager" class="section-box" style="display: none;">
+    <h3>テンプレ管理</h3>
+    <label for="templateSelect">固定テンプレ / 保存テンプレ</label>
+    <select id="templateSelect" onchange="applyTemplateFromSelect()"><option value="">テンプレを選択</option><option value="0">AIオーケストレーター</option><option value="1">テスト</option></select>
+
+    <div class="small">下の入力欄から新しいテンプレも追加できます。</div>
+    <label for="tempName">テンプレ名</label>
+    <input id="tempName" placeholder="例：バグ修正用、営業文作成">
+    <label for="tempRole">役割</label>
+    <input id="tempRole" placeholder="例：シニアエンジニア">
+    <label for="tempTask">目的</label>
+    <input id="tempTask" placeholder="例：JavaScriptの不具合修正">
+    <label for="tempDetails">詳細</label>
+    <textarea id="tempDetails" rows="5" placeholder="テンプレの詳細内容"></textarea>
+    <label for="tempTone">トーン</label>
+    <select id="tempTone">
+      <option>プロフェッショナル</option>
+      <option>丁寧</option>
+      <option>カジュアル</option>
+      <option>簡潔に</option>
+    </select>
+    <button onclick="saveTemplate()" class="btn-full">テンプレ保存</button>
+    <h4>保存済みテンプレ一覧</h4>
+
+    <div id="templateList"></div>
+
+  </div>
+
+  <div id="danger-manager" class="section-box" style="display: none;">
+    <h3>危険ワード管理</h3>
+
+    <div class="small">単語が含まれていたら警告します。
+
+</div>
+
+    <label for="dangerWord">危険ワード</label>
+    <input id="dangerWord" placeholder="例：パスワード、住所、電話番号">
+    <button onclick="saveDangerWord()" class="btn-full">危険ワード追加</button>
+    <h4>固定危険ワード + 追加危険ワード</h4>
+
+    <div id="dangerList"></div>
+
+  </div>
+
+  <div id="pattern-manager" class="section-box" style="display: none;">
+    <h3>NGパターン管理</h3>
+
+    <div class="small">形式で検出します。正規表現を追加できます。
+
+  </div>
+
+    <label for="patternName">パターン名</label>
+    <input id="patternName" placeholder="例：社員番号、会員ID">
+    <label for="patternRegex">正規表現</label>
+    <input id="patternRegex" placeholder="例：\\b[A-Z]{2}\\d{6}\\b">
+    <label for="patternFlags">フラグ</label>
+    <input id="patternFlags" placeholder="例：g または gi">
+
+    <div class="small">よく分からなければ、まずは g を入れてください。
+
+  </div>
+
+    <button onclick="savePattern()" class="btn-full">NGパターン追加</button>
+    <h4>固定NGパターン + 追加NGパターン</h4>
+
+    <div id="patternList"></div>
+
+  </div>
+
+<div id="ai-preset-manager" class="section-box" style="display: none;">
+  <h3>AIプリセット管理</h3>
+
+  <div class="small">AI別の変換方針を編集できます。
+
+</div>
+
+  <label for="aiPresetTarget">対象AI</label>
+  <select id="aiPresetTarget" onchange="loadAiPresetToEditor()">
+    <option value="chatgpt">ChatGPT</option>
+    <option value="claude">Claude</option>
+    <option value="gemini">Gemini</option>
+    <option value="cursor">Cursor</option>
+    <option value="copilot">Copilot</option>
+  </select>
+  <label for="aiPresetName">表示名</label>
+  <input id="aiPresetName" placeholder="例：ChatGPT">
+  <label for="aiPresetInstruction">変換方針</label>
+  <textarea id="aiPresetInstruction" rows="6" placeholder="このAI向けの変換方針を入力"></textarea>
+  <div class="btn-group">
+    <button onclick="saveAiPresetFromEditor()">保存</button>
+    <button onclick="resetAiPreset()">初期値に戻す</button>
+
+  </div>
+
+</div>
+
+<div class="section-box">
+  <label>履歴（最新5件）</label>
+
+  <div id="history"></div>
+
+</div>
+
+</div>
+
+<div id="repairPage" style="display: none;">
+
+  <h3>🛠 修復モード</h3>
+
+  <div class="small">
+    HTMLファイルを文字列として読み込み、
+    編集して保存できます。
+  </div>
+
+  <div id="repairStatus" class="small" style="margin-top:8px;">
+    状態：待機中
+  </div>
+
+  <div id="cursorStatus" class="small" style="margin-top:6px;">
+    Ln 1 / Col 1
+  </div>
+
+  <div
+    id="repairPreview"
+    class="code-preview"
+    style="display:none;">
+  </div>
+
+  <div
+    id="functionViewer"
+    style="display:none;">
+  </div>
+
+  <label for="repairEditor">
+    HTML編集エリア
+  </label>
+
+  <div class="repair-editor-wrap">
+
+    <div id="lineNumbers">1</div>
+
+    <textarea
+      id="repairEditor"
+      rows="20"
+      placeholder="ここにHTML全文が表示されます"
+      style="width:100%; max-width:100%;"></textarea>
+
+  </div>
+
+  <div
+    id="functionListBox"
+    class="diagnose-box"
+    style="display:none;">
+  </div>
+
+</div> <!-- repairPage -->
+
+<button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">⚙</button>
+
+<div id="floatPanel" style="display: none; right: 18px; bottom: 88px;"></div>
+
+</div> <!-- card -->
+
+<!-- ==========================
+  Bootstrap / 先行UI基盤
+  画面切替・ツールメニュー・フロートパネル
+========================== -->
+
 <script src="./00_bootstrap.js"></script>
+
+<!-- ==========================
+  Core / 共通基盤
+  定数・共通helper・基本関数
+========================== -->
+
 <script src="./01_core.js"></script>
+
+<!-- ==========================
+  Prompt生成 / AI変換
+========================== -->
+
 <script src="./02_prompt.js"></script>
+
+<!-- ==========================
+  データ管理 / localStorage
+  loadSettings / 保存復元
+========================== -->
+
 <script src="./03_data.js"></script>
+
+<!-- ==========================
+  ツールUI / 各種Manager
+  テンプレ・危険語・AI設定
+========================== -->
+
 <script src="./04_tools.js"></script>
+
+<!-- ==========================
+  Repair IDE / 修復エディタ
+========================== -->
+
 <script src="./05_repair.js"></script>
+
+<!-- ==========================
+  検索 / 置換 / ナビゲーション
+========================== -->
+
 <script src="./06_search.js"></script>
+
+<!-- ==========================
+  Backup / Health / SafeMode
+========================== -->
+
 <script src="./07_backup_health.js"></script>
+
+<!-- ==========================
+  App起動 / Event登録
+  Bootstrap
+========================== -->
+
 <script src="./08_init.js"></script>
 
 </body>
