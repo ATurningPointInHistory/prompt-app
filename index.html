@@ -571,6 +571,49 @@ body:not(.dark) #floatPanel{
 }
 
 /* ===============================
+   function view
+=============================== */
+
+.function-view-item{
+  border-bottom:1px solid var(--border);
+  padding:4px 0;
+}
+
+.function-view-line{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 4px;
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:12px;
+  cursor:pointer;
+}
+
+.function-view-line:hover{
+  background:rgba(0,122,255,0.12);
+}
+
+.function-view-mark{
+  width:16px;
+  opacity:.8;
+}
+
+.function-view-name{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.function-view-code{
+  margin:4px 0 8px 20px;
+  padding:8px;
+  border-left:2px solid var(--accent);
+  font-size:11px;
+  white-space:pre;
+  overflow-x:auto;
+}
+
+/* ===============================
    REPAIR SEARCH
 =============================== */
 
