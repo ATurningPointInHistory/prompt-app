@@ -2103,32 +2103,33 @@ function renderFunctionViewer() {
     return;
   }
 
-  const blocks =
+  const items =
     extractCodeBlocksFromText(
       editor.value
     );
 
-  const functions =
-    blocks.filter(
-      item => item.type === "function"
-    );
-
   box.innerHTML =
-    functions.length
-      ? functions.map((f,index)=>`
+    items.length
+      ? items.map((f,index)=>`
 
 <div class="function-view-item">
 
   <div
     class="function-view-line"
     onclick="toggleFunctionView(${index})"
-    oncontextmenu="event.preventDefault();selectCodeBlockByIndex(${blocks.indexOf(f)})"
-    ontouchstart="this._pressTimer=setTimeout(()=>selectCodeBlockByIndex(${blocks.indexOf(f)}),600)"
+    oncontextmenu="event.preventDefault();selectCodeBlockByStart(${f.start})"
+    ontouchstart="this._pressTimer=setTimeout(()=>selectCodeBlockByStart(${f.start}),600)"
     ontouchend="clearTimeout(this._pressTimer)"
     ontouchmove="clearTimeout(this._pressTimer)">
 
     <span class="function-view-mark">
-      ▶
+      ${
+        f.type === "section"
+          ? "📁"
+          : f.type === "variable"
+          ? "📌"
+          : "▼"
+      }
     </span>
 
     <span class="function-view-name">
@@ -2145,7 +2146,39 @@ function renderFunctionViewer() {
 </div>
 
 `).join("")
-      : "関数なし";
+      : "コードブロックなし";
+}
+
+function selectCodeBlockByStart(start) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  editor.focus();
+
+  editor.setSelectionRange(
+    start,
+    start
+  );
+
+  const line =
+    editor.value
+      .slice(0,start)
+      .split("\n")
+      .length;
+
+  editor.scrollTop =
+    Math.max(
+      0,
+      (line - 3) * 18
+    );
+
+  updateCursorPosition();
+
 }
 
 function toggleFunctionView(index) {
