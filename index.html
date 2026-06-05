@@ -873,26 +873,60 @@ mark {
       Ln 1 / Col 1
     </div>
 
-    <div id="repairPreview" class="code-preview" style="display:none;"></div>
+<div id="repairPage" style="display: none;">
 
-    <div id="functionViewer" style="display:none;"></div>
+  <h3>🛠 修復モード</h3>
 
-    <label for="repairEditor">
-      HTML編集エリア
-    </label>
+  <div class="small">
+    HTMLファイルを文字列として読み込み、
+    編集して保存できます。
+  </div>
 
-    <div class="repair-editor-wrap">
-      <div id="lineNumbers">1</div>
+  <div id="repairStatus" class="small" style="margin-top:8px;">
+    状態：待機中
+  </div>
 
-      <textarea
-        id="repairEditor"
-        rows="20"
-        placeholder="ここにHTML全文が表示されます"></textarea>
+  <div id="cursorStatus" class="small" style="margin-top:6px;">
+    Ln 1 / Col 1
+  </div>
+
+  <div
+    id="repairPreview"
+    class="code-preview"
+    style="display:none;">
+  </div>
+
+  <div
+    id="functionViewer"
+    style="display:none;">
+  </div>
+
+  <label for="repairEditor">
+    HTML編集エリア
+  </label>
+
+  <div class="repair-editor-wrap">
+
+    <div id="lineNumbers">
+      1
     </div>
 
-    <div id="functionListBox" class="diagnose-box" style="display:none;"></div>
+    <textarea
+      id="repairEditor"
+      rows="20"
+      placeholder="ここにHTML全文が表示されます"
+      style="width:100%; max-width:100%;">
+    </textarea>
 
   </div>
+
+  <div
+    id="functionListBox"
+    class="diagnose-box"
+    style="display:none;">
+  </div>
+
+</div> <!-- repairPage -->
 
   <button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">
     ⚙
