@@ -2211,12 +2211,21 @@ function toggleFunctionView(index) {
 
 function openViewerMode() {
 
-  previewRepairHtml();
+  const preview =
+    get("repairPreview");
+
+  const viewer =
+    get("functionViewer");
+
+  if (preview) {
+    preview.style.display = "none";
+  }
 
   renderFunctionViewer();
 
-  get("functionViewer").style.display =
-    "block";
+  if (viewer) {
+    viewer.style.display = "block";
+  }
 
   updateRepairStatus(
     "閲覧モード：関数ビュー表示"
