@@ -1523,6 +1523,66 @@ function applyFunctionSortList() {
   alert("並べ替えを適用しました");
 }
 
+function scrollRepairTop() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  editor.focus();
+
+  editor.scrollTop = 0;
+
+  editor.setSelectionRange(
+    0,
+    0
+  );
+
+  updateCursorPosition();
+
+  updateRepairStatus(
+    "最上部へ移動"
+  );
+
+}
+
+/* ===============================
+   Repair Navigation
+=============================== */
+
+function scrollRepairBottom() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  const len =
+    editor.value.length;
+
+  editor.focus();
+
+  editor.scrollTop =
+    editor.scrollHeight;
+
+  editor.setSelectionRange(
+    len,
+    len
+  );
+
+  updateCursorPosition();
+
+  updateRepairStatus(
+    "最下部へ移動"
+  );
+
+}
+
 /* ===============================
    Repair Editor Core
 =============================== */
