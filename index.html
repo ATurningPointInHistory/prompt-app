@@ -446,6 +446,38 @@ body:not(.dark) #floatPanel{
   cursor:grabbing;
 }
 
+#functionViewer{
+  display:none;
+  margin-top:6px;
+  padding:4px;
+  min-height:auto;
+  max-height:160px;
+  overflow-y:auto;
+}
+
+.function-view-item{
+  padding:0;
+  margin:0;
+  border-bottom:1px solid var(--border);
+}
+
+.function-view-line{
+  min-height:26px;
+  padding:2px 4px;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  font-size:12px;
+}
+
+.function-view-code{
+  margin:4px 0 6px 18px;
+  padding:6px;
+  font-size:11px;
+  max-height:220px;
+  overflow:auto;
+}
+
 /* ===============================
    TODO UI
 =============================== */
@@ -835,19 +867,19 @@ mark {
 
   <div class="tab-container">
 
-    <div class="tab active" id="appPageTab" onclick="switchAppPage('app')">
+    <div class="tab" id="appPageTab" onclick="switchAppPage('app')">
       通常モード
 
     </div>
 
-    <div class="tab" id="repairPageTab" onclick="switchAppPage('repair')">
+    <div class="tab active" id="repairPageTab" onclick="switchAppPage('repair')">
       修復モード
 
     </div>
 
   </div>
 
-  <div id="appPage" style="display: block;">
+  <div id="appPage" style="display: none;">
 
   <div class="small" id="versionLabel">v5.7.2</div>
 
@@ -894,13 +926,49 @@ mark {
 
   </div>
 
-  <div id="commandBox" class="command-box"></div>
+  <div id="commandBox" class="command-box"><button type="button" class="command-chip" data-cmd="tldr" onclick="addCommand('tldr')">
+      /tldr
+    </button><button type="button" class="command-chip" data-cmd="eli15" onclick="addCommand('eli15')">
+      /eli15
+    </button><button type="button" class="command-chip" data-cmd="human" onclick="addCommand('human')">
+      /human
+    </button><button type="button" class="command-chip" data-cmd="step" onclick="addCommand('step')">
+      /step
+    </button><button type="button" class="command-chip" data-cmd="enemy" onclick="addCommand('enemy')">
+      /enemy
+    </button><button type="button" class="command-chip" data-cmd="real" onclick="addCommand('real')">
+      /real
+    </button><button type="button" class="command-chip" data-cmd="gap" onclick="addCommand('gap')">
+      /gap
+    </button><button type="button" class="command-chip" data-cmd="sort" onclick="addCommand('sort')">
+      /sort
+    </button><button type="button" class="command-chip" data-cmd="priority" onclick="addCommand('priority')">
+      /priority
+    </button><button type="button" class="command-chip" data-cmd="schema" onclick="addCommand('schema')">
+      /schema
+    </button><button type="button" class="command-chip" data-cmd="code" onclick="addCommand('code')">
+      /code
+    </button><button type="button" class="command-chip" data-cmd="test" onclick="addCommand('test')">
+      /test
+    </button><button type="button" class="command-chip" data-cmd="prompt" onclick="addCommand('prompt')">
+      /prompt
+    </button></div>
 
 </div>
 
 <div class="small">用途別プリセット</div>
 
-<div id="presetBox" class="preset-box"></div>
+<div id="presetBox" class="preset-box"><button type="button" class="preset-chip" onclick="applyPresetByName('要約')">
+      要約
+    </button><button type="button" class="preset-chip" onclick="applyPresetByName('初心者向け')">
+      初心者向け
+    </button><button type="button" class="preset-chip" onclick="applyPresetByName('設計レビュー')">
+      設計レビュー
+    </button><button type="button" class="preset-chip" onclick="applyPresetByName('実装支援')">
+      実装支援
+    </button><button type="button" class="preset-chip" onclick="applyPresetByName('JSON設計')">
+      JSON設計
+    </button></div>
 
     <label for="rough-tone">トーン</label>
     <select id="rough-tone">
@@ -945,7 +1013,7 @@ mark {
   <div id="template-manager" class="section-box" style="display: none;">
     <h3>テンプレ管理</h3>
     <label for="templateSelect">固定テンプレ / 保存テンプレ</label>
-    <select id="templateSelect" onchange="applyTemplateFromSelect()"><option value="">テンプレを選択</option><option value="0">AIオーケストレーター</option></select>
+    <select id="templateSelect" onchange="applyTemplateFromSelect()"><option value="">テンプレを選択</option><option value="0">AIオーケストレーター</option><option value="1">テスト</option></select>
 
     <div class="small">下の入力欄から新しいテンプレも追加できます。</div>
     <label for="tempName">テンプレ名</label>
@@ -966,7 +1034,25 @@ mark {
     <button onclick="saveTemplate()" class="btn-full">テンプレ保存</button>
     <h4>保存済みテンプレ一覧</h4>
 
-    <div id="templateList"></div>
+    <div id="templateList">
+    <div class="template-item">
+      <b>AIオーケストレーター</b><br>
+      <div class="small">役割: AIオーケストレーター</div>
+      <div class="item-actions">
+        <button onclick="applyTemplateAll(0)">使う</button>
+        
+      </div>
+    </div>
+  
+    <div class="template-item">
+      <b>テスト</b><br>
+      <div class="small">役割: </div>
+      <div class="item-actions">
+        <button onclick="applyTemplateAll(1)">使う</button>
+        <button onclick="deleteTemplate(0)">削除</button>
+      </div>
+    </div>
+  </div>
 
   </div>
 
@@ -982,7 +1068,112 @@ mark {
     <button onclick="saveDangerWord()" class="btn-full">危険ワード追加</button>
     <h4>固定危険ワード + 追加危険ワード</h4>
 
-    <div id="dangerList"></div>
+    <div id="dangerList">
+    <div class="danger-item">
+      <b>パスワード</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>住所</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>電話番号</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>メールアドレス</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>マイナンバー</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>クレジットカード</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>カード番号</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>暗証番号</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>口座番号</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>銀行口座</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>本人確認書類</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>運転免許証</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>保険証</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>秘密の質問</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>生年月日</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  </div>
 
   </div>
 
@@ -1007,7 +1198,47 @@ mark {
     <button onclick="savePattern()" class="btn-full">NGパターン追加</button>
     <h4>固定NGパターン + 追加NGパターン</h4>
 
-    <div id="patternList"></div>
+    <div id="patternList">
+    <div class="pattern-item">
+      <b>メールアドレス</b>
+      <div class="code-like">/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g</div>
+      <div class="item-actions">
+        <span class="small">固定パターン</span>
+      </div>
+    </div>
+  
+    <div class="pattern-item">
+      <b>電話番号</b>
+      <div class="code-like">/(?:\+?\d{1,3}[-\s]?)?(?:\d{2,4}[-\s]?){2,4}\d{3,4}/g</div>
+      <div class="item-actions">
+        <span class="small">固定パターン</span>
+      </div>
+    </div>
+  
+    <div class="pattern-item">
+      <b>郵便番号</b>
+      <div class="code-like">/\b\d{3}-?\d{4}\b/g</div>
+      <div class="item-actions">
+        <span class="small">固定パターン</span>
+      </div>
+    </div>
+  
+    <div class="pattern-item">
+      <b>クレジットカード候補</b>
+      <div class="code-like">/\b(?:\d[ -]*?){13,16}\b/g</div>
+      <div class="item-actions">
+        <span class="small">固定パターン</span>
+      </div>
+    </div>
+  
+    <div class="pattern-item">
+      <b>マイナンバー候補</b>
+      <div class="code-like">/\b\d{12}\b/g</div>
+      <div class="item-actions">
+        <span class="small">固定パターン</span>
+      </div>
+    </div>
+  </div>
 
   </div>
 
@@ -1041,13 +1272,55 @@ mark {
 <div class="section-box">
   <label>履歴（最新5件）</label>
 
-  <div id="history"></div>
+  <div id="history">
+    <div class="history">
+      目的：
+
+以下の内容をもとに、
+次チャットへ引き継ぐための
+開発プロンプトを作成したい。
+
+【プロジェクト】
+
+AIプロンプト生成Pro
+
+【現在の状態】
+
+・...
+      <div class="history-actions">
+        <button onclick="reuseHistory(&quot;目的：\n\n以下の内容をもとに、\n次チャットへ引き継ぐための\n開発プロンプトを作成したい。\n\n【プロジェクト】\n\nAIプロンプト生成Pro\n\n【現在の状態】\n\n・HTML HEALTH 100\n・JS Syntax OK\n・duplicate function none\n・undefined onclick none\n\n【完了済み】\n\n✔ 優先度テスト\n✔ TODO優先度追加\n✔ 外部JS分割対応\n✔ 00_bootstrap.js追加方針決定\n✔ SafeMode(checkSafeMode)問題整理\n✔ loadSettings依存確認\n✔ 結合HTML出力命名改善\n✔ 本体HTML保存命名改善\n✔ 保存区分(TEST)追加\n✔ ファイル名コメント付与追加\n✔ バックアップ履歴追加\n✔ バックアップ履歴 不要候補/削除追加\n✔ HTML HEALTH強化\n✔ Function Dependency診断追加\n✔ Repair IDE強化\n✔ JS部分読込追加\n✔ TODO機能試作追加\n✔ TODO UI形式統一\n✔ TODO複数入力対応\n✔ TODO重複削除機能\n✔ TODO完了/未完了の並び替え\n✔ 1. copyTextFallback追加\n✔ 2. TODO重複削除\n✔ 未完了→上\n✔ 重複削除\n✔ TODO複数入力\n✔ TODO統合\n✔ 優先度\n✔ 一括選択\n✔ 一括削除\n✔ 一括コピー\n✔ HTML HEALTH\n✔ JS Syntax OK\n✔ duplicate function none\n✔ undefined onclick none\n\n【未完了】\n\n⚡ AI回答保存機能\n⚡ AI回答履歴一覧\n⚡ AI回答コピー\n⚡ AI回答削除\n⚡ Prompt履歴とAI回答履歴統合検討\n⚡ TODOカテゴリ追加\n⚡ TODO並び替え\n⚡ TODOエクスポート\n⚡ TODO→引き継ぎ連携\n⚡ CSS整理\n⚡ CSS分割検討\n⚡ 共通UI基盤整理(00_bootstrap検討)\n⚡ JS責務整理\n⚡ 09_todo.js分離検討\n⚡ 10_ai_memory.js分離検討\n⚡ 11_backup_ui.js分離検討\n⚡ 保存UI改善\n⚡ 保存種別選択UI化\n⚡ AIプリセット拡張\n⚡ Perplexity追加検討\n⚡ DeepSeek追加検討\n⚡ 引き継ぎ生成機能\n⚡ AI回答保存機能\n⚡ CSS重複整理\n⚡ TODO一括入力対応\n⚡ TODO管理画面改善\n⚡ 引き継ぎ生成→TODO連携\n⚡ AI回答保存メモ履歴\n⚡ CSS整理(float-panel-header統合)\n⚡ CSS整理(repairEditor統合)\n⚡ CSS整理(line-number統合)\n⚡ bootstrap依存整理\n⚡ TODO見出し別グループ化\n⚡ 3. 引き継ぎ生成\n⚡ 4. AI回答保存\n⚡ 引き継ぎ生成\n⚡ 引き継ぎ→TODO連携\n⚡ AI回答保存\n⚡ AI回答履歴\n⚡ AI回答コピー\n⚡ AI回答削除\n⚡ CSS整理\n⚡ JS責務整理\n⚡ bootstrap依存整理\n⚡ カテゴリ\n⚡ TODOエクスポート\n⚡ Perplexity\n⚡ DeepSeek\n⚡ 重複TODO登録確認\n⚡ 09_todo.js分離\n⚡ 10_ai_memory.js分離\n⚡ 設計書保存機能\n⚡ AI履歴\n⚡ 引き継ぎ\n⚡ JS分離\n\n【最優先】\n\nなし\n\n【やりたいこと】\n\n未完了TODOの中から\n優先度の高いものを順に実装したい。\n\n既存機能は壊したくない。\n\nfunction単位で\n追加・削除・更新内容を\n明示してほしい。\n\n実装後は\nHTML HEALTHで確認したい。\n\n【出力してほしい内容】\n\n・現状整理\n・次にやるべきこと\n・修正対象function\n・追加内容\n・削除内容\n・更新内容\n・動作確認方法\n\n【トーン】\n\nプロフェッショナル\n実務的\n簡潔\n\n目的、必要な出力、条件を短く明確に整理してください。\n\n必要な出力：\n要点を短く整理し、実行しやすい形で回答してください。\n期待結果：\nユーザーがすぐ実行・判断できる形で整理してください。\n\n条件：\n- 簡潔に\n- 重要点を優先\n- 必要に応じて箇条書き\n\n\n\n不明点がある場合は、\n・不足情報\n・確認事項\n・仮定した内容\nを分けて整理してください。\n\nトーン：\n\nプロフェッショナル&quot;)">再利用</button>
+        <button onclick="saveFromHistory(&quot;目的：\n\n以下の内容をもとに、\n次チャットへ引き継ぐための\n開発プロンプトを作成したい。\n\n【プロジェクト】\n\nAIプロンプト生成Pro\n\n【現在の状態】\n\n・HTML HEALTH 100\n・JS Syntax OK\n・duplicate function none\n・undefined onclick none\n\n【完了済み】\n\n✔ 優先度テスト\n✔ TODO優先度追加\n✔ 外部JS分割対応\n✔ 00_bootstrap.js追加方針決定\n✔ SafeMode(checkSafeMode)問題整理\n✔ loadSettings依存確認\n✔ 結合HTML出力命名改善\n✔ 本体HTML保存命名改善\n✔ 保存区分(TEST)追加\n✔ ファイル名コメント付与追加\n✔ バックアップ履歴追加\n✔ バックアップ履歴 不要候補/削除追加\n✔ HTML HEALTH強化\n✔ Function Dependency診断追加\n✔ Repair IDE強化\n✔ JS部分読込追加\n✔ TODO機能試作追加\n✔ TODO UI形式統一\n✔ TODO複数入力対応\n✔ TODO重複削除機能\n✔ TODO完了/未完了の並び替え\n✔ 1. copyTextFallback追加\n✔ 2. TODO重複削除\n✔ 未完了→上\n✔ 重複削除\n✔ TODO複数入力\n✔ TODO統合\n✔ 優先度\n✔ 一括選択\n✔ 一括削除\n✔ 一括コピー\n✔ HTML HEALTH\n✔ JS Syntax OK\n✔ duplicate function none\n✔ undefined onclick none\n\n【未完了】\n\n⚡ AI回答保存機能\n⚡ AI回答履歴一覧\n⚡ AI回答コピー\n⚡ AI回答削除\n⚡ Prompt履歴とAI回答履歴統合検討\n⚡ TODOカテゴリ追加\n⚡ TODO並び替え\n⚡ TODOエクスポート\n⚡ TODO→引き継ぎ連携\n⚡ CSS整理\n⚡ CSS分割検討\n⚡ 共通UI基盤整理(00_bootstrap検討)\n⚡ JS責務整理\n⚡ 09_todo.js分離検討\n⚡ 10_ai_memory.js分離検討\n⚡ 11_backup_ui.js分離検討\n⚡ 保存UI改善\n⚡ 保存種別選択UI化\n⚡ AIプリセット拡張\n⚡ Perplexity追加検討\n⚡ DeepSeek追加検討\n⚡ 引き継ぎ生成機能\n⚡ AI回答保存機能\n⚡ CSS重複整理\n⚡ TODO一括入力対応\n⚡ TODO管理画面改善\n⚡ 引き継ぎ生成→TODO連携\n⚡ AI回答保存メモ履歴\n⚡ CSS整理(float-panel-header統合)\n⚡ CSS整理(repairEditor統合)\n⚡ CSS整理(line-number統合)\n⚡ bootstrap依存整理\n⚡ TODO見出し別グループ化\n⚡ 3. 引き継ぎ生成\n⚡ 4. AI回答保存\n⚡ 引き継ぎ生成\n⚡ 引き継ぎ→TODO連携\n⚡ AI回答保存\n⚡ AI回答履歴\n⚡ AI回答コピー\n⚡ AI回答削除\n⚡ CSS整理\n⚡ JS責務整理\n⚡ bootstrap依存整理\n⚡ カテゴリ\n⚡ TODOエクスポート\n⚡ Perplexity\n⚡ DeepSeek\n⚡ 重複TODO登録確認\n⚡ 09_todo.js分離\n⚡ 10_ai_memory.js分離\n⚡ 設計書保存機能\n⚡ AI履歴\n⚡ 引き継ぎ\n⚡ JS分離\n\n【最優先】\n\nなし\n\n【やりたいこと】\n\n未完了TODOの中から\n優先度の高いものを順に実装したい。\n\n既存機能は壊したくない。\n\nfunction単位で\n追加・削除・更新内容を\n明示してほしい。\n\n実装後は\nHTML HEALTHで確認したい。\n\n【出力してほしい内容】\n\n・現状整理\n・次にやるべきこと\n・修正対象function\n・追加内容\n・削除内容\n・更新内容\n・動作確認方法\n\n【トーン】\n\nプロフェッショナル\n実務的\n簡潔\n\n目的、必要な出力、条件を短く明確に整理してください。\n\n必要な出力：\n要点を短く整理し、実行しやすい形で回答してください。\n期待結果：\nユーザーがすぐ実行・判断できる形で整理してください。\n\n条件：\n- 簡潔に\n- 重要点を優先\n- 必要に応じて箇条書き\n\n\n\n不明点がある場合は、\n・不足情報\n・確認事項\n・仮定した内容\nを分けて整理してください。\n\nトーン：\n\nプロフェッショナル&quot;)">テンプレ化</button>
+        <button onclick="deleteHistory(0)">削除</button>
+      </div>
+    </div>
+  
+    <div class="history">
+      目的：
+
+以下の内容をもとに、
+次チャットへ引き継ぐための
+開発プロンプトを作成したい。
+
+【プロジェクト】
+
+AIプロンプト生成Pro
+
+【現在の状態】
+
+・...
+      <div class="history-actions">
+        <button onclick="reuseHistory(&quot;目的：\n\n以下の内容をもとに、\n次チャットへ引き継ぐための\n開発プロンプトを作成したい。\n\n【プロジェクト】\n\nAIプロンプト生成Pro\n\n【現在の状態】\n\n・HTML HEALTH 100\n・JS Syntax OK\n・duplicate function none\n・undefined onclick none\n\n【完了済み】\n\n✔ 優先度テスト\n✔ TODO優先度追加\n✔ 外部JS分割対応\n✔ 00_bootstrap.js追加方針決定\n✔ SafeMode(checkSafeMode)問題整理\n✔ loadSettings依存確認\n✔ 結合HTML出力命名改善\n✔ 本体HTML保存命名改善\n✔ 保存区分(TEST)追加\n✔ ファイル名コメント付与追加\n✔ バックアップ履歴追加\n✔ バックアップ履歴 不要候補/削除追加\n✔ HTML HEALTH強化\n✔ Function Dependency診断追加\n✔ Repair IDE強化\n✔ JS部分読込追加\n✔ TODO機能試作追加\n✔ TODO UI形式統一\n✔ TODO複数入力対応\n✔ TODO重複削除機能\n✔ TODO完了/未完了の並び替え\n✔ 1. copyTextFallback追加\n✔ 2. TODO重複削除\n✔ 未完了→上\n✔ 重複削除\n✔ TODO複数入力\n✔ TODO統合\n✔ 優先度\n✔ 一括選択\n✔ 一括削除\n✔ 一括コピー\n✔ HTML HEALTH\n✔ JS Syntax OK\n✔ duplicate function none\n✔ undefined onclick none\n\n【未完了】\n\n⚡ AI回答保存機能\n⚡ AI回答履歴一覧\n⚡ AI回答コピー\n⚡ AI回答削除\n⚡ Prompt履歴とAI回答履歴統合検討\n⚡ TODOカテゴリ追加\n⚡ TODO並び替え\n⚡ TODOエクスポート\n⚡ TODO→引き継ぎ連携\n⚡ CSS整理\n⚡ CSS分割検討\n⚡ 共通UI基盤整理(00_bootstrap検討)\n⚡ JS責務整理\n⚡ 09_todo.js分離検討\n⚡ 10_ai_memory.js分離検討\n⚡ 11_backup_ui.js分離検討\n⚡ 保存UI改善\n⚡ 保存種別選択UI化\n⚡ AIプリセット拡張\n⚡ Perplexity追加検討\n⚡ DeepSeek追加検討\n⚡ 引き継ぎ生成機能\n⚡ AI回答保存機能\n⚡ CSS重複整理\n⚡ TODO一括入力対応\n⚡ TODO管理画面改善\n⚡ 引き継ぎ生成→TODO連携\n⚡ AI回答保存メモ履歴\n⚡ CSS整理(float-panel-header統合)\n⚡ CSS整理(repairEditor統合)\n⚡ CSS整理(line-number統合)\n⚡ bootstrap依存整理\n⚡ TODO見出し別グループ化\n⚡ 3. 引き継ぎ生成\n⚡ 4. AI回答保存\n⚡ 引き継ぎ生成\n⚡ 引き継ぎ→TODO連携\n⚡ AI回答保存\n⚡ AI回答履歴\n⚡ AI回答コピー\n⚡ AI回答削除\n⚡ CSS整理\n⚡ JS責務整理\n⚡ bootstrap依存整理\n⚡ カテゴリ\n⚡ TODOエクスポート\n⚡ Perplexity\n⚡ DeepSeek\n⚡ 重複TODO登録確認\n⚡ 09_todo.js分離\n⚡ 10_ai_memory.js分離\n⚡ 設計書保存機能\n⚡ AI履歴\n⚡ 引き継ぎ\n⚡ JS分離\n\n【最優先】\n\nなし\n\n【やりたいこと】\n\n未完了TODOの中から\n優先度の高いものを順に実装したい。\n\n既存機能は壊したくない。\n\nfunction単位で\n追加・削除・更新内容を\n明示してほしい。\n\n実装後は\nHTML HEALTHで確認したい。\n\n【出力してほしい内容】\n\n・現状整理\n・次にやるべきこと\n・修正対象function\n・追加内容\n・削除内容\n・更新内容\n・動作確認方法\n\n【トーン】\n\nプロフェッショナル\n実務的\n簡潔\n\n目的、必要な出力、条件を短く明確に整理してください。\n\n必要な出力：\n要点を短く整理し、実行しやすい形で回答してください。\n期待結果：\nユーザーがすぐ実行・判断できる形で整理してください。\n\n条件：\n- 簡潔に\n- 重要点を優先\n- 必要に応じて箇条書き\n\n\n\n不明点がある場合は、\n・不足情報\n・確認事項\n・仮定した内容\nを分けて整理してください。\n\nトーン：\n\nプロフェッショナル&quot;)">再利用</button>
+        <button onclick="saveFromHistory(&quot;目的：\n\n以下の内容をもとに、\n次チャットへ引き継ぐための\n開発プロンプトを作成したい。\n\n【プロジェクト】\n\nAIプロンプト生成Pro\n\n【現在の状態】\n\n・HTML HEALTH 100\n・JS Syntax OK\n・duplicate function none\n・undefined onclick none\n\n【完了済み】\n\n✔ 優先度テスト\n✔ TODO優先度追加\n✔ 外部JS分割対応\n✔ 00_bootstrap.js追加方針決定\n✔ SafeMode(checkSafeMode)問題整理\n✔ loadSettings依存確認\n✔ 結合HTML出力命名改善\n✔ 本体HTML保存命名改善\n✔ 保存区分(TEST)追加\n✔ ファイル名コメント付与追加\n✔ バックアップ履歴追加\n✔ バックアップ履歴 不要候補/削除追加\n✔ HTML HEALTH強化\n✔ Function Dependency診断追加\n✔ Repair IDE強化\n✔ JS部分読込追加\n✔ TODO機能試作追加\n✔ TODO UI形式統一\n✔ TODO複数入力対応\n✔ TODO重複削除機能\n✔ TODO完了/未完了の並び替え\n✔ 1. copyTextFallback追加\n✔ 2. TODO重複削除\n✔ 未完了→上\n✔ 重複削除\n✔ TODO複数入力\n✔ TODO統合\n✔ 優先度\n✔ 一括選択\n✔ 一括削除\n✔ 一括コピー\n✔ HTML HEALTH\n✔ JS Syntax OK\n✔ duplicate function none\n✔ undefined onclick none\n\n【未完了】\n\n⚡ AI回答保存機能\n⚡ AI回答履歴一覧\n⚡ AI回答コピー\n⚡ AI回答削除\n⚡ Prompt履歴とAI回答履歴統合検討\n⚡ TODOカテゴリ追加\n⚡ TODO並び替え\n⚡ TODOエクスポート\n⚡ TODO→引き継ぎ連携\n⚡ CSS整理\n⚡ CSS分割検討\n⚡ 共通UI基盤整理(00_bootstrap検討)\n⚡ JS責務整理\n⚡ 09_todo.js分離検討\n⚡ 10_ai_memory.js分離検討\n⚡ 11_backup_ui.js分離検討\n⚡ 保存UI改善\n⚡ 保存種別選択UI化\n⚡ AIプリセット拡張\n⚡ Perplexity追加検討\n⚡ DeepSeek追加検討\n⚡ 引き継ぎ生成機能\n⚡ AI回答保存機能\n⚡ CSS重複整理\n⚡ TODO一括入力対応\n⚡ TODO管理画面改善\n⚡ 引き継ぎ生成→TODO連携\n⚡ AI回答保存メモ履歴\n⚡ CSS整理(float-panel-header統合)\n⚡ CSS整理(repairEditor統合)\n⚡ CSS整理(line-number統合)\n⚡ bootstrap依存整理\n⚡ TODO見出し別グループ化\n⚡ 3. 引き継ぎ生成\n⚡ 4. AI回答保存\n⚡ 引き継ぎ生成\n⚡ 引き継ぎ→TODO連携\n⚡ AI回答保存\n⚡ AI回答履歴\n⚡ AI回答コピー\n⚡ AI回答削除\n⚡ CSS整理\n⚡ JS責務整理\n⚡ bootstrap依存整理\n⚡ カテゴリ\n⚡ TODOエクスポート\n⚡ Perplexity\n⚡ DeepSeek\n⚡ 重複TODO登録確認\n⚡ 09_todo.js分離\n⚡ 10_ai_memory.js分離\n⚡ 設計書保存機能\n⚡ AI履歴\n⚡ 引き継ぎ\n⚡ JS分離\n\n【最優先】\n\nなし\n\n【やりたいこと】\n\n未完了TODOの中から\n優先度の高いものを順に実装したい。\n\n既存機能は壊したくない。\n\nfunction単位で\n追加・削除・更新内容を\n明示してほしい。\n\n実装後は\nHTML HEALTHで確認したい。\n\n【出力してほしい内容】\n\n・現状整理\n・次にやるべきこと\n・修正対象function\n・追加内容\n・削除内容\n・更新内容\n・動作確認方法\n\n【トーン】\n\nプロフェッショナル\n実務的\n簡潔\n\n目的、必要な出力、条件を短く明確に整理してください。\n\n必要な出力：\n要点を短く整理し、実行しやすい形で回答してください。\n期待結果：\nユーザーがすぐ実行・判断できる形で整理してください。\n\n条件：\n- 簡潔に\n- 重要点を優先\n- 必要に応じて箇条書き\n\n\n\n不明点がある場合は、\n・不足情報\n・確認事項\n・仮定した内容\nを分けて整理してください。\n\nトーン：\n\nプロフェッショナル&quot;)">テンプレ化</button>
+        <button onclick="deleteHistory(1)">削除</button>
+      </div>
+    </div>
+  </div>
 
 </div>
 
 </div>
 
-<div id="repairPage" style="display: none;">
+<div id="repairPage" style="display: block;">
 
   <h3>🛠 修復モード</h3>
 
@@ -1059,21 +1332,8003 @@ mark {
 
 <div id="repairStatus" class="small" style="margin-top:8px;">状態：変更あり</div>
 
-  <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
+  <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 895 / Col 20</div>
 
 
 
 
 
-<div id="repairPreview"
-     class="code-preview"
-     style="display:none;">
+<div id="repairPreview" class="code-preview" style="display:none;">
 </div>
 
-<div
-  id="functionViewer"
-  class="diagnose-box"
-  style="display:none;">
+<div id="functionViewer" class="diagnose-box" style="display: block;">
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(0)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(12)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(12),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      loadRepairHtml
+    </span>
+
+  </div>
+
+  <pre id="functionView0" class="function-view-code" style="display:none;">function loadRepairHtml() {
+  const input =
+    document.createElement("input");
+
+  input.type = "file";
+  input.accept =
+    ".html,.js,.json,text/html,text/javascript,application/json";
+
+  input.onchange = (e) =&gt; {
+    const file =
+      e.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    currentRepairFile =
+      file.name || "";
+
+    const reader =
+      new FileReader();
+
+    reader.onload = () =&gt; {
+      try {
+        const parsed =
+          JSON.parse(reader.result);
+
+        if (parsed.html) {
+          const editor =
+            get("repairEditor");
+
+          editor.value =
+            parsed.html;
+
+          editor.scrollLeft =
+            0;
+
+          repairLastValue =
+            editor.value;
+
+          updateLineNumbers();
+          updateCursorPosition();
+
+          updateRepairStatus(
+            "フルバックアップJSON読込: " +
+            currentRepairFile
+          );
+
+          alert(
+            "フルバックアップJSON読込完了\n\n" +
+            currentRepairFile
+          );
+
+          return;
+        }
+      } catch {}
+
+      const editor =
+        get("repairEditor");
+
+      editor.value =
+        reader.result;
+
+      editor.scrollLeft =
+        0;
+
+      repairLastValue =
+        editor.value;
+
+      updateLineNumbers();
+      updateCursorPosition();
+
+      updateRepairStatus(
+        "読込: " +
+        currentRepairFile
+      );
+
+      alert(
+        "読込完了\n\n" +
+        currentRepairFile
+      );
+    };
+
+    reader.readAsText(file);
+  };
+
+  input.click();
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(1)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(13)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(13),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      saveRepairHtml
+    </span>
+
+  </div>
+
+  <pre id="functionView1" class="function-view-code" style="display:none;">function saveRepairHtml() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  const text =
+    editor.value.trim();
+
+  if (!text) {
+
+    alert(
+      "保存内容が空です"
+    );
+
+    return;
+
+  }
+
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-");
+
+  const filename =
+
+    (
+      typeof currentRepairFile !==
+      "undefined"
+
+      &amp;&amp;
+
+      currentRepairFile
+    )
+
+    ? currentRepairFile
+
+    : `AIPro_Repaired_${timestamp}.html`;
+
+  const type =
+
+    filename.endsWith(".js")
+
+      ? "text/javascript"
+
+      : "text/html";
+
+  const blob =
+    new Blob(
+      [text],
+      { type }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(
+      blob
+    );
+
+  a.download =
+    filename;
+
+  a.click();
+
+  setTimeout(() =&gt; {
+
+    URL.revokeObjectURL(
+      a.href
+    );
+
+  }, 1000);
+
+  repairLastValue =
+    editor.value;
+
+  updateRepairStatus(
+
+    `保存完了: ${filename}`
+
+  );
+
+  alert(
+
+    "保存完了\n\n" +
+
+    filename
+
+  );
+
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(2)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(14)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(14),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      copyRepairHtml
+    </span>
+
+  </div>
+
+  <pre id="functionView2" class="function-view-code" style="display:none;">async function copyRepairHtml() {
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const html =
+    editor.value.trim();
+
+  if (!html) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  try {
+    if (
+      navigator.clipboard &amp;&amp;
+      window.isSecureContext
+    ) {
+      await navigator.clipboard.writeText(html);
+      alert("HTMLコピー完了");
+      return;
+    }
+
+    const ok =
+      copyTextFallback(html);
+
+    alert(
+      ok
+        ? "HTMLコピー完了"
+        : "コピー失敗"
+    );
+
+  } catch (e) {
+    const ok =
+      copyTextFallback(html);
+
+    alert(
+      ok
+        ? "HTMLコピー完了"
+        : "コピー失敗"
+    );
+  }
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(3)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(16)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(16),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      cleanupCandidates
+    </span>
+
+  </div>
+
+  <pre id="functionView3" class="function-view-code" style="display:none;">async function cleanupCandidates() {
+  const editor = get("repairEditor");
+
+  const html =
+    editor &amp;&amp; editor.value.trim()
+      ? editor.value
+      : "&lt;!DOCTYPE html&gt;\n" + document.documentElement.outerHTML;
+
+  const externalJs =
+    await collectExternalScriptText(html);
+
+  const jsForCheck =
+    html + "\n" + externalJs;
+
+  const funcs =
+    [...jsForCheck.matchAll(
+      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    )].map(x =&gt; x[1]);
+
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )].map(x =&gt; x[1]);
+
+  const parser = new DOMParser();
+
+  const doc =
+    parser.parseFromString(
+      html,
+      "text/html"
+    );
+
+  const ids =
+    [...doc.querySelectorAll("[id]")]
+      .map(el =&gt; el.id)
+      .filter(Boolean);
+
+  const safeIgnoreFuncs = [
+    "diagnoseRepairHtml",
+    "diagnoseHtml",
+    "showHtmlHealth",
+    "closeFloatPanel",
+    "loadSettings",
+    "checkSafeMode"
+  ];
+
+  const unusedFuncs =
+    funcs.filter(fn =&gt; {
+      if (safeIgnoreFuncs.includes(fn)) return false;
+
+      const count =
+        (jsForCheck.match(
+          new RegExp("\\b" + escapeRegExp(fn) + "\\b", "g")
+        ) || []).length;
+
+      return count &lt;= 1 &amp;&amp; !onclicks.includes(fn);
+    });
+
+  const orphanIds =
+    ids.filter(id =&gt; {
+      if (!id) return false;
+
+      if (/[\$\{\}\(\)\[\]\^\|\\]/.test(id)) {
+        return false;
+      }
+
+      if ([
+        "appPage",
+        "repairPage",
+        "floatPanel",
+        "functionListBox",
+        "diffResultBox",
+        "diagnoseResultBox",
+        "healthResultBox"
+      ].includes(id)) {
+        return false;
+      }
+
+      try {
+        const count =
+          (
+            jsForCheck.match(
+              new RegExp(
+                "\\b" + escapeRegExp(id) + "\\b",
+                "g"
+              )
+            ) || []
+          ).length;
+
+        return count &lt;= 1;
+
+      } catch {
+        return false;
+      }
+    });
+
+  const message =
+    "削除候補チェック\n\n" +
+    "【未使用function】\n" +
+    (unusedFuncs.length ? unusedFuncs.join("\n") : "なし") +
+    "\n\n【孤立id】\n" +
+    (orphanIds.length ? orphanIds.join("\n") : "なし") +
+    "\n\nOKで修復エディタ内の候補をコメント化します。";
+
+  const ok = confirm(message);
+  if (!ok) return;
+
+  commentOutCleanupCandidates(
+    unusedFuncs,
+    orphanIds
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(4)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(17)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(17),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      commentOutCleanupCandidates
+    </span>
+
+  </div>
+
+  <pre id="functionView4" class="function-view-code" style="display:none;">function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
+  const editor = get("repairEditor");
+  if (!editor || !editor.value.trim()) {
+    alert("修復モードでHTMLを読み込んでから実行してください");
+    return;
+  }
+  let html = editor.value;
+  repairUndoStack.push(html);
+  repairRedoStack = [];
+  unusedFuncs.forEach(fn =&gt; {
+    const block = findFunctionBlockInText(html, fn);
+    if (!block) return;
+    if (block.block.includes("cleanup候補")) return;
+    html =
+      html.slice(0, block.start) +
+      "/* cleanup候補: 未使用function " + fn + "\n" +
+      block.block +
+      "\n*/" +
+      html.slice(block.end);
+  });
+  orphanIds.forEach(id =&gt; {
+    const reg = new RegExp(
+      `id=(["'])${escapeRegExp(id)}\\1`,
+      "g"
+    );
+    html = html.replace(reg, match =&gt; {
+      if (match.includes("data-cleanup-disabled-id")) {
+        return match;
+      }
+      return `data-cleanup-disabled-id="${id}"`;
+    });
+  });
+  editor.value = html;
+  repairLastValue = html;
+  updateRepairStatus(
+    "削除候補をコメント化 / id無効化"
+  );
+  alert(
+    "削除候補を安全処理しました。\n\n" +
+    "未使用function：コメント化\n" +
+    "孤立id：data-cleanup-disabled-id に変更\n\n" +
+    "HTML HEALTH / 編集内容診断で確認してください。"
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(5)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(18)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(18),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      deleteCommentedCleanupBlocks
+    </span>
+
+  </div>
+
+  <pre id="functionView5" class="function-view-code" style="display:none;">function deleteCommentedCleanupBlocks() {
+  const editor = get("repairEditor");
+
+  if (!editor || !editor.value.trim()) {
+    alert("修復モードでHTMLを読み込んでから実行してください");
+    return;
+  }
+
+  let html = editor.value;
+  const before = html;
+
+  const cleanupBlockRegex =
+    /\/\*\s*cleanup候補:\s*未使用function\s+[a-zA-Z0-9_$]+[\s\S]*?\*\//g;
+
+  const functionBlocks =
+    (html.match(cleanupBlockRegex) || [])
+      .filter(block =&gt;
+        /function\s+[a-zA-Z0-9_$]+\s*\(/.test(block)
+      );
+
+  const disabledIds =
+    html.match(
+      /\sdata-cleanup-disabled-id="[^"]+"/g
+    ) || [];
+
+  const message =
+    "完全削除確認\n\n" +
+    "削除対象:\n" +
+    "・コメント化済みfunction: " + functionBlocks.length + "件\n" +
+    "・無効化済みid属性: " + disabledIds.length + "件\n\n" +
+    "OKで完全削除します。\n" +
+    "事前にバックアップ保存済みか確認してください。";
+
+  const ok = confirm(message);
+  if (!ok) return;
+
+  if (
+    functionBlocks.length === 0 &amp;&amp;
+    disabledIds.length === 0
+  ) {
+    alert("削除対象はありません");
+    return;
+  }
+
+  repairUndoStack.push(before);
+  repairRedoStack = [];
+
+  functionBlocks.forEach(block =&gt; {
+    html = html.replace(block, "");
+  });
+
+  html = html.replace(
+    /\sdata-cleanup-disabled-id="[^"]+"/g,
+    ""
+  );
+
+  html = html.replace(/\n{4,}/g, "\n\n\n");
+
+  editor.value = html;
+  repairLastValue = html;
+
+  updateRepairStatus(
+    "コメント化済み候補を完全削除"
+  );
+
+  alert(
+    "完全削除しました。\n\n" +
+    "HTML HEALTH / 編集内容診断で確認してください。"
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(6)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(20)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(20),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      findFunctionBlock
+    </span>
+
+  </div>
+
+  <pre id="functionView6" class="function-view-code" style="display:none;">function findFunctionBlock(functionName){
+  const editor=get("repairEditor");
+  const text=editor.value;
+  const start=
+    text.indexOf(
+      `function ${functionName}`
+    );
+  if(start===-1){
+    alert("関数が見つかりません");
+    return null;
+  }
+  const braceStart=
+    text.indexOf("{",start);
+  let depth=1;
+  let end=braceStart+1;
+  while(
+    end&lt;text.length &amp;&amp;
+    depth&gt;0
+  ){
+    if(text[end]==="{") depth++;
+    if(text[end]==="}") depth--;
+    end++;
+  }
+  return{
+    start,
+    end,
+    block:text.slice(start,end)
+  };
+}
+
+function selectFunctionBlock(){
+  const name=
+    prompt("関数名");
+  if(!name)return;
+  const result=
+    findFunctionBlock(name);
+  if(!result)return;
+  const editor=
+    get("repairEditor");
+  editor.focus();
+  editor.setSelectionRange(
+    result.start,
+    result.end
+  );
+}
+
+function replaceFunctionBlock(){
+  const name=
+    prompt("置換する関数名");
+  if(!name)return;
+  const result=
+    findFunctionBlock(name);
+  if(!result)return;
+  const newCode=
+    prompt(
+      "新コード",
+      result.block
+    );
+  if(newCode===null)return;
+  const editor=
+    get("repairEditor");
+  editor.value=
+    editor.value.slice(0,result.start)+
+    newCode+
+    editor.value.slice(result.end);
+  alert("置換完了");
+}
+
+function findFunctionBlockInText(text, functionName) {
+
+  const src = String(text || "");
+  const name = escapeRegExp(functionName);
+
+  const fnRegex = new RegExp(
+    "\\bfunction\\s+" + name + "\\s*\\(",
+    "g"
+  );
+
+  const match = fnRegex.exec(src);
+  if (!match) return null;
+
+  const start = match.index;
+  const braceStart = src.indexOf("{", fnRegex.lastIndex);
+  if (braceStart === -1) return null;
+
+  let depth = 0;
+  let i = braceStart;
+
+  let inString = false;
+  let quote = "";
+  let inLineComment = false;
+  let inBlockComment = false;
+  let inRegex = false;
+  let escaped = false;
+
+  function prevMeaningfulChar(pos) {
+    for (let j = pos - 1; j &gt;= 0; j--) {
+      const c = src[j];
+      if (/\s/.test(c)) continue;
+      return c;
+    }
+    return "";
+  }
+
+  function isRegexStart(pos) {
+    const prev = prevMeaningfulChar(pos);
+    return (
+      !prev ||
+      "({[=:+-!?,;&lt;&gt;*&amp;|^~".includes(prev)
+    );
+  }
+
+  while (i &lt; src.length) {
+
+    const ch = src[i];
+    const next = src[i + 1];
+
+    if (inLineComment) {
+      if (ch === "\n") inLineComment = false;
+      i++;
+      continue;
+    }
+
+    if (inBlockComment) {
+      if (ch === "*" &amp;&amp; next === "/") {
+        inBlockComment = false;
+        i += 2;
+        continue;
+      }
+      i++;
+      continue;
+    }
+
+    if (inRegex) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === "/") {
+        inRegex = false;
+      }
+      i++;
+      continue;
+    }
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === quote) {
+        inString = false;
+        quote = "";
+      }
+      i++;
+      continue;
+    }
+
+    if (ch === "/" &amp;&amp; next === "/") {
+      inLineComment = true;
+      i += 2;
+      continue;
+    }
+
+    if (ch === "/" &amp;&amp; next === "*") {
+      inBlockComment = true;
+      i += 2;
+      continue;
+    }
+
+    if (ch === "/" &amp;&amp; isRegexStart(i)) {
+      inRegex = true;
+      i++;
+      continue;
+    }
+
+    if (ch === "\"" || ch === "'" || ch === "`") {
+      inString = true;
+      quote = ch;
+      i++;
+      continue;
+    }
+
+    if (ch === "{") {
+      depth++;
+    }
+
+    if (ch === "}") {
+      depth--;
+      if (depth === 0) {
+        i++;
+        return {
+          start,
+          end: i,
+          block: src.slice(start, i)
+        };
+      }
+    }
+
+    i++;
+  }
+
+  return null;
+
+}
+
+function extractFunctionBlocksFromText(text) {
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  const regex =
+    /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm;
+
+  let match;
+
+  while ((match = regex.exec(source)) !== null) {
+    const name =
+      match[1];
+
+    const start =
+      match.index;
+
+    const braceStart =
+      source.indexOf("{", start);
+
+    if (braceStart === -1) continue;
+
+    let depth = 1;
+    let end = braceStart + 1;
+
+    while (
+      end &lt; source.length &amp;&amp;
+      depth &gt; 0
+    ) {
+      if (source[end] === "{") depth++;
+      if (source[end] === "}") depth--;
+      end++;
+    }
+
+    blocks.push({
+      type: "function",
+      name,
+      start,
+      end,
+      block:
+        source.slice(start, end)
+    });
+  }
+
+  return blocks;
+}
+
+function extractCodeBlocksFromText(text) {
+
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  const functionBlocks =
+    extractFunctionBlocksFromText(source);
+
+  // section comment: 複数行見出し
+  const sectionRegex =
+    /\/\*\s*=+\s*\n([\s\S]*?)\n\s*=+\s*\*\//g;
+
+  [...source.matchAll(sectionRegex)]
+    .forEach(match =&gt; {
+
+      blocks.push({
+        type: "section",
+        name:
+          match[1]
+            .split("\n")
+            .map(x =&gt; x.trim())
+            .filter(Boolean)[0] ||
+          "Section",
+        start: match.index,
+        end:
+          match.index +
+          match[0].length,
+        block: match[0]
+      });
+
+    });
+
+  // top-level let const var only
+  const variableRegex =
+    /^(let|const|var)\s+([a-zA-Z0-9_$]+)/gm;
+
+  [...source.matchAll(variableRegex)]
+    .forEach(match =&gt; {
+
+      const start =
+        match.index;
+
+      const insideFunction =
+        functionBlocks.some(fn =&gt;
+          start &gt; fn.start &amp;&amp;
+          start &lt; fn.end
+        );
+
+      if (insideFunction) {
+        return;
+      }
+
+      const name =
+        match[2];
+
+      let end =
+        source.indexOf(
+          ";",
+          start
+        );
+
+      if (end === -1) {
+        end =
+          source.indexOf(
+            "\n",
+            start
+          );
+      }
+
+      if (end === -1) {
+        end =
+          source.length;
+      }
+
+      blocks.push({
+        type: "variable",
+        name,
+        start,
+        end: end + 1,
+        block:
+          source.slice(
+            start,
+            end + 1
+          )
+      });
+
+    });
+
+  functionBlocks.forEach(item =&gt; {
+
+    blocks.push({
+      type: "function",
+      ...item
+    });
+
+  });
+
+  return blocks.sort(
+    (a,b)=&gt;
+    a.start-b.start
+  );
+}
+
+/* ===============================
+   Code Block List / Move
+=============================== */
+
+function showFunctionList() {
+
+  const editor =
+    get("repairEditor");
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  console.log(
+    "editor total:",
+    text.split(/\r?\n/).length
+  );
+
+  console.log(
+    "has CR:",
+    text.includes("\r")
+  );
+
+  const blocks =
+    extractCodeBlocksFromText(
+      text
+    );
+
+  let html = "";
+
+  if (blocks.length === 0) {
+
+    html = "コードブロックなし";
+
+  } else {
+
+    html =
+      blocks.map((item, i) =&gt; {
+
+        const line =
+          text
+            .slice(
+              0,
+              item.start
+            )
+            .split(/\r?\n/)
+            .length;
+
+        console.log(
+          `[${item.type}] ${item.name} / L${line}`
+        );
+
+        const moveButton =
+          item.type === "function"
+            ? `
+&lt;div class="float-panel-actions"&gt;
+  &lt;button
+    onclick="
+      moveFunctionPrompt(
+        '${item.name}'
+      )
+    "&gt;
+    📦 Move
+  &lt;/button&gt;
+&lt;/div&gt;
+`
+            : "";
+
+return `
+
+&lt;div class="function-list-row"&gt;
+
+  &lt;button
+    class="
+      float-list-btn
+      function-list-select
+    "
+    onclick="
+      selectCodeBlockByIndex(${i});
+      closeFloatPanelKeepEditorSelection();
+    "&gt;
+
+    [${item.type}]
+    ${i + 1}.
+    ${escapeHtml(item.name)}
+    / L${line}
+
+  &lt;/button&gt;
+
+  ${moveButton}
+
+&lt;/div&gt;
+`;
+
+      }).join("");
+  }
+
+  openFloatPanel(
+    `コードブロック一覧 (${blocks.length})`,
+    `
+    &lt;div class="float-panel-actions"&gt;
+      &lt;button onclick="copyCodeBlockList()"&gt;
+        📋 一覧コピー
+      &lt;/button&gt;
+    &lt;/div&gt;
+    ` + html
+  );
+}
+
+function buildCodeBlockListText() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return "";
+
+  const text =
+    editor.value;
+
+  const blocks =
+    extractCodeBlocksFromText(text);
+
+  return blocks.map((item, i) =&gt; {
+
+    const line =
+      text
+        .slice(0, item.start)
+        .split("\n")
+        .length;
+
+    return `[${item.type}] ${i + 1}. ${item.name} / L${line}`;
+
+  }).join("\n");
+}
+
+function copyCodeBlockList() {
+
+  const text =
+    buildCodeBlockListText();
+
+  if (!text) {
+    alert("コピーする一覧がありません");
+    return;
+  }
+
+  if (
+    navigator.clipboard &amp;&amp;
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =&gt;
+        alert("コードブロック一覧をコピーしました")
+      )
+      .catch(() =&gt; {
+        const ok =
+          copyTextFallback(text);
+
+        alert(
+          ok
+            ? "コードブロック一覧をコピーしました"
+            : "コピー失敗"
+        );
+      });
+
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "コードブロック一覧をコピーしました"
+      : "コピー失敗"
+  );
+}
+
+function moveFunctionPrompt(functionName) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const sections =
+    extractCodeBlocksFromText(editor.value)
+      .filter(item =&gt;
+        item.type === "section"
+      );
+
+  if (sections.length === 0) {
+    alert("移動先セクションが見つかりません");
+    return;
+  }
+
+  const html =
+    sections.map(item =&gt; {
+      return `
+&lt;button
+  class="float-list-btn"
+  onclick="
+    moveFunctionToSectionByStart(
+      '${functionName}',
+      ${item.start}
+    );
+  "&gt;
+  ${escapeHtml(item.name)}
+&lt;/button&gt;
+`;
+    }).join("");
+
+  openFloatPanel(
+    `移動先を選択：${functionName}`,
+    html
+  );
+}
+
+function moveFunctionToSectionByStart(
+  functionName,
+  sectionStart
+) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  let html =
+    editor.value;
+
+  const block =
+    findFunctionBlockInText(
+      html,
+      functionName
+    );
+
+  if (!block) {
+    alert("関数が見つかりません");
+    return;
+  }
+
+  const sections =
+    extractCodeBlocksFromText(html)
+      .filter(item =&gt;
+        item.type === "section"
+      );
+
+  const target =
+    sections.find(item =&gt;
+      item.start === sectionStart
+    );
+
+  if (!target) {
+    alert("移動先セクションが見つかりません");
+    return;
+  }
+
+  const ok =
+    confirm(
+      `${functionName}\n\nを\n\n${target.name}\n\nへ移動しますか？`
+    );
+
+  if (!ok) return;
+
+  repairUndoStack.push(html);
+  repairRedoStack = [];
+
+  html =
+    html.slice(0, block.start) +
+    html.slice(block.end);
+
+  let insertPos =
+    target.end;
+
+  if (block.start &lt; target.end) {
+    insertPos =
+      target.end -
+      (block.end - block.start);
+  }
+
+  html =
+    html.slice(0, insertPos) +
+    "\n\n" +
+    block.block +
+    "\n" +
+    html.slice(insertPos);
+
+  editor.value =
+    html;
+
+  repairLastValue =
+    html;
+
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(
+    `${functionName} → ${target.name}`
+  );
+
+  closeFloatPanel();
+
+  alert("移動完了");
+}
+
+/* ===============================
+   Code Block Sort
+=============================== */
+
+function showFunctionSortList() {
+
+  const editor =
+    get("repairEditor");
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  functionSortList =
+    extractCodeBlocksFromText(
+      text
+    );
+
+  if (
+    functionSortList.length === 0
+  ) {
+    openFloatPanel(
+      "コードブロック並べ替え",
+      "コードブロックなし"
+    );
+    return;
+  }
+
+  renderFunctionSortList();
+}
+
+function renderFunctionSortList() {
+
+  const filteredList =
+    getFilteredFunctionSortList();
+
+  const html =
+`
+&lt;div class="float-panel-actions"&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'all'
+      )
+    "&gt;
+    ALL
+  &lt;/button&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'section'
+      )
+    "&gt;
+    SECTION
+  &lt;/button&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'variable'
+      )
+    "&gt;
+    VAR
+  &lt;/button&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'function'
+      )
+    "&gt;
+    FUNC
+  &lt;/button&gt;
+
+&lt;/div&gt;
+
+&lt;div class="float-panel-actions"&gt;
+
+  &lt;button
+    onclick="
+      applyFunctionSortList()
+    "&gt;
+    ✅ 並べ替えを適用
+  &lt;/button&gt;
+
+&lt;/div&gt;
+`
++
+filteredList.map(
+(entry)=&gt;{
+
+const item =
+  entry.item;
+
+const originalIndex =
+  entry.index;
+
+return `
+&lt;div
+
+  class="
+    function-sort-row
+  "
+
+  draggable="true"
+
+  data-index="
+    ${originalIndex}
+  "
+
+  ondragstart="
+    handleFunctionSortDragStart(
+      event
+    )
+  "
+
+  ondragover="
+    handleFunctionSortDragOver(
+      event
+    )
+  "
+
+  ondrop="
+    handleFunctionSortDrop(
+      event
+    )
+  "
+&gt;
+
+  &lt;div
+    class="
+      function-drag-handle
+    "&gt;
+    ≡
+  &lt;/div&gt;
+
+  &lt;button
+
+    class="
+      float-list-btn
+      function-sort-select
+    "
+
+    onclick="
+      selectCodeBlockByIndex(
+        ${originalIndex}
+      );
+
+      closeFloatPanelKeepEditorSelection();
+    "
+
+  &gt;
+
+    [${item.type}]
+    ${originalIndex + 1}.
+    ${escapeHtml(
+      item.name
+    )}
+
+  &lt;/button&gt;
+
+  &lt;div
+    class="
+      function-sort-actions
+    "&gt;
+
+    &lt;button
+      onclick="
+        moveFunctionSortItem(
+          ${originalIndex},
+          -1
+        )
+      "&gt;
+      ↑
+    &lt;/button&gt;
+
+    &lt;button
+      onclick="
+        moveFunctionSortItem(
+          ${originalIndex},
+          1
+        )
+      "&gt;
+      ↓
+    &lt;/button&gt;
+
+  &lt;/div&gt;
+
+&lt;/div&gt;
+`;
+})
+.join("");
+
+  openFloatPanel(
+    `コードブロック並べ替え (${functionSortList.length})`,
+    html
+  );
+}
+
+function moveFunctionSortItem(index, direction) {
+  const next =
+    index + direction;
+
+  if (
+    next &lt; 0 ||
+    next &gt;= functionSortList.length
+  ) {
+    return;
+  }
+
+  const temp =
+    functionSortList[index];
+
+  functionSortList[index] =
+    functionSortList[next];
+
+  functionSortList[next] =
+    temp;
+
+  renderFunctionSortList();
+}
+
+function setFunctionSortFilter(filter) {
+  functionSortFilter = filter;
+  renderFunctionSortList();
+}
+
+function getFilteredFunctionSortList() {
+  if (functionSortFilter === "all") {
+    return functionSortList.map((item, index) =&gt; ({
+      item,
+      index
+    }));
+  }
+
+  return functionSortList
+    .map((item, index) =&gt; ({
+      item,
+      index
+    }))
+    .filter(entry =&gt;
+      entry.item.type === functionSortFilter
+    );
+}
+
+let functionSortDragIndex = null;
+
+function handleFunctionSortDragStart(event) {
+  functionSortDragIndex =
+    Number(
+      event.currentTarget.dataset.index
+    );
+}
+
+function handleFunctionSortDragOver(event) {
+  event.preventDefault();
+}
+
+function handleFunctionSortDrop(event) {
+  event.preventDefault();
+
+  const dropIndex =
+    Number(
+      event.currentTarget.dataset.index
+    );
+
+  if (
+    functionSortDragIndex === null ||
+    functionSortDragIndex === dropIndex
+  ) {
+    return;
+  }
+
+  const item =
+    functionSortList.splice(
+      functionSortDragIndex,
+      1
+    )[0];
+
+  functionSortList.splice(
+    dropIndex,
+    0,
+    item
+  );
+
+  functionSortDragIndex = null;
+
+  renderFunctionSortList();
+}
+
+function applyFunctionSortList() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  const originalBlocks =
+    extractCodeBlocksFromText(text);
+
+  if (
+    originalBlocks.length !==
+    functionSortList.length
+  ) {
+    alert(
+      "コードブロック数が一致しません。\n" +
+      "再度一覧を開き直してください。"
+    );
+    return;
+  }
+
+  const ok =
+    confirm(
+      "現在の並び順をHTMLへ反映します。\n\n" +
+      "事前に保存・バックアップ済みですか？"
+    );
+
+  if (!ok) return;
+
+  repairUndoStack.push(text);
+  repairRedoStack = [];
+
+  let result = "";
+  let cursor = 0;
+
+  originalBlocks.forEach((block, index) =&gt; {
+    result += text.slice(
+      cursor,
+      block.start
+    );
+
+    result +=
+      functionSortList[index].block;
+
+    cursor = block.end;
+  });
+
+  result += text.slice(cursor);
+
+  editor.value = result;
+  repairLastValue = result;
+
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(
+    "コードブロック並べ替え適用"
+  );
+
+  autoSaveRepairDraft();
+
+  alert("並べ替えを適用しました");
+}
+
+/* ===============================
+   Repair Editor Core
+=============================== */
+
+function applyRepairIndent(isOutdent) {
+  const editor = get("repairEditor");
+  if (!editor) return;
+  const value = editor.value;
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  const indent = "  ";
+  repairUndoStack.push(value);
+  repairRedoStack = [];
+  // 単一カーソルでTabの場合
+  if (start === end &amp;&amp; !isOutdent) {
+    editor.value =
+      value.slice(0, start) +
+      indent +
+      value.slice(end);
+    const pos = start + indent.length;
+    editor.selectionStart = pos;
+    editor.selectionEnd = pos;
+  } else {
+    const lineStart =
+      value.lastIndexOf("\n", start - 1) + 1;
+    const before = value.slice(0, lineStart);
+    const target = value.slice(lineStart, end);
+    const after = value.slice(end);
+    const lines = target.split("\n");
+    const changed = isOutdent
+      ? lines.map(line =&gt; {
+          if (line.startsWith(indent)) return line.slice(indent.length);
+          if (line.startsWith(" ")) return line.slice(1);
+          return line;
+        }).join("\n")
+      : lines.map(line =&gt; indent + line).join("\n");
+    editor.value = before + changed + after;
+    const delta =
+      editor.value.length - value.length;
+    editor.selectionStart = start;
+    editor.selectionEnd = end + delta;
+  }
+  editor.focus();
+  repairLastValue = editor.value;
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(isOutdent ? "アウトデント" : "インデント");
+  autoSaveRepairDraft();
+}
+
+function indentRepairSelection() {
+  applyRepairIndent(false);
+}
+
+function outdentRepairSelection() {
+  applyRepairIndent(true);
+}
+
+function enableRepairEditorTabIndent() {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  editor.addEventListener("keydown", (e) =&gt; {
+    if (e.key !== "Tab") return;
+
+    e.preventDefault();
+
+    if (e.shiftKey) {
+      outdentRepairSelection();
+      return;
+    }
+
+    indentRepairSelection();
+  });
+}
+
+function updateLineNumbers() {
+
+  const editor =
+    get("repairEditor");
+
+  const lineBox =
+    get("lineNumbers");
+
+  if (!editor || !lineBox) return;
+
+  const currentLine =
+    editor.value
+      .slice(
+        0,
+        editor.selectionStart
+      )
+      .split("\n")
+      .length;
+
+  const count =
+    editor.value
+      .split("\n")
+      .length || 1;
+
+  lineBox.innerHTML =
+    Array.from(
+      { length: count },
+      (_, i) =&gt; {
+
+        const lineNo =
+          i + 1;
+
+        let cls =
+          "line-number";
+
+        if (
+          lineNo === currentLine
+        ){
+          cls += " active";
+        }
+
+        if (
+          lineNo === pinnedLine
+        ){
+          cls += " pinned";
+        }
+
+        return `
+&lt;div
+  class="${cls}"
+  onclick="
+    togglePinnedLine(
+      ${lineNo}
+    )
+  "
+&gt;
+${lineNo}
+&lt;/div&gt;
+`;
+      }).join("");
+}
+
+function updateRepairStatus(text) {
+  const box = get("repairStatus");
+  if (!box) return;
+  box.innerText = "状態：" + text;
+}
+
+function undoRepairEdit() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairUndoStack.length===0
+  ) return;
+
+  repairRedoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairUndoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Undo実行"
+  );
+}
+
+function redoRepairEdit() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairRedoStack.length===0
+  ) return;
+
+  repairUndoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairRedoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Redo実行"
+  );
+}
+
+function loadRepairDraft() {
+  repairAutoSaveEnabled =
+    localStorage.getItem("repairAutoSaveEnabled") === "1";
+
+  updateRepairStatus(
+    repairAutoSaveEnabled
+      ? "AutoSave ON"
+      : "AutoSave OFF"
+  );
+
+  const draft = localStorage.getItem("repairDraftHtml");
+  if (!draft) return;
+  const ok = confirm("修復モードの自動保存データを復元しますか？");
+  if (!ok) return;
+  get("repairEditor").value = draft;
+  repairLastValue = draft;
+  updateRepairStatus("自動保存データ復元");
+}
+
+function updateCursorPosition() {
+  const editor = get("repairEditor");
+  const box = get("cursorStatus");
+  if (!editor || !box) return;
+  const pos = editor.selectionStart || 0;
+  const before = editor.value.slice(0, pos);
+  const line = before.split("\n").length;
+  const col =
+    before.length -
+    before.lastIndexOf("\n");
+  box.innerText =
+    `Ln ${line} / Col ${col}`;
+  updateLineNumbers();
+}
+
+function toggleRepairAutoSave() {
+  repairAutoSaveEnabled = !repairAutoSaveEnabled;
+  localStorage.setItem(
+    "repairAutoSaveEnabled",
+    repairAutoSaveEnabled ? "1" : "0"
+  );
+  updateRepairStatus(
+    repairAutoSaveEnabled ? "AutoSave ON" : "AutoSave OFF"
+  );
+}
+
+function autoSaveRepairDraft() {
+  if (!repairAutoSaveEnabled) return;
+  const editor = get("repairEditor");
+  if (!editor) return;
+  localStorage.setItem("repairDraftHtml", editor.value);
+  localStorage.setItem(
+    "repairDraftSavedAt",
+    new Date().toISOString()
+  );
+}
+
+function togglePinnedLine(
+  line
+){
+
+  pinnedLine =
+    pinnedLine === line
+      ? null
+      : line;
+
+  updateLineNumbers();
+}
+
+/* ===============================
+   Repair Diagnose / Preview
+=============================== */
+
+async function diagnoseRepairHtml() {
+  let html =
+    get("repairEditor").value;
+
+  const externalJs =
+    await collectExternalScriptText(html);
+
+  const jsForCheck =
+    html + "\n" + externalJs;
+
+  const scripts =
+    getExternalScriptSrcList(html);
+
+  const scriptInfo =
+    scripts.length
+      ? "✔ external scripts:\n" +
+        scripts.join("\n")
+      : "✔ external scripts:none";
+
+  const parser =
+    new DOMParser();
+
+  const doc =
+    parser.parseFromString(
+      html,
+      "text/html"
+    );
+
+  let cleanHtml = html
+    .replace(
+      /&lt;script[\s\S]*?&lt;\/script&gt;/gi,
+      ""
+    )
+    .replace(
+      /&lt;style[\s\S]*?&lt;\/style&gt;/gi,
+      ""
+    );
+
+  const report = [];
+
+  report.push(
+    "Repair HTML Diagnose\n"
+  );
+
+  // div整合性
+  const open =
+    (cleanHtml.match(
+      /&lt;div\b/g
+    ) || []).length;
+
+  const close =
+    (cleanHtml.match(
+      /&lt;\/div&gt;/g
+    ) || []).length;
+
+  report.push(
+    open === close
+      ? `✔ div: ${open}/${close}`
+      : `⚠ div: ${open}/${close}`
+  );
+
+  // DOM
+  const parserError =
+    doc.querySelector(
+      "parsererror"
+    );
+
+  report.push(
+    parserError
+      ? "⚠ DOM解析エラー"
+      : "✔ DOM解析OK"
+  );
+
+  // id重複
+  const ids =
+    [...doc.querySelectorAll("[id]")]
+      .map(el =&gt; el.id);
+
+  const dupIds =
+    [...new Set(
+      ids.filter(
+        (id, i) =&gt;
+        ids.indexOf(id) !== i
+      )
+    )];
+
+  report.push(
+    dupIds.length
+      ? `⚠ id重複\n${dupIds.join("\n")}`
+      : "✔ id重複なし"
+  );
+
+  report.push("");
+  report.push(scriptInfo);
+
+  // JS構文
+  try {
+    const scriptBlocks =
+      [...doc.querySelectorAll("script")];
+
+    scriptBlocks.forEach(s =&gt; {
+      if (s.src) return;
+      new Function(
+        s.textContent
+      );
+    });
+
+    report.push("✔ JS構文OK");
+
+  } catch (e) {
+    report.push(
+      `⚠ JS構文エラー\n${e.message}`
+    );
+  }
+
+  // function重複
+  const htmlForFunctionCheck =
+    jsForCheck
+      .replace(/\/\/.*$/gm, "")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+
+  const funcs =
+    [...htmlForFunctionCheck.matchAll(
+      /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm
+    )]
+    .map(x =&gt; x[1]);
+
+  const dupFuncs =
+    [...new Set(
+      funcs.filter(
+        (f, i) =&gt;
+        funcs.indexOf(f) !== i
+      )
+    )];
+
+  report.push(
+    dupFuncs.length
+      ? `⚠ function重複\n${dupFuncs.join("\n")}`
+      : "✔ function重複なし"
+  );
+
+  // onclick未定義
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )]
+    .map(x =&gt; x[1]);
+
+  const undefinedFns =
+    [...new Set(
+      onclicks.filter(
+        fn =&gt;
+        !funcs.includes(fn)
+      )
+    )];
+
+  report.push(
+    undefinedFns.length
+      ? `⚠ 未定義onclick\n${undefinedFns.join("\n")}`
+      : "✔ onclick定義OK"
+  );
+
+  // 未使用function
+  const unusedFns =
+    funcs.filter(fn =&gt; {
+      if (
+        fn === "diagnoseRepairHtml" ||
+        fn === "closeFloatPanel"
+      ) {
+        return false;
+      }
+
+      const useCount =
+        (jsForCheck.match(
+          new RegExp(
+            "\\b" + fn + "\\b",
+            "g"
+          )
+        ) || []).length;
+
+      return useCount &lt;= 1;
+    });
+
+  report.push(
+    unusedFns.length
+      ? `⚠ 未使用function\n${
+          unusedFns
+            .slice(0, 15)
+            .join("\n")
+        }`
+      : "✔ 未使用functionなし"
+  );
+
+  // 孤立id
+  const orphanIds =
+    ids.filter(id =&gt; {
+      if (
+        !id ||
+        /[()[\]^]/.test(id)
+      ) {
+        return false;
+      }
+
+      try {
+        const useCount =
+          (
+            jsForCheck.match(
+              new RegExp(
+                "\\b" +
+                escapeRegExp(id) +
+                "\\b",
+                "g"
+              )
+            ) || []
+          ).length;
+
+        return useCount &lt;= 1;
+
+      } catch {
+        return false;
+      }
+    });
+
+  report.push(
+    orphanIds.length
+      ? `⚠ 孤立id\n${
+          orphanIds
+            .slice(0, 15)
+            .join("\n")
+        }`
+      : "✔ 孤立idなし"
+  );
+
+  const result =
+    report.join("\n");
+
+  window.latestDiagnoseResult =
+    result;
+
+  openFloatPanel(
+    "編集内容診断",
+    `
+    &lt;div class="float-panel-actions"&gt;
+      &lt;button onclick="copyDiagnoseResult()"&gt;
+        📋 コピー
+      &lt;/button&gt;
+    &lt;/div&gt;
+    &lt;pre
+      id="diagnoseResultBox"
+      class="code-preview"&gt;
+${escapeHtml(result)}
+    &lt;/pre&gt;
+    `
+  );
+}
+
+function copyDiagnoseResult() {
+  const text =
+    window.latestDiagnoseResult || "";
+  if (!text) {
+    alert("コピー内容なし");
+    return;
+  }
+  if (
+    navigator.clipboard &amp;&amp;
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =&gt;
+        alert("コピー完了")
+      )
+      .catch(() =&gt; {
+        const ok =
+          copyTextFallback(text);
+        alert(
+          ok
+            ? "コピー完了"
+            : "コピー失敗"
+        );
+      });
+    return;
+  }
+  const ok =
+    copyTextFallback(text);
+  alert(
+    ok
+      ? "コピー完了"
+      : "コピー失敗"
+  );
+}
+
+function renderFunctionViewer() {
+
+  const box =
+    get("functionViewer");
+
+  const editor =
+    get("repairEditor");
+
+  if (!box || !editor) {
+    return;
+  }
+
+  const blocks =
+    extractCodeBlocksFromText(
+      editor.value
+    );
+
+  const functions =
+    blocks.filter(
+      item =&gt; item.type === "function"
+    );
+
+  box.innerHTML =
+    functions.length
+      ? functions.map((f,index)=&gt;`
+
+&lt;div class="function-view-item"&gt;
+
+  &lt;div
+    class="function-view-line"
+    onclick="toggleFunctionView(${index})"
+    oncontextmenu="event.preventDefault();selectCodeBlockByIndex(${blocks.indexOf(f)})"
+    ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(${blocks.indexOf(f)}),600)"
+    ontouchend="clearTimeout(this._pressTimer)"
+    ontouchmove="clearTimeout(this._pressTimer)"&gt;
+
+    &lt;span class="function-view-mark"&gt;
+      ▶
+    &lt;/span&gt;
+
+    &lt;span class="function-view-name"&gt;
+      ${escapeHtml(f.name)}
+    &lt;/span&gt;
+
+  &lt;/div&gt;
+
+  &lt;pre
+    id="functionView${index}"
+    class="function-view-code"
+    style="display:none;"&gt;${escapeHtml(f.block)}&lt;/pre&gt;
+
+&lt;/div&gt;
+
+`).join("")
+      : "関数なし";
+}
+
+function toggleFunctionView(index) {
+
+  const el =
+    get(
+      "functionView" + index
+    );
+
+  if (!el) {
+    return;
+  }
+
+  el.style.display =
+    el.style.display === "block"
+      ? "none"
+      : "block";
+}
+
+function openViewerMode() {
+
+  const preview =
+    get("repairPreview");
+
+  const viewer =
+    get("functionViewer");
+
+  if (preview) {
+    preview.style.display = "none";
+  }
+
+  renderFunctionViewer();
+
+  if (viewer) {
+    viewer.style.display = "block";
+  }
+
+  updateRepairStatus(
+    "閲覧モード：関数ビュー表示"
+  );
+}
+
+function previewRepairHtml() {
+
+  const box =
+    get("repairPreview");
+
+  const btn =
+    get("previewBtn");
+
+  if (!box) {
+    return;
+  }
+
+  if (box.style.display === "block") {
+
+    box.style.display =
+      "none";
+
+    if (btn) {
+      btn.innerText =
+        "🎨 色分けプレビュー";
+    }
+
+    return;
+  }
+
+  const html =
+    get("repairEditor").value;
+
+  if (!html.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  let escaped =
+    escapeHtml(html);
+
+  escaped = escaped
+    .replace(
+      /(&amp;lt;!--[\s\S]*?--&amp;gt;)/g,
+      '&lt;span class="code-comment"&gt;$1&lt;/span&gt;'
+    )
+    .replace(
+      /(&amp;lt;\/?)([a-zA-Z0-9-]+)/g,
+      '$1&lt;span class="code-tag"&gt;$2&lt;/span&gt;'
+    )
+    .replace(
+      /\s([a-zA-Z-:]+)=/g,
+      ' &lt;span class="code-attr"&gt;$1&lt;/span&gt;='
+    )
+    .replace(
+      /(&amp;quot;.*?&amp;quot;)/g,
+      '&lt;span class="code-string"&gt;$1&lt;/span&gt;'
+    )
+    .replace(
+      /\b(function|const|let|var|return|if|else|try|catch|for|while|switch|case|break|new)\b/g,
+      '&lt;span class="code-keyword"&gt;$1&lt;/span&gt;'
+    );
+
+  box.innerHTML =
+    escaped;
+
+  box.style.display =
+    "block";
+
+  if (btn) {
+    btn.innerText =
+      "❌ プレビュー閉じる";
+  }
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(7)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(21)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(21),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      selectFunctionBlock
+    </span>
+
+  </div>
+
+  <pre id="functionView7" class="function-view-code" style="display:none;">function selectFunctionBlock(){
+  const name=
+    prompt("関数名");
+  if(!name)return;
+  const result=
+    findFunctionBlock(name);
+  if(!result)return;
+  const editor=
+    get("repairEditor");
+  editor.focus();
+  editor.setSelectionRange(
+    result.start,
+    result.end
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(8)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(22)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(22),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      replaceFunctionBlock
+    </span>
+
+  </div>
+
+  <pre id="functionView8" class="function-view-code" style="display:none;">function replaceFunctionBlock(){
+  const name=
+    prompt("置換する関数名");
+  if(!name)return;
+  const result=
+    findFunctionBlock(name);
+  if(!result)return;
+  const newCode=
+    prompt(
+      "新コード",
+      result.block
+    );
+  if(newCode===null)return;
+  const editor=
+    get("repairEditor");
+  editor.value=
+    editor.value.slice(0,result.start)+
+    newCode+
+    editor.value.slice(result.end);
+  alert("置換完了");
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(9)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(23)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(23),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      findFunctionBlockInText
+    </span>
+
+  </div>
+
+  <pre id="functionView9" class="function-view-code" style="display:none;">function findFunctionBlockInText(text, functionName) {
+
+  const src = String(text || "");
+  const name = escapeRegExp(functionName);
+
+  const fnRegex = new RegExp(
+    "\\bfunction\\s+" + name + "\\s*\\(",
+    "g"
+  );
+
+  const match = fnRegex.exec(src);
+  if (!match) return null;
+
+  const start = match.index;
+  const braceStart = src.indexOf("{", fnRegex.lastIndex);
+  if (braceStart === -1) return null;
+
+  let depth = 0;
+  let i = braceStart;
+
+  let inString = false;
+  let quote = "";
+  let inLineComment = false;
+  let inBlockComment = false;
+  let inRegex = false;
+  let escaped = false;
+
+  function prevMeaningfulChar(pos) {
+    for (let j = pos - 1; j &gt;= 0; j--) {
+      const c = src[j];
+      if (/\s/.test(c)) continue;
+      return c;
+    }
+    return "";
+  }
+
+  function isRegexStart(pos) {
+    const prev = prevMeaningfulChar(pos);
+    return (
+      !prev ||
+      "({[=:+-!?,;&lt;&gt;*&amp;|^~".includes(prev)
+    );
+  }
+
+  while (i &lt; src.length) {
+
+    const ch = src[i];
+    const next = src[i + 1];
+
+    if (inLineComment) {
+      if (ch === "\n") inLineComment = false;
+      i++;
+      continue;
+    }
+
+    if (inBlockComment) {
+      if (ch === "*" &amp;&amp; next === "/") {
+        inBlockComment = false;
+        i += 2;
+        continue;
+      }
+      i++;
+      continue;
+    }
+
+    if (inRegex) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === "/") {
+        inRegex = false;
+      }
+      i++;
+      continue;
+    }
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === quote) {
+        inString = false;
+        quote = "";
+      }
+      i++;
+      continue;
+    }
+
+    if (ch === "/" &amp;&amp; next === "/") {
+      inLineComment = true;
+      i += 2;
+      continue;
+    }
+
+    if (ch === "/" &amp;&amp; next === "*") {
+      inBlockComment = true;
+      i += 2;
+      continue;
+    }
+
+    if (ch === "/" &amp;&amp; isRegexStart(i)) {
+      inRegex = true;
+      i++;
+      continue;
+    }
+
+    if (ch === "\"" || ch === "'" || ch === "`") {
+      inString = true;
+      quote = ch;
+      i++;
+      continue;
+    }
+
+    if (ch === "{") {
+      depth++;
+    }
+
+    if (ch === "}") {
+      depth--;
+      if (depth === 0) {
+        i++;
+        return {
+          start,
+          end: i,
+          block: src.slice(start, i)
+        };
+      }
+    }
+
+    i++;
+  }
+
+  return null;
+
+}
+
+function extractFunctionBlocksFromText(text) {
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  const regex =
+    /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm;
+
+  let match;
+
+  while ((match = regex.exec(source)) !== null) {
+    const name =
+      match[1];
+
+    const start =
+      match.index;
+
+    const braceStart =
+      source.indexOf("{", start);
+
+    if (braceStart === -1) continue;
+
+    let depth = 1;
+    let end = braceStart + 1;
+
+    while (
+      end &lt; source.length &amp;&amp;
+      depth &gt; 0
+    ) {
+      if (source[end] === "{") depth++;
+      if (source[end] === "}") depth--;
+      end++;
+    }
+
+    blocks.push({
+      type: "function",
+      name,
+      start,
+      end,
+      block:
+        source.slice(start, end)
+    });
+  }
+
+  return blocks;
+}
+
+function extractCodeBlocksFromText(text) {
+
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  const functionBlocks =
+    extractFunctionBlocksFromText(source);
+
+  // section comment: 複数行見出し
+  const sectionRegex =
+    /\/\*\s*=+\s*\n([\s\S]*?)\n\s*=+\s*\*\//g;
+
+  [...source.matchAll(sectionRegex)]
+    .forEach(match =&gt; {
+
+      blocks.push({
+        type: "section",
+        name:
+          match[1]
+            .split("\n")
+            .map(x =&gt; x.trim())
+            .filter(Boolean)[0] ||
+          "Section",
+        start: match.index,
+        end:
+          match.index +
+          match[0].length,
+        block: match[0]
+      });
+
+    });
+
+  // top-level let const var only
+  const variableRegex =
+    /^(let|const|var)\s+([a-zA-Z0-9_$]+)/gm;
+
+  [...source.matchAll(variableRegex)]
+    .forEach(match =&gt; {
+
+      const start =
+        match.index;
+
+      const insideFunction =
+        functionBlocks.some(fn =&gt;
+          start &gt; fn.start &amp;&amp;
+          start &lt; fn.end
+        );
+
+      if (insideFunction) {
+        return;
+      }
+
+      const name =
+        match[2];
+
+      let end =
+        source.indexOf(
+          ";",
+          start
+        );
+
+      if (end === -1) {
+        end =
+          source.indexOf(
+            "\n",
+            start
+          );
+      }
+
+      if (end === -1) {
+        end =
+          source.length;
+      }
+
+      blocks.push({
+        type: "variable",
+        name,
+        start,
+        end: end + 1,
+        block:
+          source.slice(
+            start,
+            end + 1
+          )
+      });
+
+    });
+
+  functionBlocks.forEach(item =&gt; {
+
+    blocks.push({
+      type: "function",
+      ...item
+    });
+
+  });
+
+  return blocks.sort(
+    (a,b)=&gt;
+    a.start-b.start
+  );
+}
+
+/* ===============================
+   Code Block List / Move
+=============================== */
+
+function showFunctionList() {
+
+  const editor =
+    get("repairEditor");
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  console.log(
+    "editor total:",
+    text.split(/\r?\n/).length
+  );
+
+  console.log(
+    "has CR:",
+    text.includes("\r")
+  );
+
+  const blocks =
+    extractCodeBlocksFromText(
+      text
+    );
+
+  let html = "";
+
+  if (blocks.length === 0) {
+
+    html = "コードブロックなし";
+
+  } else {
+
+    html =
+      blocks.map((item, i) =&gt; {
+
+        const line =
+          text
+            .slice(
+              0,
+              item.start
+            )
+            .split(/\r?\n/)
+            .length;
+
+        console.log(
+          `[${item.type}] ${item.name} / L${line}`
+        );
+
+        const moveButton =
+          item.type === "function"
+            ? `
+&lt;div class="float-panel-actions"&gt;
+  &lt;button
+    onclick="
+      moveFunctionPrompt(
+        '${item.name}'
+      )
+    "&gt;
+    📦 Move
+  &lt;/button&gt;
+&lt;/div&gt;
+`
+            : "";
+
+return `
+
+&lt;div class="function-list-row"&gt;
+
+  &lt;button
+    class="
+      float-list-btn
+      function-list-select
+    "
+    onclick="
+      selectCodeBlockByIndex(${i});
+      closeFloatPanelKeepEditorSelection();
+    "&gt;
+
+    [${item.type}]
+    ${i + 1}.
+    ${escapeHtml(item.name)}
+    / L${line}
+
+  &lt;/button&gt;
+
+  ${moveButton}
+
+&lt;/div&gt;
+`;
+
+      }).join("");
+  }
+
+  openFloatPanel(
+    `コードブロック一覧 (${blocks.length})`,
+    `
+    &lt;div class="float-panel-actions"&gt;
+      &lt;button onclick="copyCodeBlockList()"&gt;
+        📋 一覧コピー
+      &lt;/button&gt;
+    &lt;/div&gt;
+    ` + html
+  );
+}
+
+function buildCodeBlockListText() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return "";
+
+  const text =
+    editor.value;
+
+  const blocks =
+    extractCodeBlocksFromText(text);
+
+  return blocks.map((item, i) =&gt; {
+
+    const line =
+      text
+        .slice(0, item.start)
+        .split("\n")
+        .length;
+
+    return `[${item.type}] ${i + 1}. ${item.name} / L${line}`;
+
+  }).join("\n");
+}
+
+function copyCodeBlockList() {
+
+  const text =
+    buildCodeBlockListText();
+
+  if (!text) {
+    alert("コピーする一覧がありません");
+    return;
+  }
+
+  if (
+    navigator.clipboard &amp;&amp;
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =&gt;
+        alert("コードブロック一覧をコピーしました")
+      )
+      .catch(() =&gt; {
+        const ok =
+          copyTextFallback(text);
+
+        alert(
+          ok
+            ? "コードブロック一覧をコピーしました"
+            : "コピー失敗"
+        );
+      });
+
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "コードブロック一覧をコピーしました"
+      : "コピー失敗"
+  );
+}
+
+function moveFunctionPrompt(functionName) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const sections =
+    extractCodeBlocksFromText(editor.value)
+      .filter(item =&gt;
+        item.type === "section"
+      );
+
+  if (sections.length === 0) {
+    alert("移動先セクションが見つかりません");
+    return;
+  }
+
+  const html =
+    sections.map(item =&gt; {
+      return `
+&lt;button
+  class="float-list-btn"
+  onclick="
+    moveFunctionToSectionByStart(
+      '${functionName}',
+      ${item.start}
+    );
+  "&gt;
+  ${escapeHtml(item.name)}
+&lt;/button&gt;
+`;
+    }).join("");
+
+  openFloatPanel(
+    `移動先を選択：${functionName}`,
+    html
+  );
+}
+
+function moveFunctionToSectionByStart(
+  functionName,
+  sectionStart
+) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  let html =
+    editor.value;
+
+  const block =
+    findFunctionBlockInText(
+      html,
+      functionName
+    );
+
+  if (!block) {
+    alert("関数が見つかりません");
+    return;
+  }
+
+  const sections =
+    extractCodeBlocksFromText(html)
+      .filter(item =&gt;
+        item.type === "section"
+      );
+
+  const target =
+    sections.find(item =&gt;
+      item.start === sectionStart
+    );
+
+  if (!target) {
+    alert("移動先セクションが見つかりません");
+    return;
+  }
+
+  const ok =
+    confirm(
+      `${functionName}\n\nを\n\n${target.name}\n\nへ移動しますか？`
+    );
+
+  if (!ok) return;
+
+  repairUndoStack.push(html);
+  repairRedoStack = [];
+
+  html =
+    html.slice(0, block.start) +
+    html.slice(block.end);
+
+  let insertPos =
+    target.end;
+
+  if (block.start &lt; target.end) {
+    insertPos =
+      target.end -
+      (block.end - block.start);
+  }
+
+  html =
+    html.slice(0, insertPos) +
+    "\n\n" +
+    block.block +
+    "\n" +
+    html.slice(insertPos);
+
+  editor.value =
+    html;
+
+  repairLastValue =
+    html;
+
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(
+    `${functionName} → ${target.name}`
+  );
+
+  closeFloatPanel();
+
+  alert("移動完了");
+}
+
+/* ===============================
+   Code Block Sort
+=============================== */
+
+function showFunctionSortList() {
+
+  const editor =
+    get("repairEditor");
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  functionSortList =
+    extractCodeBlocksFromText(
+      text
+    );
+
+  if (
+    functionSortList.length === 0
+  ) {
+    openFloatPanel(
+      "コードブロック並べ替え",
+      "コードブロックなし"
+    );
+    return;
+  }
+
+  renderFunctionSortList();
+}
+
+function renderFunctionSortList() {
+
+  const filteredList =
+    getFilteredFunctionSortList();
+
+  const html =
+`
+&lt;div class="float-panel-actions"&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'all'
+      )
+    "&gt;
+    ALL
+  &lt;/button&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'section'
+      )
+    "&gt;
+    SECTION
+  &lt;/button&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'variable'
+      )
+    "&gt;
+    VAR
+  &lt;/button&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'function'
+      )
+    "&gt;
+    FUNC
+  &lt;/button&gt;
+
+&lt;/div&gt;
+
+&lt;div class="float-panel-actions"&gt;
+
+  &lt;button
+    onclick="
+      applyFunctionSortList()
+    "&gt;
+    ✅ 並べ替えを適用
+  &lt;/button&gt;
+
+&lt;/div&gt;
+`
++
+filteredList.map(
+(entry)=&gt;{
+
+const item =
+  entry.item;
+
+const originalIndex =
+  entry.index;
+
+return `
+&lt;div
+
+  class="
+    function-sort-row
+  "
+
+  draggable="true"
+
+  data-index="
+    ${originalIndex}
+  "
+
+  ondragstart="
+    handleFunctionSortDragStart(
+      event
+    )
+  "
+
+  ondragover="
+    handleFunctionSortDragOver(
+      event
+    )
+  "
+
+  ondrop="
+    handleFunctionSortDrop(
+      event
+    )
+  "
+&gt;
+
+  &lt;div
+    class="
+      function-drag-handle
+    "&gt;
+    ≡
+  &lt;/div&gt;
+
+  &lt;button
+
+    class="
+      float-list-btn
+      function-sort-select
+    "
+
+    onclick="
+      selectCodeBlockByIndex(
+        ${originalIndex}
+      );
+
+      closeFloatPanelKeepEditorSelection();
+    "
+
+  &gt;
+
+    [${item.type}]
+    ${originalIndex + 1}.
+    ${escapeHtml(
+      item.name
+    )}
+
+  &lt;/button&gt;
+
+  &lt;div
+    class="
+      function-sort-actions
+    "&gt;
+
+    &lt;button
+      onclick="
+        moveFunctionSortItem(
+          ${originalIndex},
+          -1
+        )
+      "&gt;
+      ↑
+    &lt;/button&gt;
+
+    &lt;button
+      onclick="
+        moveFunctionSortItem(
+          ${originalIndex},
+          1
+        )
+      "&gt;
+      ↓
+    &lt;/button&gt;
+
+  &lt;/div&gt;
+
+&lt;/div&gt;
+`;
+})
+.join("");
+
+  openFloatPanel(
+    `コードブロック並べ替え (${functionSortList.length})`,
+    html
+  );
+}
+
+function moveFunctionSortItem(index, direction) {
+  const next =
+    index + direction;
+
+  if (
+    next &lt; 0 ||
+    next &gt;= functionSortList.length
+  ) {
+    return;
+  }
+
+  const temp =
+    functionSortList[index];
+
+  functionSortList[index] =
+    functionSortList[next];
+
+  functionSortList[next] =
+    temp;
+
+  renderFunctionSortList();
+}
+
+function setFunctionSortFilter(filter) {
+  functionSortFilter = filter;
+  renderFunctionSortList();
+}
+
+function getFilteredFunctionSortList() {
+  if (functionSortFilter === "all") {
+    return functionSortList.map((item, index) =&gt; ({
+      item,
+      index
+    }));
+  }
+
+  return functionSortList
+    .map((item, index) =&gt; ({
+      item,
+      index
+    }))
+    .filter(entry =&gt;
+      entry.item.type === functionSortFilter
+    );
+}
+
+let functionSortDragIndex = null;
+
+function handleFunctionSortDragStart(event) {
+  functionSortDragIndex =
+    Number(
+      event.currentTarget.dataset.index
+    );
+}
+
+function handleFunctionSortDragOver(event) {
+  event.preventDefault();
+}
+
+function handleFunctionSortDrop(event) {
+  event.preventDefault();
+
+  const dropIndex =
+    Number(
+      event.currentTarget.dataset.index
+    );
+
+  if (
+    functionSortDragIndex === null ||
+    functionSortDragIndex === dropIndex
+  ) {
+    return;
+  }
+
+  const item =
+    functionSortList.splice(
+      functionSortDragIndex,
+      1
+    )[0];
+
+  functionSortList.splice(
+    dropIndex,
+    0,
+    item
+  );
+
+  functionSortDragIndex = null;
+
+  renderFunctionSortList();
+}
+
+function applyFunctionSortList() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  const originalBlocks =
+    extractCodeBlocksFromText(text);
+
+  if (
+    originalBlocks.length !==
+    functionSortList.length
+  ) {
+    alert(
+      "コードブロック数が一致しません。\n" +
+      "再度一覧を開き直してください。"
+    );
+    return;
+  }
+
+  const ok =
+    confirm(
+      "現在の並び順をHTMLへ反映します。\n\n" +
+      "事前に保存・バックアップ済みですか？"
+    );
+
+  if (!ok) return;
+
+  repairUndoStack.push(text);
+  repairRedoStack = [];
+
+  let result = "";
+  let cursor = 0;
+
+  originalBlocks.forEach((block, index) =&gt; {
+    result += text.slice(
+      cursor,
+      block.start
+    );
+
+    result +=
+      functionSortList[index].block;
+
+    cursor = block.end;
+  });
+
+  result += text.slice(cursor);
+
+  editor.value = result;
+  repairLastValue = result;
+
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(
+    "コードブロック並べ替え適用"
+  );
+
+  autoSaveRepairDraft();
+
+  alert("並べ替えを適用しました");
+}
+
+/* ===============================
+   Repair Editor Core
+=============================== */
+
+function applyRepairIndent(isOutdent) {
+  const editor = get("repairEditor");
+  if (!editor) return;
+  const value = editor.value;
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  const indent = "  ";
+  repairUndoStack.push(value);
+  repairRedoStack = [];
+  // 単一カーソルでTabの場合
+  if (start === end &amp;&amp; !isOutdent) {
+    editor.value =
+      value.slice(0, start) +
+      indent +
+      value.slice(end);
+    const pos = start + indent.length;
+    editor.selectionStart = pos;
+    editor.selectionEnd = pos;
+  } else {
+    const lineStart =
+      value.lastIndexOf("\n", start - 1) + 1;
+    const before = value.slice(0, lineStart);
+    const target = value.slice(lineStart, end);
+    const after = value.slice(end);
+    const lines = target.split("\n");
+    const changed = isOutdent
+      ? lines.map(line =&gt; {
+          if (line.startsWith(indent)) return line.slice(indent.length);
+          if (line.startsWith(" ")) return line.slice(1);
+          return line;
+        }).join("\n")
+      : lines.map(line =&gt; indent + line).join("\n");
+    editor.value = before + changed + after;
+    const delta =
+      editor.value.length - value.length;
+    editor.selectionStart = start;
+    editor.selectionEnd = end + delta;
+  }
+  editor.focus();
+  repairLastValue = editor.value;
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(isOutdent ? "アウトデント" : "インデント");
+  autoSaveRepairDraft();
+}
+
+function indentRepairSelection() {
+  applyRepairIndent(false);
+}
+
+function outdentRepairSelection() {
+  applyRepairIndent(true);
+}
+
+function enableRepairEditorTabIndent() {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  editor.addEventListener("keydown", (e) =&gt; {
+    if (e.key !== "Tab") return;
+
+    e.preventDefault();
+
+    if (e.shiftKey) {
+      outdentRepairSelection();
+      return;
+    }
+
+    indentRepairSelection();
+  });
+}
+
+function updateLineNumbers() {
+
+  const editor =
+    get("repairEditor");
+
+  const lineBox =
+    get("lineNumbers");
+
+  if (!editor || !lineBox) return;
+
+  const currentLine =
+    editor.value
+      .slice(
+        0,
+        editor.selectionStart
+      )
+      .split("\n")
+      .length;
+
+  const count =
+    editor.value
+      .split("\n")
+      .length || 1;
+
+  lineBox.innerHTML =
+    Array.from(
+      { length: count },
+      (_, i) =&gt; {
+
+        const lineNo =
+          i + 1;
+
+        let cls =
+          "line-number";
+
+        if (
+          lineNo === currentLine
+        ){
+          cls += " active";
+        }
+
+        if (
+          lineNo === pinnedLine
+        ){
+          cls += " pinned";
+        }
+
+        return `
+&lt;div
+  class="${cls}"
+  onclick="
+    togglePinnedLine(
+      ${lineNo}
+    )
+  "
+&gt;
+${lineNo}
+&lt;/div&gt;
+`;
+      }).join("");
+}
+
+function updateRepairStatus(text) {
+  const box = get("repairStatus");
+  if (!box) return;
+  box.innerText = "状態：" + text;
+}
+
+function undoRepairEdit() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairUndoStack.length===0
+  ) return;
+
+  repairRedoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairUndoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Undo実行"
+  );
+}
+
+function redoRepairEdit() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairRedoStack.length===0
+  ) return;
+
+  repairUndoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairRedoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Redo実行"
+  );
+}
+
+function loadRepairDraft() {
+  repairAutoSaveEnabled =
+    localStorage.getItem("repairAutoSaveEnabled") === "1";
+
+  updateRepairStatus(
+    repairAutoSaveEnabled
+      ? "AutoSave ON"
+      : "AutoSave OFF"
+  );
+
+  const draft = localStorage.getItem("repairDraftHtml");
+  if (!draft) return;
+  const ok = confirm("修復モードの自動保存データを復元しますか？");
+  if (!ok) return;
+  get("repairEditor").value = draft;
+  repairLastValue = draft;
+  updateRepairStatus("自動保存データ復元");
+}
+
+function updateCursorPosition() {
+  const editor = get("repairEditor");
+  const box = get("cursorStatus");
+  if (!editor || !box) return;
+  const pos = editor.selectionStart || 0;
+  const before = editor.value.slice(0, pos);
+  const line = before.split("\n").length;
+  const col =
+    before.length -
+    before.lastIndexOf("\n");
+  box.innerText =
+    `Ln ${line} / Col ${col}`;
+  updateLineNumbers();
+}
+
+function toggleRepairAutoSave() {
+  repairAutoSaveEnabled = !repairAutoSaveEnabled;
+  localStorage.setItem(
+    "repairAutoSaveEnabled",
+    repairAutoSaveEnabled ? "1" : "0"
+  );
+  updateRepairStatus(
+    repairAutoSaveEnabled ? "AutoSave ON" : "AutoSave OFF"
+  );
+}
+
+function autoSaveRepairDraft() {
+  if (!repairAutoSaveEnabled) return;
+  const editor = get("repairEditor");
+  if (!editor) return;
+  localStorage.setItem("repairDraftHtml", editor.value);
+  localStorage.setItem(
+    "repairDraftSavedAt",
+    new Date().toISOString()
+  );
+}
+
+function togglePinnedLine(
+  line
+){
+
+  pinnedLine =
+    pinnedLine === line
+      ? null
+      : line;
+
+  updateLineNumbers();
+}
+
+/* ===============================
+   Repair Diagnose / Preview
+=============================== */
+
+async function diagnoseRepairHtml() {
+  let html =
+    get("repairEditor").value;
+
+  const externalJs =
+    await collectExternalScriptText(html);
+
+  const jsForCheck =
+    html + "\n" + externalJs;
+
+  const scripts =
+    getExternalScriptSrcList(html);
+
+  const scriptInfo =
+    scripts.length
+      ? "✔ external scripts:\n" +
+        scripts.join("\n")
+      : "✔ external scripts:none";
+
+  const parser =
+    new DOMParser();
+
+  const doc =
+    parser.parseFromString(
+      html,
+      "text/html"
+    );
+
+  let cleanHtml = html
+    .replace(
+      /&lt;script[\s\S]*?&lt;\/script&gt;/gi,
+      ""
+    )
+    .replace(
+      /&lt;style[\s\S]*?&lt;\/style&gt;/gi,
+      ""
+    );
+
+  const report = [];
+
+  report.push(
+    "Repair HTML Diagnose\n"
+  );
+
+  // div整合性
+  const open =
+    (cleanHtml.match(
+      /&lt;div\b/g
+    ) || []).length;
+
+  const close =
+    (cleanHtml.match(
+      /&lt;\/div&gt;/g
+    ) || []).length;
+
+  report.push(
+    open === close
+      ? `✔ div: ${open}/${close}`
+      : `⚠ div: ${open}/${close}`
+  );
+
+  // DOM
+  const parserError =
+    doc.querySelector(
+      "parsererror"
+    );
+
+  report.push(
+    parserError
+      ? "⚠ DOM解析エラー"
+      : "✔ DOM解析OK"
+  );
+
+  // id重複
+  const ids =
+    [...doc.querySelectorAll("[id]")]
+      .map(el =&gt; el.id);
+
+  const dupIds =
+    [...new Set(
+      ids.filter(
+        (id, i) =&gt;
+        ids.indexOf(id) !== i
+      )
+    )];
+
+  report.push(
+    dupIds.length
+      ? `⚠ id重複\n${dupIds.join("\n")}`
+      : "✔ id重複なし"
+  );
+
+  report.push("");
+  report.push(scriptInfo);
+
+  // JS構文
+  try {
+    const scriptBlocks =
+      [...doc.querySelectorAll("script")];
+
+    scriptBlocks.forEach(s =&gt; {
+      if (s.src) return;
+      new Function(
+        s.textContent
+      );
+    });
+
+    report.push("✔ JS構文OK");
+
+  } catch (e) {
+    report.push(
+      `⚠ JS構文エラー\n${e.message}`
+    );
+  }
+
+  // function重複
+  const htmlForFunctionCheck =
+    jsForCheck
+      .replace(/\/\/.*$/gm, "")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+
+  const funcs =
+    [...htmlForFunctionCheck.matchAll(
+      /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm
+    )]
+    .map(x =&gt; x[1]);
+
+  const dupFuncs =
+    [...new Set(
+      funcs.filter(
+        (f, i) =&gt;
+        funcs.indexOf(f) !== i
+      )
+    )];
+
+  report.push(
+    dupFuncs.length
+      ? `⚠ function重複\n${dupFuncs.join("\n")}`
+      : "✔ function重複なし"
+  );
+
+  // onclick未定義
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )]
+    .map(x =&gt; x[1]);
+
+  const undefinedFns =
+    [...new Set(
+      onclicks.filter(
+        fn =&gt;
+        !funcs.includes(fn)
+      )
+    )];
+
+  report.push(
+    undefinedFns.length
+      ? `⚠ 未定義onclick\n${undefinedFns.join("\n")}`
+      : "✔ onclick定義OK"
+  );
+
+  // 未使用function
+  const unusedFns =
+    funcs.filter(fn =&gt; {
+      if (
+        fn === "diagnoseRepairHtml" ||
+        fn === "closeFloatPanel"
+      ) {
+        return false;
+      }
+
+      const useCount =
+        (jsForCheck.match(
+          new RegExp(
+            "\\b" + fn + "\\b",
+            "g"
+          )
+        ) || []).length;
+
+      return useCount &lt;= 1;
+    });
+
+  report.push(
+    unusedFns.length
+      ? `⚠ 未使用function\n${
+          unusedFns
+            .slice(0, 15)
+            .join("\n")
+        }`
+      : "✔ 未使用functionなし"
+  );
+
+  // 孤立id
+  const orphanIds =
+    ids.filter(id =&gt; {
+      if (
+        !id ||
+        /[()[\]^]/.test(id)
+      ) {
+        return false;
+      }
+
+      try {
+        const useCount =
+          (
+            jsForCheck.match(
+              new RegExp(
+                "\\b" +
+                escapeRegExp(id) +
+                "\\b",
+                "g"
+              )
+            ) || []
+          ).length;
+
+        return useCount &lt;= 1;
+
+      } catch {
+        return false;
+      }
+    });
+
+  report.push(
+    orphanIds.length
+      ? `⚠ 孤立id\n${
+          orphanIds
+            .slice(0, 15)
+            .join("\n")
+        }`
+      : "✔ 孤立idなし"
+  );
+
+  const result =
+    report.join("\n");
+
+  window.latestDiagnoseResult =
+    result;
+
+  openFloatPanel(
+    "編集内容診断",
+    `
+    &lt;div class="float-panel-actions"&gt;
+      &lt;button onclick="copyDiagnoseResult()"&gt;
+        📋 コピー
+      &lt;/button&gt;
+    &lt;/div&gt;
+    &lt;pre
+      id="diagnoseResultBox"
+      class="code-preview"&gt;
+${escapeHtml(result)}
+    &lt;/pre&gt;
+    `
+  );
+}
+
+function copyDiagnoseResult() {
+  const text =
+    window.latestDiagnoseResult || "";
+  if (!text) {
+    alert("コピー内容なし");
+    return;
+  }
+  if (
+    navigator.clipboard &amp;&amp;
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =&gt;
+        alert("コピー完了")
+      )
+      .catch(() =&gt; {
+        const ok =
+          copyTextFallback(text);
+        alert(
+          ok
+            ? "コピー完了"
+            : "コピー失敗"
+        );
+      });
+    return;
+  }
+  const ok =
+    copyTextFallback(text);
+  alert(
+    ok
+      ? "コピー完了"
+      : "コピー失敗"
+  );
+}
+
+function renderFunctionViewer() {
+
+  const box =
+    get("functionViewer");
+
+  const editor =
+    get("repairEditor");
+
+  if (!box || !editor) {
+    return;
+  }
+
+  const blocks =
+    extractCodeBlocksFromText(
+      editor.value
+    );
+
+  const functions =
+    blocks.filter(
+      item =&gt; item.type === "function"
+    );
+
+  box.innerHTML =
+    functions.length
+      ? functions.map((f,index)=&gt;`
+
+&lt;div class="function-view-item"&gt;
+
+  &lt;div
+    class="function-view-line"
+    onclick="toggleFunctionView(${index})"
+    oncontextmenu="event.preventDefault();selectCodeBlockByIndex(${blocks.indexOf(f)})"
+    ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(${blocks.indexOf(f)}),600)"
+    ontouchend="clearTimeout(this._pressTimer)"
+    ontouchmove="clearTimeout(this._pressTimer)"&gt;
+
+    &lt;span class="function-view-mark"&gt;
+      ▶
+    &lt;/span&gt;
+
+    &lt;span class="function-view-name"&gt;
+      ${escapeHtml(f.name)}
+    &lt;/span&gt;
+
+  &lt;/div&gt;
+
+  &lt;pre
+    id="functionView${index}"
+    class="function-view-code"
+    style="display:none;"&gt;${escapeHtml(f.block)}&lt;/pre&gt;
+
+&lt;/div&gt;
+
+`).join("")
+      : "関数なし";
+}
+
+function toggleFunctionView(index) {
+
+  const el =
+    get(
+      "functionView" + index
+    );
+
+  if (!el) {
+    return;
+  }
+
+  el.style.display =
+    el.style.display === "block"
+      ? "none"
+      : "block";
+}
+
+function openViewerMode() {
+
+  const preview =
+    get("repairPreview");
+
+  const viewer =
+    get("functionViewer");
+
+  if (preview) {
+    preview.style.display = "none";
+  }
+
+  renderFunctionViewer();
+
+  if (viewer) {
+    viewer.style.display = "block";
+  }
+
+  updateRepairStatus(
+    "閲覧モード：関数ビュー表示"
+  );
+}
+
+function previewRepairHtml() {
+
+  const box =
+    get("repairPreview");
+
+  const btn =
+    get("previewBtn");
+
+  if (!box) {
+    return;
+  }
+
+  if (box.style.display === "block") {
+
+    box.style.display =
+      "none";
+
+    if (btn) {
+      btn.innerText =
+        "🎨 色分けプレビュー";
+    }
+
+    return;
+  }
+
+  const html =
+    get("repairEditor").value;
+
+  if (!html.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  let escaped =
+    escapeHtml(html);
+
+  escaped = escaped
+    .replace(
+      /(&amp;lt;!--[\s\S]*?--&amp;gt;)/g,
+      '&lt;span class="code-comment"&gt;$1&lt;/span&gt;'
+    )
+    .replace(
+      /(&amp;lt;\/?)([a-zA-Z0-9-]+)/g,
+      '$1&lt;span class="code-tag"&gt;$2&lt;/span&gt;'
+    )
+    .replace(
+      /\s([a-zA-Z-:]+)=/g,
+      ' &lt;span class="code-attr"&gt;$1&lt;/span&gt;='
+    )
+    .replace(
+      /(&amp;quot;.*?&amp;quot;)/g,
+      '&lt;span class="code-string"&gt;$1&lt;/span&gt;'
+    )
+    .replace(
+      /\b(function|const|let|var|return|if|else|try|catch|for|while|switch|case|break|new)\b/g,
+      '&lt;span class="code-keyword"&gt;$1&lt;/span&gt;'
+    );
+
+  box.innerHTML =
+    escaped;
+
+  box.style.display =
+    "block";
+
+  if (btn) {
+    btn.innerText =
+      "❌ プレビュー閉じる";
+  }
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(10)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(24)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(24),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      prevMeaningfulChar
+    </span>
+
+  </div>
+
+  <pre id="functionView10" class="function-view-code" style="display:none;">  function prevMeaningfulChar(pos) {
+    for (let j = pos - 1; j &gt;= 0; j--) {
+      const c = src[j];
+      if (/\s/.test(c)) continue;
+      return c;
+    }
+    return "";
+  }</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(11)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(25)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(25),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      isRegexStart
+    </span>
+
+  </div>
+
+  <pre id="functionView11" class="function-view-code" style="display:none;">  function isRegexStart(pos) {
+    const prev = prevMeaningfulChar(pos);
+    return (
+      !prev ||
+      "({[=:+-!?,;&lt;&gt;*&amp;|^~".includes(prev)
+    );
+  }
+
+  while (i &lt; src.length) {
+
+    const ch = src[i];
+    const next = src[i + 1];
+
+    if (inLineComment) {
+      if (ch === "\n") inLineComment = false;
+      i++;
+      continue;
+    }
+
+    if (inBlockComment) {
+      if (ch === "*" &amp;&amp; next === "/") {
+        inBlockComment = false;
+        i += 2;
+        continue;
+      }
+      i++;
+      continue;
+    }
+
+    if (inRegex) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === "/") {
+        inRegex = false;
+      }
+      i++;
+      continue;
+    }
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === quote) {
+        inString = false;
+        quote = "";
+      }
+      i++;
+      continue;
+    }
+
+    if (ch === "/" &amp;&amp; next === "/") {
+      inLineComment = true;
+      i += 2;
+      continue;
+    }
+
+    if (ch === "/" &amp;&amp; next === "*") {
+      inBlockComment = true;
+      i += 2;
+      continue;
+    }
+
+    if (ch === "/" &amp;&amp; isRegexStart(i)) {
+      inRegex = true;
+      i++;
+      continue;
+    }
+
+    if (ch === "\"" || ch === "'" || ch === "`") {
+      inString = true;
+      quote = ch;
+      i++;
+      continue;
+    }
+
+    if (ch === "{") {
+      depth++;
+    }
+
+    if (ch === "}") {
+      depth--;
+      if (depth === 0) {
+        i++;
+        return {
+          start,
+          end: i,
+          block: src.slice(start, i)
+        };
+      }
+    }
+
+    i++;
+  }
+
+  return null;
+
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(12)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(26)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(26),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      extractFunctionBlocksFromText
+    </span>
+
+  </div>
+
+  <pre id="functionView12" class="function-view-code" style="display:none;">function extractFunctionBlocksFromText(text) {
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  const regex =
+    /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm;
+
+  let match;
+
+  while ((match = regex.exec(source)) !== null) {
+    const name =
+      match[1];
+
+    const start =
+      match.index;
+
+    const braceStart =
+      source.indexOf("{", start);
+
+    if (braceStart === -1) continue;
+
+    let depth = 1;
+    let end = braceStart + 1;
+
+    while (
+      end &lt; source.length &amp;&amp;
+      depth &gt; 0
+    ) {
+      if (source[end] === "{") depth++;
+      if (source[end] === "}") depth--;
+      end++;
+    }
+
+    blocks.push({
+      type: "function",
+      name,
+      start,
+      end,
+      block:
+        source.slice(start, end)
+    });
+  }
+
+  return blocks;
+}
+
+function extractCodeBlocksFromText(text) {
+
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  const functionBlocks =
+    extractFunctionBlocksFromText(source);
+
+  // section comment: 複数行見出し
+  const sectionRegex =
+    /\/\*\s*=+\s*\n([\s\S]*?)\n\s*=+\s*\*\//g;
+
+  [...source.matchAll(sectionRegex)]
+    .forEach(match =&gt; {
+
+      blocks.push({
+        type: "section",
+        name:
+          match[1]
+            .split("\n")
+            .map(x =&gt; x.trim())
+            .filter(Boolean)[0] ||
+          "Section",
+        start: match.index,
+        end:
+          match.index +
+          match[0].length,
+        block: match[0]
+      });
+
+    });
+
+  // top-level let const var only
+  const variableRegex =
+    /^(let|const|var)\s+([a-zA-Z0-9_$]+)/gm;
+
+  [...source.matchAll(variableRegex)]
+    .forEach(match =&gt; {
+
+      const start =
+        match.index;
+
+      const insideFunction =
+        functionBlocks.some(fn =&gt;
+          start &gt; fn.start &amp;&amp;
+          start &lt; fn.end
+        );
+
+      if (insideFunction) {
+        return;
+      }
+
+      const name =
+        match[2];
+
+      let end =
+        source.indexOf(
+          ";",
+          start
+        );
+
+      if (end === -1) {
+        end =
+          source.indexOf(
+            "\n",
+            start
+          );
+      }
+
+      if (end === -1) {
+        end =
+          source.length;
+      }
+
+      blocks.push({
+        type: "variable",
+        name,
+        start,
+        end: end + 1,
+        block:
+          source.slice(
+            start,
+            end + 1
+          )
+      });
+
+    });
+
+  functionBlocks.forEach(item =&gt; {
+
+    blocks.push({
+      type: "function",
+      ...item
+    });
+
+  });
+
+  return blocks.sort(
+    (a,b)=&gt;
+    a.start-b.start
+  );
+}
+
+/* ===============================
+   Code Block List / Move
+=============================== */
+
+function showFunctionList() {
+
+  const editor =
+    get("repairEditor");
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  console.log(
+    "editor total:",
+    text.split(/\r?\n/).length
+  );
+
+  console.log(
+    "has CR:",
+    text.includes("\r")
+  );
+
+  const blocks =
+    extractCodeBlocksFromText(
+      text
+    );
+
+  let html = "";
+
+  if (blocks.length === 0) {
+
+    html = "コードブロックなし";
+
+  } else {
+
+    html =
+      blocks.map((item, i) =&gt; {
+
+        const line =
+          text
+            .slice(
+              0,
+              item.start
+            )
+            .split(/\r?\n/)
+            .length;
+
+        console.log(
+          `[${item.type}] ${item.name} / L${line}`
+        );
+
+        const moveButton =
+          item.type === "function"
+            ? `
+&lt;div class="float-panel-actions"&gt;
+  &lt;button
+    onclick="
+      moveFunctionPrompt(
+        '${item.name}'
+      )
+    "&gt;
+    📦 Move
+  &lt;/button&gt;
+&lt;/div&gt;
+`
+            : "";
+
+return `
+
+&lt;div class="function-list-row"&gt;
+
+  &lt;button
+    class="
+      float-list-btn
+      function-list-select
+    "
+    onclick="
+      selectCodeBlockByIndex(${i});
+      closeFloatPanelKeepEditorSelection();
+    "&gt;
+
+    [${item.type}]
+    ${i + 1}.
+    ${escapeHtml(item.name)}
+    / L${line}
+
+  &lt;/button&gt;
+
+  ${moveButton}
+
+&lt;/div&gt;
+`;
+
+      }).join("");
+  }
+
+  openFloatPanel(
+    `コードブロック一覧 (${blocks.length})`,
+    `
+    &lt;div class="float-panel-actions"&gt;
+      &lt;button onclick="copyCodeBlockList()"&gt;
+        📋 一覧コピー
+      &lt;/button&gt;
+    &lt;/div&gt;
+    ` + html
+  );
+}
+
+function buildCodeBlockListText() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return "";
+
+  const text =
+    editor.value;
+
+  const blocks =
+    extractCodeBlocksFromText(text);
+
+  return blocks.map((item, i) =&gt; {
+
+    const line =
+      text
+        .slice(0, item.start)
+        .split("\n")
+        .length;
+
+    return `[${item.type}] ${i + 1}. ${item.name} / L${line}`;
+
+  }).join("\n");
+}
+
+function copyCodeBlockList() {
+
+  const text =
+    buildCodeBlockListText();
+
+  if (!text) {
+    alert("コピーする一覧がありません");
+    return;
+  }
+
+  if (
+    navigator.clipboard &amp;&amp;
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =&gt;
+        alert("コードブロック一覧をコピーしました")
+      )
+      .catch(() =&gt; {
+        const ok =
+          copyTextFallback(text);
+
+        alert(
+          ok
+            ? "コードブロック一覧をコピーしました"
+            : "コピー失敗"
+        );
+      });
+
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "コードブロック一覧をコピーしました"
+      : "コピー失敗"
+  );
+}
+
+function moveFunctionPrompt(functionName) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const sections =
+    extractCodeBlocksFromText(editor.value)
+      .filter(item =&gt;
+        item.type === "section"
+      );
+
+  if (sections.length === 0) {
+    alert("移動先セクションが見つかりません");
+    return;
+  }
+
+  const html =
+    sections.map(item =&gt; {
+      return `
+&lt;button
+  class="float-list-btn"
+  onclick="
+    moveFunctionToSectionByStart(
+      '${functionName}',
+      ${item.start}
+    );
+  "&gt;
+  ${escapeHtml(item.name)}
+&lt;/button&gt;
+`;
+    }).join("");
+
+  openFloatPanel(
+    `移動先を選択：${functionName}`,
+    html
+  );
+}
+
+function moveFunctionToSectionByStart(
+  functionName,
+  sectionStart
+) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  let html =
+    editor.value;
+
+  const block =
+    findFunctionBlockInText(
+      html,
+      functionName
+    );
+
+  if (!block) {
+    alert("関数が見つかりません");
+    return;
+  }
+
+  const sections =
+    extractCodeBlocksFromText(html)
+      .filter(item =&gt;
+        item.type === "section"
+      );
+
+  const target =
+    sections.find(item =&gt;
+      item.start === sectionStart
+    );
+
+  if (!target) {
+    alert("移動先セクションが見つかりません");
+    return;
+  }
+
+  const ok =
+    confirm(
+      `${functionName}\n\nを\n\n${target.name}\n\nへ移動しますか？`
+    );
+
+  if (!ok) return;
+
+  repairUndoStack.push(html);
+  repairRedoStack = [];
+
+  html =
+    html.slice(0, block.start) +
+    html.slice(block.end);
+
+  let insertPos =
+    target.end;
+
+  if (block.start &lt; target.end) {
+    insertPos =
+      target.end -
+      (block.end - block.start);
+  }
+
+  html =
+    html.slice(0, insertPos) +
+    "\n\n" +
+    block.block +
+    "\n" +
+    html.slice(insertPos);
+
+  editor.value =
+    html;
+
+  repairLastValue =
+    html;
+
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(
+    `${functionName} → ${target.name}`
+  );
+
+  closeFloatPanel();
+
+  alert("移動完了");
+}
+
+/* ===============================
+   Code Block Sort
+=============================== */
+
+function showFunctionSortList() {
+
+  const editor =
+    get("repairEditor");
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  functionSortList =
+    extractCodeBlocksFromText(
+      text
+    );
+
+  if (
+    functionSortList.length === 0
+  ) {
+    openFloatPanel(
+      "コードブロック並べ替え",
+      "コードブロックなし"
+    );
+    return;
+  }
+
+  renderFunctionSortList();
+}
+
+function renderFunctionSortList() {
+
+  const filteredList =
+    getFilteredFunctionSortList();
+
+  const html =
+`
+&lt;div class="float-panel-actions"&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'all'
+      )
+    "&gt;
+    ALL
+  &lt;/button&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'section'
+      )
+    "&gt;
+    SECTION
+  &lt;/button&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'variable'
+      )
+    "&gt;
+    VAR
+  &lt;/button&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'function'
+      )
+    "&gt;
+    FUNC
+  &lt;/button&gt;
+
+&lt;/div&gt;
+
+&lt;div class="float-panel-actions"&gt;
+
+  &lt;button
+    onclick="
+      applyFunctionSortList()
+    "&gt;
+    ✅ 並べ替えを適用
+  &lt;/button&gt;
+
+&lt;/div&gt;
+`
++
+filteredList.map(
+(entry)=&gt;{
+
+const item =
+  entry.item;
+
+const originalIndex =
+  entry.index;
+
+return `
+&lt;div
+
+  class="
+    function-sort-row
+  "
+
+  draggable="true"
+
+  data-index="
+    ${originalIndex}
+  "
+
+  ondragstart="
+    handleFunctionSortDragStart(
+      event
+    )
+  "
+
+  ondragover="
+    handleFunctionSortDragOver(
+      event
+    )
+  "
+
+  ondrop="
+    handleFunctionSortDrop(
+      event
+    )
+  "
+&gt;
+
+  &lt;div
+    class="
+      function-drag-handle
+    "&gt;
+    ≡
+  &lt;/div&gt;
+
+  &lt;button
+
+    class="
+      float-list-btn
+      function-sort-select
+    "
+
+    onclick="
+      selectCodeBlockByIndex(
+        ${originalIndex}
+      );
+
+      closeFloatPanelKeepEditorSelection();
+    "
+
+  &gt;
+
+    [${item.type}]
+    ${originalIndex + 1}.
+    ${escapeHtml(
+      item.name
+    )}
+
+  &lt;/button&gt;
+
+  &lt;div
+    class="
+      function-sort-actions
+    "&gt;
+
+    &lt;button
+      onclick="
+        moveFunctionSortItem(
+          ${originalIndex},
+          -1
+        )
+      "&gt;
+      ↑
+    &lt;/button&gt;
+
+    &lt;button
+      onclick="
+        moveFunctionSortItem(
+          ${originalIndex},
+          1
+        )
+      "&gt;
+      ↓
+    &lt;/button&gt;
+
+  &lt;/div&gt;
+
+&lt;/div&gt;
+`;
+})
+.join("");
+
+  openFloatPanel(
+    `コードブロック並べ替え (${functionSortList.length})`,
+    html
+  );
+}
+
+function moveFunctionSortItem(index, direction) {
+  const next =
+    index + direction;
+
+  if (
+    next &lt; 0 ||
+    next &gt;= functionSortList.length
+  ) {
+    return;
+  }
+
+  const temp =
+    functionSortList[index];
+
+  functionSortList[index] =
+    functionSortList[next];
+
+  functionSortList[next] =
+    temp;
+
+  renderFunctionSortList();
+}
+
+function setFunctionSortFilter(filter) {
+  functionSortFilter = filter;
+  renderFunctionSortList();
+}
+
+function getFilteredFunctionSortList() {
+  if (functionSortFilter === "all") {
+    return functionSortList.map((item, index) =&gt; ({
+      item,
+      index
+    }));
+  }
+
+  return functionSortList
+    .map((item, index) =&gt; ({
+      item,
+      index
+    }))
+    .filter(entry =&gt;
+      entry.item.type === functionSortFilter
+    );
+}
+
+let functionSortDragIndex = null;
+
+function handleFunctionSortDragStart(event) {
+  functionSortDragIndex =
+    Number(
+      event.currentTarget.dataset.index
+    );
+}
+
+function handleFunctionSortDragOver(event) {
+  event.preventDefault();
+}
+
+function handleFunctionSortDrop(event) {
+  event.preventDefault();
+
+  const dropIndex =
+    Number(
+      event.currentTarget.dataset.index
+    );
+
+  if (
+    functionSortDragIndex === null ||
+    functionSortDragIndex === dropIndex
+  ) {
+    return;
+  }
+
+  const item =
+    functionSortList.splice(
+      functionSortDragIndex,
+      1
+    )[0];
+
+  functionSortList.splice(
+    dropIndex,
+    0,
+    item
+  );
+
+  functionSortDragIndex = null;
+
+  renderFunctionSortList();
+}
+
+function applyFunctionSortList() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  const originalBlocks =
+    extractCodeBlocksFromText(text);
+
+  if (
+    originalBlocks.length !==
+    functionSortList.length
+  ) {
+    alert(
+      "コードブロック数が一致しません。\n" +
+      "再度一覧を開き直してください。"
+    );
+    return;
+  }
+
+  const ok =
+    confirm(
+      "現在の並び順をHTMLへ反映します。\n\n" +
+      "事前に保存・バックアップ済みですか？"
+    );
+
+  if (!ok) return;
+
+  repairUndoStack.push(text);
+  repairRedoStack = [];
+
+  let result = "";
+  let cursor = 0;
+
+  originalBlocks.forEach((block, index) =&gt; {
+    result += text.slice(
+      cursor,
+      block.start
+    );
+
+    result +=
+      functionSortList[index].block;
+
+    cursor = block.end;
+  });
+
+  result += text.slice(cursor);
+
+  editor.value = result;
+  repairLastValue = result;
+
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(
+    "コードブロック並べ替え適用"
+  );
+
+  autoSaveRepairDraft();
+
+  alert("並べ替えを適用しました");
+}
+
+/* ===============================
+   Repair Editor Core
+=============================== */
+
+function applyRepairIndent(isOutdent) {
+  const editor = get("repairEditor");
+  if (!editor) return;
+  const value = editor.value;
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  const indent = "  ";
+  repairUndoStack.push(value);
+  repairRedoStack = [];
+  // 単一カーソルでTabの場合
+  if (start === end &amp;&amp; !isOutdent) {
+    editor.value =
+      value.slice(0, start) +
+      indent +
+      value.slice(end);
+    const pos = start + indent.length;
+    editor.selectionStart = pos;
+    editor.selectionEnd = pos;
+  } else {
+    const lineStart =
+      value.lastIndexOf("\n", start - 1) + 1;
+    const before = value.slice(0, lineStart);
+    const target = value.slice(lineStart, end);
+    const after = value.slice(end);
+    const lines = target.split("\n");
+    const changed = isOutdent
+      ? lines.map(line =&gt; {
+          if (line.startsWith(indent)) return line.slice(indent.length);
+          if (line.startsWith(" ")) return line.slice(1);
+          return line;
+        }).join("\n")
+      : lines.map(line =&gt; indent + line).join("\n");
+    editor.value = before + changed + after;
+    const delta =
+      editor.value.length - value.length;
+    editor.selectionStart = start;
+    editor.selectionEnd = end + delta;
+  }
+  editor.focus();
+  repairLastValue = editor.value;
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(isOutdent ? "アウトデント" : "インデント");
+  autoSaveRepairDraft();
+}
+
+function indentRepairSelection() {
+  applyRepairIndent(false);
+}
+
+function outdentRepairSelection() {
+  applyRepairIndent(true);
+}
+
+function enableRepairEditorTabIndent() {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  editor.addEventListener("keydown", (e) =&gt; {
+    if (e.key !== "Tab") return;
+
+    e.preventDefault();
+
+    if (e.shiftKey) {
+      outdentRepairSelection();
+      return;
+    }
+
+    indentRepairSelection();
+  });
+}
+
+function updateLineNumbers() {
+
+  const editor =
+    get("repairEditor");
+
+  const lineBox =
+    get("lineNumbers");
+
+  if (!editor || !lineBox) return;
+
+  const currentLine =
+    editor.value
+      .slice(
+        0,
+        editor.selectionStart
+      )
+      .split("\n")
+      .length;
+
+  const count =
+    editor.value
+      .split("\n")
+      .length || 1;
+
+  lineBox.innerHTML =
+    Array.from(
+      { length: count },
+      (_, i) =&gt; {
+
+        const lineNo =
+          i + 1;
+
+        let cls =
+          "line-number";
+
+        if (
+          lineNo === currentLine
+        ){
+          cls += " active";
+        }
+
+        if (
+          lineNo === pinnedLine
+        ){
+          cls += " pinned";
+        }
+
+        return `
+&lt;div
+  class="${cls}"
+  onclick="
+    togglePinnedLine(
+      ${lineNo}
+    )
+  "
+&gt;
+${lineNo}
+&lt;/div&gt;
+`;
+      }).join("");
+}
+
+function updateRepairStatus(text) {
+  const box = get("repairStatus");
+  if (!box) return;
+  box.innerText = "状態：" + text;
+}
+
+function undoRepairEdit() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairUndoStack.length===0
+  ) return;
+
+  repairRedoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairUndoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Undo実行"
+  );
+}
+
+function redoRepairEdit() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairRedoStack.length===0
+  ) return;
+
+  repairUndoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairRedoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Redo実行"
+  );
+}
+
+function loadRepairDraft() {
+  repairAutoSaveEnabled =
+    localStorage.getItem("repairAutoSaveEnabled") === "1";
+
+  updateRepairStatus(
+    repairAutoSaveEnabled
+      ? "AutoSave ON"
+      : "AutoSave OFF"
+  );
+
+  const draft = localStorage.getItem("repairDraftHtml");
+  if (!draft) return;
+  const ok = confirm("修復モードの自動保存データを復元しますか？");
+  if (!ok) return;
+  get("repairEditor").value = draft;
+  repairLastValue = draft;
+  updateRepairStatus("自動保存データ復元");
+}
+
+function updateCursorPosition() {
+  const editor = get("repairEditor");
+  const box = get("cursorStatus");
+  if (!editor || !box) return;
+  const pos = editor.selectionStart || 0;
+  const before = editor.value.slice(0, pos);
+  const line = before.split("\n").length;
+  const col =
+    before.length -
+    before.lastIndexOf("\n");
+  box.innerText =
+    `Ln ${line} / Col ${col}`;
+  updateLineNumbers();
+}
+
+function toggleRepairAutoSave() {
+  repairAutoSaveEnabled = !repairAutoSaveEnabled;
+  localStorage.setItem(
+    "repairAutoSaveEnabled",
+    repairAutoSaveEnabled ? "1" : "0"
+  );
+  updateRepairStatus(
+    repairAutoSaveEnabled ? "AutoSave ON" : "AutoSave OFF"
+  );
+}
+
+function autoSaveRepairDraft() {
+  if (!repairAutoSaveEnabled) return;
+  const editor = get("repairEditor");
+  if (!editor) return;
+  localStorage.setItem("repairDraftHtml", editor.value);
+  localStorage.setItem(
+    "repairDraftSavedAt",
+    new Date().toISOString()
+  );
+}
+
+function togglePinnedLine(
+  line
+){
+
+  pinnedLine =
+    pinnedLine === line
+      ? null
+      : line;
+
+  updateLineNumbers();
+}
+
+/* ===============================
+   Repair Diagnose / Preview
+=============================== */
+
+async function diagnoseRepairHtml() {
+  let html =
+    get("repairEditor").value;
+
+  const externalJs =
+    await collectExternalScriptText(html);
+
+  const jsForCheck =
+    html + "\n" + externalJs;
+
+  const scripts =
+    getExternalScriptSrcList(html);
+
+  const scriptInfo =
+    scripts.length
+      ? "✔ external scripts:\n" +
+        scripts.join("\n")
+      : "✔ external scripts:none";
+
+  const parser =
+    new DOMParser();
+
+  const doc =
+    parser.parseFromString(
+      html,
+      "text/html"
+    );
+
+  let cleanHtml = html
+    .replace(
+      /&lt;script[\s\S]*?&lt;\/script&gt;/gi,
+      ""
+    )
+    .replace(
+      /&lt;style[\s\S]*?&lt;\/style&gt;/gi,
+      ""
+    );
+
+  const report = [];
+
+  report.push(
+    "Repair HTML Diagnose\n"
+  );
+
+  // div整合性
+  const open =
+    (cleanHtml.match(
+      /&lt;div\b/g
+    ) || []).length;
+
+  const close =
+    (cleanHtml.match(
+      /&lt;\/div&gt;/g
+    ) || []).length;
+
+  report.push(
+    open === close
+      ? `✔ div: ${open}/${close}`
+      : `⚠ div: ${open}/${close}`
+  );
+
+  // DOM
+  const parserError =
+    doc.querySelector(
+      "parsererror"
+    );
+
+  report.push(
+    parserError
+      ? "⚠ DOM解析エラー"
+      : "✔ DOM解析OK"
+  );
+
+  // id重複
+  const ids =
+    [...doc.querySelectorAll("[id]")]
+      .map(el =&gt; el.id);
+
+  const dupIds =
+    [...new Set(
+      ids.filter(
+        (id, i) =&gt;
+        ids.indexOf(id) !== i
+      )
+    )];
+
+  report.push(
+    dupIds.length
+      ? `⚠ id重複\n${dupIds.join("\n")}`
+      : "✔ id重複なし"
+  );
+
+  report.push("");
+  report.push(scriptInfo);
+
+  // JS構文
+  try {
+    const scriptBlocks =
+      [...doc.querySelectorAll("script")];
+
+    scriptBlocks.forEach(s =&gt; {
+      if (s.src) return;
+      new Function(
+        s.textContent
+      );
+    });
+
+    report.push("✔ JS構文OK");
+
+  } catch (e) {
+    report.push(
+      `⚠ JS構文エラー\n${e.message}`
+    );
+  }
+
+  // function重複
+  const htmlForFunctionCheck =
+    jsForCheck
+      .replace(/\/\/.*$/gm, "")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+
+  const funcs =
+    [...htmlForFunctionCheck.matchAll(
+      /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm
+    )]
+    .map(x =&gt; x[1]);
+
+  const dupFuncs =
+    [...new Set(
+      funcs.filter(
+        (f, i) =&gt;
+        funcs.indexOf(f) !== i
+      )
+    )];
+
+  report.push(
+    dupFuncs.length
+      ? `⚠ function重複\n${dupFuncs.join("\n")}`
+      : "✔ function重複なし"
+  );
+
+  // onclick未定義
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )]
+    .map(x =&gt; x[1]);
+
+  const undefinedFns =
+    [...new Set(
+      onclicks.filter(
+        fn =&gt;
+        !funcs.includes(fn)
+      )
+    )];
+
+  report.push(
+    undefinedFns.length
+      ? `⚠ 未定義onclick\n${undefinedFns.join("\n")}`
+      : "✔ onclick定義OK"
+  );
+
+  // 未使用function
+  const unusedFns =
+    funcs.filter(fn =&gt; {
+      if (
+        fn === "diagnoseRepairHtml" ||
+        fn === "closeFloatPanel"
+      ) {
+        return false;
+      }
+
+      const useCount =
+        (jsForCheck.match(
+          new RegExp(
+            "\\b" + fn + "\\b",
+            "g"
+          )
+        ) || []).length;
+
+      return useCount &lt;= 1;
+    });
+
+  report.push(
+    unusedFns.length
+      ? `⚠ 未使用function\n${
+          unusedFns
+            .slice(0, 15)
+            .join("\n")
+        }`
+      : "✔ 未使用functionなし"
+  );
+
+  // 孤立id
+  const orphanIds =
+    ids.filter(id =&gt; {
+      if (
+        !id ||
+        /[()[\]^]/.test(id)
+      ) {
+        return false;
+      }
+
+      try {
+        const useCount =
+          (
+            jsForCheck.match(
+              new RegExp(
+                "\\b" +
+                escapeRegExp(id) +
+                "\\b",
+                "g"
+              )
+            ) || []
+          ).length;
+
+        return useCount &lt;= 1;
+
+      } catch {
+        return false;
+      }
+    });
+
+  report.push(
+    orphanIds.length
+      ? `⚠ 孤立id\n${
+          orphanIds
+            .slice(0, 15)
+            .join("\n")
+        }`
+      : "✔ 孤立idなし"
+  );
+
+  const result =
+    report.join("\n");
+
+  window.latestDiagnoseResult =
+    result;
+
+  openFloatPanel(
+    "編集内容診断",
+    `
+    &lt;div class="float-panel-actions"&gt;
+      &lt;button onclick="copyDiagnoseResult()"&gt;
+        📋 コピー
+      &lt;/button&gt;
+    &lt;/div&gt;
+    &lt;pre
+      id="diagnoseResultBox"
+      class="code-preview"&gt;
+${escapeHtml(result)}
+    &lt;/pre&gt;
+    `
+  );
+}
+
+function copyDiagnoseResult() {
+  const text =
+    window.latestDiagnoseResult || "";
+  if (!text) {
+    alert("コピー内容なし");
+    return;
+  }
+  if (
+    navigator.clipboard &amp;&amp;
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =&gt;
+        alert("コピー完了")
+      )
+      .catch(() =&gt; {
+        const ok =
+          copyTextFallback(text);
+        alert(
+          ok
+            ? "コピー完了"
+            : "コピー失敗"
+        );
+      });
+    return;
+  }
+  const ok =
+    copyTextFallback(text);
+  alert(
+    ok
+      ? "コピー完了"
+      : "コピー失敗"
+  );
+}
+
+function renderFunctionViewer() {
+
+  const box =
+    get("functionViewer");
+
+  const editor =
+    get("repairEditor");
+
+  if (!box || !editor) {
+    return;
+  }
+
+  const blocks =
+    extractCodeBlocksFromText(
+      editor.value
+    );
+
+  const functions =
+    blocks.filter(
+      item =&gt; item.type === "function"
+    );
+
+  box.innerHTML =
+    functions.length
+      ? functions.map((f,index)=&gt;`
+
+&lt;div class="function-view-item"&gt;
+
+  &lt;div
+    class="function-view-line"
+    onclick="toggleFunctionView(${index})"
+    oncontextmenu="event.preventDefault();selectCodeBlockByIndex(${blocks.indexOf(f)})"
+    ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(${blocks.indexOf(f)}),600)"
+    ontouchend="clearTimeout(this._pressTimer)"
+    ontouchmove="clearTimeout(this._pressTimer)"&gt;
+
+    &lt;span class="function-view-mark"&gt;
+      ▶
+    &lt;/span&gt;
+
+    &lt;span class="function-view-name"&gt;
+      ${escapeHtml(f.name)}
+    &lt;/span&gt;
+
+  &lt;/div&gt;
+
+  &lt;pre
+    id="functionView${index}"
+    class="function-view-code"
+    style="display:none;"&gt;${escapeHtml(f.block)}&lt;/pre&gt;
+
+&lt;/div&gt;
+
+`).join("")
+      : "関数なし";
+}
+
+function toggleFunctionView(index) {
+
+  const el =
+    get(
+      "functionView" + index
+    );
+
+  if (!el) {
+    return;
+  }
+
+  el.style.display =
+    el.style.display === "block"
+      ? "none"
+      : "block";
+}
+
+function openViewerMode() {
+
+  const preview =
+    get("repairPreview");
+
+  const viewer =
+    get("functionViewer");
+
+  if (preview) {
+    preview.style.display = "none";
+  }
+
+  renderFunctionViewer();
+
+  if (viewer) {
+    viewer.style.display = "block";
+  }
+
+  updateRepairStatus(
+    "閲覧モード：関数ビュー表示"
+  );
+}
+
+function previewRepairHtml() {
+
+  const box =
+    get("repairPreview");
+
+  const btn =
+    get("previewBtn");
+
+  if (!box) {
+    return;
+  }
+
+  if (box.style.display === "block") {
+
+    box.style.display =
+      "none";
+
+    if (btn) {
+      btn.innerText =
+        "🎨 色分けプレビュー";
+    }
+
+    return;
+  }
+
+  const html =
+    get("repairEditor").value;
+
+  if (!html.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  let escaped =
+    escapeHtml(html);
+
+  escaped = escaped
+    .replace(
+      /(&amp;lt;!--[\s\S]*?--&amp;gt;)/g,
+      '&lt;span class="code-comment"&gt;$1&lt;/span&gt;'
+    )
+    .replace(
+      /(&amp;lt;\/?)([a-zA-Z0-9-]+)/g,
+      '$1&lt;span class="code-tag"&gt;$2&lt;/span&gt;'
+    )
+    .replace(
+      /\s([a-zA-Z-:]+)=/g,
+      ' &lt;span class="code-attr"&gt;$1&lt;/span&gt;='
+    )
+    .replace(
+      /(&amp;quot;.*?&amp;quot;)/g,
+      '&lt;span class="code-string"&gt;$1&lt;/span&gt;'
+    )
+    .replace(
+      /\b(function|const|let|var|return|if|else|try|catch|for|while|switch|case|break|new)\b/g,
+      '&lt;span class="code-keyword"&gt;$1&lt;/span&gt;'
+    );
+
+  box.innerHTML =
+    escaped;
+
+  box.style.display =
+    "block";
+
+  if (btn) {
+    btn.innerText =
+      "❌ プレビュー閉じる";
+  }
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(13)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(27)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(27),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      extractCodeBlocksFromText
+    </span>
+
+  </div>
+
+  <pre id="functionView13" class="function-view-code" style="display:none;">function extractCodeBlocksFromText(text) {
+
+  const source =
+    String(text || "");
+
+  const blocks = [];
+
+  const functionBlocks =
+    extractFunctionBlocksFromText(source);
+
+  // section comment: 複数行見出し
+  const sectionRegex =
+    /\/\*\s*=+\s*\n([\s\S]*?)\n\s*=+\s*\*\//g;
+
+  [...source.matchAll(sectionRegex)]
+    .forEach(match =&gt; {
+
+      blocks.push({
+        type: "section",
+        name:
+          match[1]
+            .split("\n")
+            .map(x =&gt; x.trim())
+            .filter(Boolean)[0] ||
+          "Section",
+        start: match.index,
+        end:
+          match.index +
+          match[0].length,
+        block: match[0]
+      });
+
+    });
+
+  // top-level let const var only
+  const variableRegex =
+    /^(let|const|var)\s+([a-zA-Z0-9_$]+)/gm;
+
+  [...source.matchAll(variableRegex)]
+    .forEach(match =&gt; {
+
+      const start =
+        match.index;
+
+      const insideFunction =
+        functionBlocks.some(fn =&gt;
+          start &gt; fn.start &amp;&amp;
+          start &lt; fn.end
+        );
+
+      if (insideFunction) {
+        return;
+      }
+
+      const name =
+        match[2];
+
+      let end =
+        source.indexOf(
+          ";",
+          start
+        );
+
+      if (end === -1) {
+        end =
+          source.indexOf(
+            "\n",
+            start
+          );
+      }
+
+      if (end === -1) {
+        end =
+          source.length;
+      }
+
+      blocks.push({
+        type: "variable",
+        name,
+        start,
+        end: end + 1,
+        block:
+          source.slice(
+            start,
+            end + 1
+          )
+      });
+
+    });
+
+  functionBlocks.forEach(item =&gt; {
+
+    blocks.push({
+      type: "function",
+      ...item
+    });
+
+  });
+
+  return blocks.sort(
+    (a,b)=&gt;
+    a.start-b.start
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(14)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(29)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(29),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      showFunctionList
+    </span>
+
+  </div>
+
+  <pre id="functionView14" class="function-view-code" style="display:none;">function showFunctionList() {
+
+  const editor =
+    get("repairEditor");
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  console.log(
+    "editor total:",
+    text.split(/\r?\n/).length
+  );
+
+  console.log(
+    "has CR:",
+    text.includes("\r")
+  );
+
+  const blocks =
+    extractCodeBlocksFromText(
+      text
+    );
+
+  let html = "";
+
+  if (blocks.length === 0) {
+
+    html = "コードブロックなし";
+
+  } else {
+
+    html =
+      blocks.map((item, i) =&gt; {
+
+        const line =
+          text
+            .slice(
+              0,
+              item.start
+            )
+            .split(/\r?\n/)
+            .length;
+
+        console.log(
+          `[${item.type}] ${item.name} / L${line}`
+        );
+
+        const moveButton =
+          item.type === "function"
+            ? `
+&lt;div class="float-panel-actions"&gt;
+  &lt;button
+    onclick="
+      moveFunctionPrompt(
+        '${item.name}'
+      )
+    "&gt;
+    📦 Move
+  &lt;/button&gt;
+&lt;/div&gt;
+`
+            : "";
+
+return `
+
+&lt;div class="function-list-row"&gt;
+
+  &lt;button
+    class="
+      float-list-btn
+      function-list-select
+    "
+    onclick="
+      selectCodeBlockByIndex(${i});
+      closeFloatPanelKeepEditorSelection();
+    "&gt;
+
+    [${item.type}]
+    ${i + 1}.
+    ${escapeHtml(item.name)}
+    / L${line}
+
+  &lt;/button&gt;
+
+  ${moveButton}
+
+&lt;/div&gt;
+`;
+
+      }).join("");
+  }
+
+  openFloatPanel(
+    `コードブロック一覧 (${blocks.length})`,
+    `
+    &lt;div class="float-panel-actions"&gt;
+      &lt;button onclick="copyCodeBlockList()"&gt;
+        📋 一覧コピー
+      &lt;/button&gt;
+    &lt;/div&gt;
+    ` + html
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(15)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(30)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(30),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      buildCodeBlockListText
+    </span>
+
+  </div>
+
+  <pre id="functionView15" class="function-view-code" style="display:none;">function buildCodeBlockListText() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return "";
+
+  const text =
+    editor.value;
+
+  const blocks =
+    extractCodeBlocksFromText(text);
+
+  return blocks.map((item, i) =&gt; {
+
+    const line =
+      text
+        .slice(0, item.start)
+        .split("\n")
+        .length;
+
+    return `[${item.type}] ${i + 1}. ${item.name} / L${line}`;
+
+  }).join("\n");
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(16)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(31)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(31),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      copyCodeBlockList
+    </span>
+
+  </div>
+
+  <pre id="functionView16" class="function-view-code" style="display:none;">function copyCodeBlockList() {
+
+  const text =
+    buildCodeBlockListText();
+
+  if (!text) {
+    alert("コピーする一覧がありません");
+    return;
+  }
+
+  if (
+    navigator.clipboard &amp;&amp;
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =&gt;
+        alert("コードブロック一覧をコピーしました")
+      )
+      .catch(() =&gt; {
+        const ok =
+          copyTextFallback(text);
+
+        alert(
+          ok
+            ? "コードブロック一覧をコピーしました"
+            : "コピー失敗"
+        );
+      });
+
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "コードブロック一覧をコピーしました"
+      : "コピー失敗"
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(17)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(32)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(32),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      moveFunctionPrompt
+    </span>
+
+  </div>
+
+  <pre id="functionView17" class="function-view-code" style="display:none;">function moveFunctionPrompt(functionName) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const sections =
+    extractCodeBlocksFromText(editor.value)
+      .filter(item =&gt;
+        item.type === "section"
+      );
+
+  if (sections.length === 0) {
+    alert("移動先セクションが見つかりません");
+    return;
+  }
+
+  const html =
+    sections.map(item =&gt; {
+      return `
+&lt;button
+  class="float-list-btn"
+  onclick="
+    moveFunctionToSectionByStart(
+      '${functionName}',
+      ${item.start}
+    );
+  "&gt;
+  ${escapeHtml(item.name)}
+&lt;/button&gt;
+`;
+    }).join("");
+
+  openFloatPanel(
+    `移動先を選択：${functionName}`,
+    html
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(18)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(33)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(33),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      moveFunctionToSectionByStart
+    </span>
+
+  </div>
+
+  <pre id="functionView18" class="function-view-code" style="display:none;">function moveFunctionToSectionByStart(
+  functionName,
+  sectionStart
+) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  let html =
+    editor.value;
+
+  const block =
+    findFunctionBlockInText(
+      html,
+      functionName
+    );
+
+  if (!block) {
+    alert("関数が見つかりません");
+    return;
+  }
+
+  const sections =
+    extractCodeBlocksFromText(html)
+      .filter(item =&gt;
+        item.type === "section"
+      );
+
+  const target =
+    sections.find(item =&gt;
+      item.start === sectionStart
+    );
+
+  if (!target) {
+    alert("移動先セクションが見つかりません");
+    return;
+  }
+
+  const ok =
+    confirm(
+      `${functionName}\n\nを\n\n${target.name}\n\nへ移動しますか？`
+    );
+
+  if (!ok) return;
+
+  repairUndoStack.push(html);
+  repairRedoStack = [];
+
+  html =
+    html.slice(0, block.start) +
+    html.slice(block.end);
+
+  let insertPos =
+    target.end;
+
+  if (block.start &lt; target.end) {
+    insertPos =
+      target.end -
+      (block.end - block.start);
+  }
+
+  html =
+    html.slice(0, insertPos) +
+    "\n\n" +
+    block.block +
+    "\n" +
+    html.slice(insertPos);
+
+  editor.value =
+    html;
+
+  repairLastValue =
+    html;
+
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(
+    `${functionName} → ${target.name}`
+  );
+
+  closeFloatPanel();
+
+  alert("移動完了");
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(19)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(35)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(35),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      showFunctionSortList
+    </span>
+
+  </div>
+
+  <pre id="functionView19" class="function-view-code" style="display:none;">function showFunctionSortList() {
+
+  const editor =
+    get("repairEditor");
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  functionSortList =
+    extractCodeBlocksFromText(
+      text
+    );
+
+  if (
+    functionSortList.length === 0
+  ) {
+    openFloatPanel(
+      "コードブロック並べ替え",
+      "コードブロックなし"
+    );
+    return;
+  }
+
+  renderFunctionSortList();
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(20)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(36)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(36),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      renderFunctionSortList
+    </span>
+
+  </div>
+
+  <pre id="functionView20" class="function-view-code" style="display:none;">function renderFunctionSortList() {
+
+  const filteredList =
+    getFilteredFunctionSortList();
+
+  const html =
+`
+&lt;div class="float-panel-actions"&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'all'
+      )
+    "&gt;
+    ALL
+  &lt;/button&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'section'
+      )
+    "&gt;
+    SECTION
+  &lt;/button&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'variable'
+      )
+    "&gt;
+    VAR
+  &lt;/button&gt;
+
+  &lt;button
+    onclick="
+      setFunctionSortFilter(
+        'function'
+      )
+    "&gt;
+    FUNC
+  &lt;/button&gt;
+
+&lt;/div&gt;
+
+&lt;div class="float-panel-actions"&gt;
+
+  &lt;button
+    onclick="
+      applyFunctionSortList()
+    "&gt;
+    ✅ 並べ替えを適用
+  &lt;/button&gt;
+
+&lt;/div&gt;
+`
++
+filteredList.map(
+(entry)=&gt;{
+
+const item =
+  entry.item;
+
+const originalIndex =
+  entry.index;
+
+return `
+&lt;div
+
+  class="
+    function-sort-row
+  "
+
+  draggable="true"
+
+  data-index="
+    ${originalIndex}
+  "
+
+  ondragstart="
+    handleFunctionSortDragStart(
+      event
+    )
+  "
+
+  ondragover="
+    handleFunctionSortDragOver(
+      event
+    )
+  "
+
+  ondrop="
+    handleFunctionSortDrop(
+      event
+    )
+  "
+&gt;
+
+  &lt;div
+    class="
+      function-drag-handle
+    "&gt;
+    ≡
+  &lt;/div&gt;
+
+  &lt;button
+
+    class="
+      float-list-btn
+      function-sort-select
+    "
+
+    onclick="
+      selectCodeBlockByIndex(
+        ${originalIndex}
+      );
+
+      closeFloatPanelKeepEditorSelection();
+    "
+
+  &gt;
+
+    [${item.type}]
+    ${originalIndex + 1}.
+    ${escapeHtml(
+      item.name
+    )}
+
+  &lt;/button&gt;
+
+  &lt;div
+    class="
+      function-sort-actions
+    "&gt;
+
+    &lt;button
+      onclick="
+        moveFunctionSortItem(
+          ${originalIndex},
+          -1
+        )
+      "&gt;
+      ↑
+    &lt;/button&gt;
+
+    &lt;button
+      onclick="
+        moveFunctionSortItem(
+          ${originalIndex},
+          1
+        )
+      "&gt;
+      ↓
+    &lt;/button&gt;
+
+  &lt;/div&gt;
+
+&lt;/div&gt;
+`;
+})
+.join("");
+
+  openFloatPanel(
+    `コードブロック並べ替え (${functionSortList.length})`,
+    html
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(21)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(37)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(37),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      moveFunctionSortItem
+    </span>
+
+  </div>
+
+  <pre id="functionView21" class="function-view-code" style="display:none;">function moveFunctionSortItem(index, direction) {
+  const next =
+    index + direction;
+
+  if (
+    next &lt; 0 ||
+    next &gt;= functionSortList.length
+  ) {
+    return;
+  }
+
+  const temp =
+    functionSortList[index];
+
+  functionSortList[index] =
+    functionSortList[next];
+
+  functionSortList[next] =
+    temp;
+
+  renderFunctionSortList();
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(22)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(38)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(38),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      setFunctionSortFilter
+    </span>
+
+  </div>
+
+  <pre id="functionView22" class="function-view-code" style="display:none;">function setFunctionSortFilter(filter) {
+  functionSortFilter = filter;
+  renderFunctionSortList();
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(23)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(39)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(39),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      getFilteredFunctionSortList
+    </span>
+
+  </div>
+
+  <pre id="functionView23" class="function-view-code" style="display:none;">function getFilteredFunctionSortList() {
+  if (functionSortFilter === "all") {
+    return functionSortList.map((item, index) =&gt; ({
+      item,
+      index
+    }));
+  }
+
+  return functionSortList
+    .map((item, index) =&gt; ({
+      item,
+      index
+    }))
+    .filter(entry =&gt;
+      entry.item.type === functionSortFilter
+    );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(24)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(40)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(40),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      handleFunctionSortDragStart
+    </span>
+
+  </div>
+
+  <pre id="functionView24" class="function-view-code" style="display:none;">function handleFunctionSortDragStart(event) {
+  functionSortDragIndex =
+    Number(
+      event.currentTarget.dataset.index
+    );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(25)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(41)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(41),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      handleFunctionSortDragOver
+    </span>
+
+  </div>
+
+  <pre id="functionView25" class="function-view-code" style="display:none;">function handleFunctionSortDragOver(event) {
+  event.preventDefault();
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(26)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(42)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(42),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      handleFunctionSortDrop
+    </span>
+
+  </div>
+
+  <pre id="functionView26" class="function-view-code" style="display:none;">function handleFunctionSortDrop(event) {
+  event.preventDefault();
+
+  const dropIndex =
+    Number(
+      event.currentTarget.dataset.index
+    );
+
+  if (
+    functionSortDragIndex === null ||
+    functionSortDragIndex === dropIndex
+  ) {
+    return;
+  }
+
+  const item =
+    functionSortList.splice(
+      functionSortDragIndex,
+      1
+    )[0];
+
+  functionSortList.splice(
+    dropIndex,
+    0,
+    item
+  );
+
+  functionSortDragIndex = null;
+
+  renderFunctionSortList();
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(27)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(43)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(43),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      applyFunctionSortList
+    </span>
+
+  </div>
+
+  <pre id="functionView27" class="function-view-code" style="display:none;">function applyFunctionSortList() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const text =
+    editor.value;
+
+  if (!text.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  const originalBlocks =
+    extractCodeBlocksFromText(text);
+
+  if (
+    originalBlocks.length !==
+    functionSortList.length
+  ) {
+    alert(
+      "コードブロック数が一致しません。\n" +
+      "再度一覧を開き直してください。"
+    );
+    return;
+  }
+
+  const ok =
+    confirm(
+      "現在の並び順をHTMLへ反映します。\n\n" +
+      "事前に保存・バックアップ済みですか？"
+    );
+
+  if (!ok) return;
+
+  repairUndoStack.push(text);
+  repairRedoStack = [];
+
+  let result = "";
+  let cursor = 0;
+
+  originalBlocks.forEach((block, index) =&gt; {
+    result += text.slice(
+      cursor,
+      block.start
+    );
+
+    result +=
+      functionSortList[index].block;
+
+    cursor = block.end;
+  });
+
+  result += text.slice(cursor);
+
+  editor.value = result;
+  repairLastValue = result;
+
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(
+    "コードブロック並べ替え適用"
+  );
+
+  autoSaveRepairDraft();
+
+  alert("並べ替えを適用しました");
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(28)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(45)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(45),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      applyRepairIndent
+    </span>
+
+  </div>
+
+  <pre id="functionView28" class="function-view-code" style="display:none;">function applyRepairIndent(isOutdent) {
+  const editor = get("repairEditor");
+  if (!editor) return;
+  const value = editor.value;
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  const indent = "  ";
+  repairUndoStack.push(value);
+  repairRedoStack = [];
+  // 単一カーソルでTabの場合
+  if (start === end &amp;&amp; !isOutdent) {
+    editor.value =
+      value.slice(0, start) +
+      indent +
+      value.slice(end);
+    const pos = start + indent.length;
+    editor.selectionStart = pos;
+    editor.selectionEnd = pos;
+  } else {
+    const lineStart =
+      value.lastIndexOf("\n", start - 1) + 1;
+    const before = value.slice(0, lineStart);
+    const target = value.slice(lineStart, end);
+    const after = value.slice(end);
+    const lines = target.split("\n");
+    const changed = isOutdent
+      ? lines.map(line =&gt; {
+          if (line.startsWith(indent)) return line.slice(indent.length);
+          if (line.startsWith(" ")) return line.slice(1);
+          return line;
+        }).join("\n")
+      : lines.map(line =&gt; indent + line).join("\n");
+    editor.value = before + changed + after;
+    const delta =
+      editor.value.length - value.length;
+    editor.selectionStart = start;
+    editor.selectionEnd = end + delta;
+  }
+  editor.focus();
+  repairLastValue = editor.value;
+  updateLineNumbers();
+  updateCursorPosition();
+  updateRepairStatus(isOutdent ? "アウトデント" : "インデント");
+  autoSaveRepairDraft();
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(29)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(46)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(46),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      indentRepairSelection
+    </span>
+
+  </div>
+
+  <pre id="functionView29" class="function-view-code" style="display:none;">function indentRepairSelection() {
+  applyRepairIndent(false);
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(30)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(47)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(47),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      outdentRepairSelection
+    </span>
+
+  </div>
+
+  <pre id="functionView30" class="function-view-code" style="display:none;">function outdentRepairSelection() {
+  applyRepairIndent(true);
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(31)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(48)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(48),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      enableRepairEditorTabIndent
+    </span>
+
+  </div>
+
+  <pre id="functionView31" class="function-view-code" style="display:none;">function enableRepairEditorTabIndent() {
+  const editor = get("repairEditor");
+  if (!editor) return;
+
+  editor.addEventListener("keydown", (e) =&gt; {
+    if (e.key !== "Tab") return;
+
+    e.preventDefault();
+
+    if (e.shiftKey) {
+      outdentRepairSelection();
+      return;
+    }
+
+    indentRepairSelection();
+  });
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(32)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(49)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(49),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      updateLineNumbers
+    </span>
+
+  </div>
+
+  <pre id="functionView32" class="function-view-code" style="display:none;">function updateLineNumbers() {
+
+  const editor =
+    get("repairEditor");
+
+  const lineBox =
+    get("lineNumbers");
+
+  if (!editor || !lineBox) return;
+
+  const currentLine =
+    editor.value
+      .slice(
+        0,
+        editor.selectionStart
+      )
+      .split("\n")
+      .length;
+
+  const count =
+    editor.value
+      .split("\n")
+      .length || 1;
+
+  lineBox.innerHTML =
+    Array.from(
+      { length: count },
+      (_, i) =&gt; {
+
+        const lineNo =
+          i + 1;
+
+        let cls =
+          "line-number";
+
+        if (
+          lineNo === currentLine
+        ){
+          cls += " active";
+        }
+
+        if (
+          lineNo === pinnedLine
+        ){
+          cls += " pinned";
+        }
+
+        return `
+&lt;div
+  class="${cls}"
+  onclick="
+    togglePinnedLine(
+      ${lineNo}
+    )
+  "
+&gt;
+${lineNo}
+&lt;/div&gt;
+`;
+      }).join("");
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(33)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(50)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(50),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      updateRepairStatus
+    </span>
+
+  </div>
+
+  <pre id="functionView33" class="function-view-code" style="display:none;">function updateRepairStatus(text) {
+  const box = get("repairStatus");
+  if (!box) return;
+  box.innerText = "状態：" + text;
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(34)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(51)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(51),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      undoRepairEdit
+    </span>
+
+  </div>
+
+  <pre id="functionView34" class="function-view-code" style="display:none;">function undoRepairEdit() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairUndoStack.length===0
+  ) return;
+
+  repairRedoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairUndoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Undo実行"
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(35)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(52)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(52),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      redoRepairEdit
+    </span>
+
+  </div>
+
+  <pre id="functionView35" class="function-view-code" style="display:none;">function redoRepairEdit() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    repairRedoStack.length===0
+  ) return;
+
+  repairUndoStack.push(
+    editor.value
+  );
+
+  editor.value =
+    repairRedoStack.pop();
+
+  repairLastValue =
+    editor.value;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    "Redo実行"
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(36)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(53)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(53),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      loadRepairDraft
+    </span>
+
+  </div>
+
+  <pre id="functionView36" class="function-view-code" style="display:none;">function loadRepairDraft() {
+  repairAutoSaveEnabled =
+    localStorage.getItem("repairAutoSaveEnabled") === "1";
+
+  updateRepairStatus(
+    repairAutoSaveEnabled
+      ? "AutoSave ON"
+      : "AutoSave OFF"
+  );
+
+  const draft = localStorage.getItem("repairDraftHtml");
+  if (!draft) return;
+  const ok = confirm("修復モードの自動保存データを復元しますか？");
+  if (!ok) return;
+  get("repairEditor").value = draft;
+  repairLastValue = draft;
+  updateRepairStatus("自動保存データ復元");
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(37)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(54)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(54),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      updateCursorPosition
+    </span>
+
+  </div>
+
+  <pre id="functionView37" class="function-view-code" style="display:none;">function updateCursorPosition() {
+  const editor = get("repairEditor");
+  const box = get("cursorStatus");
+  if (!editor || !box) return;
+  const pos = editor.selectionStart || 0;
+  const before = editor.value.slice(0, pos);
+  const line = before.split("\n").length;
+  const col =
+    before.length -
+    before.lastIndexOf("\n");
+  box.innerText =
+    `Ln ${line} / Col ${col}`;
+  updateLineNumbers();
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(38)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(55)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(55),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      toggleRepairAutoSave
+    </span>
+
+  </div>
+
+  <pre id="functionView38" class="function-view-code" style="display:none;">function toggleRepairAutoSave() {
+  repairAutoSaveEnabled = !repairAutoSaveEnabled;
+  localStorage.setItem(
+    "repairAutoSaveEnabled",
+    repairAutoSaveEnabled ? "1" : "0"
+  );
+  updateRepairStatus(
+    repairAutoSaveEnabled ? "AutoSave ON" : "AutoSave OFF"
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(39)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(56)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(56),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      autoSaveRepairDraft
+    </span>
+
+  </div>
+
+  <pre id="functionView39" class="function-view-code" style="display:none;">function autoSaveRepairDraft() {
+  if (!repairAutoSaveEnabled) return;
+  const editor = get("repairEditor");
+  if (!editor) return;
+  localStorage.setItem("repairDraftHtml", editor.value);
+  localStorage.setItem(
+    "repairDraftSavedAt",
+    new Date().toISOString()
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(40)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(57)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(57),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      togglePinnedLine
+    </span>
+
+  </div>
+
+  <pre id="functionView40" class="function-view-code" style="display:none;">function togglePinnedLine(
+  line
+){
+
+  pinnedLine =
+    pinnedLine === line
+      ? null
+      : line;
+
+  updateLineNumbers();
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(41)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(59)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(59),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      diagnoseRepairHtml
+    </span>
+
+  </div>
+
+  <pre id="functionView41" class="function-view-code" style="display:none;">async function diagnoseRepairHtml() {
+  let html =
+    get("repairEditor").value;
+
+  const externalJs =
+    await collectExternalScriptText(html);
+
+  const jsForCheck =
+    html + "\n" + externalJs;
+
+  const scripts =
+    getExternalScriptSrcList(html);
+
+  const scriptInfo =
+    scripts.length
+      ? "✔ external scripts:\n" +
+        scripts.join("\n")
+      : "✔ external scripts:none";
+
+  const parser =
+    new DOMParser();
+
+  const doc =
+    parser.parseFromString(
+      html,
+      "text/html"
+    );
+
+  let cleanHtml = html
+    .replace(
+      /&lt;script[\s\S]*?&lt;\/script&gt;/gi,
+      ""
+    )
+    .replace(
+      /&lt;style[\s\S]*?&lt;\/style&gt;/gi,
+      ""
+    );
+
+  const report = [];
+
+  report.push(
+    "Repair HTML Diagnose\n"
+  );
+
+  // div整合性
+  const open =
+    (cleanHtml.match(
+      /&lt;div\b/g
+    ) || []).length;
+
+  const close =
+    (cleanHtml.match(
+      /&lt;\/div&gt;/g
+    ) || []).length;
+
+  report.push(
+    open === close
+      ? `✔ div: ${open}/${close}`
+      : `⚠ div: ${open}/${close}`
+  );
+
+  // DOM
+  const parserError =
+    doc.querySelector(
+      "parsererror"
+    );
+
+  report.push(
+    parserError
+      ? "⚠ DOM解析エラー"
+      : "✔ DOM解析OK"
+  );
+
+  // id重複
+  const ids =
+    [...doc.querySelectorAll("[id]")]
+      .map(el =&gt; el.id);
+
+  const dupIds =
+    [...new Set(
+      ids.filter(
+        (id, i) =&gt;
+        ids.indexOf(id) !== i
+      )
+    )];
+
+  report.push(
+    dupIds.length
+      ? `⚠ id重複\n${dupIds.join("\n")}`
+      : "✔ id重複なし"
+  );
+
+  report.push("");
+  report.push(scriptInfo);
+
+  // JS構文
+  try {
+    const scriptBlocks =
+      [...doc.querySelectorAll("script")];
+
+    scriptBlocks.forEach(s =&gt; {
+      if (s.src) return;
+      new Function(
+        s.textContent
+      );
+    });
+
+    report.push("✔ JS構文OK");
+
+  } catch (e) {
+    report.push(
+      `⚠ JS構文エラー\n${e.message}`
+    );
+  }
+
+  // function重複
+  const htmlForFunctionCheck =
+    jsForCheck
+      .replace(/\/\/.*$/gm, "")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+
+  const funcs =
+    [...htmlForFunctionCheck.matchAll(
+      /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm
+    )]
+    .map(x =&gt; x[1]);
+
+  const dupFuncs =
+    [...new Set(
+      funcs.filter(
+        (f, i) =&gt;
+        funcs.indexOf(f) !== i
+      )
+    )];
+
+  report.push(
+    dupFuncs.length
+      ? `⚠ function重複\n${dupFuncs.join("\n")}`
+      : "✔ function重複なし"
+  );
+
+  // onclick未定義
+  const onclicks =
+    [...html.matchAll(
+      /onclick="([a-zA-Z0-9_$]+)\(/g
+    )]
+    .map(x =&gt; x[1]);
+
+  const undefinedFns =
+    [...new Set(
+      onclicks.filter(
+        fn =&gt;
+        !funcs.includes(fn)
+      )
+    )];
+
+  report.push(
+    undefinedFns.length
+      ? `⚠ 未定義onclick\n${undefinedFns.join("\n")}`
+      : "✔ onclick定義OK"
+  );
+
+  // 未使用function
+  const unusedFns =
+    funcs.filter(fn =&gt; {
+      if (
+        fn === "diagnoseRepairHtml" ||
+        fn === "closeFloatPanel"
+      ) {
+        return false;
+      }
+
+      const useCount =
+        (jsForCheck.match(
+          new RegExp(
+            "\\b" + fn + "\\b",
+            "g"
+          )
+        ) || []).length;
+
+      return useCount &lt;= 1;
+    });
+
+  report.push(
+    unusedFns.length
+      ? `⚠ 未使用function\n${
+          unusedFns
+            .slice(0, 15)
+            .join("\n")
+        }`
+      : "✔ 未使用functionなし"
+  );
+
+  // 孤立id
+  const orphanIds =
+    ids.filter(id =&gt; {
+      if (
+        !id ||
+        /[()[\]^]/.test(id)
+      ) {
+        return false;
+      }
+
+      try {
+        const useCount =
+          (
+            jsForCheck.match(
+              new RegExp(
+                "\\b" +
+                escapeRegExp(id) +
+                "\\b",
+                "g"
+              )
+            ) || []
+          ).length;
+
+        return useCount &lt;= 1;
+
+      } catch {
+        return false;
+      }
+    });
+
+  report.push(
+    orphanIds.length
+      ? `⚠ 孤立id\n${
+          orphanIds
+            .slice(0, 15)
+            .join("\n")
+        }`
+      : "✔ 孤立idなし"
+  );
+
+  const result =
+    report.join("\n");
+
+  window.latestDiagnoseResult =
+    result;
+
+  openFloatPanel(
+    "編集内容診断",
+    `
+    &lt;div class="float-panel-actions"&gt;
+      &lt;button onclick="copyDiagnoseResult()"&gt;
+        📋 コピー
+      &lt;/button&gt;
+    &lt;/div&gt;
+    &lt;pre
+      id="diagnoseResultBox"
+      class="code-preview"&gt;
+${escapeHtml(result)}
+    &lt;/pre&gt;
+    `
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(42)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(60)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(60),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      copyDiagnoseResult
+    </span>
+
+  </div>
+
+  <pre id="functionView42" class="function-view-code" style="display:none;">function copyDiagnoseResult() {
+  const text =
+    window.latestDiagnoseResult || "";
+  if (!text) {
+    alert("コピー内容なし");
+    return;
+  }
+  if (
+    navigator.clipboard &amp;&amp;
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =&gt;
+        alert("コピー完了")
+      )
+      .catch(() =&gt; {
+        const ok =
+          copyTextFallback(text);
+        alert(
+          ok
+            ? "コピー完了"
+            : "コピー失敗"
+        );
+      });
+    return;
+  }
+  const ok =
+    copyTextFallback(text);
+  alert(
+    ok
+      ? "コピー完了"
+      : "コピー失敗"
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(43)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(61)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(61),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      renderFunctionViewer
+    </span>
+
+  </div>
+
+  <pre id="functionView43" class="function-view-code" style="display:none;">function renderFunctionViewer() {
+
+  const box =
+    get("functionViewer");
+
+  const editor =
+    get("repairEditor");
+
+  if (!box || !editor) {
+    return;
+  }
+
+  const blocks =
+    extractCodeBlocksFromText(
+      editor.value
+    );
+
+  const functions =
+    blocks.filter(
+      item =&gt; item.type === "function"
+    );
+
+  box.innerHTML =
+    functions.length
+      ? functions.map((f,index)=&gt;`
+
+&lt;div class="function-view-item"&gt;
+
+  &lt;div
+    class="function-view-line"
+    onclick="toggleFunctionView(${index})"
+    oncontextmenu="event.preventDefault();selectCodeBlockByIndex(${blocks.indexOf(f)})"
+    ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(${blocks.indexOf(f)}),600)"
+    ontouchend="clearTimeout(this._pressTimer)"
+    ontouchmove="clearTimeout(this._pressTimer)"&gt;
+
+    &lt;span class="function-view-mark"&gt;
+      ▶
+    &lt;/span&gt;
+
+    &lt;span class="function-view-name"&gt;
+      ${escapeHtml(f.name)}
+    &lt;/span&gt;
+
+  &lt;/div&gt;
+
+  &lt;pre
+    id="functionView${index}"
+    class="function-view-code"
+    style="display:none;"&gt;${escapeHtml(f.block)}&lt;/pre&gt;
+
+&lt;/div&gt;
+
+`).join("")
+      : "関数なし";
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(44)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(62)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(62),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      toggleFunctionView
+    </span>
+
+  </div>
+
+  <pre id="functionView44" class="function-view-code" style="display:none;">function toggleFunctionView(index) {
+
+  const el =
+    get(
+      "functionView" + index
+    );
+
+  if (!el) {
+    return;
+  }
+
+  el.style.display =
+    el.style.display === "block"
+      ? "none"
+      : "block";
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(45)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(63)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(63),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      openViewerMode
+    </span>
+
+  </div>
+
+  <pre id="functionView45" class="function-view-code" style="display:none;">function openViewerMode() {
+
+  const preview =
+    get("repairPreview");
+
+  const viewer =
+    get("functionViewer");
+
+  if (preview) {
+    preview.style.display = "none";
+  }
+
+  renderFunctionViewer();
+
+  if (viewer) {
+    viewer.style.display = "block";
+  }
+
+  updateRepairStatus(
+    "閲覧モード：関数ビュー表示"
+  );
+}</pre>
+
+</div>
+
+
+
+<div class="function-view-item">
+
+  <div class="function-view-line" onclick="toggleFunctionView(46)" oncontextmenu="event.preventDefault();selectCodeBlockByIndex(64)" ontouchstart="this._pressTimer=setTimeout(()=&gt;selectCodeBlockByIndex(64),600)" ontouchend="clearTimeout(this._pressTimer)" ontouchmove="clearTimeout(this._pressTimer)">
+
+    <span class="function-view-mark">
+      ▶
+    </span>
+
+    <span class="function-view-name">
+      previewRepairHtml
+    </span>
+
+  </div>
+
+  <pre id="functionView46" class="function-view-code" style="display:none;">function previewRepairHtml() {
+
+  const box =
+    get("repairPreview");
+
+  const btn =
+    get("previewBtn");
+
+  if (!box) {
+    return;
+  }
+
+  if (box.style.display === "block") {
+
+    box.style.display =
+      "none";
+
+    if (btn) {
+      btn.innerText =
+        "🎨 色分けプレビュー";
+    }
+
+    return;
+  }
+
+  const html =
+    get("repairEditor").value;
+
+  if (!html.trim()) {
+    alert("HTMLが空です");
+    return;
+  }
+
+  let escaped =
+    escapeHtml(html);
+
+  escaped = escaped
+    .replace(
+      /(&amp;lt;!--[\s\S]*?--&amp;gt;)/g,
+      '&lt;span class="code-comment"&gt;$1&lt;/span&gt;'
+    )
+    .replace(
+      /(&amp;lt;\/?)([a-zA-Z0-9-]+)/g,
+      '$1&lt;span class="code-tag"&gt;$2&lt;/span&gt;'
+    )
+    .replace(
+      /\s([a-zA-Z-:]+)=/g,
+      ' &lt;span class="code-attr"&gt;$1&lt;/span&gt;='
+    )
+    .replace(
+      /(&amp;quot;.*?&amp;quot;)/g,
+      '&lt;span class="code-string"&gt;$1&lt;/span&gt;'
+    )
+    .replace(
+      /\b(function|const|let|var|return|if|else|try|catch|for|while|switch|case|break|new)\b/g,
+      '&lt;span class="code-keyword"&gt;$1&lt;/span&gt;'
+    );
+
+  box.innerHTML =
+    escaped;
+
+  box.style.display =
+    "block";
+
+  if (btn) {
+    btn.innerText =
+      "❌ プレビュー閉じる";
+  }
+}</pre>
+
+</div>
+
 </div>
 
 
@@ -1098,7 +9353,120 @@ mark {
 
 <button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">⚙</button>
 
-<div id="floatPanel" style="display: none; right: 18px; bottom: 88px;"></div>
+<div id="floatPanel" style="display: none; right: 18px; bottom: 88px;"><div class="float-panel-header">
+      <span class="float-panel-title">部分読込 / 保存</span>
+      <button onclick="moveFloatPanelBy(0,-60)">↑</button>
+      <button onclick="moveFloatPanelBy(0,60)">↓</button>
+      <button onclick="moveFloatPanelBy(-60,0)">←</button>
+      <button onclick="moveFloatPanelBy(60,0)">→</button>
+      <button onclick="resetFloatPanelPosition()">↘</button>
+      <button onmousedown="event.preventDefault()" onclick="closeFloatPanelKeepEditorSelection()">×</button>
+    </div>
+    <button class="float-list-btn" onclick="
+      loadCurrentIndexToRepair()
+      ">
+      index.html
+    </button>
+    
+
+      <button class="float-list-btn" onclick="
+        loadExternalScriptToRepair(
+        './00_bootstrap.js'
+        )">
+
+        ./00_bootstrap.js
+
+      </button>
+
+    
+
+      <button class="float-list-btn" onclick="
+        loadExternalScriptToRepair(
+        './01_core.js'
+        )">
+
+        ./01_core.js
+
+      </button>
+
+    
+
+      <button class="float-list-btn" onclick="
+        loadExternalScriptToRepair(
+        './02_prompt.js'
+        )">
+
+        ./02_prompt.js
+
+      </button>
+
+    
+
+      <button class="float-list-btn" onclick="
+        loadExternalScriptToRepair(
+        './03_data.js'
+        )">
+
+        ./03_data.js
+
+      </button>
+
+    
+
+      <button class="float-list-btn" onclick="
+        loadExternalScriptToRepair(
+        './04_tools.js'
+        )">
+
+        ./04_tools.js
+
+      </button>
+
+    
+
+      <button class="float-list-btn" onclick="
+        loadExternalScriptToRepair(
+        './05_repair.js'
+        )">
+
+        ./05_repair.js
+
+      </button>
+
+    
+
+      <button class="float-list-btn" onclick="
+        loadExternalScriptToRepair(
+        './06_search.js'
+        )">
+
+        ./06_search.js
+
+      </button>
+
+    
+
+      <button class="float-list-btn" onclick="
+        loadExternalScriptToRepair(
+        './07_backup_health.js'
+        )">
+
+        ./07_backup_health.js
+
+      </button>
+
+    
+
+      <button class="float-list-btn" onclick="
+        loadExternalScriptToRepair(
+        './08_init.js'
+        )">
+
+        ./08_init.js
+
+      </button>
+
+    </div>
 
 </div> <!-- card -->
 
@@ -1161,5 +9529,5 @@ mark {
 
 <script src="./08_init.js"></script>
 
-</body>
-</html>
+
+</body></html>
