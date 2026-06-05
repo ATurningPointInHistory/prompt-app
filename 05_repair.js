@@ -2173,19 +2173,42 @@ function openViewerMode() {
   const viewer =
     get("functionViewer");
 
+  if (!viewer) {
+    return;
+  }
+
+  // 表示中なら閉じる
+
+  if (
+    viewer.style.display === "block"
+  ) {
+
+    viewer.style.display =
+      "none";
+
+    updateRepairStatus(
+      "閲覧モード終了"
+    );
+
+    return;
+  }
+
+  // 開く
+
   if (preview) {
-    preview.style.display = "none";
+    preview.style.display =
+      "none";
   }
 
   renderFunctionViewer();
 
-  if (viewer) {
-    viewer.style.display = "block";
-  }
+  viewer.style.display =
+    "block";
 
   updateRepairStatus(
     "閲覧モード：関数ビュー表示"
   );
+
 }
 
 function previewRepairHtml() {
