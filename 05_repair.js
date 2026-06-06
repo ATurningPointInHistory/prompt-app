@@ -53,14 +53,27 @@ function resetRepairEditorState(html) {
 
   try {
     localStorage.setItem(
-      "repairAutoSave",
+      "repairDraftHtml",
       html
+    );
+
+    localStorage.setItem(
+      "repairDraftSavedAt",
+      new Date().toISOString()
     );
   } catch (e) {
     console.warn(
-      "repairAutoSave保存失敗",
+      "repairDraftHtml保存失敗",
       e
     );
+  }
+
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
+
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
   }
 
   if (typeof updateRepairStatus === "function") {
@@ -75,18 +88,39 @@ function resetRepairEditorState(html) {
 =============================== */
 
 function loadRepairHtml() {
+
   const input =
     document.createElement("input");
 
   input.type = "file";
-  input.accept =
-    ".html,.js,.json,text/html,text/javascript,application/json";
 
-  input.onchange = (e) => {
+  input.accept =
+    ".html,.htm,.js,.json,.txt," +
+    "text/html,text/javascript," +
+    "application/json";
+
+  input.onchange = (event) => {
+
     const file =
-      e.target.files[0];
+      event &&
+      event.target &&
+      event.target.files &&
+      event.target.files[0];
 
     if (!file) {
+      return;
+    }
+
+    const maxSize =
+      5 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+
+      alert(
+        "ファイルサイズが大きすぎます。\n" +
+        "5MB以下のファイルを選択してください。"
+      );
+
       return;
     }
 
@@ -97,51 +131,102 @@ function loadRepairHtml() {
       new FileReader();
 
     reader.onload = () => {
-      try {
-        const parsed =
-          JSON.parse(reader.result);
 
-        if (parsed.html) {
-          const editor =
-            get("repairEditor");
+      let text =
+        normalizeLoadedHtmlText(
+          reader.result
+        );
 
-          editor.value =
-            parsed.html;
+      if (!text.trim()) {
 
-          editor.scrollLeft =
-            0;
+        alert(
+          "空のファイルです"
+        );
 
-          repairLastValue =
-            editor.value;
+        return;
+      }
 
-          updateLineNumbers();
-          updateCursorPosition();
+      // JSONバックアップ対応
 
-          updateRepairStatus(
-            "フルバックアップJSON読込: " +
-            currentRepairFile
+      if (
+        file.name
+          .toLowerCase()
+          .endsWith(".json")
+      ) {
+
+        try {
+
+          const parsed =
+            JSON.parse(text);
+
+          if (
+            parsed &&
+            typeof parsed.html ===
+            "string"
+          ) {
+
+            text =
+              normalizeLoadedHtmlText(
+                parsed.html
+              );
+
+            updateRepairStatus(
+              "フルバックアップJSON読込: " +
+              currentRepairFile
+            );
+
+          }
+
+        } catch (e) {
+
+          console.warn(
+            "JSON解析失敗",
+            e
           );
 
-          alert(
-            "フルバックアップJSON読込完了\n\n" +
-            currentRepairFile
-          );
-
-          return;
         }
-      } catch {}
+      }
 
       const editor =
         get("repairEditor");
 
+      if (!editor) {
+
+        alert(
+          "repairEditorが見つかりません"
+        );
+
+        return;
+      }
+
+      const isHtmlLike =
+        looksLikeHtml(text);
+
+      if (!isHtmlLike) {
+
+        const ok =
+          confirm(
+            "HTMLとして認識しにくい内容です。\n" +
+            "そのまま読み込みますか？"
+          );
+
+        if (!ok) {
+          return;
+        }
+      }
+
       editor.value =
-        reader.result;
+        text;
+
+      editor.scrollTop =
+        0;
 
       editor.scrollLeft =
         0;
 
-      repairLastValue =
-        editor.value;
+      resetRepairEditorState(
+        text
+      );
 
       updateLineNumbers();
       updateCursorPosition();
@@ -157,7 +242,18 @@ function loadRepairHtml() {
       );
     };
 
-    reader.readAsText(file);
+    reader.onerror = () => {
+
+      alert(
+        "ファイルの読み込みに失敗しました"
+      );
+
+    };
+
+    reader.readAsText(
+      file,
+      "UTF-8"
+    );
   };
 
   input.click();
@@ -324,32 +420,36 @@ async function cleanupCandidates() {
   const jsForCheck =
     html + "\n" + externalJs;
 
+  const functionBlocks =
+    extractFunctionBlocksFromText(
+      jsForCheck
+    );
+
   const funcs =
-    [...jsForCheck.matchAll(
-      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
-    )].map(x => x[1]);
+    functionBlocks.map(item => item.name);
 
   const onclicks =
     [...html.matchAll(
       /onclick=["']([a-zA-Z0-9_$]+)\(/g
     )].map(x => x[1]);
 
-    const eventRefs =
-      [...jsForCheck.matchAll(
-        /addEventListener\s*\([^)]*,\s*([a-zA-Z0-9_$]+)/g
-      )].map(x => x[1]);
-    
-    const windowRefs =
-      [...jsForCheck.matchAll(
-        /window\.[a-zA-Z0-9_$]+\s*=\s*([a-zA-Z0-9_$]+)/g
-      )].map(x => x[1]);
-    
-    const labelFors =
-      [...html.matchAll(
-        /for=["']([^"']+)["']/g
-      )].map(x => x[1]);
+  const eventRefs =
+    [...jsForCheck.matchAll(
+      /addEventListener\s*\([^)]*,\s*([a-zA-Z0-9_$]+)/g
+    )].map(x => x[1]);
 
-  const parser = new DOMParser();
+  const windowRefs =
+    [...jsForCheck.matchAll(
+      /window\.[a-zA-Z0-9_$]+\s*=\s*([a-zA-Z0-9_$]+)/g
+    )].map(x => x[1]);
+
+  const labelFors =
+    [...html.matchAll(
+      /for=["']([^"']+)["']/g
+    )].map(x => x[1]);
+
+  const parser =
+    new DOMParser();
 
   const doc =
     parser.parseFromString(
@@ -373,16 +473,17 @@ async function cleanupCandidates() {
     "loadSettings",
     "checkSafeMode",
     "cleanupCandidates",
-    "commentOutCleanupCandidates"
+    "commentOutCleanupCandidates",
+    "deleteCommentedCleanupBlocks"
   ];
 
   const unusedFuncs =
     funcs.filter(fn => {
-  
+
       if (safeIgnoreFuncs.includes(fn)) {
         return false;
       }
-  
+
       if (
         jsForCheck.includes(
           "cleanup候補: 未使用function " + fn
@@ -390,19 +491,19 @@ async function cleanupCandidates() {
       ) {
         return false;
       }
-  
+
       if (onclicks.includes(fn)) {
         return false;
       }
-  
+
       if (eventRefs.includes(fn)) {
         return false;
       }
-  
+
       if (windowRefs.includes(fn)) {
         return false;
       }
-  
+
       const count =
         (
           jsForCheck.match(
@@ -412,9 +513,8 @@ async function cleanupCandidates() {
             )
           ) || []
         ).length;
-  
+
       return count <= 1;
-  
     });
 
   const safeIgnoreIds = [
@@ -430,7 +530,10 @@ async function cleanupCandidates() {
 
   const orphanIds =
     ids.filter(id => {
-      if (!id) return false;
+
+      if (!id) {
+        return false;
+      }
 
       if (safeIgnoreIds.includes(id)) {
         return false;
@@ -443,11 +546,11 @@ async function cleanupCandidates() {
       ) {
         return false;
       }
-      
+
       if (labelFors.includes(id)) {
         return false;
       }
-      
+
       if (jsForCheck.includes("#" + id)) {
         return false;
       }
@@ -474,18 +577,41 @@ async function cleanupCandidates() {
       }
     });
 
+  if (
+    unusedFuncs.length === 0 &&
+    orphanIds.length === 0
+  ) {
+    alert(
+      "削除候補はありません。\n\n" +
+      "未使用function：0件\n" +
+      "孤立id：0件"
+    );
+
+    if (typeof updateRepairStatus === "function") {
+      updateRepairStatus(
+        "削除候補なし"
+      );
+    }
+
+    return;
+  }
+
   const message =
     "削除候補チェック\n\n" +
-    "【未使用function】\n" +
+    "【未使用function】(" + unusedFuncs.length + ")\n" +
     (unusedFuncs.length ? unusedFuncs.join("\n") : "なし") +
-    "\n\n【孤立id】\n" +
+    "\n\n【孤立id】(" + orphanIds.length + ")\n" +
     (orphanIds.length ? orphanIds.join("\n") : "なし") +
     "\n\nOKで修復エディタ内の候補を安全処理します。\n\n" +
     "未使用function：コメント化\n" +
     "孤立id：idをdata-cleanup-disabled-idへ変更";
 
-  const ok = confirm(message);
-  if (!ok) return;
+  const ok =
+    confirm(message);
+
+  if (!ok) {
+    return;
+  }
 
   commentOutCleanupCandidates(
     unusedFuncs,
@@ -573,7 +699,9 @@ function deleteCommentedCleanupBlocks() {
   const functionBlocks =
     (html.match(cleanupBlockRegex) || [])
       .filter(block =>
-        /function\s+[a-zA-Z0-9_$]+\s*\(/.test(block)
+        /function\s+[a-zA-Z0-9_$]+\s*\(/.test(block) ||
+        /(?:const|let|var)\s+[a-zA-Z0-9_$]+\s*=/.test(block) ||
+        /window\.[a-zA-Z0-9_$]+\s*=/.test(block)
       );
 
   const disabledIds =
@@ -581,24 +709,31 @@ function deleteCommentedCleanupBlocks() {
       /\sdata-cleanup-disabled-id="[^"]+"/g
     ) || [];
 
+  const cleanupNotes =
+    html.match(
+      /\sdata-cleanup-note="cleanup候補:\s*孤立id"/g
+    ) || [];
+
+  if (
+    functionBlocks.length === 0 &&
+    disabledIds.length === 0 &&
+    cleanupNotes.length === 0
+  ) {
+    alert("削除対象はありません");
+    return;
+  }
+
   const message =
     "完全削除確認\n\n" +
     "削除対象:\n" +
     "・コメント化済みfunction: " + functionBlocks.length + "件\n" +
-    "・無効化済みid属性: " + disabledIds.length + "件\n\n" +
+    "・無効化済みid属性: " + disabledIds.length + "件\n" +
+    "・cleanupメモ属性: " + cleanupNotes.length + "件\n\n" +
     "OKで完全削除します。\n" +
     "事前にバックアップ保存済みか確認してください。";
 
   const ok = confirm(message);
   if (!ok) return;
-
-  if (
-    functionBlocks.length === 0 &&
-    disabledIds.length === 0
-  ) {
-    alert("削除対象はありません");
-    return;
-  }
 
   repairUndoStack.push(before);
   repairRedoStack = [];
@@ -612,14 +747,25 @@ function deleteCommentedCleanupBlocks() {
     ""
   );
 
+  html = html.replace(
+    /\sdata-cleanup-note="cleanup候補:\s*孤立id"/g,
+    ""
+  );
+
   html = html.replace(/\n{4,}/g, "\n\n\n");
 
   editor.value = html;
   repairLastValue = html;
 
-  updateRepairStatus(
-    "コメント化済み候補を完全削除"
-  );
+  updateLineNumbers();
+  updateCursorPosition();
+  autoSaveRepairDraft();
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      "コメント化済み候補を完全削除"
+    );
+  }
 
   alert(
     "完全削除しました。\n\n" +
@@ -699,23 +845,95 @@ function replaceFunctionBlock(){
   alert("置換完了");
 }
 
-function findFunctionBlockInText(text, functionName) {
+findFunctionBlockInText
 
-  const src = String(text || "");
-  const name = escapeRegExp(functionName);
+function extractFunctionBlocksFromText(text) {
+  const source =
+    String(text || "");
 
-  const fnRegex = new RegExp(
-    "\\bfunction\\s+" + name + "\\s*\\(",
-    "g"
+  const blocks = [];
+
+  const patterns = [
+    {
+      type: "function",
+      regex:
+        /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm
+    },
+    {
+      type: "arrow-function",
+      regex:
+        /^\s*(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/gm
+    },
+    {
+      type: "arrow-function",
+      regex:
+        /^\s*(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s*)?[a-zA-Z0-9_$]+\s*=>\s*\{/gm
+    },
+    {
+      type: "function-expression",
+      regex:
+        /^\s*(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s+)?function\s*\(/gm
+    },
+    {
+      type: "window-function",
+      regex:
+        /^\s*window\.([a-zA-Z0-9_$]+)\s*=\s*(?:async\s+)?function\s*\(/gm
+    }
+  ];
+
+  patterns.forEach(pattern => {
+    let match;
+
+    while (
+      (match = pattern.regex.exec(source)) !== null
+    ) {
+      const name =
+        match[1];
+
+      const start =
+        match.index;
+
+      const braceStart =
+        source.indexOf(
+          "{",
+          pattern.regex.lastIndex
+        );
+
+      if (braceStart === -1) {
+        continue;
+      }
+
+      const block =
+        findBraceBlockFromPosition(
+          source,
+          start,
+          braceStart
+        );
+
+      if (!block) {
+        continue;
+      }
+
+      blocks.push({
+        type: pattern.type,
+        name,
+        start,
+        end: block.end,
+        block:
+          source.slice(
+            start,
+            block.end
+          )
+      });
+    }
+  });
+
+  return blocks.sort(
+    (a, b) => a.start - b.start
   );
+}
 
-  const match = fnRegex.exec(src);
-  if (!match) return null;
-
-  const start = match.index;
-  const braceStart = src.indexOf("{", fnRegex.lastIndex);
-  if (braceStart === -1) return null;
-
+function findBraceBlockFromPosition(source, start, braceStart) {
   let depth = 0;
   let i = braceStart;
 
@@ -723,30 +941,11 @@ function findFunctionBlockInText(text, functionName) {
   let quote = "";
   let inLineComment = false;
   let inBlockComment = false;
-  let inRegex = false;
   let escaped = false;
 
-  function prevMeaningfulChar(pos) {
-    for (let j = pos - 1; j >= 0; j--) {
-      const c = src[j];
-      if (/\s/.test(c)) continue;
-      return c;
-    }
-    return "";
-  }
-
-  function isRegexStart(pos) {
-    const prev = prevMeaningfulChar(pos);
-    return (
-      !prev ||
-      "({[=:+-!?,;<>*&|^~".includes(prev)
-    );
-  }
-
-  while (i < src.length) {
-
-    const ch = src[i];
-    const next = src[i + 1];
+  while (i < source.length) {
+    const ch = source[i];
+    const next = source[i + 1];
 
     if (inLineComment) {
       if (ch === "\n") inLineComment = false;
@@ -759,18 +958,6 @@ function findFunctionBlockInText(text, functionName) {
         inBlockComment = false;
         i += 2;
         continue;
-      }
-      i++;
-      continue;
-    }
-
-    if (inRegex) {
-      if (escaped) {
-        escaped = false;
-      } else if (ch === "\\") {
-        escaped = true;
-      } else if (ch === "/") {
-        inRegex = false;
       }
       i++;
       continue;
@@ -801,13 +988,11 @@ function findFunctionBlockInText(text, functionName) {
       continue;
     }
 
-    if (ch === "/" && isRegexStart(i)) {
-      inRegex = true;
-      i++;
-      continue;
-    }
-
-    if (ch === "\"" || ch === "'" || ch === "`") {
+    if (
+      ch === "\"" ||
+      ch === "'" ||
+      ch === "`"
+    ) {
       inString = true;
       quote = ch;
       i++;
@@ -820,12 +1005,17 @@ function findFunctionBlockInText(text, functionName) {
 
     if (ch === "}") {
       depth--;
+
       if (depth === 0) {
         i++;
+
+        if (source[i] === ";") {
+          i++;
+        }
+
         return {
           start,
-          end: i,
-          block: src.slice(start, i)
+          end: i
         };
       }
     }
@@ -834,55 +1024,6 @@ function findFunctionBlockInText(text, functionName) {
   }
 
   return null;
-
-}
-
-function extractFunctionBlocksFromText(text) {
-  const source =
-    String(text || "");
-
-  const blocks = [];
-
-  const regex =
-    /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm;
-
-  let match;
-
-  while ((match = regex.exec(source)) !== null) {
-    const name =
-      match[1];
-
-    const start =
-      match.index;
-
-    const braceStart =
-      source.indexOf("{", start);
-
-    if (braceStart === -1) continue;
-
-    let depth = 1;
-    let end = braceStart + 1;
-
-    while (
-      end < source.length &&
-      depth > 0
-    ) {
-      if (source[end] === "{") depth++;
-      if (source[end] === "}") depth--;
-      end++;
-    }
-
-    blocks.push({
-      type: "function",
-      name,
-      start,
-      end,
-      block:
-        source.slice(start, end)
-    });
-  }
-
-  return blocks;
 }
 
 function extractCodeBlocksFromText(text) {
@@ -2003,8 +2144,16 @@ function togglePinnedLine(
 =============================== */
 
 async function diagnoseRepairHtml() {
-  let html =
-    get("repairEditor").value;
+  const editor =
+    get("repairEditor");
+
+  if (!editor || !editor.value.trim()) {
+    alert("修復モードでHTMLを読み込んでから実行してください");
+    return;
+  }
+
+  const html =
+    editor.value;
 
   const externalJs =
     await collectExternalScriptText(html);
@@ -2030,15 +2179,16 @@ async function diagnoseRepairHtml() {
       "text/html"
     );
 
-  let cleanHtml = html
-    .replace(
-      /<script[\s\S]*?<\/script>/gi,
-      ""
-    )
-    .replace(
-      /<style[\s\S]*?<\/style>/gi,
-      ""
-    );
+  let cleanHtml =
+    html
+      .replace(
+        /<script[\s\S]*?<\/script>/gi,
+        ""
+      )
+      .replace(
+        /<style[\s\S]*?<\/style>/gi,
+        ""
+      );
 
   const report = [];
 
@@ -2048,14 +2198,10 @@ async function diagnoseRepairHtml() {
 
   // div整合性
   const open =
-    (cleanHtml.match(
-      /<div\b/g
-    ) || []).length;
+    (cleanHtml.match(/<div\b/g) || []).length;
 
   const close =
-    (cleanHtml.match(
-      /<\/div>/g
-    ) || []).length;
+    (cleanHtml.match(/<\/div>/g) || []).length;
 
   report.push(
     open === close
@@ -2063,11 +2209,9 @@ async function diagnoseRepairHtml() {
       : `⚠ div: ${open}/${close}`
   );
 
-  // DOM
+  // DOM解析
   const parserError =
-    doc.querySelector(
-      "parsererror"
-    );
+    doc.querySelector("parsererror");
 
   report.push(
     parserError
@@ -2078,19 +2222,23 @@ async function diagnoseRepairHtml() {
   // id重複
   const ids =
     [...doc.querySelectorAll("[id]")]
-      .map(el => el.id);
+      .map(el => el.id)
+      .filter(Boolean)
+      .filter(id =>
+        !id.startsWith("cleanup-")
+      );
 
   const dupIds =
     [...new Set(
       ids.filter(
         (id, i) =>
-        ids.indexOf(id) !== i
+          ids.indexOf(id) !== i
       )
     )];
 
   report.push(
     dupIds.length
-      ? `⚠ id重複\n${dupIds.join("\n")}`
+      ? `⚠ id重複 (${dupIds.length})\n${dupIds.join("\n")}`
       : "✔ id重複なし"
   );
 
@@ -2104,12 +2252,15 @@ async function diagnoseRepairHtml() {
 
     scriptBlocks.forEach(s => {
       if (s.src) return;
+
       new Function(
         s.textContent
       );
     });
 
-    report.push("✔ JS構文OK");
+    report.push(
+      "✔ JS構文OK"
+    );
 
   } catch (e) {
     report.push(
@@ -2117,36 +2268,56 @@ async function diagnoseRepairHtml() {
     );
   }
 
-  // function重複
+  // コメント除去後にfunction検出
   const htmlForFunctionCheck =
     jsForCheck
       .replace(/\/\/.*$/gm, "")
       .replace(/\/\*[\s\S]*?\*\//g, "");
 
+  const functionBlocks =
+    extractFunctionBlocksFromText(
+      htmlForFunctionCheck
+    );
+  
   const funcs =
-    [...htmlForFunctionCheck.matchAll(
-      /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm
-    )]
-    .map(x => x[1]);
-
+    functionBlocks.map(item => item.name);
+  
   const dupFuncs =
     [...new Set(
       funcs.filter(
         (f, i) =>
-        funcs.indexOf(f) !== i
+          funcs.indexOf(f) !== i
       )
     )];
 
   report.push(
     dupFuncs.length
-      ? `⚠ function重複\n${dupFuncs.join("\n")}`
+      ? `⚠ function重複 (${dupFuncs.length})\n${dupFuncs.join("\n")}`
       : "✔ function重複なし"
   );
 
-  // onclick未定義
+  // onclick定義確認
   const onclicks =
     [...html.matchAll(
-      /onclick="([a-zA-Z0-9_$]+)\(/g
+      /onclick=["']([a-zA-Z0-9_$]+)\(/g
+    )]
+    .map(x => x[1]);
+
+  const eventRefs =
+    [...jsForCheck.matchAll(
+      /addEventListener\s*\([^)]*,\s*([a-zA-Z0-9_$]+)/g
+    )]
+    .map(x => x[1]);
+
+  const windowRefs =
+    [...jsForCheck.matchAll(
+      /window\.[a-zA-Z0-9_$]+\s*=\s*([a-zA-Z0-9_$]+)/g
+    )]
+    .map(x => x[1]);
+
+  const labelFors =
+    [...html.matchAll(
+      /for=["']([^"']+)["']/g
     )]
     .map(x => x[1]);
 
@@ -2154,40 +2325,72 @@ async function diagnoseRepairHtml() {
     [...new Set(
       onclicks.filter(
         fn =>
-        !funcs.includes(fn)
+          !funcs.includes(fn)
       )
     )];
 
   report.push(
     undefinedFns.length
-      ? `⚠ 未定義onclick\n${undefinedFns.join("\n")}`
+      ? `⚠ 未定義onclick (${undefinedFns.length})\n${undefinedFns.join("\n")}`
       : "✔ onclick定義OK"
   );
 
   // 未使用function
+  const safeIgnoreFuncs = [
+    "diagnoseRepairHtml",
+    "diagnoseHtml",
+    "showHtmlHealth",
+    "closeFloatPanel",
+    "loadSettings",
+    "checkSafeMode",
+    "cleanupCandidates",
+    "commentOutCleanupCandidates",
+    "deleteCommentedCleanupBlocks"
+  ];
+
   const unusedFns =
     funcs.filter(fn => {
+
+      if (safeIgnoreFuncs.includes(fn)) {
+        return false;
+      }
+
       if (
-        fn === "diagnoseRepairHtml" ||
-        fn === "closeFloatPanel"
+        jsForCheck.includes(
+          "cleanup候補: 未使用function " + fn
+        )
       ) {
         return false;
       }
 
+      if (onclicks.includes(fn)) {
+        return false;
+      }
+
+      if (eventRefs.includes(fn)) {
+        return false;
+      }
+
+      if (windowRefs.includes(fn)) {
+        return false;
+      }
+
       const useCount =
-        (jsForCheck.match(
-          new RegExp(
-            "\\b" + fn + "\\b",
-            "g"
-          )
-        ) || []).length;
+        (
+          jsForCheck.match(
+            new RegExp(
+              "\\b" + escapeRegExp(fn) + "\\b",
+              "g"
+            )
+          ) || []
+        ).length;
 
       return useCount <= 1;
     });
 
   report.push(
     unusedFns.length
-      ? `⚠ 未使用function\n${
+      ? `⚠ 未使用function (${unusedFns.length})\n${
           unusedFns
             .slice(0, 15)
             .join("\n")
@@ -2196,12 +2399,45 @@ async function diagnoseRepairHtml() {
   );
 
   // 孤立id
+  const safeIgnoreIds = [
+    "appPage",
+    "repairPage",
+    "floatPanel",
+    "functionListBox",
+    "diffResultBox",
+    "diagnoseResultBox",
+    "healthResultBox",
+    "repairEditor"
+  ];
+
   const orphanIds =
     ids.filter(id => {
+
+      if (!id) {
+        return false;
+      }
+
+      if (safeIgnoreIds.includes(id)) {
+        return false;
+      }
+
       if (
-        !id ||
-        /[()[\]^]/.test(id)
+        html.includes(
+          `data-cleanup-disabled-id="${id}"`
+        )
       ) {
+        return false;
+      }
+
+      if (labelFors.includes(id)) {
+        return false;
+      }
+
+      if (jsForCheck.includes("#" + id)) {
+        return false;
+      }
+
+      if (/[\$\{\}\(\)\[\]\^\|\\]/.test(id)) {
         return false;
       }
 
@@ -2227,7 +2463,7 @@ async function diagnoseRepairHtml() {
 
   report.push(
     orphanIds.length
-      ? `⚠ 孤立id\n${
+      ? `⚠ 孤立id (${orphanIds.length})\n${
           orphanIds
             .slice(0, 15)
             .join("\n")
