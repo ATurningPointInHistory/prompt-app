@@ -537,46 +537,56 @@ function saveRepairDiff() {
     return;
   }
 
+  const json =
+    JSON.stringify(
+      diff,
+      null,
+      2
+    );
+
   const timestamp =
     new Date()
       .toISOString()
       .replace(/[:.]/g, "-");
 
   const filename =
-    `RepairDiff_${timestamp}.json`;
+    "RepairDiff_" + timestamp + ".json";
 
   const blob =
     new Blob(
-      [
-        JSON.stringify(
-          diff,
-          null,
-          2
-        )
-      ],
+      [json],
       {
-        type: "application/json"
+        type: "application/json;charset=utf-8"
       }
     );
+
+  const url =
+    URL.createObjectURL(blob);
 
   const a =
     document.createElement("a");
 
   a.href =
-    URL.createObjectURL(blob);
+    url;
 
   a.download =
     filename;
 
+  document.body.appendChild(a);
+
   a.click();
 
+  document.body.removeChild(a);
+
   setTimeout(() => {
-    URL.revokeObjectURL(a.href);
+    URL.revokeObjectURL(url);
   }, 1000);
 
-  updateRepairStatus(
-    "Diff保存完了: " + filename
-  );
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      "Diff保存完了: " + filename
+    );
+  }
 
   alert(
     "Diff保存完了\n\n" +
