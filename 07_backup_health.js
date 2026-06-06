@@ -293,15 +293,28 @@ unused.length
 
 async function showHtmlHealth() {
 
+  const editor =
+    get("repairEditor");
+
   const html =
     isRepairMode() &&
-    get("repairEditor") &&
-    get("repairEditor").value.trim()
-      ? get("repairEditor").value
-      : "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+    editor &&
+    editor.value.trim()
+      ? editor.value
+      : "<!DOCTYPE html>\n" +
+        document.documentElement.outerHTML;
 
-  const externalJs =
-    await collectExternalScriptText(html);
+  let externalJs = "";
+
+  try {
+    externalJs =
+      await collectExternalScriptText(html);
+  } catch (e) {
+    console.warn(
+      "external script collect failed",
+      e
+    );
+  }
 
   const jsForCheck =
     html + "\n" + externalJs;
@@ -309,35 +322,55 @@ async function showHtmlHealth() {
   const validation =
     validateBackupHtml(html);
 
-  const funcs =
-    [...jsForCheck.matchAll(
-      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
-    )]
-    .map(x => x[1]);
+  let funcs = [];
+
+  try {
+    const functionBlocks =
+      typeof extractFunctionBlocksFromText === "function"
+        ? extractFunctionBlocksFromText(jsForCheck)
+        : [];
+
+    funcs =
+      functionBlocks.length
+        ? functionBlocks.map(item => item.name)
+        : [...jsForCheck.matchAll(
+            /(?:^|\n)\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/g
+          )].map(x => x[1]);
+
+  } catch (e) {
+    console.warn(
+      "function extract failed",
+      e
+    );
+
+    funcs =
+      [...jsForCheck.matchAll(
+        /(?:^|\n)\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/g
+      )].map(x => x[1]);
+  }
 
   const dupFuncs =
     [...new Set(
       funcs.filter(
         (f, i) =>
-        funcs.indexOf(f) !== i
+          funcs.indexOf(f) !== i
       )
     )];
 
   const onclicks =
     [...html.matchAll(
-      /onclick="([a-zA-Z0-9_$]+)\(/g
-    )]
-    .map(x => x[1]);
+      /onclick=["']([a-zA-Z0-9_$]+)\(/g
+    )].map(x => x[1]);
 
   const undefinedFns =
     [...new Set(
       onclicks.filter(
         fn =>
-        !funcs.includes(fn)
+          !funcs.includes(fn)
       )
     )];
 
-  const score =
+  const rawScore =
     100
     -
     (validation.div_ok ? 0 : 20)
@@ -350,6 +383,12 @@ async function showHtmlHealth() {
     -
     (dupFuncs.length * 10);
 
+  const score =
+    Math.max(
+      0,
+      rawScore
+    );
+
   let result =
 `HTML HEALTH REPORT
 === HTML ===
@@ -359,6 +398,7 @@ open:
 ${validation.div_open}
 close:
 ${validation.div_close}
+
 === ID ===
 duplicate ids:
 ${
@@ -366,10 +406,12 @@ validation.duplicate_ids.length
 ? validation.duplicate_ids.join("\n")
 : "✔ none"
 }
+
 === JavaScript ===
 JS syntax:
 ${validation.js_ok ? "✔ OK" : "⚠ NG"}
 ${validation.js_error || ""}
+
 === Function ===
 function count:
 ${funcs.length}
@@ -387,18 +429,40 @@ undefinedFns.length
 }
 onclick count:
 ${onclicks.length}
+
 === Health Score ===
 ${score}/100
 `;
 
-  const dependencyReport =
+  try {
+    if (
+      typeof buildFunctionDependencyReport ===
+      "function"
+    ) {
+      const dependencyReport =
+        buildFunctionDependencyReport(
+          jsForCheck
+        );
 
-    buildFunctionDependencyReport(
-      jsForCheck
+      result +=
+        "\n" + dependencyReport;
+    } else {
+      result +=
+        "\n=== Function Dependency ===\n" +
+        "skip: buildFunctionDependencyReport not found\n";
+    }
+  } catch (e) {
+    console.warn(
+      "dependency report failed",
+      e
     );
 
-  result +=
-    dependencyReport;
+    result +=
+      "\n=== Function Dependency ===\n" +
+      "⚠ dependency report failed\n" +
+      e.message +
+      "\n";
+  }
 
   window.latestHealthResult =
     result;
