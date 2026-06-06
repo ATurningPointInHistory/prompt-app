@@ -653,10 +653,10 @@ function getPriorityIcon(priority) {
       return "[1]";
 
     case "low":
-      return "[2]";
+      return "[3]";
 
     default:
-      return "[3]";
+      return "[2]";
 
   }
 
