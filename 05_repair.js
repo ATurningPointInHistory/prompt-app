@@ -807,6 +807,87 @@ function findFunctionBlock(functionName){
   };
 }
 
+function findFunctionBlockInText(text, functionName) {
+
+  const source =
+    String(text || "");
+
+  const name =
+    escapeRegExp(functionName);
+
+  const patterns = [
+    new RegExp(
+      "\\b(?:async\\s+)?function\\s+" +
+      name +
+      "\\s*\\(",
+      "g"
+    ),
+    new RegExp(
+      "\\b(?:const|let|var)\\s+" +
+      name +
+      "\\s*=\\s*(?:async\\s*)?\\([^)]*\\)\\s*=>\\s*\\{",
+      "g"
+    ),
+    new RegExp(
+      "\\b(?:const|let|var)\\s+" +
+      name +
+      "\\s*=\\s*(?:async\\s*)?[a-zA-Z0-9_$]+\\s*=>\\s*\\{",
+      "g"
+    ),
+    new RegExp(
+      "\\b(?:const|let|var)\\s+" +
+      name +
+      "\\s*=\\s*(?:async\\s+)?function\\s*\\(",
+      "g"
+    ),
+    new RegExp(
+      "\\bwindow\\." +
+      name +
+      "\\s*=\\s*(?:async\\s+)?function\\s*\\(",
+      "g"
+    )
+  ];
+
+  for (const regex of patterns) {
+    const match =
+      regex.exec(source);
+
+    if (!match) continue;
+
+    const start =
+      match.index;
+
+    const braceStart =
+      source.indexOf(
+        "{",
+        regex.lastIndex
+      );
+
+    if (braceStart === -1) continue;
+
+    const block =
+      findBraceBlockFromPosition(
+        source,
+        start,
+        braceStart
+      );
+
+    if (!block) continue;
+
+    return {
+      start,
+      end: block.end,
+      block:
+        source.slice(
+          start,
+          block.end
+        )
+    };
+  }
+
+  return null;
+}
+
 function selectFunctionBlock(){
   const name=
     prompt("関数名");
