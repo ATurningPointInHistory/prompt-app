@@ -404,6 +404,122 @@ async function copyRepairHtml() {
   }
 }
 
+function buildLineDiff(oldText, newText) {
+
+  const oldLines =
+    String(oldText || "").split("\n");
+
+  const newLines =
+    String(newText || "").split("\n");
+
+  const max =
+    Math.max(
+      oldLines.length,
+      newLines.length
+    );
+
+  const rows = [];
+
+  for (let i = 0; i < max; i++) {
+
+    const oldLine =
+      oldLines[i];
+
+    const newLine =
+      newLines[i];
+
+    if (oldLine === newLine) {
+      rows.push({
+        type: "same",
+        oldNo: i + 1,
+        newNo: i + 1,
+        text: oldLine || ""
+      });
+      continue;
+    }
+
+    if (oldLine !== undefined) {
+      rows.push({
+        type: "delete",
+        oldNo: i + 1,
+        newNo: "",
+        text: oldLine
+      });
+    }
+
+    if (newLine !== undefined) {
+      rows.push({
+        type: "add",
+        oldNo: "",
+        newNo: i + 1,
+        text: newLine
+      });
+    }
+  }
+
+  return rows;
+}
+
+function showRepairLineDiff() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor || !editor.value.trim()) {
+    alert("修復モードでHTMLを読み込んでください");
+    return;
+  }
+
+  if (!repairOriginalHtml) {
+    alert("元HTMLがありません。先にHTMLを読み込んでください。");
+    return;
+  }
+
+  const rows =
+    buildLineDiff(
+      repairOriginalHtml,
+      editor.value
+    );
+
+  const changedRows =
+    rows.filter(row =>
+      row.type !== "same"
+    );
+
+  const html =
+    changedRows.length
+      ? changedRows.map(row => `
+<div class="line-diff-row line-diff-${row.type}">
+  <span class="line-diff-no">${row.oldNo}</span>
+  <span class="line-diff-no">${row.newNo}</span>
+  <span class="line-diff-mark">${
+    row.type === "add"
+      ? "+"
+      : row.type === "delete"
+      ? "-"
+      : " "
+  }</span>
+  <span class="line-diff-code">${escapeHtml(row.text)}</span>
+</div>
+`).join("")
+      : "差分なし";
+
+  openFloatPanel(
+    `Line Diff (${changedRows.length})`,
+    `
+<div class="float-panel-actions">
+<button onclick="showRepairDiff()">
+🧩 Function Diff
+</button>
+</div>
+
+<div class="line-diff-box">
+${html}
+</div>
+`
+  );
+}
+
 /* ===============================
    Repair Cleanup Tools
 =============================== */
