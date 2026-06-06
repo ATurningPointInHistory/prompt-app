@@ -520,6 +520,70 @@ ${html}
   );
 }
 
+function saveRepairDiff() {
+
+  const diff =
+    generateRepairDiff();
+
+  if (!diff) {
+    return;
+  }
+
+  if (
+    !diff.changes ||
+    diff.changes.length === 0
+  ) {
+    alert("保存する差分がありません");
+    return;
+  }
+
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-");
+
+  const filename =
+    `RepairDiff_${timestamp}.json`;
+
+  const blob =
+    new Blob(
+      [
+        JSON.stringify(
+          diff,
+          null,
+          2
+        )
+      ],
+      {
+        type: "application/json"
+      }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  a.download =
+    filename;
+
+  a.click();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+  }, 1000);
+
+  updateRepairStatus(
+    "Diff保存完了: " + filename
+  );
+
+  alert(
+    "Diff保存完了\n\n" +
+    filename
+  );
+}
+
 /* ===============================
    Repair Cleanup Tools
 =============================== */
