@@ -219,6 +219,9 @@ function loadRepairHtml() {
       editor.value =
         text;
 
+      repairOriginalHtml =
+        text;
+
       editor.scrollTop =
         0;
 
