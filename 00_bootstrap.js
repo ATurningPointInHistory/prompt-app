@@ -299,12 +299,12 @@ function buildRepairToolsHtml() {
 👁 閲覧モード
 </button>
 
-<button
+<button class="float-list-btn"
 onclick="scrollRepairTop()">
 ⏫ 最上部
 </button>
 
-<button
+<button class="float-list-btn"
 onclick="scrollRepairBottom()">
 ⏬ 最下部
 </button>
