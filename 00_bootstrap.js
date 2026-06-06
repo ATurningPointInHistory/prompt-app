@@ -157,11 +157,6 @@ onclick="saveProjectPackage()">
 </button>
 
 <button class="float-list-btn"
- onclick="showRepairDiff()">
-🧩 Diff
-</button>
-
-<button class="float-list-btn"
   onclick="previewRepairHtml()">
 🎨 色分けプレビュー
 </button>
@@ -317,6 +312,11 @@ onclick="scrollRepairBottom()">
 </button>
 
 <hr>
+
+<button class="float-list-btn"
+ onclick="showRepairDiff()">
+🧩 Diff
+</button>
 
 <button class="float-list-btn" onclick="diagnoseRepairHtml()">
 🩺 編集内容診断
