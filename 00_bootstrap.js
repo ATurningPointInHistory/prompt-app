@@ -6,6 +6,8 @@
    Manager Panel Core
 =============================== */
 
+let floatPanelHistory = [];
+
 function closeAllManagers() {
 
   [
@@ -359,22 +361,74 @@ function resetRepairEditorView() {
 =============================== */
 
 function openFloatPanel(title, bodyHtml){
-  const panel = get("floatPanel");
+
+  const panel =
+    get("floatPanel");
+
+  if (
+    panel &&
+    panel.style.display === "block"
+  ) {
+    floatPanelHistory.push(
+      panel.innerHTML
+    );
+
+    if (
+      floatPanelHistory.length > 20
+    ) {
+      floatPanelHistory.shift();
+    }
+  }
 
   panel.innerHTML =
     `<div class="float-panel-header">
-      <span class="float-panel-title">${title}</span>
-      <button onclick="moveFloatPanelBy(0,-60)">↑</button>
-      <button onclick="moveFloatPanelBy(0,60)">↓</button>
-      <button onclick="moveFloatPanelBy(-60,0)">←</button>
-      <button onclick="moveFloatPanelBy(60,0)">→</button>
-      <button onclick="resetFloatPanelPosition()">↘</button>
-      <button onmousedown="event.preventDefault()"
-      onclick="closeFloatPanelKeepEditorSelection()">×</button>
-    </div>` +
+
+      <span class="float-panel-title">
+        ${title}
+      </span>
+
+      <button
+      onclick="moveFloatPanelCorner('tl')">
+      ↖
+      </button>
+
+      <button
+      onclick="moveFloatPanelCorner('tr')">
+      ↗
+      </button>
+
+      <button
+      onclick="moveFloatPanelCorner('bl')">
+      ↙
+      </button>
+
+      <button
+      onclick="moveFloatPanelCorner('br')">
+      ↘
+      </button>
+
+      <button
+      onclick="resetFloatPanelPosition()">
+      □
+      </button>
+
+      <button
+      onclick="backFloatPanel()">
+      ◀
+      </button>
+
+      <button
+      onmousedown="event.preventDefault()"
+      onclick="closeFloatPanelKeepEditorSelection()">
+      ×
+      </button>
+
+    </div>`
+    +
     bodyHtml;
 
-  panel.style.display = "block";
+  panel.style.display =
+    "block";
 }
 
 function moveFloatPanelBy(dx, dy) {
