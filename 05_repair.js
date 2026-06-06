@@ -857,41 +857,43 @@ function extractFunctionBlocksFromText(text) {
     {
       type: "function",
       regex:
-        /^\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/gm
+        /(?:^|\n)\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/g
     },
     {
       type: "arrow-function",
       regex:
-        /^\s*(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/gm
+        /(?:^|\n)\s*(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/g
     },
     {
       type: "arrow-function",
       regex:
-        /^\s*(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s*)?[a-zA-Z0-9_$]+\s*=>\s*\{/gm
+        /(?:^|\n)\s*(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s*)?[a-zA-Z0-9_$]+\s*=>\s*\{/g
     },
     {
       type: "function-expression",
       regex:
-        /^\s*(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s+)?function\s*\(/gm
+        /(?:^|\n)\s*(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s+)?function\s*\(/g
     },
     {
       type: "window-function",
       regex:
-        /^\s*window\.([a-zA-Z0-9_$]+)\s*=\s*(?:async\s+)?function\s*\(/gm
+        /(?:^|\n)\s*window\.([a-zA-Z0-9_$]+)\s*=\s*(?:async\s+)?function\s*\(/g
     }
   ];
 
   patterns.forEach(pattern => {
     let match;
 
-    while (
-      (match = pattern.regex.exec(source)) !== null
-    ) {
+    pattern.regex.lastIndex = 0;
+
+    while ((match = pattern.regex.exec(source)) !== null) {
       const name =
         match[1];
 
       const start =
-        match.index;
+        match[0].startsWith("\n")
+          ? match.index + 1
+          : match.index;
 
       const braceStart =
         source.indexOf(
@@ -928,9 +930,14 @@ function extractFunctionBlocksFromText(text) {
     }
   });
 
-  return blocks.sort(
-    (a, b) => a.start - b.start
-  );
+  return blocks
+    .filter((item, index, self) =>
+      index === self.findIndex(x =>
+        x.start === item.start &&
+        x.name === item.name
+      )
+    )
+    .sort((a, b) => a.start - b.start);
 }
 
 function findBraceBlockFromPosition(source, start, braceStart) {
