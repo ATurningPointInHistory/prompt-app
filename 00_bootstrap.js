@@ -318,6 +318,12 @@ onclick="scrollRepairBottom()">
 🧩 Diff
 </button>
 
+<button
+class="float-list-btn"
+onclick="saveRepairDiff()">
+💾 Diff保存
+</button>
+
 <button class="float-list-btn"
 onclick="showRepairLineDiff()">
 🧾 Line Diff
