@@ -32,6 +32,62 @@ function getSelectedTodoTitle() {
 
 }
 
+function saveDevLogFromAiAnswer() {
+
+  const text =
+    prompt(
+      "AI回答や作業メモを貼り付けてください",
+      ""
+    );
+
+  if (!text) {
+    return;
+  }
+
+  const title =
+    guessDevLogTitle(text);
+
+  const changes =
+    extractDevLogChanges(text);
+
+  const result =
+    extractDevLogResult(text);
+
+  const next =
+    extractDevLogNext(text);
+
+  const content =
+
+`【変更内容】
+${changes}
+
+【結果】
+${result}
+
+【次にやること】
+${next}
+
+【元テキスト】
+${text}`;
+
+  saveDevLog({
+
+    title,
+
+    content,
+
+    created_at:
+      new Date()
+        .toISOString()
+
+  });
+
+  alert(
+    "AI回答から開発ログを保存しました"
+  );
+
+}
+
 function getDevLogList() {
 
   return loadJson(
@@ -109,6 +165,20 @@ function renderDevLogList() {
     "開発ログ履歴",
 
     `
+<div class="float-panel-actions">
+
+<button
+onclick="saveDevLogFromInput()">
+➕ 手動追加
+</button>
+
+<button
+onclick="saveDevLogFromAiAnswer()">
+🤖 AI回答→DevLog
+</button>
+
+</div>
+
 <div>
 
 ${
