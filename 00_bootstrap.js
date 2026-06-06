@@ -360,6 +360,79 @@ function resetRepairEditorView() {
    Float Panel Core
 =============================== */
 
+function backFloatPanel() {
+
+  const panel =
+    get("floatPanel");
+
+  if (
+    !panel ||
+    floatPanelHistory.length === 0
+  ) {
+    return;
+  }
+
+  panel.innerHTML =
+    floatPanelHistory.pop();
+}
+
+function moveFloatPanelCorner(pos) {
+
+  const panel =
+    get("floatPanel");
+
+  if (!panel) return;
+
+  panel.style.top = "";
+  panel.style.left = "";
+  panel.style.right = "";
+  panel.style.bottom = "";
+
+  switch(pos){
+
+    case "tl":
+
+      panel.style.left =
+        "18px";
+
+      panel.style.top =
+        "18px";
+
+      break;
+
+    case "tr":
+
+      panel.style.right =
+        "18px";
+
+      panel.style.top =
+        "18px";
+
+      break;
+
+    case "bl":
+
+      panel.style.left =
+        "18px";
+
+      panel.style.bottom =
+        "88px";
+
+      break;
+
+    case "br":
+
+      panel.style.right =
+        "18px";
+
+      panel.style.bottom =
+        "88px";
+
+      break;
+
+  }
+}
+
 function openFloatPanel(title, bodyHtml){
 
   const panel =
