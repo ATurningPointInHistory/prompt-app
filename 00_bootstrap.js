@@ -157,6 +157,11 @@ onclick="saveProjectPackage()">
 </button>
 
 <button class="float-list-btn"
+ onclick="showRepairDiff()">
+🧩 Diff
+</button>
+
+<button class="float-list-btn"
   onclick="previewRepairHtml()">
 🎨 色分けプレビュー
 </button>
