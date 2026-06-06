@@ -594,6 +594,168 @@ function saveRepairDiff() {
   );
 }
 
+function loadAndApplyRepairDiff() {
+
+  const input =
+    document.createElement("input");
+
+  input.type = "file";
+  input.accept = ".json,application/json";
+
+  input.onchange = (event) => {
+
+    const file =
+      event.target.files &&
+      event.target.files[0];
+
+    if (!file) return;
+
+    const reader =
+      new FileReader();
+
+    reader.onload = () => {
+
+      try {
+
+        const diff =
+          JSON.parse(reader.result);
+
+        const baseHtml =
+          repairOriginalHtml ||
+          get("repairEditor").value;
+
+        const patched =
+          applyRepairDiff(
+            baseHtml,
+            diff
+          );
+
+        if (!patched) return;
+
+        const editor =
+          get("repairEditor");
+
+        repairUndoStack.push(
+          editor.value
+        );
+
+        repairRedoStack = [];
+
+        editor.value =
+          patched;
+
+        repairLastValue =
+          patched;
+
+        updateLineNumbers();
+        updateCursorPosition();
+        autoSaveRepairDraft();
+
+        updateRepairStatus(
+          "Diff適用: " + file.name
+        );
+
+        alert(
+          "Diffを適用しました\n\n" +
+          file.name
+        );
+
+      } catch (e) {
+
+        alert(
+          "Diff JSONの読み込み/適用に失敗しました\n\n" +
+          e.message
+        );
+
+      }
+
+    };
+
+    reader.readAsText(
+      file,
+      "UTF-8"
+    );
+
+  };
+
+  input.click();
+}
+
+function applyRepairDiff(baseHtml, diff) {
+
+  if (!baseHtml || !String(baseHtml).trim()) {
+    alert("適用元HTMLが空です");
+    return null;
+  }
+
+  if (
+    !diff ||
+    !Array.isArray(diff.changes)
+  ) {
+    alert("Diff形式が正しくありません");
+    return null;
+  }
+
+  let html =
+    String(baseHtml);
+
+  diff.changes.forEach(change => {
+
+    if (change.type === "replaceFunction") {
+
+      const block =
+        findFunctionBlockInText(
+          html,
+          change.target
+        );
+
+      if (!block) {
+        console.warn(
+          "replace対象なし:",
+          change.target
+        );
+        return;
+      }
+
+      html =
+        html.slice(0, block.start) +
+        change.newCode +
+        html.slice(block.end);
+    }
+
+    if (change.type === "deleteFunction") {
+
+      const block =
+        findFunctionBlockInText(
+          html,
+          change.target
+        );
+
+      if (!block) {
+        console.warn(
+          "delete対象なし:",
+          change.target
+        );
+        return;
+      }
+
+      html =
+        html.slice(0, block.start) +
+        html.slice(block.end);
+    }
+
+    if (change.type === "addFunction") {
+      html +=
+        "\n\n" +
+        change.newCode +
+        "\n";
+    }
+
+  });
+
+  return html;
+}
+
 /* ===============================
    Repair Cleanup Tools
 =============================== */
