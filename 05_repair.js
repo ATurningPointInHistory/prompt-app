@@ -16,6 +16,7 @@ let functionSortList = [];
 let functionSortFilter = "all";
 let dragSortIndex = null;
 let pinnedLine = null;
+let repairOriginalHtml = "";
 
 function normalizeLoadedHtmlText(text) {
   if (!text) return "";
