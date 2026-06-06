@@ -167,13 +167,16 @@ function renderDevLogList() {
     `
 <div class="float-panel-actions">
 
-<button onclick="scrollRepairTop()">
+<button
+onclick="saveDevLogFromInput()">
 ➕ 手動追加
 </button>
 
-<button onclick="scrollRepairTop()">
+<button
+onclick="saveDevLogFromAiAnswer()">
 🤖 AI回答→DevLog
 </button>
+
 
 </div>
 
