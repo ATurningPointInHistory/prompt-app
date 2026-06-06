@@ -318,6 +318,11 @@ onclick="scrollRepairBottom()">
 🧩 Diff
 </button>
 
+<button class="float-list-btn"
+onclick="showRepairLineDiff()">
+🧾 Line Diff
+</button>
+
 <button class="float-list-btn" onclick="diagnoseRepairHtml()">
 🩺 編集内容診断
 </button>
