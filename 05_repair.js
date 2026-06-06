@@ -17,6 +17,59 @@ let functionSortFilter = "all";
 let dragSortIndex = null;
 let pinnedLine = null;
 
+function normalizeLoadedHtmlText(text) {
+  if (!text) return "";
+
+  let html = String(text);
+
+  // UTF-8 BOM除去
+  html = html.replace(/^\uFEFF/, "");
+
+  // 改行コード統一
+  html = html
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
+
+  return html;
+}
+
+function looksLikeHtml(text) {
+  if (!text) return false;
+
+  return (
+    /<!DOCTYPE html/i.test(text) ||
+    /<html[\s>]/i.test(text) ||
+    /<head[\s>]/i.test(text) ||
+    /<body[\s>]/i.test(text) ||
+    /<script[\s>]/i.test(text) ||
+    /<style[\s>]/i.test(text)
+  );
+}
+
+function resetRepairEditorState(html) {
+  repairUndoStack = [];
+  repairRedoStack = [];
+  repairLastValue = html;
+
+  try {
+    localStorage.setItem(
+      "repairAutoSave",
+      html
+    );
+  } catch (e) {
+    console.warn(
+      "repairAutoSave保存失敗",
+      e
+    );
+  }
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      "HTMLを読み込みました"
+    );
+  }
+}
+
 /* ===============================
    Repair File I/O
 =============================== */
@@ -258,10 +311,12 @@ async function copyRepairHtml() {
 async function cleanupCandidates() {
   const editor = get("repairEditor");
 
-  const html =
-    editor && editor.value.trim()
-      ? editor.value
-      : "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+  if (!editor || !editor.value.trim()) {
+    alert("修復モードでHTMLを読み込んでから実行してください");
+    return;
+  }
+
+  const html = editor.value;
 
   const externalJs =
     await collectExternalScriptText(html);
@@ -276,8 +331,23 @@ async function cleanupCandidates() {
 
   const onclicks =
     [...html.matchAll(
-      /onclick="([a-zA-Z0-9_$]+)\(/g
+      /onclick=["']([a-zA-Z0-9_$]+)\(/g
     )].map(x => x[1]);
+
+    const eventRefs =
+      [...jsForCheck.matchAll(
+        /addEventListener\s*\([^)]*,\s*([a-zA-Z0-9_$]+)/g
+      )].map(x => x[1]);
+    
+    const windowRefs =
+      [...jsForCheck.matchAll(
+        /window\.[a-zA-Z0-9_$]+\s*=\s*([a-zA-Z0-9_$]+)/g
+      )].map(x => x[1]);
+    
+    const labelFors =
+      [...html.matchAll(
+        /for=["']([^"']+)["']/g
+      )].map(x => x[1]);
 
   const parser = new DOMParser();
 
@@ -290,7 +360,10 @@ async function cleanupCandidates() {
   const ids =
     [...doc.querySelectorAll("[id]")]
       .map(el => el.id)
-      .filter(Boolean);
+      .filter(Boolean)
+      .filter(id =>
+        !id.startsWith("cleanup-")
+      );
 
   const safeIgnoreFuncs = [
     "diagnoseRepairHtml",
@@ -298,38 +371,88 @@ async function cleanupCandidates() {
     "showHtmlHealth",
     "closeFloatPanel",
     "loadSettings",
-    "checkSafeMode"
+    "checkSafeMode",
+    "cleanupCandidates",
+    "commentOutCleanupCandidates"
   ];
 
   const unusedFuncs =
     funcs.filter(fn => {
-      if (safeIgnoreFuncs.includes(fn)) return false;
-
+  
+      if (safeIgnoreFuncs.includes(fn)) {
+        return false;
+      }
+  
+      if (
+        jsForCheck.includes(
+          "cleanup候補: 未使用function " + fn
+        )
+      ) {
+        return false;
+      }
+  
+      if (onclicks.includes(fn)) {
+        return false;
+      }
+  
+      if (eventRefs.includes(fn)) {
+        return false;
+      }
+  
+      if (windowRefs.includes(fn)) {
+        return false;
+      }
+  
       const count =
-        (jsForCheck.match(
-          new RegExp("\\b" + escapeRegExp(fn) + "\\b", "g")
-        ) || []).length;
-
-      return count <= 1 && !onclicks.includes(fn);
+        (
+          jsForCheck.match(
+            new RegExp(
+              "\\b" + escapeRegExp(fn) + "\\b",
+              "g"
+            )
+          ) || []
+        ).length;
+  
+      return count <= 1;
+  
     });
+
+  const safeIgnoreIds = [
+    "appPage",
+    "repairPage",
+    "floatPanel",
+    "functionListBox",
+    "diffResultBox",
+    "diagnoseResultBox",
+    "healthResultBox",
+    "repairEditor"
+  ];
 
   const orphanIds =
     ids.filter(id => {
       if (!id) return false;
 
-      if (/[\$\{\}\(\)\[\]\^\|\\]/.test(id)) {
+      if (safeIgnoreIds.includes(id)) {
         return false;
       }
 
-      if ([
-        "appPage",
-        "repairPage",
-        "floatPanel",
-        "functionListBox",
-        "diffResultBox",
-        "diagnoseResultBox",
-        "healthResultBox"
-      ].includes(id)) {
+      if (
+        html.includes(
+          `data-cleanup-disabled-id="${id}"`
+        )
+      ) {
+        return false;
+      }
+      
+      if (labelFors.includes(id)) {
+        return false;
+      }
+      
+      if (jsForCheck.includes("#" + id)) {
+        return false;
+      }
+
+      if (/[\$\{\}\(\)\[\]\^\|\\]/.test(id)) {
         return false;
       }
 
@@ -357,7 +480,9 @@ async function cleanupCandidates() {
     (unusedFuncs.length ? unusedFuncs.join("\n") : "なし") +
     "\n\n【孤立id】\n" +
     (orphanIds.length ? orphanIds.join("\n") : "なし") +
-    "\n\nOKで修復エディタ内の候補をコメント化します。";
+    "\n\nOKで修復エディタ内の候補を安全処理します。\n\n" +
+    "未使用function：コメント化\n" +
+    "孤立id：idをdata-cleanup-disabled-idへ変更";
 
   const ok = confirm(message);
   if (!ok) return;
@@ -370,17 +495,24 @@ async function cleanupCandidates() {
 
 function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
   const editor = get("repairEditor");
+
   if (!editor || !editor.value.trim()) {
     alert("修復モードでHTMLを読み込んでから実行してください");
     return;
   }
+
   let html = editor.value;
+
   repairUndoStack.push(html);
   repairRedoStack = [];
+
   unusedFuncs.forEach(fn => {
-    const block = findFunctionBlockInText(html, fn);
+    const block =
+      findFunctionBlockInText(html, fn);
+
     if (!block) return;
     if (block.block.includes("cleanup候補")) return;
+
     html =
       html.slice(0, block.start) +
       "/* cleanup候補: 未使用function " + fn + "\n" +
@@ -388,23 +520,34 @@ function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
       "\n*/" +
       html.slice(block.end);
   });
+
   orphanIds.forEach(id => {
     const reg = new RegExp(
-      `id=(["'])${escapeRegExp(id)}\\1`,
+      `\\s+id=(["'])${escapeRegExp(id)}\\1`,
       "g"
     );
+
     html = html.replace(reg, match => {
-      if (match.includes("data-cleanup-disabled-id")) {
+      if (match.includes("cleanup-disabled-id")) {
         return match;
       }
-      return `data-cleanup-disabled-id="${id}"`;
+
+      return (
+        ` data-cleanup-disabled-id="${id}"` +
+        ` data-cleanup-note="cleanup候補: 孤立id"`
+      );
     });
   });
+
   editor.value = html;
   repairLastValue = html;
-  updateRepairStatus(
-    "削除候補をコメント化 / id無効化"
-  );
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      "削除候補を安全処理しました"
+    );
+  }
+
   alert(
     "削除候補を安全処理しました。\n\n" +
     "未使用function：コメント化\n" +
