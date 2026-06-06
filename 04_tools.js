@@ -165,14 +165,16 @@ function renderDevLogList() {
     "開発ログ履歴",
 
     `
-<div class="float-panel-actions">
+<div class="float-panel-actions devlog-actions">
 
-<button class="float-list-btn"
+<button
+class="float-list-btn"
 onclick="saveDevLogFromInput()">
 ➕ 手動追加
 </button>
 
-<button class="float-list-btn"
+<button
+class="float-list-btn"
 onclick="saveDevLogFromAiAnswer()">
 🤖 AI回答→DevLog
 </button>
