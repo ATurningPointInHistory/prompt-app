@@ -390,25 +390,36 @@ body:not(.dark) #floatPanel{
   top:0;
   z-index:2;
   background:var(--card);
+
   display:flex;
   align-items:center;
+
   gap:4px;
-  flex-wrap:wrap;
-  font-weight:bold;
+
+  flex-wrap:nowrap;
+
   margin-bottom:10px;
   padding-bottom:8px;
 }
 
 .float-panel-title{
-  flex:1 1 100%;
+  flex:1;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
 .float-panel-header button{
-  width:34px;
-  height:34px;
+  width:28px;
+  height:28px;
   padding:0;
-  border-radius:9px;
-  font-size:14px;
+  border-radius:8px;
+  font-size:12px;
+  flex-shrink:0;
+}
+.float-panel-title{
+  flex:1 1 100%;
 }
 
 .float-panel-actions{
