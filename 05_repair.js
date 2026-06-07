@@ -725,12 +725,18 @@ function showRepairLineDiff() {
       : "差分なし";
 
   openFloatPanel(
-    `Line Diff (${changedRows.length})`,
+    `GitHub風 Line Diff (${changedRows.length})`,
     `
 <div class="float-panel-actions">
+
 <button onclick="showRepairDiff()">
 🧩 Function Diff
 </button>
+
+<button onclick="saveRepairDiff()">
+💾 Diff保存
+</button>
+
 </div>
 
 <div class="line-diff-box">
