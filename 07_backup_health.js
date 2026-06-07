@@ -111,14 +111,27 @@ function getHtmlSummary(html) {
 
 function buildFunctionDependencyReport(source) {
 
-  const text = String(source || "");
+  const text =
+    String(source || "");
 
-  const funcs =
-    [...text.matchAll(
-      /function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g
-    )].map(x => x[1]);
+  const functionBlocks =
+    typeof extractFunctionBlocksFromText === "function"
+      ? extractFunctionBlocksFromText(text)
+      : [];
 
-  const uniqueFuncs = [...new Set(funcs)];
+  const uniqueFuncs =
+    [...new Set(
+      functionBlocks.map(item => item.name)
+    )];
+
+  const blockMap =
+    new Map();
+
+  functionBlocks.forEach(block => {
+    if (!blockMap.has(block.name)) {
+      blockMap.set(block.name, block);
+    }
+  });
 
   const onclicks =
     [...text.matchAll(
@@ -140,88 +153,8 @@ function buildFunctionDependencyReport(source) {
       /DOMContentLoaded[\s\S]{0,500}?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g
     )].map(x => x[1]);
 
-  const result = [];
-
-  uniqueFuncs.forEach(fn => {
-
-    const block =
-      findFunctionBlockInText(text, fn);
-
-    const body =
-      block?.block || "";
-
-    const calls =
-      uniqueFuncs.filter(other => {
-
-        if (other === fn) return false;
-
-        return new RegExp(
-          "\\b" + escapeRegExp(other) + "\\s*\\(",
-          "g"
-        ).test(body);
-
-      });
-
-    const directCallCount =
-      (
-        text.match(
-          new RegExp(
-            "\\b" + escapeRegExp(fn) + "\\s*\\(",
-            "g"
-          )
-        ) || []
-      ).length;
-
-    const usedByOnclick =
-      onclicks.includes(fn);
-
-    const usedByEvent =
-      eventRefs.includes(fn);
-
-    const usedByWindow =
-      windowRefs.includes(fn);
-
-    const usedByDomReady =
-      domReadyRefs.includes(fn);
-
-    const info = [];
-
-    if (calls.length) {
-      info.push(
-        "calls:" +
-        calls.join(", ")
-      );
-    }
-
-    info.push(
-      "used:" +
-      directCallCount
-    );
-
-    if (usedByOnclick) {
-      info.push("onclick");
-    }
-
-    if (usedByEvent) {
-      info.push("event");
-    }
-
-    if (usedByWindow) {
-      info.push("window");
-    }
-
-    if (usedByDomReady) {
-      info.push("domReady");
-    }
-
-    result.push(
-    `${fn}
-${info.join("\n")}`
-    );
-
-  });
-
-  const protectedFunctions = new Set([
+  const protectedFunctions =
+    new Set([
       "loadSettings",
       "initImportFileEvents",
       "handleRepairSearchKey",
@@ -244,70 +177,110 @@ ${info.join("\n")}`
       "clearHistory"
     ]);
 
-  const unused =
-    uniqueFuncs.filter(fn => {
+  const result = [];
 
-      const directCallCount =
-        (
-          text.match(
-            new RegExp(
-              "\\b" + escapeRegExp(fn) + "\\s*\\(",
-              "g"
-            )
-          ) || []
-        ).length;
+  const unused = [];
 
-      const usedByOnclick =
-        onclicks.includes(fn);
+  uniqueFuncs.forEach(fn => {
 
-      const usedByEvent =
-        eventRefs.includes(fn);
+    const block =
+      blockMap.get(fn);
 
-      const usedByWindow =
-        windowRefs.includes(fn);
+    const body =
+      block
+        ? block.block
+        : "";
 
-      const usedByDomReady =
-        domReadyRefs.includes(fn);
+    const calls =
+      uniqueFuncs.filter(other => {
 
-      return (
-              directCallCount <= 1 &&
-              !usedByOnclick &&
-              !usedByEvent &&
-              !usedByWindow &&
-              !usedByDomReady &&
-              !protectedFunctions.has(fn)
-            );
+        if (other === fn) return false;
 
-    });
+        return new RegExp(
+          "\\b" +
+          escapeRegExp(other) +
+          "\\s*\\(",
+          "g"
+        ).test(body);
 
-  const activeFunctions =
-    result.filter(item => {
-  
-      const fn =
-        item.split("\n")[0].trim();
-  
-      return !unused.includes(fn);
-  
-    });
-  
-  return `
-  === Active Functions ===
-  
-  ${
-  activeFunctions.length
-    ? activeFunctions.join("\n\n")
-    : "none"
-  }
-  
-  === Unused Candidate ===
-  
-  ${
-  unused.length
-    ? unused.join("\n")
-    : "none"
-  }
-  `;
+      });
 
+    const directCallCount =
+      (
+        text.match(
+          new RegExp(
+            "\\b" +
+            escapeRegExp(fn) +
+            "\\s*\\(",
+            "g"
+          )
+        ) || []
+      ).length;
+
+    const usedByOnclick =
+      onclicks.includes(fn);
+
+    const usedByEvent =
+      eventRefs.includes(fn);
+
+    const usedByWindow =
+      windowRefs.includes(fn);
+
+    const usedByDomReady =
+      domReadyRefs.includes(fn);
+
+    const isUnused =
+      directCallCount <= 1 &&
+      !usedByOnclick &&
+      !usedByEvent &&
+      !usedByWindow &&
+      !usedByDomReady &&
+      !protectedFunctions.has(fn);
+
+    if (isUnused) {
+      unused.push(fn);
+      return;
+    }
+
+    const info = [];
+
+    info.push(
+      "used:" + directCallCount
+    );
+
+    if (calls.length) {
+      info.push(
+        "calls:" + calls.join(", ")
+      );
+    }
+
+    if (usedByOnclick) info.push("onclick");
+    if (usedByEvent) info.push("event");
+    if (usedByWindow) info.push("window");
+    if (usedByDomReady) info.push("domReady");
+
+    result.push(
+`${fn}
+${info.join("\n")}`
+    );
+
+  });
+
+  return [
+    "",
+    "=== Active Functions ===",
+    "",
+    result.length
+      ? result.join("\n\n")
+      : "none",
+    "",
+    "=== Unused Candidate ===",
+    "",
+    unused.length
+      ? unused.join("\n")
+      : "none",
+    ""
+  ].join("\n");
 }
 
 async function showHtmlHealth() {
