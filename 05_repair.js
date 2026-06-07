@@ -994,6 +994,77 @@ function applyRepairDiff(baseHtml, diff) {
   return html;
 }
 
+function savePatchedRepairHtml() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor || !editor.value.trim()) {
+    alert("保存するPatched HTMLがありません");
+    return;
+  }
+
+  const html =
+    editor.value;
+
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-");
+
+  const baseName =
+    currentRepairFile
+      ? currentRepairFile.replace(/\.[^.]+$/, "")
+      : "PatchedHtml";
+
+  const filename =
+    baseName +
+    "_patched_" +
+    timestamp +
+    ".html";
+
+  const blob =
+    new Blob(
+      [html],
+      {
+        type: "text/html;charset=utf-8"
+      }
+    );
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    url;
+
+  a.download =
+    filename;
+
+  document.body.appendChild(a);
+
+  a.click();
+
+  document.body.removeChild(a);
+
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1000);
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      "Patched HTML保存完了: " + filename
+    );
+  }
+
+  alert(
+    "Patched HTML保存完了\n\n" +
+    filename
+  );
+}
+
 /* ===============================
    Repair Cleanup Tools
 =============================== */
