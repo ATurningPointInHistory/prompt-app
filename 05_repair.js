@@ -1432,6 +1432,9 @@ async function cleanupCandidates() {
     "cleanupCandidates",
     "commentOutCleanupCandidates",
     "deleteCommentedCleanupBlocks"
+    "moveFloatPanelBy",
+    "saveCurrentAiAnswer",
+    "editProjectState"
   ];
 
   const unusedFuncs =
@@ -3380,6 +3383,9 @@ async function diagnoseRepairHtml() {
     "cleanupCandidates",
     "commentOutCleanupCandidates",
     "deleteCommentedCleanupBlocks"
+    "moveFloatPanelBy",
+    "saveCurrentAiAnswer",
+    "editProjectState"
   ];
 
   const unusedFns =
