@@ -1,3 +1,4 @@
+console.log("07_backup_health.js loaded");
 /* ===============================
    FILE: 07_backup_health.js
    Backup / Health / Safe Mode
