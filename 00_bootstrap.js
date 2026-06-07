@@ -582,12 +582,17 @@ function closeFloatPanelKeepEditorSelection() {
   const editor = get("repairEditor");
   const start = editor ? editor.selectionStart : null;
   const end = editor ? editor.selectionEnd : null;
+
   closeFloatPanel();
+
   if (editor && start !== null && end !== null) {
     setTimeout(() => {
       editor.focus();
       editor.setSelectionRange(start, end);
-      updateCursorPosition();
+
+      if (typeof updateCursorPosition === "function") {
+        updateCursorPosition();
+      }
     }, 0);
   }
 }
