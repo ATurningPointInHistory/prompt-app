@@ -1431,7 +1431,7 @@ async function cleanupCandidates() {
     "checkSafeMode",
     "cleanupCandidates",
     "commentOutCleanupCandidates",
-    "deleteCommentedCleanupBlocks"
+    "deleteCommentedCleanupBlocks",
     "moveFloatPanelBy",
     "saveCurrentAiAnswer",
     "editProjectState"
@@ -3382,7 +3382,7 @@ async function diagnoseRepairHtml() {
     "checkSafeMode",
     "cleanupCandidates",
     "commentOutCleanupCandidates",
-    "deleteCommentedCleanupBlocks"
+    "deleteCommentedCleanupBlocks",
     "moveFloatPanelBy",
     "saveCurrentAiAnswer",
     "editProjectState"
