@@ -1520,8 +1520,6 @@ function replaceFunctionBlock(){
   alert("置換完了");
 }
 
-findFunctionBlockInText
-
 function extractFunctionBlocksFromText(text) {
   const source =
     String(text || "");
