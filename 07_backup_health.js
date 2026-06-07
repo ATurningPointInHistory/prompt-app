@@ -184,34 +184,41 @@ function buildFunctionDependencyReport(source) {
     const usedByDomReady =
       domReadyRefs.includes(fn);
 
-    result.push(
+    const info = [];
 
-`${fn}
-
-calls:
-${
-calls.length
-? calls.join(", ")
-: "none"
-}
-
-used:
-${directCallCount}
-
-onclick:
-${usedByOnclick ? "YES" : "NO"}
-
-event:
-${usedByEvent ? "YES" : "NO"}
-
-window:
-${usedByWindow ? "YES" : "NO"}
-
-domReady:
-${usedByDomReady ? "YES" : "NO"}`
-
+    if (calls.length) {
+      info.push(
+        "calls:" +
+        calls.join(", ")
+      );
+    }
+    
+    info.push(
+      "used:" +
+      directCallCount
     );
-
+    
+    if (usedByOnclick) {
+      info.push("onclick");
+    }
+    
+    if (usedByEvent) {
+      info.push("event");
+    }
+    
+    if (usedByWindow) {
+      info.push("window");
+    }
+    
+    if (usedByDomReady) {
+      info.push("domReady");
+    }
+    
+    result.push(
+    `${fn}
+    ${info.join("\n")}`
+    );
+    
   });
 
   const protectedFunctions = new Set([
