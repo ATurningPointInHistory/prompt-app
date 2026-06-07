@@ -1522,9 +1522,20 @@ function clearDiffResult() {
 =============================== */
 
 function extractFunctionNames(html) {
+  const source =
+    String(html || "");
+
+  if (
+    typeof extractFunctionBlocksFromText ===
+    "function"
+  ) {
+    return extractFunctionBlocksFromText(source)
+      .map(item => item.name);
+  }
+
   return [
-    ...String(html || "").matchAll(
-      /function\s+([a-zA-Z0-9_$]+)\s*\(/g
+    ...source.matchAll(
+      /(?:^|\n)\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/g
     )
   ].map(m => m[1]);
 }
