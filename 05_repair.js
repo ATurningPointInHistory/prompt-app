@@ -827,7 +827,7 @@ function validateBackupHtml(html) {
 function preSaveCheck(html) {
 
   let source = html;
-  
+
   if (!source) {
     source =
       isRepairMode() &&
@@ -837,7 +837,7 @@ function preSaveCheck(html) {
         : "<!DOCTYPE html>\n" +
           document.documentElement.outerHTML;
   }
-  
+
   const summary =
     getHtmlSummary(source);
 
@@ -1648,10 +1648,10 @@ async function loadExternalScriptToRepair(src){
 
     editor.value =
       text;
-    
+
     repairOriginalHtml =
       text;
-    
+
     currentRepairFile =
       src;
 
@@ -1706,10 +1706,10 @@ async function loadCurrentIndexToRepair() {
 
     editor.value =
       html;
-    
+
     repairOriginalHtml =
       html;
-    
+
     currentRepairFile =
       "index.html";
         repairLastValue =
@@ -1809,17 +1809,17 @@ ${info.time || "unknown"}
     localStorage.getItem(
       "repairDraftHtml"
     );
-  
+
   if (
     draft &&
     !get("repairEditor").value.trim()
   ) {
     get("repairEditor").value =
       draft;
-  
+
     repairLastValue =
       draft;
-  
+
     updateLineNumbers();
     updateCursorPosition();
     updateRepairStatus(
