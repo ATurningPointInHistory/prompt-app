@@ -1,4 +1,5 @@
-console.log("07_backup_health.js loaded");
+alert("07 start");
+
 /* ===============================
    FILE: 07_backup_health.js
    Backup / Health / Safe Mode
@@ -1575,6 +1576,8 @@ function extractIds(html) {
    External Script Helpers
 =============================== */
 
+alert("before backupPartialScript");
+
 async function backupPartialScript() {
 
   const html =
@@ -2157,5 +2160,3 @@ function copyProjectJsHealth() {
       : "コピー失敗"
   );
 }
-
-
