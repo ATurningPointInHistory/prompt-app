@@ -965,10 +965,28 @@ function applyRepairDiff(baseHtml, diff) {
     }
 
     if (change.type === "addFunction") {
-      html +=
-        "\n\n" +
-        change.newCode +
-        "\n";
+
+      const section =
+        extractCodeBlocksFromText(html)
+          .find(block =>
+            block.type === "section" &&
+            block.name === change.section
+          );
+
+      if (section) {
+        html =
+          html.slice(0, section.end) +
+          "\n\n" +
+          change.newCode +
+          "\n" +
+          html.slice(section.end);
+      } else {
+        html +=
+          "\n\n" +
+          change.newCode +
+          "\n";
+      }
+
     }
 
   });
