@@ -1467,6 +1467,16 @@ function generateRepairDiff() {
         newCode:
           currentBlock.block
       });
+      
+        section:
+          findSectionNameForPosition(
+            editor.value,
+            currentBlock.start
+          ),
+      
+        newCode:
+          currentBlock.block
+      });
 
     }
   );
