@@ -2011,3 +2011,136 @@ async function saveProjectPackage() {
   }
 
 }
+
+/* ===============================
+   Project JS Health
+=============================== */
+
+function analyzeProjectJsDependency() {
+
+  const input =
+    document.createElement("input");
+
+  input.type = "file";
+  input.accept = ".html,.htm,text/html";
+
+  input.onchange = (event) => {
+
+    const file =
+      event.target.files &&
+      event.target.files[0];
+
+    if (!file) return;
+
+    const reader =
+      new FileReader();
+
+    reader.onload = () => {
+
+      const html =
+        String(reader.result || "");
+
+      const scripts =
+        [...html.matchAll(
+          /<script\s+[^>]*src=["']([^"']+)["'][^>]*><\/script>/gi
+        )]
+        .map(match => match[1]);
+
+      const localScripts =
+        scripts.filter(src =>
+          !/^https?:\/\//i.test(src)
+        );
+
+      const cdnScripts =
+        scripts.filter(src =>
+          /^https?:\/\//i.test(src)
+        );
+
+      const result =
+        "Project JS Health\n\n" +
+        "=== Source ===\n" +
+        file.name +
+        "\n\n" +
+
+        "=== Local JS Files ===\n" +
+        (
+          localScripts.length
+            ? localScripts.join("\n")
+            : "none"
+        ) +
+        "\n\n" +
+
+        "=== CDN / External JS ===\n" +
+        (
+          cdnScripts.length
+            ? cdnScripts.join("\n")
+            : "none"
+        ) +
+        "\n\n" +
+
+        "=== Summary ===\n" +
+        "local scripts: " + localScripts.length + "\n" +
+        "external scripts: " + cdnScripts.length;
+
+      window.latestProjectJsHealth =
+        result;
+
+      openFloatPanel(
+        "Project JS Health",
+        `
+<div class="float-panel-actions">
+  <button onclick="copyProjectJsHealth()">
+    📋 コピー
+  </button>
+</div>
+
+<pre class="code-preview">
+${escapeHtml(result)}
+</pre>
+`
+      );
+    };
+
+    reader.readAsText(
+      file,
+      "UTF-8"
+    );
+  };
+
+  input.click();
+}
+
+function copyProjectJsHealth() {
+
+  const text =
+    window.latestProjectJsHealth || "";
+
+  if (!text) {
+    alert("コピー内容なし");
+    return;
+  }
+
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => alert("コピー完了"))
+      .catch(() => {
+        const ok = copyTextFallback(text);
+        alert(ok ? "コピー完了" : "コピー失敗");
+      });
+
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "コピー完了"
+      : "コピー失敗"
+  );
+}
