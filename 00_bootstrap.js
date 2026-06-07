@@ -324,6 +324,12 @@ onclick="saveRepairDiff()">
 💾 Diff保存
 </button>
 
+<button
+class="float-list-btn"
+onclick="savePatchedRepairHtml()">
+💾 Patched HTML保存
+</button>
+
 <button class="float-list-btn"
 onclick="showRepairLineDiff()">
 🧾 Line Diff
