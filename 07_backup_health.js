@@ -1628,7 +1628,10 @@ async function loadExternalScriptToRepair(src){
 
     editor.value =
       text;
-
+    
+    repairOriginalHtml =
+      text;
+    
     currentRepairFile =
       src;
 
@@ -1683,12 +1686,14 @@ async function loadCurrentIndexToRepair() {
 
     editor.value =
       html;
-
+    
+    repairOriginalHtml =
+      html;
+    
     currentRepairFile =
       "index.html";
-
-    repairLastValue =
-      html;
+        repairLastValue =
+          html;
 
     updateLineNumbers();
 
