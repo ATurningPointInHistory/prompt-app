@@ -161,6 +161,10 @@ onclick="saveProjectPackage()">
 🎨 色分けプレビュー
 </button>
 
+<button onclick="analyzeProjectJsDependency()">
+  🧭 全JS依存診断
+</button>
+
 <button class="float-list-btn" onclick="showHtmlHealth()">
 💚 HTML HEALTH
 </button>
