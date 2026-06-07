@@ -731,18 +731,13 @@ function showRepairLineDiff() {
   <span class="line-diff-no">${row.oldNo}</span>
   <span class="line-diff-no"></span>
   <span class="line-diff-mark">-</span>
-  <span class="line-diff-code">
-${inline.before}<span class="inline-remove">${inline.removed}</span>${inline.after}
-  </span>
+  <span class="line-diff-code">${inline.oldHtml}</span>
 </div>
-
 <div class="line-diff-row line-diff-add">
   <span class="line-diff-no"></span>
   <span class="line-diff-no">${next.newNo}</span>
   <span class="line-diff-mark">+</span>
-  <span class="line-diff-code">
-${inline.before}<span class="inline-add">${inline.added}</span>${inline.after}
-  </span>
+  <span class="line-diff-code">${inline.newHtml}</span>
 </div>
 `;
           }
@@ -769,12 +764,11 @@ ${inline.before}<span class="inline-add">${inline.added}</span>${inline.after}
   <span class="line-diff-code">${escapeHtml(row.text)}</span>
 </div>
 `;
-
         }).join("")
       : "差分なし";
 
   openFloatPanel(
-    `GitHub風 Line Diff (${changedRows.length})`,
+    `GitHub風 Line Diff：読込時 → 現在 (${changedRows.length})`,
     `
 <div class="float-panel-actions">
 
@@ -918,63 +912,117 @@ function buildLineDiffLCS(oldText, newText) {
 
 function buildInlineDiff(oldText, newText) {
 
-  const a =
-    String(oldText || "");
+  const oldChars =
+    Array.from(
+      String(oldText || "")
+    );
 
-  const b =
-    String(newText || "");
+  const newChars =
+    Array.from(
+      String(newText || "")
+    );
 
-  let start = 0;
+  const m =
+    oldChars.length;
 
-  while (
-    start < a.length &&
-    start < b.length &&
-    a[start] === b[start]
-  ) {
-    start++;
+  const n =
+    newChars.length;
+
+  const dp =
+    Array.from(
+      { length: m + 1 },
+      () => Array(n + 1).fill(0)
+    );
+
+  for (let i = m - 1; i >= 0; i--) {
+    for (let j = n - 1; j >= 0; j--) {
+
+      if (oldChars[i] === newChars[j]) {
+        dp[i][j] =
+          dp[i + 1][j + 1] + 1;
+      } else {
+        dp[i][j] =
+          Math.max(
+            dp[i + 1][j],
+            dp[i][j + 1]
+          );
+      }
+
+    }
   }
 
-  let endA =
-    a.length - 1;
+  const oldParts = [];
+  const newParts = [];
 
-  let endB =
-    b.length - 1;
+  let i = 0;
+  let j = 0;
 
-  while (
-    endA >= start &&
-    endB >= start &&
-    a[endA] === b[endB]
-  ) {
-    endA--;
-    endB--;
+  while (i < m && j < n) {
+
+    if (oldChars[i] === newChars[j]) {
+
+      const text =
+        escapeHtml(oldChars[i]);
+
+      oldParts.push(text);
+      newParts.push(text);
+
+      i++;
+      j++;
+
+      continue;
+    }
+
+    if (
+      dp[i + 1][j] >=
+      dp[i][j + 1]
+    ) {
+
+      oldParts.push(
+        `<span class="inline-remove">${
+          escapeHtml(oldChars[i])
+        }</span>`
+      );
+
+      i++;
+
+    } else {
+
+      newParts.push(
+        `<span class="inline-add">${
+          escapeHtml(newChars[j])
+        }</span>`
+      );
+
+      j++;
+
+    }
+  }
+
+  while (i < m) {
+    oldParts.push(
+      `<span class="inline-remove">${
+        escapeHtml(oldChars[i])
+      }</span>`
+    );
+    i++;
+  }
+
+  while (j < n) {
+    newParts.push(
+      `<span class="inline-add">${
+        escapeHtml(newChars[j])
+      }</span>`
+    );
+    j++;
   }
 
   return {
-    before:
-      escapeHtml(
-        a.slice(0, start)
-      ),
+    oldHtml:
+      oldParts.join(""),
 
-    removed:
-      escapeHtml(
-        a.slice(
-          start,
-          endA + 1
-        )
-      ),
-
-    added:
-      escapeHtml(
-        b.slice(
-          start,
-          endB + 1
-        )
-      ),
-
-    after:
-      escapeHtml(
-        a.slice(endA + 1)
-      )
+    newHtml:
+      newParts.join("")
   };
 }
 
