@@ -708,7 +708,54 @@ function showRepairLineDiff() {
 
   const html =
     changedRows.length
-      ? changedRows.map(row => `
+      ? changedRows.map((row, index) => {
+
+          const next =
+            changedRows[index + 1];
+
+          const isReplaceDelete =
+            row.type === "delete" &&
+            next &&
+            next.type === "add";
+
+          if (isReplaceDelete) {
+
+            const inline =
+              buildInlineDiff(
+                row.text,
+                next.text
+              );
+
+            return `
+<div class="line-diff-row line-diff-delete">
+  <span class="line-diff-no">${row.oldNo}</span>
+  <span class="line-diff-no"></span>
+  <span class="line-diff-mark">-</span>
+  <span class="line-diff-code">
+${inline.before}<span class="inline-remove">${inline.removed}</span>${inline.after}
+  </span>
+</div>
+
+<div class="line-diff-row line-diff-add">
+  <span class="line-diff-no"></span>
+  <span class="line-diff-no">${next.newNo}</span>
+  <span class="line-diff-mark">+</span>
+  <span class="line-diff-code">
+${inline.before}<span class="inline-add">${inline.added}</span>${inline.after}
+  </span>
+</div>
+`;
+          }
+
+          if (
+            row.type === "add" &&
+            index > 0 &&
+            changedRows[index - 1].type === "delete"
+          ) {
+            return "";
+          }
+
+          return `
 <div class="line-diff-row line-diff-${row.type}">
   <span class="line-diff-no">${row.oldNo}</span>
   <span class="line-diff-no">${row.newNo}</span>
@@ -721,7 +768,9 @@ function showRepairLineDiff() {
   }</span>
   <span class="line-diff-code">${escapeHtml(row.text)}</span>
 </div>
-`).join("")
+`;
+
+        }).join("")
       : "差分なし";
 
   openFloatPanel(
@@ -865,6 +914,68 @@ function buildLineDiffLCS(oldText, newText) {
 
   return rows;
 
+}
+
+function buildInlineDiff(oldText, newText) {
+
+  const a =
+    String(oldText || "");
+
+  const b =
+    String(newText || "");
+
+  let start = 0;
+
+  while (
+    start < a.length &&
+    start < b.length &&
+    a[start] === b[start]
+  ) {
+    start++;
+  }
+
+  let endA =
+    a.length - 1;
+
+  let endB =
+    b.length - 1;
+
+  while (
+    endA >= start &&
+    endB >= start &&
+    a[endA] === b[endB]
+  ) {
+    endA--;
+    endB--;
+  }
+
+  return {
+    before:
+      escapeHtml(
+        a.slice(0, start)
+      ),
+
+    removed:
+      escapeHtml(
+        a.slice(
+          start,
+          endA + 1
+        )
+      ),
+
+    added:
+      escapeHtml(
+        b.slice(
+          start,
+          endB + 1
+        )
+      ),
+
+    after:
+      escapeHtml(
+        a.slice(endA + 1)
+      )
+  };
 }
 
 function saveRepairDiff() {
