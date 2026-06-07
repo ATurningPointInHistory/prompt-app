@@ -362,24 +362,12 @@ async function showHtmlHealth() {
       )
     )];
 
-  const rawScore =
-    100
-    -
-    (validation.div_ok ? 0 : 20)
-    -
-    (validation.js_ok ? 0 : 25)
-    -
-    (validation.duplicate_ids.length * 5)
-    -
-    (undefinedFns.length * 10)
-    -
-    (dupFuncs.length * 10);
-
-  const score =
-    Math.max(
-      0,
-      rawScore
-    );
+    const score =
+      calcHealthScore(
+        validation,
+        undefinedFns,
+        dupFuncs
+      );
 
   let result =
 `HTML HEALTH REPORT
@@ -824,17 +812,18 @@ function validateBackupHtml(html) {
 
 function preSaveCheck(html) {
 
-  const source =
-    html ||
-    (
+  let source = html;
+  
+  if (!source) {
+    source =
       isRepairMode() &&
       get("repairEditor") &&
       get("repairEditor").value.trim()
-    )
-      ? get("repairEditor").value
-      : "<!DOCTYPE html>\n" +
-        document.documentElement.outerHTML;
-
+        ? get("repairEditor").value
+        : "<!DOCTYPE html>\n" +
+          document.documentElement.outerHTML;
+  }
+  
   const summary =
     getHtmlSummary(source);
 
