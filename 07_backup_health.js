@@ -1457,6 +1457,13 @@ function generateRepairDiff() {
       changes.push({
         type: "addFunction",
         target: name,
+      
+        section:
+          findSectionNameForPosition(
+            editor.value,
+            currentBlock.start
+          ),
+      
         newCode:
           currentBlock.block
       });
@@ -1699,6 +1706,33 @@ function clearDiffResult() {
   window.latestDiffResult = "";
   closeFloatPanel();
 }
+
+function findSectionNameForPosition(text, position) {
+
+  const blocks =
+    extractCodeBlocksFromText(text)
+      .filter(
+        x => x.type === "section"
+      );
+
+  let current =
+    "Unknown";
+
+  blocks.forEach(block => {
+
+    if (
+      block.start <= position
+    ) {
+      current =
+        block.name;
+    }
+
+  });
+
+  return current;
+}
+
+
 
 /* ===============================
    Backup Helpers
