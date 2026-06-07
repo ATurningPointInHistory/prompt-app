@@ -408,6 +408,126 @@ async function copyRepairHtml() {
    Repair Diff
 =============================== */
 
+function loadAndApplyRepairDiff() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor || !editor.value.trim()) {
+    alert(
+      "先に適用元HTML/JSを修復モードへ読み込んでください"
+    );
+    return;
+  }
+
+  const input =
+    document.createElement("input");
+
+  input.type = "file";
+  input.accept =
+    ".json,application/json";
+
+  input.onchange = (event) => {
+
+    const file =
+      event.target.files &&
+      event.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader =
+      new FileReader();
+
+    reader.onload = () => {
+
+      try {
+
+        const diff =
+          JSON.parse(reader.result);
+
+        const baseHtml =
+          repairOriginalHtml &&
+          repairOriginalHtml.trim()
+            ? repairOriginalHtml
+            : editor.value;
+
+        const patched =
+          applyRepairDiff(
+            baseHtml,
+            diff
+          );
+
+        if (!patched) {
+          return;
+        }
+
+        const ok =
+          confirm(
+            "Diffを適用して修復エディタへ反映しますか？\n\n" +
+            "Diff: " + file.name
+          );
+
+        if (!ok) {
+          return;
+        }
+
+        repairUndoStack.push(
+          editor.value
+        );
+
+        repairRedoStack = [];
+
+        editor.value =
+          patched;
+
+        repairLastValue =
+          patched;
+
+        if (typeof updateLineNumbers === "function") {
+          updateLineNumbers();
+        }
+
+        if (typeof updateCursorPosition === "function") {
+          updateCursorPosition();
+        }
+
+        if (typeof autoSaveRepairDraft === "function") {
+          autoSaveRepairDraft();
+        }
+
+        if (typeof updateRepairStatus === "function") {
+          updateRepairStatus(
+            "Diff適用完了: " + file.name
+          );
+        }
+
+        alert(
+          "Diff適用完了\n\n" +
+          file.name
+        );
+
+      } catch (e) {
+
+        alert(
+          "Diff JSONの読み込み/適用に失敗しました\n\n" +
+          e.message
+        );
+
+      }
+
+    };
+
+    reader.readAsText(
+      file,
+      "UTF-8"
+    );
+  };
+
+  input.click();
+}
+
 function generateRepairDiff() {
 
   const editor =
