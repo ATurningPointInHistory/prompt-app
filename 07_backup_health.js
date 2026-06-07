@@ -288,7 +288,7 @@ async function showHtmlHealth() {
   const editor =
     get("repairEditor");
 
-  const html =
+  const source =
     isRepairMode() &&
     editor &&
     editor.value.trim()
@@ -296,23 +296,28 @@ async function showHtmlHealth() {
       : "<!DOCTYPE html>\n" +
         document.documentElement.outerHTML;
 
+  const isHtmlSource =
+    looksLikeHtml(source);
+
   let externalJs = "";
 
-  try {
-    externalJs =
-      await collectExternalScriptText(html);
-  } catch (e) {
-    console.warn(
-      "external script collect failed",
-      e
-    );
+  if (isHtmlSource) {
+    try {
+      externalJs =
+        await collectExternalScriptText(source);
+    } catch (e) {
+      console.warn(
+        "external script collect failed",
+        e
+      );
+    }
   }
 
   const jsForCheck =
-    html + "\n" + externalJs;
+    source + "\n" + externalJs;
 
   const validation =
-    validateBackupHtml(html);
+    validateBackupHtml(source);
 
   let funcs = [];
 
@@ -350,9 +355,11 @@ async function showHtmlHealth() {
     )];
 
   const onclicks =
-    [...html.matchAll(
-      /onclick=["']([a-zA-Z0-9_$]+)\(/g
-    )].map(x => x[1]);
+    isHtmlSource
+      ? [...source.matchAll(
+          /onclick=["']([a-zA-Z0-9_$]+)\(/g
+        )].map(x => x[1])
+      : [];
 
   const undefinedFns =
     [...new Set(
@@ -362,18 +369,21 @@ async function showHtmlHealth() {
       )
     )];
 
-    const score =
-      calcHealthScore(
-        validation,
-        undefinedFns,
-        dupFuncs
-      );
+  const score =
+    calcHealthScore(
+      validation,
+      undefinedFns,
+      dupFuncs
+    );
 
   let result =
 `HTML HEALTH REPORT
+=== Source Type ===
+${isHtmlSource ? "HTML" : "JavaScript"}
+
 === HTML ===
 div:
-${validation.div_ok ? "✔ OK" : "⚠ NG"}
+${isHtmlSource ? (validation.div_ok ? "✔ OK" : "⚠ NG") : "skip: JS file"}
 open:
 ${validation.div_open}
 close:
@@ -382,9 +392,13 @@ ${validation.div_close}
 === ID ===
 duplicate ids:
 ${
-validation.duplicate_ids.length
-? validation.duplicate_ids.join("\n")
-: "✔ none"
+isHtmlSource
+  ? (
+      validation.duplicate_ids.length
+        ? validation.duplicate_ids.join("\n")
+        : "✔ none"
+    )
+  : "skip: JS file"
 }
 
 === JavaScript ===
@@ -813,7 +827,7 @@ function validateBackupHtml(html) {
 function preSaveCheck(html) {
 
   let source = html;
-  
+
   if (!source) {
     source =
       isRepairMode() &&
@@ -823,7 +837,7 @@ function preSaveCheck(html) {
         : "<!DOCTYPE html>\n" +
           document.documentElement.outerHTML;
   }
-  
+
   const summary =
     getHtmlSummary(source);
 
@@ -1634,10 +1648,10 @@ async function loadExternalScriptToRepair(src){
 
     editor.value =
       text;
-    
+
     repairOriginalHtml =
       text;
-    
+
     currentRepairFile =
       src;
 
@@ -1692,10 +1706,10 @@ async function loadCurrentIndexToRepair() {
 
     editor.value =
       html;
-    
+
     repairOriginalHtml =
       html;
-    
+
     currentRepairFile =
       "index.html";
         repairLastValue =
@@ -1795,17 +1809,17 @@ ${info.time || "unknown"}
     localStorage.getItem(
       "repairDraftHtml"
     );
-  
+
   if (
     draft &&
     !get("repairEditor").value.trim()
   ) {
     get("repairEditor").value =
       draft;
-  
+
     repairLastValue =
       draft;
-  
+
     updateLineNumbers();
     updateCursorPosition();
     updateRepairStatus(
