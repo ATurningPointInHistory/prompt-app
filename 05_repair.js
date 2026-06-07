@@ -1303,11 +1303,17 @@ function savePatchedRepairHtml() {
       ? currentRepairFile.replace(/\.[^.]+$/, "")
       : "PatchedHtml";
 
+  const ext =
+    currentRepairFile &&
+    currentRepairFile.toLowerCase().endsWith(".js")
+      ? ".js"
+      : ".html";
+  
   const filename =
     baseName +
     "_patched_" +
     timestamp +
-    ".html";
+    ext;
 
   const blob =
     new Blob(
@@ -1728,34 +1734,25 @@ function deleteCommentedCleanupBlocks() {
    Code Block / Function Tools
 =============================== */
 
-function findFunctionBlock(functionName){
-  const editor=get("repairEditor");
-  const text=editor.value;
-  const start=
-    text.indexOf(
-      `function ${functionName}`
+function findFunctionBlock(functionName) {
+  const editor = get("repairEditor");
+
+  if (!editor) {
+    return null;
+  }
+
+  const result =
+    findFunctionBlockInText(
+      editor.value,
+      functionName
     );
-  if(start===-1){
+
+  if (!result) {
     alert("関数が見つかりません");
     return null;
   }
-  const braceStart=
-    text.indexOf("{",start);
-  let depth=1;
-  let end=braceStart+1;
-  while(
-    end<text.length &&
-    depth>0
-  ){
-    if(text[end]==="{") depth++;
-    if(text[end]==="}") depth--;
-    end++;
-  }
-  return{
-    start,
-    end,
-    block:text.slice(start,end)
-  };
+
+  return result;
 }
 
 function findFunctionBlockInText(text, functionName) {
