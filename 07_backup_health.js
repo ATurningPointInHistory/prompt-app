@@ -192,33 +192,33 @@ function buildFunctionDependencyReport(source) {
         calls.join(", ")
       );
     }
-    
+
     info.push(
       "used:" +
       directCallCount
     );
-    
+
     if (usedByOnclick) {
       info.push("onclick");
     }
-    
+
     if (usedByEvent) {
       info.push("event");
     }
-    
+
     if (usedByWindow) {
       info.push("window");
     }
-    
+
     if (usedByDomReady) {
       info.push("domReady");
     }
-    
+
     result.push(
     `${fn}
-    ${info.join("\n")}`
+${info.join("\n")}`
     );
-    
+
   });
 
   const protectedFunctions = new Set([
@@ -280,21 +280,35 @@ function buildFunctionDependencyReport(source) {
 
     });
 
+  const activeFunctions =
+    result.filter(text => {
+  
+      const fn =
+        text.split("\n")[0];
+  
+      return !unused.includes(fn);
+  
+    });
+  
   return `
-
-=== Function Dependency ===
-
-${result.join("\n\n")}
-
-=== Unused Candidate ===
-
-${
-unused.length
-? unused.join("\n")
-: "none"
-}
-
-`;
+  
+  === Active Functions ===
+  
+  ${
+  activeFunctions.length
+  ? activeFunctions.join("\n\n")
+  : "none"
+  }
+  
+  === Unused Candidate ===
+  
+  ${
+  unused.length
+  ? unused.join("\n")
+  : "none"
+  }
+  
+  `;
 
 }
 
