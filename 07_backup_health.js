@@ -1,4 +1,3 @@
-alert("07 start");
 
 /* ===============================
    FILE: 07_backup_health.js
@@ -1576,20 +1575,6 @@ function extractIds(html) {
    External Script Helpers
 =============================== */
 
-
-
-
-
-
-alert("before backupPartialScript");
-
-
-
-
-
-
-async function backupPartialScript() {
-
 async function backupPartialScript() {
 
   const html =
@@ -1852,7 +1837,6 @@ ${info.time || "unknown"}
             "SAFE MODE復元"
           );
         }
-    );
   }
 
   const debugBox =
