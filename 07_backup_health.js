@@ -281,33 +281,31 @@ ${info.join("\n")}`
     });
 
   const activeFunctions =
-    result.filter(text => {
+    result.filter(item => {
   
       const fn =
-        text.split("\n")[0];
+        item.split("\n")[0].trim();
   
       return !unused.includes(fn);
   
     });
   
   return `
-  
   === Active Functions ===
   
   ${
   activeFunctions.length
-  ? activeFunctions.join("\n\n")
-  : "none"
+    ? activeFunctions.join("\n\n")
+    : "none"
   }
   
   === Unused Candidate ===
   
   ${
   unused.length
-  ? unused.join("\n")
-  : "none"
+    ? unused.join("\n")
+    : "none"
   }
-  
   `;
 
 }
@@ -769,7 +767,32 @@ ${externalJs.replace(/<\/script>/gi, "<\\/script>")}
 }
 
 function validateBackupHtml(html) {
-  const source = String(html || "");
+  const source =
+    String(html || "");
+
+  const isHtml =
+    looksLikeHtml(source);
+
+  if (!isHtml) {
+    let jsOk = true;
+    let jsError = "";
+
+    try {
+      new Function(source);
+    } catch (e) {
+      jsOk = false;
+      jsError = e.message;
+    }
+
+    return {
+      div_ok: true,
+      div_open: 0,
+      div_close: 0,
+      duplicate_ids: [],
+      js_ok: jsOk,
+      js_error: jsError
+    };
+  }
 
   const cleanHtml = source
     .replace(/<script[\s\S]*?<\/script>/gi, "")
@@ -781,7 +804,8 @@ function validateBackupHtml(html) {
   const divClose =
     (cleanHtml.match(/<\/div>/gi) || []).length;
 
-  const parser = new DOMParser();
+  const parser =
+    new DOMParser();
 
   const doc =
     parser.parseFromString(
@@ -807,6 +831,7 @@ function validateBackupHtml(html) {
       [...doc.querySelectorAll("script")];
 
     scripts.forEach(s => {
+      if (s.src) return;
       new Function(s.textContent);
     });
   } catch (e) {
@@ -1376,8 +1401,6 @@ function manageBackupHistory() {
     JSON.stringify(list.slice(0, 10))
   );
 }
-
-
 
 /* ===============================
    Backup Compare / Diff
