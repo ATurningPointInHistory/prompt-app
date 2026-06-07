@@ -1534,9 +1534,6 @@ function clearDiffResult() {
   closeFloatPanel();
 }
 
-
-
-
 /* ===============================
    Backup Helpers
 =============================== */
@@ -1820,10 +1817,19 @@ ${info.time || "unknown"}
     repairLastValue =
       draft;
 
-    updateLineNumbers();
-    updateCursorPosition();
-    updateRepairStatus(
-      "SAFE MODE復元"
+    if (typeof updateLineNumbers === "function") {
+          updateLineNumbers();
+        }
+
+        if (typeof updateCursorPosition === "function") {
+      updateCursorPosition();
+        }
+
+        if (typeof updateRepairStatus === "function") {
+          updateRepairStatus(
+            "SAFE MODE復元"
+          );
+        }
     );
   }
 
