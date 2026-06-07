@@ -121,7 +121,11 @@ document.addEventListener(
 
     loadSettings();
 
+    if (typeof checkSafeMode === "function") {
     checkSafeMode();
+  } else {
+    console.warn("checkSafeMode is not defined");
+  }
 
     initRepairIde();
 
