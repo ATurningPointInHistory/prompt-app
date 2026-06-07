@@ -2026,7 +2026,6 @@ async function saveProjectPackage() {
 
 /* ===============================
    Project JS Health
-=============================== */
 
 function analyzeProjectJsDependency() {
 
@@ -2156,3 +2155,5 @@ function copyProjectJsHealth() {
       : "コピー失敗"
   );
 }
+
+=============================== */
