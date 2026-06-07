@@ -1655,13 +1655,19 @@ async function loadExternalScriptToRepair(src){
     repairLastValue =
       editor.value;
 
-    updateLineNumbers();
-    updateCursorPosition();
+    if (typeof updateLineNumbers === "function") {
+          updateLineNumbers();
+        }
 
-    updateRepairStatus(
-      `読込: ${src}`
-    );
+        if (typeof updateCursorPosition === "function") {
+          updateCursorPosition();
+        }
 
+        if (typeof updateRepairStatus === "function") {
+          updateRepairStatus(
+            `読込: ${src}`
+          );
+        }
     closeFloatPanel();
 
   }catch(err){
