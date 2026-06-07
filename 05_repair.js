@@ -696,7 +696,7 @@ function showRepairLineDiff() {
   }
 
   const rows =
-    buildLineDiff(
+    buildLineDiffLCS(
       repairOriginalHtml,
       editor.value
     );
@@ -744,6 +744,127 @@ ${html}
 </div>
 `
   );
+}
+
+function buildLineDiffLCS(oldText, newText) {
+
+  const oldLines =
+    String(oldText || "").split("\n");
+
+  const newLines =
+    String(newText || "").split("\n");
+
+  const m = oldLines.length;
+  const n = newLines.length;
+
+  const dp =
+    Array.from(
+      { length: m + 1 },
+      () => Array(n + 1).fill(0)
+    );
+
+  for (let i = m - 1; i >= 0; i--) {
+
+    for (let j = n - 1; j >= 0; j--) {
+
+      if (oldLines[i] === newLines[j]) {
+
+        dp[i][j] =
+          dp[i + 1][j + 1] + 1;
+
+      } else {
+
+        dp[i][j] =
+          Math.max(
+            dp[i + 1][j],
+            dp[i][j + 1]
+          );
+
+      }
+
+    }
+
+  }
+
+  const rows = [];
+
+  let i = 0;
+  let j = 0;
+
+  while (i < m && j < n) {
+
+    if (oldLines[i] === newLines[j]) {
+
+      rows.push({
+        type: "same",
+        oldNo: i + 1,
+        newNo: j + 1,
+        text: oldLines[i]
+      });
+
+      i++;
+      j++;
+
+      continue;
+    }
+
+    if (
+      dp[i + 1][j] >=
+      dp[i][j + 1]
+    ) {
+
+      rows.push({
+        type: "delete",
+        oldNo: i + 1,
+        newNo: "",
+        text: oldLines[i]
+      });
+
+      i++;
+
+    } else {
+
+      rows.push({
+        type: "add",
+        oldNo: "",
+        newNo: j + 1,
+        text: newLines[j]
+      });
+
+      j++;
+
+    }
+
+  }
+
+  while (i < m) {
+
+    rows.push({
+      type: "delete",
+      oldNo: i + 1,
+      newNo: "",
+      text: oldLines[i]
+    });
+
+    i++;
+
+  }
+
+  while (j < n) {
+
+    rows.push({
+      type: "add",
+      oldNo: "",
+      newNo: j + 1,
+      text: newLines[j]
+    });
+
+    j++;
+
+  }
+
+  return rows;
+
 }
 
 function saveRepairDiff() {
