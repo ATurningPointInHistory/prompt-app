@@ -643,6 +643,8 @@ function toggleRepairSearchPopup() {
 </button>
 `;
 
+<div id="repairSearchPopupResult"></div>
+
   document.body.appendChild(box);
 }
 
