@@ -598,6 +598,30 @@ function buildRepairQuickToolsHtml() {
 `;
 }
 
+
+
+function toggleRepairQuickPanel() {
+
+  const panel =
+    get("repairQuickPanel");
+
+  const toggle =
+    get("repairQuickToggle");
+
+  if (!panel || !toggle) {
+    console.warn("repairQuickPanel or toggle not found");
+    return;
+  }
+
+  const closed =
+    panel.classList.toggle("closed");
+
+  toggle.textContent =
+    closed
+      ? "▶"
+      : "◀";
+}
+
 function initRepairQuickPanel() {
   if (get("repairQuickPanel")) {
     updateRepairQuickPanelVisibility();
@@ -637,6 +661,87 @@ function toggleRepairQuickPanel() {
       : "◀";
 
   console.log("repairQuickPanel closed:", closed);
+}
+
+function enableRepairQuickDrag() {
+
+  const panel =
+    get("repairQuickPanel");
+
+  const header =
+    get("repairQuickHeader");
+
+  if (!panel || !header) return;
+
+  let dragging = false;
+  let startY = 0;
+  let startBottom = 0;
+
+  function start(e) {
+
+    dragging = true;
+
+    startY =
+      e.touches
+        ? e.touches[0].clientY
+        : e.clientY;
+
+    startBottom =
+      parseInt(panel.style.bottom || "80", 10);
+  }
+
+  function move(e) {
+
+    if (!dragging) return;
+
+    const y =
+      e.touches
+        ? e.touches[0].clientY
+        : e.clientY;
+
+    const delta =
+      startY - y;
+
+    panel.style.bottom =
+      Math.max(
+        0,
+        startBottom + delta
+      ) + "px";
+  }
+
+  function end() {
+    dragging = false;
+  }
+
+  header.addEventListener(
+    "mousedown",
+    start
+  );
+
+  document.addEventListener(
+    "mousemove",
+    move
+  );
+
+  document.addEventListener(
+    "mouseup",
+    end
+  );
+
+  header.addEventListener(
+    "touchstart",
+    start
+  );
+
+  document.addEventListener(
+    "touchmove",
+    move
+  );
+
+  document.addEventListener(
+    "touchend",
+    end
+  );
 }
 
 function updateRepairQuickPanelVisibility() {
