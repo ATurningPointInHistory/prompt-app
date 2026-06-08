@@ -634,16 +634,21 @@ function toggleRepairSearchPopup() {
 
   box.innerHTML = `
 <input
-  id="repairSearchPopupInput"
+  id="repairSearch"
   placeholder="検索">
 
 <button
-  onclick="findNextRepair()">
+  onclick="searchRepairText()">
+  検索
+</button>
+
+<button
+  onclick="searchRepairNext()">
   次へ
 </button>
-`;
 
 <div id="repairSearchPopupResult"></div>
+`;
 
   document.body.appendChild(box);
 }
