@@ -12,7 +12,7 @@ let isLoading = false;
 const APP_VERSION = "v5.8.0";
 const DEBUG_MODE = true;
 const CHANGELOG = [
-  "Test１",
+  "Test２",
 ];
 const BUILD_INFO = {
   version: APP_VERSION,
