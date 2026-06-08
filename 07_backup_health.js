@@ -81,24 +81,29 @@ function getHtmlSummary(html) {
   const funcs = extractFunctionNames(html);
   const ids = extractIds(html);
   const validation = validateBackupHtml(html);
+
   const dupFuncs =
     [...new Set(
       funcs.filter((f, i) => funcs.indexOf(f) !== i)
     )];
+
   const onclicks =
     [...String(html || "").matchAll(
       /onclick="([a-zA-Z0-9_$]+)\(/g
     )].map(x => x[1]);
+
   const undefinedFns =
     [...new Set(
       onclicks.filter(fn => !funcs.includes(fn))
     )];
+
   const score =
     calcHealthScore(
       validation,
       undefinedFns,
       dupFuncs
     );
+
   return {
     funcs,
     ids,
@@ -108,6 +113,7 @@ function getHtmlSummary(html) {
     score
   };
 }
+
 /* ===============================
    Function Dependency Diagnose
 =============================== */
@@ -541,7 +547,7 @@ async function showHtmlHealth() {
 
   const garbageIssues =
     typeof detectGarbageIssues === "function"
-      ? detectGarbageIssues(jsForCheck)
+      ? detectGarbageIssues(externalJs || source)
       : [];
 
   let result =
