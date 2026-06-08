@@ -436,7 +436,7 @@ function extractTemplateStrings(text) {
   const reg = /`([\s\S]*?)`/g;
   let match;
 
-  while ((m = reg.exec(block.block)) !== null) {
+  while ((match = reg.exec(source)) !== null) {
     results.push({
       text: match[1],
       start: match.index
@@ -467,7 +467,7 @@ function detectDuplicateDeclsInFunctions(text) {
 
     let m;
 
-    while ((m = reg.exec(block.code)) !== null) {
+    while ((m = reg.exec(block.block)) !== null) {
 
       const name = m[2];
 
