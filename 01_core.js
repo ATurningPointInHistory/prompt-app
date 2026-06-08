@@ -17,7 +17,7 @@ const CHANGELOG = [
   "v5.7.0 Gemini/Cursor/Copilot評価改善"
 ];
 const BUILD_INFO = {
-  version: "v5.8.0",
+  version: APP_VERSION,
   build: "2026-06-08 17:00",
   note: "Health改善"
 };
