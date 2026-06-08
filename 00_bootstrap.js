@@ -736,11 +736,19 @@ function enableRepairQuickDrag() {
     const delta =
       startY - y;
 
+    const nextBottom =
+      startBottom + delta;
+    
+    const minBottom = 20;
+    const maxBottom =
+      window.innerHeight - panel.offsetHeight - 60;
+    
     panel.style.bottom =
-      Math.max(
-        0,
-        startBottom + delta
+      Math.min(
+        Math.max(minBottom, nextBottom),
+        Math.max(minBottom, maxBottom)
       ) + "px";
+
   }
 
   function end() {
