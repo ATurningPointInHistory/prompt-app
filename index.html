@@ -486,16 +486,31 @@ body:not(.dark) #floatPanel{
 
 .repair-quick-toggle {
   position: absolute;
-  top: 8px;
+  top: 50%;
   right: -34px;
+  transform: translateY(-50%);
+
   width: 32px;
   height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  line-height: 1;
+
   border-radius: 0 8px 8px 0;
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--text);
   cursor: pointer;
   z-index: 10001;
+}
+
+.repair-quick-panel .float-list-btn {
+  text-align: center;
+  line-height: 1.15;
 }
 
 .repair-quick-panel .float-list-btn {
