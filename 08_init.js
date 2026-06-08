@@ -122,18 +122,19 @@ document.addEventListener(
     loadSettings();
 
     if (typeof checkSafeMode === "function") {
-    checkSafeMode();
-  } else {
-    console.warn("checkSafeMode is not defined");
-  }
+      checkSafeMode();
+    } else {
+      console.warn("checkSafeMode is not defined");
+    }
 
     initRepairIde();
+
+    initRepairQuickPanel();
 
     initImportFileEvents();
 
   }
 );
-
 document.addEventListener(
   "input",
   saveCurrentState
