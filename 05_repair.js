@@ -128,6 +128,11 @@ function loadRepairHtml() {
     currentRepairFile =
       file.name || "";
 
+    localStorage.setItem(
+      "repairCurrentFile",
+      currentRepairFile
+    );
+
     const reader =
       new FileReader();
 
@@ -3116,6 +3121,9 @@ function redoRepairEdit() {
 function loadRepairDraft() {
   repairAutoSaveEnabled =
     localStorage.getItem("repairAutoSaveEnabled") === "1";
+
+  currentRepairFile =
+    localStorage.getItem("repairCurrentFile") || "";
 
   updateRepairStatus(
     repairAutoSaveEnabled
