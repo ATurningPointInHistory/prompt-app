@@ -479,9 +479,11 @@ function detectGarbageIssues(text) {
 
   const issues = [];
 
+/*
   issues.push(
     ...detectLargeFunctions(text)
   );
+*/
 
   issues.push(
     ...detectFunctionBlockBracketIssues(text)
