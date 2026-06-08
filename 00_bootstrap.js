@@ -580,14 +580,14 @@ function buildRepairQuickToolsHtml() {
     ◀
   </button>
 
-  <button class="float-list-btn" onclick="undoRepairEdit()">↩ Undo</button>
-  <button class="float-list-btn" onclick="redoRepairEdit()">↪ Redo</button>
-  <button class="float-list-btn" onclick="indentRepairSelection()">➡indent</button>
-  <button class="float-list-btn" onclick="outdentRepairSelection()">⬅outdent</button>
-  <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾Save</button>
-  <button class="float-list-btn" onclick="scrollRepairTop()">⏫上部</button>
-  <button class="float-list-btn" onclick="scrollRepairBottom()">⏬下部</button>
-  <button class="float-list-btn" onclick="reloadAppPage()">🔄更新</button>
+  <button class="float-list-btn" onclick="undoRepairEdit()">↩<br>Undo</button>
+  <button class="float-list-btn" onclick="redoRepairEdit()">↪<br>Redo</button>
+  <button class="float-list-btn" onclick="indentRepairSelection()">➡<br>indent</button>
+  <button class="float-list-btn" onclick="outdentRepairSelection()">⬅<br>outdent</button>
+  <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾<br>Save</button>
+  <button class="float-list-btn" onclick="scrollRepairTop()">⏫<br>上部</button>
+  <button class="float-list-btn" onclick="scrollRepairBottom()">⏬<br>下部</button>
+  <button class="float-list-btn" onclick="reloadAppPage()">🔄<br>更新</button>
 
 </div>
 `;
