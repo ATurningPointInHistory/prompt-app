@@ -633,22 +633,26 @@ function toggleRepairSearchPopup() {
     "repairSearchPopup";
 
   box.innerHTML = `
-<input
-  id="repairSearch"
-  placeholder="検索">
+  <div class="repair-search-toolbar">
 
-<button
-  onclick="searchRepairText()">
-  検索
-</button>
+    <input
+      id="repairSearch"
+      placeholder="検索">
 
-<button
-  onclick="searchRepairNext()">
-  次へ
-</button>
+    <button
+      onclick="searchRepairText()">
+      検索
+    </button>
 
-<div id="repairSearchPopupResult"></div>
-`;
+    <button
+      onclick="searchRepairNext()">
+      次へ
+    </button>
+
+  </div>
+
+  <div id="repairSearchPopupResult"></div>
+  `;
 
   document.body.appendChild(box);
 }
