@@ -582,8 +582,8 @@ function buildRepairQuickToolsHtml() {
 
   <button class="float-list-btn" onclick="undoRepairEdit()">↩ Undo</button>
   <button class="float-list-btn" onclick="redoRepairEdit()">↪ Redo</button>
-  <button class="float-list-btn" onclick="indentRepairSelection()">➡イン</button>
-  <button class="float-list-btn" onclick="outdentRepairSelection()">⬅アウト</button>
+  <button class="float-list-btn" onclick="indentRepairSelection()">➡indent</button>
+  <button class="float-list-btn" onclick="outdentRepairSelection()">⬅outdent</button>
   <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾Save</button>
   <button class="float-list-btn" onclick="scrollRepairTop()">⏫上部</button>
   <button class="float-list-btn" onclick="scrollRepairBottom()">⏬下部</button>
