@@ -257,14 +257,6 @@ function buildRepairToolsHtml() {
 ↕コードブロック並べ替え
 </button>
 
-<button class="float-list-btn" onclick="toggleRepairSearchBox()">
-🔍 検索
-</button>
-
-<button class="float-list-btn" onclick="openReplacePanel()">
-🔁 検索置換
-</button>
-
 <hr>
 
 <button class="float-list-btn" onclick="cleanupCandidates()">
@@ -575,7 +567,7 @@ function buildRepairQuickToolsHtml() {
     id="repairQuickHeader"
     class="small"
     style="cursor:move;">
-    Quick
+    <hr>Quick<hr>
   </div>
 
   <button
@@ -598,7 +590,52 @@ function buildRepairQuickToolsHtml() {
 `;
 }
 
+function buildRepairSearchQuickHtml() {
+  return `
+<div id="repairSearchQuickPanel" class="repair-search-quick-panel">
 
+  <div class="small">Search</div>
+
+  <button class="float-list-btn" onclick="toggleRepairSearchBox()">
+  🔍<br>検索
+  </button>
+
+  <button class="float-list-btn" onclick="openReplacePanel()">
+  🔁<br>置換
+  </button>
+
+</div>
+`;
+}
+
+function initRepairSearchQuickPanel() {
+  if (get("repairSearchQuickPanel")) {
+    updateRepairSearchQuickVisibility();
+    return;
+  }
+
+  const wrap = document.createElement("div");
+  wrap.innerHTML = buildRepairSearchQuickHtml();
+
+  const panel = wrap.firstElementChild;
+  if (!panel) return;
+
+  panel.style.display = "none";
+
+  document.body.appendChild(panel);
+
+  updateRepairSearchQuickVisibility();
+}
+
+function updateRepairSearchQuickVisibility() {
+  const panel = get("repairSearchQuickPanel");
+  if (!panel) return;
+
+  panel.style.display =
+    isRepairMode()
+      ? "flex"
+      : "none";
+}
 
 function toggleRepairQuickPanel() {
 
