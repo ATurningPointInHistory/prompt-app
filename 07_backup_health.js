@@ -945,11 +945,16 @@ function validateBackupHtml(html) {
   } catch (e) {
     jsOk = false;
   
+    const stack =
+      String(e.stack || "");
+  
     const lineMatch =
-      String(e.stack || "").match(/<anonymous>:(\d+):(\d+)/);
+      stack.match(/<anonymous>:(\d+):(\d+)/);
   
     jsError =
       e.message +
+      "\nstack:\n" +
+      stack +
       (
         lineMatch
           ? "\nline: " + lineMatch[1] +
