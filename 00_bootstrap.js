@@ -581,12 +581,12 @@ function buildRepairQuickToolsHtml() {
 
   <button class="float-list-btn" onclick="undoRepairEdit()">↩ Undo</button>
   <button class="float-list-btn" onclick="redoRepairEdit()">↪ Redo</button>
-  <button class="float-list-btn" onclick="indentRepairSelection()">➡ インデント</button>
-  <button class="float-list-btn" onclick="outdentRepairSelection()">⬅ アウトデント</button>
+  <button class="float-list-btn" onclick="indentRepairSelection()">➡イン</button>
+  <button class="float-list-btn" onclick="outdentRepairSelection()">⬅アウト</button>
   <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾 AutoSave</button>
-  <button class="float-list-btn" onclick="scrollRepairTop()">⏫ 最上部</button>
-  <button class="float-list-btn" onclick="scrollRepairBottom()">⏬ 最下部</button>
-  <button class="float-list-btn" onclick="reloadAppPage()">🔄 ページ更新</button>
+  <button class="float-list-btn" onclick="scrollRepairTop()">⏫最上部</button>
+  <button class="float-list-btn" onclick="scrollRepairBottom()">⏬最下部</button>
+  <button class="float-list-btn" onclick="reloadAppPage()">🔄 更新</button>
 </div>
 `;
 }
