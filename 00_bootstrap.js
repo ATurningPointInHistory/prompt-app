@@ -632,12 +632,20 @@ function buildRepairQuickToolsHtml() {
 }
 
 function initRepairQuickPanel() {
-  if (get("repairQuickPanel")) return;
+  if (get("repairQuickPanel")) {
+    updateRepairQuickPanelVisibility();
+    return;
+  }
 
   const wrap = document.createElement("div");
   wrap.innerHTML = buildRepairQuickToolsHtml();
 
-  document.body.appendChild(wrap.firstElementChild);
+  const panel = wrap.firstElementChild;
+  if (!panel) return;
+
+  panel.style.display = "none";
+
+  document.body.appendChild(panel);
 
   updateRepairQuickPanelVisibility();
 }
@@ -660,10 +668,12 @@ function updateRepairQuickPanelVisibility() {
   const panel = get("repairQuickPanel");
   if (!panel) return;
 
+  const visible =
+    isRepairMode();
+
   panel.style.display =
-    isRepairMode()
+    visible
       ? "flex"
       : "none";
 }
-
 
