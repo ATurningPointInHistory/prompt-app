@@ -466,6 +466,35 @@ body:not(.dark) #floatPanel{
   top: 12px;
   left: 12px;
   z-index: 10000;
+  width: 160px;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  transition: left 0.25s ease;
+}
+
+.repair-quick-panel.closed {
+  left: -150px;
+}
+
+.repair-quick-toggle {
+  position: absolute;
+  top: 8px;
+  right: -34px;
+  width: 32px;
+  height: 32px;
+  border-radius: 0 8px 8px 0;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  z-index: 10001;
 }
 
 .repair-float-panel {
