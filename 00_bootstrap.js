@@ -567,6 +567,8 @@ function closeFloatPanel(){
   }
 }
 
+function buildRepairQuickToolsHtml() {
+  return `
 <div id="repairQuickPanel" class="repair-quick-panel">
 
   <div class="small">Quick</div>
@@ -588,6 +590,8 @@ function closeFloatPanel(){
   <button class="float-list-btn" onclick="reloadAppPage()">🔄更新</button>
 
 </div>
+`;
+}
 
 function initRepairQuickPanel() {
   if (get("repairQuickPanel")) {
