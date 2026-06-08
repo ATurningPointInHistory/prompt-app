@@ -461,12 +461,19 @@ body:not(.dark) #floatPanel{
    REPAIR FLOAT CONTROL PANEL
 =============================== */
 
+.repair-quick-panel .float-list-btn {
+  border-radius: 4px;
+  padding: 4px;
+  font-size: 11px;
+  text-align: left;
+}
+
 .repair-quick-panel {
   position: fixed;
   top: 12px;
   left: 12px;
   z-index: 10000;
-  width: 50px;
+  width: 70px;
   background: var(--card);
   color: var(--text);
   border: 1px solid var(--border);
@@ -480,7 +487,7 @@ body:not(.dark) #floatPanel{
 }
 
 .repair-quick-panel.closed {
-  left: -40px;
+  left: -60px;
 }
 
 .repair-quick-toggle {
@@ -1002,12 +1009,6 @@ mark {
 .code-string { color: #a5d6ff; }
 .code-comment { color: #8b949e; }
 .code-keyword { color: #ff7b72; }
-
-
-
-
-
-
 
 </style>
 </head>
