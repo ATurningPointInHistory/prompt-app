@@ -284,6 +284,129 @@ ${info.join("\n")}`
   ].join("\n");
 }
 
+function detectBracketMismatch(text) {
+  const issues = [];
+  const stack = [];
+
+  const openers = {
+    "(": ")",
+    "[": "]",
+    "{": "}"
+  };
+
+  const closers = {
+    ")": "(",
+    "]": "[",
+    "}": "{"
+  };
+
+  let line = 1;
+  let col = 0;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (ch === "\n") {
+      line++;
+      col = 0;
+      continue;
+    }
+
+    col++;
+
+    if (openers[ch]) {
+      stack.push({
+        ch,
+        line,
+        col
+      });
+      continue;
+    }
+
+    if (closers[ch]) {
+      const last = stack.pop();
+
+      if (!last || last.ch !== closers[ch]) {
+        issues.push(
+          "括弧不一致疑い: " +
+          ch +
+          " が余分 line " +
+          line +
+          ", col " +
+          col
+        );
+      }
+    }
+  }
+
+  stack.forEach(item => {
+    issues.push(
+      "括弧閉じ忘れ疑い: " +
+      item.ch +
+      " line " +
+      item.line +
+      ", col " +
+      item.col
+    );
+  });
+
+  return issues;
+}
+
+function detectGarbageIssues(text) {
+  const issues = [];
+
+  issues.push(
+    ...detectBracketMismatch(text)
+  );
+
+  const brokenHtmlTags =
+    text.match(
+      /<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s+[^\n<>]*)?$/gm
+    ) || [];
+
+  brokenHtmlTags.forEach(tag => {
+    issues.push(
+      "HTMLタグ閉じ忘れ疑い: " + tag
+    );
+  });
+
+  const missingCommas =
+    [...text.matchAll(
+      /(["'`][^"'`\n]+["'`])\s*\n\s*(["'`][^"'`\n]+["'`])/g
+    )];
+
+  missingCommas.forEach(m => {
+    issues.push(
+      "カンマつけ忘れ疑い: " +
+      m[1] +
+      " の後"
+    );
+  });
+
+  const duplicateDecls = {};
+
+  const declReg =
+    /\b(const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g;
+
+  let match;
+
+  while ((match = declReg.exec(text)) !== null) {
+    const name = match[2];
+
+    duplicateDecls[name] =
+      (duplicateDecls[name] || 0) + 1;
+
+    if (duplicateDecls[name] === 2) {
+      issues.push(
+        "二重定義疑い: " + name
+      );
+    }
+  }
+
+  return issues;
+}
+
 async function showHtmlHealth() {
 
   const editor =
