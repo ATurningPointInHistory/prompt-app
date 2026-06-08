@@ -13,7 +13,7 @@ const APP_VERSION = "v5.8.0";
 const DEBUG_MODE = true;
 const CHANGELOG = [
   "Health Garbage Check誤検知削減",
-  "test2"
+  "test3"
 ];
 const BUILD_INFO = {
   version: APP_VERSION,
