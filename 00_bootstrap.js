@@ -631,10 +631,7 @@ function updateRepairSearchQuickVisibility() {
   const panel = get("repairSearchQuickPanel");
   if (!panel) return;
 
-  panel.style.display =
-    isRepairMode()
-      ? "flex"
-      : "none";
+  panel.style.display = "flex";
 }
 
 function toggleRepairQuickPanel() {
