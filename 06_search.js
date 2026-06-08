@@ -88,6 +88,23 @@ function clearRepairSearch() {
   box.focus();
 }
 
+function updateRepairFloatingPanelsVisibility() {
+  updateRepairQuickPanelVisibility();
+  updateRepairSearchQuickVisibility();
+
+  const searchPopup = get("repairSearchPopup");
+  if (searchPopup && !isRepairMode()) {
+    searchPopup.style.display = "none";
+  }
+
+  const replacePopup = get("repairReplacePopup");
+  if (replacePopup && !isRepairMode()) {
+    replacePopup.style.display = "none";
+  }
+}
+
+
+
 /* ===============================
    Search Action
 =============================== */
