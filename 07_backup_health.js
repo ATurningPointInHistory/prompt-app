@@ -436,7 +436,7 @@ function extractTemplateStrings(text) {
   const reg = /`([\s\S]*?)`/g;
   let match;
 
-  while ((match = reg.exec(source)) !== null) {
+  while ((m = reg.exec(block.block)) !== null) {
     results.push({
       text: match[1],
       start: match.index
@@ -1072,8 +1072,16 @@ function validateBackupHtml(html) {
   const source =
     String(html || "");
 
+  const currentName =
+    String(
+      typeof currentRepairFile !== "undefined"
+        ? currentRepairFile
+        : ""
+    ).toLowerCase();
+  
   const isHtml =
-    looksLikeHtml(source);
+    looksLikeHtml(source) &&
+    !currentName.endsWith(".js");
 
   if (!isHtml) {
     let jsOk = true;
@@ -2064,6 +2072,11 @@ async function loadCurrentIndexToRepair() {
 
     currentRepairFile =
       "index.html";
+
+    localStorage.setItem(
+      "repairCurrentFile",
+      currentRepairFile
+    );
         repairLastValue =
           html;
 
