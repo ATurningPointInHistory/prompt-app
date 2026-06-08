@@ -465,9 +465,16 @@ async function showHtmlHealth() {
       : "<!DOCTYPE html>\n" +
         document.documentElement.outerHTML;
 
-  const isHtmlSource =
-    looksLikeHtml(source);
+  const currentName =
+    String(
+      typeof currentRepairFile !== "undefined"
+        ? currentRepairFile
+        : ""
+    ).toLowerCase();
 
+  const isHtmlSource =
+    looksLikeHtml(source) &&
+    !currentName.endsWith(".js");
   let externalJs = "";
 
   if (isHtmlSource) {
