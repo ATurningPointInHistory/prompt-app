@@ -1628,6 +1628,10 @@ function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
   editor.value = html;
   repairLastValue = html;
 
+  updateLineNumbers();
+  updateCursorPosition();
+  autoSaveRepairDraft();
+
   if (typeof updateRepairStatus === "function") {
     updateRepairStatus(
       "削除候補を安全処理しました"
@@ -1691,45 +1695,6 @@ function deleteCommentedCleanupBlocks() {
     "・cleanupメモ属性: " + cleanupNotes.length + "件\n\n" +
     "OKで完全削除します。\n" +
     "事前にバックアップ保存済みか確認してください。";
-
-  const ok = confirm(message);
-  if (!ok) return;
-
-  repairUndoStack.push(before);
-  repairRedoStack = [];
-
-  functionBlocks.forEach(block => {
-    html = html.replace(block, "");
-  });
-
-  html = html.replace(
-    /\sdata-cleanup-disabled-id="[^"]+"/g,
-    ""
-  );
-
-  html = html.replace(
-    /\sdata-cleanup-note="cleanup候補:\s*孤立id"/g,
-    ""
-  );
-
-  html = html.replace(/\n{4,}/g, "\n\n\n");
-
-  editor.value = html;
-  repairLastValue = html;
-
-  updateLineNumbers();
-  updateCursorPosition();
-  autoSaveRepairDraft();
-
-  if (typeof updateRepairStatus === "function") {
-    updateRepairStatus(
-      "コメント化済み候補を完全削除"
-    );
-  }
-
-  alert(
-    "完全削除しました。\n\n" +
-    "HTML HEALTH / 編集内容診断で確認してください。"
   );
 }
 
