@@ -440,7 +440,7 @@ function detectGarbageIssues(text) {
   issues.push(
     ...detectFunctionBlockBracketIssues(text)
   );
-
+/*
   const brokenHtmlTags =
     text.match(
       /<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s+[^\n<>]*)?$/gm
@@ -451,7 +451,7 @@ function detectGarbageIssues(text) {
       "HTMLタグ閉じ忘れ疑い: " + tag
     );
   });
-
+*/
   const missingCommas =
     [...text.matchAll(
       /(["'`][^"'`\n]+["'`])\s*\n\s*(["'`][^"'`\n]+["'`])/g
