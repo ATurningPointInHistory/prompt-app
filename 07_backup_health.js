@@ -1996,6 +1996,11 @@ async function loadExternalScriptToRepair(src){
     currentRepairFile =
       src;
 
+    localStorage.setItem(
+      "repairCurrentFile",
+      currentRepairFile
+    );
+
     repairLastValue =
       editor.value;
 
