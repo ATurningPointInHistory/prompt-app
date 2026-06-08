@@ -552,7 +552,36 @@ body:not(.dark) #floatPanel{
   border-radius:
 }
 
+#repairSearchPopup,
+#repairReplacePopup {
 
+  position: fixed;
+
+  top: 12px;
+  right: 90px;
+
+  z-index: 10001;
+
+  width: 180px;
+
+  padding: 8px;
+
+  background: var(--card);
+
+  border: 1px solid var(--border);
+
+  border-radius: 10px;
+
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.3);
+}
+
+#repairSearchPopup input,
+#repairReplacePopup input {
+
+  width: 100%;
+  margin-bottom: 6px;
+}
 /* ===============================
    TODO UI
 =============================== */
