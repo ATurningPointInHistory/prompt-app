@@ -9,12 +9,10 @@
 
 let currentTab = 1;
 let isLoading = false;
-const APP_VERSION = "v5.7.2";
+const APP_VERSION = "v5.8.0";
 const DEBUG_MODE = true;
 const CHANGELOG = [
-  "v5.7.0 AI別レビュー強化",
-  "v5.7.0 AIプリセット保存/復元",
-  "v5.7.0 Gemini/Cursor/Copilot評価改善"
+  "v5.8.0",
 ];
 const BUILD_INFO = {
   version: APP_VERSION,
