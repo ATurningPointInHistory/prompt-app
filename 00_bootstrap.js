@@ -567,17 +567,16 @@ function closeFloatPanel(){
   }
 }
 
-function buildRepairQuickToolsHtml() {
-  return `
 <div id="repairQuickPanel" class="repair-quick-panel">
+
+  <div class="small">Quick</div>
+
   <button
     id="repairQuickToggle"
     class="repair-quick-toggle"
     onclick="toggleRepairQuickPanel()">
     ◀
   </button>
-
-  <div class="small">Quick</div>
 
   <button class="float-list-btn" onclick="undoRepairEdit()">↩ Undo</button>
   <button class="float-list-btn" onclick="redoRepairEdit()">↪ Redo</button>
@@ -586,10 +585,9 @@ function buildRepairQuickToolsHtml() {
   <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾Save</button>
   <button class="float-list-btn" onclick="scrollRepairTop()">⏫上部</button>
   <button class="float-list-btn" onclick="scrollRepairBottom()">⏬下部</button>
-  <button class="float-list-btn" onclick="reloadAppPage()">🔄 更新</button>
+  <button class="float-list-btn" onclick="reloadAppPage()">🔄更新</button>
+
 </div>
-`;
-}
 
 function initRepairQuickPanel() {
   if (get("repairQuickPanel")) {
