@@ -131,6 +131,8 @@ document.addEventListener(
 
     initRepairQuickPanel();
 
+    initRepairSearchQuickPanel();
+
     initImportFileEvents();
 
   }
