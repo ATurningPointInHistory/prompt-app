@@ -560,6 +560,56 @@ function detectGarbageIssues(text) {
   return issues;
 }
 
+function getErrorContext(
+  source,
+  line,
+  radius = 5
+) {
+
+  if (!line) {
+    return "";
+  }
+
+  const lines =
+    String(source || "")
+      .split("\n");
+
+  const start =
+    Math.max(
+      0,
+      line - radius - 1
+    );
+
+  const end =
+    Math.min(
+      lines.length,
+      line + radius
+    );
+
+  const result = [];
+
+  for (
+    let i = start;
+    i < end;
+    i++
+  ) {
+
+    const prefix =
+      i + 1 === line
+        ? ">>> "
+        : "    ";
+
+    result.push(
+      prefix +
+      (i + 1) +
+      ": " +
+      lines[i]
+    );
+  }
+
+  return result.join("\n");
+}
+
 async function showHtmlHealth() {
 
   const editor =
@@ -694,6 +744,15 @@ isHtmlSource
 JS syntax:
 ${validation.js_ok ? "✔ OK" : "⚠ NG"}
 ${validation.js_error || ""}
+${
+!validation.js_ok
+  ? "\n\n=== Error Context ===\n" +
+    getErrorContext(
+      source,
+      validation.error_line
+    )
+  : ""
+}
 
 === Garbage Check ===
 ${
@@ -1085,7 +1144,15 @@ function validateBackupHtml(html) {
       div_close: 0,
       duplicate_ids: [],
       js_ok: jsOk,
-      js_error: jsError
+      js_error: jsError,
+      error_line:
+        lineMatch
+          ? Number(lineMatch[1])
+          : null,
+      error_column:
+        lineMatch
+          ? Number(lineMatch[2])
+          : null
     };
   }
 
