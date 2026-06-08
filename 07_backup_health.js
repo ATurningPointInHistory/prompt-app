@@ -1,4 +1,3 @@
-
 /* ===============================
    FILE: 07_backup_health.js
    Backup / Health / Safe Mode
@@ -32,6 +31,10 @@ async function collectExternalScriptText(html) {
       script.getAttribute("src");
 
     if (!src) continue;
+
+    if (/^https?:\/\//i.test(src)) {
+      continue;
+    }
 
     try {
 
@@ -105,7 +108,6 @@ function getHtmlSummary(html) {
     score
   };
 }
-
 /* ===============================
    Function Dependency Diagnose
 =============================== */
@@ -353,8 +355,45 @@ function detectBracketMismatch(text) {
   return issues;
 }
 
-function detectGarbageIssues(text) {
+function detectLargeFunctions(text) {
+
+  if (
+    typeof extractFunctionBlocksFromText !==
+    "function"
+  ) {
+    return [];
+  }
+
+  const blocks =
+    extractFunctionBlocksFromText(text);
+
   const issues = [];
+
+  blocks.forEach(block => {
+
+    const lines =
+      block.block.split("\n").length;
+
+    if (lines >= 300) {
+
+      issues.push(
+        `巨大function候補: ${block.name} (${lines}行)`
+      );
+
+    }
+
+  });
+
+  return issues;
+}
+
+function detectGarbageIssues(text) {
+
+  const issues = [];
+
+  issues.push(
+    ...detectLargeFunctions(text)
+  );
 
   issues.push(
     ...detectBracketMismatch(text)
@@ -500,6 +539,11 @@ async function showHtmlHealth() {
       dupFuncs
     );
 
+  const garbageIssues =
+    typeof detectGarbageIssues === "function"
+      ? detectGarbageIssues(jsForCheck)
+      : [];
+
   let result =
 `HTML HEALTH REPORT
 === Source Type ===
@@ -529,6 +573,13 @@ isHtmlSource
 JS syntax:
 ${validation.js_ok ? "✔ OK" : "⚠ NG"}
 ${validation.js_error || ""}
+
+=== Garbage Check ===
+${
+garbageIssues.length
+  ? garbageIssues.join("\n")
+  : "✔ none"
+}
 
 === Function ===
 function count:
