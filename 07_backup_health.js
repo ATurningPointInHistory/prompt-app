@@ -934,7 +934,13 @@ function validateBackupHtml(html) {
     String(html || "");
 
   const isHtml =
-    looksLikeHtml(source);
+    looksLikeHtml(source) &&
+    !(
+      typeof currentRepairFile !== "undefined" &&
+      String(currentRepairFile)
+        .toLowerCase()
+        .endsWith(".js")
+    );
 
   if (!isHtml) {
     let jsOk = true;
@@ -956,6 +962,61 @@ function validateBackupHtml(html) {
       js_error: jsError
     };
   }
+
+  const cleanHtml = source
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "");
+
+  const divOpen =
+    (cleanHtml.match(/<div\b/gi) || []).length;
+
+  const divClose =
+    (cleanHtml.match(/<\/div>/gi) || []).length;
+
+  const parser =
+    new DOMParser();
+
+  const doc =
+    parser.parseFromString(
+      source,
+      "text/html"
+    );
+
+  const ids =
+    [...doc.querySelectorAll("[id]")]
+      .map(el => el.id)
+      .filter(Boolean);
+
+  const duplicateIds =
+    [...new Set(
+      ids.filter((id, i) => ids.indexOf(id) !== i)
+    )];
+
+  let jsOk = true;
+  let jsError = "";
+
+  try {
+    const scripts =
+      [...doc.querySelectorAll("script")];
+
+    scripts.forEach(s => {
+      if (s.src) return;
+      new Function(s.textContent);
+    });
+  } catch (e) {
+    jsOk = false;
+    jsError = e.message;
+  }
+
+  return {
+    div_ok: divOpen === divClose,
+    div_open: divOpen,
+    div_close: divClose,
+    duplicate_ids: duplicateIds,
+    js_ok: jsOk,
+    js_error: jsError
+  };
+}
 
   const cleanHtml = source
     .replace(/<script[\s\S]*?<\/script>/gi, "")
