@@ -267,30 +267,6 @@ function buildRepairToolsHtml() {
 
 <hr>
 
-<button class="float-list-btn" onclick="undoRepairEdit()">
-↩ Undo
-</button>
-
-<button class="float-list-btn" onclick="redoRepairEdit()">
-↪ Redo
-</button>
-
-<button class="float-list-btn"
-  onclick="indentRepairSelection()">
-➡ インデント
-</button>
-
-<button class="float-list-btn"
-  onclick="outdentRepairSelection()">
-⬅ アウトデント
-</button>
-
-<button class="float-list-btn" onclick="toggleRepairAutoSave()">
-💾 AutoSave
-</button>
-
-<hr>
-
 <button class="float-list-btn" onclick="cleanupCandidates()">
 🧹 削除候補チェック
 </button>
@@ -303,16 +279,6 @@ function buildRepairToolsHtml() {
 
 <button class="float-list-btn" onclick="openViewerMode()">
 👁 閲覧モード
-</button>
-
-<button class="float-list-btn"
-onclick="scrollRepairTop()">
-⏫ 最上部
-</button>
-
-<button class="float-list-btn"
-onclick="scrollRepairBottom()">
-⏬ 最下部
 </button>
 
 <hr>
@@ -350,12 +316,6 @@ onclick="loadAndApplyRepairDiff()">
 
 <button class="float-list-btn" onclick="showHtmlHealth()">
 💚 HTML HEALTH
-</button>
-
-<hr>
-
-<button class="float-list-btn" onclick="reloadAppPage()">
-🔄 ページ更新
 </button>
 
 `;
@@ -654,14 +614,20 @@ function toggleRepairQuickPanel() {
   const panel = get("repairQuickPanel");
   const toggle = get("repairQuickToggle");
 
-  if (!panel || !toggle) return;
+  if (!panel || !toggle) {
+    console.warn("repair quick panel not found");
+    return;
+  }
 
-  panel.classList.toggle("closed");
+  const closed =
+    panel.classList.toggle("closed");
 
   toggle.textContent =
-    panel.classList.contains("closed")
+    closed
       ? "▶"
       : "◀";
+
+  console.log("repairQuickPanel closed:", closed);
 }
 
 function updateRepairQuickPanelVisibility() {
