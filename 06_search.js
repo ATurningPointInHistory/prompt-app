@@ -267,6 +267,7 @@ function renderRepairSearchResults(
 ) {
 
   const resultBox =
+    get("repairSearchPopupResult") ||
     get("repairSearchResult");
 
   if (!resultBox) return;
