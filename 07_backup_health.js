@@ -520,7 +520,7 @@ function detectGarbageIssues(text) {
   });
 
   // ↓以降は既存処理
-
+/*
   const duplicateDecls = {};
 
   const declReg =
@@ -540,7 +540,7 @@ function detectGarbageIssues(text) {
       );
     }
   }
-
+*/
   return issues;
 }
 
