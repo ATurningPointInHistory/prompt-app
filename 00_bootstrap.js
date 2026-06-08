@@ -385,6 +385,8 @@ function resetRepairEditorView() {
   editor.scrollLeft = 0;
   editor.style.width = "100%";
   editor.style.maxWidth = "100%";
+  updateRepairQuickPanelVisibility();
+
 }
 
 /* ===============================
@@ -604,3 +606,64 @@ function closeFloatPanel(){
     btn.innerText = "⚙";
   }
 }
+
+function buildRepairQuickToolsHtml() {
+  return `
+<div id="repairQuickPanel" class="repair-quick-panel">
+  <button
+    id="repairQuickToggle"
+    class="repair-quick-toggle"
+    onclick="toggleRepairQuickPanel()">
+    ◀
+  </button>
+
+  <div class="small">Quick</div>
+
+  <button class="float-list-btn" onclick="undoRepairEdit()">↩ Undo</button>
+  <button class="float-list-btn" onclick="redoRepairEdit()">↪ Redo</button>
+  <button class="float-list-btn" onclick="indentRepairSelection()">➡ インデント</button>
+  <button class="float-list-btn" onclick="outdentRepairSelection()">⬅ アウトデント</button>
+  <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾 AutoSave</button>
+  <button class="float-list-btn" onclick="scrollRepairTop()">⏫ 最上部</button>
+  <button class="float-list-btn" onclick="scrollRepairBottom()">⏬ 最下部</button>
+  <button class="float-list-btn" onclick="reloadAppPage()">🔄 ページ更新</button>
+</div>
+`;
+}
+
+function initRepairQuickPanel() {
+  if (get("repairQuickPanel")) return;
+
+  const wrap = document.createElement("div");
+  wrap.innerHTML = buildRepairQuickToolsHtml();
+
+  document.body.appendChild(wrap.firstElementChild);
+
+  updateRepairQuickPanelVisibility();
+}
+
+function toggleRepairQuickPanel() {
+  const panel = get("repairQuickPanel");
+  const toggle = get("repairQuickToggle");
+
+  if (!panel || !toggle) return;
+
+  panel.classList.toggle("closed");
+
+  toggle.textContent =
+    panel.classList.contains("closed")
+      ? "▶"
+      : "◀";
+}
+
+function updateRepairQuickPanelVisibility() {
+  const panel = get("repairQuickPanel");
+  if (!panel) return;
+
+  panel.style.display =
+    isRepairMode()
+      ? "flex"
+      : "none";
+}
+
+
