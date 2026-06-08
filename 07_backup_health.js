@@ -522,36 +522,27 @@ function detectGarbageIssues(text) {
 
   const issues = [];
 
-  issues.push(
-    ...detectDuplicateDeclsInFunctions(text)
-);
+  let jsOk = true;
 
-/*
-  issues.push(
-    ...detectLargeFunctions(text)
-  );
-*/
+  try {
+    new Function(text);
+  } catch {
+    jsOk = false;
+  }
 
-  issues.push(
-    ...detectFunctionBlockBracketIssues(text)
-  );
+  if (!jsOk) {
+    issues.push(
+      ...detectFunctionBlockBracketIssues(text)
+    );
+
+    issues.push(
+      ...detectDuplicateDeclsInFunctions(text)
+    );
+  }
 
   issues.push(
     ...detectTemplateHtmlIssues(text)
   );
-
-  /*
-  const brokenHtmlTags =
-    text.match(
-      /<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s+[^\n<>]*)?$/gm
-    ) || [];
-
-  brokenHtmlTags.forEach(tag => {
-    issues.push(
-      "HTMLタグ閉じ忘れ疑い: " + tag
-    );
-  });
-  */
 
   const missingCommas =
     [...text.matchAll(
@@ -566,28 +557,6 @@ function detectGarbageIssues(text) {
     );
   });
 
-  // ↓以降は既存処理
-/*
-  const duplicateDecls = {};
-
-  const declReg =
-    /\b(const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g;
-
-  let match;
-
-  while ((match = declReg.exec(text)) !== null) {
-    const name = match[2];
-
-    duplicateDecls[name] =
-      (duplicateDecls[name] || 0) + 1;
-
-    if (duplicateDecls[name] === 2) {
-      issues.push(
-        "二重定義疑い: " + name
-      );
-    }
-  }
-*/
   return issues;
 }
 
