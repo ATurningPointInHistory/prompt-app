@@ -64,23 +64,45 @@ function updatePanelButtonStates() {
 =============================== */
 function switchAppPage(mode) {
   closeFloatPanel();
+
   get("appPage").style.display =
     mode === "app" ? "block" : "none";
+
   get("repairPage").style.display =
     mode === "repair" ? "block" : "none";
+
   get("appPageTab").classList.toggle(
     "active",
     mode === "app"
   );
+
   get("repairPageTab").classList.toggle(
     "active",
     mode === "repair"
   );
+
   if (mode === "repair") {
     resetRepairEditorView();
   }
-}
 
+  updateRepairQuickPanelVisibility();
+  updateRepairSearchQuickVisibility();
+
+  const searchPopup =
+    get("repairSearchPopup");
+
+  if (searchPopup && mode !== "repair") {
+    searchPopup.style.display = "none";
+  }
+
+  const replacePopup =
+    get("repairReplacePopup");
+
+  if (replacePopup && mode !== "repair") {
+    replacePopup.style.display = "none";
+  }
+}
+ 
 function isRepairMode() {
   return get("repairPage").style.display !== "none";
 }
