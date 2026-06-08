@@ -571,7 +571,12 @@ function buildRepairQuickToolsHtml() {
   return `
 <div id="repairQuickPanel" class="repair-quick-panel">
 
-  <div class="small">Quick</div>
+  <div
+    id="repairQuickHeader"
+    class="small"
+    style="cursor:move;">
+    Quick
+  </div>
 
   <button
     id="repairQuickToggle"
@@ -596,6 +601,7 @@ function buildRepairQuickToolsHtml() {
 function initRepairQuickPanel() {
   if (get("repairQuickPanel")) {
     updateRepairQuickPanelVisibility();
+    enableRepairQuickDrag();
     return;
   }
 
@@ -610,6 +616,7 @@ function initRepairQuickPanel() {
   document.body.appendChild(panel);
 
   updateRepairQuickPanelVisibility();
+  enableRepairQuickDrag();
 }
 
 function toggleRepairQuickPanel() {
@@ -644,4 +651,3 @@ function updateRepairQuickPanelVisibility() {
       ? "flex"
       : "none";
 }
-
