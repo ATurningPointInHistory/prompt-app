@@ -446,6 +446,49 @@ function extractTemplateStrings(text) {
   return results;
 }
 
+function detectDuplicateDeclsInFunctions(text) {
+
+  const issues = [];
+
+  const functionBlocks =
+    extractCodeBlocksFromText(text)
+      .filter(
+        b =>
+          b.type === "function" ||
+          b.type === "async function"
+      );
+
+  functionBlocks.forEach(block => {
+
+    const decls = {};
+
+    const reg =
+      /\b(const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g;
+
+    let m;
+
+    while ((m = reg.exec(block.code)) !== null) {
+
+      const name = m[2];
+
+      decls[name] =
+        (decls[name] || 0) + 1;
+
+      if (decls[name] === 2) {
+
+        issues.push(
+          `${block.name}: 二重定義疑い: ${name}`
+        );
+
+      }
+    }
+
+  });
+
+  return issues;
+
+}
+
 function detectTemplateHtmlIssues(text) {
   const issues = [];
   const templates =
@@ -478,6 +521,10 @@ function detectTemplateHtmlIssues(text) {
 function detectGarbageIssues(text) {
 
   const issues = [];
+
+  issues.push(
+    ...detectDuplicateDeclsInFunctions(text)
+);
 
 /*
   issues.push(
