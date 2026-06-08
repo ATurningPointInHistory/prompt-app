@@ -592,20 +592,97 @@ function buildRepairQuickToolsHtml() {
 
 function buildRepairSearchQuickHtml() {
   return `
-<div id="repairSearchQuickPanel" class="repair-search-quick-panel">
+<div id="repairSearchQuickPanel"
+     class="repair-search-quick-panel">
 
-  <div class="small">Search</div>
-
-  <button class="float-list-btn" onclick="toggleRepairSearchBox()">
-  🔍<br>検索
+  <button
+    class="float-list-btn"
+    onclick="toggleRepairSearchPopup()">
+    🔍<br>検索
   </button>
 
-  <button class="float-list-btn" onclick="openReplacePanel()">
-  🔁<br>置換
+  <button
+    class="float-list-btn"
+    onclick="toggleRepairReplacePopup()">
+    🔁<br>置換
   </button>
 
 </div>
 `;
+}
+
+function toggleRepairSearchPopup() {
+
+  let box =
+    get("repairSearchPopup");
+
+  if (box) {
+
+    box.style.display =
+      box.style.display === "none"
+        ? "block"
+        : "none";
+
+    return;
+  }
+
+  box =
+    document.createElement("div");
+
+  box.id =
+    "repairSearchPopup";
+
+  box.innerHTML = `
+<input
+  id="repairSearchPopupInput"
+  placeholder="検索">
+
+<button
+  onclick="findNextRepair()">
+  次へ
+</button>
+`;
+
+  document.body.appendChild(box);
+}
+
+function toggleRepairReplacePopup() {
+
+  let box =
+    get("repairReplacePopup");
+
+  if (box) {
+
+    box.style.display =
+      box.style.display === "none"
+        ? "block"
+        : "none";
+
+    return;
+  }
+
+  box =
+    document.createElement("div");
+
+  box.id =
+    "repairReplacePopup";
+
+  box.innerHTML = `
+<input
+  id="replaceFrom"
+  placeholder="検索">
+
+<input
+  id="replaceTo"
+  placeholder="置換">
+
+<button
+  onclick="replaceRepairText()">
+  実行
+</button>
+`;
+
+  document.body.appendChild(box);
 }
 
 function initRepairSearchQuickPanel() {
