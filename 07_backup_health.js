@@ -429,6 +429,52 @@ function detectFunctionBlockBracketIssues(text) {
   return issues;
 }
 
+function extractTemplateStrings(text) {
+  const source = String(text || "");
+  const results = [];
+
+  const reg = /`([\s\S]*?)`/g;
+  let match;
+
+  while ((match = reg.exec(source)) !== null) {
+    results.push({
+      text: match[1],
+      start: match.index
+    });
+  }
+
+  return results;
+}
+
+function detectTemplateHtmlIssues(text) {
+  const issues = [];
+  const templates =
+    extractTemplateStrings(text);
+
+  templates.forEach((item, index) => {
+    const html = item.text;
+
+    const divOpen =
+      (html.match(/<div\b/gi) || []).length;
+
+    const divClose =
+      (html.match(/<\/div>/gi) || []).length;
+
+    if (divOpen !== divClose) {
+      issues.push(
+        "template HTML div不一致: template#" +
+        (index + 1) +
+        " open:" +
+        divOpen +
+        " close:" +
+        divClose
+      );
+    }
+  });
+
+  return issues;
+}
+
 function detectGarbageIssues(text) {
 
   const issues = [];
@@ -440,7 +486,12 @@ function detectGarbageIssues(text) {
   issues.push(
     ...detectFunctionBlockBracketIssues(text)
   );
-/*
+
+  issues.push(
+    ...detectTemplateHtmlIssues(text)
+  );
+
+  /*
   const brokenHtmlTags =
     text.match(
       /<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s+[^\n<>]*)?$/gm
@@ -451,7 +502,8 @@ function detectGarbageIssues(text) {
       "HTMLタグ閉じ忘れ疑い: " + tag
     );
   });
-*/
+  */
+
   const missingCommas =
     [...text.matchAll(
       /(["'`][^"'`\n]+["'`])\s*\n\s*(["'`][^"'`\n]+["'`])/g
@@ -464,6 +516,8 @@ function detectGarbageIssues(text) {
       " の後"
     );
   });
+
+  // ↓以降は既存処理
 
   const duplicateDecls = {};
 
@@ -1333,6 +1387,7 @@ async function saveProgramHtml() {
     suffix
   );
 }
+
 function restoreProgramBackup() {
   const input =
     document.createElement("input");
