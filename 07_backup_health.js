@@ -934,24 +934,29 @@ function validateBackupHtml(html) {
     String(html || "");
 
   const isHtml =
-    looksLikeHtml(source) &&
-    !(
-      typeof currentRepairFile !== "undefined" &&
-      String(currentRepairFile)
-        .toLowerCase()
-        .endsWith(".js")
-    );
+    looksLikeHtml(source);
 
   if (!isHtml) {
     let jsOk = true;
     let jsError = "";
 
-    try {
-      new Function(source);
-    } catch (e) {
-      jsOk = false;
-      jsError = e.message;
-    }
+  try {
+    new Function(source);
+  } catch (e) {
+    jsOk = false;
+  
+    const lineMatch =
+      String(e.stack || "").match(/<anonymous>:(\d+):(\d+)/);
+  
+    jsError =
+      e.message +
+      (
+        lineMatch
+          ? "\nline: " + lineMatch[1] +
+            "\ncolumn: " + lineMatch[2]
+          : ""
+      );
+  }
 
     return {
       div_ok: true,
@@ -962,61 +967,6 @@ function validateBackupHtml(html) {
       js_error: jsError
     };
   }
-
-  const cleanHtml = source
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "");
-
-  const divOpen =
-    (cleanHtml.match(/<div\b/gi) || []).length;
-
-  const divClose =
-    (cleanHtml.match(/<\/div>/gi) || []).length;
-
-  const parser =
-    new DOMParser();
-
-  const doc =
-    parser.parseFromString(
-      source,
-      "text/html"
-    );
-
-  const ids =
-    [...doc.querySelectorAll("[id]")]
-      .map(el => el.id)
-      .filter(Boolean);
-
-  const duplicateIds =
-    [...new Set(
-      ids.filter((id, i) => ids.indexOf(id) !== i)
-    )];
-
-  let jsOk = true;
-  let jsError = "";
-
-  try {
-    const scripts =
-      [...doc.querySelectorAll("script")];
-
-    scripts.forEach(s => {
-      if (s.src) return;
-      new Function(s.textContent);
-    });
-  } catch (e) {
-    jsOk = false;
-    jsError = e.message;
-  }
-
-  return {
-    div_ok: divOpen === divClose,
-    div_open: divOpen,
-    div_close: divClose,
-    duplicate_ids: duplicateIds,
-    js_ok: jsOk,
-    js_error: jsError
-  };
-}
 
   const cleanHtml = source
     .replace(/<script[\s\S]*?<\/script>/gi, "")
