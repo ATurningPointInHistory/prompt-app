@@ -135,6 +135,8 @@ document.addEventListener(
 
     initImportFileEvents();
 
+    updateRepairFloatingPanelsVisibility();
+
   }
 );
 document.addEventListener(
