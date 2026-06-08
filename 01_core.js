@@ -16,7 +16,34 @@ const CHANGELOG = [
   "v5.7.0 AIプリセット保存/復元",
   "v5.7.0 Gemini/Cursor/Copilot評価改善"
 ];
+const BUILD_INFO = {
+  version: "v5.8.0",
+  build: "2026-06-08 17:00",
+  note: "Health改善"
+};
 
+function renderBuildInfo() {
+
+  const versionEl =
+    get("versionLabel");
+
+  const buildEl =
+    get("buildInfoLabel");
+
+  if (versionEl) {
+    versionEl.textContent =
+      BUILD_INFO.version;
+  }
+
+  if (buildEl) {
+    buildEl.innerHTML =
+      "Build: " +
+      BUILD_INFO.build +
+      "<br>" +
+      BUILD_INFO.note;
+  }
+
+}
 /* ===============================
    Core DOM Helpers
 =============================== */
