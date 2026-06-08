@@ -393,6 +393,42 @@ function detectLargeFunctions(text) {
   return issues;
 }
 
+function detectFunctionBlockBracketIssues(text) {
+
+  const issues = [];
+
+  if (
+    typeof extractFunctionBlocksFromText !==
+    "function"
+  ) {
+    return issues;
+  }
+
+  const blocks =
+    extractFunctionBlocksFromText(text);
+
+  blocks.forEach(block => {
+
+    const bracketIssues =
+      detectBracketMismatch(
+        block.block
+      );
+
+    bracketIssues.forEach(issue => {
+
+      issues.push(
+        block.name +
+        ": " +
+        issue
+      );
+
+    });
+
+  });
+
+  return issues;
+}
+
 function detectGarbageIssues(text) {
 
   const issues = [];
@@ -402,7 +438,7 @@ function detectGarbageIssues(text) {
   );
 
   issues.push(
-    ...detectBracketMismatch(text)
+    ...detectFunctionBlockBracketIssues(text)
   );
 
   const brokenHtmlTags =
