@@ -635,6 +635,7 @@ async function showHtmlHealth() {
   const isHtmlSource =
     looksLikeHtml(source) &&
     !currentName.endsWith(".js");
+    alert("isHtmlSource = " + isHtmlSource);
   let externalJs = "";
 
   if (isHtmlSource) {
