@@ -700,19 +700,22 @@ function toggleRepairReplacePopup() {
     "repairReplacePopup";
 
   box.innerHTML = `
-<input
-  id="replaceFrom"
-  placeholder="検索">
-
-<input
-  id="replaceTo"
-  placeholder="置換">
-
-<button
-  onclick="replaceRepairText()">
-  実行
-</button>
-`;
+  <div class="repair-search-toolbar">
+  
+    <input
+      id="replaceFrom"
+      placeholder="検索">
+  
+    <input
+      id="replaceTo"
+      placeholder="置換">
+  
+    <button onclick="replaceRepairText()">
+      実行
+    </button>
+  
+  </div>
+  `;
 
   document.body.appendChild(box);
 }
