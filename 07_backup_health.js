@@ -622,21 +622,34 @@ function detectScopeLeakIssues(text) {
     const blockText = m[2];
     const afterText = m[3];
 
-    const names =
+    const matches =
       [...blockText.matchAll(
         /\bconst\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g
-      )].map(x => x[1]);
+      )];
 
-    names.forEach(name => {
+    matches.forEach(match => {
+      const name = match[1];
+
       const usedAfter =
         new RegExp(
           "\\b" + escapeRegExp(name) + "\\b"
         ).test(afterText);
 
       if (usedAfter) {
+        const before =
+          text.slice(
+            0,
+            m.index + match.index
+          );
+
+        const line =
+          before.split("\n").length;
+
         issues.push(
           "スコープ外参照疑い: " +
-          name
+          name +
+          " line " +
+          line
         );
       }
     });
