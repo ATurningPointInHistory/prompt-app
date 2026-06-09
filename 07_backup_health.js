@@ -7,6 +7,10 @@
    Health Check
 =============================== */
 
+function testUnusedFunction() {
+  return 1;
+}
+
 async function collectExternalScriptText(html) {
 
   const parser =
@@ -675,6 +679,9 @@ function sendUnusedToDeleteCandidate() {
       healthUnusedFunctions
     )
   ) {
+    alert(
+      "Unused Candidate未取得"
+    );
     return;
   }
 
@@ -695,12 +702,21 @@ function sendUnusedToDeleteCandidate() {
   openFloatPanel(
     "削除候補",
     `
-<textarea
-style="
-width:100%;
-height:250px;
-">${escapeHtml(output)}</textarea>
-`
+    <div class="small">
+      Unused Candidate:
+      ${healthUnusedFunctions.length}件
+    </div>
+
+    <textarea
+      readonly
+      style="
+        width:100%;
+        height:250px;
+        margin-top:8px;
+        font-family:monospace;
+        font-size:12px;
+      ">${escapeHtml(output)}</textarea>
+    `
   );
 }
 
