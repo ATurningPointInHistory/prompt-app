@@ -186,10 +186,6 @@ onclick="saveProjectPackage()">
   🧭 全JS依存診断
 </button>
 
-<button class="float-list-btn" onclick="showHtmlHealth()">
-💚 HTML HEALTH
-</button>
-
 <hr>
 
 <button class="float-list-btn" onclick="exportTemplates()">
@@ -593,6 +589,8 @@ function buildRepairQuickToolsHtml() {
     ◀
   </button>
 
+<button class="float-list-btn" onclick="showHtmlHealth()">💚<hr>HEALTH
+</button>
 <button class="float-list-btn"
   onclick="copyRepairHtml()">📋<br>HTMLコピー
 </button>
