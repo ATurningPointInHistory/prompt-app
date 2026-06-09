@@ -1390,7 +1390,7 @@ function sendUnusedToDeleteCandidate() {
   <button class="health-action-btn"onclick="showUnusedDeleteDiff()">📊 Diff</button>
   <button class="health-action-btn"onclick="rollbackLastDelete()">↩ 復元</button>
   <button class="health-action-btn"onclick="deleteSelectedUnusedFunctionsSafe()">🗑 削除</button>
-  <button class="health-action-btn onclick="showDeleteHistory()">📚 履歴</button>
+  <button class="health-action-btn" onclick="showDeleteHistory()">📚 履歴</button>
   <button class="health-action-btn"onclick="selectAllUnusedChecks()">✅ 全選択</button>
   <button class="health-action-btn"onclick="selectSafeUnusedFunctions()">⭐ 安全のみ</button>
   <button class="health-action-btn"onclick="clearAllUnusedChecks()">⬜ 全解除</button>
