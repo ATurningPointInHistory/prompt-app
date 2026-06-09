@@ -613,7 +613,7 @@ function getErrorContext(
 async function showHtmlHealth() {
 
 
-  alert("health start");
+  alert("1");
 
 
 
@@ -657,6 +657,8 @@ async function showHtmlHealth() {
 
   const validation =
     validateBackupHtml(source);
+
+  alert("2");
 
   let funcs = [];
 
@@ -820,6 +822,8 @@ ${score}/100
 
   window.latestHealthResult =
     result;
+
+    alert("3");
 
   openFloatPanel(
     "HTML HEALTH",
