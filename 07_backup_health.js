@@ -1023,6 +1023,83 @@ function saveSelectedUnusedFunctions() {
       .map(el => el.value);
 }
 
+function saveSelectedUnusedFunctions() {
+
+  selectedUnusedFunctions =
+    [...document.querySelectorAll(
+      ".unused-check:checked"
+    )]
+      .map(
+        el => el.value
+      );
+
+}
+
+function showUnusedDeleteDiff() {
+
+  saveSelectedUnusedFunctions();
+
+  const names =
+    [...selectedUnusedFunctions];
+
+  if (names.length === 0) {
+
+    alert(
+      "関数を選択してください"
+    );
+
+    return;
+  }
+
+  const source =
+    get("repairEditor")
+      ?.value || "";
+
+  const blocks =
+    typeof extractFunctionBlocksFromText ===
+    "function"
+      ? extractFunctionBlocksFromText(
+          source
+        )
+      : [];
+
+  const diff = [];
+
+  names.forEach(name => {
+
+    const block =
+      blocks.find(
+        item =>
+          item.name === name
+      );
+
+    if (!block) return;
+
+    diff.push(
+      block.block
+        .split("\n")
+        .map(
+          line => "- " + line
+        )
+        .join("\n")
+    );
+
+  });
+
+  openFloatPanel(
+    `削除Diff (${names.length})`,
+    `
+<pre class="code-preview">
+${escapeHtml(
+  diff.join(
+    "\n\n"
+  )
+)}
+</pre>
+`
+  );
+}
+
 function sendUnusedToDeleteCandidate() {
 
   if (
@@ -1105,6 +1182,12 @@ function sendUnusedToDeleteCandidate() {
     class="health-action-btn"
     onclick="simulateUnusedDelete()">
     🗑 simulate
+  </button>
+
+  <button
+    class="health-action-btn"
+    onclick="showUnusedDeleteDiff()">
+    📊 Diff
   </button>
 
   <button
