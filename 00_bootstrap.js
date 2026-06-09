@@ -109,7 +109,7 @@ function isRepairMode() {
 function buildNormalToolsHtml() {
   return `
 
-<button class="float-list-btn" onclick="toggleTemplateManager()">💚 HTML HEALTH</button>
+<button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
 <button class="float-list-btn" onclick="toggleTemplateManager()">🧩 テンプレ管理</button>
 <button class="float-list-btn" onclick="toggleDangerManager()">⚠ 危険ワード管理</button>
 <button class="float-list-btn" onclick="togglePatternManager()">🚫 NGパターン管理</button>
@@ -436,7 +436,7 @@ function buildRepairQuickToolsHtml() {
     ◀
   </button>
 
-  <button class="float-list-btn" onclick="showHtmlHealth()">💚<hr>HEALTH</button>
+  <button class="float-list-btn" onclick="showHtmlHealth()">💚<br>HEALTH</button>
   <button class="float-list-btn" onclick="copyRepairHtml()">📋<br>HTMLコピー</button>
   <button class="float-list-btn" onclick="undoRepairEdit()">↩<br>Undo</button>
   <button class="float-list-btn" onclick="redoRepairEdit()">↪<br>Redo</button>
