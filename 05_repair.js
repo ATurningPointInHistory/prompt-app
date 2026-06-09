@@ -3805,3 +3805,76 @@ function previewRepairHtml() {
       "❌ プレビュー閉じる";
   }
 }
+
+function saveDeleteRollbackSnapshot(
+  label = ""
+) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  lastDeleteRollbackHtml =
+    editor.value;
+
+  lastDeleteRollbackInfo =
+    label;
+
+  localStorage.setItem(
+    "lastDeleteRollbackHtml",
+    lastDeleteRollbackHtml
+  );
+
+  localStorage.setItem(
+    "lastDeleteRollbackInfo",
+    lastDeleteRollbackInfo
+  );
+
+}
+
+function rollbackLastDelete() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  const backup =
+    lastDeleteRollbackHtml ||
+    localStorage.getItem(
+      "lastDeleteRollbackHtml"
+    );
+
+  if (!backup) {
+
+    alert(
+      "ロールバックデータなし"
+    );
+
+    return;
+  }
+
+  if (
+    !confirm(
+      "削除前へ戻しますか？"
+    )
+  ) {
+    return;
+  }
+
+  editor.value =
+    backup;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  updateRepairStatus(
+    "ロールバック完了"
+  );
+
+}
