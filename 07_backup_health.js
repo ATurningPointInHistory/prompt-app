@@ -1376,6 +1376,7 @@ async function showHtmlHealth() {
   const isHtmlSource =
     looksLikeHtml(source) &&
     !currentName.endsWith(".js");
+
   let externalJs = "";
 
   if (isHtmlSource) {
@@ -1392,9 +1393,9 @@ async function showHtmlHealth() {
 
   const jsForCheck =
     source + "\n" + externalJs;
-    
-    const validation =
-      validateBackupHtml(source);
+
+  const validation =
+    validateBackupHtml(source);
 
   let funcs = [];
 
@@ -1430,8 +1431,7 @@ async function showHtmlHealth() {
           funcs.indexOf(f) !== i
       )
     )];
-  healthUndefinedFunctions =
-    [...undefinedFns];
+
   const onclicks =
     isHtmlSource
       ? [...source.matchAll(
@@ -1446,6 +1446,9 @@ async function showHtmlHealth() {
           !funcs.includes(fn)
       )
     )];
+
+  healthUndefinedFunctions =
+    [...undefinedFns];
 
   const score =
     calcHealthScore(
