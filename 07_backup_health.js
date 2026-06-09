@@ -314,7 +314,7 @@ healthUnusedFunctions =
               `${item.name} (L${item.line})`
           )
           .join("\n")
-      : "none"
+      : "none",
     ""
   ].join("\n");
 }
