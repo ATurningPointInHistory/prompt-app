@@ -711,13 +711,20 @@ function toggleRepairReplacePopup() {
 
   if (box) {
 
+    const opening =
+      box.style.display === "none";
+
+    closeRepairPopups();
+
     box.style.display =
-      box.style.display === "none"
+      opening
         ? "block"
         : "none";
 
     return;
   }
+
+  closeRepairPopups();
 
   box =
     document.createElement("div");
@@ -727,19 +734,20 @@ function toggleRepairReplacePopup() {
 
   box.innerHTML = `
   <div class="repair-search-toolbar">
-  
+
     <input
       id="replaceFrom"
       placeholder="検索">
-  
+
     <input
       id="replaceTo"
       placeholder="置換">
-  
-    <button onclick="replaceRepairText()">
+
+    <button
+      onclick="replaceRepairText()">
       実行
     </button>
-  
+
   </div>
   `;
 
