@@ -694,6 +694,39 @@ function toggleHealthSection(id) {
       ? "block"
       : "none";
 }
+function copySelectedUnusedFunctions() {
+
+  const checks =
+    document.querySelectorAll(
+      ".unused-check:checked"
+    );
+
+  const names =
+    [...checks]
+      .map(
+        el => el.value
+      );
+
+  const output =
+    get(
+      "unusedFunctionOutput"
+    );
+
+  if (!output) return;
+
+  output.value =
+    names.join("\n");
+
+  output.select();
+
+  document.execCommand(
+    "copy"
+  );
+
+  updateRepairStatus(
+    `${names.length}件コピー`
+  );
+}
 
 function sendUnusedToDeleteCandidate() {
 
@@ -717,25 +750,62 @@ function sendUnusedToDeleteCandidate() {
     return;
   }
 
-  const html =
+  const listHtml =
     healthUnusedFunctions
       .map(item => `
-<button
-  class="float-list-btn"
-  onclick="
-    jumpToLine(
-      ${item.line}
-    )
+<label
+  style="
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin:4px 0;
   ">
-  ${escapeHtml(item.name)}
-  (L${item.line})
-</button>
+  <input
+    type="checkbox"
+    class="unused-check"
+    value="${escapeHtml(item.name)}">
+
+  <button
+    type="button"
+    onclick="
+      jumpToLine(
+        ${item.line}
+      )
+    ">
+    ${escapeHtml(item.name)}
+    (L${item.line})
+  </button>
+</label>
 `)
       .join("");
 
   openFloatPanel(
     `削除候補 (${healthUnusedFunctions.length})`,
-    html
+    `
+
+<div
+  class="float-panel-actions">
+
+  <button
+    onclick="
+      copySelectedUnusedFunctions()
+    ">
+    📋 コピー
+  </button>
+
+</div>
+
+${listHtml}
+
+<textarea
+  id="unusedFunctionOutput"
+  style="
+    width:100%;
+    height:120px;
+    margin-top:8px;
+  "></textarea>
+
+`
   );
 }
 
