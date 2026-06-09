@@ -632,6 +632,25 @@ function buildRepairSearchQuickHtml() {
 `;
 }
 
+function closeRepairPopups() {
+
+  [
+    "repairSearchPopup",
+    "repairReplacePopup"
+  ].forEach(id => {
+
+    const el =
+      get(id);
+
+    if (el) {
+      el.style.display =
+        "none";
+    }
+
+  });
+
+}
+
 function toggleRepairSearchPopup() {
 
   let box =
@@ -639,13 +658,20 @@ function toggleRepairSearchPopup() {
 
   if (box) {
 
+    const opening =
+      box.style.display === "none";
+
+    closeRepairPopups();
+
     box.style.display =
-      box.style.display === "none"
+      opening
         ? "block"
         : "none";
 
     return;
   }
+
+  closeRepairPopups();
 
   box =
     document.createElement("div");
