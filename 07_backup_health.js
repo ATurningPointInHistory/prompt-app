@@ -612,12 +612,9 @@ function getErrorContext(
 
 async function showHtmlHealth() {
 
-  alert("1");
 
   const editor =
     get("repairEditor");
-
-  alert("1.1");
 
   const source =
     isRepairMode() &&
@@ -627,7 +624,6 @@ async function showHtmlHealth() {
       : "<!DOCTYPE html>\n" +
         document.documentElement.outerHTML;
 
-  alert("1.2");
 
   const currentName =
     String(
@@ -636,14 +632,10 @@ async function showHtmlHealth() {
         : ""
     ).toLowerCase();
 
-  alert("1.3");
-
   const isHtmlSource =
     looksLikeHtml(source) &&
     !currentName.endsWith(".js");
   let externalJs = "";
-
-  alert("1.4");
 
   if (isHtmlSource) {
     try {
