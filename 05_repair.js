@@ -3852,7 +3852,7 @@ function saveDeleteRollbackSnapshot(
 
 }
 
-function rollbackLastDelete(skipConfirm = false) {
+async function rollbackLastDelete(skipConfirm = false) {
 
   const editor =
     get("repairEditor");
@@ -3882,12 +3882,24 @@ function rollbackLastDelete(skipConfirm = false) {
   editor.value =
     backup;
 
-  updateLineNumbers();
-  updateCursorPosition();
+  repairLastValue =
+    backup;
 
-  showHtmlHealth();
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
 
-  updateRepairStatus(
-    "ロールバック完了"
-  );
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
+
+  if (typeof showHtmlHealth === "function") {
+    await showHtmlHealth();
+  }
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      "ロールバック完了"
+    );
+  }
 }
