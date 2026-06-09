@@ -133,7 +133,11 @@ document.addEventListener(
 
     initRepairSearchQuickPanel();
 
-    initImportFileEvents();
+    if (typeof initImportFileEvents === "function") {
+      initImportFileEvents();
+    } else {
+      console.warn("initImportFileEvents is not defined");
+    }
 
     updateRepairFloatingPanelsVisibility();
 
