@@ -1207,6 +1207,10 @@ async function deleteSelectedUnusedFunctionsSafe() {
   updateRepairStatus(
     `削除完了: ${names.length}件`
   );
+  
+  selectedUnusedFunctions = [];
+  healthUnusedFunctions = [];
+  closeFloatPanel();
 
   alert(
     `削除完了\n${names.length}件`
