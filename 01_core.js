@@ -14,6 +14,7 @@ let selectedUnusedFunctions = [];
 let healthUndefinedFunctions = [];
 let lastDeleteRollbackHtml = "";
 let lastDeleteRollbackInfo = "";
+let deleteHistory = [];
 const APP_VERSION = "v5.8.2";
 const DEBUG_MODE = true;
 const CHANGELOG = [
