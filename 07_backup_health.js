@@ -612,6 +612,11 @@ function getErrorContext(
 
 async function showHtmlHealth() {
 
+
+  alert("health start");
+
+
+
   const editor =
     get("repairEditor");
 
