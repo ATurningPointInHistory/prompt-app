@@ -1216,8 +1216,26 @@ async function deleteSelectedUnusedFunctionsSafe() {
   );
   
   selectedUnusedFunctions = [];
-  healthUnusedFunctions = [];
+
   closeFloatPanel();
+
+  await showHtmlHealth();
+
+  if (
+    healthUnusedFunctions.length
+  ) {
+
+    updateRepairStatus(
+      `削除完了: ${names.length}件 / 未使用候補:${healthUnusedFunctions.length}件`
+    );
+
+  } else {
+
+    updateRepairStatus(
+      `削除完了: ${names.length}件 / 未使用候補なし`
+    );
+
+  }
 
   alert(
     `削除完了\n${names.length}件`
