@@ -653,9 +653,13 @@ async function showHtmlHealth() {
   const jsForCheck =
     source + "\n" + externalJs;
 
-  const validation =
-    validateBackupHtml(source);
-
+    alert("before validate");
+    
+    const validation =
+      validateBackupHtml(source);
+    
+    alert("after validate");
+    
   let funcs = [];
 
   try {
