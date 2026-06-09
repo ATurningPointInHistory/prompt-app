@@ -9,6 +9,7 @@
 
 let currentTab = 1;
 let isLoading = false;
+let healthUnusedFunctions = [];
 const APP_VERSION = "v5.8.0";
 const DEBUG_MODE = true;
 const CHANGELOG = [
