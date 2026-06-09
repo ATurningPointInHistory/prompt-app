@@ -1222,6 +1222,20 @@ async function deleteSelectedUnusedFunctionsSafe() {
   await showHtmlHealth();
 
   if (
+    healthUndefinedFunctions.length
+  ) {
+  
+    rollbackLastDelete();
+  
+    alert(
+      "未定義onclick検出\n自動ロールバックしました\n\n" +
+      healthUndefinedFunctions.join("\n")
+    );
+  
+    return;
+  }
+
+  if (
     healthUnusedFunctions.length
   ) {
 
@@ -1416,7 +1430,8 @@ async function showHtmlHealth() {
           funcs.indexOf(f) !== i
       )
     )];
-
+  healthUndefinedFunctions =
+    [...undefinedFns];
   const onclicks =
     isHtmlSource
       ? [...source.matchAll(
