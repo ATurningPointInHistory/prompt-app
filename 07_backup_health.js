@@ -885,8 +885,7 @@ function sendUnusedToDeleteCandidate() {
     `削除候補 (${healthUnusedFunctions.length})`,
     `
 
-<div
-  class="float-panel-actions">
+<div class="unused-actions">
 
   <button
     class="health-action-btn"
