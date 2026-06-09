@@ -1023,18 +1023,6 @@ function saveSelectedUnusedFunctions() {
       .map(el => el.value);
 }
 
-function saveSelectedUnusedFunctions() {
-
-  selectedUnusedFunctions =
-    [...document.querySelectorAll(
-      ".unused-check:checked"
-    )]
-      .map(
-        el => el.value
-      );
-
-}
-
 function showUnusedDeleteDiff() {
 
   saveSelectedUnusedFunctions();
