@@ -694,6 +694,23 @@ function toggleHealthSection(id) {
       ? "block"
       : "none";
 }
+
+function selectAllUnusedChecks() {
+  document
+    .querySelectorAll(".unused-check")
+    .forEach(el => {
+      el.checked = true;
+    });
+}
+
+function clearAllUnusedChecks() {
+  document
+    .querySelectorAll(".unused-check")
+    .forEach(el => {
+      el.checked = false;
+    });
+}
+
 function copySelectedUnusedFunctions() {
 
   const checks =
@@ -787,6 +804,19 @@ function sendUnusedToDeleteCandidate() {
         copySelectedUnusedFunctions()
       ">
     📋 コピー
+
+    <button
+      class="health-action-btn"
+      onclick="selectAllUnusedChecks()">
+      ✅ 全選択
+    </button>
+    
+    <button
+      class="health-action-btn"
+      onclick="clearAllUnusedChecks()">
+      ⬜ 全解除
+    </button>
+
   </button>
 
 </div>
