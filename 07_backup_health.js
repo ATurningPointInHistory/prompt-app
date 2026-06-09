@@ -635,7 +635,6 @@ async function showHtmlHealth() {
   const isHtmlSource =
     looksLikeHtml(source) &&
     !currentName.endsWith(".js");
-    alert("isHtmlSource = " + isHtmlSource);
   let externalJs = "";
 
   if (isHtmlSource) {
@@ -652,14 +651,10 @@ async function showHtmlHealth() {
 
   const jsForCheck =
     source + "\n" + externalJs;
-
-    alert("before validate");
     
     const validation =
       validateBackupHtml(source);
-    
-    alert("after validate");
-    
+
   let funcs = [];
 
   try {
@@ -1113,7 +1108,7 @@ function validateBackupHtml(html) {
         ? currentRepairFile
         : ""
     ).toLowerCase();
-  
+
   const isHtml =
     looksLikeHtml(source) &&
     !currentName.endsWith(".js");
@@ -1121,29 +1116,30 @@ function validateBackupHtml(html) {
   if (!isHtml) {
     let jsOk = true;
     let jsError = "";
+    let lineMatch = null;
 
-  try {
-    new Function(source);
-  } catch (e) {
-    jsOk = false;
-  
-    const stack =
-      String(e.stack || "");
-  
-    const lineMatch =
-      stack.match(/<anonymous>:(\d+):(\d+)/);
-  
-    jsError =
-      e.message +
-      "\nstack:\n" +
-      stack +
-      (
-        lineMatch
-          ? "\nline: " + lineMatch[1] +
-            "\ncolumn: " + lineMatch[2]
-          : ""
-      );
-  }
+    try {
+      new Function(source);
+    } catch (e) {
+      jsOk = false;
+
+      const stack =
+        String(e.stack || "");
+
+      lineMatch =
+        stack.match(/<anonymous>:(\d+):(\d+)/);
+
+      jsError =
+        e.message +
+        "\nstack:\n" +
+        stack +
+        (
+          lineMatch
+            ? "\nline: " + lineMatch[1] +
+              "\ncolumn: " + lineMatch[2]
+            : ""
+        );
+    }
 
     return {
       div_ok: true,
@@ -1194,6 +1190,8 @@ function validateBackupHtml(html) {
 
   let jsOk = true;
   let jsError = "";
+  let errorLine = null;
+  let errorColumn = null;
 
   try {
     const scripts =
@@ -1206,6 +1204,20 @@ function validateBackupHtml(html) {
   } catch (e) {
     jsOk = false;
     jsError = e.message;
+
+    const stack =
+      String(e.stack || "");
+
+    const match =
+      stack.match(/<anonymous>:(\d+):(\d+)/);
+
+    if (match) {
+      errorLine =
+        Number(match[1]);
+
+      errorColumn =
+        Number(match[2]);
+    }
   }
 
   return {
@@ -1214,7 +1226,9 @@ function validateBackupHtml(html) {
     div_close: divClose,
     duplicate_ids: duplicateIds,
     js_ok: jsOk,
-    js_error: jsError
+    js_error: jsError,
+    error_line: errorLine,
+    error_column: errorColumn
   };
 }
 
