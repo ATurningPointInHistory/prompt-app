@@ -88,18 +88,17 @@ function switchAppPage(mode) {
   updateRepairQuickPanelVisibility();
   updateRepairSearchQuickVisibility();
 
-  const searchPopup =
-    get("repairSearchPopup");
-
-  if (searchPopup && mode !== "repair") {
-    searchPopup.style.display = "none";
-  }
-
-  const replacePopup =
-    get("repairReplacePopup");
-
-  if (replacePopup && mode !== "repair") {
-    replacePopup.style.display = "none";
+  if (mode !== "repair") {
+    [
+      "repairSearchPopup",
+      "repairReplacePopup",
+      "repairSearchQuickPanel"
+    ].forEach(id => {
+      const el = get(id);
+      if (el) {
+        el.style.display = "none";
+      }
+    });
   }
 }
  
@@ -738,10 +737,16 @@ function initRepairSearchQuickPanel() {
 }
 
 function updateRepairSearchQuickVisibility() {
-  const panel = get("repairSearchQuickPanel");
+
+  const panel =
+    get("repairSearchQuickPanel");
+
   if (!panel) return;
 
-  panel.style.display = "flex";
+  panel.style.display =
+    isRepairMode()
+      ? "flex"
+      : "none";
 }
 
 function toggleRepairQuickPanel() {
@@ -753,12 +758,18 @@ function toggleRepairQuickPanel() {
     get("repairQuickToggle");
 
   if (!panel || !toggle) {
-    console.warn("repairQuickPanel or toggle not found");
+
+    console.warn(
+      "repairQuickPanel or toggle not found"
+    );
+
     return;
   }
 
   const closed =
-    panel.classList.toggle("closed");
+    panel.classList.toggle(
+      "closed"
+    );
 
   toggle.textContent =
     closed
