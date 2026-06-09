@@ -2485,11 +2485,19 @@ function moveFunctionToSectionByStart(
   repairLastValue =
     html;
 
-  updateLineNumbers();
-  updateCursorPosition();
-  updateRepairStatus(
-    `${functionName} → ${target.name}`
-  );
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
+
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      `${functionName} → ${target.name}`
+    );
+  }
 
   closeFloatPanel();
 
