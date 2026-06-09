@@ -610,6 +610,41 @@ function getErrorContext(
   return result.join("\n");
 }
 
+function detectScopeLeakIssues(text) {
+  const issues = [];
+
+  const reg =
+    /(try|catch|if|for|while)\s*\([^)]*\)?\s*\{([\s\S]*?)\}\s*[\s\S]{0,300}?(return\s*\{[\s\S]*?\}|return[\s\S]*?;)/g;
+
+  let m;
+
+  while ((m = reg.exec(text)) !== null) {
+    const blockText = m[2];
+    const afterText = m[3];
+
+    const names =
+      [...blockText.matchAll(
+        /\bconst\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g
+      )].map(x => x[1]);
+
+    names.forEach(name => {
+      const usedAfter =
+        new RegExp(
+          "\\b" + escapeRegExp(name) + "\\b"
+        ).test(afterText);
+
+      if (usedAfter) {
+        issues.push(
+          "スコープ外参照疑い: " +
+          name
+        );
+      }
+    });
+  }
+
+  return issues;
+}
+
 async function showHtmlHealth() {
 
 
@@ -716,6 +751,14 @@ async function showHtmlHealth() {
     typeof detectGarbageIssues === "function"
       ? detectGarbageIssues(externalJs || source)
       : [];
+
+  if (typeof detectScopeLeakIssues === "function") {
+    garbageIssues.push(
+      ...detectScopeLeakIssues(
+        externalJs || source
+      )
+    );
+  }
 
   let result =
 `HTML HEALTH REPORT
