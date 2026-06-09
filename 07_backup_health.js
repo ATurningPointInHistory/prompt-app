@@ -1160,25 +1160,32 @@ async function deleteSelectedUnusedFunctionsSafe() {
       : [];
 
   let nextSource =
-    source;
-
-  names.forEach(name => {
-
-    const block =
-      blocks.find(
-        item =>
-          item.name === name
-      );
-
-    if (!block) return;
-
-    nextSource =
-      nextSource.replace(
-        block.block,
-        ""
-      );
-
-  });
+      source;
+  
+    const targets =
+      blocks
+        .filter(block =>
+          names.includes(
+            block.name
+          )
+        )
+        .sort((a, b) =>
+          b.start - a.start
+        );
+  
+    targets.forEach(block => {
+  
+      nextSource =
+        nextSource.slice(
+          0,
+          block.start
+        )
+        +
+        nextSource.slice(
+          block.end
+        );
+  
+    });
 
   editor.value =
     nextSource;
