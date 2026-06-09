@@ -1117,17 +1117,101 @@ function selectSafeUnusedFunctions() {
 }
 
 async function deleteSelectedUnusedFunctionsSafe() {
+
+  saveSelectedUnusedFunctions();
+
+  const names =
+    [...selectedUnusedFunctions];
+
+  if (names.length === 0) {
+
+    alert(
+      "関数を選択してください"
+    );
+
+    return;
+  }
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+
+    alert(
+      "repairEditorが見つかりません"
+    );
+
+    return;
+  }
+
   saveDeleteRollbackSnapshot(
     "Unused削除前"
   );
 
-  // 選択function削除
+  const source =
+    editor.value;
 
-  // Health検査
+  const blocks =
+    typeof extractFunctionBlocksFromText ===
+    "function"
+      ? extractFunctionBlocksFromText(
+          source
+        )
+      : [];
 
-  // NGなら rollbackLastDelete()
+  let nextSource =
+    source;
 
-  // OKなら完了
+  names.forEach(name => {
+
+    const block =
+      blocks.find(
+        item =>
+          item.name === name
+      );
+
+    if (!block) return;
+
+    nextSource =
+      nextSource.replace(
+        block.block,
+        ""
+      );
+
+  });
+
+  editor.value =
+    nextSource;
+
+  const validation =
+    validateBackupHtml(
+      nextSource
+    );
+
+  if (
+    !validation.js_ok
+  ) {
+
+    rollbackLastDelete();
+
+    alert(
+      "JSエラー検出\n自動ロールバックしました"
+    );
+
+    return;
+  }
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  updateRepairStatus(
+    `削除完了: ${names.length}件`
+  );
+
+  alert(
+    `削除完了\n${names.length}件`
+  );
+
 }
 
 function sendUnusedToDeleteCandidate() {
