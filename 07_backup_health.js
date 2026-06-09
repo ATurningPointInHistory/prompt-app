@@ -835,6 +835,73 @@ ${escapeHtml(
   );
 }
 
+function previewSelectedUnusedDelete() {
+
+  const checks =
+    document.querySelectorAll(
+      ".unused-check:checked"
+    );
+
+  const names =
+    [...checks].map(
+      el => el.value
+    );
+
+  if (names.length === 0) {
+    alert("関数を選択してください");
+    return;
+  }
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    alert("repairEditor が見つかりません");
+    return;
+  }
+
+  const source =
+    editor.value || "";
+
+  const blocks =
+    typeof extractFunctionBlocksFromText === "function"
+      ? extractFunctionBlocksFromText(source)
+      : [];
+
+  const preview = [];
+
+  names.forEach(name => {
+
+    const block =
+      blocks.find(
+        item => item.name === name
+      );
+
+    if (!block) {
+      preview.push(
+`=== ${name} ===
+⚠ function block not found`
+      );
+      return;
+    }
+
+    preview.push(
+`=== ${name} ===
+${block.block}`
+    );
+
+  });
+
+  openFloatPanel(
+    "削除プレビュー",
+    `
+<pre class="code-preview">
+${escapeHtml(preview.join("\n\n----------------\n\n"))}
+</pre>
+`
+  );
+}
+
 function sendUnusedToDeleteCandidate() {
 
   if (
@@ -898,13 +965,19 @@ function sendUnusedToDeleteCandidate() {
     onclick="analyzeSelectedUnusedFunctions()">
     🔍 影響
   </button>
-  
+
+  <button
+    class="health-action-btn"
+    onclick="previewSelectedUnusedDelete()">
+    ✂ プレビュー
+  </button>
+
   <button
     class="health-action-btn"
     onclick="selectAllUnusedChecks()">
     ✅ 全選択
   </button>
-  
+
   <button
     class="health-action-btn"
     onclick="clearAllUnusedChecks()">
