@@ -436,8 +436,8 @@ function buildRepairQuickToolsHtml() {
     ◀
   </button>
 
-  <button class="float-list-btn" onclick="showHtmlHealth()">💚<br>HEALTH</button>
   <button class="float-list-btn" onclick="copyRepairHtml()">📋<br>HTMLコピー</button>
+  <button class="float-list-btn" onclick="showHtmlHealth()">💚<br>HEALTH</button>
   <button class="float-list-btn" onclick="undoRepairEdit()">↩<br>Undo</button>
   <button class="float-list-btn" onclick="redoRepairEdit()">↪<br>Redo</button>
   <button class="float-list-btn" onclick="indentRepairSelection()">➡<br>indent</button>
