@@ -1219,6 +1219,10 @@ async function deleteSelectedUnusedFunctionsSafe() {
 
   closeFloatPanel();
 
+  saveDeleteHistory(
+    names
+  );
+
   await showHtmlHealth();
 
   if (
@@ -1254,6 +1258,69 @@ async function deleteSelectedUnusedFunctionsSafe() {
   alert(
     `削除完了\n${names.length}件`
   );
+
+}
+
+function showDeleteHistory() {
+
+  if (
+    deleteHistory.length === 0
+  ) {
+
+    alert(
+      "削除履歴なし"
+    );
+
+    return;
+  }
+
+  const html =
+    deleteHistory
+      .map(item =>
+
+`<div class="history-item">
+
+<b>${escapeHtml(item.time)}</b>
+
+<br>
+
+${item.count}件
+
+<br>
+
+${escapeHtml(
+  item.functions.join(", ")
+)}
+
+</div>`
+
+      )
+      .join("");
+
+  openFloatPanel(
+    "削除履歴",
+    html
+  );
+}
+
+function saveDeleteHistory(names) {
+
+  deleteHistory.unshift({
+
+    time:
+      new Date()
+        .toLocaleString(),
+
+    count:
+      names.length,
+
+    functions:
+      [...names]
+
+  });
+
+  deleteHistory =
+    deleteHistory.slice(0, 50);
 
 }
 
@@ -1316,27 +1383,17 @@ function sendUnusedToDeleteCandidate() {
     `
 
 <div class="unused-actions">
-
   <button class="health-action-btn"onclick="copySelectedUnusedFunctions()">📋 コピー</button>
-
   <button class="health-action-btn"onclick="analyzeSelectedUnusedFunctions()">🔍 analyze</button>
-
-  <button  class="health-action-btn"onclick="previewSelectedUnusedDelete()">✂ preview</button>
-
-  <button  class="health-action-btn"onclick="simulateUnusedDelete()">🗑 simulate</button>
-
-  <button  class="health-action-btn"onclick="showUnusedDeleteDiff()">📊 Diff</button>
-
-  <button  class="health-action-btn"onclick="rollbackLastDelete()">↩ 復元</button>
-
+  <button class="health-action-btn"onclick="previewSelectedUnusedDelete()">✂ preview</button>
+  <button class="health-action-btn"onclick="simulateUnusedDelete()">🗑 simulate</button>
+  <button class="health-action-btn"onclick="showUnusedDeleteDiff()">📊 Diff</button>
+  <button class="health-action-btn"onclick="rollbackLastDelete()">↩ 復元</button>
   <button class="health-action-btn"onclick="deleteSelectedUnusedFunctionsSafe()">🗑 削除</button>
-
+  <button class="health-action-btn onclick="showDeleteHistory()">📚 履歴</button>
   <button class="health-action-btn"onclick="selectAllUnusedChecks()">✅ 全選択</button>
-
-  <button  class="health-action-btn"onclick="selectSafeUnusedFunctions()">⭐ 安全のみ</button>
-
-  <button  class="health-action-btn"onclick="clearAllUnusedChecks()">⬜ 全解除</button>
-
+  <button class="health-action-btn"onclick="selectSafeUnusedFunctions()">⭐ 安全のみ</button>
+  <button class="health-action-btn"onclick="clearAllUnusedChecks()">⬜ 全解除</button>
 </div>
 
 ${listHtml}
