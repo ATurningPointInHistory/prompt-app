@@ -477,6 +477,10 @@ function detectDuplicateDeclsInFunctions(text) {
 
   const issues = [];
 
+  if (typeof extractCodeBlocksFromText !== "function") {
+    return issues;
+  }
+
   const functionBlocks =
     extractCodeBlocksFromText(text)
       .filter(
@@ -502,18 +506,14 @@ function detectDuplicateDeclsInFunctions(text) {
         (decls[name] || 0) + 1;
 
       if (decls[name] === 2) {
-
         issues.push(
           `${block.name}: 二重定義疑い: ${name}`
         );
-
       }
     }
-
   });
 
   return issues;
-
 }
 
 function detectTemplateHtmlIssues(text) {
