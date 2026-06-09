@@ -11,6 +11,7 @@ let currentTab = 1;
 let isLoading = false;
 let healthUnusedFunctions = [];
 let selectedUnusedFunctions = [];
+let healthUndefinedFunctions = [];
 let lastDeleteRollbackHtml = "";
 let lastDeleteRollbackInfo = "";
 const APP_VERSION = "v5.8.2";
