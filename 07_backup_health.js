@@ -1077,6 +1077,7 @@ function showUnusedDeleteDiff() {
 
     diff.push(
       block.block
+        .trim()
         .split("\n")
         .map(
           line => "- " + line
