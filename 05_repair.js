@@ -3835,7 +3835,7 @@ function saveDeleteRollbackSnapshot(
 
 }
 
-function rollbackLastDelete() {
+function rollbackLastDelete(skipConfirm = false) {
 
   const editor =
     get("repairEditor");
@@ -3851,18 +3851,13 @@ function rollbackLastDelete() {
     );
 
   if (!backup) {
-
-    alert(
-      "ロールバックデータなし"
-    );
-
+    alert("ロールバックデータなし");
     return;
   }
 
   if (
-    !confirm(
-      "削除前へ戻しますか？"
-    )
+    !skipConfirm &&
+    !confirm("削除前へ戻しますか？")
   ) {
     return;
   }
@@ -3876,5 +3871,4 @@ function rollbackLastDelete() {
   updateRepairStatus(
     "ロールバック完了"
   );
-
 }
