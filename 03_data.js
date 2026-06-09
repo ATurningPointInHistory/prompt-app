@@ -341,8 +341,15 @@ function loadSettings() {
       .add("dark");
   }
 
-  closeAllManagers();
 
+  renderDangerWords();
+  renderPatterns();
+  renderCommandChips();
+  renderPresetChips();
+
+
+/*
+  closeAllManagers();
   renderHistory();
   renderTemplates();
   renderTemplateSelect();
@@ -350,6 +357,8 @@ function loadSettings() {
   renderPatterns();
   renderCommandChips();
   renderPresetChips();
+*/
+
 
   get("raw-input").value =
     localStorage.getItem(
