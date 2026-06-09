@@ -118,6 +118,42 @@ function getHtmlSummary(html) {
    Function Dependency Diagnose
 =============================== */
 
+function sendUnusedToDeleteCandidate() {
+
+  if (
+    !Array.isArray(
+      healthUnusedFunctions
+    )
+  ) {
+    return;
+  }
+
+  if (
+    healthUnusedFunctions.length === 0
+  ) {
+    alert(
+      "Unused Candidateなし"
+    );
+    return;
+  }
+
+  const output =
+    healthUnusedFunctions.join(
+      "\n"
+    );
+
+  openFloatPanel(
+    "削除候補",
+    `
+<textarea
+style="
+width:100%;
+height:250px;
+">${escapeHtml(output)}</textarea>
+`
+  );
+}
+
 function buildFunctionDependencyReport(source) {
 
   const text =
@@ -274,6 +310,9 @@ ${info.join("\n")}`
     );
 
   });
+
+  healthUnusedFunctions =
+    [...unused];
 
   return [
     "",
