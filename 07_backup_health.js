@@ -1116,6 +1116,20 @@ function selectSafeUnusedFunctions() {
   );
 }
 
+async function deleteSelectedUnusedFunctionsSafe() {
+  saveDeleteRollbackSnapshot(
+    "Unused削除前"
+  );
+
+  // 選択function削除
+
+  // Health検査
+
+  // NGなら rollbackLastDelete()
+
+  // OKなら完了
+}
+
 function sendUnusedToDeleteCandidate() {
 
   if (
@@ -1178,7 +1192,7 @@ function sendUnusedToDeleteCandidate() {
 
   <button class="health-action-btn"onclick="copySelectedUnusedFunctions()">📋 コピー</button>
 
-  <button class="health-action-btn"  onclick="analyzeSelectedUnusedFunctions()">🔍 analyze</button>
+  <button class="health-action-btn"onclick="analyzeSelectedUnusedFunctions()">🔍 analyze</button>
 
   <button  class="health-action-btn"onclick="previewSelectedUnusedDelete()">✂ preview</button>
 
@@ -1188,11 +1202,13 @@ function sendUnusedToDeleteCandidate() {
 
   <button  class="health-action-btn"onclick="rollbackLastDelete()">↩ 復元</button>
 
+  <button class="health-action-btn"onclick="deleteSelectedUnusedFunctionsSafe()">🗑 削除</button>
+
   <button class="health-action-btn"onclick="selectAllUnusedChecks()">✅ 全選択</button>
 
-  <button class="health-action-btn"onclick="selectSafeUnusedFunctions()">⭐ 安全のみ</button>
+  <button  class="health-action-btn"onclick="selectSafeUnusedFunctions()">⭐ 安全のみ</button>
 
-  <button class="health-action-btn"onclick="clearAllUnusedChecks()">⬜ 全解除</button>
+  <button  class="health-action-btn"onclick="clearAllUnusedChecks()">⬜ 全解除</button>
 
 </div>
 
