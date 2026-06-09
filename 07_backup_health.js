@@ -1053,6 +1053,7 @@ function sendUnusedToDeleteCandidate() {
     type="checkbox"
     class="unused-check"
     value="${escapeHtml(item.name)}"
+    onchange="saveSelectedUnusedFunctions()"
     ${
       selectedUnusedFunctions.includes(
         item.name
