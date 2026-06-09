@@ -251,7 +251,22 @@ function buildFunctionDependencyReport(source) {
       !protectedFunctions.has(fn);
 
     if (isUnused) {
-      unused.push(fn);
+    
+      const line = text
+        .slice(
+          0,
+          block
+            ? block.start
+            : 0
+        )
+        .split("\n")
+        .length;
+    
+      unused.push({
+        name: fn,
+        line
+      });
+    
       return;
     }
 
@@ -293,8 +308,13 @@ healthUnusedFunctions =
     "=== Unused Candidate ===",
     "",
     unused.length
-      ? unused.join("\n")
-      : "none",
+      ? unused
+          .map(
+            item =>
+              `${item.name} (L${item.line})`
+          )
+          .join("\n")
+      : "none"
     ""
   ].join("\n");
 }
@@ -697,29 +717,25 @@ function sendUnusedToDeleteCandidate() {
     return;
   }
 
-  const output =
-    healthUnusedFunctions.join(
-      "\n"
-    );
+  const html =
+    healthUnusedFunctions
+      .map(item => `
+<button
+  class="float-list-btn"
+  onclick="
+    jumpToLine(
+      ${item.line}
+    )
+  ">
+  ${escapeHtml(item.name)}
+  (L${item.line})
+</button>
+`)
+      .join("");
 
   openFloatPanel(
-    "削除候補",
-    `
-    <div class="small">
-      Unused Candidate:
-      ${healthUnusedFunctions.length}件
-    </div>
-
-    <textarea
-      readonly
-      style="
-        width:100%;
-        height:250px;
-        margin-top:8px;
-        font-family:monospace;
-        font-size:12px;
-      ">${escapeHtml(output)}</textarea>
-    `
+    `削除候補 (${healthUnusedFunctions.length})`,
+    html
   );
 }
 
