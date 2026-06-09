@@ -713,6 +713,8 @@ function clearAllUnusedChecks() {
 
 function copySelectedUnusedFunctions() {
 
+  saveSelectedUnusedFunctions();
+
   const checks =
     document.querySelectorAll(
       ".unused-check:checked"
@@ -746,6 +748,8 @@ function copySelectedUnusedFunctions() {
 }
 
 function analyzeSelectedUnusedFunctions() {
+
+  saveSelectedUnusedFunctions();
 
   const checks =
     document.querySelectorAll(
@@ -837,6 +841,8 @@ ${escapeHtml(
 
 function previewSelectedUnusedDelete() {
 
+  saveSelectedUnusedFunctions();
+
   const checks =
     document.querySelectorAll(
       ".unused-check:checked"
@@ -903,6 +909,8 @@ ${escapeHtml(preview.join("\n\n----------------\n\n"))}
 }
 
 function simulateUnusedDelete() {
+
+  saveSelectedUnusedFunctions();
 
   const checks =
     document.querySelectorAll(
@@ -1009,6 +1017,12 @@ removedFunctions.join(
   );
 }
 
+function saveSelectedUnusedFunctions() {
+  selectedUnusedFunctions =
+    [...document.querySelectorAll(".unused-check:checked")]
+      .map(el => el.value);
+}
+
 function sendUnusedToDeleteCandidate() {
 
   if (
@@ -1038,16 +1052,23 @@ function sendUnusedToDeleteCandidate() {
   <input
     type="checkbox"
     class="unused-check"
-    value="${escapeHtml(item.name)}">
+    value="${escapeHtml(item.name)}"
+    ${
+      selectedUnusedFunctions.includes(
+        item.name
+      )
+        ? "checked"
+        : ""
+    }>
 
-    <button
-      type="button"
-      class="health-action-btn"
-      onclick="
-        jumpToLine(
-          ${item.line}
-        )
-      ">
+  <button
+    type="button"
+    class="health-action-btn"
+    onclick="
+      jumpToLine(
+        ${item.line}
+      )
+    ">
     ${escapeHtml(item.name)}
     (L${item.line})
   </button>
