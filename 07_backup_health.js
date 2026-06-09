@@ -1904,7 +1904,7 @@ async function getCleanProgramHtml() {
     }
   });
 
-const html =
+  const html =
     "<!DOCTYPE html>\n" +
     clone.outerHTML;
 
@@ -1913,19 +1913,21 @@ const html =
 
   const htmlWithoutExternalScripts =
     html.replace(
-      /<script\s+src="[^"]+"\s*><\/script>\s*/g,
+      /<script\b[^>]*\bsrc=["'][^"']+["'][^>]*>\s*<\/script>\s*/gi,
       ""
     );
 
   const mergedHtml =
-    htmlWithoutExternalScripts.replace(
-      /<\/body>/i,
-      `
+    externalJs.trim()
+      ? htmlWithoutExternalScripts.replace(
+          /<\/body>/i,
+          `
 <script>
 ${externalJs.replace(/<\/script>/gi, "<\\/script>")}
 </script>
 </body>`
-    );
+        )
+      : htmlWithoutExternalScripts;
 
   return mergedHtml;
 }
