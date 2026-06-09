@@ -1199,7 +1199,7 @@ async function deleteSelectedUnusedFunctionsSafe() {
     !validation.js_ok
   ) {
 
-    rollbackLastDelete();
+    rollbackLastDelete(true);
 
     alert(
       "JSエラー検出\n自動ロールバックしました"
@@ -1225,7 +1225,7 @@ async function deleteSelectedUnusedFunctionsSafe() {
     healthUndefinedFunctions.length
   ) {
   
-    rollbackLastDelete();
+    rollbackLastDelete(true);
   
     alert(
       "未定義onclick検出\n自動ロールバックしました\n\n" +
