@@ -658,8 +658,17 @@ function detectScopeLeakIssues(text) {
   return issues;
 }
 
-async function showHtmlHealth() {
+function toggleHealthSection(id) {
+  const el = get(id);
+  if (!el) return;
 
+  el.style.display =
+    el.style.display === "none"
+      ? "block"
+      : "none";
+}
+
+async function showHtmlHealth() {
 
   const editor =
     get("repairEditor");
@@ -671,7 +680,6 @@ async function showHtmlHealth() {
       ? editor.value
       : "<!DOCTYPE html>\n" +
         document.documentElement.outerHTML;
-
 
   const currentName =
     String(
@@ -874,18 +882,49 @@ ${score}/100
   window.latestHealthResult =
     result;
 
-  openFloatPanel(
+  const parts =
+    result.split(
+      "=== Active Functions ==="
+    );
+  
+  const summary =
+    parts[0];
+  
+  const detail =
+    parts[1]
+      ? "=== Active Functions ===" + parts[1]
+      : "Function Dependencyなし";
+  
+    openFloatPanel(
     "HTML HEALTH",
     `
     <div class="float-panel-actions">
-      <button onclick="copyHealthResult()">
+  
+      <button
+        onclick="copyHealthResult()">
         📋 コピー
       </button>
+  
+      <button
+        onclick="
+        toggleHealthSection(
+        'healthActiveFunctions'
+        )">
+        📚 Functions
+      </button>
+  
     </div>
+  
     <pre
-      id="healthResultBox"
       class="code-preview">
-${escapeHtml(result)}
+  ${escapeHtml(summary)}
+    </pre>
+  
+    <pre
+      id="healthActiveFunctions"
+      class="code-preview"
+      style="display:none;">
+  ${escapeHtml(detail)}
     </pre>
     `
   );
