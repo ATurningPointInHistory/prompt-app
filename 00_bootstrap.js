@@ -148,8 +148,6 @@ function buildNormalToolsHtml() {
 function buildRepairToolsHtml() {
   return `
 
-<button class="float-list-btn" onclick="loadRepairHtml()">📖 HTML読込</button>
-<button class="float-list-btn" onclick="backupPartialScript()">📦 JS部分読込</button>
 <button class="float-list-btn" onclick="saveRepairHtml()">💾 現在ファイル保存</button>
 <hr>
 <button class="float-list-btn" onclick="selectFunctionBlock()">📦 関数選択</button>
@@ -435,6 +433,9 @@ function buildRepairQuickToolsHtml() {
     onclick="toggleRepairQuickPanel()">
     ◀
   </button>
+
+  <button class="float-list-btn" onclick="loadRepairHtml()">📖<br>HTML読込</button>
+  <button class="float-list-btn" onclick="backupPartialScript()">📦<br>JS部分読込</button>
 
   <button class="float-list-btn" onclick="copyRepairHtml()">📋<br>HTMLコピー</button>
   <button class="float-list-btn" onclick="showHtmlHealth()">💚<br>HEALTH</button>
