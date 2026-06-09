@@ -15,7 +15,7 @@ let healthUndefinedFunctions = [];
 let lastDeleteRollbackHtml = "";
 let lastDeleteRollbackInfo = "";
 let deleteHistory = [];
-const APP_VERSION = "v5.8.2";
+const APP_VERSION = "v5.8.3";
 const DEBUG_MODE = true;
 const CHANGELOG = [
   "Health Garbage Check誤検知削減",
