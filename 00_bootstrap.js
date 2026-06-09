@@ -627,34 +627,6 @@ function updateRepairSearchQuickVisibility() {
       : "none";
 }
 
-function toggleRepairQuickPanel() {
-
-  const panel =
-    get("repairQuickPanel");
-
-  const toggle =
-    get("repairQuickToggle");
-
-  if (!panel || !toggle) {
-
-    console.warn(
-      "repairQuickPanel or toggle not found"
-    );
-
-    return;
-  }
-
-  const closed =
-    panel.classList.toggle(
-      "closed"
-    );
-
-  toggle.textContent =
-    closed
-      ? "▶"
-      : "◀";
-}
-
 function initRepairQuickPanel() {
   if (get("repairQuickPanel")) {
     updateRepairQuickPanelVisibility();
