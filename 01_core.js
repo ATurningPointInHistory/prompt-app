@@ -10,6 +10,7 @@
 let currentTab = 1;
 let isLoading = false;
 let healthUnusedFunctions = [];
+let selectedUnusedFunctions = [];
 const APP_VERSION = "v5.8.2";
 const DEBUG_MODE = true;
 const CHANGELOG = [
