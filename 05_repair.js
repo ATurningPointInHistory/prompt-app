@@ -176,10 +176,12 @@ function loadRepairHtml() {
                 parsed.html
               );
 
-            updateRepairStatus(
-              "フルバックアップJSON読込: " +
-              currentRepairFile
-            );
+            if (typeof updateRepairStatus === "function") {
+              updateRepairStatus(
+                "フルバックアップJSON読込: " +
+                currentRepairFile
+              );
+            }
 
           }
 
@@ -237,13 +239,20 @@ function loadRepairHtml() {
         text
       );
 
-      updateLineNumbers();
-      updateCursorPosition();
+      if (typeof updateLineNumbers === "function") {
+        updateLineNumbers();
+      }
 
-      updateRepairStatus(
-        "読込: " +
-        currentRepairFile
-      );
+      if (typeof updateCursorPosition === "function") {
+        updateCursorPosition();
+      }
+
+      if (typeof updateRepairStatus === "function") {
+        updateRepairStatus(
+          "読込: " +
+          currentRepairFile
+        );
+      }
 
       alert(
         "読込完了\n\n" +
@@ -1821,7 +1830,7 @@ function findFunctionBlockInText(text, functionName) {
     const braceStart =
       source.indexOf(
         "{",
-        regex.lastIndex
+        start
       );
 
     if (braceStart === -1) continue;
@@ -1938,7 +1947,7 @@ function extractFunctionBlocksFromText(text) {
       const braceStart =
         source.indexOf(
           "{",
-          pattern.regex.lastIndex
+          start
         );
 
       if (braceStart === -1) {
