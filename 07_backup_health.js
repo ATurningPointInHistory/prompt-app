@@ -279,6 +279,9 @@ ${info.join("\n")}`
 
   });
 
+healthUnusedFunctions =
+    [...unused];
+
   return [
     "",
     "=== Active Functions ===",
