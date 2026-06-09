@@ -3868,6 +3868,8 @@ function rollbackLastDelete(skipConfirm = false) {
   updateLineNumbers();
   updateCursorPosition();
 
+  showHtmlHealth();
+
   updateRepairStatus(
     "ロールバック完了"
   );
