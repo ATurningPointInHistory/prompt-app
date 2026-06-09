@@ -765,13 +765,14 @@ function sendUnusedToDeleteCandidate() {
     class="unused-check"
     value="${escapeHtml(item.name)}">
 
-  <button
-    type="button"
-    onclick="
-      jumpToLine(
-        ${item.line}
-      )
-    ">
+    <button
+      type="button"
+      class="health-action-btn"
+      onclick="
+        jumpToLine(
+          ${item.line}
+        )
+      ">
     ${escapeHtml(item.name)}
     (L${item.line})
   </button>
@@ -786,10 +787,11 @@ function sendUnusedToDeleteCandidate() {
 <div
   class="float-panel-actions">
 
-  <button
-    onclick="
-      copySelectedUnusedFunctions()
-    ">
+    <button
+      class="health-action-btn"
+      onclick="
+        copySelectedUnusedFunctions()
+      ">
     📋 コピー
   </button>
 
