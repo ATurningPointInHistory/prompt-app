@@ -1101,6 +1101,21 @@ ${escapeHtml(
   );
 }
 
+function selectSafeUnusedFunctions() {
+
+  document
+    .querySelectorAll(".unused-check")
+    .forEach(el => {
+      el.checked = true;
+    });
+
+  saveSelectedUnusedFunctions();
+
+  updateRepairStatus(
+    "安全候補を選択しました"
+  );
+}
+
 function sendUnusedToDeleteCandidate() {
 
   if (
@@ -1195,6 +1210,12 @@ function sendUnusedToDeleteCandidate() {
     class="health-action-btn"
     onclick="selectAllUnusedChecks()">
     ✅ 全選択
+  </button>
+
+  <button
+    class="health-action-btn"
+    onclick="selectSafeUnusedFunctions()">
+    ⭐ 安全のみ
   </button>
 
   <button
