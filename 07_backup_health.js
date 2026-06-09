@@ -7,10 +7,6 @@
    Health Check
 =============================== */
 
-function testUnusedFunction() {
-  return 1;
-}
-
 async function collectExternalScriptText(html) {
 
   const parser =
