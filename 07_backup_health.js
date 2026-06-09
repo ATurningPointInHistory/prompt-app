@@ -753,13 +753,7 @@ function sendUnusedToDeleteCandidate() {
   const listHtml =
     healthUnusedFunctions
       .map(item => `
-<label
-  style="
-    display:flex;
-    align-items:center;
-    gap:6px;
-    margin:4px 0;
-  ">
+<label class="unused-row">
   <input
     type="checkbox"
     class="unused-check"
