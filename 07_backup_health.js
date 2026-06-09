@@ -902,6 +902,113 @@ ${escapeHtml(preview.join("\n\n----------------\n\n"))}
   );
 }
 
+function simulateUnusedDelete() {
+
+  const checks =
+    document.querySelectorAll(
+      ".unused-check:checked"
+    );
+
+  const names =
+    [...checks]
+      .map(el => el.value);
+
+  if (names.length === 0) {
+
+    alert(
+      "関数を選択してください"
+    );
+
+    return;
+  }
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+
+    alert(
+      "repairEditorが見つかりません"
+    );
+
+    return;
+  }
+
+  const source =
+    editor.value || "";
+
+  const blocks =
+    typeof extractFunctionBlocksFromText ===
+    "function"
+      ? extractFunctionBlocksFromText(
+          source
+        )
+      : [];
+
+  let simulated =
+    source;
+
+  let removedLines = 0;
+
+  const removedFunctions = [];
+
+  names.forEach(name => {
+
+    const block =
+      blocks.find(
+        item =>
+          item.name === name
+      );
+
+    if (!block) return;
+
+    removedFunctions.push(
+      name
+    );
+
+    removedLines +=
+      block.block
+        .split("\n")
+        .length;
+
+    simulated =
+      simulated.replace(
+        block.block,
+        ""
+      );
+
+  });
+
+  openFloatPanel(
+    "削除シミュレーション",
+    `
+
+<div class="small">
+
+削除関数数:
+${removedFunctions.length}
+
+<br>
+
+削除行数:
+${removedLines}
+
+</div>
+
+<pre class="code-preview">
+${escapeHtml(
+
+removedFunctions.join(
+"\n"
+)
+
+)}
+</pre>
+
+`
+  );
+}
+
 function sendUnusedToDeleteCandidate() {
 
   if (
@@ -963,13 +1070,19 @@ function sendUnusedToDeleteCandidate() {
   <button
     class="health-action-btn"
     onclick="analyzeSelectedUnusedFunctions()">
-    🔍 影響
+    🔍 analyze
   </button>
 
   <button
     class="health-action-btn"
     onclick="previewSelectedUnusedDelete()">
-    ✂ プレビュー
+    ✂ preview
+  </button>
+
+  <button
+    class="health-action-btn"
+    onclick="simulateUnusedDelete()">
+    🗑 simulate
   </button>
 
   <button
