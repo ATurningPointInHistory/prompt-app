@@ -10,11 +10,11 @@
 let currentTab = 1;
 let isLoading = false;
 let healthUnusedFunctions = [];
-const APP_VERSION = "v5.8.１";
+const APP_VERSION = "v5.8.2";
 const DEBUG_MODE = true;
 const CHANGELOG = [
   "Health Garbage Check誤検知削減",
-  "test4"
+  "test"
 ];
 const BUILD_INFO = {
   version: APP_VERSION,
