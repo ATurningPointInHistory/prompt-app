@@ -2970,17 +2970,20 @@ async function loadCurrentIndexToRepair() {
       "repairCurrentFile",
       currentRepairFile
     );
-        repairLastValue =
-          html;
+    repairLastValue =
+      html;
 
-    updateLineNumbers();
+    if (typeof updateLineNumbers === "function") {
+      updateLineNumbers();
+    }
 
-    updateCursorPosition();
+    if (typeof updateCursorPosition === "function") {
+      updateCursorPosition();
+    }
 
-    updateRepairStatus(
-      "読込: index.html"
-    );
-
+    if (typeof updateRepairStatus === "function") {
+      updateRepairStatus("読込: index.html");
+    }
     closeFloatPanel();
 
   } catch (e) {
