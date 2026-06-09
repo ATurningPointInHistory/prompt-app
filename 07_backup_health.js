@@ -745,6 +745,96 @@ function copySelectedUnusedFunctions() {
   );
 }
 
+function analyzeSelectedUnusedFunctions() {
+
+  const checks =
+    document.querySelectorAll(
+      ".unused-check:checked"
+    );
+
+  const names =
+    [...checks]
+      .map(el => el.value);
+
+  if (names.length === 0) {
+
+    alert(
+      "関数を選択してください"
+    );
+
+    return;
+  }
+
+  const source =
+    get("repairEditor")
+      ?.value || "";
+
+  const report = [];
+
+  names.forEach(fn => {
+
+    const refs =
+      (
+        source.match(
+          new RegExp(
+            "\\b" +
+            escapeRegExp(fn) +
+            "\\s*\\(",
+            "g"
+          )
+        ) || []
+      ).length;
+
+    const onclickUsed =
+      new RegExp(
+        `onclick=["'][^"']*${escapeRegExp(fn)}\\(`
+      ).test(source);
+
+    const eventUsed =
+      new RegExp(
+        `addEventListener\\([^\\n]+${escapeRegExp(fn)}`
+      ).test(source);
+
+    report.push(
+
+`${fn}
+
+参照数:
+${Math.max(0, refs - 1)}
+
+onclick:
+${onclickUsed ? "あり" : "なし"}
+
+event:
+${eventUsed ? "あり" : "なし"}
+
+削除安全度:
+${
+refs <= 1 &&
+!onclickUsed &&
+!eventUsed
+  ? "★★★★★"
+  : refs <= 2
+    ? "★★★☆☆"
+    : "★☆☆☆☆"
+}
+`
+    );
+
+  });
+
+  openFloatPanel(
+    "削除影響確認",
+    `
+<pre class="code-preview">
+${escapeHtml(
+  report.join("\n----------------\n")
+)}
+</pre>
+`
+  );
+}
+
 function sendUnusedToDeleteCandidate() {
 
   if (
@@ -798,25 +888,28 @@ function sendUnusedToDeleteCandidate() {
 <div
   class="float-panel-actions">
 
-    <button
-      class="health-action-btn"
-      onclick="
-        copySelectedUnusedFunctions()
-      ">
-    📋 コピー
+  <button
+    class="health-action-btn"
+    onclick="copySelectedUnusedFunctions()">
+  📋 コピー
+  </button>
 
-    <button
-      class="health-action-btn"
-      onclick="selectAllUnusedChecks()">
-      ✅ 全選択
-    </button>
-    
-    <button
-      class="health-action-btn"
-      onclick="clearAllUnusedChecks()">
-      ⬜ 全解除
-    </button>
-
+  <button
+    class="health-action-btn"
+    onclick="analyzeSelectedUnusedFunctions()">
+    🔍 影響
+  </button>
+  
+  <button
+    class="health-action-btn"
+    onclick="selectAllUnusedChecks()">
+    ✅ 全選択
+  </button>
+  
+  <button
+    class="health-action-btn"
+    onclick="clearAllUnusedChecks()">
+    ⬜ 全解除
   </button>
 
 </div>
