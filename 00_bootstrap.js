@@ -251,11 +251,6 @@ function buildRepairToolsHtml() {
 </button>
 
 <button class="float-list-btn"
-  onclick="copyRepairHtml()">
-📋 HTMLコピー
-</button>
-
-<button class="float-list-btn"
   onclick="saveRepairHtml()">
 💾 現在ファイル保存
 </button>
@@ -598,6 +593,9 @@ function buildRepairQuickToolsHtml() {
     ◀
   </button>
 
+<button class="float-list-btn"
+  onclick="copyRepairHtml()">📋<br>HTMLコピー
+</button>
   <button class="float-list-btn" onclick="undoRepairEdit()">↩<br>Undo</button>
   <button class="float-list-btn" onclick="redoRepairEdit()">↪<br>Redo</button>
   <button class="float-list-btn" onclick="indentRepairSelection()">➡<br>indent</button>
