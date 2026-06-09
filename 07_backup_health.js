@@ -30,6 +30,8 @@ async function collectExternalScriptText(html) {
     const src =
       script.getAttribute("src");
 
+    console.log("health fetch src:", src);
+
     if (!src) continue;
 
     if (/^https?:\/\//i.test(src)) {
