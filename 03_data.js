@@ -331,105 +331,95 @@ function loadSettings() {
 
   isLoading = true;
 
-  if (
-    localStorage.getItem(
-      "darkMode"
-    ) === "1"
-  ) {
-    document.body
-      .classList
-      .add("dark");
-  }
+  try {
 
-  closeAllManagers();
-  renderHistory();
-  renderTemplates();
-  renderTemplateSelect();
-  renderDangerWords();
-  renderPatterns();
-  renderCommandChips();
-  renderPresetChips();
-
-  get("raw-input").value =
-    localStorage.getItem(
-      "rawInput"
-    ) || "";
-
-  get("rough-tone").value =
-    localStorage.getItem(
-      "roughTone"
-    ) ||
-    "プロフェッショナル";
-
-  get(
-    "rough-output-format"
-  ).value =
-    localStorage.getItem(
-      "roughOutputFormat"
-    ) ||
-    "prompt";
-
-  get("role").value =
-    localStorage.getItem(
-      "roleValue"
-    ) || "";
-
-  get("task").value =
-    localStorage.getItem(
-      "taskValue"
-    ) || "";
-
-  get("details").value =
-    localStorage.getItem(
-      "detailsValue"
-    ) || "";
-
-  get("tone").value =
-    localStorage.getItem(
-      "toneValue"
-    ) ||
-    "プロフェッショナル";
-
-  get("ai-target").value =
-    localStorage.getItem(
-      "aiTarget"
-    ) ||
-    "chatgpt";
-
-  const savedTab =
-    Number(
+    if (
       localStorage.getItem(
-        "currentTab"
-      ) || "1"
+        "darkMode"
+      ) === "1"
+    ) {
+      document.body
+        .classList
+        .add("dark");
+    }
+
+    closeAllManagers();
+    renderHistory();
+
+    if (typeof renderTemplates === "function") {
+      renderTemplates();
+    } else {
+      console.warn("renderTemplates is not defined");
+    }
+
+    if (typeof renderTemplateSelect === "function") {
+      renderTemplateSelect();
+    } else {
+      console.warn("renderTemplateSelect is not defined");
+    }
+
+    renderDangerWords();
+    renderPatterns();
+    renderCommandChips();
+    renderPresetChips();
+
+    get("raw-input").value =
+      localStorage.getItem("rawInput") || "";
+
+    get("rough-tone").value =
+      localStorage.getItem("roughTone") ||
+      "プロフェッショナル";
+
+    get("rough-output-format").value =
+      localStorage.getItem("roughOutputFormat") ||
+      "prompt";
+
+    get("role").value =
+      localStorage.getItem("roleValue") || "";
+
+    get("task").value =
+      localStorage.getItem("taskValue") || "";
+
+    get("details").value =
+      localStorage.getItem("detailsValue") || "";
+
+    get("tone").value =
+      localStorage.getItem("toneValue") ||
+      "プロフェッショナル";
+
+    get("ai-target").value =
+      localStorage.getItem("aiTarget") ||
+      "chatgpt";
+
+    const savedTab =
+      Number(
+        localStorage.getItem("currentTab") || "1"
+      );
+
+    currentTab =
+      savedTab;
+
+    switchTab(
+      savedTab
     );
 
-  currentTab =
-    savedTab;
+    syncCommandButtons();
 
-  switchTab(
-    savedTab
-  );
+    updatePanelButtonStates();
 
-  syncCommandButtons();
+    get("versionLabel").innerText =
+      APP_VERSION;
 
-  updatePanelButtonStates();
+    get("changelogLabel").innerHTML =
+      CHANGELOG
+        .map(x => escapeHtml(x))
+        .join("<br>");
 
-  get(
-    "versionLabel"
-  ).innerText =
-    APP_VERSION;
+  } finally {
 
-  get(
-    "changelogLabel"
-  ).innerHTML =
+    isLoading = false;
 
-    CHANGELOG
-      .map(
-        x => escapeHtml(x)
-      )
-      .join("<br>");
-
-  isLoading = false;
+  }
 }
 
 /* ===============================
