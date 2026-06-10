@@ -1516,7 +1516,10 @@ async function showHtmlHealth() {
       ? detectGarbageIssues(externalJs || source)
       : [];
 
-  if (typeof detectScopeLeakIssues === "function") {
+  if (
+    !validation.js_ok &&
+    typeof detectScopeLeakIssues === "function"
+  ) {
     garbageIssues.push(
       ...detectScopeLeakIssues(
         externalJs || source
