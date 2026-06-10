@@ -13,7 +13,10 @@ function showFunctionRelationMap() {
       : document.documentElement.outerHTML;
 
   const blocks =
-    extractCodeBlocksFromText(text);
+    extractCodeBlocksFromText(text)
+     .filter(block =>
+        block.type === "function"
+      );
 
   if (!blocks.length) {
     alert("関数が見つかりません");
