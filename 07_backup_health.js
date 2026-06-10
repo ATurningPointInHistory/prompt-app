@@ -193,7 +193,20 @@ function buildFunctionDependencyReport(source) {
       "backupPartialScript",
       "checkSafeMode",
       "saveProjectPackage",
-      "analyzeProjectJsDependency"
+      "analyzeProjectJsDependency",
+      "moveFloatPanelBy",
+      "initRepairSearchQuickPanel",
+      "initRepairQuickPanel",
+      "renderBuildInfo",
+      "renderCommandChips",
+      "renderPresetChips",
+      "saveCurrentAiAnswer",
+      "editProjectState",
+      "buildLineDiff",
+      "enableRepairEditorTabIndent",
+      "loadRepairDraft",
+      "updateRepairFloatingPanelsVisibility",
+      "openReplacePanel"
     ]);
 
   const result = [];
