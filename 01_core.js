@@ -49,6 +49,29 @@ function renderBuildInfo() {
   }
 
 }
+
+function safeRun(fn, name) {
+
+  if (typeof fn === "function") {
+
+    try {
+      fn();
+    } catch (e) {
+      console.warn(
+        name + " failed:",
+        e
+      );
+    }
+
+  } else {
+
+    console.warn(
+      name + " is not defined"
+    );
+
+  }
+
+}
 /* ===============================
    Core DOM Helpers
 =============================== */
