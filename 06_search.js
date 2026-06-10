@@ -419,43 +419,143 @@ function openReplacePanel() {
 }
 
 function replaceRepairText() {
-  const editor = get("repairEditor");
-  const findText = get("repairFindText").value;
-  const replaceText = get("repairReplaceText").value;
+
+  const editor =
+    get("repairEditor");
+
+  const findBox =
+    get("repairFindText") ||
+    get("replaceFrom");
+
+  const replaceBox =
+    get("repairReplaceText") ||
+    get("replaceTo");
+
+  if (!editor || !findBox || !replaceBox) {
+    alert("置換UIが見つかりません");
+    return;
+  }
+
+  const findText =
+    findBox.value;
+
+  const replaceText =
+    replaceBox.value;
+
   if (!findText) {
     alert("検索文字を入力してください");
     return;
   }
-  const index = editor.value.indexOf(findText);
+
+  const index =
+    editor.value.indexOf(findText);
+
   if (index === -1) {
     alert("見つかりませんでした");
     return;
   }
-  repairUndoStack.push(editor.value);
+
+  repairUndoStack.push(
+    editor.value
+  );
+
+  repairRedoStack = [];
+
   editor.value =
     editor.value.slice(0, index) +
     replaceText +
-    editor.value.slice(index + findText.length);
-  repairLastValue = editor.value;
-  updateRepairStatus("1件置換");
+    editor.value.slice(
+      index + findText.length
+    );
+
+  repairLastValue =
+    editor.value;
+
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
+
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
+
+  if (typeof autoSaveRepairDraft === "function") {
+    autoSaveRepairDraft();
+  }
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus("1件置換");
+  }
 }
 
 function replaceAllRepairText() {
-  const editor = get("repairEditor");
-  const findText = get("repairFindText").value;
-  const replaceText = get("repairReplaceText").value;
+
+  const editor =
+    get("repairEditor");
+
+  const findBox =
+    get("repairFindText") ||
+    get("replaceFrom");
+
+  const replaceBox =
+    get("repairReplaceText") ||
+    get("replaceTo");
+
+  if (!editor || !findBox || !replaceBox) {
+    alert("置換UIが見つかりません");
+    return;
+  }
+
+  const findText =
+    findBox.value;
+
+  const replaceText =
+    replaceBox.value;
+
   if (!findText) {
     alert("検索文字を入力してください");
     return;
   }
-  const count = editor.value.split(findText).length - 1;
+
+  const count =
+    editor.value.split(findText).length - 1;
+
   if (count <= 0) {
     alert("見つかりませんでした");
     return;
   }
-  repairUndoStack.push(editor.value);
-  editor.value = editor.value.split(findText).join(replaceText);
-  repairLastValue = editor.value;
-  updateRepairStatus(`${count}件置換`);
+
+  repairUndoStack.push(
+    editor.value
+  );
+
+  repairRedoStack = [];
+
+  editor.value =
+    editor.value
+      .split(findText)
+      .join(replaceText);
+
+  repairLastValue =
+    editor.value;
+
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
+
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
+
+  if (typeof autoSaveRepairDraft === "function") {
+    autoSaveRepairDraft();
+  }
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      `${count}件置換`
+    );
+  }
+
   alert(`${count}件置換しました`);
 }
