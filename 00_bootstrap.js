@@ -148,7 +148,9 @@ function buildNormalToolsHtml() {
 
 function buildRepairToolsHtml() {
   return `
-
+<button class="float-list-btn" onclick="showFunctionRelationMap()">🌳 関数関連図</button>
+<button class="float-list-btn" onclick="analyzeProjectJsDependency()">🧭 全JS依存診断</button>
+<hr>
 <button class="float-list-btn" onclick="saveRepairHtml()">💾 現在ファイル保存</button>
 <hr>
 <button class="float-list-btn" onclick="selectFunctionBlock()">📦 関数選択</button>
