@@ -110,6 +110,7 @@ function buildNormalToolsHtml() {
   return `
 <button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
 <button class="float-list-btn" onclick="showFunctionRelationMap()">🌳 関数関連図</button>
+<button class="float-list-btn" onclick="analyzeAiGeneratedCode()">🤖 AIコード解析</button>
 <button class="float-list-btn" onclick="analyzeProjectJsDependency()">🧭 全JS依存診断</button>
 <hr>
 <button class="float-list-btn" onclick="toggleTemplateManager()">🧩 テンプレ管理</button>
