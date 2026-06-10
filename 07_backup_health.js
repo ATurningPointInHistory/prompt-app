@@ -636,14 +636,27 @@ function getErrorContext(
 function detectScopeLeakIssues(text) {
   const issues = [];
 
+  // JS構文が正常ならスコープ診断は不要
+  // 誤検知が多いため、構文エラー時のみ補助診断として使う
+  try {
+    new Function(String(text || ""));
+    return issues;
+  } catch {
+    // 構文NG時だけ下の簡易検出を続行
+  }
+
+  const source =
+    String(text || "");
+
   const reg =
-    /(try|catch|if|for|while)\s*\([^)]*\)?\s*\{([\s\S]*?)\}\s*[\s\S]{0,300}?(return\s*\{[\s\S]*?\}|return[\s\S]*?;)/g;
+    /\b(?:try|if|for|while)\s*\([^)]*\)?\s*\{([\s\S]*?)\}\s*[\s\S]{0,300}?(return\s*\{[\s\S]*?\}|return[\s\S]*?;)/g;
 
   let m;
 
-  while ((m = reg.exec(text)) !== null) {
-    const blockText = m[2];
-    const afterText = m[3];
+  while ((m = reg.exec(source)) !== null) {
+
+    const blockText = m[1];
+    const afterText = m[2];
 
     const matches =
       [...blockText.matchAll(
@@ -660,7 +673,7 @@ function detectScopeLeakIssues(text) {
 
       if (usedAfter) {
         const before =
-          text.slice(
+          source.slice(
             0,
             m.index + match.index
           );
