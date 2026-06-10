@@ -183,7 +183,7 @@ function buildFunctionDependencyReport(source) {
       "saveDangerWord",
       "savePattern",
       "applyTemplateFromSelect",
-      "clearHistory"
+      "clearHistory",
       "detectLargeFunctions",
       "diagnoseHtml",
       "backupProgram",
