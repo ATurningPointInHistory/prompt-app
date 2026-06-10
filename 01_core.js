@@ -14,7 +14,7 @@ let selectedUnusedFunctions = [];
 let healthUndefinedFunctions = [];
 let lastDeleteRollbackHtml = "";
 let lastDeleteRollbackInfo = "";
-let deleteHistory = [];
+let unusedDeleteHistory = [];
 const APP_VERSION = "v5.8.3";
 const DEBUG_MODE = true;
 const CHANGELOG = [
@@ -52,26 +52,25 @@ function renderBuildInfo() {
 
 function safeRun(fn, name) {
 
-  if (typeof fn === "function") {
-
-    try {
-      fn();
-    } catch (e) {
-      console.warn(
-        name + " failed:",
-        e
-      );
-    }
-
-  } else {
-
+  if (typeof fn !== "function") {
     console.warn(
       name + " is not defined"
     );
-
+    return false;
   }
 
+  try {
+    fn();
+    return true;
+  } catch (e) {
+    console.warn(
+      name + " failed:",
+      e
+    );
+    return false;
+  }
 }
+
 /* ===============================
    Core DOM Helpers
 =============================== */
