@@ -7,30 +7,29 @@
    Error Handler
 =============================== */
 
-window.onerror =
-  function(
-    message,
-    source,
-    line,
-    column,
-    error
-  ) {
+window.onerror = function(
+  message,
+  source,
+  line,
+  column,
+  error
+) {
 
-  localStorage.setItem(
-    "lastCrash",
-    JSON.stringify({
-      message,
-      line,
-      column,
-      source,
-      stack:
-        error?.stack ||
-        "no stack",
-      time:
-        new Date()
-          .toISOString()
-    })
-  );
+  try {
+    localStorage.setItem(
+      "lastCrash",
+      JSON.stringify({
+        message,
+        line,
+        column,
+        source,
+        stack: error?.stack || "no stack",
+        time: new Date().toISOString()
+      })
+    );
+  } catch (e) {
+    console.warn("lastCrash save failed", e);
+  }
 
   if (!DEBUG_MODE) return;
 
@@ -61,206 +60,125 @@ let repairIdeInitialized = false;
 function initRepairIde() {
 
   if (repairIdeInitialized) {
-    console.warn(
-      "initRepairIde already initialized"
-    );
+    console.warn("initRepairIde already initialized");
+    return;
+  }
+
+  const editor = get("repairEditor");
+
+  if (!editor) {
+    console.warn("repairEditor not found");
     return;
   }
 
   repairIdeInitialized = true;
 
-  const editor =
-    get("repairEditor");
+  repairLastValue = editor.value || "";
 
-  if (!editor) {
-    console.warn(
-      "repairEditor not found"
-    );
-    return;
-  }
+  editor.addEventListener("keydown", (e) => {
 
-  repairLastValue =
-    editor.value || "";
+    const isSearch =
+      (e.ctrlKey || e.metaKey) &&
+      e.key.toLowerCase() === "f";
 
-  editor.addEventListener(
-    "keydown",
-    (e) => {
+    if (!isSearch) return;
 
-      const isSearch =
-        (e.ctrlKey || e.metaKey) &&
-        e.key.toLowerCase() === "f";
+    e.preventDefault();
 
-      if (!isSearch) return;
-
-      e.preventDefault();
-
+    if (typeof toggleRepairSearchBox === "function") {
       toggleRepairSearchBox();
-
-      setTimeout(() => {
-
-        const box =
-          get("repairSearch");
-
-        if (box) {
-          box.focus();
-          box.select();
-        }
-
-      }, 50);
-
     }
-  );
+
+    setTimeout(() => {
+      const box = get("repairSearch");
+      if (box) {
+        box.focus();
+        box.select();
+      }
+    }, 50);
+  });
 
   const updateCursor = () => {
-
-    if (
-      typeof updateCursorPosition ===
-      "function"
-    ) {
+    if (typeof updateCursorPosition === "function") {
       updateCursorPosition();
     }
-
   };
 
-  editor.addEventListener(
-    "click",
-    updateCursor
-  );
+  editor.addEventListener("click", updateCursor);
+  editor.addEventListener("keyup", updateCursor);
+  editor.addEventListener("select", updateCursor);
 
-  editor.addEventListener(
-    "keyup",
-    updateCursor
-  );
+  editor.addEventListener("scroll", () => {
+    const lineBox = get("lineNumbers");
+    if (lineBox) {
+      lineBox.scrollTop = editor.scrollTop;
+    }
+  });
 
-  editor.addEventListener(
-    "select",
-    updateCursor
-  );
+  editor.addEventListener("input", () => {
 
-  editor.addEventListener(
-    "scroll",
-    () => {
+    if (typeof updateLineNumbers === "function") {
+      updateLineNumbers();
+    }
 
-      const lineBox =
-        get("lineNumbers");
+    updateCursor();
 
-      if (lineBox) {
-        lineBox.scrollTop =
-          editor.scrollTop;
+    if (repairLastValue !== editor.value) {
+
+      repairUndoStack.push(repairLastValue);
+      repairRedoStack = [];
+
+      repairLastValue = editor.value;
+
+      if (typeof updateRepairStatus === "function") {
+        updateRepairStatus("変更あり");
       }
 
-    }
-  );
-
-  editor.addEventListener(
-    "input",
-    () => {
-
-      updateLineNumbers();
-      updateCursor();
-
-      if (
-        repairLastValue !==
-        editor.value
-      ) {
-
-        repairUndoStack.push(
-          repairLastValue
-        );
-
-        repairRedoStack = [];
-
-        repairLastValue =
-          editor.value;
-
-        updateRepairStatus(
-          "変更あり"
-        );
-
+      if (typeof autoSaveRepairDraft === "function") {
         autoSaveRepairDraft();
       }
-
     }
-  );
+  });
 
-  loadRepairDraft();
-
-  updateLineNumbers();
-
+  safeRun(loadRepairDraft, "loadRepairDraft");
+  safeRun(updateLineNumbers, "updateLineNumbers");
   updateCursor();
+  safeRun(enableRepairEditorTabIndent, "enableRepairEditorTabIndent");
 
-  enableRepairEditorTabIndent();
-
-  console.log(
-    "initRepairIde initialized"
-  );
+  console.log("initRepairIde initialized");
 }
 
 /* ===============================
    App Events
 =============================== */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
+document.addEventListener("DOMContentLoaded", () => {
 
-    try {
+  try {
 
-      loadSettings();
+    safeRun(loadSettings, "loadSettings");
+    safeRun(checkSafeMode, "checkSafeMode");
+    safeRun(initRepairIde, "initRepairIde");
+    safeRun(initRepairQuickPanel, "initRepairQuickPanel");
+    safeRun(initRepairSearchQuickPanel, "initRepairSearchQuickPanel");
+    safeRun(initImportFileEvents, "initImportFileEvents");
+    safeRun(updateRepairFloatingPanelsVisibility, "updateRepairFloatingPanelsVisibility");
 
-      if (
-        typeof checkSafeMode ===
-        "function"
-      ) {
-        checkSafeMode();
-      }
+  } catch (e) {
 
-      initRepairIde();
+    console.error("Startup Error", e);
 
-      initRepairQuickPanel();
-
-      initRepairSearchQuickPanel();
-
-      if (
-        typeof initImportFileEvents ===
-        "function"
-      ) {
-        initImportFileEvents();
-      }
-
-      updateRepairFloatingPanelsVisibility();
-
-    } catch (e) {
-
-      console.error(
-        "Startup Error",
-        e
-      );
-
-      alert(
-        "起動中にエラーが発生しました\n" +
-        e.message
-      );
-
-    }
-
+    alert(
+      "起動中にエラーが発生しました\n" +
+      e.message
+    );
   }
-);
-      initImportFileEvents();
-    } else {
-      console.warn("initImportFileEvents is not defined");
-    }
+});
 
-    updateRepairFloatingPanelsVisibility();
+document.addEventListener("input", () => {
+  safeRun(saveCurrentState, "saveCurrentState");
+});
 
-  }
-);
-document.addEventListener(
-  "input",
-  saveCurrentState
-);
-
-document.addEventListener(
-  "change",
-  saveCurrentState
-);
+document.addEventListener("change", () => {
+  safeRun(saveCurrentState, "saveCurrentState");
+});
