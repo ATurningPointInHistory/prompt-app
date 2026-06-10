@@ -247,35 +247,54 @@ function moveRepairSearchSelection(index, length) {
     !editor ||
     index === undefined ||
     index === null
-  ) return;
+  ) {
+    return;
+  }
 
-  editor.focus({
-    preventScroll:true
-  });
+  editor.focus();
 
   editor.setSelectionRange(
     index,
     index + length
   );
 
-  const line =
-    editor.value
-      .slice(0, index)
-      .split("\n")
-      .length;
+  // カーソル位置を画面内へ確実に表示
+  editor.blur();
+  editor.focus();
 
-  editor.scrollTop =
+  const before =
+    editor.value.slice(0, index);
+
+  const line =
+    before.split("\n").length;
+
+  const lineHeight =
+    parseFloat(
+      getComputedStyle(editor).lineHeight
+    ) || 18;
+
+  const targetTop =
     Math.max(
       0,
-      (line - 4) * 18
+      (line - 6) * lineHeight
     );
 
-  updateCursorPosition();
-  updateLineNumbers();
+  editor.scrollTop =
+    targetTop;
 
-  updateRepairStatus(
-    `検索移動: ${repairSearchIndex + 1}/${repairSearchMatches.length}`
-  );
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
+
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      `検索移動: ${repairSearchIndex + 1}/${repairSearchMatches.length}`
+    );
+  }
 }
 
 function renderRepairSearchResults(
