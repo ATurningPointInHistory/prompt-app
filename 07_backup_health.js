@@ -3450,3 +3450,104 @@ function copyProjectJsHealth() {
       : "コピー失敗"
   );
 }
+
+function showFunctionRelationMap() {
+
+  const editor =
+    get("repairEditor");
+
+  const source =
+    editor && editor.value.trim()
+      ? editor.value
+      : document.documentElement.outerHTML;
+
+  const blocks =
+    extractFunctionBlocksFromText(source);
+
+  if (!blocks.length) {
+    alert("関数が見つかりません");
+    return;
+  }
+
+  const names =
+    blocks.map(block => block.name);
+
+  const lines = [];
+
+  lines.push("Function Relation Map");
+  lines.push("");
+
+  blocks.forEach(block => {
+
+    const calls =
+      names.filter(name => {
+
+        if (name === block.name) {
+          return false;
+        }
+
+        const reg =
+          new RegExp(
+            "\\b" +
+            escapeRegExp(name) +
+            "\\s*\\(",
+            "g"
+          );
+
+        return reg.test(block.block);
+      });
+
+    lines.push(block.name);
+
+    if (calls.length) {
+      calls.forEach(call => {
+        lines.push("  └─ " + call);
+      });
+    } else {
+      lines.push("  └─ calls: none");
+    }
+
+    lines.push("");
+  });
+
+  const result =
+    lines.join("\n");
+
+  window.latestFunctionRelationMap =
+    result;
+
+  openFloatPanel(
+    "関数関連図",
+    `
+<div class="float-panel-actions">
+  <button onclick="copyFunctionRelationMap()">
+    📋 コピー
+  </button>
+</div>
+
+<pre class="code-preview">
+${escapeHtml(result)}
+</pre>
+`
+  );
+}
+
+function copyFunctionRelationMap() {
+
+  const text =
+    window.latestFunctionRelationMap || "";
+
+  if (!text) {
+    alert("コピー内容なし");
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "関数関連図をコピーしました"
+      : "コピー失敗"
+  );
+}
