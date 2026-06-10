@@ -343,25 +343,45 @@ function loadSettings() {
         .add("dark");
     }
 
-    closeAllManagers();
-    renderHistory();
+    safeRun(
+      closeAllManagers,
+      "closeAllManagers"
+    );
 
-    if (typeof renderTemplates === "function") {
-      renderTemplates();
-    } else {
-      console.warn("renderTemplates is not defined");
-    }
+    safeRun(
+      renderHistory,
+      "renderHistory"
+    );
 
-    if (typeof renderTemplateSelect === "function") {
-      renderTemplateSelect();
-    } else {
-      console.warn("renderTemplateSelect is not defined");
-    }
+    safeRun(
+      renderTemplates,
+      "renderTemplates"
+    );
 
-    renderDangerWords();
-    renderPatterns();
-    renderCommandChips();
-    renderPresetChips();
+    safeRun(
+      renderTemplateSelect,
+      "renderTemplateSelect"
+    );
+
+    safeRun(
+      renderDangerWords,
+      "renderDangerWords"
+    );
+
+    safeRun(
+      renderPatterns,
+      "renderPatterns"
+    );
+
+    safeRun(
+      renderCommandChips,
+      "renderCommandChips"
+    );
+
+    safeRun(
+      renderPresetChips,
+      "renderPresetChips"
+    );
 
     get("raw-input").value =
       localStorage.getItem("rawInput") || "";
