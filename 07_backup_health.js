@@ -184,6 +184,16 @@ function buildFunctionDependencyReport(source) {
       "savePattern",
       "applyTemplateFromSelect",
       "clearHistory"
+      "detectLargeFunctions",
+      "diagnoseHtml",
+      "backupProgram",
+      "saveProgramHtml",
+      "restoreProgramBackup",
+      "compareBackupSummary",
+      "backupPartialScript",
+      "checkSafeMode",
+      "saveProjectPackage",
+      "analyzeProjectJsDependency",
     ]);
 
   const result = [];
