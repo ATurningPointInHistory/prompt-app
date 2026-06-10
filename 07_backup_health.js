@@ -1248,7 +1248,7 @@ async function deleteSelectedUnusedFunctionsSafe() {
 function showDeleteHistory() {
 
   if (
-    deleteHistory.length === 0
+    unusedDeleteHistory.length === 0
   ) {
 
     alert(
@@ -1259,7 +1259,7 @@ function showDeleteHistory() {
   }
 
   const html =
-    deleteHistory
+    unusedDeleteHistory
       .map(item =>
 
 `<div class="history-item">
@@ -1289,7 +1289,7 @@ ${escapeHtml(
 
 function saveDeleteHistory(names) {
 
-  deleteHistory.unshift({
+  unusedDeleteHistory.unshift({
 
     time:
       new Date()
@@ -1303,8 +1303,8 @@ function saveDeleteHistory(names) {
 
   });
 
-  deleteHistory =
-    deleteHistory.slice(0, 50);
+  unusedDeleteHistory =
+    unusedDeleteHistory.slice(0, 50);
 
 }
 
