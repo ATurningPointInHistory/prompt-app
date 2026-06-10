@@ -574,7 +574,7 @@ function toggleRepairReplacePopup() {
     "repairReplacePopup";
 
   box.innerHTML = `
-    <div class="repair-replace-toolbar">
+    <div class="repair-search-toolbar">
 
       <input
         id="replaceFrom"
@@ -584,16 +584,16 @@ function toggleRepairReplacePopup() {
         id="replaceTo"
         placeholder="置換">
 
-      <div class="repair-replace-actions">
-        <button
-          onclick="replaceRepairText()">
+      <div class="repair-search-actions">
+
+        <button onclick="replaceRepairText()">
           1件
         </button>
 
-        <button
-          onclick="replaceAllRepairText()">
+        <button onclick="replaceAllRepairText()">
           全件
         </button>
+
       </div>
 
     </div>
