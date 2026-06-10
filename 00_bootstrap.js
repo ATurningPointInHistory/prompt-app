@@ -108,8 +108,10 @@ function isRepairMode() {
 
 function buildNormalToolsHtml() {
   return `
-
 <button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
+<button class="float-list-btn" onclick="showFunctionRelationMap()">🌳 関数関連図</button>
+<button class="float-list-btn" onclick="analyzeProjectJsDependency()">🧭 全JS依存診断</button>
+<hr>
 <button class="float-list-btn" onclick="toggleTemplateManager()">🧩 テンプレ管理</button>
 <button class="float-list-btn" onclick="toggleDangerManager()">⚠ 危険ワード管理</button>
 <button class="float-list-btn" onclick="togglePatternManager()">🚫 NGパターン管理</button>
@@ -129,7 +131,6 @@ function buildNormalToolsHtml() {
 <button class="float-list-btn" onclick="diagnoseHtml()">🩺 HTML診断</button>
 <button class="float-list-btn" onclick="compareBackupSummary()">📊 バックアップ差分確認</button>
 <button class="float-list-btn" onclick="previewRepairHtml()">🎨 色分けプレビュー</button>
-<button class="float-list-btn" onclick="analyzeProjectJsDependency()">🧭 全JS依存診断</button>
 <hr>
 <button class="float-list-btn" onclick="exportTemplates()">📤 テンプレ保存</button>
 <button class="float-list-btn" onclick="importTemplates()">📥 テンプレ復元</button>
