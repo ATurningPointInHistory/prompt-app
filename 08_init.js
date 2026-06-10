@@ -56,59 +56,144 @@ ${error?.stack || "no stack"}`;
    Repair IDE Init
 =============================== */
 
+let repairIdeInitialized = false;
+
 function initRepairIde() {
-  const editor = get("repairEditor");
-  if (!editor) return;
 
-  repairLastValue = editor.value || "";
+  if (repairIdeInitialized) {
+    console.warn(
+      "initRepairIde already initialized"
+    );
+    return;
+  }
 
-  editor.addEventListener("keydown", (e) => {
-    const isSearch =
-      (e.ctrlKey || e.metaKey) &&
-      e.key.toLowerCase() === "f";
+  repairIdeInitialized = true;
 
-    if (!isSearch) return;
+  const editor =
+    get("repairEditor");
 
-    e.preventDefault();
-    toggleRepairSearchBox();
+  if (!editor) {
+    console.warn(
+      "repairEditor not found"
+    );
+    return;
+  }
 
-    setTimeout(() => {
-      const box = get("repairSearch");
-      if (box) {
-        box.focus();
-        box.select();
+  repairLastValue =
+    editor.value || "";
+
+  editor.addEventListener(
+    "keydown",
+    (e) => {
+
+      const isSearch =
+        (e.ctrlKey || e.metaKey) &&
+        e.key.toLowerCase() === "f";
+
+      if (!isSearch) return;
+
+      e.preventDefault();
+
+      toggleRepairSearchBox();
+
+      setTimeout(() => {
+
+        const box =
+          get("repairSearch");
+
+        if (box) {
+          box.focus();
+          box.select();
+        }
+
+      }, 50);
+
+    }
+  );
+
+  const updateCursor = () => {
+
+    if (
+      typeof updateCursorPosition ===
+      "function"
+    ) {
+      updateCursorPosition();
+    }
+
+  };
+
+  editor.addEventListener(
+    "click",
+    updateCursor
+  );
+
+  editor.addEventListener(
+    "keyup",
+    updateCursor
+  );
+
+  editor.addEventListener(
+    "select",
+    updateCursor
+  );
+
+  editor.addEventListener(
+    "scroll",
+    () => {
+
+      const lineBox =
+        get("lineNumbers");
+
+      if (lineBox) {
+        lineBox.scrollTop =
+          editor.scrollTop;
       }
-    }, 50);
-  });
 
-  editor.addEventListener("click", updateCursorPosition);
-  editor.addEventListener("keyup", updateCursorPosition);
-  editor.addEventListener("select", updateCursorPosition);
-
-  editor.addEventListener("scroll", () => {
-    const lineBox = get("lineNumbers");
-    if (lineBox) {
-      lineBox.scrollTop = editor.scrollTop;
     }
-  });
+  );
 
-  editor.addEventListener("input", () => {
-    updateLineNumbers();
-    updateCursorPosition();
+  editor.addEventListener(
+    "input",
+    () => {
 
-    if (repairLastValue !== editor.value) {
-      repairUndoStack.push(repairLastValue);
-      repairRedoStack = [];
-      repairLastValue = editor.value;
-      updateRepairStatus("変更あり");
-      autoSaveRepairDraft();
+      updateLineNumbers();
+      updateCursor();
+
+      if (
+        repairLastValue !==
+        editor.value
+      ) {
+
+        repairUndoStack.push(
+          repairLastValue
+        );
+
+        repairRedoStack = [];
+
+        repairLastValue =
+          editor.value;
+
+        updateRepairStatus(
+          "変更あり"
+        );
+
+        autoSaveRepairDraft();
+      }
+
     }
-  });
+  );
 
   loadRepairDraft();
+
   updateLineNumbers();
-  updateCursorPosition();
+
+  updateCursor();
+
   enableRepairEditorTabIndent();
+
+  console.log(
+    "initRepairIde initialized"
+  );
 }
 
 /* ===============================
@@ -119,21 +204,48 @@ document.addEventListener(
   "DOMContentLoaded",
   () => {
 
-    loadSettings();
+    try {
 
-    if (typeof checkSafeMode === "function") {
-      checkSafeMode();
-    } else {
-      console.warn("checkSafeMode is not defined");
+      loadSettings();
+
+      if (
+        typeof checkSafeMode ===
+        "function"
+      ) {
+        checkSafeMode();
+      }
+
+      initRepairIde();
+
+      initRepairQuickPanel();
+
+      initRepairSearchQuickPanel();
+
+      if (
+        typeof initImportFileEvents ===
+        "function"
+      ) {
+        initImportFileEvents();
+      }
+
+      updateRepairFloatingPanelsVisibility();
+
+    } catch (e) {
+
+      console.error(
+        "Startup Error",
+        e
+      );
+
+      alert(
+        "起動中にエラーが発生しました\n" +
+        e.message
+      );
+
     }
 
-    initRepairIde();
-
-    initRepairQuickPanel();
-
-    initRepairSearchQuickPanel();
-
-    if (typeof initImportFileEvents === "function") {
+  }
+);
       initImportFileEvents();
     } else {
       console.warn("initImportFileEvents is not defined");
