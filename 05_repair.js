@@ -37,13 +37,14 @@ function normalizeLoadedHtmlText(text) {
 function looksLikeHtml(text) {
   if (!text) return false;
 
+  const source =
+    String(text).trim();
+
   return (
-    /<!DOCTYPE html/i.test(text) ||
-    /<html[\s>]/i.test(text) ||
-    /<head[\s>]/i.test(text) ||
-    /<body[\s>]/i.test(text) ||
-    /<script[\s>]/i.test(text) ||
-    /<style[\s>]/i.test(text)
+    /^<!DOCTYPE html/i.test(source) ||
+    /^<html[\s>]/i.test(source) ||
+    /<html[\s>]/i.test(source) &&
+    /<body[\s>]/i.test(source)
   );
 }
 
