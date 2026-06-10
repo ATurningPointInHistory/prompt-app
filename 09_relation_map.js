@@ -1,22 +1,6 @@
-function copyFunctionRelationMap() {
-
-  const text =
-    window.latestFunctionRelationMap || "";
-
-  if (!text) {
-    alert("コピー内容なし");
-    return;
-  }
-
-  const ok =
-    copyTextFallback(text);
-
-  alert(
-    ok
-      ? "関数関連図をコピーしました"
-      : "コピー失敗"
-  );
-}
+/* ===============================
+   Function Relation Map
+=============================== */
 
 function showFunctionRelationMap() {
 
@@ -120,5 +104,25 @@ onclick="copyFunctionRelationMap()">
 ${escapeHtml(result)}
 </pre>
 `
+  );
+}
+
+function copyFunctionRelationMap() {
+
+  const text =
+    window.latestFunctionRelationMap || "";
+
+  if (!text) {
+    alert("コピー内容なし");
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "関数関連図をコピーしました"
+      : "コピー失敗"
   );
 }
