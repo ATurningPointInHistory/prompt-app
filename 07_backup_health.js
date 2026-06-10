@@ -193,7 +193,7 @@ function buildFunctionDependencyReport(source) {
       "backupPartialScript",
       "checkSafeMode",
       "saveProjectPackage",
-      "analyzeProjectJsDependency",
+      "analyzeProjectJsDependency"
     ]);
 
   const result = [];
