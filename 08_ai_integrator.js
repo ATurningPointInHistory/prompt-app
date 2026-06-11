@@ -844,18 +844,39 @@ function applyAiIntegration() {
   repairLastValue =
     text;
 
+  const health =
+    validateBackupHtml(
+      text
+    );
+
+  if (!health.js_ok) {
+
+    rollbackLastDelete(
+      true
+    );
+
+    alert(
+      "AI統合失敗\n\n" +
+      health.js_error
+    );
+
+    return;
+  }
+
   updateLineNumbers();
   updateCursorPosition();
 
   autoSaveRepairDraft();
 
   updateRepairStatus(
-    `AI統合 完了 add:${addCount} replace:${replaceCount}`
+    `AI統合成功 add:${addCount} replace:${replaceCount}`
   );
+
+  showHtmlHealth();
 
   alert(
     [
-      "AI統合完了",
+      "AI統合成功",
       "",
       "追加: " + addCount,
       "更新: " + replaceCount,
