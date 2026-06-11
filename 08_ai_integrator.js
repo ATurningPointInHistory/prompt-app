@@ -497,68 +497,6 @@ console.log(
 function showAiIntegrationDiff() {
 
   if (
-    !Array.isArray(latestAiIntegrationChanges) ||
-    latestAiIntegrationChanges.length === 0
-  ) {
-    alert("Diff対象がありません");
-    return;
-  }
-
-  const targets =
-    latestAiIntegrationChanges.filter(change =>
-      change.type === "add" ||
-      change.type === "replace"
-    );
-
-  if (!targets.length) {
-    alert("追加・更新対象はありません");
-    return;
-  }
-
-  const html =
-    targets.map(change => {
-
-      return `
-<div class="ai-diff-item">
-
-  <b>${escapeHtml(change.type)}: ${escapeHtml(change.name)}</b>
-
-  <div class="small">
-    risk: ${escapeHtml(change.risk)}
-    ${
-      change.line
-        ? " / L" + change.line
-        : ""
-    }
-  </div>
-
-  <div class="small">OLD</div>
-  <pre class="code-preview">${
-    escapeHtml(
-      change.oldCode || "none"
-    )
-  }</pre>
-
-  <div class="small">NEW</div>
-  <pre class="code-preview">${
-    escapeHtml(
-      change.newCode || "none"
-    )
-  }</pre>
-
-</div>
-`;
-    }).join("");
-
-  openFloatPanel(
-    "AI統合Diff",
-    html
-  );
-}
-
-function showAiIntegrationDiff() {
-
-  if (
     !latestAiIntegrationChanges.length
   ) {
     alert("Diff対象なし");
@@ -621,17 +559,17 @@ ${escapeHtml(
 
 }
 
-window.analyzeAiGeneratedCode =
-  analyzeAiGeneratedCode;
+window.showFunctionRelationMap =
+  showFunctionRelationMap;
 
-window.runAiGeneratedCodeAnalysis =
-  runAiGeneratedCodeAnalysis;
+window.expandAllFunctionRelations =
+  expandAllFunctionRelations;
 
-window.copyAiIntegrationReport =
-  copyAiIntegrationReport;
+window.collapseAllFunctionRelations =
+  collapseAllFunctionRelations;
 
-window.showAiIntegrationDiff =
-  showAiIntegrationDiff;
+window.copyFunctionRelationMap =
+  copyFunctionRelationMap;
 
 /* ===============================
    ai_classifier
@@ -732,17 +670,11 @@ function classifyAiChanges(functionName = "") {
     },
 
     {
-      file: "09_relation_map.js",
+      file: "08_ai_integrator.js",
       score: [
         "relation",
         "graph",
-        "map"
-      ]
-    },
-
-    {
-      file: "10_ai_integrator.js",
-      score: [
+        "map",
         "ai",
         "integration",
         "diff",
