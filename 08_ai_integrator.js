@@ -758,7 +758,7 @@ function classifyAiChanges(
   };
 }
 
-function applyAiIntegration() {
+async function applyAiIntegration() {
 
   const editor =
     get("repairEditor");
