@@ -51,10 +51,14 @@ function runAiGeneratedCodeAnalysis() {
     editor.value;
 
   const aiBlocks =
-    extractFunctionBlocksFromText(aiCode);
+    extractFunctionBlocksFromText(
+      aiCode
+    );
 
   const currentBlocks =
-    extractFunctionBlocksFromText(currentCode);
+    extractFunctionBlocksFromText(
+      currentCode
+    );
 
   if (!aiBlocks.length) {
     alert("AI出力からfunctionを検出できませんでした");
@@ -75,16 +79,29 @@ function runAiGeneratedCodeAnalysis() {
       const current =
         currentMap.get(block.name);
 
+      const target =
+        classifyAiChanges(
+          block.name
+        );
+
       if (!current) {
         return {
           type: "add",
           name: block.name,
           line: null,
           risk: "middle",
+          targetFile: target.file,
+          targetScore: target.score,
           oldCode: "",
           newCode: block.block
         };
       }
+
+      const line =
+        currentCode
+          .slice(0, current.start)
+          .split("\n")
+          .length;
 
       if (
         current.block.trim() ===
@@ -93,33 +110,31 @@ function runAiGeneratedCodeAnalysis() {
         return {
           type: "same",
           name: block.name,
-          line:
-            currentCode
-              .slice(0, current.start)
-              .split("\n")
-              .length,
-          risk: "low"
+          line,
+          risk: "low",
+          targetFile: target.file,
+          targetScore: target.score,
+          oldCode: current.block,
+          newCode: block.block
         };
       }
 
       return {
         type: "replace",
         name: block.name,
-        line:
-          currentCode
-            .slice(0, current.start)
-            .split("\n")
-            .length,
+        line,
         risk: "high",
-        oldCode:
-          current.block,
-        newCode:
-          block.block
+        targetFile: target.file,
+        targetScore: target.score,
+        oldCode: current.block,
+        newCode: block.block
       };
     });
 
   const report =
-    buildAiIntegrationReport(changes);
+    buildAiIntegrationReport(
+      changes
+    );
 
   latestAiIntegrationReport =
     report;
@@ -132,10 +147,12 @@ function runAiGeneratedCodeAnalysis() {
     `
 <div class="float-panel-actions">
   <button onclick="copyAiIntegrationReport()">
-    📋 コピー</button>
-  <button onclick="showAiIntegrationDiff()">
-  🧩 Diff</button>
+    📋 コピー
+  </button>
 
+  <button onclick="showAiIntegrationDiff()">
+    🧩 Diff
+  </button>
 </div>
 
 <pre class="code-preview">
