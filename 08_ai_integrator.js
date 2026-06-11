@@ -901,6 +901,110 @@ async function applyAiIntegration() {
     );
   }
 
+function testAiIntegrationSandbox() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    alert("repairEditorなし");
+    return;
+  }
+
+  if (
+    !latestAiIntegrationChanges ||
+    !latestAiIntegrationChanges.length
+  ) {
+    alert("Sandbox対象なし");
+    return;
+  }
+
+  let text =
+    editor.value;
+
+  let addCount = 0;
+  let replaceCount = 0;
+  let skipCount = 0;
+
+  latestAiIntegrationChanges.forEach(change => {
+
+    if (change.type === "same") {
+      skipCount++;
+      return;
+    }
+
+    if (change.type === "replace") {
+
+      const block =
+        findFunctionBlockInText(
+          text,
+          change.name
+        );
+
+      if (!block) {
+        skipCount++;
+        return;
+      }
+
+      text =
+        text.slice(0, block.start) +
+        change.newCode +
+        text.slice(block.end);
+
+      replaceCount++;
+      return;
+    }
+
+    if (change.type === "add") {
+
+      const exists =
+        findFunctionBlockInText(
+          text,
+          change.name
+        );
+
+      if (exists) {
+        skipCount++;
+        return;
+      }
+
+      text +=
+        "\n\n" +
+        change.newCode;
+
+      addCount++;
+    }
+
+  });
+
+  const health =
+    validateBackupHtml(text);
+
+  const report =
+`AI Integration Sandbox
+
+=== Result ===
+${health.js_ok ? "✔ OK" : "⚠ NG"}
+
+=== Count ===
+add: ${addCount}
+replace: ${replaceCount}
+skip: ${skipCount}
+
+=== JS Error ===
+${health.js_error || "none"}
+`;
+
+  openFloatPanel(
+    "AI Sandbox",
+    `
+<pre class="code-preview">
+${escapeHtml(report)}
+</pre>
+`
+  );
+}
+
 window.analyzeAiGeneratedCode =
   analyzeAiGeneratedCode;
 
