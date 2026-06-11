@@ -7,36 +7,53 @@ let latestAiIntegrationReport = "";
 
 function analyzeAiGeneratedCode() {
 
+  openFloatPanel(
+    "AIコード解析",
+    `
+<textarea
+  id="aiCodeInput"
+  rows="10"
+  placeholder="AIが出力したfunctionコードを貼り付け"
+></textarea>
+
+<div class="float-panel-actions">
+  <button onclick="runAiGeneratedCodeAnalysis()">
+    解析
+  </button>
+</div>
+`
+  );
+}
+
+function runAiGeneratedCodeAnalysis() {
+
   const editor =
     get("repairEditor");
+
+  const input =
+    get("aiCodeInput");
 
   if (!editor || !editor.value.trim()) {
     alert("先に修復エディタへ現在コードを読み込んでください");
     return;
   }
 
-  const aiCode =
-    prompt(
-      "AIが出力したコードを貼り付けてください",
-      ""
-    );
-
-  if (!aiCode || !aiCode.trim()) {
+  if (!input || !input.value.trim()) {
+    alert("AIコードを貼り付けてください");
     return;
   }
+
+  const aiCode =
+    input.value;
 
   const currentCode =
     editor.value;
 
   const aiBlocks =
-    extractFunctionBlocksFromText(
-      aiCode
-    );
+    extractFunctionBlocksFromText(aiCode);
 
   const currentBlocks =
-    extractFunctionBlocksFromText(
-      currentCode
-    );
+    extractFunctionBlocksFromText(currentCode);
 
   if (!aiBlocks.length) {
     alert("AI出力からfunctionを検出できませんでした");
@@ -95,15 +112,13 @@ function analyzeAiGeneratedCode() {
     });
 
   const report =
-    buildAiIntegrationReport(
-      changes
-    );
+    buildAiIntegrationReport(changes);
 
   latestAiIntegrationReport =
     report;
 
   openFloatPanel(
-    "AIコード解析",
+    "AIコード解析結果",
     `
 <div class="float-panel-actions">
   <button onclick="copyAiIntegrationReport()">
@@ -198,6 +213,9 @@ console.log(
 
 window.analyzeAiGeneratedCode =
   analyzeAiGeneratedCode;
+
+window.runAiGeneratedCodeAnalysis =
+  runAiGeneratedCodeAnalysis;
 
 window.copyAiIntegrationReport =
   copyAiIntegrationReport;
