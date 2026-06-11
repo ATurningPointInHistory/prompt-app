@@ -379,6 +379,7 @@ function runAiGeneratedCodeAnalysis() {
     "AIコード解析結果",
     `
 <div class="float-panel-actions">
+
   <button onclick="copyAiIntegrationReport()">
     📋 コピー
   </button>
@@ -386,6 +387,11 @@ function runAiGeneratedCodeAnalysis() {
   <button onclick="showAiIntegrationDiff()">
     🧩 Diff
   </button>
+
+  <button onclick="applyAiIntegration()">
+    🚀 適用
+  </button>
+
 </div>
 
 <pre class="code-preview">
@@ -761,6 +767,112 @@ function classifyAiChanges(
         ? "keyword"
         : "unknown"
   };
+}
+
+function applyAiIntegration() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    alert("repairEditorなし");
+    return;
+  }
+
+  if (
+    !latestAiIntegrationChanges ||
+    !latestAiIntegrationChanges.length
+  ) {
+    alert("適用対象なし");
+    return;
+  }
+
+  saveDeleteRollbackSnapshot();
+
+  let text =
+    editor.value;
+
+  let addCount = 0;
+  let replaceCount = 0;
+  let skipCount = 0;
+
+  latestAiIntegrationChanges.forEach(
+    change => {
+
+      if (
+        change.type === "same"
+      ) {
+        skipCount++;
+        return;
+      }
+
+      if (
+        change.type === "replace"
+      ) {
+
+        const block =
+          findFunctionBlockInText(
+            text,
+            change.name
+          );
+
+        if (!block) {
+          skipCount++;
+          return;
+        }
+
+        text =
+          text.slice(
+            0,
+            block.start
+          ) +
+          change.newCode +
+          text.slice(
+            block.end
+          );
+
+        replaceCount++;
+        return;
+      }
+
+      if (
+        change.type === "add"
+      ) {
+
+        text +=
+          "\n\n" +
+          change.newCode;
+
+        addCount++;
+      }
+
+    }
+  );
+
+  editor.value =
+    text;
+
+  repairLastValue =
+    text;
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  autoSaveRepairDraft();
+
+  updateRepairStatus(
+    `AI統合 完了 add:${addCount} replace:${replaceCount}`
+  );
+
+  alert(
+    [
+      "AI統合完了",
+      "",
+      "追加: " + addCount,
+      "更新: " + replaceCount,
+      "スキップ: " + skipCount
+    ].join("\n")
+  );
 }
 
 console.log(
