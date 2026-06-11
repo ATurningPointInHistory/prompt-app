@@ -578,17 +578,6 @@ ${escapeHtml(
 
 }
 
-window.analyzeAiGeneratedCode =
-  analyzeAiGeneratedCode;
-
-window.runAiGeneratedCodeAnalysis =
-  runAiGeneratedCodeAnalysis;
-
-window.copyAiIntegrationReport =
-  copyAiIntegrationReport;
-
-window.showAiIntegrationDiff =
-  showAiIntegrationDiff;
 /* ===============================
    ai_classifier
 =============================== */
@@ -874,6 +863,21 @@ function applyAiIntegration() {
     ].join("\n")
   );
 }
+
+window.analyzeAiGeneratedCode =
+  analyzeAiGeneratedCode;
+
+window.runAiGeneratedCodeAnalysis =
+  runAiGeneratedCodeAnalysis;
+
+window.copyAiIntegrationReport =
+  copyAiIntegrationReport;
+
+window.showAiIntegrationDiff =
+  showAiIntegrationDiff;
+
+window.applyAiIntegration =
+  applyAiIntegration;
 
 console.log(
   "08_ai_integrator loaded"
