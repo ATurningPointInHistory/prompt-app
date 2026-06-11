@@ -107,7 +107,11 @@ function runAiGeneratedCodeAnalysis() {
             .slice(0, current.start)
             .split("\n")
             .length,
-        risk: "high"
+        risk: "high",
+        oldCode:
+          current.block,
+        newCode:
+          block.block
       };
     });
 
