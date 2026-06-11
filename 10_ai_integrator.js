@@ -285,6 +285,71 @@ function showAiIntegrationDiff() {
   );
 }
 
+function showAiIntegrationDiff() {
+
+  if (
+    !latestAiIntegrationChanges.length
+  ) {
+    alert("Diff対象なし");
+    return;
+  }
+
+  const targets =
+    latestAiIntegrationChanges.filter(
+      x =>
+        x.type === "add" ||
+        x.type === "replace"
+    );
+
+  if (!targets.length) {
+    alert("差分なし");
+    return;
+  }
+
+  const html =
+    targets.map(change => `
+
+<h3>
+${escapeHtml(change.name)}
+</h3>
+
+<div>
+種別:
+${escapeHtml(change.type)}
+</div>
+
+<div>
+リスク:
+${escapeHtml(change.risk)}
+</div>
+
+<h4>OLD</h4>
+
+<pre class="code-preview">
+${escapeHtml(
+  change.oldCode || "none"
+)}
+</pre>
+
+<h4>NEW</h4>
+
+<pre class="code-preview">
+${escapeHtml(
+  change.newCode || "none"
+)}
+</pre>
+
+<hr>
+
+`).join("");
+
+  openFloatPanel(
+    "AI統合Diff",
+    html
+  );
+
+}
+
 window.analyzeAiGeneratedCode =
   analyzeAiGeneratedCode;
 
