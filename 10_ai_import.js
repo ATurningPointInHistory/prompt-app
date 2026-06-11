@@ -191,3 +191,13 @@ function copyAiIntegrationReport() {
       : "コピー失敗"
   );
 }
+
+console.log(
+  "10_ai_integrator loaded"
+);
+
+window.analyzeAiGeneratedCode =
+  analyzeAiGeneratedCode;
+
+window.copyAiIntegrationReport =
+  copyAiIntegrationReport;
