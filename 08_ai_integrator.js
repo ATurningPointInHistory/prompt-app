@@ -306,7 +306,12 @@ function runAiGeneratedCodeAnalysis() {
 
       const target =
         classifyAiChanges(
-          block.name
+          block.name,
+          {
+            code: block.block,
+            currentBlock: current,
+            currentFile: currentRepairFile
+          }
         );
 
       if (!current) {
@@ -402,7 +407,6 @@ function buildAiIntegrationReport(changes) {
 
   lines.push("AI Code Integration Report");
   lines.push("");
-
   lines.push("=== Summary ===");
   lines.push("add: " + add.length);
   lines.push("replace: " + replace.length);
@@ -427,6 +431,8 @@ function buildAiIntegrationReport(changes) {
             target.file +
             "\nscore: " +
             target.score
+            "\nreason: " +
+            target.reason
           );
 
         }).join("\n\n")
@@ -460,7 +466,6 @@ function buildAiIntegrationReport(changes) {
       : "none"
   );
   lines.push("");
-
   lines.push("=== Same Function ===");
   lines.push(
     same.length
@@ -489,10 +494,6 @@ function copyAiIntegrationReport() {
       : "コピー失敗"
   );
 }
-
-console.log(
-  "10_ai_integrator loaded"
-);
 
 function showAiIntegrationDiff() {
 
@@ -575,16 +576,56 @@ window.copyFunctionRelationMap =
    ai_classifier
 =============================== */
 
-function classifyAiChanges(functionName = "") {
+function classifyAiChanges(
+  functionName = "",
+  options = {}
+) {
 
   const name =
-    String(functionName).toLowerCase();
+    String(functionName || "")
+      .toLowerCase();
+
+  const code =
+    String(options.code || "");
+
+  const currentBlock =
+    options.currentBlock || null;
+
+  const currentFile =
+    String(
+      options.currentFile ||
+      currentRepairFile ||
+      ""
+    );
+
+  const targetComment =
+    code.match(
+      /\/\/\s*targetFile\s*:\s*([a-zA-Z0-9_.\-\/]+\.js)/
+    );
+
+  if (targetComment) {
+    return {
+      file: targetComment[1],
+      score: 99,
+      reason: "targetFile comment"
+    };
+  }
+
+  if (
+    currentBlock &&
+    currentFile
+  ) {
+    return {
+      file: currentFile,
+      score: 90,
+      reason: "existing function file"
+    };
+  }
 
   const rules = [
-
     {
       file: "00_bootstrap.js",
-      score: [
+      words: [
         "float",
         "panel",
         "menu",
@@ -592,10 +633,9 @@ function classifyAiChanges(functionName = "") {
         "switchapp"
       ]
     },
-
     {
       file: "01_core.js",
-      score: [
+      words: [
         "escape",
         "copy",
         "helper",
@@ -603,10 +643,9 @@ function classifyAiChanges(functionName = "") {
         "safe"
       ]
     },
-
     {
       file: "02_prompt.js",
-      score: [
+      words: [
         "prompt",
         "review",
         "convert",
@@ -614,10 +653,9 @@ function classifyAiChanges(functionName = "") {
         "generate"
       ]
     },
-
     {
       file: "03_data.js",
-      score: [
+      words: [
         "save",
         "load",
         "history",
@@ -625,66 +663,63 @@ function classifyAiChanges(functionName = "") {
         "state"
       ]
     },
-
     {
       file: "04_tools.js",
-      score: [
+      words: [
         "template",
         "danger",
         "pattern",
         "preset",
-        "todo"
+        "todo",
+        "devlog"
       ]
     },
-
     {
       file: "05_repair.js",
-      score: [
+      words: [
         "repair",
         "undo",
         "redo",
         "editor",
-        "functionsort"
+        "functionsort",
+        "diff"
       ]
     },
-
     {
       file: "06_search.js",
-      score: [
+      words: [
         "search",
         "replace",
         "highlight",
         "cursor"
       ]
     },
-
     {
       file: "07_backup_health.js",
-      score: [
+      words: [
         "backup",
         "health",
         "diagnose",
         "dependency",
+        "validate",
         "safe"
       ]
     },
-
     {
       file: "08_ai_integrator.js",
-      score: [
-        "relation",
-        "graph",
-        "map",
+      words: [
         "ai",
         "integration",
-        "diff",
-        "classifier"
+        "integrator",
+        "classifier",
+        "relation",
+        "graph",
+        "map"
       ]
     }
-
   ];
 
-  let best =
+  let bestFile =
     "unknown";
 
   let bestScore =
@@ -694,30 +729,29 @@ function classifyAiChanges(functionName = "") {
 
     let score = 0;
 
-    rule.score.forEach(word => {
-
-      if (
-        name.includes(word)
-      ) {
+    rule.words.forEach(word => {
+      if (name.includes(word)) {
         score++;
       }
-
     });
 
     if (score > bestScore) {
-
       bestScore = score;
-
-      best =
-        rule.file;
-
+      bestFile = rule.file;
     }
 
   });
 
   return {
-    file: best,
-    score: bestScore
+    file: bestFile,
+    score: bestScore,
+    reason:
+      bestScore > 0
+        ? "keyword"
+        : "unknown"
   };
-
 }
+
+console.log(
+  "08_ai_integrator loaded"
+);
