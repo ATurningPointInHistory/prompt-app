@@ -883,18 +883,23 @@ function applyAiIntegration() {
     `AI統合成功 add:${addCount} replace:${replaceCount}`
   );
 
-  showHtmlHealth();
+  if (typeof showHtmlHealth === "function") {
+    await showHtmlHealth();
+  }
 
-  alert(
-    [
-      "AI統合成功",
-      "",
-      "追加: " + addCount,
-      "更新: " + replaceCount,
-      "スキップ: " + skipCount
-    ].join("\n")
-  );
-}
+  latestAiIntegrationChanges = [];
+  latestAiIntegrationReport = "";
+
+    alert(
+      [
+        "AI統合成功",
+        "",
+        "追加: " + addCount,
+        "更新: " + replaceCount,
+        "スキップ: " + skipCount
+      ].join("\n")
+    );
+  }
 
 window.analyzeAiGeneratedCode =
   analyzeAiGeneratedCode;
