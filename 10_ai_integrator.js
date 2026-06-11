@@ -4,6 +4,7 @@
 =============================== */
 
 let latestAiIntegrationReport = "";
+let latestAiIntegrationChanges = [];
 
 function analyzeAiGeneratedCode() {
 
@@ -79,7 +80,9 @@ function runAiGeneratedCodeAnalysis() {
           type: "add",
           name: block.name,
           line: null,
-          risk: "middle"
+          risk: "middle",
+          oldCode: "",
+          newCode: block.block
         };
       }
 
@@ -121,13 +124,18 @@ function runAiGeneratedCodeAnalysis() {
   latestAiIntegrationReport =
     report;
 
+  latestAiIntegrationChanges =
+    changes;
+
   openFloatPanel(
     "AIコード解析結果",
     `
 <div class="float-panel-actions">
   <button onclick="copyAiIntegrationReport()">
-    📋 コピー
-  </button>
+    📋 コピー</button>
+  <button onclick="showAiIntegrationDiff()">
+  🧩 Diff</button>
+
 </div>
 
 <pre class="code-preview">
@@ -215,6 +223,68 @@ console.log(
   "10_ai_integrator loaded"
 );
 
+function showAiIntegrationDiff() {
+
+  if (
+    !Array.isArray(latestAiIntegrationChanges) ||
+    latestAiIntegrationChanges.length === 0
+  ) {
+    alert("Diff対象がありません");
+    return;
+  }
+
+  const targets =
+    latestAiIntegrationChanges.filter(change =>
+      change.type === "add" ||
+      change.type === "replace"
+    );
+
+  if (!targets.length) {
+    alert("追加・更新対象はありません");
+    return;
+  }
+
+  const html =
+    targets.map(change => {
+
+      return `
+<div class="ai-diff-item">
+
+  <b>${escapeHtml(change.type)}: ${escapeHtml(change.name)}</b>
+
+  <div class="small">
+    risk: ${escapeHtml(change.risk)}
+    ${
+      change.line
+        ? " / L" + change.line
+        : ""
+    }
+  </div>
+
+  <div class="small">OLD</div>
+  <pre class="code-preview">${
+    escapeHtml(
+      change.oldCode || "none"
+    )
+  }</pre>
+
+  <div class="small">NEW</div>
+  <pre class="code-preview">${
+    escapeHtml(
+      change.newCode || "none"
+    )
+  }</pre>
+
+</div>
+`;
+    }).join("");
+
+  openFloatPanel(
+    "AI統合Diff",
+    html
+  );
+}
+
 window.analyzeAiGeneratedCode =
   analyzeAiGeneratedCode;
 
@@ -223,3 +293,6 @@ window.runAiGeneratedCodeAnalysis =
 
 window.copyAiIntegrationReport =
   copyAiIntegrationReport;
+
+window.showAiIntegrationDiff =
+  showAiIntegrationDiff;
