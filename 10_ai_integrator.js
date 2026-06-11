@@ -168,24 +168,53 @@ function buildAiIntegrationReport(changes) {
   lines.push("");
 
   lines.push("=== Add Function ===");
+
   lines.push(
     add.length
-      ? add.map(x => "＋ " + x.name).join("\n")
+      ? add.map(x => {
+
+          const target =
+            classifyAiChanges(
+              x.name
+            );
+
+          return (
+            "＋ " +
+            x.name +
+            "\n→ " +
+            target.file +
+            "\nscore: " +
+            target.score
+          );
+
+        }).join("\n\n")
       : "none"
   );
   lines.push("");
 
   lines.push("=== Replace Function ===");
+
   lines.push(
     replace.length
-      ? replace
-          .map(x =>
+      ? replace.map(x => {
+
+          const target =
+            classifyAiChanges(
+              x.name
+            );
+
+          return (
             "⚠ " +
             x.name +
             " / L" +
-            x.line
-          )
-          .join("\n")
+            x.line +
+            "\n→ " +
+            target.file +
+            "\nscore: " +
+            target.score
+          );
+
+        }).join("\n\n")
       : "none"
   );
   lines.push("");
