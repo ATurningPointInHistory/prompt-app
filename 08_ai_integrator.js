@@ -828,6 +828,17 @@ function applyAiIntegration() {
         change.type === "add"
       ) {
 
+        const exists =
+          findFunctionBlockInText(
+            text,
+            change.name
+          );
+
+        if (exists) {
+          skipCount++;
+          return;
+        }
+
         text +=
           "\n\n" +
           change.newCode;
