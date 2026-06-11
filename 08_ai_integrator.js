@@ -388,6 +388,10 @@ function runAiGeneratedCodeAnalysis() {
     🧩 Diff
   </button>
 
+  <button onclick="testAiIntegrationSandbox()">
+    🧪 Sandbox
+  </button>
+
   <button onclick="applyAiIntegration()">
     🚀 適用
   </button>
@@ -1019,6 +1023,9 @@ window.showAiIntegrationDiff =
 
 window.applyAiIntegration =
   applyAiIntegration;
+
+window.testAiIntegrationSandbox =
+  testAiIntegrationSandbox;
 
 console.log(
   "08_ai_integrator loaded"
