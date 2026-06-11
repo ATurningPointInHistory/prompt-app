@@ -322,6 +322,7 @@ function runAiGeneratedCodeAnalysis() {
           risk: "middle",
           targetFile: target.file,
           targetScore: target.score,
+          targetReason: target.reason,
           oldCode: "",
           newCode: block.block
         };
@@ -344,6 +345,7 @@ function runAiGeneratedCodeAnalysis() {
           risk: "low",
           targetFile: target.file,
           targetScore: target.score,
+          targetReason: target.reason,
           oldCode: current.block,
           newCode: block.block
         };
@@ -356,6 +358,7 @@ function runAiGeneratedCodeAnalysis() {
         risk: "high",
         targetFile: target.file,
         targetScore: target.score,
+        targetReason: target.reason,
         oldCode: current.block,
         newCode: block.block
       };
@@ -419,25 +422,21 @@ function buildAiIntegrationReport(changes) {
     add.length
       ? add.map(x => {
 
-          const target =
-            classifyAiChanges(
-              x.name
-            );
-
           return (
             "＋ " +
             x.name +
             "\n→ " +
-            target.file +
+            (x.targetFile || "unknown") +
             "\nscore: " +
-            target.score
+            (x.targetScore ?? 0) +
             "\nreason: " +
-            target.reason
+            (x.targetReason || "unknown")
           );
 
         }).join("\n\n")
       : "none"
   );
+
   lines.push("");
 
   lines.push("=== Replace Function ===");
@@ -446,30 +445,43 @@ function buildAiIntegrationReport(changes) {
     replace.length
       ? replace.map(x => {
 
-          const target =
-            classifyAiChanges(
-              x.name
-            );
-
           return (
             "⚠ " +
             x.name +
             " / L" +
             x.line +
             "\n→ " +
-            target.file +
+            (x.targetFile || "unknown") +
             "\nscore: " +
-            target.score
+            (x.targetScore ?? 0) +
+            "\nreason: " +
+            (x.targetReason || "unknown")
           );
 
         }).join("\n\n")
       : "none"
   );
+
   lines.push("");
+
   lines.push("=== Same Function ===");
+
   lines.push(
     same.length
-      ? same.map(x => "＝ " + x.name).join("\n")
+      ? same.map(x => {
+
+          return (
+            "＝ " +
+            x.name +
+            "\n→ " +
+            (x.targetFile || "unknown") +
+            "\nscore: " +
+            (x.targetScore ?? 0) +
+            "\nreason: " +
+            (x.targetReason || "unknown")
+          );
+
+        }).join("\n\n")
       : "none"
   );
 
@@ -560,18 +572,17 @@ ${escapeHtml(
 
 }
 
-window.showFunctionRelationMap =
-  showFunctionRelationMap;
+window.analyzeAiGeneratedCode =
+  analyzeAiGeneratedCode;
 
-window.expandAllFunctionRelations =
-  expandAllFunctionRelations;
+window.runAiGeneratedCodeAnalysis =
+  runAiGeneratedCodeAnalysis;
 
-window.collapseAllFunctionRelations =
-  collapseAllFunctionRelations;
+window.copyAiIntegrationReport =
+  copyAiIntegrationReport;
 
-window.copyFunctionRelationMap =
-  copyFunctionRelationMap;
-
+window.showAiIntegrationDiff =
+  showAiIntegrationDiff;
 /* ===============================
    ai_classifier
 =============================== */
