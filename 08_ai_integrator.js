@@ -907,17 +907,18 @@ async function applyAiIntegration() {
 
   latestAiIntegrationChanges = [];
   latestAiIntegrationReport = "";
+  latestAiAutoTestPassed = false;
 
-    alert(
+  alert(
       [
-        "AI統合成功",
-        "",
-        "追加: " + addCount,
-        "更新: " + replaceCount,
-        "スキップ: " + skipCount
-      ].join("\n")
-    );
-  }
+      "AI統合成功",
+      "",
+      "追加: " + addCount,
+      "更新: " + replaceCount,
+      "スキップ: " + skipCount
+    ].join("\n")
+  );
+}
 
 function testAiIntegrationSandbox() {
 
