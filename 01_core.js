@@ -294,3 +294,24 @@ function getAiPreset(aiTarget) {
   const presets = getAiPresets();
 return presets[aiTarget] || presets.chatgpt;
 }
+
+/* ===============================
+   Project Config
+=============================== */
+
+function getProjectConfig() {
+
+  return {
+
+    moduleRules:
+      getProjectModuleRules(),
+
+    protectedFunctions:
+      getProtectedFunctionNames(),
+
+    ignoreFunctionCalls:
+      getIgnoredFunctionCalls()
+
+  };
+
+}
