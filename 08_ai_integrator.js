@@ -777,6 +777,16 @@ async function applyAiIntegration() {
   }
 
   if (
+    latestAiAutoTestPassed !== true
+  ) {
+    alert(
+      "先にAutoTestを実行してPASSにしてください"
+    );
+    return;
+  }
+
+
+  if (
     !latestAiIntegrationChanges ||
     !latestAiIntegrationChanges.length
   ) {
