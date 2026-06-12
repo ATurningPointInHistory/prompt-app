@@ -392,6 +392,10 @@ function runAiGeneratedCodeAnalysis() {
     🧪 Sandbox
   </button>
 
+  <button onclick="runAiAutoTest()">
+    ✅ AutoTest
+  </button>
+
   <button onclick="applyAiIntegration()">
     🚀 適用
   </button>
