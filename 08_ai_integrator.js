@@ -1106,9 +1106,15 @@ function detectMissingFunctionCallsInText(text) {
   const funcs =
     extractFunctionNames(text);
 
+  const config =
+    typeof getProjectConfig === "function"
+      ? getProjectConfig()
+      : {};
+
   const ignore =
-    getProjectConfig()
-      .ignoreFunctionCalls;
+    new Set(
+      config.ignoreFunctionCalls || []
+    );
 
   const calls =
     [...text.matchAll(
@@ -1223,13 +1229,19 @@ function runAiAutoTest() {
   const protectedChanges =
     detectProtectedAiChanges();
 
+  const missingCriticalFunctions =
+    detectMissingCriticalFunctionsInText(
+      virtual.text
+    );
+
   const results = {
     jsOk: validation.js_ok,
     dupFuncs,
     aiDupFuncs,
     undefinedOnclicks,
     missingCalls,
-    protectedChanges
+    protectedChanges,
+    missingCriticalFunctions
   };
 
   const healthScore =
@@ -1242,7 +1254,8 @@ function runAiAutoTest() {
     dupFuncs.length === 0 &&
     aiDupFuncs.length === 0 &&
     undefinedOnclicks.length === 0 &&
-    protectedChanges.length === 0;
+    protectedChanges.length === 0 &&
+    missingCriticalFunctions.length === 0;
 
   latestAiAutoTestPassed =
     pass;
@@ -1279,6 +1292,9 @@ ${missingCalls.length ? missingCalls.join("\n") : "✔ none"}
 
 === Protected Function Changes ===
 ${protectedChanges.length ? protectedChanges.join("\n") : "✔ none"}
+
+=== Missing Critical Functions ===
+${missingCriticalFunctions.length ? missingCriticalFunctions.join("\n") : "✔ none"}
 
 === Function Count ===
 ${funcs.length}
@@ -1364,7 +1380,10 @@ function getProjectConfig() {
       getProtectedFunctionNames(),
 
     ignoreFunctionCalls:
-      getIgnoredFunctionCalls()
+      getIgnoredFunctionCalls(),
+
+    criticalFunctions:
+      getCriticalFunctionNames()
   };
 
 }
@@ -1506,6 +1525,23 @@ function getIgnoredFunctionCalls() {
 
 }
 
+function getCriticalFunctionNames() {
+
+  return new Set([
+    "loadSettings",
+    "saveCurrentState",
+    "initRepairIde",
+    "loadRepairHtml",
+    "saveRepairHtml",
+    "showHtmlHealth",
+    "validateBackupHtml",
+    "applyAiIntegration",
+    "runAiAutoTest",
+    "rollbackLastDelete"
+  ]);
+
+}
+
 function getProtectedFunctionNames() {
 
   return new Set([
@@ -1531,4 +1567,26 @@ function getProtectedFunctionNames() {
     "initRepairIde",
     "loadSettings"
   ]);
+}
+
+function detectMissingCriticalFunctionsInText(text) {
+
+  const funcs =
+    extractFunctionNames(text);
+
+  const config =
+    typeof getProjectConfig === "function"
+      ? getProjectConfig()
+      : {};
+
+  const critical =
+    config.criticalFunctions ||
+    new Set();
+
+  return [
+    ...critical
+  ].filter(name =>
+    !funcs.includes(name)
+  );
+
 }
