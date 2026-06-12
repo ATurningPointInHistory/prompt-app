@@ -1033,6 +1033,30 @@ ${escapeHtml(report)}
    AI Auto Test
 =============================== */
 
+function detectAiInputDuplicateFunctions() {
+
+  if (
+    !latestAiIntegrationChanges ||
+    !latestAiIntegrationChanges.length
+  ) {
+    return [];
+  }
+
+  const names =
+    latestAiIntegrationChanges.map(
+      x => x.name
+    );
+
+  return [
+    ...new Set(
+      names.filter(
+        (name, index) =>
+          names.indexOf(name) !== index
+      )
+    )
+  ];
+}
+
 function buildAiIntegrationVirtualText() {
 
   const editor =
@@ -1140,12 +1164,17 @@ function runAiAutoTest() {
       funcs.filter(
         (f, i) =>
           funcs.indexOf(f) !== i
+
+  const aiDupFuncs =
+    detectAiInputDuplicateFunctions();
+
       )
     )];
 
   const pass =
     validation.js_ok &&
-    dupFuncs.length === 0;
+    dupFuncs.length === 0 &&
+    aiDupFuncs.length === 0;
 
   latestAiAutoTestPassed =
     pass;
