@@ -645,7 +645,7 @@ function classifyAiChanges(
     getProjectConfig();
 
   const rules =
-    config.moduleRules || [];
+    getProjectConfig().moduleRules;
 
   let bestFile =
     "unknown";
