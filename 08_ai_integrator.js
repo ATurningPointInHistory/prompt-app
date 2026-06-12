@@ -641,102 +641,11 @@ function classifyAiChanges(
     };
   }
 
-  const rules = [
-    {
-      file: "00_bootstrap.js",
-      words: [
-        "float",
-        "panel",
-        "menu",
-        "bootstrap",
-        "switchapp"
-      ]
-    },
-    {
-      file: "01_core.js",
-      words: [
-        "escape",
-        "copy",
-        "helper",
-        "util",
-        "safe"
-      ]
-    },
-    {
-      file: "02_prompt.js",
-      words: [
-        "prompt",
-        "review",
-        "convert",
-        "command",
-        "generate"
-      ]
-    },
-    {
-      file: "03_data.js",
-      words: [
-        "save",
-        "load",
-        "history",
-        "storage",
-        "state"
-      ]
-    },
-    {
-      file: "04_tools.js",
-      words: [
-        "template",
-        "danger",
-        "pattern",
-        "preset",
-        "todo",
-        "devlog"
-      ]
-    },
-    {
-      file: "05_repair.js",
-      words: [
-        "repair",
-        "undo",
-        "redo",
-        "editor",
-        "functionsort",
-        "diff"
-      ]
-    },
-    {
-      file: "06_search.js",
-      words: [
-        "search",
-        "replace",
-        "highlight",
-        "cursor"
-      ]
-    },
-    {
-      file: "07_backup_health.js",
-      words: [
-        "backup",
-        "health",
-        "diagnose",
-        "dependency",
-        "validate",
-        "safe"
-      ]
-    },
-    {
-      file: "08_ai_integrator.js",
-      words: [
-        "ai",
-        "integration",
-        "integrator",
-        "classifier",
-        "relation",
-        "graph",
-        "map"
-      ]
-    }
-  ];
+  const config =
+    getProjectConfig();
+
+  const rules =
+    config.moduleRules || [];
 
   let bestFile =
     "unknown";
@@ -749,9 +658,11 @@ function classifyAiChanges(
     let score = 0;
 
     rule.words.forEach(word => {
+
       if (name.includes(word)) {
         score++;
       }
+
     });
 
     if (score > bestScore) {
