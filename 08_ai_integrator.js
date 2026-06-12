@@ -1033,6 +1033,68 @@ ${escapeHtml(report)}
    AI Auto Test
 =============================== */
 
+function getProtectedFunctionNames() {
+
+  return new Set([
+    "loadRepairHtml",
+    "saveRepairHtml",
+    "copyRepairHtml",
+
+    "showHtmlHealth",
+    "validateBackupHtml",
+    "getHtmlSummary",
+    "collectExternalScriptText",
+
+    "checkSafeMode",
+    "safeRun",
+
+    "rollbackLastDelete",
+    "saveDeleteRollbackSnapshot",
+
+    "updateLineNumbers",
+    "updateCursorPosition",
+    "autoSaveRepairDraft",
+
+    "initRepairIde",
+    "loadSettings"
+  ]);
+}
+function addProtectedFunctionName(name) {
+
+  const list =
+    loadJson(
+      "extraProtectedFunctions",
+      []
+    );
+
+  if (!list.includes(name)) {
+    list.push(name);
+    localStorage.setItem(
+      "extraProtectedFunctions",
+      JSON.stringify(list)
+    );
+  }
+}
+
+function getAllProtectedFunctionNames() {
+
+  const base =
+    getProtectedFunctionNames();
+
+  const extra =
+    loadJson(
+      "extraProtectedFunctions",
+      []
+    );
+
+  extra.forEach(name =>
+    base.add(name)
+  );
+
+  return base;
+}
+
+
 function detectAiInputDuplicateFunctions() {
 
   if (
@@ -1139,6 +1201,132 @@ function buildAiIntegrationVirtualText() {
   };
 }
 
+function detectUndefinedOnclicksInText(text) {
+
+  const onclicks =
+    [...text.matchAll(
+      /onclick\s*=\s*["'][^"']*?\b([a-zA-Z_$][\w$]*)\s*\(/g
+    )].map(m => m[1]);
+
+  const funcs =
+    extractFunctionNames(text);
+
+  return onclicks.filter(name =>
+    !funcs.includes(name)
+  );
+}
+
+function detectMissingFunctionCallsInText(text) {
+
+  const funcs =
+    extractFunctionNames(text);
+
+  const ignore =
+    new Set([
+      "if",
+      "for",
+      "while",
+      "switch",
+      "catch",
+      "function",
+      "return",
+      "alert",
+      "confirm",
+      "prompt",
+      "console",
+      "String",
+      "Number",
+      "Boolean",
+      "Array",
+      "Object",
+      "Map",
+      "Set",
+      "Date",
+      "RegExp",
+      "JSON",
+      "Math",
+      "document",
+      "window",
+      "localStorage",
+      "sessionStorage",
+      "setTimeout",
+      "clearTimeout",
+      "setInterval",
+      "clearInterval",
+      "fetch",
+      "encodeURIComponent",
+      "decodeURIComponent"
+    ]);
+
+  const calls =
+    [...text.matchAll(
+      /\b([a-zA-Z_$][\w$]*)\s*\(/g
+    )].map(m => m[1]);
+
+  return [
+    ...new Set(
+      calls.filter(name =>
+        !funcs.includes(name) &&
+        !ignore.has(name)
+      )
+    )
+  ];
+}
+
+function calcAiAutoHealthScore(results) {
+
+  let score = 100;
+
+  if (!results.jsOk) {
+    score -= 40;
+  }
+
+  if (results.dupFuncs.length) {
+    score -= 20;
+  }
+
+  if (results.aiDupFuncs.length) {
+    score -= 20;
+  }
+
+  if (results.undefinedOnclicks.length) {
+    score -= 20;
+  }
+
+  if (results.missingCalls.length) {
+    score -= 10;
+  }
+
+  if (results.protectedChanges.length) {
+    score -= 30;
+  }
+
+  return Math.max(
+    0,
+    score
+  );
+}
+
+function detectProtectedAiChanges() {
+
+  if (
+    !latestAiIntegrationChanges ||
+    !latestAiIntegrationChanges.length
+  ) {
+    return [];
+  }
+
+  const protectedNames =
+    getAllProtectedFunctionNames();
+
+  return latestAiIntegrationChanges
+    .filter(change =>
+      change.type === "replace" &&
+      protectedNames.has(change.name)
+    )
+    .map(change => change.name);
+}
+
 function runAiAutoTest() {
 
   const virtual =
@@ -1170,10 +1358,39 @@ function runAiAutoTest() {
   const aiDupFuncs =
     detectAiInputDuplicateFunctions();
 
+  const undefinedOnclicks =
+    detectUndefinedOnclicksInText(
+      virtual.text
+    );
+
+  const missingCalls =
+    detectMissingFunctionCallsInText(
+      virtual.text
+    );
+
+  const protectedChanges =
+    detectProtectedAiChanges();
+
+  const results = {
+    jsOk: validation.js_ok,
+    dupFuncs,
+    aiDupFuncs,
+    undefinedOnclicks,
+    missingCalls,
+    protectedChanges
+  };
+
+  const healthScore =
+    calcAiAutoHealthScore(
+      results
+    );
+
   const pass =
     validation.js_ok &&
     dupFuncs.length === 0 &&
-    aiDupFuncs.length === 0;
+    aiDupFuncs.length === 0 &&
+    undefinedOnclicks.length === 0 &&
+    protectedChanges.length === 0;
 
   latestAiAutoTestPassed =
     pass;
@@ -1183,6 +1400,9 @@ function runAiAutoTest() {
 
 === Result ===
 ${pass ? "PASS" : "FAIL"}
+
+=== Health Score ===
+${healthScore}/100
 
 === Apply Count ===
 add: ${virtual.addCount}
@@ -1198,6 +1418,15 @@ ${dupFuncs.length ? dupFuncs.join("\n") : "✔ none"}
 
 === AI Input Duplicate Functions ===
 ${aiDupFuncs.length ? aiDupFuncs.join("\n") : "✔ none"}
+
+=== Undefined onclick ===
+${undefinedOnclicks.length ? undefinedOnclicks.join("\n") : "✔ none"}
+
+=== Missing Function Calls ===
+${missingCalls.length ? missingCalls.join("\n") : "✔ none"}
+
+=== Protected Function Changes ===
+${protectedChanges.length ? protectedChanges.join("\n") : "✔ none"}
 
 === Function Count ===
 ${funcs.length}
