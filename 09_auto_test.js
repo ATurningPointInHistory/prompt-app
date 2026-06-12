@@ -3,6 +3,8 @@
    AI Auto Test
 =============================== */
 
+let latestAiAutoTestPassed = false;
+
 let latestAiAutoTestReport = "";
 
 function buildAiIntegrationVirtualText() {
@@ -141,8 +143,12 @@ ${dupFuncs.length ? dupFuncs.join("\n") : "✔ none"}
 ${funcs.length}
 `;
 
-  latestAiAutoTestReport =
-    report;
+  const pass =
+    validation.js_ok &&
+    dupFuncs.length === 0;
+
+  latestAiAutoTestPassed =
+    pass;
 
   openFloatPanel(
     "AI AutoTest",
