@@ -1033,32 +1033,6 @@ ${escapeHtml(report)}
    AI Auto Test
 =============================== */
 
-function getProtectedFunctionNames() {
-
-  return new Set([
-    "loadRepairHtml",
-    "saveRepairHtml",
-    "copyRepairHtml",
-
-    "showHtmlHealth",
-    "validateBackupHtml",
-    "getHtmlSummary",
-    "collectExternalScriptText",
-
-    "checkSafeMode",
-    "safeRun",
-
-    "rollbackLastDelete",
-    "saveDeleteRollbackSnapshot",
-
-    "updateLineNumbers",
-    "updateCursorPosition",
-    "autoSaveRepairDraft",
-
-    "initRepairIde",
-    "loadSettings"
-  ]);
-}
 function addProtectedFunctionName(name) {
 
   const list =
@@ -1668,27 +1642,7 @@ function getProjectModuleRules() {
 
 }
 
-function getProtectedFunctionNames() {
 
-  return new Set([
-    "loadRepairHtml",
-    "saveRepairHtml",
-    "copyRepairHtml",
-    "showHtmlHealth",
-    "validateBackupHtml",
-    "getHtmlSummary",
-    "collectExternalScriptText",
-    "checkSafeMode",
-    "rollbackLastDelete",
-    "saveDeleteRollbackSnapshot",
-    "updateLineNumbers",
-    "updateCursorPosition",
-    "autoSaveRepairDraft",
-    "initRepairIde",
-    "loadSettings"
-  ]);
-
-}
 
 function getIgnoredFunctionCalls() {
 
@@ -1724,4 +1678,31 @@ function getIgnoredFunctionCalls() {
     "has"
   ]);
 
+}
+
+function getProtectedFunctionNames() {
+
+  return new Set([
+    "loadRepairHtml",
+    "saveRepairHtml",
+    "copyRepairHtml",
+
+    "showHtmlHealth",
+    "validateBackupHtml",
+    "getHtmlSummary",
+    "collectExternalScriptText",
+
+    "checkSafeMode",
+    "safeRun",
+
+    "rollbackLastDelete",
+    "saveDeleteRollbackSnapshot",
+
+    "updateLineNumbers",
+    "updateCursorPosition",
+    "autoSaveRepairDraft",
+
+    "initRepairIde",
+    "loadSettings"
+  ]);
 }
