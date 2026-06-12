@@ -1300,7 +1300,13 @@ function detectMissingFunctionCallsInText(text) {
       "ceil",
       "round",
       "abs",
-      "log"
+      "log",
+      "get",
+      "test",
+      "b",
+      "setItem",
+      "has",
+      "add"
 
     ]);
 
