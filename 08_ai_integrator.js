@@ -1164,12 +1164,11 @@ function runAiAutoTest() {
       funcs.filter(
         (f, i) =>
           funcs.indexOf(f) !== i
+      )
+    )];
 
   const aiDupFuncs =
     detectAiInputDuplicateFunctions();
-
-      )
-    )];
 
   const pass =
     validation.js_ok &&
@@ -1196,6 +1195,9 @@ ${validation.js_error || ""}
 
 === Duplicate Functions ===
 ${dupFuncs.length ? dupFuncs.join("\n") : "✔ none"}
+
+=== AI Input Duplicate Functions ===
+${aiDupFuncs.length ? aiDupFuncs.join("\n") : "✔ none"}
 
 === Function Count ===
 ${funcs.length}
