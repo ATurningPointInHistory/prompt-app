@@ -1549,3 +1549,179 @@ window.testAiIntegrationSandbox =
 console.log(
   "08_ai_integrator loaded"
 );
+
+/* ===============================
+   Project Config
+=============================== */
+
+function getProjectConfig() {
+
+  return {
+    moduleRules:
+      getProjectModuleRules(),
+
+    protectedFunctions:
+      getProtectedFunctionNames(),
+
+    ignoreFunctionCalls:
+      getIgnoredFunctionCalls()
+  };
+
+}
+
+function getProjectModuleRules() {
+
+  return [
+    {
+      file: "00_bootstrap.js",
+      words: [
+        "float",
+        "panel",
+        "menu",
+        "bootstrap",
+        "switchapp"
+      ]
+    },
+    {
+      file: "01_core.js",
+      words: [
+        "escape",
+        "copy",
+        "helper",
+        "util",
+        "safe"
+      ]
+    },
+    {
+      file: "02_prompt.js",
+      words: [
+        "prompt",
+        "review",
+        "convert",
+        "command",
+        "generate"
+      ]
+    },
+    {
+      file: "03_data.js",
+      words: [
+        "save",
+        "load",
+        "history",
+        "storage",
+        "state"
+      ]
+    },
+    {
+      file: "04_tools.js",
+      words: [
+        "template",
+        "danger",
+        "pattern",
+        "preset",
+        "todo",
+        "devlog"
+      ]
+    },
+    {
+      file: "05_repair.js",
+      words: [
+        "repair",
+        "undo",
+        "redo",
+        "editor",
+        "functionsort",
+        "diff"
+      ]
+    },
+    {
+      file: "06_search.js",
+      words: [
+        "search",
+        "replace",
+        "highlight",
+        "cursor"
+      ]
+    },
+    {
+      file: "07_backup_health.js",
+      words: [
+        "backup",
+        "health",
+        "diagnose",
+        "dependency",
+        "validate"
+      ]
+    },
+    {
+      file: "08_ai_integrator.js",
+      words: [
+        "ai",
+        "integration",
+        "classifier",
+        "relation",
+        "graph",
+        "map"
+      ]
+    }
+  ];
+
+}
+
+function getProtectedFunctionNames() {
+
+  return new Set([
+    "loadRepairHtml",
+    "saveRepairHtml",
+    "copyRepairHtml",
+    "showHtmlHealth",
+    "validateBackupHtml",
+    "getHtmlSummary",
+    "collectExternalScriptText",
+    "checkSafeMode",
+    "rollbackLastDelete",
+    "saveDeleteRollbackSnapshot",
+    "updateLineNumbers",
+    "updateCursorPosition",
+    "autoSaveRepairDraft",
+    "initRepairIde",
+    "loadSettings"
+  ]);
+
+}
+
+function getIgnoredFunctionCalls() {
+
+  return new Set([
+    "alert",
+    "confirm",
+    "prompt",
+    "trim",
+    "filter",
+    "map",
+    "forEach",
+    "find",
+    "findIndex",
+    "slice",
+    "split",
+    "join",
+    "includes",
+    "indexOf",
+    "match",
+    "matchAll",
+    "replace",
+    "toLowerCase",
+    "toUpperCase",
+    "querySelector",
+    "querySelectorAll",
+    "setItem",
+    "stringify",
+    "min",
+    "max",
+    "log",
+    "get",
+    "add",
+    "has"
+  ]);
+
+}
