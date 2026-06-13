@@ -450,8 +450,8 @@ function buildRepairQuickToolsHtml() {
   <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾<br>Save</button>
   <button class="float-list-btn" onclick="reloadAppPage()">🔄<br>更新</button>
   <button class="float-list-btn" onclick="showHtmlHealth()">💚<br>HEALTH</button>
-  <button class="float-list-btn"
-onclick="openProjectConfigManager()">⚙ Project Config</button>
+  <button class="float-list-btn" onclick="openProjectConfigManager()">⚙ Project Config</button>
+  <button class="float-list-btn" onclick="analyzeAiInstruction()">🧠 指示解析</button>
 </div>
 `;
 }
