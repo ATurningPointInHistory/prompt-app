@@ -1511,16 +1511,16 @@ function buildAiInstructionReport(
       text
     );
 
+  const primaryTarget =
+    extractPrimaryAiTarget(
+      text
+    );
+
   const replaceCandidate =
     buildAiReplaceCandidate(
       primaryTarget,
       changeData.before,
       changeData.after
-    );
-
-  const primaryTarget =
-    extractPrimaryAiTarget(
-      text
     );
 
   const targets =
@@ -1628,6 +1628,31 @@ function buildAiInstructionReport(
   );
 
   lines.push("");
+
+  if (replaceCandidate) {
+
+    lines.push(
+      "=== Replace Candidate ==="
+    );
+
+    lines.push("");
+
+    lines.push(
+      "Target : " +
+      replaceCandidate.functionName
+    );
+
+  lines.push("");
+
+  lines.push(
+    replaceCandidate.found
+      ? "FOUND"
+      : "NOT FOUND"
+  );
+
+  lines.push("");
+
+}
 
   lines.push(
     "=== Suggested Search ==="
