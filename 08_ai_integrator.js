@@ -1174,28 +1174,21 @@ function detectProtectedAiChanges() {
     return [];
   }
 
-  const config =
-    typeof getProjectConfig === "function"
-      ? getProjectConfig()
-      : {};
-
   const protectedNames =
-    new Set([
-      ...(
-        config.protectedFunctions || []
-      ),
-      ...(
-        typeof getAllProtectedFunctionNames === "function"
-          ? getAllProtectedFunctionNames()
-          : []
-      )
-    ]);
+    getAllProtectedFunctionNames();
 
   return latestAiIntegrationChanges
-    .filter(change =>
-      change.type === "replace" &&
-      protectedNames.has(change.name)
-    )
+    .filter(change => {
+
+      if (change.type !== "replace") {
+        return false;
+      }
+
+      return protectedNames.has(
+        change.name
+      );
+
+    })
     .map(change => change.name);
 
 }
