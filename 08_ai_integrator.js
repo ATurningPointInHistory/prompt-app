@@ -1174,8 +1174,22 @@ function detectProtectedAiChanges() {
     return [];
   }
 
+  const config =
+    typeof getProjectConfig === "function"
+      ? getProjectConfig()
+      : {};
+
   const protectedNames =
-    getAllProtectedFunctionNames();
+    new Set([
+      ...(
+        config.protectedFunctions || []
+      ),
+      ...(
+        typeof getAllProtectedFunctionNames === "function"
+          ? getAllProtectedFunctionNames()
+          : []
+      )
+    ]);
 
   return latestAiIntegrationChanges
     .filter(change =>
@@ -1183,6 +1197,7 @@ function detectProtectedAiChanges() {
       protectedNames.has(change.name)
     )
     .map(change => change.name);
+
 }
 
 function runAiAutoTest() {
