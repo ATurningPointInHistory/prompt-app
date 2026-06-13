@@ -301,27 +301,6 @@ return presets[aiTarget] || presets.chatgpt;
 
 function getProjectConfig() {
 
-  return {
-
-    moduleRules:
-      getProjectModuleRules(),
-
-    protectedFunctions:
-      getProtectedFunctionNames(),
-
-    ignoreFunctionCalls:
-      getIgnoredFunctionCalls()
-
-  };
-
-}
-
-/* ===============================
-   Project Config
-=============================== */
-
-function getProjectConfig() {
-
   const saved =
     loadJson(
       "projectConfig",
