@@ -1345,6 +1345,28 @@ function copyAiAutoTestReport() {
   );
 }
 
+function detectMissingCriticalFunctionsInText(text) {
+
+  const funcs =
+    extractFunctionNames(text);
+
+  const config =
+    typeof getProjectConfig === "function"
+      ? getProjectConfig()
+      : {};
+
+  const critical =
+    config.criticalFunctions ||
+    new Set();
+
+  return [
+    ...critical
+  ].filter(name =>
+    !funcs.includes(name)
+  );
+
+}
+
 window.runAiAutoTest =
   runAiAutoTest;
 
@@ -1372,25 +1394,3 @@ window.testAiIntegrationSandbox =
 console.log(
   "08_ai_integrator loaded"
 );
-
-function detectMissingCriticalFunctionsInText(text) {
-
-  const funcs =
-    extractFunctionNames(text);
-
-  const config =
-    typeof getProjectConfig === "function"
-      ? getProjectConfig()
-      : {};
-
-  const critical =
-    config.criticalFunctions ||
-    new Set();
-
-  return [
-    ...critical
-  ].filter(name =>
-    !funcs.includes(name)
-  );
-
-}
