@@ -162,51 +162,19 @@ function buildFunctionDependencyReport(source) {
       /DOMContentLoaded[\s\S]{0,500}?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g
     )].map(x => x[1]);
 
+  const config =
+    typeof getProjectConfig === "function"
+      ? getProjectConfig()
+      : {};
+
   const protectedFunctions =
     new Set([
-      "loadSettings",
-      "initImportFileEvents",
-      "handleRepairSearchKey",
-      "initRepairIde",
-      "toggleTemplateManager",
-      "toggleDangerManager",
-      "togglePatternManager",
-      "saveCurrentState",
-      "saveHistory",
-      "saveTemplate",
-      "exportTemplates",
-      "importTemplates",
-      "exportAiPresets",
-      "importAiPresets",
-      "saveAiPresetFromEditor",
-      "resetAiPreset",
-      "saveDangerWord",
-      "savePattern",
-      "applyTemplateFromSelect",
-      "clearHistory",
-      "detectLargeFunctions",
-      "diagnoseHtml",
-      "backupProgram",
-      "saveProgramHtml",
-      "restoreProgramBackup",
-      "compareBackupSummary",
-      "backupPartialScript",
-      "checkSafeMode",
-      "saveProjectPackage",
-      "analyzeProjectJsDependency",
-      "moveFloatPanelBy",
-      "initRepairSearchQuickPanel",
-      "initRepairQuickPanel",
-      "renderBuildInfo",
-      "renderCommandChips",
-      "renderPresetChips",
-      "saveCurrentAiAnswer",
-      "editProjectState",
-      "buildLineDiff",
-      "enableRepairEditorTabIndent",
-      "loadRepairDraft",
-      "updateRepairFloatingPanelsVisibility",
-      "openReplacePanel"
+      ...(
+        config.protectedFunctions || []
+      ),
+      ...(
+        config.criticalFunctions || []
+      )
     ]);
 
   const result = [];
