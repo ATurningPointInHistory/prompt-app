@@ -1511,10 +1511,45 @@ function buildAiInstructionReport(
       text
     );
 
+  const editor =
+    get("repairEditor");
+
+  const editorText =
+    editor && editor.value
+      ? editor.value
+      : "";
+
+  const pageText =
+    document.documentElement
+      ? document.documentElement.outerHTML
+      : "";
+
+  const searchText =
+    editorText.trim()
+      ? editorText
+      : pageText;
+
+  const sourceLabel =
+    editorText.trim()
+      ? "repairEditor"
+      : "document";
+
   const lines = [];
 
   lines.push(
     "AI Instruction Report"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "=== Source ==="
+  );
+
+  lines.push("");
+
+  lines.push(
+    sourceLabel
   );
 
   lines.push("");
@@ -1543,8 +1578,7 @@ function buildAiInstructionReport(
 
     const block =
       findFunctionBlockInText(
-        get("repairEditor")
-          ?.value || "",
+        searchText,
         name
       );
 
@@ -1559,8 +1593,7 @@ function buildAiInstructionReport(
     }
 
     const line =
-      get("repairEditor")
-        .value
+      searchText
         .slice(
           0,
           block.start
@@ -1569,7 +1602,7 @@ function buildAiInstructionReport(
         .length;
 
     lines.push(
-      `${name} : L${line}`
+      `${name} : ${sourceLabel} / L${line}`
     );
 
   });
