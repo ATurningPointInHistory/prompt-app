@@ -1564,24 +1564,22 @@ function getProtectedFunctionNames() {
     "loadRepairHtml",
     "saveRepairHtml",
     "copyRepairHtml",
-
     "showHtmlHealth",
     "validateBackupHtml",
     "getHtmlSummary",
     "collectExternalScriptText",
-
     "checkSafeMode",
     "safeRun",
-
     "rollbackLastDelete",
     "saveDeleteRollbackSnapshot",
-
     "updateLineNumbers",
     "updateCursorPosition",
     "autoSaveRepairDraft",
-
     "initRepairIde",
-    "loadSettings"
+    "loadSettings",
+    "detectProtectedAiChanges",
+    "getAllProtectedFunctionNames",
+    "getProtectedFunctionNames"
   ]);
 }
 
