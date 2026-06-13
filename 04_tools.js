@@ -1609,6 +1609,14 @@ onclick="resetProjectConfig()">
 初期化
 </button>
 
+<button onclick="exportProjectConfig()">
+Export
+</button>
+
+<button onclick="importProjectConfig()">
+Import
+</button>
+
 </div>
 
 <textarea
