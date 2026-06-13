@@ -1602,6 +1602,32 @@ function buildAiInstructionReport(
 
   lines.push("");
 
+  lines.push(
+    "=== Change Before ==="
+  );
+
+  lines.push("");
+
+  lines.push(
+    changeData.before ||
+    "none"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "=== Change After ==="
+  );
+
+  lines.push("");
+
+  lines.push(
+    changeData.after ||
+    "none"
+  );
+
+  lines.push("");
+
   targets.forEach(name => {
 
     const block =
