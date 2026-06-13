@@ -1560,14 +1560,32 @@ function buildAiInstructionReport(
   lines.push("");
 
   lines.push(
-    "=== Function Candidates ==="
+  "=== Target Function ==="
   );
 
   lines.push("");
 
   lines.push(
-    targets.length
-      ? targets.join("\n")
+    primaryTarget || "none"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "=== Related Functions ==="
+  );
+
+  lines.push("");
+
+  const related =
+    targets.filter(
+      name =>
+        name !== primaryTarget
+    );
+
+  lines.push(
+    related.length
+      ? related.join("\n")
       : "none"
   );
 
