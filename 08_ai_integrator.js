@@ -1506,6 +1506,11 @@ function buildAiInstructionReport(
   text
 ) {
 
+  const primaryTarget =
+    extractPrimaryAiTarget(
+      text
+    );
+
   const targets =
     extractAiInstructionTargets(
       text
@@ -1654,6 +1659,7 @@ function extractPrimaryAiTarget(
   return "";
 
 }
+
 
 window.analyzeAiInstruction =
   analyzeAiInstruction;
