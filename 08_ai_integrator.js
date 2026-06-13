@@ -1625,6 +1625,36 @@ function copyAiInstructionReport() {
 
 }
 
+function extractPrimaryAiTarget(
+  text
+) {
+
+  const patterns = [
+
+    /([a-zA-Z_$][\w$]*)\s*\(\)\s*を修正/g,
+
+    /function\s+([a-zA-Z_$][\w$]*)/g
+
+  ];
+
+  for (const pattern of patterns) {
+
+    const match =
+      pattern.exec(text);
+
+    if (
+      match &&
+      match[1]
+    ) {
+      return match[1];
+    }
+
+  }
+
+  return "";
+
+}
+
 window.analyzeAiInstruction =
   analyzeAiInstruction;
 
