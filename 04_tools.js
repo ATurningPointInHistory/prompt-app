@@ -1710,6 +1710,108 @@ function resetProjectConfig() {
 
 }
 
+function exportProjectConfig() {
+
+  const config =
+    getProjectConfig();
+
+  const data = {
+    moduleRules:
+      config.moduleRules,
+
+    protectedFunctions:
+      [...config.protectedFunctions],
+
+    ignoreFunctionCalls:
+      [...config.ignoreFunctionCalls],
+
+    criticalFunctions:
+      [...config.criticalFunctions]
+  };
+
+  const blob =
+    new Blob(
+      [
+        JSON.stringify(
+          data,
+          null,
+          2
+        )
+      ],
+      {
+        type: "application/json"
+      }
+    );
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const a =
+    document.createElement("a");
+
+  a.href = url;
+  a.download =
+    "project_config.json";
+
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function importProjectConfig() {
+
+  const input =
+    document.createElement("input");
+
+  input.type = "file";
+  input.accept = ".json,application/json";
+
+  input.onchange = event => {
+
+    const file =
+      event.target.files &&
+      event.target.files[0];
+
+    if (!file) return;
+
+    const reader =
+      new FileReader();
+
+    reader.onload = () => {
+
+      try {
+
+        const config =
+          JSON.parse(reader.result);
+
+        localStorage.setItem(
+          "projectConfig",
+          JSON.stringify(config)
+        );
+
+        alert(
+          "ProjectConfigを読み込みました"
+        );
+
+        openProjectConfigManager();
+
+      } catch (err) {
+
+        alert(
+          "ProjectConfig読込エラー\n\n" +
+          err.message
+        );
+
+      }
+
+    };
+
+    reader.readAsText(file);
+  };
+
+  input.click();
+}
+
 window.openProjectConfigManager =
   openProjectConfigManager;
 
@@ -1718,6 +1820,12 @@ window.saveProjectConfig =
 
 window.resetProjectConfig =
   resetProjectConfig;
+
+window.exportProjectConfig =
+  exportProjectConfig;
+
+window.importProjectConfig =
+  importProjectConfig;
 
 console.log("CHANGELOG");
 console.table(CHANGELOG);
