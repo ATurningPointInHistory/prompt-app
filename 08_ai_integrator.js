@@ -1597,12 +1597,6 @@ function buildAiInstructionReport(
   lines.push("");
 
   lines.push(
-    "=== Suggested Search ==="
-  );
-
-  lines.push("");
-
-  lines.push(
     "=== Change Before ==="
   );
 
@@ -1624,6 +1618,12 @@ function buildAiInstructionReport(
   lines.push(
     changeData.after ||
     "none"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "=== Suggested Search ==="
   );
 
   lines.push("");
