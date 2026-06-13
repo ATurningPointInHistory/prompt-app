@@ -1367,6 +1367,30 @@ function detectMissingCriticalFunctionsInText(text) {
 
 }
 
+window.runAiAutoTest =
+  runAiAutoTest;
+
+window.copyAiAutoTestReport =
+  copyAiAutoTestReport;
+
+window.analyzeAiGeneratedCode =
+  analyzeAiGeneratedCode;
+
+window.runAiGeneratedCodeAnalysis =
+  runAiGeneratedCodeAnalysis;
+
+window.copyAiIntegrationReport =
+  copyAiIntegrationReport;
+
+window.showAiIntegrationDiff =
+  showAiIntegrationDiff;
+
+window.applyAiIntegration =
+  applyAiIntegration;
+
+window.testAiIntegrationSandbox =
+  testAiIntegrationSandbox;
+
 /* ===============================
    FILE: 09_ai_instruction.js
    AI Instruction Analyzer
@@ -1576,30 +1600,6 @@ window.runAiInstructionAnalysis =
 
 window.copyAiInstructionReport =
   copyAiInstructionReport;
-
-window.runAiAutoTest =
-  runAiAutoTest;
-
-window.copyAiAutoTestReport =
-  copyAiAutoTestReport;
-
-window.analyzeAiGeneratedCode =
-  analyzeAiGeneratedCode;
-
-window.runAiGeneratedCodeAnalysis =
-  runAiGeneratedCodeAnalysis;
-
-window.copyAiIntegrationReport =
-  copyAiIntegrationReport;
-
-window.showAiIntegrationDiff =
-  showAiIntegrationDiff;
-
-window.applyAiIntegration =
-  applyAiIntegration;
-
-window.testAiIntegrationSandbox =
-  testAiIntegrationSandbox;
 
 console.log(
   "08_ai_integrator loaded"
