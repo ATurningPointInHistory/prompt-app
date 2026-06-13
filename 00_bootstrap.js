@@ -170,7 +170,8 @@ function buildRepairToolsHtml() {
 <button class="float-list-btn" onclick="showRepairLineDiff()">🧾 Line Diff</button>
 <button class="float-list-btn" onclick="loadAndApplyRepairDiff()">📂 Diff適用</button>
 <button class="float-list-btn" onclick="diagnoseRepairHtml()">🩺 編集内容診断</button>
-
+<button class="float-list-btn"
+onclick="openProjectConfigManager()">⚙ Project Config</button>
 `;
 }
 
