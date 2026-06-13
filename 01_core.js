@@ -322,19 +322,24 @@ function getProjectConfig() {
 
 function getProjectConfig() {
 
-  return {
-    moduleRules:
-      getProjectModuleRules(),
+  const saved =
+    loadJson(
+      "projectConfig",
+      null
+    );
 
-    protectedFunctions:
-      getProtectedFunctionNames(),
+  if (
+    saved &&
+    typeof saved === "object"
+  ) {
+    return normalizeProjectConfig(
+      saved
+    );
+  }
 
-    ignoreFunctionCalls:
-      getIgnoredFunctionCalls(),
-
-    criticalFunctions:
-      getCriticalFunctionNames()
-  };
+  return normalizeProjectConfig(
+    getDefaultProjectConfig()
+  );
 
 }
 
@@ -524,4 +529,57 @@ function getProtectedFunctionNames() {
     "getAllProtectedFunctionNames",
     "getProtectedFunctionNames"
   ]);
+}
+
+function getDefaultProjectConfig() {
+
+  return {
+
+    moduleRules:
+      getProjectModuleRules(),
+
+    protectedFunctions:
+      [...getProtectedFunctionNames()],
+
+    ignoreFunctionCalls:
+      [...getIgnoredFunctionCalls()],
+
+    criticalFunctions:
+      [...getCriticalFunctionNames()]
+
+  };
+
+}
+
+function normalizeProjectConfig(config) {
+
+  return {
+
+    moduleRules:
+      Array.isArray(
+        config.moduleRules
+      )
+        ? config.moduleRules
+        : getProjectModuleRules(),
+
+    protectedFunctions:
+      new Set(
+        config.protectedFunctions ||
+        [...getProtectedFunctionNames()]
+      ),
+
+    ignoreFunctionCalls:
+      new Set(
+        config.ignoreFunctionCalls ||
+        [...getIgnoredFunctionCalls()]
+      ),
+
+    criticalFunctions:
+      new Set(
+        config.criticalFunctions ||
+        [...getCriticalFunctionNames()]
+      )
+
+  };
+
 }
