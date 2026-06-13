@@ -1519,7 +1519,16 @@ function getIgnoredFunctionCalls() {
     "log",
     "get",
     "add",
-    "has"
+    "has",
+    "if",
+    "return",
+    "String",
+    "RegExp",
+    "Map",
+    "Set",
+    "push",
+    "test",
+    "b"
   ]);
 
 }
