@@ -1585,5 +1585,95 @@ function reloadAppPage() {
   location.reload();
 }
 
+/* ===============================
+   ProjectConfigManager
+=============================== */
+
+function openProjectConfigManager() {
+
+  const config =
+    getProjectConfig();
+
+  openFloatPanel(
+    "⚙ Project Config",
+    `
+<div class="float-panel-actions">
+
+<button
+onclick="saveProjectConfig()">
+保存
+</button>
+
+<button
+onclick="resetProjectConfig()">
+初期化
+</button>
+
+</div>
+
+<textarea
+id="projectConfigEditor"
+style="width:100%;height:400px;"
+>${escapeHtml(
+JSON.stringify(
+{
+  moduleRules:
+    config.moduleRules,
+
+  protectedFunctions:
+    [...config.protectedFunctions],
+
+  ignoreFunctionCalls:
+    [...config.ignoreFunctionCalls],
+
+  criticalFunctions:
+    [...config.criticalFunctions]
+
+},
+null,
+2
+)
+)}</textarea>
+`
+  );
+
+}
+
+function saveProjectConfig() {
+
+  const editor =
+    get("projectConfigEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  try {
+
+    const config =
+      JSON.parse(
+        editor.value
+      );
+
+    localStorage.setItem(
+      "projectConfig",
+      JSON.stringify(config)
+    );
+
+    alert(
+      "ProjectConfig保存完了"
+    );
+
+  } catch (err) {
+
+    alert(
+      "JSONエラー\n\n" +
+      err.message
+    );
+
+  }
+
+}
+
 console.log("CHANGELOG");
 console.table(CHANGELOG);
