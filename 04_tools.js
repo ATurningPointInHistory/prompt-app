@@ -1613,9 +1613,16 @@ onclick="resetProjectConfig()">
 
 <textarea
 id="projectConfigEditor"
-style="width:100%;height:400px;"
->${escapeHtml(
-JSON.stringify(
+style="
+width:100%;
+height:60vh;
+font-family:monospace;
+font-size:11px;
+white-space:pre;
+overflow:auto;
+resize:vertical;
+"
+>${JSON.stringify(
 {
   moduleRules:
     config.moduleRules,
@@ -1628,11 +1635,9 @@ JSON.stringify(
 
   criticalFunctions:
     [...config.criticalFunctions]
-
 },
 null,
 2
-)
 )}</textarea>
 `
   );
