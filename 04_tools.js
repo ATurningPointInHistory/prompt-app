@@ -1675,5 +1675,36 @@ function saveProjectConfig() {
 
 }
 
+function resetProjectConfig() {
+
+  if (
+    !confirm(
+      "初期設定へ戻しますか？"
+    )
+  ) {
+    return;
+  }
+
+  localStorage.removeItem(
+    "projectConfig"
+  );
+
+  alert(
+    "ProjectConfig初期化完了"
+  );
+
+  openProjectConfigManager();
+
+}
+
+window.openProjectConfigManager =
+  openProjectConfigManager;
+
+window.saveProjectConfig =
+  saveProjectConfig;
+
+window.resetProjectConfig =
+  resetProjectConfig;
+
 console.log("CHANGELOG");
 console.table(CHANGELOG);
