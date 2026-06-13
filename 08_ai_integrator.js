@@ -1506,6 +1506,11 @@ function buildAiInstructionReport(
   text
 ) {
 
+  const changeData =
+    extractAiBeforeAfter(
+      text
+    );
+
   const primaryTarget =
     extractPrimaryAiTarget(
       text
@@ -1677,6 +1682,37 @@ function extractPrimaryAiTarget(
   return "";
 
 }
+
+function extractAiBeforeAfter(
+  text
+) {
+
+  const beforeMatch =
+    text.match(
+      /変更前([\s\S]*?)変更後/i
+    );
+
+  const afterMatch =
+    text.match(
+      /変更後([\s\S]*)/i
+    );
+
+  return {
+
+    before:
+      beforeMatch
+        ? beforeMatch[1].trim()
+        : "",
+
+    after:
+      afterMatch
+        ? afterMatch[1].trim()
+        : ""
+
+  };
+
+}
+
 
 
 window.analyzeAiInstruction =
