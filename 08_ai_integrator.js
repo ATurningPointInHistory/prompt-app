@@ -1511,6 +1511,13 @@ function buildAiInstructionReport(
       text
     );
 
+  const replaceCandidate =
+    buildAiReplaceCandidate(
+      primaryTarget,
+      changeData.before,
+      changeData.after
+    );
+
   const primaryTarget =
     extractPrimaryAiTarget(
       text
@@ -1739,7 +1746,49 @@ function extractAiBeforeAfter(
 
 }
 
+function buildAiReplaceCandidate(
+  targetFunction,
+  beforeText,
+  afterText
+) {
 
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    !editor.value
+  ) {
+    return null;
+  }
+
+  const block =
+    findFunctionBlockInText(
+      editor.value,
+      targetFunction
+    );
+
+  if (!block) {
+    return null;
+  }
+
+  return {
+    functionName:
+      targetFunction,
+
+    found:
+      block.block.includes(
+        beforeText
+      ),
+
+    before:
+      beforeText,
+
+    after:
+      afterText
+  };
+
+}
 
 window.analyzeAiInstruction =
   analyzeAiInstruction;
