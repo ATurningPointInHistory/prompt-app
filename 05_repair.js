@@ -1493,16 +1493,10 @@ async function cleanupCandidates() {
       return count <= 1;
     });
 
-  const safeIgnoreIds = [
-    "appPage",
-    "repairPage",
-    "floatPanel",
-    "functionListBox",
-    "diffResultBox",
-    "diagnoseResultBox",
-    "healthResultBox",
-    "repairEditor"
-  ];
+  const safeIgnoreIds =
+    typeof getSystemIgnoreIds === "function"
+      ? getSystemIgnoreIds()
+      : new Set();
 
   const orphanIds =
     ids.filter(id => {
@@ -1511,7 +1505,7 @@ async function cleanupCandidates() {
         return false;
       }
 
-      if (safeIgnoreIds.includes(id)) {
+      if (safeIgnoreIds.has(id)) {
         return false;
       }
 
@@ -3466,16 +3460,10 @@ async function diagnoseRepairHtml() {
   );
 
   // 孤立id
-  const safeIgnoreIds = [
-    "appPage",
-    "repairPage",
-    "floatPanel",
-    "functionListBox",
-    "diffResultBox",
-    "diagnoseResultBox",
-    "healthResultBox",
-    "repairEditor"
-  ];
+  const safeIgnoreIds =
+    typeof getSystemIgnoreIds === "function"
+      ? getSystemIgnoreIds()
+      : new Set();
 
   const orphanIds =
     ids.filter(id => {
@@ -3484,7 +3472,7 @@ async function diagnoseRepairHtml() {
         return false;
       }
 
-      if (safeIgnoreIds.includes(id)) {
+      if (safeIgnoreIds.has(id)) {
         return false;
       }
 
