@@ -3423,7 +3423,7 @@ async function diagnoseRepairHtml() {
   const unusedFns =
     funcs.filter(fn => {
 
-      if (safeIgnoreFuncs.includes(fn)) {
+      if (safeIgnoreFuncs.has(fn)) {
         return false;
       }
 
