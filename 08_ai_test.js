@@ -1,3 +1,8 @@
+
+let latestAiAutoTestPassed = false;
+
+let latestAiAutoTestReport = "";
+
 function testAiIntegrationSandbox() {
 
   const editor =
