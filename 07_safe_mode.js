@@ -1,7 +1,8 @@
 /* ===============================
    FILE: 07_safe_mode.js
-   Safe Mode
+   Safe Mode / Emergency Recovery
 =============================== */
+
 function checkSafeMode() {
   const crash =
     localStorage.getItem("lastCrash");
