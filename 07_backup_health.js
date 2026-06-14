@@ -865,7 +865,6 @@ async function saveProjectPackage() {
     // 分割JS
 
     const files = [
-
       "00_bootstrap.js",
       "01_core.js",
       "02_prompt.js",
@@ -873,9 +872,17 @@ async function saveProjectPackage() {
       "04_tools.js",
       "05_repair.js",
       "06_search.js",
+      "07_health_dependency.js",
+      "07_health_diagnose.js",
+      "07_health_unused.js",
       "07_backup_health.js",
-      "08_init.js"
-
+      "08_function_relation.js",
+      "08_ai_analyzer.js",
+      "08_ai_apply.js",
+      "08_ai_test.js",
+      "08_ai_integrator.js",
+      "09_ai_instruction.js",
+      "99_init.js"
     ];
 
     for (const file of files) {
