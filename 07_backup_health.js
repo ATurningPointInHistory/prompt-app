@@ -155,7 +155,10 @@ function buildFunctionDependencyReport(source) {
     refs.eventRefs;
   
   const windowRefs =
-    refs.windowNames;
+    [
+      ...refs.windowNames,
+      ...refs.windowRefs
+    ];
 
   const domReadyRefs =
     [...text.matchAll(
