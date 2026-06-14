@@ -1494,14 +1494,17 @@ function selectCodeBlockByIndex(index) {
 }
 
 function jumpToLine(lineNumber) {
+
   const editor =
     get("repairEditor");
 
   if (!editor) return;
 
+  const text =
+    String(editor.value || "");
+
   const lines =
-    String(editor.value || "")
-      .split("\n");
+    text.split(/\r?\n/);
 
   const targetLine =
     Math.min(
@@ -1517,7 +1520,7 @@ function jumpToLine(lineNumber) {
     i++
   ) {
     pos +=
-      (lines[i] || "").length + 1;
+      lines[i].length + 1;
   }
 
   editor.focus();
@@ -1535,9 +1538,20 @@ function jumpToLine(lineNumber) {
       (targetLine - 3) * lineHeight
     );
 
-  updateCursorPosition();
-}
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
 
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      "L" + targetLine + "へジャンプ"
+    );
+  }
+}
 /* ===============================
    Tool Menu / Category
 =============================== */
