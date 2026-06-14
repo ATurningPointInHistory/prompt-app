@@ -1435,25 +1435,30 @@ async function cleanupCandidates() {
         !id.startsWith("cleanup-")
       );
 
-  const safeIgnoreFuncs = [
-    "diagnoseRepairHtml",
-    "diagnoseHtml",
-    "showHtmlHealth",
-    "closeFloatPanel",
-    "loadSettings",
-    "checkSafeMode",
-    "cleanupCandidates",
-    "commentOutCleanupCandidates",
-    "deleteCommentedCleanupBlocks",
-    "moveFloatPanelBy",
-    "saveCurrentAiAnswer",
-    "editProjectState"
-  ];
+  const config =
+  typeof getProjectConfig === "function"
+    ? getProjectConfig()
+    : {};
+
+  const safeIgnoreFuncs =
+    new Set([
+      ...(
+        config.protectedFunctions || []
+      ),
+      ...(
+        config.criticalFunctions || []
+      ),
+      "diagnoseRepairHtml",
+      "diagnoseHtml",
+      "cleanupCandidates",
+      "commentOutCleanupCandidates",
+      "deleteCommentedCleanupBlocks"
+    ]);
 
   const unusedFuncs =
     funcs.filter(fn => {
 
-      if (safeIgnoreFuncs.includes(fn)) {
+      if (safeIgnoreFuncs.has(fn)) {
         return false;
       }
 
