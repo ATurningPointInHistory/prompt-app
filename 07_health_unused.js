@@ -1,6 +1,6 @@
 /* ===============================
    FILE: 07_health_unused.js
-   Health Unused Function Tools
+   Health / Unused Analysis
 =============================== */
 
 function selectAllUnusedChecks() {
