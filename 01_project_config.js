@@ -53,6 +53,19 @@ function getProjectModuleRules() {
         "reference"
       ]
     },
+
+    {
+      file: "01_function_reference.js",
+      words: [
+        "reference",
+        "onclick",
+        "eventlistener",
+        "windowassigned",
+        "labelfor",
+        "countfunctionreferences"
+      ]
+    },
+
     {
       file: "02_prompt.js",
       words: [
