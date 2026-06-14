@@ -17,11 +17,26 @@ const APP_REGEX = {
       `onclick\\s*=\\s*["']\\s*(${APP_REGEX_PARTS.jsName})\\s*\\(`
     ),
 
-function extractFunctionReferences(
-  text,
-  html = text
-) {
+  addEventListenerFunction:
+    buildAppRegex(
+      `addEventListener\\s*\\([^)]*,\\s*(${APP_REGEX_PARTS.jsName})`
+    ),
 
+  windowAssignedFunction:
+    buildAppRegex(
+      `window\\.[a-zA-Z_$][a-zA-Z0-9_$]*\\s*=\\s*(${APP_REGEX_PARTS.jsName})`
+    ),
+
+  windowAssignedName:
+    buildAppRegex(
+      `window\\.(${APP_REGEX_PARTS.jsName})\\s*=`
+    ),
+
+  labelFor:
+    /for\s*=\s*["']([^"']+)["']/g
+};
+
+function extractFunctionReferences(text, html = text) {
   const source =
     String(text || "");
 
