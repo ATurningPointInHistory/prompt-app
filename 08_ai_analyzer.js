@@ -1,5 +1,6 @@
 /* ===============================
-   ai_classifier
+   FILE: 08_ai_analyzer.js
+   AI Code Analyzer
 =============================== */
 
 function classifyAiChanges(
