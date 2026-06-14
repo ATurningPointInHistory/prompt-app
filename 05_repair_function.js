@@ -614,3 +614,35 @@ function copyCodeBlockList() {
       : "コピー失敗"
   );
 }
+
+function selectCodeBlockByStart(start) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  editor.focus();
+
+  editor.setSelectionRange(
+    start,
+    start
+  );
+
+  const line =
+    editor.value
+      .slice(0,start)
+      .split("\n")
+      .length;
+
+  editor.scrollTop =
+    Math.max(
+      0,
+      (line - 3) * 18
+    );
+
+  updateCursorPosition();
+
+}
