@@ -372,6 +372,130 @@ function enableRepairEditorTabIndent() {
   });
 }
 
+
+
+
+/* ===============================
+   Repair Line Number / Selection
+=============================== */
+
+const REPAIR_LINE_LONG_PRESS_MS = 500;
+
+let repairLinePressTimer = null;
+let repairLineLongPressFired = false;
+
+function startRepairLineLongPress(
+  line,
+  event
+) {
+
+  if (event) {
+    event.preventDefault();
+  }
+
+  repairLineLongPressFired = false;
+
+  if (repairLinePressTimer) {
+    clearTimeout(repairLinePressTimer);
+  }
+
+  repairLinePressTimer =
+    setTimeout(() => {
+
+      repairLinePressTimer = null;
+
+      if (
+        pinnedLine === null ||
+        pinnedLine === undefined ||
+        pinnedLine === line
+      ) {
+        return;
+      }
+
+      repairLineLongPressFired = true;
+
+      selectRepairLineRange(
+        pinnedLine,
+        line
+      );
+
+    }, REPAIR_LINE_LONG_PRESS_MS);
+}
+
+function cancelRepairLineLongPress() {
+
+  if (repairLinePressTimer) {
+    clearTimeout(repairLinePressTimer);
+    repairLinePressTimer = null;
+  }
+
+}
+
+function selectRepairLineRange(
+  fromLine,
+  toLine
+) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) return;
+
+  const lines =
+    String(editor.value || "")
+      .split("\n");
+
+  const startLine =
+    Math.max(
+      1,
+      Math.min(fromLine, toLine)
+    );
+
+  const endLine =
+    Math.min(
+      lines.length,
+      Math.max(fromLine, toLine)
+    );
+
+  let startPos = 0;
+
+  for (
+    let i = 0;
+    i < startLine - 1;
+    i++
+  ) {
+    startPos +=
+      lines[i].length + 1;
+  }
+
+  let endPos = startPos;
+
+  for (
+    let i = startLine - 1;
+    i < endLine;
+    i++
+  ) {
+    endPos += lines[i].length;
+
+    if (i < lines.length - 1) {
+      endPos += 1;
+    }
+  }
+
+  editor.focus();
+
+  editor.setSelectionRange(
+    startPos,
+    endPos
+  );
+
+  updateCursorPosition();
+
+  updateRepairStatus(
+    `L${startLine}〜L${endLine} を範囲選択`
+  );
+}
+
 function updateLineNumbers() {
 
   const editor =
@@ -407,31 +531,30 @@ function updateLineNumbers() {
         let cls =
           "line-number";
 
-        if (
-          lineNo === currentLine
-        ){
+        if (lineNo === currentLine) {
           cls += " active";
         }
 
-        if (
-          lineNo === pinnedLine
-        ){
+        if (lineNo === pinnedLine) {
           cls += " pinned";
         }
 
         return `
 <div
   class="${cls}"
-  onclick="
-    togglePinnedLine(
-      ${lineNo}
-    )
-  "
+  onmousedown="startRepairLineLongPress(${lineNo}, event)"
+  onmouseup="cancelRepairLineLongPress()"
+  onmouseleave="cancelRepairLineLongPress()"
+  ontouchstart="startRepairLineLongPress(${lineNo}, event)"
+  ontouchend="cancelRepairLineLongPress()"
+  ontouchcancel="cancelRepairLineLongPress()"
+  onclick="togglePinnedLine(${lineNo})"
 >
 ${lineNo}
 </div>
 `;
-      }).join("");
+      }
+    ).join("");
 }
 
 function updateRepairStatus(text) {
@@ -561,7 +684,12 @@ function autoSaveRepairDraft() {
 
 function togglePinnedLine(
   line
-){
+) {
+
+  if (repairLineLongPressFired) {
+    repairLineLongPressFired = false;
+    return;
+  }
 
   pinnedLine =
     pinnedLine === line
