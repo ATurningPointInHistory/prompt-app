@@ -1440,11 +1440,6 @@ async function cleanupCandidates() {
     ? getProjectConfig()
     : {};
 
-  const config =
-  typeof getProjectConfig === "function"
-    ? getProjectConfig()
-    : {};
-
   const systemIgnoreFuncs =
     typeof getSystemIgnoreFunctions === "function"
       ? getSystemIgnoreFunctions()
