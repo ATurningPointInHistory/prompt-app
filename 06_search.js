@@ -578,3 +578,25 @@ function replaceAllRepairText() {
 
   alert(`${count}件置換しました`);
 }
+
+/* ===============================
+   Global Search Cache
+=============================== */
+
+let repairSearchFileStore = {};
+
+function registerRepairSearchFile(
+  fileName,
+  text
+) {
+
+  if (!fileName || !text) {
+    return;
+  }
+
+  repairSearchFileStore[fileName] = {
+    fileName,
+    text: String(text),
+    updatedAt: Date.now()
+  };
+}
