@@ -590,6 +590,11 @@ const APP_REGEX = {
     buildAppRegex(
       `window\\.[a-zA-Z_$][a-zA-Z0-9_$]*\\s*=\\s*(${APP_REGEX_PARTS.jsName})`
     ),
+  
+  windowAssignedName:
+    buildAppRegex(
+      `window\\.(${APP_REGEX_PARTS.jsName})\\s*=`
+    ),
 
   labelFor:
     /for\s*=\s*["']([^"']+)["']/g
@@ -617,6 +622,10 @@ function extractFunctionReferences(
 
     windowRefs:
       [...source.matchAll(APP_REGEX.windowAssignedFunction)]
+        .map(x => x[1]),
+
+    windowNames:
+      [...source.matchAll(APP_REGEX.windowAssignedName)]
         .map(x => x[1]),
 
     labelFors:
