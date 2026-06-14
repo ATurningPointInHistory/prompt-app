@@ -1,6 +1,6 @@
 /* ===============================
    FILE: 07_health_dependency.js
-   Function Dependency
+   Health / Dependency Analysis
 =============================== */
 
 function detectBracketMismatch(text) {
