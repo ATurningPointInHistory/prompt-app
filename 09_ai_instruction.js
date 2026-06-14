@@ -306,6 +306,26 @@ function buildAiInstructionReport(
         ? "FOUND"
         : "NOT FOUND"
     );
+    
+    lines.push("");
+    
+    lines.push(
+      "exact : " +
+      (
+        replaceCandidate.foundExact
+          ? "YES"
+          : "NO"
+      )
+    );
+    
+    lines.push(
+      "loose : " +
+      (
+        replaceCandidate.foundLoose
+          ? "YES"
+          : "NO"
+      )
+    );
 
   } else {
 
@@ -639,7 +659,8 @@ function buildAiReplaceCandidate(
 
   if (
     !editor ||
-    !editor.value
+    !editor.value ||
+    !targetFunction
   ) {
     return null;
   }
@@ -654,20 +675,45 @@ function buildAiReplaceCandidate(
     return null;
   }
 
+  const rawBefore =
+    String(beforeText || "");
+
+  const rawAfter =
+    String(afterText || "");
+
+  const normalize =
+    value =>
+      String(value || "")
+        .replace(/\s+/g, "");
+
+  const foundExact =
+    rawBefore
+      ? block.block.includes(rawBefore)
+      : false;
+
+  const foundLoose =
+    rawBefore
+      ? normalize(block.block).includes(
+          normalize(rawBefore)
+        )
+      : false;
+
   return {
     functionName:
       targetFunction,
 
     found:
-      block.block.includes(
-        beforeText
-      ),
+      foundExact || foundLoose,
+
+    foundExact,
+
+    foundLoose,
 
     before:
-      beforeText,
+      rawBefore,
 
     after:
-      afterText
+      rawAfter
   };
 
 }
