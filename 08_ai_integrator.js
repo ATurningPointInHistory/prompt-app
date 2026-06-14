@@ -1,6 +1,6 @@
 /* ===============================
    FILE: 08_ai_integrator.js
-   AI Integrator Main
+   AI Integration System
 =============================== */
 
 /* ===============================
