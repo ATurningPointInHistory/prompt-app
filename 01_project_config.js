@@ -215,7 +215,6 @@ function getProjectModuleRules() {
       ]
     },
     {
-      {
       file: "09_ai_instruction.js",
       words: [
         "instruction",
@@ -225,7 +224,8 @@ function getProjectModuleRules() {
         "primarytarget",
         "replacecandidate"
       ]
-    }
+    },
+    {
       file: "99_init.js",
       words: [
         "init",
