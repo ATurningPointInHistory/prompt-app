@@ -1552,6 +1552,7 @@ function jumpToLine(lineNumber) {
     );
   }
 }
+
 /* ===============================
    Tool Menu / Category
 =============================== */
