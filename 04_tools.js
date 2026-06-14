@@ -1503,24 +1503,25 @@ function jumpToLine(lineNumber) {
   const text =
     String(editor.value || "");
 
-  const lines =
-    text.split(/\r?\n/);
-
   const targetLine =
-    Math.min(
-      Math.max(1, Number(lineNumber) || 1),
-      lines.length
+    Math.max(
+      1,
+      Number(lineNumber) || 1
     );
 
-  let pos = 0;
+  const lineRegex =
+    /\r\n|\n|\r/g;
 
-  for (
-    let i = 0;
-    i < targetLine - 1;
-    i++
+  let currentLine = 1;
+  let pos = 0;
+  let match;
+
+  while (
+    currentLine < targetLine &&
+    (match = lineRegex.exec(text)) !== null
   ) {
-    pos +=
-      lines[i].length + 1;
+    currentLine++;
+    pos = lineRegex.lastIndex;
   }
 
   editor.focus();
