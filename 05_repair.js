@@ -3363,29 +3363,24 @@ async function diagnoseRepairHtml() {
   );
 
   // onclick定義確認
+
+  const refs =
+    extractFunctionReferences(
+      jsForCheck,
+      html
+    );
+  
   const onclicks =
-    [...html.matchAll(
-      /onclick=["']([a-zA-Z0-9_$]+)\(/g
-    )]
-    .map(x => x[1]);
-
+    refs.onclicks;
+  
   const eventRefs =
-    [...jsForCheck.matchAll(
-      /addEventListener\s*\([^)]*,\s*([a-zA-Z0-9_$]+)/g
-    )]
-    .map(x => x[1]);
-
+    refs.eventRefs;
+  
   const windowRefs =
-    [...jsForCheck.matchAll(
-      /window\.[a-zA-Z0-9_$]+\s*=\s*([a-zA-Z0-9_$]+)/g
-    )]
-    .map(x => x[1]);
-
+    refs.windowRefs;
+  
   const labelFors =
-    [...html.matchAll(
-      /for=["']([^"']+)["']/g
-    )]
-    .map(x => x[1]);
+    refs.labelFors;
 
   const undefinedFns =
     [...new Set(
