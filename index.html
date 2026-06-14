@@ -1493,15 +1493,15 @@ mark {
 </div> <!-- card -->
 
 <!-- ==========================
-  Bootstrap / 先行UI基盤
-  画面切替・ツールメニュー・フロートパネル
+  Bootstrap / UI基盤
+  タブ・フロートパネル・ツールメニュー
 ========================== -->
 
 <script src="./00_bootstrap.js?v=5.8.3"></script>
 
 <!-- ==========================
   Core / 共通基盤
-  定数・共通helper・基本関数
+  定数・Helper・ProjectConfig
 ========================== -->
 
 <script src="./01_core.js?v=5.8.3"></script>
@@ -1513,33 +1513,36 @@ mark {
 <script src="./02_prompt.js?v=5.8.3"></script>
 
 <!-- ==========================
-  データ管理 / localStorage
-  loadSettings / 保存復元
+  データ管理
+  localStorage・履歴・設定保存
 ========================== -->
 
 <script src="./03_data.js?v=5.8.3"></script>
 
 <!-- ==========================
-  ツールUI / 各種Manager
-  テンプレ・危険語・AI設定
+  ツール管理
+  Template・Danger・Preset・Todo
 ========================== -->
 
 <script src="./04_tools.js?v=5.8.3"></script>
 
 <!-- ==========================
-  Repair IDE / 修復エディタ
+  Repair IDE
+  修復エディタ・Diff・Function整理
 ========================== -->
 
 <script src="./05_repair.js?v=5.8.3"></script>
 
 <!-- ==========================
-  検索 / 置換 / ナビゲーション
+  Search
+  検索・置換・ハイライト
 ========================== -->
 
 <script src="./06_search.js?v=5.8.3"></script>
 
 <!-- ==========================
-  Backup / Health
+  Health Analysis
+  Dependency / Diagnose / Unused
 ========================== -->
 
 <script src="./07_health_dependency.js?v=5.8.5"></script>
@@ -1548,18 +1551,43 @@ mark {
 
 <script src="./07_health_unused.js?v=5.8.5"></script>
 
+<!-- ==========================
+  Backup Manager
+  Save / Restore / History / Diff
+========================== -->
+
 <script src="./07_backup_manager.js?v=5.8.5"></script>
+
+<!-- ==========================
+  Project Package
+  ZIP保存 / JS構成解析
+========================== -->
+
+<script src="./07_project_package.js?v=5.8.5"></script>
+
+<!-- ==========================
+  Safe Mode
+  Crash Recovery
+========================== -->
+
+<script src="./07_safe_mode.js?v=5.8.5"></script>
+
+<!-- ==========================
+  Health Runtime
+  HTML HEALTH本体
+========================== -->
 
 <script src="./07_backup_health.js?v=5.8.5"></script>
 
 <!-- ==========================
-  Function Analysis
+  Function Relation Analysis
 ========================== -->
 
 <script src="./08_function_relation.js?v=5.8.5"></script>
 
 <!-- ==========================
   AI Integration
+  Analyze / Apply / Test
 ========================== -->
 
 <script src="./08_ai_analyzer.js?v=5.8.5"></script>
@@ -1571,16 +1599,17 @@ mark {
 <script src="./08_ai_integrator.js?v=5.8.5"></script>
 
 <!-- ==========================
-  AI Instruction Analyzer
+  AI Instruction Analysis
 ========================== -->
 
 <script src="./09_ai_instruction.js?v=5.8.5"></script>
+
 <!-- ==========================
-  App起動 / Event登録
-  Bootstrap
+  Application Startup
+  DOMContentLoaded / 初期化
 ========================== -->
 
-<script src="./99_init.js?v=5.8.3"></script>
+<script src="./99_init.js?v=5.8.5"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
