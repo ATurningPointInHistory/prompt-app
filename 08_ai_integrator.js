@@ -3,10 +3,6 @@
    AI Integrator Main
 =============================== */
 
-let latestAiAutoTestPassed = false;
-
-let latestAiAutoTestReport = "";
-
 /* ===============================
    ai_integrator
 =============================== */
