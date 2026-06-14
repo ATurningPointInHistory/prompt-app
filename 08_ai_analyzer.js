@@ -205,3 +205,85 @@ function buildAiIntegrationReport(changes) {
 
   return lines.join("\n");
 }
+
+function detectMissingFunctionCallsInText(text) {
+
+  const funcs =
+    extractFunctionNames(text);
+
+  const config =
+    typeof getProjectConfig === "function"
+      ? getProjectConfig()
+      : {};
+
+  const ignore =
+    new Set(
+      config.ignoreFunctionCalls || []
+    );
+
+  const calls =
+    [...text.matchAll(
+      /\b([a-zA-Z_$][\w$]*)\s*\(/g
+    )].map(m => m[1]);
+
+  return [
+    ...new Set(
+      calls.filter(name =>
+        !funcs.includes(name) &&
+        !ignore.has(name)
+      )
+    )
+  ];
+}
+
+function detectProtectedAiChanges() {
+
+  if (
+    !latestAiIntegrationChanges ||
+    !latestAiIntegrationChanges.length
+  ) {
+    return [];
+  }
+
+  const protectedNames =
+    getAllProtectedFunctionNames();
+
+  return latestAiIntegrationChanges
+    .filter(change => {
+
+      if (change.type !== "replace") {
+        return false;
+      }
+
+      return protectedNames.has(
+        change.name
+      );
+
+    })
+    .map(change => change.name);
+
+}
+
+function detectMissingCriticalFunctionsInText(text) {
+
+  const funcs =
+    extractFunctionNames(text);
+
+  const config =
+    typeof getProjectConfig === "function"
+      ? getProjectConfig()
+      : {};
+
+  const critical =
+    config.criticalFunctions ||
+    new Set();
+
+  return [
+    ...critical
+  ].filter(name =>
+    !funcs.includes(name)
+  );
+
+}
+
+
