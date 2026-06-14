@@ -98,22 +98,20 @@ function extractAiInstructionTargets(
   const targets =
     new Set();
 
+  const ignoreNames =
+    getIgnoredFunctionCalls();
+
   const patterns = [
 
-    // function test()
     /function\s+([a-zA-Z_$][\w$]*)/g,
 
-    // test()
     /([a-zA-Z_$][\w$]*)\s*\(\)/g,
 
-    // testを修正
-    /([a-zA-Z_$][\w$]*)\s*を(?:修正|変更|改善|追加|削除)/g,
+    /([a-zA-Z_$][\w$]*)\s*を(?:修正|変更|改善|追加|削除|強化)/g,
 
-    // test に追加
     /([a-zA-Z_$][\w$]*)\s*に(?:追加|実装)/g,
 
-    // test の修正
-    /([a-zA-Z_$][\w$]*)\s*の(?:修正|変更|改善)/g
+    /([a-zA-Z_$][\w$]*)\s*の(?:修正|変更|改善|追加|削除|強化)/g
 
   ];
 
@@ -133,7 +131,8 @@ function extractAiInstructionTargets(
 
       if (
         !name ||
-        name.length < 2
+        name.length < 2 ||
+        ignoreNames.has(name)
       ) {
         continue;
       }
@@ -147,8 +146,6 @@ function extractAiInstructionTargets(
   return [...targets];
 
 }
-
-
 
 function buildAiInstructionReport(
   text
@@ -404,93 +401,55 @@ function guessAiTargetFile(
 ) {
 
   const name =
-    String(functionName || "");
+    String(functionName || "")
+      .toLowerCase();
 
-  const rules = [
-    {
-      file: "08_function_relation.js",
-      keywords: [
-        "FunctionRelation",
-        "RelationMap",
-        "jumpToLine"
-      ]
-    },
-    {
-      file: "08_ai_analyzer.js",
-      keywords: [
-        "AiInstruction",
-        "AiTarget",
-        "AiBeforeAfter",
-        "AiReplaceCandidate"
-      ]
-    },
-    {
-      file: "08_ai_apply.js",
-      keywords: [
-        "AiApply",
-        "Apply",
-        "Replace"
-      ]
-    },
-    {
-      file: "08_ai_test.js",
-      keywords: [
-        "AiTest",
-        "TestRunner",
-        "Test"
-      ]
-    },
-    {
-      file: "07_health_dependency.js",
-      keywords: [
-        "Dependency",
-        "FunctionDependency"
-      ]
-    },
-    {
-      file: "07_health_diagnose.js",
-      keywords: [
-        "Health",
-        "Diagnose",
-        "HtmlHealth"
-      ]
-    },
-    {
-      file: "07_health_unused.js",
-      keywords: [
-        "Unused",
-        "Cleanup"
-      ]
-    },
-    {
-      file: "07_backup_manager.js",
-      keywords: [
-        "Backup",
-        "Restore"
-      ]
-    },
-    {
-      file: "07_safe_mode.js",
-      keywords: [
-        "SafeMode",
-        "Emergency"
-      ]
-    }
-  ];
-
-  for (const rule of rules) {
-
-    if (
-      rule.keywords.some(keyword =>
-        name.includes(keyword)
-      )
-    ) {
-      return rule.file;
-    }
-
+  if (!name) {
+    return "unknown";
   }
 
-  return "unknown";
+  const rules =
+    typeof getProjectModuleRules === "function"
+      ? getProjectModuleRules()
+      : [];
+
+  let bestFile =
+    "unknown";
+
+  let bestScore =
+    0;
+
+  rules.forEach(rule => {
+
+    const words =
+      rule.words || [];
+
+    let score = 0;
+
+    words.forEach(word => {
+
+      const key =
+        String(word || "")
+          .toLowerCase();
+
+      if (
+        key &&
+        name.includes(key)
+      ) {
+        score++;
+      }
+
+    });
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestFile = rule.file;
+    }
+
+  });
+
+  return bestFile;
+
 }
 
 function buildAiMatchScore(
