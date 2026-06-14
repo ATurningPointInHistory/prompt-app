@@ -1,6 +1,6 @@
 /* ===============================
    FILE: 08_ai_integrator.js
-   Function Relation Map
+   AI Integrator Main
 =============================== */
 
 let latestAiAutoTestPassed = false;
