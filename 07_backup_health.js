@@ -155,10 +155,7 @@ function buildFunctionDependencyReport(source) {
     refs.eventRefs;
   
   const windowRefs =
-    [
-      ...refs.windowNames,
-      ...refs.windowRefs
-    ];
+    refs.windowNames;
 
   const domReadyRefs =
     [...text.matchAll(
@@ -209,16 +206,11 @@ function buildFunctionDependencyReport(source) {
       });
 
     const directCallCount =
-      (
-        text.match(
-          new RegExp(
-            "\\b" +
-            escapeRegExp(fn) +
-            "\\s*\\(",
-            "g"
-          )
-        ) || []
-      ).length;
+      countFunctionReferences(
+        text,
+        fn,
+        true
+      );
 
     const usedByOnclick =
       onclicks.includes(fn);
