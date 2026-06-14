@@ -621,10 +621,16 @@ function extractPrimaryAiTarget(
 
   }
 
-  return "";
+  const targets =
+    extractAiInstructionTargets(
+      source
+    );
+
+  return targets.length
+    ? targets[0]
+    : "";
 
 }
-
 function extractAiBeforeAfter(
   text
 ) {
