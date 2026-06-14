@@ -142,8 +142,6 @@ function buildFunctionDependencyReport(source) {
     }
   });
 
-
-
   const refs =
     extractFunctionReferences(
       text,
@@ -157,9 +155,7 @@ function buildFunctionDependencyReport(source) {
     refs.eventRefs;
   
   const windowRefs =
-    refs.windowRefs;
-
-
+    refs.windowNames;
 
   const domReadyRefs =
     [...text.matchAll(
