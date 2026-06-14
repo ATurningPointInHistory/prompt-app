@@ -294,26 +294,3 @@ function getAiPreset(aiTarget) {
   const presets = getAiPresets();
 return presets[aiTarget] || presets.chatgpt;
 }
-
-/* ===============================
-   Function Reference Extractor
-=============================== */
-
-  addEventListenerFunction:
-    buildAppRegex(
-      `addEventListener\\s*\\([^)]*,\\s*(${APP_REGEX_PARTS.jsName})`
-    ),
-
-  windowAssignedFunction:
-    buildAppRegex(
-      `window\\.[a-zA-Z_$][a-zA-Z0-9_$]*\\s*=\\s*(${APP_REGEX_PARTS.jsName})`
-    ),
-  
-  windowAssignedName:
-    buildAppRegex(
-      `window\\.(${APP_REGEX_PARTS.jsName})\\s*=`
-    ),
-
-  labelFor:
-    /for\s*=\s*["']([^"']+)["']/g
-};
