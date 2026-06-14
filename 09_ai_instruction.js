@@ -3,6 +3,8 @@
    AI Instruction Analyzer
 =============================== */
 
+let latestAiInstructionJson = "";
+
 let latestAiInstructionReport = "";
 
 function analyzeAiInstruction() {
@@ -50,6 +52,14 @@ function runAiInstructionAnalysis() {
       input.value
     );
 
+  const json =
+    buildAiInstructionJson(
+      input.value
+    );
+  
+  latestAiInstructionJson =
+    json;
+
   latestAiInstructionReport =
     report;
 
@@ -61,6 +71,11 @@ function runAiInstructionAnalysis() {
 <button
 onclick="copyAiInstructionReport()">
 📋 コピー
+</button>
+
+<button
+onclick="copyAiInstructionJson()">
+📦 JSON
 </button>
 
 </div>
@@ -654,6 +669,87 @@ function buildAiReplaceCandidate(
     after:
       afterText
   };
+
+}
+
+function buildAiInstructionJson(
+  text
+) {
+
+  const changeData =
+    extractAiBeforeAfter(
+      text
+    );
+
+  const primaryTarget =
+    extractPrimaryAiTarget(
+      text
+    );
+
+  const targets =
+    extractAiInstructionTargets(
+      text
+    );
+
+  const fileCandidate =
+    guessAiTargetFile(
+      primaryTarget
+    );
+
+  const riskLevel =
+    buildAiRiskLevel(
+      primaryTarget,
+      changeData.before,
+      changeData.after
+    );
+
+  return JSON.stringify(
+    {
+
+      version: 1,
+
+      targetFunction:
+        primaryTarget,
+
+      relatedFunctions:
+        targets.filter(
+          x =>
+            x !== primaryTarget
+        ),
+
+      fileCandidate,
+
+      riskLevel,
+
+      before:
+        changeData.before,
+
+      after:
+        changeData.after,
+
+      timestamp:
+        new Date()
+          .toISOString()
+
+    },
+
+    null,
+    2
+  );
+
+}
+
+function copyAiInstructionJson() {
+
+  if (
+    !latestAiInstructionJson
+  ) {
+    return;
+  }
+
+  copyTextFallback(
+    latestAiInstructionJson
+  );
 
 }
 
