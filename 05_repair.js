@@ -1537,14 +1537,11 @@ async function cleanupCandidates() {
 
       try {
         const count =
-          (
-            jsForCheck.match(
-              new RegExp(
-                "\\b" + escapeRegExp(id) + "\\b",
-                "g"
-              )
-            ) || []
-          ).length;
+          countFunctionReferences(
+            jsForCheck,
+            id,
+            false
+          );
 
         return count <= 1;
 
