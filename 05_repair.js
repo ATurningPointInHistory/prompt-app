@@ -236,28 +236,6 @@ async function rollbackLastDelete(skipConfirm = false) {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function scrollRepairTop() {
 
   const editor =
