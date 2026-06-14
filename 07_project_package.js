@@ -1,6 +1,6 @@
 /* ===============================
    FILE: 07_project_package.js
-   Project Package / JS Health
+   Project Package Builder
 =============================== */
 
 
