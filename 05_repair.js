@@ -372,9 +372,6 @@ function enableRepairEditorTabIndent() {
   });
 }
 
-
-
-
 /* ===============================
    Repair Line Number / Selection
 =============================== */
@@ -384,7 +381,7 @@ const REPAIR_LINE_LONG_PRESS_MS = 500;
 let repairLinePressTimer = null;
 let repairLineLongPressFired = false;
 
-function startRepairLineLongPress(
+function startRepairLinePress(
   line,
   event
 ) {
@@ -403,26 +400,43 @@ function startRepairLineLongPress(
     setTimeout(() => {
 
       repairLinePressTimer = null;
-
-      if (
-        pinnedLine === null ||
-        pinnedLine === undefined ||
-        pinnedLine === line
-      ) {
-        return;
-      }
-
       repairLineLongPressFired = true;
 
-      selectRepairLineRange(
-        pinnedLine,
-        line
-      );
+      if (
+        pinnedLine !== null &&
+        pinnedLine !== undefined &&
+        pinnedLine !== line
+      ) {
+        selectRepairLineRange(
+          pinnedLine,
+          line
+        );
+      }
 
     }, REPAIR_LINE_LONG_PRESS_MS);
 }
 
-function cancelRepairLineLongPress() {
+function endRepairLinePress(
+  line,
+  event
+) {
+
+  if (event) {
+    event.preventDefault();
+  }
+
+  if (repairLinePressTimer) {
+    clearTimeout(repairLinePressTimer);
+    repairLinePressTimer = null;
+
+    togglePinnedLine(line);
+    return;
+  }
+
+  repairLineLongPressFired = false;
+}
+
+function cancelRepairLinePress() {
 
   if (repairLinePressTimer) {
     clearTimeout(repairLinePressTimer);
@@ -531,24 +545,27 @@ function updateLineNumbers() {
         let cls =
           "line-number";
 
-        if (lineNo === currentLine) {
+        if (
+          lineNo === currentLine
+        ) {
           cls += " active";
         }
 
-        if (lineNo === pinnedLine) {
+        if (
+          lineNo === pinnedLine
+        ) {
           cls += " pinned";
         }
 
         return `
 <div
   class="${cls}"
-  onmousedown="startRepairLineLongPress(${lineNo}, event)"
-  onmouseup="cancelRepairLineLongPress()"
-  onmouseleave="cancelRepairLineLongPress()"
-  ontouchstart="startRepairLineLongPress(${lineNo}, event)"
-  ontouchend="cancelRepairLineLongPress()"
-  ontouchcancel="cancelRepairLineLongPress()"
-  onclick="togglePinnedLine(${lineNo})"
+  onmousedown="startRepairLinePress(${lineNo}, event)"
+  onmouseup="endRepairLinePress(${lineNo}, event)"
+  onmouseleave="cancelRepairLinePress()"
+  ontouchstart="startRepairLinePress(${lineNo}, event)"
+  ontouchend="endRepairLinePress(${lineNo}, event)"
+  ontouchcancel="cancelRepairLinePress()"
 >
 ${lineNo}
 </div>
