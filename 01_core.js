@@ -525,6 +525,21 @@ function getSystemIgnoreFunctions() {
 
 }
 
+function getSystemIgnoreIds() {
+
+  return new Set([
+    "appPage",
+    "repairPage",
+    "floatPanel",
+    "functionListBox",
+    "diffResultBox",
+    "diagnoseResultBox",
+    "healthResultBox",
+    "repairEditor"
+  ]);
+
+}
+
 function getDefaultProjectConfig() {
 
   return {
