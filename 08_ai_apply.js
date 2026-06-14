@@ -1,3 +1,8 @@
+/* ===============================
+   FILE: 08_ai_apply.js
+   AI Apply Engine
+=============================== */
+
 function showAiIntegrationDiff() {
 
   if (
