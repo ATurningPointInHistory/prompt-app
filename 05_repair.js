@@ -1478,14 +1478,11 @@ async function cleanupCandidates() {
       }
 
       const count =
-        (
-          jsForCheck.match(
-            new RegExp(
-              "\\b" + escapeRegExp(fn) + "\\b",
-              "g"
-            )
-          ) || []
-        ).length;
+        countFunctionReferences(
+          jsForCheck,
+          fn,
+          false
+        );
 
       return count <= 1;
     });
@@ -3440,15 +3437,12 @@ async function diagnoseRepairHtml() {
       }
 
       const useCount =
-        (
-          jsForCheck.match(
-            new RegExp(
-              "\\b" + escapeRegExp(fn) + "\\b",
-              "g"
-            )
-          ) || []
-        ).length;
-
+        countFunctionReferences(
+          jsForCheck,
+          fn,
+          false
+        );
+      
       return useCount <= 1;
     });
 
@@ -3507,16 +3501,11 @@ async function diagnoseRepairHtml() {
 
       try {
         const useCount =
-          (
-            jsForCheck.match(
-              new RegExp(
-                "\\b" +
-                escapeRegExp(id) +
-                "\\b",
-                "g"
-              )
-            ) || []
-          ).length;
+          countFunctionReferences(
+            jsForCheck,
+            id,
+            false
+          );
 
         return useCount <= 1;
 
