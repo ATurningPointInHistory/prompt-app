@@ -149,7 +149,19 @@ function buildNormalToolsHtml() {
 function buildRepairToolsHtml() {
   return `
 <button class="float-list-btn" onclick="openProjectConfigManager()">⚙ Project Config</button>
+
 <button class="float-list-btn" onclick="analyzeAiInstruction()">🧠 指示解析</button>
+
+<button class="float-list-btn" onclick="generateErrorPrompt()">🚨 AI Error Prompt Generation</button>
+
+<button class="float-list-btn" onclick="copyErrorPrompt()">📋 AI Error Prompt Copy</button>
+
+<textarea
+id="aiErrorPromptOutput"
+rows="12"
+placeholder="Generated AI Error Prompt"
+></textarea>
+
 <button class="float-list-btn" onclick="showFunctionRelationMap()">🌳 関数関連図</button>
 <button class="float-list-btn" onclick="analyzeProjectJsDependency()">🧭 全JS依存診断</button>
 <button class="float-list-btn" onclick="analyzeAiGeneratedCode()">🤖 AIコード解析</button>
