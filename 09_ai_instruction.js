@@ -312,7 +312,7 @@ function buildAiInstructionReport(
     lines.push(
       "exact : " +
       (
-        replaceCandidate.foundExact
+        replaceCandidate.foundExact === true
           ? "YES"
           : "NO"
       )
@@ -321,7 +321,7 @@ function buildAiInstructionReport(
     lines.push(
       "loose : " +
       (
-        replaceCandidate.foundLoose
+        replaceCandidate.foundLoose === true
           ? "YES"
           : "NO"
       )
