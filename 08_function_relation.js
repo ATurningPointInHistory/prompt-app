@@ -78,6 +78,32 @@ function showFunctionRelationMap() {
   renderFunctionRelationMap();
 }
 
+function startFunctionRelationLongPress(el, line) {
+
+  if (!el) return;
+
+  cancelFunctionRelationLongPress(el);
+
+  el._functionRelationPressTimer =
+    setTimeout(() => {
+      jumpToLine(line);
+    }, 600);
+}
+
+function cancelFunctionRelationLongPress(el) {
+
+  if (
+    el &&
+    el._functionRelationPressTimer
+  ) {
+    clearTimeout(
+      el._functionRelationPressTimer
+    );
+
+    el._functionRelationPressTimer = null;
+  }
+}
+
 function renderFunctionRelationMap() {
 
   const html =
