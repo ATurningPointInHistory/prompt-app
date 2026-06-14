@@ -312,7 +312,7 @@ function buildAiInstructionReport(
     lines.push(
       "exact : " +
       (
-        replaceCandidate.foundExact === true
+        replaceCandidate.foundExact
           ? "YES"
           : "NO"
       )
@@ -321,7 +321,7 @@ function buildAiInstructionReport(
     lines.push(
       "loose : " +
       (
-        replaceCandidate.foundLoose === true
+        replaceCandidate.foundLoose
           ? "YES"
           : "NO"
       )
@@ -592,18 +592,25 @@ function extractPrimaryAiTarget(
   text
 ) {
 
+  const source =
+    String(text || "");
+
   const patterns = [
 
-    /([a-zA-Z_$][\w$]*)\s*\(\)\s*を修正/g,
+    /([a-zA-Z_$][\w$]*)\s*\(\)\s*を(?:修正|変更|改善|追加|削除|強化)/,
 
-    /function\s+([a-zA-Z_$][\w$]*)/g
+    /([a-zA-Z_$][\w$]*)\s*を(?:修正|変更|改善|追加|削除|強化)/,
+
+    /([a-zA-Z_$][\w$]*)\s*の(?:修正|変更|改善|追加|削除|強化)/,
+
+    /function\s+([a-zA-Z_$][\w$]*)/
 
   ];
 
   for (const pattern of patterns) {
 
     const match =
-      pattern.exec(text);
+      pattern.exec(source);
 
     if (
       match &&
