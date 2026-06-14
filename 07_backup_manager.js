@@ -431,7 +431,7 @@ async function backupProgram() {
   );
 }
 
-
+async function saveProgramHtml() {
   const html =
     await getCleanProgramHtml();
 
@@ -607,3 +607,312 @@ function restoreLocalStorageOnly(localStorageData) {
     });
 }
 
+
+function saveBackupHistory(backupData) {
+  const list = loadJson("backupHistory", []);
+
+  list.unshift({
+    version: backupData.version,
+    created_at: backupData.created_at,
+    backup_note: backupData.backup_note || "",
+    validation: backupData.validation || null,
+    html: backupData.html,
+    localStorageData: backupData.localStorageData
+  });
+
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list.slice(0, 10))
+  );
+}
+
+function showBackupHistory() {
+  const list = loadJson("backupHistory", []);
+
+  if (list.length === 0) {
+    alert("バックアップ履歴はありません");
+    return;
+  }
+
+  openFloatPanel(
+    "バックアップ履歴",
+    list.map((b, i) => `
+      <div class="backup-history-item">
+        <div>
+          <b>${i + 1}. ${escapeHtml(b.version || "-")}</b>
+        </div>
+        <div>
+          ${escapeHtml(b.created_at || "-")}
+        </div>
+        <div>
+          メモ: ${escapeHtml(b.backup_note || "メモなし")}
+        </div>
+        <div class="float-panel-actions">
+          <button onclick="restoreBackupHistory(${i})">
+            復元
+          </button>
+          <button onclick="markBackupUnused(${i})">
+            ⚠ 不要
+          </button>
+          <button onclick="deleteBackupHistory(${i})">
+            🗑 削除
+          </button>
+        </div>
+      </div>
+    `).join("")
+  );
+}
+
+function markBackupUnused(index) {
+  const list = loadJson("backupHistory", []);
+  const item = list[index];
+
+  if (!item) return;
+
+  if (
+    !confirm(
+      "このバックアップを不要候補にしますか？\n\n" +
+      "Version: " + (item.version || "-") + "\n" +
+      "メモ: " + (item.backup_note || "メモなし")
+    )
+  ) {
+    return;
+  }
+
+  if (
+    !String(item.backup_note || "")
+      .startsWith("[不要候補]")
+  ) {
+    item.backup_note =
+      "[不要候補] " +
+      (item.backup_note || "");
+  }
+
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list)
+  );
+
+  showBackupHistory();
+}
+
+function deleteBackupHistory(index) {
+  const list = loadJson("backupHistory", []);
+  const item = list[index];
+
+  if (!item) return;
+
+  if (
+    !confirm(
+      "バックアップを完全削除しますか？\n\n" +
+      "Version: " + (item.version || "-") + "\n" +
+      "作成日時: " + (item.created_at || "-") + "\n\n" +
+      "メモ:\n" + (item.backup_note || "メモなし")
+    )
+  ) {
+    return;
+  }
+
+  list.splice(index, 1);
+
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list)
+  );
+
+  showBackupHistory();
+}
+
+function restoreBackupHistory(index) {
+  const list = loadJson("backupHistory", []);
+  const item = list[index];
+
+  if (!item) {
+    alert("履歴が見つかりません");
+    return;
+  }
+
+  const ok =
+    confirm(
+      "このバックアップ履歴を復元しますか？\n\n" +
+      "Version: " + (item.version || "-") + "\n" +
+      "メモ: " + (item.backup_note || "メモなし")
+    );
+
+  if (!ok) return;
+
+  Object.entries(item.localStorageData || {}).forEach(([key, value]) => {
+    if (value === null || value === undefined) {
+      localStorage.removeItem(key);
+    } else if (typeof value === "string") {
+      localStorage.setItem(key, value);
+    } else {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  });
+
+  alert("履歴から復元しました。再読み込みします。");
+  location.reload();
+}
+
+function manageBackupHistory() {
+  const list = loadJson("backupHistory", []);
+
+  localStorage.setItem(
+    "backupHistory",
+    JSON.stringify(list.slice(0, 10))
+  );
+}
+
+
+function compareBackupSummary() {
+  const input =
+    document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!data || !data.html) {
+          alert("比較できるバックアップ形式ではありません");
+          return;
+        }
+        const currentHtml =
+          isRepairMode() &&
+          get("repairEditor") &&
+          get("repairEditor").value.trim()
+            ? get("repairEditor").value
+            : "<!DOCTYPE html>\n" +
+              document.documentElement.outerHTML;
+        const oldHtml = data.html;
+        const current =
+          getHtmlSummary(currentHtml);
+        const old =
+          getHtmlSummary(oldHtml);
+        const addedFuncs =
+          current.funcs.filter(x => !old.funcs.includes(x));
+        const removedFuncs =
+          old.funcs.filter(x => !current.funcs.includes(x));
+        const addedIds =
+          current.ids.filter(x => !old.ids.includes(x));
+        const removedIds =
+          old.ids.filter(x => !current.ids.includes(x));
+        const result =
+`バックアップ差分サマリー
+【比較元】
+version:
+${data.app_version || data.version || "不明"}
+created_at:
+${data.created_at || "不明"}
+backup note:
+${data.backup_note || "なし"}
+【Health Score】
+現在:
+${current.score}/100
+バックアップ:
+${old.score}/100
+差:
+${current.score - old.score}
+【Function】
+現在:
+${current.funcs.length}
+バックアップ:
+${old.funcs.length}
+追加function:
+${addedFuncs.length ? addedFuncs.join("\n") : "なし"}
+削除function:
+${removedFuncs.length ? removedFuncs.join("\n") : "なし"}
+【ID】
+現在:
+${current.ids.length}
+バックアップ:
+${old.ids.length}
+追加id:
+${addedIds.length ? addedIds.join("\n") : "なし"}
+削除id:
+${removedIds.length ? removedIds.join("\n") : "なし"}
+【現在の警告】
+重複id:
+${current.validation.duplicate_ids.length ? current.validation.duplicate_ids.join("\n") : "なし"}
+重複function:
+${current.dupFuncs.length ? current.dupFuncs.join("\n") : "なし"}
+未定義onclick:
+${current.undefinedFns.length ? current.undefinedFns.join("\n") : "なし"}
+`;
+        showDiffResult(result);
+      } catch (err) {
+        alert(
+          "差分確認に失敗しました\n\n" +
+          err.message
+        );
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function showDiffResult(text) {
+  openFloatPanel(
+    "差分確認結果",
+    `
+    <div class="float-panel-actions">
+      <button onclick="copyDiffResult()">📋 コピー</button>
+      <button onclick="clearDiffResult()">🧹 クリア</button>
+    </div>
+    <pre id="diffResultBox" class="code-preview">${escapeHtml(text)}</pre>
+    `
+  );
+  window.latestDiffResult = text;
+}
+
+function copyDiffResult() {
+  const text =
+    window.latestDiffResult || "";
+
+  if (!text) {
+    alert("コピーする差分結果がありません");
+    return;
+  }
+
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() =>
+        alert("差分結果をコピーしました")
+      )
+      .catch(() => {
+        const ok =
+          copyTextFallback(text);
+
+        alert(
+          ok
+            ? "差分結果をコピーしました"
+            : "コピー失敗"
+        );
+      });
+
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "差分結果をコピーしました"
+      : "コピー失敗"
+  );
+}
+
+function clearDiffResult() {
+  window.latestDiffResult = "";
+  closeFloatPanel();
+}
