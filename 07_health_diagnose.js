@@ -1,3 +1,8 @@
+/* ===============================
+   FILE: 07_health_diagnose.js
+   Health / Diagnose
+=============================== */
+
 function calcHealthScore(validation, undefinedFns, dupFuncs) {
   return Math.max(
     0,
