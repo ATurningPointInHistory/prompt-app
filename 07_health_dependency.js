@@ -153,6 +153,36 @@ function extractTemplateStrings(text) {
   return issues;
 }
 
+function detectTemplateHtmlIssues(text) {
+
+  const issues = [];
+  const templates =
+    extractTemplateStrings(text);
+
+  templates.forEach((item, index) => {
+    const html = item.text;
+
+    const divOpen =
+      (html.match(/<div\b/gi) || []).length;
+
+    const divClose =
+      (html.match(/<\/div>/gi) || []).length;
+
+    if (divOpen !== divClose) {
+      issues.push(
+        "template HTML div不一致: template#" +
+        (index + 1) +
+        " open:" +
+        divOpen +
+        " close:" +
+        divClose
+      );
+    }
+  });
+
+  return issues;
+}
+
 function getErrorContext(
   source,
   line,
@@ -344,7 +374,10 @@ function buildFunctionDependencyReport(source) {
     refs.eventRefs;
   
   const windowRefs =
-    refs.windowNames;
+    [
+      ...refs.windowNames,
+      ...refs.windowRefs
+    ];
 
   const domReadyRefs =
     [...text.matchAll(
