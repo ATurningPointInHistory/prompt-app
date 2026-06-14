@@ -562,3 +562,65 @@ function normalizeProjectConfig(config) {
   };
 
 }
+
+/* ===============================
+   Function Reference Extractor
+=============================== */
+
+const APP_REGEX_PARTS = {
+  jsName: "[a-zA-Z_$][a-zA-Z0-9_$]*"
+};
+
+function buildAppRegex(pattern, flags = "g") {
+  return new RegExp(pattern, flags);
+}
+
+const APP_REGEX = {
+  onclickFunction:
+    buildAppRegex(
+      `onclick\\s*=\\s*["']\\s*(${APP_REGEX_PARTS.jsName})\\s*\\(`
+    ),
+
+  addEventListenerFunction:
+    buildAppRegex(
+      `addEventListener\\s*\\([^)]*,\\s*(${APP_REGEX_PARTS.jsName})`
+    ),
+
+  windowAssignedFunction:
+    buildAppRegex(
+      `window\\.[a-zA-Z_$][a-zA-Z0-9_$]*\\s*=\\s*(${APP_REGEX_PARTS.jsName})`
+    ),
+
+  labelFor:
+    /for\s*=\s*["']([^"']+)["']/g
+};
+
+function extractFunctionReferences(
+  text,
+  html = text
+) {
+
+  const source =
+    String(text || "");
+
+  const htmlText =
+    String(html || "");
+
+  return {
+    onclicks:
+      [...htmlText.matchAll(APP_REGEX.onclickFunction)]
+        .map(x => x[1]),
+
+    eventRefs:
+      [...source.matchAll(APP_REGEX.addEventListenerFunction)]
+        .map(x => x[1]),
+
+    windowRefs:
+      [...source.matchAll(APP_REGEX.windowAssignedFunction)]
+        .map(x => x[1]),
+
+    labelFors:
+      [...htmlText.matchAll(APP_REGEX.labelFor)]
+        .map(x => x[1])
+  };
+}
