@@ -209,22 +209,23 @@ function getProjectModuleRules() {
     {
       file: "08_ai_integrator.js",
       words: [
-        "ai",
         "integration",
         "aicode",
         "generatedcode"
       ]
     },
     {
+      {
       file: "09_ai_instruction.js",
       words: [
         "instruction",
+        "aiinstruction",
+        "buildaiinstructionreport",
         "beforeafter",
         "primarytarget",
         "replacecandidate"
       ]
-    },
-    {
+    }
       file: "99_init.js",
       words: [
         "init",
