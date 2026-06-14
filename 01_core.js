@@ -510,6 +510,21 @@ function getProtectedFunctionNames() {
   ]);
 }
 
+function getSystemIgnoreFunctions() {
+
+  return new Set([
+    "diagnoseRepairHtml",
+    "diagnoseHtml",
+    "cleanupCandidates",
+    "commentOutCleanupCandidates",
+    "deleteCommentedCleanupBlocks",
+    "moveFloatPanelBy",
+    "saveCurrentAiAnswer",
+    "editProjectState"
+  ]);
+
+}
+
 function getDefaultProjectConfig() {
 
   return {
