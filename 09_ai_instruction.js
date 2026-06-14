@@ -77,29 +77,53 @@ function extractAiInstructionTargets(
   text
 ) {
 
+  const source =
+    String(text || "");
+
   const targets =
     new Set();
 
   const patterns = [
 
+    // function test()
     /function\s+([a-zA-Z_$][\w$]*)/g,
 
-    /([a-zA-Z_$][\w$]*)\s*\(\)/g
+    // test()
+    /([a-zA-Z_$][\w$]*)\s*\(\)/g,
+
+    // testを修正
+    /([a-zA-Z_$][\w$]*)\s*を(?:修正|変更|改善|追加|削除)/g,
+
+    // test に追加
+    /([a-zA-Z_$][\w$]*)\s*に(?:追加|実装)/g,
+
+    // test の修正
+    /([a-zA-Z_$][\w$]*)\s*の(?:修正|変更|改善)/g
 
   ];
 
   patterns.forEach(pattern => {
 
+    pattern.lastIndex = 0;
+
     let match;
 
     while (
       (match =
-        pattern.exec(text))
+        pattern.exec(source))
     ) {
 
-      targets.add(
-        match[1]
-      );
+      const name =
+        match[1];
+
+      if (
+        !name ||
+        name.length < 2
+      ) {
+        continue;
+      }
+
+      targets.add(name);
 
     }
 
@@ -108,6 +132,8 @@ function extractAiInstructionTargets(
   return [...targets];
 
 }
+
+
 
 function buildAiInstructionReport(
   text
@@ -121,13 +147,6 @@ function buildAiInstructionReport(
   const primaryTarget =
     extractPrimaryAiTarget(
       text
-    );
-
-  const replaceCandidate =
-    buildAiReplaceCandidate(
-      primaryTarget,
-      changeData.before,
-      changeData.after
     );
 
   const targets =
@@ -158,42 +177,71 @@ function buildAiInstructionReport(
       ? "repairEditor"
       : "document";
 
+  const targetBlock =
+    primaryTarget
+      ? findFunctionBlockInText(
+          searchText,
+          primaryTarget
+        )
+      : null;
+
+  const replaceCandidate =
+    buildAiReplaceCandidate(
+      primaryTarget,
+      changeData.before,
+      changeData.after
+    );
+
+  const matchScore =
+    buildAiMatchScore(
+      targetBlock,
+      changeData.before,
+      changeData.after
+    );
+
+  const riskLevel =
+    buildAiRiskLevel(
+      primaryTarget,
+      changeData.before,
+      changeData.after
+    );
+
+  const fileCandidate =
+    guessAiTargetFile(
+      primaryTarget
+    );
+
   const lines = [];
 
-  lines.push(
-    "AI Instruction Report"
-  );
-
+  lines.push("AI Instruction Report v2");
   lines.push("");
 
-  lines.push(
-    "=== Source ==="
-  );
-
+  lines.push("=== Source ===");
+  lines.push("");
+  lines.push(sourceLabel);
   lines.push("");
 
-  lines.push(
-    sourceLabel
-  );
-
+  lines.push("=== Target Function ===");
+  lines.push("");
+  lines.push(primaryTarget || "none");
   lines.push("");
 
-  lines.push(
-  "=== Target Function ==="
-  );
-
+  lines.push("=== File Candidate ===");
+  lines.push("");
+  lines.push(fileCandidate);
   lines.push("");
 
-  lines.push(
-    primaryTarget || "none"
-  );
-
+  lines.push("=== Match Score ===");
+  lines.push("");
+  lines.push(String(matchScore));
   lines.push("");
 
-  lines.push(
-    "=== Related Functions ==="
-  );
+  lines.push("=== Risk Level ===");
+  lines.push("");
+  lines.push(riskLevel);
+  lines.push("");
 
+  lines.push("=== Related Functions ===");
   lines.push("");
 
   const related =
@@ -210,61 +258,49 @@ function buildAiInstructionReport(
 
   lines.push("");
 
-  lines.push(
-    "=== Change Before ==="
-  );
-
+  lines.push("=== Change Before ===");
   lines.push("");
-
   lines.push(
     changeData.before ||
     "none"
   );
-
   lines.push("");
 
-  lines.push(
-    "=== Change After ==="
-  );
-
+  lines.push("=== Change After ===");
   lines.push("");
-
   lines.push(
     changeData.after ||
     "none"
   );
+  lines.push("");
 
+  lines.push("=== Replace Candidate ===");
   lines.push("");
 
   if (replaceCandidate) {
-
-    lines.push(
-      "=== Replace Candidate ==="
-    );
-
-    lines.push("");
 
     lines.push(
       "Target : " +
       replaceCandidate.functionName
     );
 
+    lines.push("");
+
+    lines.push(
+      replaceCandidate.found
+        ? "FOUND"
+        : "NOT FOUND"
+    );
+
+  } else {
+
+    lines.push("none");
+
+  }
+
   lines.push("");
 
-  lines.push(
-    replaceCandidate.found
-      ? "FOUND"
-      : "NOT FOUND"
-  );
-
-  lines.push("");
-
-}
-
-  lines.push(
-    "=== Suggested Search ==="
-  );
-
+  lines.push("=== Suggested Search ===");
   lines.push("");
 
   targets.forEach(name => {
@@ -291,7 +327,7 @@ function buildAiInstructionReport(
           0,
           block.start
         )
-        .split("\n")
+        .split(/\r?\n/)
         .length;
 
     lines.push(
@@ -300,8 +336,207 @@ function buildAiInstructionReport(
 
   });
 
+  lines.push("");
+
+  lines.push("=== Suggested Action ===");
+  lines.push("");
+
+  if (
+    riskLevel === "HIGH"
+  ) {
+    lines.push(
+      "manual review required"
+    );
+  } else if (
+    replaceCandidate &&
+    replaceCandidate.found
+  ) {
+    lines.push(
+      "replace candidate available"
+    );
+  } else {
+    lines.push(
+      "search and inspect manually"
+    );
+  }
+
   return lines.join("\n");
 
+}
+
+function guessAiTargetFile(
+  functionName
+) {
+
+  const name =
+    String(functionName || "");
+
+  const rules = [
+    {
+      file: "08_function_relation.js",
+      keywords: [
+        "FunctionRelation",
+        "RelationMap",
+        "jumpToLine"
+      ]
+    },
+    {
+      file: "08_ai_analyzer.js",
+      keywords: [
+        "AiInstruction",
+        "AiTarget",
+        "AiBeforeAfter",
+        "AiReplaceCandidate"
+      ]
+    },
+    {
+      file: "08_ai_apply.js",
+      keywords: [
+        "AiApply",
+        "Apply",
+        "Replace"
+      ]
+    },
+    {
+      file: "08_ai_test.js",
+      keywords: [
+        "AiTest",
+        "TestRunner",
+        "Test"
+      ]
+    },
+    {
+      file: "07_health_dependency.js",
+      keywords: [
+        "Dependency",
+        "FunctionDependency"
+      ]
+    },
+    {
+      file: "07_health_diagnose.js",
+      keywords: [
+        "Health",
+        "Diagnose",
+        "HtmlHealth"
+      ]
+    },
+    {
+      file: "07_health_unused.js",
+      keywords: [
+        "Unused",
+        "Cleanup"
+      ]
+    },
+    {
+      file: "07_backup_manager.js",
+      keywords: [
+        "Backup",
+        "Restore"
+      ]
+    },
+    {
+      file: "07_safe_mode.js",
+      keywords: [
+        "SafeMode",
+        "Emergency"
+      ]
+    }
+  ];
+
+  for (const rule of rules) {
+
+    if (
+      rule.keywords.some(keyword =>
+        name.includes(keyword)
+      )
+    ) {
+      return rule.file;
+    }
+
+  }
+
+  return "unknown";
+}
+
+function buildAiMatchScore(
+  block,
+  beforeText,
+  afterText
+) {
+
+  if (!block) {
+    return 0;
+  }
+
+  let score = 40;
+
+  if (
+    beforeText &&
+    block.block.includes(beforeText)
+  ) {
+    score += 40;
+  }
+
+  if (
+    afterText &&
+    block.block.includes(afterText)
+  ) {
+    score += 10;
+  }
+
+  if (
+    block.block.length > 50
+  ) {
+    score += 10;
+  }
+
+  return Math.min(
+    100,
+    score
+  );
+}
+
+function buildAiRiskLevel(
+  targetFunction,
+  beforeText,
+  afterText
+) {
+
+  const text =
+    [
+      targetFunction,
+      beforeText,
+      afterText
+    ].join("\n");
+
+  const highRiskWords = [
+    "localStorage.clear",
+    "innerHTML",
+    "eval",
+    "new Function",
+    "document.write",
+    "delete",
+    "removeItem",
+    "replace("
+  ];
+
+  const hit =
+    highRiskWords.some(word =>
+      text.includes(word)
+    );
+
+  if (hit) {
+    return "HIGH";
+  }
+
+  if (
+    !beforeText ||
+    !afterText
+  ) {
+    return "MEDIUM";
+  }
+
+  return "LOW";
 }
 
 function copyAiInstructionReport() {
