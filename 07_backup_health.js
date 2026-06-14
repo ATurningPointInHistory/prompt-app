@@ -429,38 +429,6 @@ ${score}/100
   );
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function sanitizeFileNamePart(text) {
   return String(text || "")
     .trim()
