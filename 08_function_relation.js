@@ -70,7 +70,7 @@ function showFunctionRelationMap() {
         line:
           text
             .slice(0, block.start)
-            .split("\n")
+            .split(/\r?\n/)
             .length
       };
     });
