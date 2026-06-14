@@ -142,20 +142,24 @@ function buildFunctionDependencyReport(source) {
     }
   });
 
+
+
+  const refs =
+    extractFunctionReferences(
+      text,
+      text
+    );
+  
   const onclicks =
-    [...text.matchAll(
-      /onclick\s*=\s*["']\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g
-    )].map(x => x[1]);
-
+    refs.onclicks;
+  
   const eventRefs =
-    [...text.matchAll(
-      /addEventListener\s*\(\s*["'][^"']+["']\s*,\s*([a-zA-Z_$][a-zA-Z0-9_$]*)/g
-    )].map(x => x[1]);
-
+    refs.eventRefs;
+  
   const windowRefs =
-    [...text.matchAll(
-      /window\.([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g
-    )].map(x => x[1]);
+    refs.windowRefs;
+
+
 
   const domReadyRefs =
     [...text.matchAll(
@@ -3418,4 +3422,3 @@ function copyProjectJsHealth() {
       : "コピー失敗"
   );
 }
-
