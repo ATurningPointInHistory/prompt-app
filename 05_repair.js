@@ -3405,20 +3405,26 @@ async function diagnoseRepairHtml() {
   );
 
   // 未使用function
-  const safeIgnoreFuncs = [
-    "diagnoseRepairHtml",
-    "diagnoseHtml",
-    "showHtmlHealth",
-    "closeFloatPanel",
-    "loadSettings",
-    "checkSafeMode",
-    "cleanupCandidates",
-    "commentOutCleanupCandidates",
-    "deleteCommentedCleanupBlocks",
-    "moveFloatPanelBy",
-    "saveCurrentAiAnswer",
-    "editProjectState"
-  ];
+   const config =
+    typeof getProjectConfig === "function"
+      ? getProjectConfig()
+      : {};
+  
+  const systemIgnoreFuncs =
+    typeof getSystemIgnoreFunctions === "function"
+      ? getSystemIgnoreFunctions()
+      : new Set();
+  
+  const safeIgnoreFuncs =
+    new Set([
+      ...(
+        config.protectedFunctions || []
+      ),
+      ...(
+        config.criticalFunctions || []
+      ),
+      ...systemIgnoreFuncs
+    ]);
 
   const unusedFns =
     funcs.filter(fn => {
