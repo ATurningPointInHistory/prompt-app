@@ -555,76 +555,73 @@ function getProjectModuleRules() {
         "backuphistory"
       ]
     },
-  {
-    file: "08_function_relation.js",
-    words: [
-      "relation",
-      "functionrelation",
-      "calledby",
-      "callmap",
-      "graph"
-    ]
-  },
-  {
-    file: "08_ai_analyzer.js",
-    words: [
-      "aianalyzer",
-      "classify",
-      "integrationreport",
-      "duplicatefunctions",
-      "missingfunction"
-    ]
-  },
-  {
-    file: "08_ai_apply.js",
-    words: [
-      "apply",
-      "integrationdiff",
-      "virtualtext",
-      "replacecandidate"
-    ]
-  },
-  {
-    file: "08_ai_test.js",
-    words: [
-      "autotest",
-      "sandbox",
-      "testai",
-      "healthscore"
-    ]
-  },
-  {
-    file: "08_ai_integrator.js",
-    words: [
-      "ai",
-      "integration",
-      "aicode",
-      "generatedcode"
-    ]
-  },
-  {
-    file: "09_ai_instruction.js",
-    words: [
-      "instruction",
-      "beforeafter",
-      "primarytarget",
-      "replacecandidate"
-    ]
-  },
-  {
-    file: "99_init.js",
-    words: [
-      "init",
-      "domcontentloaded",
-      "startup",
-      "loadsettings"
-    ]
-  }
-];
-
+    {
+      file: "08_function_relation.js",
+      words: [
+        "relation",
+        "functionrelation",
+        "calledby",
+        "callmap",
+        "graph"
+      ]
+    },
+    {
+      file: "08_ai_analyzer.js",
+      words: [
+        "aianalyzer",
+        "classify",
+        "integrationreport",
+        "duplicatefunctions",
+        "missingfunction"
+      ]
+    },
+    {
+      file: "08_ai_apply.js",
+      words: [
+        "apply",
+        "integrationdiff",
+        "virtualtext",
+        "replacecandidate"
+      ]
+    },
+    {
+      file: "08_ai_test.js",
+      words: [
+        "autotest",
+        "sandbox",
+        "testai",
+        "healthscore"
+      ]
+    },
+    {
+      file: "08_ai_integrator.js",
+      words: [
+        "ai",
+        "integration",
+        "aicode",
+        "generatedcode"
+      ]
+    },
+    {
+      file: "09_ai_instruction.js",
+      words: [
+        "instruction",
+        "beforeafter",
+        "primarytarget",
+        "replacecandidate"
+      ]
+    },
+    {
+      file: "99_init.js",
+      words: [
+        "init",
+        "domcontentloaded",
+        "startup",
+        "loadsettings"
+      ]
+    }
+  ];
 }
-
-
 
 function getIgnoredFunctionCalls() {
 
