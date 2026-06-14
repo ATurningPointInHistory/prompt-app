@@ -436,7 +436,8 @@ function getProjectModuleRules() {
         "panel",
         "menu",
         "bootstrap",
-        "switchapp"
+        "switchapp",
+        "tab"
       ]
     },
     {
@@ -446,7 +447,10 @@ function getProjectModuleRules() {
         "copy",
         "helper",
         "util",
-        "safe"
+        "safe",
+        "config",
+        "regex",
+        "reference"
       ]
     },
     {
@@ -501,27 +505,122 @@ function getProjectModuleRules() {
       ]
     },
     {
-      file: "07_backup_health.js",
+      file: "07_health_dependency.js",
       words: [
-        "backup",
-        "health",
-        "diagnose",
         "dependency",
-        "validate"
+        "bracket",
+        "scope",
+        "duplicate",
+        "garbage",
+        "functiondependency"
       ]
     },
     {
-      file: "08_ai_integrator.js",
+      file: "07_health_diagnose.js",
       words: [
-        "ai",
-        "integration",
-        "classifier",
-        "relation",
-        "graph",
-        "map"
+        "diagnose",
+        "summary",
+        "score",
+        "healthscore",
+        "htmlsummary"
       ]
-    }
-  ];
+    },
+    {
+      file: "07_health_unused.js",
+      words: [
+        "unused",
+        "deletecandidate",
+        "unusedfunction",
+        "deletehistory"
+      ]
+    },
+    {
+      file: "07_backup_health.js",
+      words: [
+        "health",
+        "showhtmlhealth",
+        "safemode",
+        "externalscript",
+        "projectjshealth"
+      ]
+    },
+    {
+      file: "07_backup_manager.js",
+      words: [
+        "backup",
+        "restore",
+        "programhtml",
+        "saveprogram",
+        "diffresult",
+        "backuphistory"
+      ]
+    },
+  {
+    file: "08_function_relation.js",
+    words: [
+      "relation",
+      "functionrelation",
+      "calledby",
+      "callmap",
+      "graph"
+    ]
+  },
+  {
+    file: "08_ai_analyzer.js",
+    words: [
+      "aianalyzer",
+      "classify",
+      "integrationreport",
+      "duplicatefunctions",
+      "missingfunction"
+    ]
+  },
+  {
+    file: "08_ai_apply.js",
+    words: [
+      "apply",
+      "integrationdiff",
+      "virtualtext",
+      "replacecandidate"
+    ]
+  },
+  {
+    file: "08_ai_test.js",
+    words: [
+      "autotest",
+      "sandbox",
+      "testai",
+      "healthscore"
+    ]
+  },
+  {
+    file: "08_ai_integrator.js",
+    words: [
+      "ai",
+      "integration",
+      "aicode",
+      "generatedcode"
+    ]
+  },
+  {
+    file: "09_ai_instruction.js",
+    words: [
+      "instruction",
+      "beforeafter",
+      "primarytarget",
+      "replacecandidate"
+    ]
+  },
+  {
+    file: "99_init.js",
+    words: [
+      "init",
+      "domcontentloaded",
+      "startup",
+      "loadsettings"
+    ]
+  }
+];
 
 }
 
