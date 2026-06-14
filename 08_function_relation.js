@@ -89,7 +89,32 @@ function renderFunctionRelationMap() {
 
   <button
     class="float-list-btn"
-    onclick="toggleFunctionRelationDetail(${index})">
+    onclick="toggleFunctionRelationDetail(${index})"
+
+    oncontextmenu="
+      event.preventDefault();
+      jumpToLine(${item.line});
+    "
+
+    ontouchstart="
+      startFunctionRelationLongPress(this, ${item.line});
+    "
+    ontouchend="
+      cancelFunctionRelationLongPress(this);
+    "
+    ontouchmove="
+      cancelFunctionRelationLongPress(this);
+    "
+
+    onpointerdown="
+      startFunctionRelationLongPress(this, ${item.line});
+    "
+    onpointerup="
+      cancelFunctionRelationLongPress(this);
+    "
+    onpointerleave="
+      cancelFunctionRelationLongPress(this);
+    ">
     ▶ ${escapeHtml(item.name)}
     <br>
     <span class="small">
@@ -149,6 +174,32 @@ function renderFunctionRelationMap() {
 ${html}
 `
   );
+}
+
+function startFunctionRelationLongPress(el, line) {
+
+  if (!el) return;
+
+  cancelFunctionRelationLongPress(el);
+
+  el._functionRelationPressTimer =
+    setTimeout(() => {
+      jumpToLine(line);
+    }, 600);
+}
+
+function cancelFunctionRelationLongPress(el) {
+
+  if (
+    el &&
+    el._functionRelationPressTimer
+  ) {
+    clearTimeout(
+      el._functionRelationPressTimer
+    );
+
+    el._functionRelationPressTimer = null;
+  }
 }
 
 function toggleFunctionRelationDetail(index) {
