@@ -1440,6 +1440,16 @@ async function cleanupCandidates() {
     ? getProjectConfig()
     : {};
 
+  const config =
+  typeof getProjectConfig === "function"
+    ? getProjectConfig()
+    : {};
+
+  const systemIgnoreFuncs =
+    typeof getSystemIgnoreFunctions === "function"
+      ? getSystemIgnoreFunctions()
+      : new Set();
+  
   const safeIgnoreFuncs =
     new Set([
       ...(
@@ -1448,11 +1458,7 @@ async function cleanupCandidates() {
       ...(
         config.criticalFunctions || []
       ),
-      "diagnoseRepairHtml",
-      "diagnoseHtml",
-      "cleanupCandidates",
-      "commentOutCleanupCandidates",
-      "deleteCommentedCleanupBlocks"
+      ...systemIgnoreFuncs
     ]);
 
   const unusedFuncs =
