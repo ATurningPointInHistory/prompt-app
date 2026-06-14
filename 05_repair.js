@@ -19,9 +19,8 @@ let pinnedLine = null;
 let repairOriginalHtml = "";
 
 /* ===============================
-   Code Block / Function Tools
+   Repair View / Preview
 =============================== */
-
 
 function toggleFunctionView(index) {
 
