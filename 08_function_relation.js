@@ -71,7 +71,7 @@ function showFunctionRelationMap() {
           text
             .slice(0, block.start)
             .split(/\r?\n/)
-            .length
+            .length + 1
       };
     });
 
