@@ -3,11 +3,6 @@
    Function Reference Analyzer
 =============================== */
 
-/* ===============================
-   FILE: 01_function_reference.js
-   Function Reference Analyzer
-=============================== */
-
 const APP_REGEX_PARTS = {
   jsName:
     "[a-zA-Z_$][a-zA-Z0-9_$]*"
