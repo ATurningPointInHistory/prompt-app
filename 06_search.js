@@ -8,6 +8,61 @@
 
 let repairSearchFileStore = {};
 
+function openGlobalSearchResult(index) {
+
+  const item =
+    repairGlobalSearchResults[index];
+
+  if (!item) {
+    return;
+  }
+
+  const file =
+    repairSearchFileStore[item.fileName];
+
+  if (!file) {
+    alert("対象ファイルが見つかりません");
+    return;
+  }
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    alert("repairEditor が見つかりません");
+    return;
+  }
+
+  editor.value =
+    file.text;
+
+  if (typeof currentRepairFile !== "undefined") {
+    currentRepairFile =
+      item.fileName;
+  }
+
+  closeGlobalSearchModal();
+
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
+
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
+
+  jumpToLine(
+    item.lineNumber
+  );
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      `${item.fileName} / L${item.lineNumber}へ移動`
+    );
+  }
+
+}
+
 function registerRepairSearchFile(
   fileName,
   text
@@ -140,77 +195,6 @@ function loadRepairSearchFiles() {
 }
 
 /* ===============================
-   Search File Loader
-=============================== */
-
-function loadRepairSearchFiles() {
-
-  const input =
-    document.createElement("input");
-
-  input.type = "file";
-
-  input.accept =
-    ".js,.html,.txt,.json";
-
-  input.multiple = true;
-
-  input.onchange =
-    function(event) {
-
-      const files =
-        Array.from(
-          event.target.files || []
-        );
-
-      if (!files.length) {
-        return;
-      }
-
-      let loaded = 0;
-
-      files.forEach(file => {
-
-        const reader =
-          new FileReader();
-
-        reader.onload =
-          function() {
-
-            registerRepairSearchFile(
-              file.name,
-              reader.result
-            );
-
-            loaded++;
-
-            updateRepairStatus(
-              `検索用ファイル読込 ${loaded}/${files.length}`
-            );
-
-            if (
-              loaded === files.length
-            ) {
-
-              updateRepairStatus(
-                `検索用ファイル ${loaded}件読込完了`
-              );
-
-            }
-
-          };
-
-        reader.readAsText(file);
-
-      });
-
-    };
-
-  input.click();
-
-}
-
-/* ===============================
    Global Search
 =============================== */
 
@@ -287,10 +271,6 @@ function searchAllRepairFiles() {
   console.log(
     "Global Search Results",
     repairGlobalSearchResults
-  );
-
-  alert(
-    `全検索結果 ${results.length}件`
   );
 
   updateRepairStatus(
@@ -413,8 +393,6 @@ function ensureGlobalSearchModal() {
 
 function renderGlobalSearchModal() {
 
-  ensureGlobalSearchModalStyle();
-
   const body =
     get("globalSearchResultBody");
 
@@ -493,20 +471,6 @@ function renderGlobalSearchModal() {
 
 }
 
-function showGlobalSearchModal() {
-
-  ensureGlobalSearchModal();
-
-  renderGlobalSearchModal();
-
-  const modal =
-    get("globalSearchModal");
-
-  if (modal) {
-    modal.style.display = "flex";
-  }
-
-}
 /* ===============================
    Search State
 =============================== */
