@@ -100,7 +100,6 @@ function detectLargeFunctions(text) {
 
   return issues;
 }
-
 function detectGarbageIssues(text) {
 
   const issues = [];
@@ -108,30 +107,24 @@ function detectGarbageIssues(text) {
   const source =
     String(text || "");
 
-  let jsOk = true;
+  const validation =
+    validateBackupHtml(source);
 
-  try {
-    new Function(source);
-  } catch {
-    jsOk = false;
-  }
+  if (validation.js_ok) {
 
-  if (jsOk) {
+    return [];
 
-    issues.push(
-      "✔ JS構文OKのため括弧詳細診断は省略"
-    );
-
-    issues.push(
-      ...detectTemplateHtmlIssues(source)
-    );
-
-    return issues;
   }
 
   issues.push(
     "⚠ JS構文NGのため詳細診断を実行"
   );
+
+  if (validation.error_line) {
+    issues.push(
+      `JS構文エラー位置: L${validation.error_line}`
+    );
+  }
 
   issues.push(
     ...detectFunctionBlockBracketIssues(source)
