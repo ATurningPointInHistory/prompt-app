@@ -521,6 +521,12 @@ function buildRepairSearchQuickHtml() {
 
   <button
     class="float-list-btn"
+    onclick="loadCurrentProjectSearchFiles()">
+    📦<br>現在
+  </button>
+
+  <button
+    class="float-list-btn"
     onclick="showRepairSearchFiles()">
     📋<br>一覧
   </button>
