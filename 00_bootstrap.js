@@ -500,6 +500,12 @@ function buildRepairSearchQuickHtml() {
 
   <button
     class="float-list-btn"
+    onclick="searchAllRepairFiles()">
+    📚<br>全検索
+  </button>
+
+  <button
+    class="float-list-btn"
     onclick="toggleRepairReplacePopup()">
     🔁<br>置換
   </button>
