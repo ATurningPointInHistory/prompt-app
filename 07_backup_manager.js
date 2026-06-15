@@ -131,6 +131,7 @@ ${externalJs.replace(/<\/script>/gi, "<\\/script>")}
 }
 
 function validateBackupHtml(html) {
+
   const source =
     String(html || "");
 
@@ -140,6 +141,16 @@ function validateBackupHtml(html) {
         ? currentRepairFile
         : ""
     ).toLowerCase();
+
+  console.log(
+    "validateBackupHtml",
+    {
+      currentRepairFile,
+      currentName,
+      isHtml: looksLikeHtml(source),
+      sourceHead: source.slice(0, 100)
+    }
+  );
 
   const isHtml =
     looksLikeHtml(source) &&
