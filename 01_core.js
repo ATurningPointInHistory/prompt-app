@@ -294,3 +294,31 @@ function getAiPreset(aiTarget) {
   const presets = getAiPresets();
 return presets[aiTarget] || presets.chatgpt;
 }
+
+/* ===============================
+状態管理関数追加
+=============================== */
+
+let currentRepairFile = "";
+
+function setCurrentRepairFile(
+  fileName
+) {
+
+  currentRepairFile =
+    fileName || "";
+
+  const label =
+    get(
+      "currentRepairFileLabel"
+    );
+
+  if (label) {
+
+    label.textContent =
+      currentRepairFile ||
+      "未選択";
+
+  }
+
+}
