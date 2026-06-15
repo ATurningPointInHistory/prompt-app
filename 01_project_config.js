@@ -406,3 +406,25 @@ function normalizeProjectConfig(config) {
   };
 
 }
+
+/* ===============================
+状態管理関数追加
+=============================== */
+
+let currentRepairFile = "";
+
+function setCurrentRepairFile(
+  fileName
+) {
+
+  currentRepairFile =
+    fileName || "";
+
+  const label =
+    get(
+      "currentRepairFileLabel"
+    );
+
+  if (label) {
+
+    label.textContent
