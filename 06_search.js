@@ -173,16 +173,6 @@ function loadRepairSearchFiles() {
               reader.result || ""
             );
 
-            if (
-              !currentRepairFile
-            ) {
-            
-              setCurrentRepairFile(
-                file.name
-              );
-            
-            }
-
             loaded++;
 
             console.log(
@@ -566,8 +556,6 @@ function updateRepairFloatingPanelsVisibility() {
     replacePopup.style.display = "none";
   }
 }
-
-
 
 /* ===============================
    Search Action
