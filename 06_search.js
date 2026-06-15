@@ -9,6 +9,92 @@
 let repairSearchFileStore = {};
 let repairLastGlobalSearchKeyword = "";
 
+async function loadCurrentProjectSearchFiles() {
+
+  try {
+
+    if (typeof updateRepairStatus === "function") {
+      updateRepairStatus(
+        "現在プロジェクト読込中..."
+      );
+    }
+
+    registerRepairSearchFile(
+      "index.html",
+      "<!DOCTYPE html>\n" +
+      document.documentElement.outerHTML
+    );
+
+    const scripts =
+      [
+        ...document.querySelectorAll(
+          "script[src]"
+        )
+      ];
+
+    let loaded = 1;
+
+    for (const script of scripts) {
+
+      const src =
+        script.getAttribute("src");
+
+      if (!src) {
+        continue;
+      }
+
+      try {
+
+        const res =
+          await fetch(src);
+
+        if (!res.ok) {
+          continue;
+        }
+
+        const text =
+          await res.text();
+
+        registerRepairSearchFile(
+          src,
+          text
+        );
+
+        loaded++;
+
+      } catch (e) {
+
+        console.warn(
+          "現在プロジェクトJS読込失敗:",
+          src,
+          e
+        );
+
+      }
+
+    }
+
+    if (typeof updateRepairStatus === "function") {
+      updateRepairStatus(
+        `現在プロジェクト ${loaded}件読込`
+      );
+    }
+
+    alert(
+      `現在プロジェクト ${loaded}件を検索対象に登録しました`
+    );
+
+  } catch (e) {
+
+    alert(
+      "現在プロジェクト読込に失敗しました\n\n" +
+      e.message
+    );
+
+  }
+
+}
+
 function saveSearchHistory(
   file,
   line,
