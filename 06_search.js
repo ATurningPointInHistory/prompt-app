@@ -680,7 +680,7 @@ function searchRepairNext() {
     repairSearchIndex >=
     repairSearchMatches.length
   ) {
-    repairSearchIndex = -1;
+    repairSearchIndex = 0;
   }
 
   moveRepairSearchSelection(
