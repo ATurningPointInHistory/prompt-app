@@ -59,10 +59,9 @@ function openGlobalSearchResult(index) {
   editor.value =
     file.text;
 
-  if (typeof currentRepairFile !== "undefined") {
-    currentRepairFile =
-      item.fileName;
-  }
+  setCurrentRepairFile(
+    item.fileName
+  );
 
   const searchBox =
     get("repairSearch");
@@ -173,6 +172,16 @@ function loadRepairSearchFiles() {
               file.name,
               reader.result || ""
             );
+
+            if (
+              !currentRepairFile
+            ) {
+            
+              setCurrentRepairFile(
+                file.name
+              );
+            
+            }
 
             loaded++;
 
@@ -1033,4 +1042,3 @@ function replaceAllRepairText() {
 
   alert(`${count}件置換しました`);
 }
-
