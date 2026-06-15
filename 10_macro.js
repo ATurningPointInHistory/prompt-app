@@ -118,3 +118,60 @@ ${escapeHtml(name)}
   );
 
 }
+
+function recordMacroClick(
+  event
+) {
+
+  if (
+    !macroRecording
+  ) {
+    return;
+  }
+
+  const btn =
+    event.target.closest(
+      "button"
+    );
+
+  if (!btn) {
+    return;
+  }
+
+  const onclick =
+    btn.getAttribute(
+      "onclick"
+    );
+
+  if (!onclick) {
+    return;
+  }
+
+  if (
+    onclick.includes(
+      "startMacroRecording"
+    ) ||
+    onclick.includes(
+      "stopMacroRecording"
+    ) ||
+    onclick.includes(
+      "showMacroList"
+    ) ||
+    onclick.includes(
+      "runMacro"
+    )
+  ) {
+    return;
+  }
+
+  currentMacroActions.push({
+
+    label:
+      btn.innerText,
+
+    code:
+      onclick
+
+  });
+
+}
