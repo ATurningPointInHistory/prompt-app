@@ -482,6 +482,18 @@ function buildRepairSearchQuickHtml() {
 
   <button
     class="float-list-btn"
+    onclick="searchRepairNext()">
+    ⏭<br>次へ
+  </button>
+
+  <button
+    class="float-list-btn"
+    onclick="loadRepairSearchFiles()">
+    📁<br>JS読込
+  </button>
+
+  <button
+    class="float-list-btn"
     onclick="toggleRepairReplacePopup()">
     🔁<br>置換
   </button>
