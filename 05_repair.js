@@ -4,20 +4,6 @@
 =============================== */
 
 /* ===============================
-   Repair State
-=============================== */
-
-let repairUndoStack = [];
-let repairRedoStack = [];
-let repairLastValue = "";
-let repairAutoSaveEnabled = false;
-let currentRepairFile = "";
-let functionSortList = [];
-let functionSortFilter = "all";
-let pinnedLine = null;
-let repairOriginalHtml = "";
-
-/* ===============================
    Repair View / Preview
 =============================== */
 
