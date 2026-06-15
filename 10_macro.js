@@ -187,21 +187,33 @@ function showMacroList() {
 
   openFloatPanel(
     "Macro",
-    names.map(name => `
-<div class="function-item">
+    `
+<div class="macro-list">
+${
+  names.map(name => `
+<div class="macro-row">
 
-  <button onclick='runMacro(${JSON.stringify(name)})'>
+  <button
+    class="macro-mini-btn"
+    onclick='runMacro(${JSON.stringify(name)})'>
     ▶
   </button>
 
-  <button onclick='deleteMacro(${JSON.stringify(name)})'>
+  <button
+    class="macro-mini-btn"
+    onclick='deleteMacro(${JSON.stringify(name)})'>
     🗑
   </button>
 
-  ${escapeHtml(name)}
+  <span class="macro-name">
+    ${escapeHtml(name)}
+  </span>
 
 </div>
 `).join("")
+}
+</div>
+`
   );
 
 }
