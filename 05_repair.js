@@ -573,12 +573,6 @@ ${lineNo}
     ).join("");
 }
 
-function updateRepairStatus(text) {
-  const box = get("repairStatus");
-  if (!box) return;
-  box.innerText = "状態：" + text;
-}
-
 function undoRepairEdit() {
 
   const editor =
