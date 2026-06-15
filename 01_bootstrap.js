@@ -453,7 +453,6 @@ function buildRepairQuickToolsHtml() {
 
   <button class="float-list-btn" onclick="loadRepairHtml()">📖<br>File読込</button>
   <button class="float-list-btn" onclick="backupPartialScript()">📦<br>読込</button>
-  <button class="float-list-btn" onclick="showSearchHistory()">🕘<br>履歴</button>
   <button class="float-list-btn" onclick="copyRepairHtml()">📋<br>コピー</button>
   <button class="float-list-btn" onclick="undoRepairEdit()">↩<br>Undo</button>
   <button class="float-list-btn" onclick="rollbackLastDelete()">↩<br>復元</button>
@@ -498,6 +497,8 @@ function buildRepairSearchQuickHtml() {
     onclick="showRepairSearchFiles()">
     📋<br>一覧
   </button>
+
+  <button class="float-list-btn" onclick="showSearchHistory()">🕘<br>履歴</button>
 
   <button
     class="float-list-btn"
