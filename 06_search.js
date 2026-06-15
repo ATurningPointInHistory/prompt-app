@@ -31,6 +31,37 @@ function saveRepairSearchCache() {
 
 }
 
+function loadRepairSearchCache() {
+
+  try {
+
+    const data =
+      JSON.parse(
+        localStorage.getItem(
+          "repairSearchFiles"
+        ) || "[]"
+      );
+
+    if (
+      Array.isArray(data)
+    ) {
+
+      window.repairSearchFiles =
+        data;
+
+    }
+
+  } catch (e) {
+
+    console.warn(
+      "loadRepairSearchCache failed",
+      e
+    );
+
+  }
+
+}
+
 function saveCurrentSearchEditorFile() {
 
   const editor =
