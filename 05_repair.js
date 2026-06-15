@@ -671,14 +671,32 @@ function updateCursorPosition() {
 }
 
 function toggleRepairAutoSave() {
-  repairAutoSaveEnabled = !repairAutoSaveEnabled;
+
+  if (
+    typeof repairAutoSaveEnabled === "undefined"
+  ) {
+    repairAutoSaveEnabled =
+      localStorage.getItem("repairAutoSaveEnabled") === "1";
+  }
+
+  repairAutoSaveEnabled =
+    !repairAutoSaveEnabled;
+
   localStorage.setItem(
     "repairAutoSaveEnabled",
     repairAutoSaveEnabled ? "1" : "0"
   );
-  updateRepairStatus(
-    repairAutoSaveEnabled ? "AutoSave ON" : "AutoSave OFF"
-  );
+
+  if (
+    typeof updateRepairStatus === "function"
+  ) {
+    updateRepairStatus(
+      repairAutoSaveEnabled
+        ? "AutoSave ON"
+        : "AutoSave OFF"
+    );
+  }
+
 }
 
 function autoSaveRepairDraft() {
