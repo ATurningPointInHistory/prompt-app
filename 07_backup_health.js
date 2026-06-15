@@ -105,30 +105,48 @@ function detectGarbageIssues(text) {
 
   const issues = [];
 
+  const source =
+    String(text || "");
+
   let jsOk = true;
 
   try {
-    new Function(text);
+    new Function(source);
   } catch {
     jsOk = false;
   }
 
-  if (!jsOk) {
+  if (jsOk) {
+
     issues.push(
-      ...detectFunctionBlockBracketIssues(text)
+      "✔ JS構文OKのため括弧詳細診断は省略"
     );
 
     issues.push(
-      ...detectDuplicateDeclsInFunctions(text)
+      ...detectTemplateHtmlIssues(source)
     );
+
+    return issues;
   }
 
   issues.push(
-    ...detectTemplateHtmlIssues(text)
+    "⚠ JS構文NGのため詳細診断を実行"
+  );
+
+  issues.push(
+    ...detectFunctionBlockBracketIssues(source)
+  );
+
+  issues.push(
+    ...detectDuplicateDeclsInFunctions(source)
+  );
+
+  issues.push(
+    ...detectTemplateHtmlIssues(source)
   );
 
   const missingCommas =
-    [...text.matchAll(
+    [...source.matchAll(
       /(["'`][^"'`\n]+["'`])\s*\n\s*(["'`][^"'`\n]+["'`])/g
     )];
 
