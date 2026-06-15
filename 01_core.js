@@ -300,3 +300,17 @@ function getAiPreset(aiTarget) {
   const presets = getAiPresets();
 return presets[aiTarget] || presets.chatgpt;
 }
+
+function updateRepairStatus(text) {
+
+  const box =
+    get("repairStatus");
+
+  if (!box) {
+    return;
+  }
+
+  box.innerText =
+    "状態：" + text;
+
+}
