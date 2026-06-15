@@ -22,6 +22,7 @@ let repairUndoStack = [];
 let repairRedoStack = [];
 let repairLastValue = "";
 let repairAutoSaveEnabled = false;
+let repairSearchHistory = [];
 let currentRepairFile = "";
 let functionSortList = [];
 let functionSortFilter = "all";
