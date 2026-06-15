@@ -208,21 +208,6 @@ async function showHtmlHealth() {
   const validation =
     validateBackupHtml(source);
 
-let syntaxInfo = "";
-
-if (!validation.js_ok) {
-
-  syntaxInfo =
-    "\nJS Error:\n" +
-    (validation.js_error || "") +
-    "\nline: " +
-    (validation.error_line || "?") +
-    "\ncolumn: " +
-    (validation.error_column || "?") +
-    "\n";
-
-}
-
   let funcs = [];
 
   try {
@@ -283,10 +268,22 @@ if (!validation.js_ok) {
       dupFuncs
     );
 
+  const garbageTarget =
+    isHtmlSource
+      ? (externalJs || source)
+      : source;
+  
+  const garbageValidation =
+    validateBackupHtml(
+      garbageTarget
+    );
+  
   const garbageIssues =
-    typeof detectGarbageIssues === "function"
-      ? detectGarbageIssues(externalJs || source)
-      : [];
+    garbageValidation.js_ok
+      ? []
+      : detectGarbageIssues(
+          garbageTarget
+        );
 
   if (
     !validation.js_ok &&
@@ -346,9 +343,13 @@ ${
 
 === Garbage Check ===
 ${
-garbageIssues.length
-  ? garbageIssues.join("\n")
-  : "✔ none"
+garbageValidation.js_ok
+  ? "✔ JS構文OK"
+  : (
+      garbageIssues.length
+        ? garbageIssues.join("\n")
+        : "✔ none"
+    )
 }
 
 === Function ===
