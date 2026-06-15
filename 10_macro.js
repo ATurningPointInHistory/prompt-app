@@ -88,34 +88,33 @@ function runMacro(name) {
 
 }
 
-function showMacroList() {
+function deleteMacro(name) {
 
-  const names =
-    Object.keys(
-      macroList
-    );
+  if (!name) {
+    return;
+  }
 
-  openFloatPanel(
-    "Macro",
-    names.map(
-      name => `
-<div
-class="function-item">
+  if (
+    !confirm(
+      "このMacroを削除しますか？\n\n" +
+      name
+    )
+  ) {
+    return;
+  }
 
-<button
-onclick="
-runMacro(
-'${name}'
-)">
-▶
-</button>
+  delete macroList[name];
 
-${escapeHtml(name)}
-
-</div>
-`
-    ).join("")
+  localStorage.setItem(
+    "macroList",
+    JSON.stringify(macroList)
   );
+
+  updateRepairStatus(
+    "Macro削除: " + name
+  );
+
+  showMacroList();
 
 }
 
@@ -173,5 +172,36 @@ function recordMacroClick(
       onclick
 
   });
+
+}
+
+function showMacroList() {
+
+  const names =
+    Object.keys(macroList);
+
+  if (!names.length) {
+    alert("Macroなし");
+    return;
+  }
+
+  openFloatPanel(
+    "Macro",
+    names.map(name => `
+<div class="function-item">
+
+  <button onclick='runMacro(${JSON.stringify(name)})'>
+    ▶
+  </button>
+
+  <button onclick='deleteMacro(${JSON.stringify(name)})'>
+    🗑
+  </button>
+
+  ${escapeHtml(name)}
+
+</div>
+`).join("")
+  );
 
 }
