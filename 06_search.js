@@ -296,8 +296,7 @@ function searchAllRepairFiles() {
   updateRepairStatus(
     `全検索結果 ${results.length}件`
   );
-  showGlobalSearchResults();
-
+  showGlobalSearchModal();
 
 }
 
@@ -351,6 +350,146 @@ function showGlobalSearchResults() {
   });
 
   alert(text);
+
+}
+
+function showGlobalSearchModal() {
+
+  ensureGlobalSearchModal();
+
+  renderGlobalSearchModal();
+
+  const modal =
+    get("globalSearchModal");
+
+  if (modal) {
+    modal.style.display = "flex";
+  }
+
+}
+
+function closeGlobalSearchModal() {
+
+  const modal =
+    get("globalSearchModal");
+
+  if (modal) {
+    modal.style.display = "none";
+  }
+
+}
+
+function ensureGlobalSearchModal() {
+
+  if (get("globalSearchModal")) {
+    return;
+  }
+
+  const modal =
+    document.createElement("div");
+
+  modal.id =
+    "globalSearchModal";
+
+  modal.innerHTML = `
+    <div class="global-search-box">
+
+      <div class="global-search-header">
+        <b>全検索結果</b>
+        <button onclick="closeGlobalSearchModal()">×</button>
+      </div>
+
+      <div
+        id="globalSearchResultBody"
+        class="global-search-body">
+      </div>
+
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+}
+
+function renderGlobalSearchModal() {
+
+  ensureGlobalSearchModalStyle();
+
+  const body =
+    get("globalSearchResultBody");
+
+  if (!body) {
+    return;
+  }
+
+  const total =
+    repairGlobalSearchResults.length;
+
+  const list =
+    repairGlobalSearchResults
+      .slice(0, 30);
+
+  if (!total) {
+    body.innerHTML =
+      `<div class="small">検索結果なし</div>`;
+    return;
+  }
+
+  let html =
+    `<div class="small">
+      検索結果 ${total}件
+      ${
+        total > 30
+          ? "<br>表示件数 30件まで"
+          : ""
+      }
+    </div><br>`;
+
+  html +=
+    list.map((item, index) => {
+
+      return `
+        <div
+          class="global-search-item"
+          onclick="openGlobalSearchResult(${index})">
+
+          <div class="global-search-file">
+            [${escapeHtml(item.fileName)}] L${item.lineNumber}
+          </div>
+
+          <div>
+            <span class="global-search-line-no">L${item.lineNumber - 2}</span>
+            ${escapeHtml(item.before2)}
+          </div>
+
+          <div>
+            <span class="global-search-line-no">L${item.lineNumber - 1}</span>
+            ${escapeHtml(item.before1)}
+          </div>
+
+          <div class="global-search-hit">
+            <span class="global-search-line-no">L${item.lineNumber}</span>
+            ★ ${escapeHtml(item.line)}
+          </div>
+
+          <div>
+            <span class="global-search-line-no">L${item.lineNumber + 1}</span>
+            ${escapeHtml(item.after1)}
+          </div>
+
+          <div>
+            <span class="global-search-line-no">L${item.lineNumber + 2}</span>
+            ${escapeHtml(item.after2)}
+          </div>
+
+        </div>
+      `;
+
+    })
+    .join("");
+
+  body.innerHTML =
+    html;
 
 }
 /* ===============================
