@@ -300,11 +300,3 @@ function getAiPreset(aiTarget) {
   const presets = getAiPresets();
 return presets[aiTarget] || presets.chatgpt;
 }
-
- =
-      currentRepairFile ||
-      "未選択";
-
-  }
-
-}
