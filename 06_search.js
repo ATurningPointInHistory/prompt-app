@@ -9,6 +9,28 @@
 let repairSearchFileStore = {};
 let repairLastGlobalSearchKeyword = "";
 
+function saveRepairSearchCache() {
+
+  try {
+
+    localStorage.setItem(
+      "repairSearchFiles",
+      JSON.stringify(
+        window.repairSearchFiles || []
+      )
+    );
+
+  } catch (e) {
+
+    console.warn(
+      "saveRepairSearchCache failed",
+      e
+    );
+
+  }
+
+}
+
 function saveCurrentSearchEditorFile() {
 
   const editor =
