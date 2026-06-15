@@ -9,7 +9,29 @@
 let repairSearchFileStore = {};
 let repairLastGlobalSearchKeyword = "";
 
+function saveCurrentSearchEditorFile() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  const fileName =
+    currentRepairFile ||
+    "current_editor.js";
+
+  registerRepairSearchFile(
+    fileName,
+    editor.value
+  );
+
+}
+
 function openGlobalSearchResult(index) {
+
+  saveCurrentSearchEditorFile();
 
   const item =
     repairGlobalSearchResults[index];
