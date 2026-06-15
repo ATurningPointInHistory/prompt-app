@@ -1286,4 +1286,38 @@ mark {
   max-height: 120px;
 }
 
+/* ===============================
+   Macro UI
+=============================== */
+
+.macro-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.macro-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.macro-mini-btn {
+  min-width: 34px;
+  padding: 3px 5px;
+  font-size: 12px;
+  line-height: 1.2;
+  border-radius: 4px;
+}
+
+.macro-name {
+  font-size: 12px;
+  line-height: 1.3;
+  word-break: break-all;
+}
+
 </style>
