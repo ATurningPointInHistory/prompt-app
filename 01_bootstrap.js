@@ -108,7 +108,9 @@ function isRepairMode() {
 
 function buildNormalToolsHtml() {
   return `
+
 <div class="small">💚 診断・確認</div>
+<button class="float-list-btn" onclick="showMobileConsole()">📱 Console</button>
 <button class="float-list-btn" onclick="showHtmlHealth()">HTML HEALTH</button>
 <button class="float-list-btn" onclick="diagnoseHtml()">HTML簡易診断</button>
 <button class="float-list-btn" onclick="analyzeProjectJsDependency()">JS読込診断</button>
@@ -159,6 +161,13 @@ function buildNormalToolsHtml() {
 
 function buildRepairToolsHtml() {
   return `
+
+<div class="small">💚 診断・確認</div>
+<button class="float-list-btn" onclick="showMobileConsole()">📱 Console</button>
+<button class="float-list-btn" onclick="showHtmlHealth()">HTML HEALTH</button>
+
+<hr>
+
 <div class="small">⚙ 設定・AI支援</div>
 <button class="float-list-btn" onclick="openProjectConfigManager()">Project Config</button>
 <button class="float-list-btn" onclick="analyzeAiInstruction()">AI指示解析</button>
@@ -490,17 +499,7 @@ function buildRepairQuickToolsHtml() {
 
   <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾<br>Save</button>
   <button class="float-list-btn" onclick="reloadAppPage()">🔄<br>Reload</button>
-  <button class="float-list-btn" onclick="showHtmlHealth()">💚<br>Check</button>
-  <button
-class="float-list-btn" onclick="startMacroRecording()">🔴 Macro記録</button>
 
-<button class="float-list-btn" onclick="stopMacroRecording()">⏹ Macro保存</button>
-
-<button
-class="float-list-btn"
-onclick="showMacroList()">
-▶ Macro実行
-</button>
 </div>
 `;
 }
@@ -556,6 +555,22 @@ function buildRepairSearchQuickHtml() {
     class="float-list-btn"
     onclick="toggleRepairReplacePopup()">
     🔁<br>置換
+  </button>
+
+  <button
+    class="float-list-btn" 
+    onclick="startMacroRecording()">
+    🔴 Macro記録
+  </button>
+
+  <button class="float-list-btn"
+    onclick="stopMacroRecording()">
+    ⏹ Macro保存
+  </button>
+
+  <button class="float-list-btn"
+    onclick="showMacroList()">
+    ▶ Macro実行
   </button>
 
 </div>
