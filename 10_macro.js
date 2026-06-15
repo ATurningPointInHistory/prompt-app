@@ -3,31 +3,6 @@
    Macro Recorder
 =============================== */
 
-let macroRecording = false;
-
-let currentMacroActions = [];
-
-function getMacroList() {
-
-  return JSON.parse(
-    localStorage.getItem(
-      "macroList"
-    ) || "{}"
-  );
-
-}
-
-function saveMacroList(
-  data
-) {
-
-  localStorage.setItem(
-    "macroList",
-    JSON.stringify(data)
-  );
-
-}
-
 function startMacroRecording() {
 
   macroRecording = true;
@@ -42,11 +17,11 @@ function startMacroRecording() {
 
 function stopMacroRecording() {
 
+  macroRecording = false;
+
   if (
     !currentMacroActions.length
   ) {
-
-    macroRecording = false;
 
     alert(
       "記録なし"
@@ -59,94 +34,52 @@ function stopMacroRecording() {
   const name =
     prompt(
       "Macro名",
-      "新規Macro"
+      "Macro"
     );
 
   if (!name) {
-
-    macroRecording = false;
-
     return;
-
   }
 
-  const macros =
-    getMacroList();
-
-  macros[name] =
+  macroList[name] =
     [...currentMacroActions];
 
-  saveMacroList(
-    macros
+  localStorage.setItem(
+    "macroList",
+    JSON.stringify(
+      macroList
+    )
   );
-
-  macroRecording = false;
 
   updateRepairStatus(
-    `Macro保存: ${name}`
+    "Macro保存"
   );
 
 }
 
-function recordMacroAction(
-  action
-) {
-
-  if (
-    !macroRecording
-  ) {
-    return;
-  }
-
-  currentMacroActions.push(
-    action
-  );
-
-}
-
-function runMacro(
-  name
-) {
-
-  const macros =
-    getMacroList();
+function runMacro(name) {
 
   const actions =
-    macros[name];
+    macroList[name];
 
   if (!actions) {
-
-    alert(
-      "Macroなし"
-    );
-
     return;
-
   }
 
   actions.forEach(
     action => {
 
-      const fn =
-        window[action];
+      try {
 
-      if (
-        typeof fn ===
-        "function"
-      ) {
+        new Function(
+          action.code
+        )();
 
-        try {
+      } catch (e) {
 
-          fn();
-
-        } catch (e) {
-
-          console.error(
-            action,
-            e
-          );
-
-        }
+        console.error(
+          e
+        );
 
       }
 
@@ -157,40 +90,27 @@ function runMacro(
 
 function showMacroList() {
 
-  const macros =
-    getMacroList();
-
   const names =
     Object.keys(
-      macros
+      macroList
     );
-
-  if (!names.length) {
-
-    alert(
-      "Macroなし"
-    );
-
-    return;
-
-  }
 
   openFloatPanel(
-    "Macro一覧",
+    "Macro",
     names.map(
       name => `
 <div
 class="function-item">
 
-  <button
-  onclick="
-  runMacro(
-  '${name}'
-  )">
-  ▶
-  </button>
+<button
+onclick="
+runMacro(
+'${name}'
+)">
+▶
+</button>
 
-  ${escapeHtml(name)}
+${escapeHtml(name)}
 
 </div>
 `
