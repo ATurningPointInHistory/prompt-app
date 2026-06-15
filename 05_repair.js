@@ -14,7 +14,6 @@ let repairAutoSaveEnabled = false;
 let currentRepairFile = "";
 let functionSortList = [];
 let functionSortFilter = "all";
-let dragSortIndex = null;
 let pinnedLine = null;
 let repairOriginalHtml = "";
 
