@@ -195,27 +195,37 @@ function copyErrorPrompt() {
     return;
   }
 
-  navigator.clipboard
-    .writeText(text)
-    .then(() => {
-      alert("AI Error Promptをコピーしました");
-    })
-    .catch(() => {
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        alert("AI Error Promptをコピーしました");
+      })
+      .catch(() => {
+        const ok =
+          copyTextFallback(text);
 
-      const temp =
-        document.createElement("textarea");
+        alert(
+          ok
+            ? "AI Error Promptをコピーしました"
+            : "コピー失敗"
+        );
+      });
 
-      temp.value =
-        text;
+    return;
+  }
 
-      document.body.appendChild(temp);
-      temp.select();
-      document.execCommand("copy");
-      document.body.removeChild(temp);
+  const ok =
+    copyTextFallback(text);
 
-      alert("AI Error Promptをコピーしました");
-    });
-
+  alert(
+    ok
+      ? "AI Error Promptをコピーしました"
+      : "コピー失敗"
+  );
 }
 
 function extractErrorField(
