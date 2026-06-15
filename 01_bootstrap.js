@@ -108,82 +108,105 @@ function isRepairMode() {
 
 function buildNormalToolsHtml() {
   return `
-<button class="float-list-btn" onclick="showHtmlHealth()">💚 HTML HEALTH</button>
-<button class="float-list-btn" onclick="showFunctionRelationMap()">🌳 関数関連図</button>
-<button class="float-list-btn" onclick="analyzeProjectJsDependency()">🧭 全JS依存診断</button>
+<div class="small">💚 診断・確認</div>
+<button class="float-list-btn" onclick="showHtmlHealth()">HTML HEALTH</button>
+<button class="float-list-btn" onclick="diagnoseHtml()">HTML簡易診断</button>
+<button class="float-list-btn" onclick="analyzeProjectJsDependency()">JS読込診断</button>
+<button class="float-list-btn" onclick="showFunctionRelationMap()">関数関連図</button>
+<button class="float-list-btn" onclick="previewRepairHtml()">色分けプレビュー</button>
+
 <hr>
-<button class="float-list-btn" onclick="toggleTemplateManager()">🧩 テンプレ管理</button>
-<button class="float-list-btn" onclick="toggleDangerManager()">⚠ 危険ワード管理</button>
-<button class="float-list-btn" onclick="togglePatternManager()">🚫 NGパターン管理</button>
-<button class="float-list-btn" onclick="toggleAiPresetManager()">🤖 AIプリセット管理</button>
+
+<div class="small">💾 保存・バックアップ</div>
+<button class="float-list-btn" onclick="saveProjectPackage()">プロジェクトZIP保存</button>
+<button class="float-list-btn" onclick="backupProgram()">結合HTMLバックアップ</button>
+<button class="float-list-btn" onclick="saveProgramHtml()">本体HTML保存</button>
+<button class="float-list-btn" onclick="showBackupHistory()">バックアップ履歴</button>
+<button class="float-list-btn" onclick="restoreProgramBackup()">設定復元</button>
+<button class="float-list-btn" onclick="compareBackupSummary()">バックアップ差分</button>
+
 <hr>
-<button class="float-list-btn" onclick="saveProjectPackage()">📦 プロジェクト保存</button>
-<button class="float-list-btn" onclick="backupProgram()">💾 結合HTML出力</button>
-<button class="float-list-btn" onclick="showBackupHistory()">📚 バックアップ履歴</button>
-<button class="float-list-btn" onclick="saveProgramHtml()">💾 本体HTML保存</button>
-<button class="float-list-btn" onclick="restoreProgramBackup()">♻ フル復元</button>
+
+<div class="small">🧩 設定・管理</div>
+<button class="float-list-btn" onclick="toggleTemplateManager()">テンプレ管理</button>
+<button class="float-list-btn" onclick="toggleDangerManager()">危険ワード管理</button>
+<button class="float-list-btn" onclick="togglePatternManager()">NGパターン管理</button>
+<button class="float-list-btn" onclick="toggleAiPresetManager()">AIプリセット管理</button>
+
 <hr>
-<button class="float-list-btn" onclick="reviewPrompt()">🛠 Promptレビュー</button>
-<button class="float-list-btn" onclick="testPromptObject()">🧩 内部JSONテスト</button>
-<button class="float-list-btn" onclick="testJsonFormat()">🧪 JSONテスト</button>
-<button class="float-list-btn" onclick="formatJsonOutput()">📦 JSON整形</button>
-<button class="float-list-btn" onclick="recheckOutput()">🔍 再チェック</button>
-<button class="float-list-btn" onclick="diagnoseHtml()">🩺 HTML診断</button>
-<button class="float-list-btn" onclick="compareBackupSummary()">📊 バックアップ差分確認</button>
-<button class="float-list-btn" onclick="previewRepairHtml()">🎨 色分けプレビュー</button>
+
+<div class="small">🛠 通常モード支援</div>
+<button class="float-list-btn" onclick="reviewPrompt()">Promptレビュー</button>
+<button class="float-list-btn" onclick="testPromptObject()">内部JSONテスト</button>
+<button class="float-list-btn" onclick="testJsonFormat()">JSONテスト</button>
+<button class="float-list-btn" onclick="formatJsonOutput()">JSON整形</button>
+<button class="float-list-btn" onclick="recheckOutput()">再チェック</button>
+
 <hr>
-<button class="float-list-btn" onclick="exportTemplates()">📤 テンプレ保存</button>
-<button class="float-list-btn" onclick="importTemplates()">📥 テンプレ復元</button>
-<button class="float-list-btn" onclick="exportAiPresets()">🤖 AI設定バックアップ</button>
-<button class="float-list-btn" onclick="importAiPresets()">🤖 AI設定復元</button>
+
+<div class="small">📚 開発管理</div>
+<button class="float-list-btn" onclick="renderTodoList()">開発TODO</button>
+<button class="float-list-btn" onclick="renderDevLogList()">開発履歴</button>
+
 <hr>
-<button class="float-list-btn" onclick="renderTodoList()">☑ 開発TODO</button>
-<button class="float-list-btn" onclick="renderDevLogList()">📚 開発履歴</button>
-<hr>
-<button class="float-list-btn" onclick="clearOutput()">🧹 出力クリア</button>
-<button class="float-list-btn" onclick="clearHistory()">🗑 履歴全削除</button>
-<button class="float-list-btn" onclick="reloadAppPage()">🔄 ページ更新</button>
+
+<div class="small">🧹 その他</div>
+<button class="float-list-btn" onclick="clearOutput()">出力クリア</button>
+<button class="float-list-btn" onclick="clearHistory()">履歴全削除</button>
+<button class="float-list-btn" onclick="reloadAppPage()">ページ更新</button>
 `;
 }
 
 function buildRepairToolsHtml() {
   return `
-<button class="float-list-btn" onclick="openProjectConfigManager()">⚙ Project Config</button>
-
-<button class="float-list-btn" onclick="analyzeAiInstruction()">🧠 指示解析</button>
-
-<button class="float-list-btn" onclick="generateErrorPrompt()">🚨 AI Error Prompt Generation</button>
-
-<button class="float-list-btn" onclick="copyErrorPrompt()">📋 AI Error Prompt Copy</button>
+<div class="small">⚙ 設定・AI支援</div>
+<button class="float-list-btn" onclick="openProjectConfigManager()">Project Config</button>
+<button class="float-list-btn" onclick="analyzeAiInstruction()">AI指示解析</button>
+<button class="float-list-btn" onclick="analyzeAiGeneratedCode()">AIコード解析</button>
+<button class="float-list-btn" onclick="generateErrorPrompt()">AIエラー調査プロンプト生成</button>
+<button class="float-list-btn" onclick="copyErrorPrompt()">AIエラー調査プロンプトコピー</button>
 
 <textarea
 id="aiErrorPromptOutput"
-rows="12"
+rows="10"
 placeholder="Generated AI Error Prompt"
 ></textarea>
 
-<button class="float-list-btn" onclick="showFunctionRelationMap()">🌳 関数関連図</button>
-<button class="float-list-btn" onclick="analyzeProjectJsDependency()">🧭 全JS依存診断</button>
-<button class="float-list-btn" onclick="analyzeAiGeneratedCode()">🤖 AIコード解析</button>
 <hr>
-<button class="float-list-btn" onclick="saveRepairHtml()">💾 現在ファイル保存</button>
+
+<div class="small">💾 ファイル操作</div>
+<button class="float-list-btn" onclick="saveRepairHtml()">現在ファイル保存</button>
+<button class="float-list-btn" onclick="savePatchedRepairHtml()">Patched保存</button>
+
 <hr>
-<button class="float-list-btn" onclick="selectFunctionBlock()">📦 関数選択</button>
-<button class="float-list-btn" onclick="replaceFunctionBlock()">✏ 関数置換</button>
-<button class="float-list-btn" onclick="showFunctionList()">📚 コードブロック一覧</button>
-<button class="float-list-btn" onclick="showFunctionSortList()">↕コードブロック並べ替え</button>
+
+<div class="small">🔍 解析・診断</div>
+<button class="float-list-btn" onclick="diagnoseRepairHtml()">編集内容診断</button>
+<button class="float-list-btn" onclick="analyzeProjectJsDependency()">JS読込診断</button>
+<button class="float-list-btn" onclick="showFunctionRelationMap()">関数関連図</button>
+<button class="float-list-btn" onclick="showFunctionList()">コードブロック一覧</button>
+
 <hr>
-<button class="float-list-btn" onclick="cleanupCandidates()">🧹 削除候補チェック</button>
-<button class="float-list-btn" onclick="deleteCommentedCleanupBlocks()">🗑 コメント化済みを完全削除</button>
+
+<div class="small">✏ 編集・整理</div>
+<button class="float-list-btn" onclick="selectFunctionBlock()">関数選択</button>
+<button class="float-list-btn" onclick="replaceFunctionBlock()">関数置換</button>
+<button class="float-list-btn" onclick="showFunctionSortList()">コードブロック並べ替え</button>
+<button class="float-list-btn" onclick="openViewerMode()">閲覧モード</button>
+
 <hr>
-<button class="float-list-btn" onclick="openViewerMode()">👁 閲覧モード</button>
+
+<div class="small">🧹 削除・整理</div>
+<button class="float-list-btn" onclick="cleanupCandidates()">削除候補チェック</button>
+<button class="float-list-btn" onclick="deleteCommentedCleanupBlocks()">コメント化済み完全削除</button>
+
 <hr>
-<button class="float-list-btn" onclick="showRepairDiff()">🧩 Diff</button>
-<button class="float-list-btn" onclick="saveRepairDiff()">💾 Diff保存</button>
-<button class="float-list-btn" onclick="savePatchedRepairHtml()">💾 Patched HTML保存</button>
-<button class="float-list-btn" onclick="showRepairLineDiff()">🧾 Line Diff</button>
-<button class="float-list-btn" onclick="loadAndApplyRepairDiff()">📂 Diff適用</button>
-<button class="float-list-btn" onclick="diagnoseRepairHtml()">🩺 編集内容診断</button>
+
+<div class="small">🧩 Diff・差分</div>
+<button class="float-list-btn" onclick="showRepairDiff()">Function Diff</button>
+<button class="float-list-btn" onclick="showRepairLineDiff()">Line Diff</button>
+<button class="float-list-btn" onclick="saveRepairDiff()">Diff保存</button>
+<button class="float-list-btn" onclick="loadAndApplyRepairDiff()">Diff適用</button>
 `;
 }
 
@@ -451,19 +474,23 @@ function buildRepairQuickToolsHtml() {
     ◀
   </button>
 
-  <button class="float-list-btn" onclick="loadRepairHtml()">📖<br>File読込</button>
-  <button class="float-list-btn" onclick="backupPartialScript()">📦<br>読込</button>
-  <button class="float-list-btn" onclick="copyRepairHtml()">📋<br>コピー</button>
+  <button class="float-list-btn" onclick="loadRepairHtml()">📖<br>File</button>
+  <button class="float-list-btn" onclick="backupPartialScript()">📦<br>JS</button>
+  <button class="float-list-btn" onclick="copyRepairHtml()">📋<br>Copy</button>
+
   <button class="float-list-btn" onclick="undoRepairEdit()">↩<br>Undo</button>
-  <button class="float-list-btn" onclick="rollbackLastDelete()">↩<br>復元</button>
+  <button class="float-list-btn" onclick="rollbackLastDelete()">♻<br>復元</button>
   <button class="float-list-btn" onclick="redoRepairEdit()">↪<br>Redo</button>
-  <button class="float-list-btn" onclick="indentRepairSelection()">➡<br>indent</button>
-  <button class="float-list-btn" onclick="outdentRepairSelection()">⬅<br>outdent</button>
-  <button class="float-list-btn" onclick="scrollRepairTop()">⏫<br>上部</button>
-  <button class="float-list-btn" onclick="scrollRepairBottom()">⏬<br>下部</button>
+
+  <button class="float-list-btn" onclick="indentRepairSelection()">➡<br>In</button>
+  <button class="float-list-btn" onclick="outdentRepairSelection()">⬅<br>Out</button>
+
+  <button class="float-list-btn" onclick="scrollRepairTop()">⏫<br>Top</button>
+  <button class="float-list-btn" onclick="scrollRepairBottom()">⏬<br>End</button>
+
   <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾<br>Save</button>
-  <button class="float-list-btn" onclick="reloadAppPage()">🔄<br>更新</button>
-  <button class="float-list-btn" onclick="showHtmlHealth()">💚<br>HEALTH</button>
+  <button class="float-list-btn" onclick="reloadAppPage()">🔄<br>Reload</button>
+  <button class="float-list-btn" onclick="showHtmlHealth()">💚<br>Check</button>
 
 </div>
 `;
@@ -483,13 +510,13 @@ function buildRepairSearchQuickHtml() {
   <button
     class="float-list-btn"
     onclick="searchRepairNext()">
-    ⏭<br>次へ
+    ⏭<br>次
   </button>
 
   <button
     class="float-list-btn"
     onclick="loadRepairSearchFiles()">
-    📁<br>JS読込
+    📁<br>読込
   </button>
 
   <button
@@ -498,12 +525,16 @@ function buildRepairSearchQuickHtml() {
     📋<br>一覧
   </button>
 
-  <button class="float-list-btn" onclick="showSearchHistory()">🕘<br>履歴</button>
+  <button
+    class="float-list-btn"
+    onclick="showSearchHistory()">
+    🕘<br>履歴
+  </button>
 
   <button
     class="float-list-btn"
     onclick="searchAllRepairFiles()">
-    📚<br>全検索
+    📚<br>全検
   </button>
 
   <button
