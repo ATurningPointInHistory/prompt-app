@@ -15,6 +15,19 @@ let healthUndefinedFunctions = [];
 let lastDeleteRollbackHtml = "";
 let lastDeleteRollbackInfo = "";
 let unusedDeleteHistory = [];
+/* ===============================
+   Repair State
+=============================== */
+let repairUndoStack = [];
+let repairRedoStack = [];
+let repairLastValue = "";
+let repairAutoSaveEnabled = false;
+let currentRepairFile = "";
+let functionSortList = [];
+let functionSortFilter = "all";
+let pinnedLine = null;
+let repairOriginalHtml = "";
+
 const APP_VERSION = "v5.8.3";
 const DEBUG_MODE = true;
 const CHANGELOG = [
