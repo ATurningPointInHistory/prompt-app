@@ -223,9 +223,18 @@ function openGlobalSearchResult(index) {
   editor.value =
     file.text;
 
-  setCurrentRepairFile(
-    item.fileName
-  );
+  if (typeof setCurrentRepairFile === "function") {
+
+    setCurrentRepairFile(
+      item.fileName
+    );
+
+  } else {
+
+    currentRepairFile =
+      item.fileName;
+
+  }
 
   const searchBox =
     get("repairSearch");
