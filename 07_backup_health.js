@@ -268,21 +268,11 @@ async function showHtmlHealth() {
       dupFuncs
     );
 
-  const garbageTarget =
-    isHtmlSource
-      ? (externalJs || source)
-      : source;
-  
-  const garbageValidation =
-    validateBackupHtml(
-      garbageTarget
-    );
-  
   const garbageIssues =
-    garbageValidation.js_ok
+    validation.js_ok
       ? []
       : detectGarbageIssues(
-          garbageTarget
+          source
         );
 
   if (
@@ -343,7 +333,7 @@ ${
 
 === Garbage Check ===
 ${
-garbageValidation.js_ok
+validation.js_ok
   ? "✔ JS構文OK"
   : (
       garbageIssues.length
