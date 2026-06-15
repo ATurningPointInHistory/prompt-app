@@ -9,76 +9,101 @@
 let repairSearchFileStore = {};
 let repairLastGlobalSearchKeyword = "";
 
-function saveRepairSearchCache() {
+function saveSearchHistory(
+  file,
+  line,
+  keyword
+) {
 
-  try {
+  repairSearchHistory.unshift({
 
-    localStorage.setItem(
-      "repairSearchFiles",
-      JSON.stringify(
-        window.repairSearchFiles || []
-      )
-    );
+    file,
+    line,
+    keyword,
+    time:
+      Date.now()
 
-  } catch (e) {
+  });
 
-    console.warn(
-      "saveRepairSearchCache failed",
-      e
-    );
-
+  if (
+    repairSearchHistory.length > 50
+  ) {
+    repairSearchHistory.length =
+      50;
   }
+
+  localStorage.setItem(
+    "repairSearchHistory",
+    JSON.stringify(
+      repairSearchHistory
+    )
+  );
 
 }
 
-function loadRepairSearchCache() {
+function showSearchHistory() {
 
-  try {
-
-    const data =
-      JSON.parse(
-        localStorage.getItem(
-          "repairSearchFiles"
-        ) || "[]"
-      );
-
-    if (
-      Array.isArray(data)
-    ) {
-
-      window.repairSearchFiles =
-        data;
-
-    }
-
-  } catch (e) {
-
-    console.warn(
-      "loadRepairSearchCache failed",
-      e
-    );
-
+  if (!repairSearchHistory.length) {
+    alert("履歴なし");
+    return;
   }
+
+  openFloatPanel(
+    "検索履歴",
+    repairSearchHistory
+      .map(item => `
+<div
+  class="function-item"
+  onclick='jumpToSearchHistory(
+    ${JSON.stringify(item.file)},
+    ${Number(item.line) || 1}
+  )'>
+📄 ${escapeHtml(item.file)}
+<br>
+L${item.line}
+<br>
+${escapeHtml(item.keyword)}
+</div>
+`)
+      .join("")
+  );
 
 }
 
-function saveCurrentSearchEditorFile() {
+function jumpToSearchHistory(
+  fileName,
+  line
+) {
+
+  const file =
+    repairSearchFileStore[fileName];
+
+  if (!file) {
+    alert("ファイル未読込");
+    return;
+  }
 
   const editor =
     get("repairEditor");
 
   if (!editor) {
+    alert("repairEditor が見つかりません");
     return;
   }
 
-  const fileName =
-    currentRepairFile ||
-    "current_editor.js";
+  editor.value =
+    file.text;
 
-  registerRepairSearchFile(
-    fileName,
-    editor.value
+  setCurrentRepairFile(
+    file.fileName
   );
+
+  updateLineNumbers();
+  updateCursorPosition();
+
+  jumpToLine(line);
+
+  closeFloatPanel();
 
 }
 
@@ -143,6 +168,51 @@ function openGlobalSearchResult(index) {
       `${item.fileName} / L${item.lineNumber}へ移動`
     );
   }
+
+  saveSearchHistory(
+    item.fileName,
+    item.lineNumber,
+    repairLastGlobalSearchKeyword
+  );
+
+}
+
+function loadSearchHistory() {
+
+  try {
+
+    repairSearchHistory =
+      JSON.parse(
+        localStorage.getItem(
+          "repairSearchHistory"
+        ) || "[]"
+      );
+
+  } catch {
+
+    repairSearchHistory = [];
+
+  }
+
+}
+
+function saveCurrentSearchEditorFile() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  const fileName =
+    currentRepairFile ||
+    "current_editor.js";
+
+  registerRepairSearchFile(
+    fileName,
+    editor.value
+  );
 
 }
 
