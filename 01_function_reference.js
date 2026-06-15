@@ -24,7 +24,7 @@ const APP_REGEX = {
 
   windowAssignedFunction:
     buildAppRegex(
-      `window\\.[a-zA-Z_$][a-zA-Z0-9_$]*\\s*=\\s*(${APP_REGEX_PARTS.jsName})`
+      `window\\.${APP_REGEX_PARTS.jsName}\\s*=\\s*(${APP_REGEX_PARTS.jsName})`
     ),
 
   windowAssignedName:
@@ -33,68 +33,15 @@ const APP_REGEX = {
     ),
 
   labelFor:
-    /for\s*=\s*["']([^"']+)["']/g
+    /for\s*=\s*["']([^"']+)["']/g,
+
+  functionDeclaration:
+    buildAppRegex(
+      `(?:^|\\n)\\s*(?:async\\s+)?function\\s+(${APP_REGEX_PARTS.jsName})\\s*\\(`
+    ),
+
+  functionCall:
+    buildAppRegex(
+      `\\b(${APP_REGEX_PARTS.jsName})\\s*\\(`
+    )
 };
-
-function extractFunctionReferences(text, html = text) {
-  const source =
-    String(text || "");
-
-  const htmlText =
-    String(html || "");
-
-  return {
-    onclicks:
-      [...htmlText.matchAll(APP_REGEX.onclickFunction)]
-        .map(x => x[1]),
-
-    eventRefs:
-      [...source.matchAll(APP_REGEX.addEventListenerFunction)]
-        .map(x => x[1]),
-
-    windowRefs:
-      [...source.matchAll(APP_REGEX.windowAssignedFunction)]
-        .map(x => x[1]),
-
-    windowNames:
-      [...source.matchAll(APP_REGEX.windowAssignedName)]
-        .map(x => x[1]),
-
-    labelFors:
-      [...htmlText.matchAll(APP_REGEX.labelFor)]
-        .map(x => x[1])
-  };
-}
-
-function countFunctionReferences(
-  text,
-  name,
-  withCall = false
-) {
-  const source =
-    String(text || "");
-
-  const target =
-    String(name || "");
-
-  if (!target) {
-    return 0;
-  }
-
-  const suffix =
-    withCall
-      ? "\\s*\\("
-      : "";
-
-  return (
-    source.match(
-      new RegExp(
-        "\\b" +
-        escapeRegExp(target) +
-        "\\b" +
-        suffix,
-        "g"
-      )
-    ) || []
-  ).length;
-}
