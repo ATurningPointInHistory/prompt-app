@@ -284,6 +284,11 @@ function searchAllRepairFiles() {
   repairGlobalSearchResults =
     results;
 
+  console.log(
+    "Global Search Results",
+    repairGlobalSearchResults
+  );
+
   alert(
     `全検索結果 ${results.length}件`
   );
@@ -291,6 +296,61 @@ function searchAllRepairFiles() {
   updateRepairStatus(
     `全検索結果 ${results.length}件`
   );
+  showGlobalSearchResults();
+
+
+}
+
+function showGlobalSearchResults() {
+
+  if (
+    !repairGlobalSearchResults ||
+    !repairGlobalSearchResults.length
+  ) {
+
+    alert(
+      "検索結果なし"
+    );
+
+    return;
+  }
+
+  const list =
+    repairGlobalSearchResults
+      .slice(0, 30);
+
+  let text =
+    `検索結果 ${repairGlobalSearchResults.length}件\n\n`;
+
+  list.forEach(item => {
+
+    text +=
+      `[${item.fileName}]\n`;
+
+    text +=
+      `L${item.lineNumber}\n`;
+
+    text +=
+      `${item.before2}\n`;
+
+    text +=
+      `${item.before1}\n`;
+
+    text +=
+      `★ ${item.line}\n`;
+
+    text +=
+      `${item.after1}\n`;
+
+    text +=
+      `${item.after2}\n`;
+
+    text +=
+      `\n-----------------\n\n`;
+
+  });
+
+  alert(text);
 
 }
 /* ===============================
