@@ -394,9 +394,6 @@ ${score}/100
       "\n";
   }
 
-  window.latestHealthResult =
-    result;
-
   const parts =
     result.split(
       "=== Active Functions ==="
@@ -404,11 +401,17 @@ ${score}/100
   
   const summary =
     parts[0];
-  
+
   const detail =
     parts[1]
       ? "=== Active Functions ===" + parts[1]
       : "Function Dependencyなし";
+
+window.latestHealthResult =
+  result;
+
+window.latestHealthSummaryResult =
+  summary;
   
     openFloatPanel(
     "HTML HEALTH",
@@ -426,6 +429,13 @@ ${score}/100
         'healthActiveFunctions'
         )">
         📚 Functions
+      </button>
+
+      <button
+        onclick="
+        copyHealthFullResult(
+        )">
+        📚 全文コピー
       </button>
 
       <button
@@ -450,6 +460,16 @@ ${score}/100
     </pre>
     `
   );
+}
+
+function copyHealthResult() {
+
+  const text =
+    window.latestHealthSummaryResult ||
+    window.latestHealthResult ||
+    "";
+
+  copyTextFallback(text);
 }
 
 function sanitizeFileNamePart(text) {
@@ -502,6 +522,26 @@ function getSaveFileLabel() {
   return safeNote
     ? `${label}_${safeNote}`
     : label;
+}
+
+function copyHealthFullResult() {
+
+  const text =
+    window.latestHealthResult || "";
+
+  if (!text) {
+    alert("コピー内容なし");
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "Health全文をコピーしました"
+      : "コピー失敗"
+  );
 }
 
 /* ===============================
