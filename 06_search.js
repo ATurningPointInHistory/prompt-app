@@ -492,6 +492,21 @@ function renderGlobalSearchModal() {
     html;
 
 }
+
+function showGlobalSearchModal() {
+
+  ensureGlobalSearchModal();
+
+  renderGlobalSearchModal();
+
+  const modal =
+    get("globalSearchModal");
+
+  if (modal) {
+    modal.style.display = "flex";
+  }
+
+}
 /* ===============================
    Search State
 =============================== */
