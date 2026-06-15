@@ -195,6 +195,15 @@ function jumpToSearchHistory(
 
 function openGlobalSearchResult(index) {
 
+  if (typeof recordMacroAction === "function") {
+    recordMacroAction(
+      "openGlobalSearchResult",
+      {
+        index
+      }
+    );
+  }
+
   saveCurrentSearchEditorFile();
 
   const item =
@@ -460,6 +469,15 @@ function searchAllRepairFiles() {
     return;
   }
 
+  if (typeof recordMacroAction === "function") {
+    recordMacroAction(
+      "searchAllRepairFiles",
+      {
+        keyword
+      }
+    );
+  }
+
   repairLastGlobalSearchKeyword =
     keyword;
 
@@ -498,12 +516,12 @@ function searchAllRepairFiles() {
 
       results.push({
 
-        fileName: fileName,
+        fileName,
 
         lineNumber:
           index + 1,
 
-        line: line,
+        line,
 
         before2:
           lines[index - 2] || "",
@@ -517,7 +535,8 @@ function searchAllRepairFiles() {
         after2:
           lines[index + 2] || ""
 
-        });
+      });
+
     });
 
   });
@@ -533,10 +552,10 @@ function searchAllRepairFiles() {
   updateRepairStatus(
     `全検索結果 ${results.length}件`
   );
+
   showGlobalSearchModal();
 
 }
-
 function showGlobalSearchModal() {
 
   ensureGlobalSearchModal();
@@ -780,6 +799,7 @@ function updateRepairFloatingPanelsVisibility() {
 =============================== */
 
 function searchRepairText() {
+
   const editor =
     get("repairEditor");
 
@@ -790,6 +810,15 @@ function searchRepairText() {
 
   if (!editor || !keyword) {
     return;
+  }
+
+  if (typeof recordMacroAction === "function") {
+    recordMacroAction(
+      "searchRepairText",
+      {
+        keyword
+      }
+    );
   }
 
   const sourceText =
