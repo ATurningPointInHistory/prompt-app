@@ -182,3 +182,9 @@ document.addEventListener("input", () => {
 document.addEventListener("change", () => {
   safeRun(saveCurrentState, "saveCurrentState");
 });
+
+document.addEventListener(
+  "click",
+  recordMacroClick,
+  true
+);
