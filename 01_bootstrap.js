@@ -491,7 +491,25 @@ function buildRepairQuickToolsHtml() {
   <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾<br>Save</button>
   <button class="float-list-btn" onclick="reloadAppPage()">🔄<br>Reload</button>
   <button class="float-list-btn" onclick="showHtmlHealth()">💚<br>Check</button>
+<hr>
 
+<button
+class="float-list-btn"
+onclick="startMacroRecording()">
+🔴 Macro記録
+</button>
+
+<button
+class="float-list-btn"
+onclick="stopMacroRecording()">
+⏹ Macro保存
+</button>
+
+<button
+class="float-list-btn"
+onclick="showMacroList()">
+▶ Macro実行
+</button>
 </div>
 `;
 }
