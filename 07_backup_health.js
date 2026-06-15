@@ -208,6 +208,21 @@ async function showHtmlHealth() {
   const validation =
     validateBackupHtml(source);
 
+let syntaxInfo = "";
+
+if (!validation.js_ok) {
+
+  syntaxInfo =
+    "\nJS Error:\n" +
+    (validation.js_error || "") +
+    "\nline: " +
+    (validation.error_line || "?") +
+    "\ncolumn: " +
+    (validation.error_column || "?") +
+    "\n";
+
+}
+
   let funcs = [];
 
   try {
@@ -312,10 +327,16 @@ isHtmlSource
 === JavaScript ===
 JS syntax:
 ${validation.js_ok ? "✔ OK" : "⚠ NG"}
+
 ${validation.js_error || ""}
+
 ${
 !validation.js_ok
-  ? "\n\n=== Error Context ===\n" +
+  ? "line: " +
+    (validation.error_line || "?") +
+    "\ncolumn: " +
+    (validation.error_column || "?") +
+    "\n\n=== Error Context ===\n" +
     getErrorContext(
       source,
       validation.error_line
