@@ -25,6 +25,32 @@ function registerRepairSearchFile(
 
 }
 
+function showRepairSearchFiles() {
+
+  const names =
+    Object.keys(
+      repairSearchFileStore
+    );
+
+  if (!names.length) {
+
+    alert(
+      "検索用ファイル未読込"
+    );
+
+    return;
+  }
+
+  alert(
+    [
+      `読込済み: ${names.length}件`,
+      "",
+      ...names
+    ].join("\n")
+  );
+
+}
+
 function loadRepairSearchFiles() {
 
   const input =
