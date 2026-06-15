@@ -27,6 +27,12 @@ const BUILD_INFO = {
   note: "Health改善"
 };
 
+function updateRepairStatus(text) {
+  const box = get("repairStatus");
+  if (!box) return;
+  box.innerText = "状態：" + text;
+}
+
 function renderBuildInfo() {
 
   const versionEl =
