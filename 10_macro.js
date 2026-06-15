@@ -175,6 +175,23 @@ function recordMacroClick(
 
 }
 
+const keyword =
+  get("repairSearch")
+    ?.value
+    .trim();
+
+if (
+  typeof recordMacroAction ===
+  "function"
+) {
+  recordMacroAction(
+    "searchRepairText",
+    {
+      keyword
+    }
+  );
+}
+
 function showMacroList() {
 
   const names =
