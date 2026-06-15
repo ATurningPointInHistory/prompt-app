@@ -7,6 +7,7 @@
 =============================== */
 
 let repairSearchFileStore = {};
+let repairLastGlobalSearchKeyword = "";
 
 function openGlobalSearchResult(index) {
 
@@ -39,6 +40,14 @@ function openGlobalSearchResult(index) {
   if (typeof currentRepairFile !== "undefined") {
     currentRepairFile =
       item.fileName;
+  }
+
+  const searchBox =
+    get("repairSearch");
+
+  if (searchBox) {
+    searchBox.value =
+      repairLastGlobalSearchKeyword || "";
   }
 
   closeGlobalSearchModal();
@@ -212,6 +221,9 @@ function searchAllRepairFiles() {
     return;
   }
 
+  repairLastGlobalSearchKeyword =
+    keyword;
+
   const fileNames =
     Object.keys(
       repairSearchFileStore
@@ -235,7 +247,13 @@ function searchAllRepairFiles() {
 
     lines.forEach((line, index) => {
 
-      if (!line.includes(keyword)) {
+      if (
+        !line
+          .toLowerCase()
+          .includes(
+            keyword.toLowerCase()
+          )
+      ) {
         return;
       }
 
@@ -277,59 +295,6 @@ function searchAllRepairFiles() {
     `全検索結果 ${results.length}件`
   );
   showGlobalSearchModal();
-
-}
-
-function showGlobalSearchResults() {
-
-  if (
-    !repairGlobalSearchResults ||
-    !repairGlobalSearchResults.length
-  ) {
-
-    alert(
-      "検索結果なし"
-    );
-
-    return;
-  }
-
-  const list =
-    repairGlobalSearchResults
-      .slice(0, 30);
-
-  let text =
-    `検索結果 ${repairGlobalSearchResults.length}件\n\n`;
-
-  list.forEach(item => {
-
-    text +=
-      `[${item.fileName}]\n`;
-
-    text +=
-      `L${item.lineNumber}\n`;
-
-    text +=
-      `${item.before2}\n`;
-
-    text +=
-      `${item.before1}\n`;
-
-    text +=
-      `★ ${item.line}\n`;
-
-    text +=
-      `${item.after1}\n`;
-
-    text +=
-      `${item.after2}\n`;
-
-    text +=
-      `\n-----------------\n\n`;
-
-  });
-
-  alert(text);
 
 }
 
