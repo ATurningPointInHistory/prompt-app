@@ -25,6 +25,76 @@ function registerRepairSearchFile(
 }
 
 /* ===============================
+   Search File Loader
+=============================== */
+
+function loadRepairSearchFiles() {
+
+  const input =
+    document.createElement("input");
+
+  input.type = "file";
+
+  input.accept =
+    ".js,.html,.txt,.json";
+
+  input.multiple = true;
+
+  input.onchange =
+    function(event) {
+
+      const files =
+        Array.from(
+          event.target.files || []
+        );
+
+      if (!files.length) {
+        return;
+      }
+
+      let loaded = 0;
+
+      files.forEach(file => {
+
+        const reader =
+          new FileReader();
+
+        reader.onload =
+          function() {
+
+            registerRepairSearchFile(
+              file.name,
+              reader.result
+            );
+
+            loaded++;
+
+            updateRepairStatus(
+              `検索用ファイル読込 ${loaded}/${files.length}`
+            );
+
+            if (
+              loaded === files.length
+            ) {
+
+              updateRepairStatus(
+                `検索用ファイル ${loaded}件読込完了`
+              );
+
+            }
+
+          };
+
+        reader.readAsText(file);
+
+      });
+
+    };
+
+  input.click();
+
+}
+/* ===============================
    Search State
 =============================== */
 
