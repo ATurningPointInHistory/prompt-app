@@ -256,11 +256,27 @@ function searchAllRepairFiles() {
       }
 
       results.push({
-        fileName: fileName,
-        lineNumber: index + 1,
-        line: line
-      });
 
+        fileName: fileName,
+
+        lineNumber:
+          index + 1,
+
+        line: line,
+
+        before2:
+          lines[index - 2] || "",
+
+        before1:
+          lines[index - 1] || "",
+
+        after1:
+          lines[index + 1] || "",
+
+        after2:
+          lines[index + 2] || ""
+
+        });
     });
 
   });
