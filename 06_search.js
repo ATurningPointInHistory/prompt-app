@@ -8,20 +8,92 @@
 
 let repairSearchFileStore = {};
 
-function registerRepairSearchFile(
-  fileName,
-  text
-) {
+function loadRepairSearchFiles() {
 
-  if (!fileName || !text) {
-    return;
-  }
+  const input =
+    document.createElement("input");
 
-  repairSearchFileStore[fileName] = {
-    fileName,
-    text: String(text),
-    updatedAt: Date.now()
-  };
+  input.type = "file";
+  input.accept = ".js,.html,.txt,.json";
+  input.multiple = true;
+
+  input.onchange =
+    function(event) {
+
+      const files =
+        Array.from(
+          event.target.files || []
+        );
+
+      if (!files.length) {
+        alert("ファイルが選択されていません");
+        return;
+      }
+
+      let loaded = 0;
+
+      files.forEach(file => {
+
+        const reader =
+          new FileReader();
+
+        reader.onload =
+          function() {
+
+            registerRepairSearchFile(
+              file.name,
+              reader.result || ""
+            );
+
+            loaded++;
+
+            console.log(
+              "検索用ファイル読込:",
+              file.name,
+              loaded,
+              "/",
+              files.length
+            );
+
+            if (
+              typeof updateRepairStatus === "function"
+            ) {
+              updateRepairStatus(
+                `検索用ファイル読込 ${loaded}/${files.length}`
+              );
+            }
+
+            if (loaded === files.length) {
+
+              const message =
+                `検索用ファイル ${loaded}件読込完了`;
+
+              console.log(message);
+              alert(message);
+
+              if (
+                typeof updateRepairStatus === "function"
+              ) {
+                updateRepairStatus(message);
+              }
+            }
+          };
+
+        reader.onerror =
+          function() {
+            console.error(
+              "ファイル読込失敗:",
+              file.name
+            );
+          };
+
+        reader.readAsText(file);
+
+      });
+
+    };
+
+  input.click();
 }
 
 /* ===============================
