@@ -1,0 +1,178 @@
+/* ===============================
+   FILE: 11_mobile_console.js
+   Mobile Debug Console
+=============================== */
+
+let mobileConsoleLogs = [];
+
+function initMobileConsole() {
+
+  hookMobileConsoleLog();
+  hookMobileConsoleError();
+
+}
+
+function hookMobileConsoleLog() {
+
+  ["log", "warn", "error"].forEach(type => {
+
+    const original =
+      console[type];
+
+    console[type] =
+      function(...args) {
+
+        original.apply(
+          console,
+          args
+        );
+
+        addMobileConsoleLog(
+          type,
+          args.map(x =>
+            typeof x === "object"
+              ? JSON.stringify(x, null, 2)
+              : String(x)
+          ).join(" ")
+        );
+
+      };
+
+  });
+
+}
+
+function hookMobileConsoleError() {
+
+  window.addEventListener(
+    "error",
+    event => {
+
+      addMobileConsoleLog(
+        "error",
+        [
+          event.message,
+          "line:" + event.lineno,
+          "column:" + event.colno,
+          event.filename
+        ].join("\n")
+      );
+
+    }
+  );
+
+}
+
+function addMobileConsoleLog(type, text) {
+
+  mobileConsoleLogs.push({
+    type,
+    text,
+    time:
+      new Date().toLocaleTimeString()
+  });
+
+  if (mobileConsoleLogs.length > 100) {
+    mobileConsoleLogs.shift();
+  }
+
+}
+
+function showMobileConsole() {
+
+  openFloatPanel(
+    "Mobile Console",
+    `
+<div class="float-panel-actions">
+  <button onclick="copyMobileConsole()">コピー</button>
+  <button onclick="clearMobileConsole()">クリア</button>
+  <button onclick="checkFunctionExistsPrompt()">関数確認</button>
+  <button onclick="runMobileConsoleEval()">JS実行</button>
+</div>
+
+<pre class="code-preview">
+${escapeHtml(
+  mobileConsoleLogs.map(log =>
+    `[${log.time}] ${log.type}\n${log.text}`
+  ).join("\n\n") || "ログなし"
+)}
+</pre>
+`
+  );
+
+}
+
+function copyMobileConsole() {
+
+  const text =
+    mobileConsoleLogs.map(log =>
+      `[${log.time}] ${log.type}\n${log.text}`
+    ).join("\n\n");
+
+  copyTextFallback(text);
+
+  alert("Consoleログをコピーしました");
+
+}
+
+function clearMobileConsole() {
+
+  mobileConsoleLogs = [];
+
+  showMobileConsole();
+
+}
+
+function checkFunctionExistsPrompt() {
+
+  const name =
+    prompt(
+      "確認する関数名",
+      "startMacroRecording"
+    );
+
+  if (!name) {
+    return;
+  }
+
+  alert(
+    name +
+    " : " +
+    typeof window[name]
+  );
+
+}
+
+function runMobileConsoleEval() {
+
+  const code =
+    prompt(
+      "実行するJS",
+      "typeof startMacroRecording"
+    );
+
+  if (!code) {
+    return;
+  }
+
+  try {
+
+    const result =
+      Function(
+        "return (" + code + ")"
+      )();
+
+    alert(
+      String(result)
+    );
+
+  } catch (e) {
+
+    alert(
+      "実行エラー\n\n" +
+      e.message
+    );
+
+  }
+
+}
