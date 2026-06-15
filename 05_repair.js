@@ -262,6 +262,36 @@ function scrollRepairTop() {
 
 }
 
+function scrollRepairBottom() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  editor.focus();
+
+  const end =
+    editor.value.length;
+
+  editor.scrollTop =
+    editor.scrollHeight;
+
+  editor.setSelectionRange(
+    end,
+    end
+  );
+
+  updateCursorPosition();
+
+  updateRepairStatus(
+    "最下部へ移動"
+  );
+
+}
+
 /* ===============================
    Repair Navigation
 =============================== */
