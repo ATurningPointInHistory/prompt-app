@@ -209,6 +209,74 @@ function loadRepairSearchFiles() {
   input.click();
 
 }
+
+/* ===============================
+   Global Search
+=============================== */
+
+let repairGlobalSearchResults = [];
+
+function searchAllRepairFiles() {
+
+  const keyword =
+    get("repairSearch")
+      ?.value
+      .trim();
+
+  if (!keyword) {
+    alert("検索文字を入力してください");
+    return;
+  }
+
+  const fileNames =
+    Object.keys(
+      repairSearchFileStore
+    );
+
+  if (!fileNames.length) {
+    alert("検索用ファイルが未読込です");
+    return;
+  }
+
+  const results = [];
+
+  fileNames.forEach(fileName => {
+
+    const file =
+      repairSearchFileStore[fileName];
+
+    const lines =
+      String(file.text || "")
+        .split("\n");
+
+    lines.forEach((line, index) => {
+
+      if (!line.includes(keyword)) {
+        return;
+      }
+
+      results.push({
+        fileName: fileName,
+        lineNumber: index + 1,
+        line: line
+      });
+
+    });
+
+  });
+
+  repairGlobalSearchResults =
+    results;
+
+  alert(
+    `全検索結果 ${results.length}件`
+  );
+
+  updateRepairStatus(
+    `全検索結果 ${results.length}件`
+  );
+
+}
 /* ===============================
    Search State
 =============================== */
