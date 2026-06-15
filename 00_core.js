@@ -315,3 +315,13 @@ function getAiPreset(aiTarget) {
 return presets[aiTarget] || presets.chatgpt;
 }
 
+let macroRecording = false;
+
+let currentMacroActions = [];
+
+let macroList =
+  loadJson(
+    "macroList",
+    {}
+  );
+
