@@ -539,26 +539,6 @@ function copyHealthFullResult() {
 /* ===============================
    Backup Helpers
 =============================== */
-
-function extractFunctionNames(html) {
-  const source =
-    String(html || "");
-
-  if (
-    typeof extractFunctionBlocksFromText ===
-    "function"
-  ) {
-    return extractFunctionBlocksFromText(source)
-      .map(item => item.name);
-  }
-
-  return [
-    ...source.matchAll(
-      /(?:^|\n)\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/g
-    )
-  ].map(m => m[1]);
-}
-
 function extractIds(html) {
   const parser = new DOMParser();
   const doc =
