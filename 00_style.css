@@ -1372,4 +1372,20 @@ mark {
   word-break: break-all;
 }
 
+.memo-tab.active {
+
+  background:
+    #2d8cff;
+
+  color:
+    white;
+
+  border:
+    1px solid #5ca9ff;
+
+  font-weight:
+    bold;
+
+}
+
 </style>
