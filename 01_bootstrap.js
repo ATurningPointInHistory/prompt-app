@@ -482,7 +482,7 @@ function buildRepairQuickToolsHtml() {
     id="repairQuickHeader"
     class="small"
     style="cursor:move;">
-    <hr>Quick<hr>
+    <hr>move<hr>
   </div>
 
   <button
@@ -517,6 +517,13 @@ function buildRepairSearchQuickHtml() {
   return `
 <div id="repairSearchQuickPanel"
      class="repair-search-quick-panel">
+
+<div
+  id="repairSearchQuickHeader"
+  class="small"
+  style="cursor:move;">
+  <hr>move<hr>
+</div>
 
   <button
     id="repairSearchQuickToggle"
