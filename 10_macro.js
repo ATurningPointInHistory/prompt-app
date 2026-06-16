@@ -153,37 +153,11 @@ function recordMacroClick(
   }
 
   currentMacroActions.push({
-
+    type: "onclick",
     label:
       btn.innerText,
-
     code:
       onclick
-
-  });
-
-}
-
-function addMacroInputStep() {
-
-  if (!macroRecording) {
-    alert("先に記録開始してください");
-    return;
-  }
-
-  const label =
-    prompt(
-      "入力項目名",
-      "検索文字"
-    );
-
-  if (!label) {
-    return;
-  }
-
-  currentMacroActions.push({
-    type: "input",
-    label
   });
 
 }
@@ -281,40 +255,49 @@ function showMacroDetail(name) {
   }
 
   openFloatPanel(
-    "Macro編集: " + name,
+    `Macro : ${name}`,
     `
-<div class="macro-edit-box">
+<div class="macro-detail">
 
-  <input
-    id="macroEditName"
-    value="${escapeHtml(name)}">
+<pre
+class="code-preview"
+style="
+max-height:60vh;
+overflow:auto;
+">
+${escapeHtml(
+  JSON.stringify(
+    actions,
+    null,
+    2
+  )
+)}
+</pre>
 
-  <textarea
-    id="macroEditJson"
-    rows="14"
-    style="width:100%;">${escapeHtml(
-      JSON.stringify(
-        actions,
-        null,
-        2
-      )
-    )}</textarea>
+<div
+style="
+display:flex;
+gap:4px;
+margin-top:6px;
+">
 
-  <div class="macro-edit-actions">
+<button
+onclick="
+runMacro(
+'${name}'
+)">
+▶ 実行
+</button>
 
-    <button onclick='saveMacroDetail(${JSON.stringify(name)})'>
-      保存
-    </button>
+<button
+onclick="
+showMacroEditor(
+'${name}'
+)">
+✏ 編集
+</button>
 
-    <button onclick='runMacro(${JSON.stringify(name)})'>
-      実行
-    </button>
-
-    <button onclick='showMacroList()'>
-      戻る
-    </button>
-
-  </div>
+</div>
 
 </div>
 `
@@ -380,6 +363,64 @@ function saveMacroDetail(oldName) {
   );
 
   showMacroList();
+
+}
+
+function showMacroEditor(name) {
+
+  const actions =
+    macroList[name];
+
+  if (!actions) {
+    alert("Macroなし");
+    return;
+  }
+
+  openFloatPanel(
+    "Macro編集: " + name,
+    `
+<div class="macro-edit-box">
+
+<input
+  id="macroEditName"
+  value="${escapeHtml(name)}">
+
+<textarea
+  id="macroEditJson"
+  rows="14"
+  style="width:100%;">${escapeHtml(
+    JSON.stringify(
+      actions,
+      null,
+      2
+    )
+  )}</textarea>
+
+<div
+  style="
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:4px;
+    margin-top:6px;
+  ">
+
+<button onclick='saveMacroDetail(${JSON.stringify(name)})'>
+保存
+</button>
+
+<button onclick='runMacro(${JSON.stringify(name)})'>
+実行
+</button>
+
+<button onclick='showMacroList()'>
+戻る
+</button>
+
+</div>
+
+</div>
+`
+  );
 
 }
 
