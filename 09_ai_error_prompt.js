@@ -259,6 +259,32 @@ function copyErrorPrompt() {
   );
 }
 
+function openErrorPromptInputPopup() {
+
+  openFloatPanel(
+    "🧯 AIエラー調査プロンプト生成",
+    `
+<textarea
+id="aiErrorPromptInput"
+style="
+width:100%;
+height:45vh;
+font-family:monospace;
+font-size:11px;
+white-space:pre;
+"
+placeholder="ここにエラー情報を貼り付け"
+></textarea>
+
+<div class="float-panel-actions">
+<button onclick="generateErrorPromptFromPopup()">
+生成
+</button>
+</div>
+`
+  );
+}
+
 function extractErrorField(
   text,
   keyword
