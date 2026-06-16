@@ -1559,15 +1559,25 @@ function jumpToLine(lineNumber) {
 =============================== */
 
 function toggleToolCategory(id) {
-  const box = get(id);
+
+  const box =
+    get(id);
+
+  if (!box) {
+    return;
+  }
+
   const btn =
     document.querySelector(
       `[onclick="toggleToolCategory('${id}')"]`
     );
+
   const isOpen =
     getComputedStyle(box).display !== "none";
+
   box.style.display =
     isOpen ? "none" : "grid";
+
   if (btn) {
     btn.innerText =
       btn.innerText.replace(
@@ -1578,8 +1588,14 @@ function toggleToolCategory(id) {
 }
 
 function toggleCommandMenu() {
+
   const menu =
     get("commandMenu");
+
+  if (!menu) {
+    return;
+  }
+
   menu.style.display =
     menu.style.display === "none"
       ? "block"
@@ -1842,6 +1858,3 @@ window.exportProjectConfig =
 
 window.importProjectConfig =
   importProjectConfig;
-
-console.log("CHANGELOG");
-console.table(CHANGELOG);
