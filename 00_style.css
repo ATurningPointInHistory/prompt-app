@@ -353,22 +353,29 @@ body.dark button.active-panel {
 =============================== */
 
 #floatPanel{
-  position:fixed;
-  right:18px;
-  bottom:88px;
-  left:auto;
-  top:auto;
-  z-index:998;
-  width:min(280px, calc(100vw - 36px));
-  max-height:34vh;
-  overflow-y:auto;
-  background:rgba(36,37,38,0.88);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,0.18);
-  border-radius:15px;
-  padding:12px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.25);
+  position: fixed;
+  right: 18px;
+  bottom: 88px;
+  left: 40px;
+  top: auto;
+
+  z-index: 998;
+
+  width: min(92vw, 760px);
+  max-width: 92vw;
+
+  max-height: 82vh;
+  overflow: auto;
+
+  background: rgba(36,37,38,0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 15px;
+  padding: 12px;
+
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
 }
 
 body:not(.dark) #floatPanel{
@@ -1328,16 +1335,7 @@ mark {
   font-size: 10px;
   max-height: 120px;
 }
-/* ===============================
-   Float Panel Size
-=============================== */
 
-#floatPanel {
-  width: min(92vw, 760px);
-  max-width: 92vw;
-  max-height: 82vh;
-  overflow: auto;
-}
 
 /* ===============================
    Memo Box UI
