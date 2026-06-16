@@ -540,8 +540,8 @@ body:not(.dark) .repair-tools-panel{
 .repair-quick-favorite-panel {
   position: fixed;
   left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 110px;
+  transform: none;
 
   z-index: 30000;
 
@@ -574,26 +574,19 @@ body:not(.dark) .repair-tools-panel{
 
 .repair-quick-favorite-toggle {
   position: fixed;
-
   left: 58px;
-  top: 50%;
-  transform: translateY(-50%);
-
+  top: 110px;
+  transform: none;
   width: 28px;
   height: 36px;
-
   padding: 0;
   border-radius: 0 6px 6px 0;
-
   background: var(--card);
   color: var(--text);
-
   border: 1px solid var(--border);
   border-left: none;
-
   font-size: 14px;
   line-height: 1;
-
   z-index: 30001;
 }
 
@@ -612,17 +605,15 @@ body:not(.dark) .repair-tools-panel{
 }
 
 .repair-quick-favorite-btn {
-  width: 48px;
-  min-height: 34px;
-
+  width:44px;
+  height:38px;
   padding: 0;
   border-radius: 6px;
-
-  font-size: 15px;
+  font-size:12px;
   line-height: 1;
-
   text-align: center;
   white-space: normal;
+  min-height: 34px;
 }
 
 /* ===============================
