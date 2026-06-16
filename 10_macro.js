@@ -252,6 +252,11 @@ ${
     🗑
   </button>
 
+  <button
+    onclick='showMacroDetail(${JSON.stringify(name)})'>
+    ✏
+  </button>
+
   <span class="macro-name">
     ${escapeHtml(name)}
   </span>
@@ -262,6 +267,119 @@ ${
 </div>
 `
   );
+
+}
+
+function showMacroDetail(name) {
+
+  const actions =
+    macroList[name];
+
+  if (!actions) {
+    alert("Macroなし");
+    return;
+  }
+
+  openFloatPanel(
+    "Macro編集: " + name,
+    `
+<div class="macro-edit-box">
+
+  <input
+    id="macroEditName"
+    value="${escapeHtml(name)}">
+
+  <textarea
+    id="macroEditJson"
+    rows="14"
+    style="width:100%;">${escapeHtml(
+      JSON.stringify(
+        actions,
+        null,
+        2
+      )
+    )}</textarea>
+
+  <div class="macro-edit-actions">
+
+    <button onclick='saveMacroDetail(${JSON.stringify(name)})'>
+      保存
+    </button>
+
+    <button onclick='runMacro(${JSON.stringify(name)})'>
+      実行
+    </button>
+
+    <button onclick='showMacroList()'>
+      戻る
+    </button>
+
+  </div>
+
+</div>
+`
+  );
+
+}
+
+function saveMacroDetail(oldName) {
+
+  const name =
+    get("macroEditName")
+      ?.value
+      .trim();
+
+  const json =
+    get("macroEditJson")
+      ?.value
+      .trim();
+
+  if (!name || !json) {
+    alert("Macro名または内容が空です");
+    return;
+  }
+
+  let actions;
+
+  try {
+    actions =
+      JSON.parse(json);
+  } catch (e) {
+    alert(
+      "JSON形式が正しくありません\n\n" +
+      e.message
+    );
+    return;
+  }
+
+  if (!Array.isArray(actions)) {
+    alert("Macro内容は配列である必要があります");
+    return;
+  }
+
+  if (
+    oldName !== name &&
+    macroList[name]
+  ) {
+    alert("同名のMacroが既にあります");
+    return;
+  }
+
+  delete macroList[oldName];
+
+  macroList[name] =
+    actions;
+
+  localStorage.setItem(
+    "macroList",
+    JSON.stringify(macroList)
+  );
+
+  updateRepairStatus(
+    "Macro保存: " + name
+  );
+
+  showMacroList();
 
 }
 
