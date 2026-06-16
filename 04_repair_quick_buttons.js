@@ -362,3 +362,25 @@ function updateRepairQuickFavoriteVisibility() {
       "flex";
   }
 }
+
+/* ===============================
+   Repair Quick Favorite Expose
+=============================== */
+
+window.initRepairQuickFavoritePanel =
+  initRepairQuickFavoritePanel;
+
+window.renderRepairQuickFavoritePanel =
+  renderRepairQuickFavoritePanel;
+
+window.toggleRepairQuickFavoritePanel =
+  toggleRepairQuickFavoritePanel;
+
+window.toggleRepairFavoriteButton =
+  toggleRepairFavoriteButton;
+
+window.runRepairQuickFavoriteAction =
+  runRepairQuickFavoriteAction;
+
+window.updateRepairQuickFavoriteVisibility =
+  updateRepairQuickFavoriteVisibility;
