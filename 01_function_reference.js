@@ -123,23 +123,21 @@ function countFunctionReferences(
     return 0;
   }
 
-  const suffix =
-    withCall
-      ? "\\s*\\("
-      : "";
+  const pattern =
+    "\\b" +
+    escapeRegExp(target) +
+    "\\b" +
+    (
+      withCall
+        ? "\\s*\\("
+        : ""
+    );
 
   return (
     source.match(
-      new RegExp(
-        "\\b" +
-        escapeRegExp(target) +
-        "\\b" +
-        suffix,
-        "g"
-      )
+      new RegExp(pattern, "g")
     ) || []
   ).length;
-
 }
 
 function extractFunctionNames(
