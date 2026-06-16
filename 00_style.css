@@ -1193,6 +1193,27 @@ mark {
   user-select: none;
 }
 
+.macro-step-row {
+  font-size: 11px;
+  padding: 4px;
+  margin-bottom: 4px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+
+.macro-step-row button {
+  font-size: 10px;
+  padding: 2px 5px;
+  min-height: 22px;
+  border-radius: 3px;
+}
+
+.macro-step-action {
+  font-size: 10px;
+  opacity: 0.75;
+  word-break: break-all;
+}
+
 /* ===============================
    FUNCTION LIST
 =============================== */
