@@ -50,10 +50,14 @@ function classifyAiChanges(
   }
 
   const config =
-    getProjectConfig();
+    typeof getProjectConfig === "function"
+      ? getProjectConfig()
+      : {};
 
   const rules =
-    getProjectConfig().moduleRules;
+    Array.isArray(config.moduleRules)
+      ? config.moduleRules
+      : [];
 
   let bestFile =
     "unknown";
@@ -65,19 +69,22 @@ function classifyAiChanges(
 
     let score = 0;
 
-    rule.words.forEach(word => {
+    const words =
+      Array.isArray(rule.words)
+        ? rule.words
+        : [];
 
+    words.forEach(word => {
       if (name.includes(word)) {
         score++;
       }
-
     });
 
     if (score > bestScore) {
       bestScore = score;
-      bestFile = rule.file;
+      bestFile =
+        rule.file || "unknown";
     }
-
   });
 
   return {
