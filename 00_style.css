@@ -607,17 +607,19 @@ body:not(.dark) .repair-tools-panel{
   position: fixed;
 
   top: 0;
-  right: var(--repair-side-right);
-  bottom: var(--repair-tools-btn-space);
+  right: 0;
+  bottom: auto;
 
   z-index: 10000;
 
-  width: var(--repair-side-width);
+  width: 60px;
+  max-height: calc(100vh - 44px);
+
   background: var(--card);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 0;
-  padding: var(--repair-side-padding);
+  padding: 8px;
   box-shadow: none;
 
   display: none;
@@ -625,7 +627,6 @@ body:not(.dark) .repair-tools-panel{
   gap: 6px;
 
   overflow: auto;
-
   transition: right 0.25s ease;
 }
 
@@ -636,7 +637,7 @@ body:not(.dark) .repair-tools-panel{
 .repair-search-quick-toggle{
   position: absolute;
   top: 50%;
-  left: -32px;
+  left: -30px;
   transform: translateY(-50%);
 
   width: 30px;
