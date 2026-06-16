@@ -214,22 +214,23 @@ ${
   names.map(name => `
 <div class="macro-row">
 
-  <button
-    class="macro-mini-btn"
-    onclick='runMacro(${JSON.stringify(name)})'>
-    ▶
-  </button>
+<button
+  class="macro-mini-btn"
+  onclick='runMacro(${JSON.stringify(name)})'>
+  ▶
+</button>
 
-  <button
-    class="macro-mini-btn"
-    onclick='deleteMacro(${JSON.stringify(name)})'>
-    🗑
-  </button>
+<button
+  class="macro-mini-btn"
+  onclick='showMacroStepEditor(${JSON.stringify(name)})'>
+  ✏
+</button>
 
-  <button
-    onclick='showMacroDetail(${JSON.stringify(name)})'>
-    ✏
-  </button>
+<button
+  class="macro-mini-btn"
+  onclick='deleteMacro(${JSON.stringify(name)})'>
+  🗑
+</button>
 
   <span class="macro-name">
     ${escapeHtml(name)}
@@ -420,6 +421,178 @@ function showMacroEditor(name) {
 
 </div>
 `
+  );
+
+}
+
+function showMacroStepEditor(name) {
+
+  const actions =
+    macroList[name];
+
+  if (!actions) {
+    alert("Macroなし");
+    return;
+  }
+
+  openFloatPanel(
+    `Macro Step : ${name}`,
+    actions.map(
+      (step, index) => `
+
+<div class="function-item">
+
+<b>
+#${index + 1}
+</b>
+
+<br>
+
+${escapeHtml(
+  step.type || ""
+)}
+
+<br>
+
+${escapeHtml(
+  step.action ||
+  step.label ||
+  step.code ||
+  ""
+)}
+
+<br><br>
+
+<button
+onclick="
+moveMacroStepUp(
+'${name}',
+${index}
+)">
+⬆
+</button>
+
+<button
+onclick="
+moveMacroStepDown(
+'${name}',
+${index}
+)">
+⬇
+</button>
+
+<button
+onclick="
+deleteMacroStep(
+'${name}',
+${index}
+)">
+🗑
+</button>
+
+</div>
+
+`
+    ).join("")
+  );
+
+}
+
+function deleteMacroStep(
+  name,
+  index
+) {
+
+  const actions =
+    macroList[name];
+
+  if (!actions) {
+    return;
+  }
+
+  actions.splice(
+    index,
+    1
+  );
+
+  localStorage.setItem(
+    "macroList",
+    JSON.stringify(
+      macroList
+    )
+  );
+
+  showMacroStepEditor(
+    name
+  );
+
+}
+
+function moveMacroStepUp(
+  name,
+  index
+) {
+
+  if (index <= 0) {
+    return;
+  }
+
+  const actions =
+    macroList[name];
+
+  [
+    actions[index - 1],
+    actions[index]
+  ] = [
+    actions[index],
+    actions[index - 1]
+  ];
+
+  localStorage.setItem(
+    "macroList",
+    JSON.stringify(
+      macroList
+    )
+  );
+
+  showMacroStepEditor(
+    name
+  );
+
+}
+
+function moveMacroStepDown(
+  name,
+  index
+) {
+
+  const actions =
+    macroList[name];
+
+  if (
+    index >=
+    actions.length - 1
+  ) {
+    return;
+  }
+
+  [
+    actions[index],
+    actions[index + 1]
+  ] = [
+    actions[index + 1],
+    actions[index]
+  ];
+
+  localStorage.setItem(
+    "macroList",
+    JSON.stringify(
+      macroList
+    )
+  );
+
+  showMacroStepEditor(
+    name
   );
 
 }
