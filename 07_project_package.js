@@ -9,11 +9,9 @@ async function saveProjectPackage() {
   try {
 
     if (typeof JSZip === "undefined") {
-
       alert(
         "JSZipが読み込まれていません"
       );
-
       return;
     }
 
@@ -23,44 +21,29 @@ async function saveProjectPackage() {
     const timestamp =
       new Date()
         .toISOString()
-        .replace(/[:.]/g,"-");
-
-    // index.html
+        .replace(/[:.]/g, "-");
 
     const html =
-
       "<!DOCTYPE html>\n" +
-
-      document.documentElement
-        .outerHTML;
+      document.documentElement.outerHTML;
 
     zip.file(
       "index.html",
       html
     );
 
-    // 分割JS
-
-    const files = [
-      "00_bootstrap.js",
-      "01_core.js",
-      "02_prompt.js",
-      "03_data.js",
-      "04_tools.js",
-      "05_repair.js",
-      "06_search.js",
-      "07_health_dependency.js",
-      "07_health_diagnose.js",
-      "07_health_unused.js",
-      "07_backup_health.js",
-      "08_function_relation.js",
-      "08_ai_analyzer.js",
-      "08_ai_apply.js",
-      "08_ai_test.js",
-      "08_ai_integrator.js",
-      "09_ai_instruction.js",
-      "99_init.js"
-    ];
+    const files =
+      typeof getExternalScriptSrcList === "function"
+        ? getExternalScriptSrcList(html)
+            .filter(src =>
+              !/^https?:\/\//i.test(src)
+            )
+            .map(src =>
+              src
+                .replace(/^\.\//, "")
+                .split("?")[0]
+            )
+        : [];
 
     for (const file of files) {
 
@@ -81,52 +64,44 @@ async function saveProjectPackage() {
           text
         );
 
-      } catch {}
-
+      } catch (e) {
+        console.warn(
+          "package file skip:",
+          file,
+          e
+        );
+      }
     }
 
-    // 情報
-
     zip.file(
-
       "project_info.json",
+      JSON.stringify(
+        {
+          project:
+            "AIプロンプト生成Pro",
 
-      JSON.stringify({
+          version:
+            get("versionLabel")
+              ?.innerText ||
+            "unknown",
 
-        project:
-          "AIプロンプト生成Pro",
+          savedAt:
+            new Date()
+              .toISOString(),
 
-        version:
-          get("versionLabel")
-            ?.innerText ||
+          files,
 
-          "unknown",
-
-        savedAt:
-          new Date()
-            .toISOString(),
-
-        functionCount:
-          (
-            document.body.innerHTML
-              .match(
-                /function\s+[a-zA-Z0-9_$]+\s*\(/g
-              ) || []
-          ).length
-
-      },
-
-      null,
-
-      2)
-
+          fileCount:
+            files.length
+        },
+        null,
+        2
+      )
     );
 
     const blob =
       await zip.generateAsync({
-
-        type:"blob"
-
+        type: "blob"
       });
 
     const a =
@@ -136,35 +111,27 @@ async function saveProjectPackage() {
       URL.createObjectURL(blob);
 
     a.download =
-
       `AIPro_Project_${timestamp}.zip`;
 
     a.click();
 
-    setTimeout(()=>{
-
+    setTimeout(() => {
       URL.revokeObjectURL(
         a.href
       );
-
-    },1000);
+    }, 1000);
 
     alert(
       "プロジェクト保存完了"
     );
 
-  } catch(e) {
+  } catch (e) {
 
     alert(
-
       "保存失敗\n\n" +
-
       e.message
-
     );
-
   }
-
 }
 
 function analyzeProjectJsDependency() {
