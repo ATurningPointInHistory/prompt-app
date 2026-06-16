@@ -141,7 +141,7 @@ function showMemoBox() {
     memoBoxList
       .map((item, index) => `
 <button
-  class="tab ${
+  class="memo-tab ${
     index === memoBoxActiveIndex
       ? "active"
       : ""
@@ -160,11 +160,11 @@ ${escapeHtml(item.name)}
   openFloatPanel(
     "MEMO BOX",
     `
-<div class="tab-container">
+<div class="memo-tabs">
 ${tabs}
 
 <button
-  class="tab"
+  class="memo-tab"
   onclick="addMemoBox()">
 ＋
 </button>
@@ -172,16 +172,15 @@ ${tabs}
 
 <input
   id="memoBoxName"
+  class="memo-name-input"
   value="${escapeHtml(current.name)}">
 
 <textarea
   id="memoBoxText"
-  rows="12"
-  style="width:100%;">
-${escapeHtml(current.text)}
-</textarea>
+  class="memo-textarea"
+  rows="12">${escapeHtml(current.text)}</textarea>
 
-<div class="btn-group">
+<div class="memo-actions">
 
 <button onclick="saveMemoBoxCurrent()">
 💾保存
