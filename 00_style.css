@@ -573,6 +573,10 @@ body:not(.dark) .repair-tools-panel{
   left: -82px;
 }
 
+.repair-quick-favorite-panel.closed .repair-quick-favorite-toggle {
+  right: -34px;
+}
+
 .repair-quick-favorite-toggle {
   position: absolute;
 
