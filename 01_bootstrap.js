@@ -113,6 +113,14 @@ function switchAppPage(mode) {
   if (typeof updateRepairSearchQuickVisibility === "function") {
     updateRepairSearchQuickVisibility();
   }
+
+  if (typeof initRepairQuickFavoritePanel === "function") {
+    initRepairQuickFavoritePanel();
+  }
+
+  if (typeof   updateRepairQuickFavoriteVisibility === "function") {
+    updateRepairQuickFavoriteVisibility();
+  }
 }
 
 function isRepairMode() {
