@@ -317,11 +317,11 @@ body.dark button.active-panel {
   right: 18px;
   bottom: 18px;
   z-index: 999;
-  width: 58px;
-  height: 58px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   padding: 0;
-  font-size: 22px;
+  font-size: 18px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.25);
 }
 
@@ -478,15 +478,31 @@ body:not(.dark) #floatPanel{
 }
 
 /* ===============================
+   REPAIR FLOAT PANEL LAYOUT
+   左Quick / 中央Tools / 右Search
+=============================== */
+
+:root{
+  --repair-side-left: 0px;
+  --repair-side-right: 0px;
+  --repair-side-width: 60px;
+  --repair-side-padding: 8px;
+  --repair-side-total: 78px;
+
+  --repair-bottom: 0px;
+  --repair-tools-btn-space: 44px;
+}
+
+/* ===============================
    REPAIR TOOLS PANEL
 =============================== */
 
 .repair-tools-panel{
   position: fixed;
 
-  left: 76px;      /* 左パネル幅 + 左位置 */
-  right: 76px;     /* 右パネル幅 + 右位置 */
-  bottom: 0;       /* 最下段に固定 */
+  left: var(--repair-side-total);
+  right: var(--repair-side-total);
+  bottom: var(--repair-bottom);
 
   z-index: 999;
 
@@ -498,7 +514,7 @@ body:not(.dark) #floatPanel{
   background: rgba(36,37,38,0.88);
   border: 1px solid rgba(255,255,255,0.18);
 
-  border-radius: 0;   /* 角を四角 */
+  border-radius: 0;
   padding: 8px;
 
   box-shadow: none;
@@ -524,37 +540,42 @@ body:not(.dark) .repair-tools-panel{
    REPAIR QUICK PANEL
 =============================== */
 
-.repair-quick-panel {
+.repair-quick-panel{
   position: fixed;
+
   top: auto;
-  bottom: 80px;
-  left: 12px;
+  bottom: var(--repair-bottom);
+  left: var(--repair-side-left);
+
   z-index: 10000;
-  width: 60px;
+
+  width: var(--repair-side-width);
   background: var(--card);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 2px;
-  padding: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  border-radius: 0;
+  padding: var(--repair-side-padding);
+  box-shadow: none;
+
   display: none;
   flex-direction: column;
   gap: 6px;
+
   transition: left 0.25s ease;
 }
 
-.repair-quick-panel.closed {
-  left: -56px;
+.repair-quick-panel.closed{
+  left: calc(-1 * var(--repair-side-total));
 }
 
-.repair-quick-toggle {
+.repair-quick-toggle{
   position: absolute;
   top: 50%;
-  right: -34px;
+  right: -32px;
   transform: translateY(-50%);
 
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
 
   display: flex;
   align-items: center;
@@ -563,7 +584,7 @@ body:not(.dark) .repair-tools-panel{
   padding: 0;
   line-height: 1;
 
-  border-radius: 0 8px 8px 0;
+  border-radius: 0;
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--text);
@@ -571,50 +592,55 @@ body:not(.dark) .repair-tools-panel{
   z-index: 10001;
 }
 
-.repair-quick-panel .float-list-btn {
+.repair-quick-panel .float-list-btn{
   font-size: 9px;
   padding: 2px;
-  border-radius: 2px;
+  border-radius: 0;
   text-align: left;
 }
 
-.repair-search-quick-panel {
-  transition: right 0.25s ease;
-}
 /* ===============================
    REPAIR SEARCH QUICK PANEL
 =============================== */
 
-.repair-search-quick-panel {
+.repair-search-quick-panel{
   position: fixed;
-  top: 80px;
-  right: 12px;
+
+  top: 0;
+  right: var(--repair-side-right);
+  bottom: var(--repair-tools-btn-space);
+
   z-index: 10000;
-  width: 60px;
+
+  width: var(--repair-side-width);
   background: var(--card);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 2px;
-  padding: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  border-radius: 0;
+  padding: var(--repair-side-padding);
+  box-shadow: none;
+
   display: none;
   flex-direction: column;
   gap: 6px;
+
+  overflow: auto;
+
   transition: right 0.25s ease;
 }
 
-.repair-search-quick-panel.closed {
-  right: -56px;
+.repair-search-quick-panel.closed{
+  right: calc(-1 * var(--repair-side-total));
 }
 
-.repair-search-quick-toggle {
+.repair-search-quick-toggle{
   position: absolute;
   top: 50%;
-  left: -34px;
+  left: -32px;
   transform: translateY(-50%);
 
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
 
   display: flex;
   align-items: center;
@@ -623,7 +649,7 @@ body:not(.dark) .repair-tools-panel{
   padding: 0;
   line-height: 1;
 
-  border-radius: 8px 0 0 8px;
+  border-radius: 0;
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--text);
@@ -631,15 +657,32 @@ body:not(.dark) .repair-tools-panel{
   z-index: 10001;
 }
 
-.repair-search-quick-panel .float-list-btn {
+.repair-search-quick-panel .float-list-btn{
   font-size: 9px;
   padding: 2px;
-  border-radius: 2px;
+  border-radius: 0;
   text-align: left;
 }
 
+/* ===============================
+   TOOLS BUTTON
+=============================== */
+
+#toolsBtn{
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ===============================
+   REPAIR SEARCH / REPLACE POPUP
+=============================== */
+
 #repairSearchPopup,
-#repairReplacePopup {
+#repairReplacePopup{
   position: fixed;
   top: 12px;
   right: 90px;
@@ -648,53 +691,52 @@ body:not(.dark) .repair-tools-panel{
   padding: 8px;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow:
-    0 4px 16px rgba(0,0,0,0.3);
+  border-radius: 0;
+  box-shadow: none;
 }
 
-#repairSearchPopup button {
+#repairSearchPopup button{
   padding: 4px 6px;
   font-size: 10px;
   min-height: 20px;
 }
 
-.repair-search-toolbar {
+.repair-search-toolbar{
   display: flex;
   gap: 4px;
   align-items: center;
 }
 
-.repair-search-toolbar input {
+.repair-search-toolbar input{
   flex: 1;
   margin: 0;
 }
 
-.repair-search-toolbar button {
+.repair-search-toolbar button{
   width: 48px;
   height: 26px;
   padding: 0;
   font-size: 10px;
 }
 
-.repair-replace-toolbar {
+.repair-replace-toolbar{
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.repair-replace-toolbar input {
+.repair-replace-toolbar input{
   width: 100%;
   margin: 0;
 }
 
-.repair-replace-actions {
+.repair-replace-actions{
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
 }
 
-.repair-replace-actions button {
+.repair-replace-actions button{
   width: 100%;
   height: 28px;
   padding: 0;
