@@ -161,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
     safeRun(initRepairIde, "initRepairIde");
 
     safeRun(initRepairQuickPanel, "initRepairQuickPanel");
-    safeRun(initRepairToolsPanel, "initRepairToolsPanel");
     safeRun(initRepairSearchQuickPanel, "initRepairSearchQuickPanel");
 
     safeRun(initImportFileEvents, "initImportFileEvents");
