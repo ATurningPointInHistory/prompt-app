@@ -519,77 +519,52 @@ function buildRepairSearchQuickHtml() {
      class="repair-search-quick-panel">
 
   <button
-    class="float-list-btn"
-    onclick="toggleRepairSearchPopup()">
-    🔍<br>検索
+    id="repairSearchQuickToggle"
+    class="repair-search-quick-toggle"
+    onclick="toggleRepairSearchQuickPanel()">
+    ▶
   </button>
 
-  <button
-    class="float-list-btn"
-    onclick="toggleRepairReplacePopup()">
-    🔁<br>置換
-  </button>
+  <button class="float-list-btn" onclick="toggleRepairSearchPopup()">🔍<br>検索</button>
+  <button class="float-list-btn" onclick="toggleRepairReplacePopup()">🔁<br>置換</button>
+  <button class="float-list-btn" onclick="searchRepairNext()">⏭<br>次</button>
+  <button class="float-list-btn" onclick="loadRepairSearchFiles()">📁<br>読込</button>
+  <button class="float-list-btn" onclick="loadCurrentProjectSearchFiles()">📦<br>現在</button>
+  <button class="float-list-btn" onclick="showRepairSearchFiles()">📋<br>一覧</button>
+  <button class="float-list-btn" onclick="showSearchHistory()">🕘<br>履歴</button>
+  <button class="float-list-btn" onclick="searchAllRepairFiles()">📚<br>全検</button>
 
-  <button
-    class="float-list-btn"
-    onclick="searchRepairNext()">
-    ⏭<br>次
-  </button>
-
-  <button
-    class="float-list-btn"
-    onclick="loadRepairSearchFiles()">
-    📁<br>読込
-  </button>
-
-  <button
-    class="float-list-btn"
-    onclick="loadCurrentProjectSearchFiles()">
-    📦<br>現在
-  </button>
-
-  <button
-    class="float-list-btn"
-    onclick="showRepairSearchFiles()">
-    📋<br>一覧
-  </button>
-
-  <button
-    class="float-list-btn"
-    onclick="showSearchHistory()">
-    🕘<br>履歴
-  </button>
-
-  <button
-    class="float-list-btn"
-    onclick="searchAllRepairFiles()">
-    📚<br>全検
-  </button>
-
-  <button
-    class="float-list-btn" 
-    onclick="startMacroRecording()">
-    🔴 Macro記録
-  </button>
-
-  <button class="float-list-btn"
-    onclick="stopMacroRecording()">
-    ⏹ Macro保存
-  </button>
-
-  <button class="float-list-btn"
-    onclick="showMacroList()">
-    ▶ Macro実行
-  </button>
-
-  <button
-    class="float-list-btn"
-    onclick="addMacroInputStep()">
-    ⌨<br>入力
-  </button>
+  <button class="float-list-btn" onclick="startMacroRecording()">🔴<br>記録</button>
+  <button class="float-list-btn" onclick="stopMacroRecording()">⏹<br>保存</button>
+  <button class="float-list-btn" onclick="showMacroList()">▶<br>実行</button>
+  <button class="float-list-btn" onclick="addMacroInputStep()">⌨<br>入力</button>
 
 </div>
 `;
+}
+
+function toggleRepairSearchQuickPanel() {
+
+  const panel =
+    get("repairSearchQuickPanel");
+
+  const toggle =
+    get("repairSearchQuickToggle");
+
+  if (!panel || !toggle) {
+    return;
+  }
+
+  const closed =
+    panel.classList.toggle(
+      "closed"
+    );
+
+  toggle.textContent =
+    closed
+      ? "◀"
+      : "▶";
+
 }
 
 function closeRepairPopups() {
