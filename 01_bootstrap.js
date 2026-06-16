@@ -29,34 +29,31 @@ function closeAllManagers() {
 }
 
 function updatePanelButtonStates() {
-  const templateBtn = get("templateBtn");
-  const dangerBtn = get("dangerBtn");
-  const patternBtn = get("patternBtn");
-  const aiPresetBtn = get("aiPresetBtn");
-  if (templateBtn) {
-    templateBtn.classList.toggle(
+
+  const pairs = [
+    ["templateBtn", "template-manager"],
+    ["dangerBtn", "danger-manager"],
+    ["patternBtn", "pattern-manager"],
+    ["aiPresetBtn", "ai-preset-manager"]
+  ];
+
+  pairs.forEach(([btnId, panelId]) => {
+
+    const btn =
+      get(btnId);
+
+    const panel =
+      get(panelId);
+
+    if (!btn || !panel) {
+      return;
+    }
+
+    btn.classList.toggle(
       "active-panel",
-      get("template-manager").style.display !== "none"
+      panel.style.display !== "none"
     );
-  }
-  if (dangerBtn) {
-    dangerBtn.classList.toggle(
-      "active-panel",
-      get("danger-manager").style.display !== "none"
-    );
-  }
-  if (patternBtn) {
-    patternBtn.classList.toggle(
-      "active-panel",
-      get("pattern-manager").style.display !== "none"
-    );
-  }
-  if (aiPresetBtn) {
-    aiPresetBtn.classList.toggle(
-      "active-panel",
-    get("ai-preset-manager").style.display !== "none"
-    );
-  }
+  });
 }
 
 /* ===============================
@@ -529,22 +526,22 @@ function resetFloatPanelPosition() {
   panel.style.bottom = "88px";
 }
 
-function closeFloatPanelKeepEditorSelection() {
-  const editor = get("repairEditor");
-  const start = editor ? editor.selectionStart : null;
-  const end = editor ? editor.selectionEnd : null;
+function closeFloatPanel(){
 
-  closeFloatPanel();
+  const panel =
+    get("floatPanel");
 
-  if (editor && start !== null && end !== null) {
-    setTimeout(() => {
-      editor.focus();
-      editor.setSelectionRange(start, end);
+  if (panel) {
+    panel.style.display =
+      "none";
+  }
 
-      if (typeof updateCursorPosition === "function") {
-        updateCursorPosition();
-      }
-    }, 0);
+  const btn =
+    get("toolsBtn");
+
+  if (btn) {
+    btn.innerText =
+      "⚙";
   }
 }
 
