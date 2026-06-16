@@ -323,7 +323,7 @@ function buildRepairToolsHtml() {
 🤖 AIコード解析
 </button>
 
-<button class="float-list-btn" onclick="generateErrorPrompt()">
+<button class="float-list-btn" onclick="openErrorPromptInputPopup()">
 🧯 AIエラー調査プロンプト生成
 </button>
 
