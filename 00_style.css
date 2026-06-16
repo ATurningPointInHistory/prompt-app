@@ -532,75 +532,34 @@ body:not(.dark) .repair-tools-panel{
 
 .repair-tools-panel-body{
   overflow: auto;
-}
 /* ===============================
    Repair Quick Favorite Panel
    左中央固定・お気に入りボタン
 =============================== */
-
 .repair-quick-favorite-panel {
-  position: fixed;
-
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-
-  z-index: 30000;
-
-  width: 82px;
-  max-height: 74vh;
   overflow-y: auto;
-
-  display: none;
-  flex-direction: column;
-  gap: 6px;
-
-  padding: 8px 6px;
-
-  background: var(--card);
-  color: var(--text);
-
-  border: 1px solid var(--border);
-  border-left: none;
-  border-radius: 0 10px 10px 0;
-
-  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
-
-  transition: left 0.25s ease;
-}
-
-.repair-quick-favorite-panel.closed {
-  left: -82px;
-}
-
-.repair-quick-favorite-panel.closed .repair-quick-favorite-toggle {
-  right: -34px;
+  overflow-x: visible;
 }
 
 .repair-quick-favorite-toggle {
-  position: absolute;
+  position: fixed;
 
+  left: 58px;
   top: 50%;
-  right: -32px;
   transform: translateY(-50%);
 
-  width: 32px;
-  height: 44px;
-
-  padding: 0;
-
-  border-radius: 0 8px 8px 0;
-
-  background: var(--card);
-  color: var(--text);
-
-  border: 1px solid var(--border);
-  border-left: none;
-
-  font-size: 16px;
-  font-weight: bold;
+  width: 28px;
+  height: 36px;
 
   z-index: 30001;
+}
+
+.repair-quick-favorite-panel.closed {
+  left: -58px;
+}
+
+.repair-quick-favorite-panel.closed .repair-quick-favorite-toggle {
+  left: 0;
 }
 
 .repair-quick-favorite-title {
