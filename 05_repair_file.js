@@ -276,13 +276,10 @@ function saveRepairHtml() {
     editor.value.trim();
 
   if (!text) {
-
     alert(
       "保存内容が空です"
     );
-
     return;
-
   }
 
   const timestamp =
@@ -291,26 +288,16 @@ function saveRepairHtml() {
       .replace(/[:.]/g, "-");
 
   const filename =
-
     (
-      typeof currentRepairFile !==
-      "undefined"
-
-      &&
-
+      typeof currentRepairFile !== "undefined" &&
       currentRepairFile
     )
-
-    ? currentRepairFile
-
-    : `AIPro_Repaired_${timestamp}.html`;
+      ? currentRepairFile
+      : `AIPro_Repaired_${timestamp}.html`;
 
   const type =
-
     filename.endsWith(".js")
-
       ? "text/javascript"
-
       : "text/html";
 
   const blob =
@@ -333,30 +320,24 @@ function saveRepairHtml() {
   a.click();
 
   setTimeout(() => {
-
     URL.revokeObjectURL(
       a.href
     );
-
   }, 1000);
 
   repairLastValue =
     editor.value;
 
-  updateRepairStatus(
-
-    `保存完了: ${filename}`
-
-  );
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      `保存完了: ${filename}`
+    );
+  }
 
   alert(
-
     "保存完了\n\n" +
-
     filename
-
   );
-
 }
 
 async function copyRepairHtml() {
