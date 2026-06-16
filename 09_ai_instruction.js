@@ -771,11 +771,22 @@ function copyAiInstructionJson() {
 
 }
 
-window.analyzeAiInstruction =
-  analyzeAiInstruction;
+if (typeof analyzeAiInstruction === "function") {
+  window.analyzeAiInstruction =
+    analyzeAiInstruction;
+}
 
-window.runAiInstructionAnalysis =
-  runAiInstructionAnalysis;
+if (typeof runAiInstructionAnalysis === "function") {
+  window.runAiInstructionAnalysis =
+    runAiInstructionAnalysis;
+}
 
-window.copyAiInstructionReport =
-  copyAiInstructionReport;
+if (typeof copyAiInstructionReport === "function") {
+  window.copyAiInstructionReport =
+    copyAiInstructionReport;
+}
+
+if (typeof copyAiInstructionJson === "function") {
+  window.copyAiInstructionJson =
+    copyAiInstructionJson;
+}
