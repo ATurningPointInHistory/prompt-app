@@ -251,6 +251,7 @@ function initRepairQuickFavoritePanel() {
     get("repairQuickFavoritePanel")
   ) {
     renderRepairQuickFavoritePanel();
+    openRepairQuickFavoritePanel();
     return;
   }
 
@@ -272,6 +273,33 @@ function initRepairQuickFavoritePanel() {
   );
 
   updateRepairQuickFavoriteVisibility();
+
+  openRepairQuickFavoritePanel();
+}
+
+function openRepairQuickFavoritePanel() {
+
+  const panel =
+    get("repairQuickFavoritePanel");
+
+  if (!panel) {
+    return;
+  }
+
+  panel.classList.remove(
+    "closed"
+  );
+
+  panel.style.left =
+    "0px";
+
+  const toggle =
+    get("repairQuickFavoriteToggle");
+
+  if (toggle) {
+    toggle.textContent =
+      "◀";
+  }
 }
 
 function renderRepairQuickFavoritePanel() {
@@ -381,6 +409,9 @@ window.toggleRepairFavoriteButton =
 
 window.runRepairQuickFavoriteAction =
   runRepairQuickFavoriteAction;
+
+window.openRepairQuickFavoritePanel =
+  openRepairQuickFavoritePanel;
 
 window.updateRepairQuickFavoriteVisibility =
   updateRepairQuickFavoriteVisibility;
