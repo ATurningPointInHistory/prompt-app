@@ -159,8 +159,11 @@ document.addEventListener("DOMContentLoaded", () => {
     safeRun(loadSettings, "loadSettings");
     safeRun(checkSafeMode, "checkSafeMode");
     safeRun(initRepairIde, "initRepairIde");
+
     safeRun(initRepairQuickPanel, "initRepairQuickPanel");
+    safeRun(initRepairToolsPanel, "initRepairToolsPanel");
     safeRun(initRepairSearchQuickPanel, "initRepairSearchQuickPanel");
+
     safeRun(initImportFileEvents, "initImportFileEvents");
     safeRun(updateRepairFloatingPanelsVisibility, "updateRepairFloatingPanelsVisibility");
 
