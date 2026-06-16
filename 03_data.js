@@ -273,8 +273,19 @@ function buildConfirmMessage(report, actionName) {
 }
 
 function hideWarning() {
-  get("warningBox").style.display = "none";
-  get("warningBox").innerText = "";
+
+  const box =
+    get("warningBox");
+
+  if (!box) {
+    return;
+  }
+
+  box.style.display =
+    "none";
+
+  box.innerText =
+    "";
 }
 
 /* ===============================
@@ -612,7 +623,16 @@ function exportTemplates() {
 }
 
 function importTemplates() {
-  get("fileInput").click();
+
+  const input =
+    get("fileInput");
+
+  if (!input) {
+    alert("テンプレ読込用inputがありません");
+    return;
+  }
+
+  input.click();
 }
 
 function exportAiPresets() {
@@ -652,7 +672,16 @@ function exportAiPresets() {
 }
 
 function importAiPresets() {
-  get("aiPresetFileInput").click();
+
+  const input =
+    get("aiPresetFileInput");
+
+  if (!input) {
+    alert("AIプリセット読込用inputがありません");
+    return;
+  }
+
+  input.click();
 }
 
 /* ===== Import File Events ===== */
