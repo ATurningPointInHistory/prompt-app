@@ -5,7 +5,15 @@
 
 let mobileConsoleLogs = [];
 
+let mobileConsoleInitialized = false;
+
 function initMobileConsole() {
+
+  if (mobileConsoleInitialized) {
+    return;
+  }
+
+  mobileConsoleInitialized = true;
 
   hookMobileConsoleLog();
   hookMobileConsoleError();
