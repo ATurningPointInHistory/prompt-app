@@ -508,6 +508,9 @@ body:not(.dark) #floatPanel{
   text-align: left;
 }
 
+.repair-search-quick-panel {
+  transition: right 0.25s ease;
+}
 /* ===============================
    REPAIR SEARCH QUICK PANEL
 =============================== */
