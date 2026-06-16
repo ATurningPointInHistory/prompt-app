@@ -11,10 +11,10 @@ let floatPanelHistory = [];
 function closeAllManagers() {
 
   [
-    "repairSearchPopup",
-    "repairReplacePopup",
-    "repairSearchQuickPanel",
-    "repairToolsPanel"
+    "template-manager",
+    "danger-manager",
+    "pattern-manager",
+    "ai-preset-manager"
   ].forEach(id => {
 
     const el =
@@ -93,9 +93,10 @@ function switchAppPage(mode) {
     [
       "repairSearchPopup",
       "repairReplacePopup",
-      "repairSearchQuickPanel"
+      "repairSearchQuickPanel",
+      "repairToolsPanel"
     ].forEach(id => {
-      const el = get(id);
+        const el = get(id);
       if (el) {
         el.style.display = "none";
       }
@@ -836,12 +837,26 @@ function updateRepairSearchQuickVisibility() {
 
   if (!panel) return;
 
-  panel.style.display =
-    isRepairMode()
-      ? "flex"
-      : "none";
-}
+  if (isRepairMode()) {
 
+    panel.style.display =
+      "flex";
+
+    panel.style.top =
+      "0px";
+
+    panel.style.right =
+      "0px";
+
+    panel.style.bottom =
+      "auto";
+
+  } else {
+
+    panel.style.display =
+      "none";
+  }
+}
 function initRepairQuickPanel() {
   if (get("repairQuickPanel")) {
     updateRepairQuickPanelVisibility();
@@ -1047,14 +1062,26 @@ function enableRepairQuickDrag() {
 }
 
 function updateRepairQuickPanelVisibility() {
-  const panel = get("repairQuickPanel");
+
+  const panel =
+    get("repairQuickPanel");
+
   if (!panel) return;
 
-  const visible =
-    isRepairMode();
+  if (isRepairMode()) {
 
-  panel.style.display =
-    visible
-      ? "flex"
-      : "none";
+    panel.style.display =
+      "flex";
+
+    panel.style.left =
+      "0px";
+
+    panel.style.bottom =
+      "0px";
+
+  } else {
+
+    panel.style.display =
+      "none";
+  }
 }
