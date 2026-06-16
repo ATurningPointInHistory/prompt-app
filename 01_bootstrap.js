@@ -227,101 +227,29 @@ placeholder="Generated AI Error Prompt"
 `;
 }
 
-function buildRepairToolsPanelHtml() {
-  return `
-<div id="repairToolsPanel" class="repair-tools-panel">
-
-  <div class="repair-tools-panel-header">
-    <span>修復ツール</span>
-
-    <button onclick="toggleRepairToolsPanel()">
-      ×
-    </button>
-  </div>
-
-  <div class="repair-tools-panel-body">
-    ${buildRepairToolsHtml()}
-  </div>
-
-</div>
-`;
-}
-
-function initRepairToolsPanel() {
-
-  if (get("repairToolsPanel")) {
-    updateRepairToolsPanelVisibility();
-    return;
-  }
-
-  const wrap =
-    document.createElement("div");
-
-  wrap.innerHTML =
-    buildRepairToolsPanelHtml();
-
-  const panel =
-    wrap.firstElementChild;
-
-  if (!panel) return;
-
-  panel.style.display =
-    "none";
-
-  document.body.appendChild(panel);
-
-  updateRepairToolsPanelVisibility();
-}
-
-function updateRepairToolsPanelVisibility() {
-
-  const panel =
-    get("repairToolsPanel");
-
-  if (!panel) return;
-
-  panel.style.display =
-    isRepairMode()
-      ? "block"
-      : "none";
-}
-
-function toggleRepairToolsPanel() {
-
-  const panel =
-    get("repairToolsPanel");
-
-  if (!panel) return;
-
-  panel.style.display =
-    panel.style.display === "none"
-      ? "block"
-      : "none";
-}
-
-function toggleToolsMenu() {
-
-  if (isRepairMode()) {
-    closeFloatPanel();
-    toggleRepairToolsPanel();
-    return;
-  }
-
-  const panel =
-    get("floatPanel");
+function toggleToolsMenu(){
+  const panel = get("floatPanel");
 
   if (panel.style.display !== "none") {
     closeFloatPanel();
     return;
   }
 
-  get("toolsBtn").innerText =
-    "×";
+  get("toolsBtn").innerText = "×";
 
-  openFloatPanel(
-    "通常ツール",
-    buildNormalToolsHtml()
-  );
+  const repairMode = isRepairMode();
+
+  const title =
+    repairMode
+      ? "修復ツール"
+      : "通常ツール";
+
+  const bodyHtml =
+    repairMode
+      ? buildRepairToolsHtml()
+      : buildNormalToolsHtml();
+
+  openFloatPanel(title, bodyHtml);
 }
 
 function resetRepairEditorView() {
