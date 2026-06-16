@@ -162,12 +162,23 @@ function escapeRegExp(str) {
 
 function loadJson(key, fallback) {
   try {
-    return JSON.parse(
-      localStorage.getItem(key) || JSON.stringify(fallback)
-    );
+    const raw =
+      localStorage.getItem(key);
+
+    if (!raw) {
+      return structuredClone
+        ? structuredClone(fallback)
+        : JSON.parse(JSON.stringify(fallback));
+    }
+
+    return JSON.parse(raw);
+
   } catch {
     localStorage.removeItem(key);
-    return fallback;
+
+    return structuredClone
+      ? structuredClone(fallback)
+      : JSON.parse(JSON.stringify(fallback));
   }
 }
 
