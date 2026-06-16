@@ -77,6 +77,194 @@ function stopMacroRecording() {
 
 }
 
+function deleteMacro(name) {
+
+  if (!name) {
+    return;
+  }
+
+  if (
+    !confirm(
+      "このMacroを削除しますか？\n\n" +
+      name
+    )
+  ) {
+    return;
+  }
+
+  delete macroList[name];
+
+  localStorage.setItem(
+    "macroList",
+    JSON.stringify(macroList)
+  );
+
+  updateRepairStatus(
+    "Macro削除: " + name
+  );
+
+  showMacroList();
+
+}
+
+function recordMacroClick(
+  event
+) {
+
+  if (
+    !macroRecording
+  ) {
+    return;
+  }
+
+  const btn =
+    event.target.closest(
+      "button"
+    );
+
+  if (!btn) {
+    return;
+  }
+
+  const onclick =
+    btn.getAttribute(
+      "onclick"
+    );
+
+  if (!onclick) {
+    return;
+  }
+
+  if (
+    onclick.includes(
+      "startMacroRecording"
+    ) ||
+    onclick.includes(
+      "stopMacroRecording"
+    ) ||
+    onclick.includes(
+      "showMacroList"
+    ) ||
+    onclick.includes(
+      "runMacro"
+    )
+  ) {
+    return;
+  }
+
+  currentMacroActions.push({
+
+    label:
+      btn.innerText,
+
+    code:
+      onclick
+
+  });
+
+}
+
+function addMacroInputStep() {
+
+  if (!macroRecording) {
+    alert("先に記録開始してください");
+    return;
+  }
+
+  const label =
+    prompt(
+      "入力項目名",
+      "検索文字"
+    );
+
+  if (!label) {
+    return;
+  }
+
+  currentMacroActions.push({
+    type: "input",
+    label
+  });
+
+}
+
+function addMacroInputStep() {
+
+  if (!macroRecording) {
+    alert(
+      "先に記録開始してください"
+    );
+    return;
+  }
+
+  const label =
+    prompt(
+      "入力項目名",
+      "検索文字"
+    );
+
+  if (!label) {
+    return;
+  }
+
+  currentMacroActions.push({
+
+    type:
+      "input",
+
+    label
+
+  });
+
+  updateRepairStatus(
+    `入力待ち追加: ${label}`
+  );
+
+}
+
+function showMacroList() {
+
+  const names =
+    Object.keys(macroList);
+
+  if (!names.length) {
+    alert("Macroなし");
+    return;
+  }
+
+  openFloatPanel(
+    "Macro",
+    `
+<div class="macro-list">
+${
+  names.map(name => `
+<div class="macro-row">
+
+  <button
+    class="macro-mini-btn"
+    onclick='runMacro(${JSON.stringify(name)})'>
+    ▶
+  </button>
+
+  <button
+    class="macro-mini-btn"
+    onclick='deleteMacro(${JSON.stringify(name)})'>
+    🗑
+  </button>
+
+  <span class="macro-name">
+    ${escapeHtml(name)}
+  </span>
+
+</div>
+`).join("")
+}
+</div>
+`
+  );
+
+}
+
 async function runMacro(name) {
 
   const actions =
@@ -225,159 +413,5 @@ async function runMacro(name) {
 
   macroRecording =
     wasRecording;
-
-}
-
-function deleteMacro(name) {
-
-  if (!name) {
-    return;
-  }
-
-  if (
-    !confirm(
-      "このMacroを削除しますか？\n\n" +
-      name
-    )
-  ) {
-    return;
-  }
-
-  delete macroList[name];
-
-  localStorage.setItem(
-    "macroList",
-    JSON.stringify(macroList)
-  );
-
-  updateRepairStatus(
-    "Macro削除: " + name
-  );
-
-  showMacroList();
-
-}
-
-function recordMacroClick(
-  event
-) {
-
-  if (
-    !macroRecording
-  ) {
-    return;
-  }
-
-  const btn =
-    event.target.closest(
-      "button"
-    );
-
-  if (!btn) {
-    return;
-  }
-
-  const onclick =
-    btn.getAttribute(
-      "onclick"
-    );
-
-  if (!onclick) {
-    return;
-  }
-
-  if (
-    onclick.includes(
-      "startMacroRecording"
-    ) ||
-    onclick.includes(
-      "stopMacroRecording"
-    ) ||
-    onclick.includes(
-      "showMacroList"
-    ) ||
-    onclick.includes(
-      "runMacro"
-    )
-  ) {
-    return;
-  }
-
-  currentMacroActions.push({
-
-    label:
-      btn.innerText,
-
-    code:
-      onclick
-
-  });
-
-}
-
-function addMacroInputStep() {
-
-  if (!macroRecording) {
-    alert("先に記録開始してください");
-    return;
-  }
-
-  const label =
-    prompt(
-      "入力項目名",
-      "検索文字"
-    );
-
-  if (!label) {
-    return;
-  }
-
-  currentMacroActions.push({
-    type: "input",
-    label
-  });
-
-}
-
-function showMacroList() {
-
-  const names =
-    Object.keys(macroList);
-
-  if (!names.length) {
-    alert("Macroなし");
-    return;
-  }
-
-  openFloatPanel(
-    "Macro",
-    `
-<div class="macro-list">
-${
-  names.map(name => `
-<div class="macro-row">
-
-  <button
-    class="macro-mini-btn"
-    onclick='runMacro(${JSON.stringify(name)})'>
-    ▶
-  </button>
-
-  <button
-    class="macro-mini-btn"
-    onclick='deleteMacro(${JSON.stringify(name)})'>
-    🗑
-  </button>
-
-  <span class="macro-name">
-    ${escapeHtml(name)}
-  </span>
-
-</div>
-`).join("")
-}
-</div>
-`
-  );
 
 }
