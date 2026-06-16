@@ -308,3 +308,22 @@ function getErrorPromptInputText() {
   ) || "";
 
 }
+
+if (typeof generateErrorPrompt === "function") {
+  window.generateErrorPrompt =
+    generateErrorPrompt;
+}
+
+if (typeof copyErrorPrompt === "function") {
+  window.copyErrorPrompt =
+    copyErrorPrompt;
+}
+
+if (typeof buildErrorInvestigationPrompt === "function") {
+  window.buildErrorInvestigationPrompt =
+    buildErrorInvestigationPrompt;
+}
+
+console.log(
+  "09_ai_error_prompt loaded"
+);
