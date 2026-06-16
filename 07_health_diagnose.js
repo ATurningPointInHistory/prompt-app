@@ -88,12 +88,15 @@ function copyDiagnoseResult() {
 }
 
 function diagnoseHtml() {
+
   let html =
     "<!DOCTYPE html>\n" +
     document.documentElement.outerHTML;
 
   const scripts =
-    getExternalScriptSrcList(html);
+    typeof getExternalScriptSrcList === "function"
+      ? getExternalScriptSrcList(html)
+      : [];
 
   const scriptInfo =
     scripts.length
@@ -101,9 +104,10 @@ function diagnoseHtml() {
         scripts.join("\n")
       : "✔ external scripts:none";
 
-  html = html
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "");
+  html =
+    html
+      .replace(/<script[\s\S]*?<\/script>/gi, "")
+      .replace(/<style[\s\S]*?<\/style>/gi, "");
 
   const report = [];
 
@@ -120,6 +124,7 @@ function diagnoseHtml() {
   ];
 
   tags.forEach(tag => {
+
     const open =
       (html.match(
         new RegExp(`<${tag}\\b`, "gi")
@@ -145,7 +150,7 @@ function diagnoseHtml() {
     [...new Set(
       ids.filter(
         (id, i) =>
-        ids.indexOf(id) !== i
+          ids.indexOf(id) !== i
       )
     )];
 
@@ -159,15 +164,24 @@ function diagnoseHtml() {
   report.push(scriptInfo);
 
   try {
+
     [...document.scripts].forEach(s => {
+
       if (s.src) return;
-      new Function(s.textContent);
+
+      const code =
+        String(s.textContent || "").trim();
+
+      if (!code) return;
+
+      new Function(code);
     });
 
     report.push("");
     report.push("✔ JS構文OK");
 
   } catch (e) {
+
     report.push("");
     report.push(
       `⚠ JS構文エラー\n${e.message}`
@@ -177,11 +191,26 @@ function diagnoseHtml() {
   const box =
     get("diagnoseBox");
 
-  box.style.display =
-    "block";
-
-  box.innerText =
+  const result =
     report.join("\n");
+
+  window.latestDiagnoseResult =
+    result;
+
+  if (box) {
+    box.style.display =
+      "block";
+
+    box.innerText =
+      result;
+  } else if (typeof openFloatPanel === "function") {
+    openFloatPanel(
+      "HTML簡易診断",
+      `<pre class="code-preview">${escapeHtml(result)}</pre>`
+    );
+  } else {
+    alert(result);
+  }
 }
 
 async function diagnoseRepairHtml() {
