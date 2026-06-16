@@ -514,36 +514,55 @@ body:not(.dark) #floatPanel{
 
 .repair-search-quick-panel {
   position: fixed;
-  top: 12px;
+  top: 80px;
   right: 12px;
-  left: auto;
-  bottom: auto;
   z-index: 10000;
   width: 60px;
   background: var(--card);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 2px;
-  padding: 4px;
+  padding: 8px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   display: none;
   flex-direction: column;
-  gap: 3px;
+  gap: 6px;
+  transition: right 0.25s ease;
 }
 
-.repair-search-quick-panel .small {
-  font-size: 9px;
-  text-align: center;
+.repair-search-quick-panel.closed {
+  right: -56px;
+}
+
+.repair-search-quick-toggle {
+  position: absolute;
+  top: 50%;
+  left: -34px;
+  transform: translateY(-50%);
+
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
   line-height: 1;
-}
 
+  border-radius: 8px 0 0 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  z-index: 10001;
+}
 
 .repair-search-quick-panel .float-list-btn {
   font-size: 9px;
   padding: 2px;
-  line-height: 1.05;
-  text-align: center;
   border-radius: 2px;
+  text-align: left;
 }
 
 #repairSearchPopup,
