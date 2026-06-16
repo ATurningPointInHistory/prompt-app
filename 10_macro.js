@@ -279,6 +279,30 @@ function recordMacroClick(
 
 }
 
+function addMacroInputStep() {
+
+  if (!macroRecording) {
+    alert("先に記録開始してください");
+    return;
+  }
+
+  const label =
+    prompt(
+      "入力項目名",
+      "検索文字"
+    );
+
+  if (!label) {
+    return;
+  }
+
+  currentMacroActions.push({
+    type: "input",
+    label
+  });
+
+}
+
 function showMacroList() {
 
   const names =
