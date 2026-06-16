@@ -263,29 +263,45 @@ function detectUndefinedOnclicksInText(text) {
   );
 }
 
-window.runAiAutoTest =
-  runAiAutoTest;
+if (typeof runAiAutoTest === "function") {
+  window.runAiAutoTest =
+    runAiAutoTest;
+}
 
-window.copyAiAutoTestReport =
-  copyAiAutoTestReport;
+if (typeof copyAiAutoTestReport === "function") {
+  window.copyAiAutoTestReport =
+    copyAiAutoTestReport;
+}
 
-window.analyzeAiGeneratedCode =
-  analyzeAiGeneratedCode;
+if (typeof analyzeAiGeneratedCode === "function") {
+  window.analyzeAiGeneratedCode =
+    analyzeAiGeneratedCode;
+}
 
-window.runAiGeneratedCodeAnalysis =
-  runAiGeneratedCodeAnalysis;
+if (typeof runAiGeneratedCodeAnalysis === "function") {
+  window.runAiGeneratedCodeAnalysis =
+    runAiGeneratedCodeAnalysis;
+}
 
-window.copyAiIntegrationReport =
-  copyAiIntegrationReport;
+if (typeof copyAiIntegrationReport === "function") {
+  window.copyAiIntegrationReport =
+    copyAiIntegrationReport;
+}
 
-window.showAiIntegrationDiff =
-  showAiIntegrationDiff;
+if (typeof showAiIntegrationDiff === "function") {
+  window.showAiIntegrationDiff =
+    showAiIntegrationDiff;
+}
 
-window.applyAiIntegration =
-  applyAiIntegration;
+if (typeof applyAiIntegration === "function") {
+  window.applyAiIntegration =
+    applyAiIntegration;
+}
 
-window.testAiIntegrationSandbox =
-  testAiIntegrationSandbox;
+if (typeof testAiIntegrationSandbox === "function") {
+  window.testAiIntegrationSandbox =
+    testAiIntegrationSandbox;
+}
 
 console.log(
   "08_ai_integrator loaded"
