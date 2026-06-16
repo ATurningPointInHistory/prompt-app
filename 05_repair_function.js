@@ -633,7 +633,7 @@ function selectCodeBlockByStart(start) {
 
   const line =
     editor.value
-      .slice(0,start)
+      .slice(0, start)
       .split("\n")
       .length;
 
@@ -643,6 +643,7 @@ function selectCodeBlockByStart(start) {
       (line - 3) * 18
     );
 
-  updateCursorPosition();
-
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
 }
