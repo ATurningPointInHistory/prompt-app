@@ -420,6 +420,245 @@ placeholder="Generated AI Error Prompt"
 `;
 }
 
+function buildRepairSearchQuickHtml() {
+  return `
+<div id="repairSearchQuickPanel"
+     class="repair-search-quick-panel">
+
+  <button
+    id="repairSearchQuickToggle"
+    class="repair-search-quick-toggle"
+    onclick="toggleRepairSearchQuickPanel()">
+    ▶
+  </button>
+
+  <button class="float-list-btn" onclick="toggleRepairSearchPopup()">🔍<br>検索</button>
+  <button class="float-list-btn" onclick="toggleRepairReplacePopup()">🔁<br>置換</button>
+  <button class="float-list-btn" onclick="searchRepairNext()">⏭<br>次</button>
+
+  <button class="float-list-btn" onclick="loadRepairSearchFiles()">📁<br>読込</button>
+  <button class="float-list-btn" onclick="loadCurrentProjectSearchFiles()">📦<br>現在</button>
+  <button class="float-list-btn" onclick="showRepairSearchFiles()">📋<br>一覧</button>
+  <button class="float-list-btn" onclick="showSearchHistory()">🕘<br>履歴</button>
+  <button class="float-list-btn" onclick="searchAllRepairFiles()">📚<br>全検</button>
+
+  <button class="float-list-btn" onclick="startMacroRecording()">🔴<br>記録</button>
+  <button class="float-list-btn" onclick="stopMacroRecording()">⏹<br>保存</button>
+  <button class="float-list-btn" onclick="showMacroList()">▶<br>実行</button>
+  <button class="float-list-btn" onclick="addMacroInputStep()">⌨<br>入力</button>
+
+</div>
+`;
+}
+
+function toggleRepairSearchQuickPanel() {
+
+  const panel =
+    get("repairSearchQuickPanel");
+
+  const toggle =
+    get("repairSearchQuickToggle");
+
+  if (!panel || !toggle) {
+    return;
+  }
+
+  const closed =
+    panel.classList.toggle(
+      "closed"
+    );
+
+  toggle.textContent =
+    closed
+      ? "◀"
+      : "▶";
+}
+
+function initRepairSearchQuickPanel() {
+
+  if (get("repairSearchQuickPanel")) {
+
+    updateRepairSearchQuickVisibility();
+
+    if (
+      typeof enableRepairSearchQuickDrag ===
+      "function"
+    ) {
+      enableRepairSearchQuickDrag();
+    }
+
+    return;
+  }
+
+  const wrap =
+    document.createElement("div");
+
+  wrap.innerHTML =
+    buildRepairSearchQuickHtml();
+
+  const panel =
+    wrap.firstElementChild;
+
+  if (!panel) {
+    return;
+  }
+
+  panel.style.display =
+    "none";
+
+  document.body.appendChild(
+    panel
+  );
+
+  updateRepairSearchQuickVisibility();
+
+  if (
+    typeof enableRepairSearchQuickDrag ===
+    "function"
+  ) {
+    enableRepairSearchQuickDrag();
+  }
+}
+
+function updateRepairSearchQuickVisibility() {
+
+  const panel =
+    get("repairSearchQuickPanel");
+
+  if (!panel) {
+    return;
+  }
+
+  panel.style.display =
+    isRepairMode()
+      ? "flex"
+      : "none";
+}
+
+function closeRepairPopups() {
+
+  [
+    "repairSearchPopup",
+    "repairReplacePopup"
+  ].forEach(id => {
+
+    const el =
+      get(id);
+
+    if (el) {
+      el.style.display =
+        "none";
+    }
+  });
+}
+function toggleRepairSearchPopup() {
+
+  let box =
+    get("repairSearchPopup");
+
+  if (box) {
+
+    const opening =
+      box.style.display === "none";
+
+    closeRepairPopups();
+
+    box.style.display =
+      opening
+        ? "block"
+        : "none";
+
+    return;
+  }
+
+  closeRepairPopups();
+
+  box =
+    document.createElement("div");
+
+  box.id =
+    "repairSearchPopup";
+
+  box.innerHTML = `
+  <div class="repair-search-toolbar">
+
+    <input
+      id="repairSearch"
+      placeholder="検索">
+
+    <button onclick="searchRepairText()">
+      検索
+    </button>
+
+    <button onclick="searchRepairNext()">
+      次へ
+    </button>
+
+  </div>
+
+  <div id="repairSearchPopupResult"></div>
+  `;
+
+  document.body.appendChild(box);
+}
+
+function toggleRepairReplacePopup() {
+
+  let box =
+    get("repairReplacePopup");
+
+  if (box) {
+
+    const opening =
+      box.style.display === "none";
+
+    closeRepairPopups();
+
+    box.style.display =
+      opening
+        ? "block"
+        : "none";
+
+    return;
+  }
+
+  closeRepairPopups();
+
+  box =
+    document.createElement("div");
+
+  box.id =
+    "repairReplacePopup";
+
+  box.innerHTML = `
+  <div class="repair-replace-toolbar">
+
+    <input
+      id="replaceFrom"
+      placeholder="検索">
+
+    <input
+      id="replaceTo"
+      placeholder="置換">
+
+    <div class="repair-replace-actions">
+
+      <button onclick="replaceRepairText()">
+        1件
+      </button>
+
+      <button onclick="replaceAllRepairText()">
+        全件
+      </button>
+
+    </div>
+
+  </div>
+  `;
+
+  document.body.appendChild(box);
+}
+
 function toggleToolsMenu(){
   const panel = get("floatPanel");
   if (panel.style.display !== "none") {
