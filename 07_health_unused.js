@@ -29,30 +29,36 @@ function copySelectedUnusedFunctions() {
     );
 
   const names =
-    [...checks]
-      .map(
-        el => el.value
-      );
-
-  const output =
-    get(
-      "unusedFunctionOutput"
+    [...checks].map(
+      el => el.value
     );
 
-  if (!output) return;
+  const output =
+    get("unusedFunctionOutput");
+
+  if (!output) {
+    return;
+  }
 
   output.value =
     names.join("\n");
 
   output.select();
 
-  document.execCommand(
-    "copy"
-  );
+  const ok =
+    document.execCommand(
+      "copy"
+    );
 
-  updateRepairStatus(
-    `${names.length}件コピー`
-  );
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      `${names.length}件コピー`
+    );
+  }
+
+  if (!ok) {
+    alert("コピー失敗");
+  }
 }
 
 function analyzeSelectedUnusedFunctions() {
@@ -407,9 +413,11 @@ function selectSafeUnusedFunctions() {
 
   saveSelectedUnusedFunctions();
 
-  updateRepairStatus(
-    "安全候補を選択しました"
-  );
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      "安全候補を選択しました"
+    );
+  }
 }
 
 async function deleteSelectedUnusedFunctionsSafe() {
