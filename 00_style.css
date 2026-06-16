@@ -3,6 +3,26 @@
    AIプロンプト生成Pro Style
 =============================== */
 
+/* ===============================
+left.            左余白・パネル幅
+right.           右余白・パネル幅
+top.             上からの位置
+bottom.          下からの位置
+width.           横幅
+max-width.       最大横幅
+height.          高さ固定
+max-height.      最大高さ
+padding.         中の余白
+margin.          外側の余白
+border-radius.   角の丸さ
+font-size.       文字サイズ
+gap.             ボタン同士の間隔
+overflow.        スクロール方法
+z-index.         前後関係
+background.      背景色
+box-shadow.      影の大きさ
+=============================== */
+
 <style>
 
 :root {
@@ -354,17 +374,18 @@ body.dark button.active-panel {
 
 #floatPanel{
   position: fixed;
-  right: 30px;
+
+  left: 88px;
+  right: 88px;
   bottom: 88px;
-  left: 80px;
   top: auto;
 
   z-index: 998;
 
-  width: min(92vw, 760px);
-  max-width: 92vw;
+  width: auto;
+  max-width: none;
 
-  max-height: 82vh;
+  max-height: 76vh;
   overflow: auto;
 
   background: rgba(36,37,38,0.88);
