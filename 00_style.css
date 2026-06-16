@@ -1285,10 +1285,62 @@ mark {
   font-size: 10px;
   max-height: 120px;
 }
+/* ===============================
+   Float Panel Size
+=============================== */
+
+#floatPanel {
+  width: min(92vw, 760px);
+  max-width: 92vw;
+  max-height: 82vh;
+  overflow: auto;
+}
 
 /* ===============================
-   Macro UI
+   Memo Box UI
 =============================== */
+
+.memo-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.memo-tab {
+  padding: 4px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+  border-radius: 4px;
+  min-width: auto;
+}
+
+.memo-name-input {
+  width: 100%;
+  font-size: 13px;
+  padding: 6px;
+  margin-bottom: 6px;
+}
+
+.memo-textarea {
+  width: 100%;
+  min-height: 260px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.memo-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.memo-actions button {
+  font-size: 12px;
+  padding: 6px 4px;
+  border-radius: 4px;
+}
 
 .macro-list {
   display: flex;
