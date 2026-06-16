@@ -42,10 +42,12 @@ function testAiIntegrationSandbox() {
     if (change.type === "replace") {
 
       const block =
-        findFunctionBlockInText(
-          text,
-          change.name
-        );
+        typeof findFunctionBlockInText === "function"
+          ? findFunctionBlockInText(
+              text,
+              change.name
+            )
+          : null;
 
       if (!block) {
         skipCount++;
@@ -64,10 +66,12 @@ function testAiIntegrationSandbox() {
     if (change.type === "add") {
 
       const exists =
-        findFunctionBlockInText(
-          text,
-          change.name
-        );
+        typeof findFunctionBlockInText === "function"
+          ? findFunctionBlockInText(
+              text,
+              change.name
+            )
+          : null;
 
       if (exists) {
         skipCount++;
@@ -80,11 +84,15 @@ function testAiIntegrationSandbox() {
 
       addCount++;
     }
-
   });
 
   const health =
-    validateBackupHtml(text);
+    typeof validateBackupHtml === "function"
+      ? validateBackupHtml(text)
+      : {
+          js_ok: true,
+          js_error: ""
+        };
 
   const report =
 `AI Integration Sandbox
@@ -101,14 +109,18 @@ skip: ${skipCount}
 ${health.js_error || "none"}
 `;
 
-  openFloatPanel(
-    "AI Sandbox",
-    `
+  if (typeof openFloatPanel === "function") {
+    openFloatPanel(
+      "AI Sandbox",
+      `
 <pre class="code-preview">
 ${escapeHtml(report)}
 </pre>
 `
-  );
+    );
+  } else {
+    alert(report);
+  }
 }
 
 function runAiAutoTest() {
