@@ -90,11 +90,38 @@ async function runMacro(name) {
   const wasRecording =
     macroRecording;
 
+  const previousInputValue =
+    window.macroInputValue || "";
+
   macroRecording = false;
+
+  window.macroInputValue =
+    previousInputValue;
 
   for (const step of actions) {
 
     try {
+
+      if (
+        step.type === "input"
+      ) {
+
+        const value =
+          prompt(
+            step.label || "入力",
+            window.macroInputValue || ""
+          );
+
+        if (value === null) {
+          alert("マクロ中断");
+          return;
+        }
+
+        window.macroInputValue =
+          value;
+
+        continue;
+      }
 
       if (
         step.type === "action"
@@ -113,7 +140,9 @@ async function runMacro(name) {
 
           if (box) {
             box.value =
-              data.keyword || "";
+              window.macroInputValue ||
+              data.keyword ||
+              "";
           }
 
           searchRepairText();
@@ -130,7 +159,9 @@ async function runMacro(name) {
 
           if (box) {
             box.value =
-              data.keyword || "";
+              window.macroInputValue ||
+              data.keyword ||
+              "";
           }
 
           searchAllRepairFiles();
@@ -153,6 +184,11 @@ async function runMacro(name) {
 
           if (index >= 0) {
             openGlobalSearchResult(index);
+          } else {
+            console.warn(
+              "Macro search result not found",
+              data
+            );
           }
 
           continue;
@@ -177,7 +213,7 @@ async function runMacro(name) {
 
       alert(
         "Macro実行エラー\n\n" +
-        (step.action || step.code || "") +
+        (step.action || step.code || step.type || "") +
         "\n\n" +
         e.message
       );
