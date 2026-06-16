@@ -8,24 +8,37 @@
 =============================== */
 
 function formatJsonOutput() {
-  const output = get("output");
-  let text = output.innerText.trim();
+
+  const output =
+    get("output");
+
+  if (!output) {
+    alert("出力欄がありません");
+    return;
+  }
+
+  let text =
+    output.innerText.trim();
+
   if (!text || text === "ここに表示") {
     alert("JSONがありません");
     return;
   }
+
   try {
-    // ```json 除去
     text = text
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
-    // JSON化
-    const parsed = JSON.parse(text);
-    // 整形
-    const formatted = JSON.stringify(parsed, null, 2);
-    output.innerText = formatted;
+
+    const parsed =
+      JSON.parse(text);
+
+    output.innerText =
+      JSON.stringify(parsed, null, 2);
+
     alert("JSON整形完了");
+
   } catch (e) {
     alert("JSON形式が不正です\n\n" + e.message);
   }
@@ -400,12 +413,25 @@ function applyPresetByName(name) {
 }
 
 function applyPreset(commands) {
-  const input = get("raw-input");
-  // 既存コマンド削除
-  let text = input.value.replace(/\/[a-zA-Z0-9]+/g, "").trim();
-  // プリセット追加
-  const commandText = commands.map(c => `/${c}`).join(" ");
-  input.value = `${text} ${commandText}`.trim();
+
+  const input =
+    get("raw-input");
+
+  if (!input) {
+    return;
+  }
+
+  let text =
+    input.value
+      .replace(/\/[a-zA-Z0-9]+/g, "")
+      .trim();
+
+  const commandText =
+    commands.map(c => `/${c}`).join(" ");
+
+  input.value =
+    `${text} ${commandText}`.trim();
+
   syncCommandButtons();
   saveCurrentState();
   input.focus();
@@ -433,13 +459,32 @@ function addCommand(cmd) {
 }
 
 function syncCommandButtons() {
-  const input = get("raw-input");
-  const text = input.value;
-  const commands = text.match(/\/[a-zA-Z0-9]+/g) || [];
-  document.querySelectorAll(".command-chip").forEach(btn => {
-    const cmd = btn.dataset.cmd;
-    btn.classList.toggle("active", commands.includes(`/${cmd}`));
-  });
+
+  const input =
+    get("raw-input");
+
+  if (!input) {
+    return;
+  }
+
+  const text =
+    input.value;
+
+  const commands =
+    text.match(/\/[a-zA-Z0-9]+/g) || [];
+
+  document
+    .querySelectorAll(".command-chip")
+    .forEach(btn => {
+
+      const cmd =
+        btn.dataset.cmd;
+
+      btn.classList.toggle(
+        "active",
+        commands.includes(`/${cmd}`)
+      );
+    });
 }
 
 /* ===============================
