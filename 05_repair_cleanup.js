@@ -218,21 +218,28 @@ async function cleanupCandidates() {
 }
 
 function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
-  const editor = get("repairEditor");
+
+  const editor =
+    get("repairEditor");
 
   if (!editor || !editor.value.trim()) {
     alert("修復モードでHTMLを読み込んでから実行してください");
     return;
   }
 
-  let html = editor.value;
+  let html =
+    editor.value;
 
   repairUndoStack.push(html);
   repairRedoStack = [];
 
   unusedFuncs.forEach(fn => {
+
     const block =
-      findFunctionBlockInText(html, fn);
+      findFunctionBlockInText(
+        html,
+        fn
+      );
 
     if (!block) return;
     if (block.block.includes("cleanup候補")) return;
@@ -246,29 +253,44 @@ function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
   });
 
   orphanIds.forEach(id => {
-    const reg = new RegExp(
-      `\\s+id=(["'])${escapeRegExp(id)}\\1`,
-      "g"
-    );
 
-    html = html.replace(reg, match => {
-      if (match.includes("cleanup-disabled-id")) {
-        return match;
-      }
-
-      return (
-        ` data-cleanup-disabled-id="${id}"` +
-        ` data-cleanup-note="cleanup候補: 孤立id"`
+    const reg =
+      new RegExp(
+        `\\s+id=(["'])${escapeRegExp(id)}\\1`,
+        "g"
       );
-    });
+
+    html =
+      html.replace(reg, match => {
+
+        if (match.includes("cleanup-disabled-id")) {
+          return match;
+        }
+
+        return (
+          ` data-cleanup-disabled-id="${id}"` +
+          ` data-cleanup-note="cleanup候補: 孤立id"`
+        );
+      });
   });
 
-  editor.value = html;
-  repairLastValue = html;
+  editor.value =
+    html;
 
-  updateLineNumbers();
-  updateCursorPosition();
-  autoSaveRepairDraft();
+  repairLastValue =
+    html;
+
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
+
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
+
+  if (typeof autoSaveRepairDraft === "function") {
+    autoSaveRepairDraft();
+  }
 
   if (typeof updateRepairStatus === "function") {
     updateRepairStatus(
@@ -285,15 +307,20 @@ function commentOutCleanupCandidates(unusedFuncs, orphanIds) {
 }
 
 function deleteCommentedCleanupBlocks() {
-  const editor = get("repairEditor");
+
+  const editor =
+    get("repairEditor");
 
   if (!editor || !editor.value.trim()) {
     alert("修復モードでHTMLを読み込んでから実行してください");
     return;
   }
 
-  let html = editor.value;
-  const before = html;
+  let html =
+    editor.value;
+
+  const before =
+    html;
 
   const cleanupBlockRegex =
     /\/\*\s*cleanup候補:\s*未使用function\s+[a-zA-Z0-9_$]+[\s\S]*?\*\//g;
@@ -334,35 +361,54 @@ function deleteCommentedCleanupBlocks() {
     "OKで完全削除します。\n" +
     "事前にバックアップ保存済みか確認してください。";
 
-  const ok = confirm(message);
+  const ok =
+    confirm(message);
 
   if (!ok) {
     return;
   }
 
-  html = html.replace(cleanupBlockRegex, "");
+  html =
+    html.replace(
+      cleanupBlockRegex,
+      ""
+    );
 
-  html = html.replace(
-    /\sdata-cleanup-disabled-id="[^"]+"/g,
-    ""
-  );
+  html =
+    html.replace(
+      /\sdata-cleanup-disabled-id="[^"]+"/g,
+      ""
+    );
 
-  html = html.replace(
-    /\sdata-cleanup-note="cleanup候補:\s*孤立id"/g,
-    ""
-  );
+  html =
+    html.replace(
+      /\sdata-cleanup-note="cleanup候補:\s*孤立id"/g,
+      ""
+    );
 
-  html = html.replace(/\n{4,}/g, "\n\n\n");
+  html =
+    html.replace(/\n{4,}/g, "\n\n\n");
 
   repairUndoStack.push(before);
   repairRedoStack = [];
 
-  editor.value = html;
-  repairLastValue = html;
+  editor.value =
+    html;
 
-  updateLineNumbers();
-  updateCursorPosition();
-  autoSaveRepairDraft();
+  repairLastValue =
+    html;
+
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
+
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
+
+  if (typeof autoSaveRepairDraft === "function") {
+    autoSaveRepairDraft();
+  }
 
   if (typeof updateRepairStatus === "function") {
     updateRepairStatus(
