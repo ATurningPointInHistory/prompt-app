@@ -517,6 +517,12 @@ function buildRepairSearchQuickHtml() {
 
   <button
     class="float-list-btn"
+    onclick="toggleRepairReplacePopup()">
+    🔁<br>置換
+  </button>
+
+  <button
+    class="float-list-btn"
     onclick="searchRepairNext()">
     ⏭<br>次
   </button>
@@ -552,12 +558,6 @@ function buildRepairSearchQuickHtml() {
   </button>
 
   <button
-    class="float-list-btn"
-    onclick="toggleRepairReplacePopup()">
-    🔁<br>置換
-  </button>
-
-  <button
     class="float-list-btn" 
     onclick="startMacroRecording()">
     🔴 Macro記録
@@ -571,6 +571,12 @@ function buildRepairSearchQuickHtml() {
   <button class="float-list-btn"
     onclick="showMacroList()">
     ▶ Macro実行
+  </button>
+
+  <button
+    class="float-list-btn"
+    onclick="addMacroInputStep()">
+    ⌨<br>入力
   </button>
 
 </div>
