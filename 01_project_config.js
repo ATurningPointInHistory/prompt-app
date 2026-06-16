@@ -424,11 +424,7 @@ function setCurrentRepairFile(
     );
 
   if (label) {
-
     label.textContent =
-      currentRepairFile ||
-      "未選択";
-
+      currentRepairFile || "未選択";
   }
-
 }
