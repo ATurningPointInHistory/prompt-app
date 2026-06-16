@@ -116,7 +116,14 @@ function switchAppPage(mode) {
 }
 
 function isRepairMode() {
-  return get("repairPage").style.display !== "none";
+  const page =
+    get("repairPage");
+
+  if (!page) {
+    return false;
+  }
+
+  return page.style.display !== "none";
 }
 
 function buildNormalToolsHtml() {
@@ -776,21 +783,44 @@ function toggleRepairReplacePopup() {
   document.body.appendChild(box);
 }
 
-function toggleToolsMenu(){
-  const panel = get("floatPanel");
+function toggleToolsMenu() {
+
+  const panel =
+    get("floatPanel");
+
+  const btn =
+    get("toolsBtn");
+
+  if (!panel) {
+    return;
+  }
+
   if (panel.style.display !== "none") {
     closeFloatPanel();
     return;
   }
-  get("toolsBtn").innerText = "×";
-  const repairMode = isRepairMode();
-  const title = repairMode
-    ? "修復ツール"
-    : "通常ツール";
-  const bodyHtml = repairMode
-    ? buildRepairToolsHtml()
-    : buildNormalToolsHtml();
-  openFloatPanel(title, bodyHtml);
+
+  if (btn) {
+    btn.innerText = "×";
+  }
+
+  const repairMode =
+    isRepairMode();
+
+  const title =
+    repairMode
+      ? "修復ツール"
+      : "通常ツール";
+
+  const bodyHtml =
+    repairMode
+      ? buildRepairToolsHtml()
+      : buildNormalToolsHtml();
+
+  openFloatPanel(
+    title,
+    bodyHtml
+  );
 }
 
 function resetRepairEditorView() {
