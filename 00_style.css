@@ -536,10 +536,6 @@ body:not(.dark) .repair-tools-panel{
    Repair Quick Favorite Panel
    左中央固定・お気に入りボタン
 =============================== */
-/* ===============================
-   Repair Quick Favorite Panel
-   左中央固定・お気に入りボタン
-=============================== */
 
 .repair-quick-favorite-panel {
   position: fixed;
