@@ -491,16 +491,29 @@ function applyFunctionSortList() {
 
   result += text.slice(cursor);
 
-  editor.value = result;
-  repairLastValue = result;
+  editor.value =
+    result;
 
-  updateLineNumbers();
-  updateCursorPosition();
-  updateRepairStatus(
-    "コードブロック並べ替え適用"
-  );
+  repairLastValue =
+    result;
 
-  autoSaveRepairDraft();
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
+
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      "コードブロック並べ替え適用"
+    );
+  }
+
+  if (typeof autoSaveRepairDraft === "function") {
+    autoSaveRepairDraft();
+  }
 
   alert("並べ替えを適用しました");
 }
