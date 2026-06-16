@@ -239,12 +239,15 @@ function scrollRepairTop() {
     0
   );
 
-  updateCursorPosition();
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
 
-  updateRepairStatus(
-    "最上部へ移動"
-  );
-
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      "最上部へ移動"
+    );
+  }
 }
 
 /* ===============================
@@ -273,12 +276,15 @@ function scrollRepairBottom() {
     len
   );
 
-  updateCursorPosition();
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
 
-  updateRepairStatus(
-    "最下部へ移動"
-  );
-
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      "最下部へ移動"
+    );
+  }
 }
 
 /* ===============================
@@ -286,49 +292,123 @@ function scrollRepairBottom() {
 =============================== */
 
 function applyRepairIndent(isOutdent) {
-  const editor = get("repairEditor");
-  if (!editor) return;
-  const value = editor.value;
-  const start = editor.selectionStart;
-  const end = editor.selectionEnd;
-  const indent = "  ";
-  repairUndoStack.push(value);
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  const value =
+    editor.value;
+
+  const start =
+    editor.selectionStart;
+
+  const end =
+    editor.selectionEnd;
+
+  const indent =
+    "  ";
+
+  repairUndoStack.push(
+    value
+  );
+
   repairRedoStack = [];
-  // 単一カーソルでTabの場合
+
   if (start === end && !isOutdent) {
+
     editor.value =
       value.slice(0, start) +
       indent +
       value.slice(end);
-    const pos = start + indent.length;
-    editor.selectionStart = pos;
-    editor.selectionEnd = pos;
+
+    const pos =
+      start + indent.length;
+
+    editor.selectionStart =
+      pos;
+
+    editor.selectionEnd =
+      pos;
+
   } else {
+
     const lineStart =
-      value.lastIndexOf("\n", start - 1) + 1;
-    const before = value.slice(0, lineStart);
-    const target = value.slice(lineStart, end);
-    const after = value.slice(end);
-    const lines = target.split("\n");
-    const changed = isOutdent
-      ? lines.map(line => {
-          if (line.startsWith(indent)) return line.slice(indent.length);
-          if (line.startsWith(" ")) return line.slice(1);
-          return line;
-        }).join("\n")
-      : lines.map(line => indent + line).join("\n");
-    editor.value = before + changed + after;
+      value.lastIndexOf(
+        "\n",
+        start - 1
+      ) + 1;
+
+    const before =
+      value.slice(0, lineStart);
+
+    const target =
+      value.slice(lineStart, end);
+
+    const after =
+      value.slice(end);
+
+    const lines =
+      target.split("\n");
+
+    const changed =
+      isOutdent
+        ? lines.map(line => {
+            if (line.startsWith(indent)) {
+              return line.slice(indent.length);
+            }
+
+            if (line.startsWith(" ")) {
+              return line.slice(1);
+            }
+
+            return line;
+          }).join("\n")
+        : lines.map(line =>
+            indent + line
+          ).join("\n");
+
+    editor.value =
+      before + changed + after;
+
     const delta =
-      editor.value.length - value.length;
-    editor.selectionStart = start;
-    editor.selectionEnd = end + delta;
+      editor.value.length -
+      value.length;
+
+    editor.selectionStart =
+      start;
+
+    editor.selectionEnd =
+      end + delta;
   }
+
   editor.focus();
-  repairLastValue = editor.value;
-  updateLineNumbers();
-  updateCursorPosition();
-  updateRepairStatus(isOutdent ? "アウトデント" : "インデント");
-  autoSaveRepairDraft();
+
+  repairLastValue =
+    editor.value;
+
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
+
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      isOutdent
+        ? "アウトデント"
+        : "インデント"
+    );
+  }
+
+  if (typeof autoSaveRepairDraft === "function") {
+    autoSaveRepairDraft();
+  }
 }
 
 function indentRepairSelection() {
