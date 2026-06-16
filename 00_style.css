@@ -23,8 +23,6 @@ background.      背景色
 box-shadow.      影の大きさ
 =============================== */
 
-<style>
-
 :root {
   --bg: #f0f2f5;
   --text: #1c1e21;
@@ -1534,5 +1532,3 @@ mark {
     bold;
 
 }
-
-</style>
