@@ -726,7 +726,10 @@ async function runMacro(name) {
               "";
           }
 
-          searchRepairText();
+          if (typeof searchRepairText === "function") {
+            searchRepairText();
+          }
+
           continue;
         }
 
@@ -742,23 +745,32 @@ async function runMacro(name) {
               "";
           }
 
-          searchAllRepairFiles();
+          if (typeof searchAllRepairFiles === "function") {
+            searchAllRepairFiles();
+          }
+
           continue;
         }
 
         if (step.action === "openGlobalSearchResult") {
 
+          const list =
+            Array.isArray(window.repairGlobalSearchResults)
+              ? window.repairGlobalSearchResults
+              : [];
+
           const index =
             typeof data.index === "number"
               ? data.index
-              : repairGlobalSearchResults
-                  .findIndex(item =>
-                    item.fileName === data.fileName &&
-                    item.lineNumber === data.lineNumber
-                  );
+              : list.findIndex(item =>
+                  item.fileName === data.fileName &&
+                  item.lineNumber === data.lineNumber
+                );
 
           if (index >= 0) {
-            openGlobalSearchResult(index);
+            if (typeof openGlobalSearchResult === "function") {
+              openGlobalSearchResult(index);
+            }
           } else {
             console.warn(
               "Macro search result not found",
@@ -768,7 +780,6 @@ async function runMacro(name) {
 
           continue;
         }
-
       }
 
       if (
@@ -795,10 +806,8 @@ async function runMacro(name) {
 
       break;
     }
-
   }
 
   macroRecording =
     wasRecording;
-
 }
