@@ -540,6 +540,7 @@ body:not(.dark) .repair-tools-panel{
 =============================== */
 
 .repair-quick-favorite-panel {
+
   position: fixed;
 
   left: 0;
@@ -548,78 +549,103 @@ body:not(.dark) .repair-tools-panel{
 
   z-index: 10002;
 
-  width: 54px;
-  max-height: 72vh;
+  width: 74px;
+  max-height: 75vh;
   overflow-y: auto;
 
   display: none;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 
-  padding: 6px 4px;
+  padding: 8px 6px;
 
   background: var(--card);
   color: var(--text);
+
   border: 1px solid var(--border);
   border-left: none;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 10px 10px 0;
 
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  box-shadow: 0 6px 18px rgba(0,0,0,.3);
 
-  transition: left 0.25s ease;
+  transition: left .25s ease;
+
 }
 
 .repair-quick-favorite-panel.closed {
-  left: -54px;
+
+  left: -74px;
+
 }
 
 .repair-quick-favorite-toggle {
+
   position: absolute;
+
   top: 50%;
-  right: -28px;
+  right: -34px;
+
   transform: translateY(-50%);
 
-  width: 28px;
-  height: 34px;
+  width: 34px;
+  height: 46px;
 
   padding: 0;
-  border-radius: 0 6px 6px 0;
+
+  border-radius: 0 8px 8px 0;
 
   background: var(--card);
   color: var(--text);
+
   border: 1px solid var(--border);
   border-left: none;
 
-  font-size: 14px;
-  line-height: 1;
+  font-size: 18px;
+  font-weight: bold;
+
+  cursor: pointer;
 
   z-index: 10003;
+
 }
 
 .repair-quick-favorite-title {
-  font-size: 9px;
+
+  font-size: 11px;
+
   text-align: center;
-  opacity: 0.75;
-  margin-bottom: 2px;
+
+  opacity: .75;
+
+  margin-bottom: 4px;
+
 }
 
 .repair-quick-favorite-list {
+
   display: flex;
+
   flex-direction: column;
-  gap: 4px;
+
+  gap: 6px;
+
 }
 
 .repair-quick-favorite-btn {
-  width: 44px;
-  height: 34px;
+
+  width: 60px;
+  height: 42px;
 
   padding: 0;
-  border-radius: 6px;
 
-  font-size: 15px;
+  border-radius: 8px;
+
+  font-size: 18px;
+
   line-height: 1;
 
   text-align: center;
+
 }
 
 /* ===============================
