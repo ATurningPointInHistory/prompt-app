@@ -41,6 +41,13 @@ function selectMemoBox(index) {
 
 function saveMemoBoxCurrent() {
 
+  if (
+    memoBoxActiveIndex < 0 ||
+    memoBoxActiveIndex >= memoBoxList.length
+  ) {
+    memoBoxActiveIndex = 0;
+  }
+
   const name =
     get("memoBoxName")
       ?.value || "";
@@ -57,7 +64,6 @@ function saveMemoBoxCurrent() {
   };
 
   saveMemoBoxes();
-
 }
 
 function useMemoForSearch() {
