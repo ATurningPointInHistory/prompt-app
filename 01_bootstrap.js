@@ -907,7 +907,7 @@ function enableRepairSearchQuickDrag() {
         : e.clientY;
 
     startTop =
-      parseInt(panel.style.top || "12", 10);
+      parseInt(panel.style.top || "0", 10);
   }
 
   function move(e) {
@@ -922,12 +922,20 @@ function enableRepairSearchQuickDrag() {
     const nextTop =
       startTop + (y - startY);
 
-    const minTop = 8;
+    const minTop = 0;
 
+    const toolsBtn =
+      get("toolsBtn");
+    
+    const bottomLimit =
+      toolsBtn
+        ? window.innerHeight - toolsBtn.offsetTop
+        : 44;
+    
     const maxTop =
       window.innerHeight -
       panel.offsetHeight -
-      20;
+      bottomLimit;
 
     panel.style.top =
       Math.min(
