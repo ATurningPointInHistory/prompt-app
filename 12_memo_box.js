@@ -134,3 +134,73 @@ function deleteMemoBox() {
   showMemoBox();
 
 }
+
+function showMemoBox() {
+
+  const tabs =
+    memoBoxList
+      .map((item, index) => `
+<button
+  class="tab ${
+    index === memoBoxActiveIndex
+      ? "active"
+      : ""
+  }"
+  onclick="selectMemoBox(${index})">
+${escapeHtml(item.name)}
+</button>
+`)
+      .join("");
+
+  const current =
+    memoBoxList[
+      memoBoxActiveIndex
+    ];
+
+  openFloatPanel(
+    "MEMO BOX",
+    `
+<div class="tab-container">
+${tabs}
+
+<button
+  class="tab"
+  onclick="addMemoBox()">
+＋
+</button>
+</div>
+
+<input
+  id="memoBoxName"
+  value="${escapeHtml(current.name)}">
+
+<textarea
+  id="memoBoxText"
+  rows="12"
+  style="width:100%;">
+${escapeHtml(current.text)}
+</textarea>
+
+<div class="btn-group">
+
+<button onclick="saveMemoBoxCurrent()">
+💾保存
+</button>
+
+<button onclick="useMemoForSearch()">
+🔍検索
+</button>
+
+<button onclick="copyMemoBox()">
+📋コピー
+</button>
+
+<button onclick="deleteMemoBox()">
+🗑削除
+</button>
+
+</div>
+`
+  );
+
+}
