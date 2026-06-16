@@ -15,6 +15,26 @@ function startMacroRecording() {
 
 }
 
+function recordMacroAction(
+  action,
+  data = {}
+) {
+
+  if (!macroRecording) {
+    return;
+  }
+
+  currentMacroActions.push({
+    type:
+      "action",
+
+    action,
+
+    data
+  });
+
+}
+
 function stopMacroRecording() {
 
   macroRecording = false;
@@ -57,34 +77,118 @@ function stopMacroRecording() {
 
 }
 
-function runMacro(name) {
+async function runMacro(name) {
 
   const actions =
     macroList[name];
 
   if (!actions) {
+    alert("Macroなし");
     return;
   }
 
-  actions.forEach(
-    action => {
+  const wasRecording =
+    macroRecording;
 
-      try {
+  macroRecording = false;
 
-        new Function(
-          action.code
-        )();
+  for (const step of actions) {
 
-      } catch (e) {
+    try {
 
-        console.error(
-          e
-        );
+      if (
+        step.type === "action"
+      ) {
+
+        const data =
+          step.data || {};
+
+        if (
+          step.action ===
+          "searchRepairText"
+        ) {
+
+          const box =
+            get("repairSearch");
+
+          if (box) {
+            box.value =
+              data.keyword || "";
+          }
+
+          searchRepairText();
+          continue;
+        }
+
+        if (
+          step.action ===
+          "searchAllRepairFiles"
+        ) {
+
+          const box =
+            get("repairSearch");
+
+          if (box) {
+            box.value =
+              data.keyword || "";
+          }
+
+          searchAllRepairFiles();
+          continue;
+        }
+
+        if (
+          step.action ===
+          "openGlobalSearchResult"
+        ) {
+
+          const index =
+            typeof data.index === "number"
+              ? data.index
+              : repairGlobalSearchResults
+                  .findIndex(item =>
+                    item.fileName === data.fileName &&
+                    item.lineNumber === data.lineNumber
+                  );
+
+          if (index >= 0) {
+            openGlobalSearchResult(index);
+          }
+
+          continue;
+        }
 
       }
 
+      if (
+        step.type === "onclick" &&
+        step.code
+      ) {
+        new Function(step.code)();
+      }
+
+    } catch (e) {
+
+      console.error(
+        "Macro step failed",
+        step,
+        e
+      );
+
+      alert(
+        "Macro実行エラー\n\n" +
+        (step.action || step.code || "") +
+        "\n\n" +
+        e.message
+      );
+
+      break;
     }
-  );
+
+  }
+
+  macroRecording =
+    wasRecording;
 
 }
 
