@@ -87,7 +87,6 @@ async function applyAiIntegration() {
     return;
   }
 
-
   if (
     !latestAiIntegrationChanges ||
     !latestAiIntegrationChanges.length
@@ -96,7 +95,11 @@ async function applyAiIntegration() {
     return;
   }
 
-  saveDeleteRollbackSnapshot();
+  if (typeof saveDeleteRollbackSnapshot === "function") {
+    saveDeleteRollbackSnapshot(
+      "AI統合前"
+    );
+  }
 
   let text =
     editor.value;
@@ -105,69 +108,59 @@ async function applyAiIntegration() {
   let replaceCount = 0;
   let skipCount = 0;
 
-  latestAiIntegrationChanges.forEach(
-    change => {
+  latestAiIntegrationChanges.forEach(change => {
 
-      if (
-        change.type === "same"
-      ) {
+    if (change.type === "same") {
+      skipCount++;
+      return;
+    }
+
+    if (change.type === "replace") {
+
+      const block =
+        typeof findFunctionBlockInText === "function"
+          ? findFunctionBlockInText(
+              text,
+              change.name
+            )
+          : null;
+
+      if (!block) {
         skipCount++;
         return;
       }
 
-      if (
-        change.type === "replace"
-      ) {
+      text =
+        text.slice(0, block.start) +
+        change.newCode +
+        text.slice(block.end);
 
-        const block =
-          findFunctionBlockInText(
-            text,
-            change.name
-          );
+      replaceCount++;
+      return;
+    }
 
-        if (!block) {
-          skipCount++;
-          return;
-        }
+    if (change.type === "add") {
 
-        text =
-          text.slice(
-            0,
-            block.start
-          ) +
-          change.newCode +
-          text.slice(
-            block.end
-          );
+      const exists =
+        typeof findFunctionBlockInText === "function"
+          ? findFunctionBlockInText(
+              text,
+              change.name
+            )
+          : null;
 
-        replaceCount++;
+      if (exists) {
+        skipCount++;
         return;
       }
 
-      if (
-        change.type === "add"
-      ) {
+      text +=
+        "\n\n" +
+        change.newCode;
 
-        const exists =
-          findFunctionBlockInText(
-            text,
-            change.name
-          );
-
-        if (exists) {
-          skipCount++;
-          return;
-        }
-
-        text +=
-          "\n\n" +
-          change.newCode;
-
-        addCount++;
-      }
-
+      addCount++;
     }
-  );
+  });
 
   editor.value =
     text;
@@ -176,15 +169,15 @@ async function applyAiIntegration() {
     text;
 
   const health =
-    validateBackupHtml(
-      text
-    );
+    typeof validateBackupHtml === "function"
+      ? validateBackupHtml(text)
+      : { js_ok: true, js_error: "" };
 
   if (!health.js_ok) {
 
-    rollbackLastDelete(
-      true
-    );
+    if (typeof rollbackLastDelete === "function") {
+      rollbackLastDelete(true);
+    }
 
     alert(
       "AI統合失敗\n\n" +
@@ -194,14 +187,23 @@ async function applyAiIntegration() {
     return;
   }
 
-  updateLineNumbers();
-  updateCursorPosition();
+  if (typeof updateLineNumbers === "function") {
+    updateLineNumbers();
+  }
 
-  autoSaveRepairDraft();
+  if (typeof updateCursorPosition === "function") {
+    updateCursorPosition();
+  }
 
-  updateRepairStatus(
-    `AI統合成功 add:${addCount} replace:${replaceCount}`
-  );
+  if (typeof autoSaveRepairDraft === "function") {
+    autoSaveRepairDraft();
+  }
+
+  if (typeof updateRepairStatus === "function") {
+    updateRepairStatus(
+      `AI統合成功 add:${addCount} replace:${replaceCount}`
+    );
+  }
 
   if (typeof showHtmlHealth === "function") {
     await showHtmlHealth();
@@ -212,7 +214,7 @@ async function applyAiIntegration() {
   latestAiAutoTestPassed = false;
 
   alert(
-      [
+    [
       "AI統合成功",
       "",
       "追加: " + addCount,
