@@ -248,6 +248,58 @@ function buildRepairToolsPanelHtml() {
 `;
 }
 
+function initRepairToolsPanel() {
+
+  if (get("repairToolsPanel")) {
+    updateRepairToolsPanelVisibility();
+    return;
+  }
+
+  const wrap =
+    document.createElement("div");
+
+  wrap.innerHTML =
+    buildRepairToolsPanelHtml();
+
+  const panel =
+    wrap.firstElementChild;
+
+  if (!panel) return;
+
+  panel.style.display =
+    "none";
+
+  document.body.appendChild(panel);
+
+  updateRepairToolsPanelVisibility();
+}
+
+function updateRepairToolsPanelVisibility() {
+
+  const panel =
+    get("repairToolsPanel");
+
+  if (!panel) return;
+
+  panel.style.display =
+    isRepairMode()
+      ? "block"
+      : "none";
+}
+
+function toggleRepairToolsPanel() {
+
+  const panel =
+    get("repairToolsPanel");
+
+  if (!panel) return;
+
+  panel.style.display =
+    panel.style.display === "none"
+      ? "block"
+      : "none";
+}
+
 function toggleToolsMenu(){
   const panel = get("floatPanel");
   if (panel.style.display !== "none") {
@@ -379,6 +431,31 @@ function openFloatPanel(title, bodyHtml){
       <span class="float-panel-title">
         ${title}
       </span>
+
+      <button
+      onclick="moveFloatPanelCorner('tl')">
+      ↖
+      </button>
+
+      <button
+      onclick="moveFloatPanelCorner('tr')">
+      ↗
+      </button>
+
+      <button
+      onclick="moveFloatPanelCorner('bl')">
+      ↙
+      </button>
+
+      <button
+      onclick="moveFloatPanelCorner('br')">
+      ↘
+      </button>
+
+      <button
+      onclick="resetFloatPanelPosition()">
+      □
+      </button>
 
       <button
       onclick="backFloatPanel()">
@@ -756,32 +833,6 @@ function updateRepairSearchQuickVisibility() {
       : "none";
 }
 
-function initRepairToolsPanel() {
-
-  if (get("repairToolsPanel")) {
-    updateRepairToolsPanelVisibility();
-    return;
-  }
-
-  const wrap =
-    document.createElement("div");
-
-  wrap.innerHTML =
-    buildRepairToolsPanelHtml();
-
-  const panel =
-    wrap.firstElementChild;
-
-  if (!panel) return;
-
-  panel.style.display =
-    "none";
-
-  document.body.appendChild(panel);
-
-  updateRepairToolsPanelVisibility();
-}
-
 function initRepairQuickPanel() {
   if (get("repairQuickPanel")) {
     updateRepairQuickPanelVisibility();
@@ -976,19 +1027,6 @@ function enableRepairQuickDrag() {
     "touchend",
     end
   );
-}
-
-function updateRepairToolsPanelVisibility() {
-
-  const panel =
-    get("repairToolsPanel");
-
-  if (!panel) return;
-
-  panel.style.display =
-    isRepairMode()
-      ? "block"
-      : "none";
 }
 
 function updateRepairQuickPanelVisibility() {
