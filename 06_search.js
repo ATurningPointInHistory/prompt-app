@@ -195,15 +195,6 @@ function jumpToSearchHistory(
 
 function openGlobalSearchResult(index) {
 
-  if (typeof recordMacroAction === "function") {
-    recordMacroAction(
-      "openGlobalSearchResult",
-      {
-        index
-      }
-    );
-  }
-
   saveCurrentSearchEditorFile();
 
   const item =
@@ -211,6 +202,24 @@ function openGlobalSearchResult(index) {
 
   if (!item) {
     return;
+  }
+
+  if (
+    typeof recordMacroAction ===
+    "function"
+  ) {
+    recordMacroAction(
+      "openGlobalSearchResult",
+      {
+        fileName:
+          item.fileName,
+
+        lineNumber:
+          item.lineNumber,
+
+        index
+      }
+    );
   }
 
   const file =
@@ -232,7 +241,10 @@ function openGlobalSearchResult(index) {
   editor.value =
     file.text;
 
-  if (typeof setCurrentRepairFile === "function") {
+  if (
+    typeof setCurrentRepairFile ===
+    "function"
+  ) {
 
     setCurrentRepairFile(
       item.fileName
@@ -249,17 +261,25 @@ function openGlobalSearchResult(index) {
     get("repairSearch");
 
   if (searchBox) {
+
     searchBox.value =
       repairLastGlobalSearchKeyword || "";
+
   }
 
   closeGlobalSearchModal();
 
-  if (typeof updateLineNumbers === "function") {
+  if (
+    typeof updateLineNumbers ===
+    "function"
+  ) {
     updateLineNumbers();
   }
 
-  if (typeof updateCursorPosition === "function") {
+  if (
+    typeof updateCursorPosition ===
+    "function"
+  ) {
     updateCursorPosition();
   }
 
@@ -267,7 +287,10 @@ function openGlobalSearchResult(index) {
     item.lineNumber
   );
 
-  if (typeof updateRepairStatus === "function") {
+  if (
+    typeof updateRepairStatus ===
+    "function"
+  ) {
     updateRepairStatus(
       `${item.fileName} / L${item.lineNumber}へ移動`
     );
@@ -556,6 +579,7 @@ function searchAllRepairFiles() {
   showGlobalSearchModal();
 
 }
+
 function showGlobalSearchModal() {
 
   ensureGlobalSearchModal();
@@ -812,7 +836,10 @@ function searchRepairText() {
     return;
   }
 
-  if (typeof recordMacroAction === "function") {
+  if (
+    typeof recordMacroAction ===
+    "function"
+  ) {
     recordMacroAction(
       "searchRepairText",
       {
@@ -836,20 +863,24 @@ function searchRepairText() {
   repairSearchMatches =
     matches.map(m => m.index);
 
-  repairSearchIndex = -1;
+  repairSearchIndex =
+    -1;
 
   renderRepairSearchResults(
     keyword,
     sourceText
   );
 
-  if (repairSearchMatches.length > 0) {
+  if (
+    repairSearchMatches.length > 0
+  ) {
     searchRepairNext();
   }
 
   updateRepairStatus(
     `検索結果 ${matches.length}件`
   );
+
 }
 
 function searchRepairPrev() {
