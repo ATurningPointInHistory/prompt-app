@@ -4,6 +4,7 @@
 =============================== */
 
 function checkSafeMode() {
+
   const crash =
     localStorage.getItem("lastCrash");
 
@@ -12,7 +13,8 @@ function checkSafeMode() {
   let info = {};
 
   try {
-    info = JSON.parse(crash);
+    info =
+      JSON.parse(crash);
   } catch {
     info = {
       message: String(crash),
@@ -46,7 +48,12 @@ ${info.time || "unknown"}
     return;
   }
 
-  switchAppPage("repair");
+  if (typeof switchAppPage === "function") {
+    switchAppPage("repair");
+  }
+
+  const editor =
+    get("repairEditor");
 
   const draft =
     localStorage.getItem(
@@ -54,35 +61,38 @@ ${info.time || "unknown"}
     );
 
   if (
+    editor &&
     draft &&
-    !get("repairEditor").value.trim()
+    !editor.value.trim()
   ) {
-    get("repairEditor").value =
+    editor.value =
       draft;
 
     repairLastValue =
       draft;
 
     if (typeof updateLineNumbers === "function") {
-          updateLineNumbers();
-        }
+      updateLineNumbers();
+    }
 
-        if (typeof updateCursorPosition === "function") {
+    if (typeof updateCursorPosition === "function") {
       updateCursorPosition();
-        }
+    }
 
-        if (typeof updateRepairStatus === "function") {
-          updateRepairStatus(
-            "SAFE MODE復元"
-          );
-        }
+    if (typeof updateRepairStatus === "function") {
+      updateRepairStatus(
+        "SAFE MODE復元"
+      );
+    }
   }
 
   const debugBox =
     get("debugBox");
 
   if (debugBox) {
-    debugBox.style.display = "block";
+    debugBox.style.display =
+      "block";
+
     debugBox.innerText =
 `SAFE MODE
 前回クラッシュ情報
