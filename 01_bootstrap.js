@@ -482,7 +482,7 @@ function buildRepairQuickToolsHtml() {
     id="repairQuickHeader"
     class="small"
     style="cursor:move;">
-    <hr>move<hr>
+    <hr>Quick<hr>
   </div>
 
   <button
@@ -517,13 +517,6 @@ function buildRepairSearchQuickHtml() {
   return `
 <div id="repairSearchQuickPanel"
      class="repair-search-quick-panel">
-
-<div
-  id="repairSearchQuickHeader"
-  class="small"
-  style="cursor:move;">
-  <hr>move<hr>
-</div>
 
   <button
     id="repairSearchQuickToggle"
@@ -704,22 +697,48 @@ function toggleRepairReplacePopup() {
 }
 
 function initRepairSearchQuickPanel() {
+
   if (get("repairSearchQuickPanel")) {
+
     updateRepairSearchQuickVisibility();
+
+    if (
+      typeof enableRepairSearchQuickDrag ===
+      "function"
+    ) {
+      enableRepairSearchQuickDrag();
+    }
+
     return;
   }
 
-  const wrap = document.createElement("div");
-  wrap.innerHTML = buildRepairSearchQuickHtml();
+  const wrap =
+    document.createElement("div");
 
-  const panel = wrap.firstElementChild;
+  wrap.innerHTML =
+    buildRepairSearchQuickHtml();
+
+  const panel =
+    wrap.firstElementChild;
+
   if (!panel) return;
 
-  panel.style.display = "none";
+  panel.style.display =
+    "none";
 
-  document.body.appendChild(panel);
+  document.body.appendChild(
+    panel
+  );
 
   updateRepairSearchQuickVisibility();
+
+  if (
+    typeof enableRepairSearchQuickDrag ===
+    "function"
+  ) {
+    enableRepairSearchQuickDrag();
+  }
+
 }
 
 function updateRepairSearchQuickVisibility() {
@@ -774,72 +793,6 @@ function toggleRepairQuickPanel() {
       : "◀";
 
   console.log("repairQuickPanel closed:", closed);
-}
-
-function enableRepairSearchQuickDrag() {
-
-  const panel =
-    get("repairSearchQuickPanel");
-
-  const header =
-    get("repairSearchQuickHeader");
-
-  if (!panel || !header) return;
-
-  let dragging = false;
-  let startY = 0;
-  let startTop = 0;
-
-  function start(e) {
-
-    dragging = true;
-
-    startY =
-      e.touches
-        ? e.touches[0].clientY
-        : e.clientY;
-
-    startTop =
-      parseInt(panel.style.top || "12", 10);
-  }
-
-  function move(e) {
-
-    if (!dragging) return;
-
-    const y =
-      e.touches
-        ? e.touches[0].clientY
-        : e.clientY;
-
-    const nextTop =
-      startTop + (y - startY);
-
-    const minTop = 8;
-
-    const maxTop =
-      window.innerHeight -
-      panel.offsetHeight -
-      20;
-
-    panel.style.top =
-      Math.min(
-        Math.max(minTop, nextTop),
-        Math.max(minTop, maxTop)
-      ) + "px";
-  }
-
-  function end() {
-    dragging = false;
-  }
-
-  header.addEventListener("mousedown", start);
-  document.addEventListener("mousemove", move);
-  document.addEventListener("mouseup", end);
-
-  header.addEventListener("touchstart", start);
-  document.addEventListener("touchmove", move);
-  document.addEventListener("touchend", end);
 }
 
 function enableRepairQuickDrag() {
