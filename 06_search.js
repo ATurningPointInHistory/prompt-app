@@ -804,17 +804,29 @@ function clearRepairSearch() {
 }
 
 function updateRepairFloatingPanelsVisibility() {
-  updateRepairQuickPanelVisibility();
-  updateRepairSearchQuickVisibility();
 
-  const searchPopup = get("repairSearchPopup");
-  if (searchPopup && !isRepairMode()) {
-    searchPopup.style.display = "none";
+  if (typeof updateRepairQuickPanelVisibility === "function") {
+    updateRepairQuickPanelVisibility();
   }
 
-  const replacePopup = get("repairReplacePopup");
+  if (typeof updateRepairSearchQuickVisibility === "function") {
+    updateRepairSearchQuickVisibility();
+  }
+
+  const searchPopup =
+    get("repairSearchPopup");
+
+  if (searchPopup && !isRepairMode()) {
+    searchPopup.style.display =
+      "none";
+  }
+
+  const replacePopup =
+    get("repairReplacePopup");
+
   if (replacePopup && !isRepairMode()) {
-    replacePopup.style.display = "none";
+    replacePopup.style.display =
+      "none";
   }
 }
 
