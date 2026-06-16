@@ -375,8 +375,8 @@ body.dark button.active-panel {
 #floatPanel{
   position: fixed;
 
-  left: 88px;
-  right: 88px;
+  left: 70px;
+  right: 110px;
   bottom: 88px;
   top: auto;
 
