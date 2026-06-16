@@ -1,1012 +1,242 @@
 /* ===============================
-   FILE: 01_bootstrap.js
-   Bootstrap / Shared Core
+   FILE: 01_core.js
+   Core / Utility / Constants
 =============================== */
-/* ===============================
-   Manager Panel Core
-=============================== */
-
-let floatPanelHistory = [];
-
-function closeAllManagers() {
-
-  [
-    "template-manager",
-    "danger-manager",
-    "pattern-manager",
-    "ai-preset-manager"
-  ].forEach(id => {
-
-    const el =
-      get(id);
-
-    if (el) {
-      el.style.display =
-        "none";
-    }
-
-  });
-}
-
-function updatePanelButtonStates() {
-
-  const pairs = [
-    ["templateBtn", "template-manager"],
-    ["dangerBtn", "danger-manager"],
-    ["patternBtn", "pattern-manager"],
-    ["aiPresetBtn", "ai-preset-manager"]
-  ];
-
-  pairs.forEach(([btnId, panelId]) => {
-
-    const btn =
-      get(btnId);
-
-    const panel =
-      get(panelId);
-
-    if (!btn || !panel) {
-      return;
-    }
-
-    btn.classList.toggle(
-      "active-panel",
-      panel.style.display !== "none"
-    );
-  });
-}
 
 /* ===============================
-   App Navigation / Tools Menu
+   Core State / Constants
 =============================== */
-function switchAppPage(mode) {
-  closeFloatPanel();
 
-  get("appPage").style.display =
-    mode === "app" ? "block" : "none";
-
-  get("repairPage").style.display =
-    mode === "repair" ? "block" : "none";
-
-  get("appPageTab").classList.toggle(
-    "active",
-    mode === "app"
-  );
-
-  get("repairPageTab").classList.toggle(
-    "active",
-    mode === "repair"
-  );
-
-  if (mode === "repair") {
-    resetRepairEditorView();
-  }
-
-  updateRepairQuickPanelVisibility();
-  updateRepairToolsPanelVisibility();
-  updateRepairSearchQuickVisibility();
-
-  if (mode !== "repair") {
-    [
-      "repairSearchPopup",
-      "repairReplacePopup",
-      "repairSearchQuickPanel",
-      "repairToolsPanel"
-    ].forEach(id => {
-        const el = get(id);
-      if (el) {
-        el.style.display = "none";
-      }
-    });
-  }
-}
- 
-function isRepairMode() {
-  return get("repairPage").style.display !== "none";
-}
-
-function buildNormalToolsHtml() {
-  return `
-
-<div class="small">💚 診断・確認</div>
-<button class="float-list-btn" onclick="showMobileConsole()">📱 Console</button>
-<button class="float-list-btn" onclick="showHtmlHealth()">HTML HEALTH</button>
-<button class="float-list-btn" onclick="diagnoseHtml()">HTML簡易診断</button>
-<button class="float-list-btn" onclick="analyzeProjectJsDependency()">JS読込診断</button>
-<button class="float-list-btn" onclick="showFunctionRelationMap()">関数関連図</button>
-<button class="float-list-btn" onclick="previewRepairHtml()">色分けプレビュー</button>
-
-<hr>
-
-<div class="small">💾 保存・バックアップ</div>
-<button class="float-list-btn" onclick="saveProjectPackage()">プロジェクトZIP保存</button>
-<button class="float-list-btn" onclick="backupProgram()">結合HTMLバックアップ</button>
-<button class="float-list-btn" onclick="saveProgramHtml()">本体HTML保存</button>
-<button class="float-list-btn" onclick="showBackupHistory()">バックアップ履歴</button>
-<button class="float-list-btn" onclick="restoreProgramBackup()">設定復元</button>
-<button class="float-list-btn" onclick="compareBackupSummary()">バックアップ差分</button>
-
-<hr>
-
-<div class="small">🧩 設定・管理</div>
-<button class="float-list-btn" onclick="toggleTemplateManager()">テンプレ管理</button>
-<button class="float-list-btn" onclick="toggleDangerManager()">危険ワード管理</button>
-<button class="float-list-btn" onclick="togglePatternManager()">NGパターン管理</button>
-<button class="float-list-btn" onclick="toggleAiPresetManager()">AIプリセット管理</button>
-
-<hr>
-
-<div class="small">🛠 通常モード支援</div>
-<button class="float-list-btn" onclick="reviewPrompt()">Promptレビュー</button>
-<button class="float-list-btn" onclick="testPromptObject()">内部JSONテスト</button>
-<button class="float-list-btn" onclick="testJsonFormat()">JSONテスト</button>
-<button class="float-list-btn" onclick="formatJsonOutput()">JSON整形</button>
-<button class="float-list-btn" onclick="recheckOutput()">再チェック</button>
-
-<hr>
-
-<div class="small">📚 開発管理</div>
-<button class="float-list-btn" onclick="renderTodoList()">開発TODO</button>
-<button class="float-list-btn" onclick="renderDevLogList()">開発履歴</button>
-
-<hr>
-
-<div class="small">🧹 その他</div>
-
-<button class="float-list-btn" onclick="showMemoBox()">📝 Memo</button>
-<button class="float-list-btn" onclick="clearOutput()">出力クリア</button>
-<button class="float-list-btn" onclick="clearHistory()">履歴全削除</button>
-<button class="float-list-btn" onclick="reloadAppPage()">ページ更新</button>
-`;
-}
-
-function buildRepairToolsHtml() {
-  return `
-
-<div class="small">💚 診断・確認</div>
-<button class="float-list-btn" onclick="showMobileConsole()">📱 Console</button>
-<button class="float-list-btn" onclick="showHtmlHealth()">HTML HEALTH</button>
-
-<hr>
-
-<div class="small">⚙ 設定・AI支援</div>
-<button class="float-list-btn" onclick="openProjectConfigManager()">Project Config</button>
-<button class="float-list-btn" onclick="analyzeAiInstruction()">AI指示解析</button>
-<button class="float-list-btn" onclick="analyzeAiGeneratedCode()">AIコード解析</button>
-<button class="float-list-btn" onclick="generateErrorPrompt()">AIエラー調査プロンプト生成</button>
-<button class="float-list-btn" onclick="copyErrorPrompt()">AIエラー調査プロンプトコピー</button>
-
-<textarea
-id="aiErrorPromptOutput"
-rows="10"
-placeholder="Generated AI Error Prompt"
-></textarea>
-
-<hr>
-
-<div class="small">💾 ファイル操作</div>
-<button class="float-list-btn" onclick="saveRepairHtml()">現在ファイル保存</button>
-<button class="float-list-btn" onclick="savePatchedRepairHtml()">Patched保存</button>
-
-<hr>
-
-<div class="small">🔍 解析・診断</div>
-<button class="float-list-btn" onclick="diagnoseRepairHtml()">編集内容診断</button>
-<button class="float-list-btn" onclick="analyzeProjectJsDependency()">JS読込診断</button>
-<button class="float-list-btn" onclick="showFunctionRelationMap()">関数関連図</button>
-<button class="float-list-btn" onclick="showFunctionList()">コードブロック一覧</button>
-
-<hr>
-
-<div class="small">✏ 編集・整理</div>
-<button class="float-list-btn" onclick="selectFunctionBlock()">関数選択</button>
-<button class="float-list-btn" onclick="replaceFunctionBlock()">関数置換</button>
-<button class="float-list-btn" onclick="showFunctionSortList()">コードブロック並べ替え</button>
-<button class="float-list-btn" onclick="openViewerMode()">閲覧モード</button>
-
-<hr>
-
-<div class="small">🧹 削除・整理</div>
-<button class="float-list-btn" onclick="cleanupCandidates()">削除候補チェック</button>
-<button class="float-list-btn" onclick="deleteCommentedCleanupBlocks()">コメント化済み完全削除</button>
-
-<hr>
-
-<div class="small">🧩 Diff・差分</div>
-<button class="float-list-btn" onclick="showRepairDiff()">Function Diff</button>
-<button class="float-list-btn" onclick="showRepairLineDiff()">Line Diff</button>
-<button class="float-list-btn" onclick="saveRepairDiff()">Diff保存</button>
-<button class="float-list-btn" onclick="loadAndApplyRepairDiff()">Diff適用</button>
-
-<hr>
-
-<div class="small">🧹 その他</div>
-
-<button class="float-list-btn" onclick="showMemoBox()">📝 Memo</button>
-
-`;
-}
-
-function toggleToolsMenu(){
-  const panel = get("floatPanel");
-
-  if (panel.style.display !== "none") {
-    closeFloatPanel();
-    return;
-  }
-
-  get("toolsBtn").innerText = "×";
-
-  const repairMode = isRepairMode();
-
-  const title =
-    repairMode
-      ? "修復ツール"
-      : "通常ツール";
-
-  const bodyHtml =
-    repairMode
-      ? buildRepairToolsHtml()
-      : buildNormalToolsHtml();
-
-  openFloatPanel(title, bodyHtml);
-}
-
-function resetRepairEditorView() {
-  const editor = get("repairEditor");
-  if (!editor) return;
-
-  editor.scrollLeft = 0;
-  editor.style.width = "100%";
-  editor.style.maxWidth = "100%";
-  updateRepairQuickPanelVisibility();
-
-}
+let currentTab = 1;
+let isLoading = false;
+const APP_VERSION = "v5.7.2";
+const DEBUG_MODE = true;
+const CHANGELOG = [
+  "v5.7.0 AI別レビュー強化",
+  "v5.7.0 AIプリセット保存/復元",
+  "v5.7.0 Gemini/Cursor/Copilot評価改善"
+];
 
 /* ===============================
-   Float Panel Core
+   Core DOM Helpers
 =============================== */
 
-function backFloatPanel() {
+const get = (id) => document.getElementById(id);
 
-  const panel =
-    get("floatPanel");
+function copyTextFallback(text) {
 
-  if (
-    !panel ||
-    floatPanelHistory.length === 0
-  ) {
-    return;
-  }
+  const textarea =
+    document.createElement("textarea");
 
-  panel.innerHTML =
-    floatPanelHistory.pop();
-}
+  textarea.value =
+    String(text || "");
 
-function moveFloatPanelCorner(pos) {
+  textarea.style.position =
+    "fixed";
 
-  const panel =
-    get("floatPanel");
+  textarea.style.left =
+    "-9999px";
 
-  if (!panel) return;
-
-  panel.style.top = "";
-  panel.style.left = "";
-  panel.style.right = "";
-  panel.style.bottom = "";
-
-  switch(pos){
-
-    case "tl":
-
-      panel.style.left =
-        "18px";
-
-      panel.style.top =
-        "18px";
-
-      break;
-
-    case "tr":
-
-      panel.style.right =
-        "18px";
-
-      panel.style.top =
-        "18px";
-
-      break;
-
-    case "bl":
-
-      panel.style.left =
-        "18px";
-
-      panel.style.bottom =
-        "88px";
-
-      break;
-
-    case "br":
-
-      panel.style.right =
-        "18px";
-
-      panel.style.bottom =
-        "88px";
-
-      break;
-
-  }
-}
-
-function openFloatPanel(title, bodyHtml){
-
-  const panel =
-    get("floatPanel");
-
-  if (
-    panel &&
-    panel.style.display === "block"
-  ) {
-    floatPanelHistory.push(
-      panel.innerHTML
-    );
-
-    if (
-      floatPanelHistory.length > 20
-    ) {
-      floatPanelHistory.shift();
-    }
-  }
-
-  panel.innerHTML =
-    `<div class="float-panel-header">
-
-      <span class="float-panel-title">
-        ${title}
-      </span>
-
-      <button
-      onclick="moveFloatPanelCorner('tl')">
-      ↖
-      </button>
-
-      <button
-      onclick="moveFloatPanelCorner('tr')">
-      ↗
-      </button>
-
-      <button
-      onclick="moveFloatPanelCorner('bl')">
-      ↙
-      </button>
-
-      <button
-      onclick="moveFloatPanelCorner('br')">
-      ↘
-      </button>
-
-      <button
-      onclick="resetFloatPanelPosition()">
-      □
-      </button>
-
-      <button
-      onclick="backFloatPanel()">
-      ◀
-      </button>
-
-      <button
-      onmousedown="event.preventDefault()"
-      onclick="closeFloatPanelKeepEditorSelection()">
-      ×
-      </button>
-
-    </div>`
-    +
-    bodyHtml;
-
-  panel.style.display =
-    "block";
-}
-
-function moveFloatPanelBy(dx, dy) {
-  const panel = get("floatPanel");
-  if (!panel) return;
-
-  const rect = panel.getBoundingClientRect();
-
-  let nextLeft = rect.left + dx;
-  let nextTop = rect.top + dy;
-
-  const maxLeft =
-    window.innerWidth - rect.width;
-
-  const maxTop =
-    window.innerHeight - rect.height;
-
-  nextLeft =
-    Math.min(
-      Math.max(0, nextLeft),
-      Math.max(0, maxLeft)
-    );
-
-  nextTop =
-    Math.min(
-      Math.max(0, nextTop),
-      Math.max(0, maxTop)
-    );
-
-  panel.style.left = nextLeft + "px";
-  panel.style.top = nextTop + "px";
-  panel.style.right = "auto";
-  panel.style.bottom = "auto";
-}
-
-function resetFloatPanelPosition() {
-  const panel = get("floatPanel");
-  if (!panel) return;
-
-  panel.style.left = "auto";
-  panel.style.top = "auto";
-  panel.style.right = "18px";
-  panel.style.bottom = "88px";
-}
-
-function closeFloatPanel(){
-
-  const panel =
-    get("floatPanel");
-
-  if (panel) {
-    panel.style.display =
-      "none";
-  }
-
-  const btn =
-    get("toolsBtn");
-
-  if (btn) {
-    btn.innerText =
-      "⚙";
-  }
-}
-
-function closeFloatPanel(){
-  get("floatPanel").style.display = "none";
-  const btn = get("toolsBtn");
-  if(btn){
-    btn.innerText = "⚙";
-  }
-}
-
-function buildRepairQuickToolsHtml() {
-  return `
-<div id="repairQuickPanel" class="repair-quick-panel">
-
-  <div
-    id="repairQuickHeader"
-    class="small"
-    style="cursor:move;">
-    <hr>move<hr>
-  </div>
-
-  <button
-    id="repairQuickToggle"
-    class="repair-quick-toggle"
-    onclick="toggleRepairQuickPanel()">
-    ◀
-  </button>
-
-  <button class="float-list-btn" onclick="loadRepairHtml()">📖<br>File</button>
-  <button class="float-list-btn" onclick="backupPartialScript()">📦<br>JS</button>
-  <button class="float-list-btn" onclick="copyRepairHtml()">📋<br>Copy</button>
-
-  <button class="float-list-btn" onclick="undoRepairEdit()">↩<br>Undo</button>
-  <button class="float-list-btn" onclick="rollbackLastDelete()">♻<br>復元</button>
-  <button class="float-list-btn" onclick="redoRepairEdit()">↪<br>Redo</button>
-
-  <button class="float-list-btn" onclick="indentRepairSelection()">➡<br>In</button>
-  <button class="float-list-btn" onclick="outdentRepairSelection()">⬅<br>Out</button>
-
-  <button class="float-list-btn" onclick="scrollRepairTop()">⏫<br>Top</button>
-  <button class="float-list-btn" onclick="scrollRepairBottom()">⏬<br>End</button>
-
-  <button class="float-list-btn" onclick="toggleRepairAutoSave()">💾<br>Save</button>
-  <button class="float-list-btn" onclick="reloadAppPage()">🔄<br>Reload</button>
-
-</div>
-`;
-}
-
-function buildRepairSearchQuickHtml() {
-  return `
-<div id="repairSearchQuickPanel"
-     class="repair-search-quick-panel">
-
-  <div
-    id="repairSearchQuickHeader"
-    class="small"
-    style="cursor:move;">
-    <hr>move<hr>
-  </div>
-
-  <button
-    id="repairSearchQuickToggle"
-    class="repair-search-quick-toggle"
-    onclick="toggleRepairSearchQuickPanel()">
-    ▶
-  </button>
-
-  <button class="float-list-btn" onclick="toggleRepairSearchPopup()">🔍<br>検索</button>
-  <button class="float-list-btn" onclick="toggleRepairReplacePopup()">🔁<br>置換</button>
-  <button class="float-list-btn" onclick="searchRepairNext()">⏭<br>次</button>
-  <button class="float-list-btn" onclick="loadRepairSearchFiles()">📁<br>読込</button>
-  <button class="float-list-btn" onclick="loadCurrentProjectSearchFiles()">📦<br>現在</button>
-  <button class="float-list-btn" onclick="showRepairSearchFiles()">📋<br>一覧</button>
-  <button class="float-list-btn" onclick="showSearchHistory()">🕘<br>履歴</button>
-  <button class="float-list-btn" onclick="searchAllRepairFiles()">📚<br>全検</button>
-
-  <button class="float-list-btn" onclick="startMacroRecording()">🔴<br>記録</button>
-  <button class="float-list-btn" onclick="stopMacroRecording()">⏹<br>保存</button>
-  <button class="float-list-btn" onclick="showMacroList()">▶<br>実行</button>
-  <button class="float-list-btn" onclick="addMacroInputStep()">⌨<br>入力</button>
-
-</div>
-`;
-}
-
-function toggleRepairSearchQuickPanel() {
-
-  const panel =
-    get("repairSearchQuickPanel");
-
-  const toggle =
-    get("repairSearchQuickToggle");
-
-  if (!panel || !toggle) {
-    return;
-  }
-
-  const closed =
-    panel.classList.toggle(
-      "closed"
-    );
-
-  toggle.textContent =
-    closed
-      ? "◀"
-      : "▶";
-
-}
-
-function closeRepairPopups() {
-
-  [
-    "repairSearchPopup",
-    "repairReplacePopup"
-  ].forEach(id => {
-
-    const el =
-      get(id);
-
-    if (el) {
-      el.style.display =
-        "none";
-    }
-
-  });
-
-}
-
-function toggleRepairSearchPopup() {
-
-  let box =
-    get("repairSearchPopup");
-
-  if (box) {
-
-    const opening =
-      box.style.display === "none";
-
-    closeRepairPopups();
-
-    box.style.display =
-      opening
-        ? "block"
-        : "none";
-
-    return;
-  }
-
-  closeRepairPopups();
-
-  box =
-    document.createElement("div");
-
-  box.id =
-    "repairSearchPopup";
-
-  box.innerHTML = `
-  <div class="repair-search-toolbar">
-
-    <input
-      id="repairSearch"
-      placeholder="検索">
-
-    <button
-      onclick="searchRepairText()">
-      検索
-    </button>
-
-    <button
-      onclick="searchRepairNext()">
-      次へ
-    </button>
-
-  </div>
-
-  <div id="repairSearchPopupResult"></div>
-  `;
-
-  document.body.appendChild(box);
-}
-
-function toggleRepairReplacePopup() {
-
-  let box =
-    get("repairReplacePopup");
-
-  if (box) {
-
-    const opening =
-      box.style.display === "none";
-
-    closeRepairPopups();
-
-    box.style.display =
-      opening
-        ? "block"
-        : "none";
-
-    return;
-  }
-
-  closeRepairPopups();
-
-  box =
-    document.createElement("div");
-
-  box.id =
-    "repairReplacePopup";
-
-  box.innerHTML = `
-    <div class="repair-search-toolbar">
-
-      <input
-        id="replaceFrom"
-        placeholder="検索">
-
-      <input
-        id="replaceTo"
-        placeholder="置換">
-
-      <div class="repair-search-actions">
-
-        <button onclick="replaceRepairText()">
-          1件
-        </button>
-
-        <button onclick="replaceAllRepairText()">
-          全件
-        </button>
-
-      </div>
-
-    </div>
-    `;
-
-  document.body.appendChild(box);
-}
-
-function initRepairSearchQuickPanel() {
-
-  if (get("repairSearchQuickPanel")) {
-
-    updateRepairSearchQuickVisibility();
-
-    if (
-      typeof enableRepairSearchQuickDrag ===
-      "function"
-    ) {
-      enableRepairSearchQuickDrag();
-    }
-
-    return;
-  }
-
-  const wrap =
-    document.createElement("div");
-
-  wrap.innerHTML =
-    buildRepairSearchQuickHtml();
-
-  const panel =
-    wrap.firstElementChild;
-
-  if (!panel) return;
-
-  panel.style.display =
-    "none";
+  textarea.style.top =
+    "0";
 
   document.body.appendChild(
-    panel
+    textarea
   );
 
-  updateRepairSearchQuickVisibility();
+  textarea.focus();
+  textarea.select();
 
-  if (
-    typeof enableRepairSearchQuickDrag ===
-    "function"
-  ) {
-    enableRepairSearchQuickDrag();
+  let ok = false;
+
+  try {
+    ok =
+      document.execCommand(
+        "copy"
+      );
+  } catch {
+    ok = false;
   }
 
+  document.body.removeChild(
+    textarea
+  );
+
+  return ok;
 }
 
-function updateRepairSearchQuickVisibility() {
+/* ===============================
+   Core Escape Helpers
+=============================== */
 
-  const panel =
-    get("repairSearchQuickPanel");
-
-  if (!panel) return;
-
-  if (isRepairMode()) {
-
-    panel.style.display =
-      "flex";
-
-    panel.style.top =
-      "0px";
-
-    panel.style.right =
-      "0px";
-
-    panel.style.bottom =
-      "auto";
-
-  } else {
-
-    panel.style.display =
-      "none";
-  }
-}
-function initRepairQuickPanel() {
-  if (get("repairQuickPanel")) {
-    updateRepairQuickPanelVisibility();
-    enableRepairQuickDrag();
-    return;
-  }
-
-  const wrap = document.createElement("div");
-  wrap.innerHTML = buildRepairQuickToolsHtml();
-
-  const panel = wrap.firstElementChild;
-  if (!panel) return;
-
-  panel.style.display = "none";
-
-  document.body.appendChild(panel);
-
-  updateRepairQuickPanelVisibility();
-  enableRepairQuickDrag();
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
-function toggleRepairQuickPanel() {
-  const panel = get("repairQuickPanel");
-  const toggle = get("repairQuickToggle");
-
-  if (!panel || !toggle) {
-    console.warn("repair quick panel not found");
-    return;
-  }
-
-  const closed =
-    panel.classList.toggle("closed");
-
-  toggle.textContent =
-    closed
-      ? "▶"
-      : "◀";
-
-  console.log("repairQuickPanel closed:", closed);
+function escapeRegExp(str) {
+  return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function enableRepairSearchQuickDrag() {
+/* ===============================
+   Core Storage Helpers
+=============================== */
 
-  const panel =
-    get("repairSearchQuickPanel");
-
-  const header =
-    get("repairSearchQuickHeader");
-
-  if (!panel || !header) return;
-
-  let dragging = false;
-  let startY = 0;
-  let startTop = 0;
-
-  function start(e) {
-
-    dragging = true;
-
-    startY =
-      e.touches
-        ? e.touches[0].clientY
-        : e.clientY;
-
-    startTop =
-      parseInt(panel.style.top || "0", 10);
+function loadJson(key, fallback) {
+  try {
+    return JSON.parse(
+      localStorage.getItem(key) || JSON.stringify(fallback)
+    );
+  } catch {
+    localStorage.removeItem(key);
+    return fallback;
   }
-
-  function move(e) {
-
-    if (!dragging) return;
-
-    const y =
-      e.touches
-        ? e.touches[0].clientY
-        : e.clientY;
-
-    const nextTop =
-      startTop + (y - startY);
-
-    const minTop = 0;
-
-    const toolsBtn =
-      get("toolsBtn");
-    
-    const bottomLimit =
-      toolsBtn
-        ? window.innerHeight - toolsBtn.offsetTop
-        : 44;
-    
-    const maxTop =
-      window.innerHeight -
-      panel.offsetHeight -
-      bottomLimit;
-
-    panel.style.top =
-      Math.min(
-        Math.max(minTop, nextTop),
-        Math.max(minTop, maxTop)
-      ) + "px";
-  }
-
-  function end() {
-    dragging = false;
-  }
-
-  header.addEventListener("mousedown", start);
-  document.addEventListener("mousemove", move);
-  document.addEventListener("mouseup", end);
-
-  header.addEventListener("touchstart", start);
-  document.addEventListener("touchmove", move);
-  document.addEventListener("touchend", end);
 }
 
-function enableRepairQuickDrag() {
+/* ===============================
+   Default Data
+=============================== */
 
-  const panel =
-    get("repairQuickPanel");
+const defaultTemplates = [
+  {
+    name: "AIオーケストレーター",
+    role: "AIオーケストレーター",
+    task: "ユーザーの質問に対して最適なロールを生成して回答する",
+    details: `あなたは「AIオーケストレーター」です。
 
-  const header =
-    get("repairQuickHeader");
+ユーザーの質問に対して、最適な専門ロール（ジョブ）を自動生成・選定し、そのロールとして回答してください。
 
-  if (!panel || !header) return;
+【処理手順】
+① 質問の意図を分析する
+② 必要なロールを3〜5個生成する
+③ 各ロールの役割を簡潔に説明する
+④ 最適なロールを1つ選び、理由を述べる
+⑤ 選ばれたロールとして最終回答を行う
 
-  let dragging = false;
-  let startY = 0;
-  let startBottom = 0;
+【条件】
+・ロールは具体的かつ専門的にする
+・最終回答は選ばれたロールになりきる
+・無駄な説明は省き、論理的に出力する
 
-  function start(e) {
+【出力形式】
+1. 意図分析
+2. ロール候補
+3. 最適ロールと選定理由
+4. 最終回答`,
+    tone: "プロフェッショナル"
+  }
+];
 
-    dragging = true;
+const defaultDangerWords = [
+  "パスワード",
+  "住所",
+  "電話番号",
+  "メールアドレス",
+  "マイナンバー",
+  "クレジットカード",
+  "カード番号",
+  "暗証番号",
+  "口座番号",
+  "銀行口座",
+  "本人確認書類",
+  "運転免許証",
+  "保険証",
+  "秘密の質問",
+  "生年月日"
+];
 
-    startY =
-      e.touches
-        ? e.touches[0].clientY
-        : e.clientY;
+const defaultPatterns = [
+  { name: "メールアドレス", regex: "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", flags: "g" },
+  { name: "電話番号", regex: "(?:\\+?\\d{1,3}[-\\s]?)?(?:\\d{2,4}[-\\s]?){2,4}\\d{3,4}", flags: "g" },
+  { name: "郵便番号", regex: "\\b\\d{3}-?\\d{4}\\b", flags: "g" },
+  { name: "クレジットカード候補", regex: "\\b(?:\\d[ -]*?){13,16}\\b", flags: "g" },
+  { name: "マイナンバー候補", regex: "\\b\\d{12}\\b", flags: "g" }
+];
 
-    startBottom =
-      parseInt(panel.style.bottom || "80", 10);
+const commandDefinitions = {
+  tldr: "要点を短く箇条書きでまとめる",
+  eli15: "専門用語を減らし、15歳でも理解できる説明にする",
+  human: "AIっぽさを減らし、自然な文章にする",
+  step: "実行可能な手順に分解する",
+  enemy: "弱点・リスク・反論を洗い出す",
+  real: "事実・推測・不明点を分けて、根拠重視で回答する",
+  gap: "不足情報・確認すべき点を洗い出す",
+  sort: "内容をカテゴリ別に整理する",
+  priority: "重要度・実装優先度を整理する",
+  schema: "JSONスキーマやデータ構造に変換する",
+  code: "実装コード案を出す",
+  test: "テスト観点を作る",
+  prompt: "生成AI向けの高品質プロンプトに再構成する"
+};
+
+const presetDefinitions = {
+  "要約": ["tldr", "sort"],
+  "初心者向け": ["eli15", "step"],
+  "設計レビュー": ["enemy", "gap", "priority"],
+  "実装支援": ["step", "code", "test"],
+  "JSON設計": ["schema", "real", "prompt"]
+};
+
+const aiPresetDefinitions = {
+
+  chatgpt: {
+    name: "ChatGPT",
+    instruction:
+      "役割、目的、条件、制約、出力形式、トーンを明確に整理してください。"
+  },
+
+  claude: {
+    name: "Claude",
+    instruction:
+      "背景、意図、考慮点、判断理由を自然文中心で整理してください。"
+  },
+
+  gemini: {
+    name: "Gemini",
+    instruction:
+      "目的、必要な出力、条件を短く明確に整理してください。"
+  },
+
+  cursor: {
+    name: "Cursor",
+    instruction:
+      "目的、問題、期待動作、制約、修正方針を明確に整理してください。"
+  },
+
+  copilot: {
+    name: "Copilot",
+    instruction:
+      "Goal、Context、Expected behavior、Constraints を短いコメント形式で整理してください。"
   }
 
-  function move(e) {
+};
 
-    if (!dragging) return;
+/* ===============================
+   AI Preset Core
+=============================== */
 
-    const y =
-      e.touches
-        ? e.touches[0].clientY
-        : e.clientY;
+function getAiPresets() {
+  const saved = loadJson("aiPresets", null);
 
-    const delta =
-      startY - y;
-
-    const nextBottom =
-      startBottom + delta;
-    
-    const minBottom = 20;
-    const maxBottom =
-      window.innerHeight - panel.offsetHeight - 60;
-    
-    panel.style.bottom =
-      Math.min(
-        Math.max(minBottom, nextBottom),
-        Math.max(minBottom, maxBottom)
-      ) + "px";
-
+  if (!saved) {
+    return aiPresetDefinitions;
   }
 
-  function end() {
-    dragging = false;
-  }
-
-  header.addEventListener(
-    "mousedown",
-    start
-  );
-
-  document.addEventListener(
-    "mousemove",
-    move
-  );
-
-  document.addEventListener(
-    "mouseup",
-    end
-  );
-
-  header.addEventListener(
-    "touchstart",
-    start
-  );
-
-  document.addEventListener(
-    "touchmove",
-    move
-  );
-
-  document.addEventListener(
-    "touchend",
-    end
-  );
+  return {
+    ...aiPresetDefinitions,
+    ...saved
+  };
 }
 
-function updateRepairQuickPanelVisibility() {
+function saveAiPresets(presets) {
+  localStorage.setItem("aiPresets", JSON.stringify(presets));
+}
 
-  const panel =
-    get("repairQuickPanel");
-
-  if (!panel) return;
-
-  if (isRepairMode()) {
-
-    panel.style.display =
-      "flex";
-
-    panel.style.left =
-      "0px";
-
-    panel.style.bottom =
-      "0px";
-
-  } else {
-
-    panel.style.display =
-      "none";
-  }
+function getAiPreset(aiTarget) {
+  const presets = getAiPresets();
+return presets[aiTarget] || presets.chatgpt;
 }
