@@ -153,6 +153,8 @@ function buildNormalToolsHtml() {
 <hr>
 
 <div class="small">🧹 その他</div>
+
+<button class="float-list-btn" onclick="showMemoBox()">📝 Memo</button>
 <button class="float-list-btn" onclick="clearOutput()">出力クリア</button>
 <button class="float-list-btn" onclick="clearHistory()">履歴全削除</button>
 <button class="float-list-btn" onclick="reloadAppPage()">ページ更新</button>
@@ -216,6 +218,13 @@ placeholder="Generated AI Error Prompt"
 <button class="float-list-btn" onclick="showRepairLineDiff()">Line Diff</button>
 <button class="float-list-btn" onclick="saveRepairDiff()">Diff保存</button>
 <button class="float-list-btn" onclick="loadAndApplyRepairDiff()">Diff適用</button>
+
+<hr>
+
+<div class="small">🧹 その他</div>
+
+<button class="float-list-btn" onclick="showMemoBox()">📝 Memo</button>
+
 `;
 }
 
