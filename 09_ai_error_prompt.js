@@ -285,6 +285,28 @@ placeholder="ここにエラー情報を貼り付け"
   );
 }
 
+function generateErrorPromptFromPopup() {
+
+  const input =
+    get("aiErrorPromptInput");
+
+  if (!input || !input.value.trim()) {
+    alert("エラー情報が空です");
+    return;
+  }
+
+  localStorage.setItem(
+    "lastCrash",
+    JSON.stringify({
+      message: input.value,
+      stack: input.value,
+      time: new Date().toISOString()
+    })
+  );
+
+  generateErrorPrompt();
+}
+
 function extractErrorField(
   text,
   keyword
