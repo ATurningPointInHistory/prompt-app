@@ -140,19 +140,21 @@ function countFunctionReferences(
   ).length;
 }
 
-function extractFunctionNames(
-  text
-) {
-
+function extractFunctionNames(html) {
   const source =
-    String(text || "");
+    String(html || "");
+
+  if (
+    typeof extractFunctionBlocksFromText ===
+    "function"
+  ) {
+    return extractFunctionBlocksFromText(source)
+      .map(item => item.name);
+  }
 
   return [
     ...source.matchAll(
-      APP_REGEX.functionDeclaration
+      /(?:^|\n)\s*(?:async\s+)?function\s+([a-zA-Z0-9_$]+)\s*\(/g
     )
-  ].map(
-    x => x[1]
-  );
-
+  ].map(m => m[1]);
 }
