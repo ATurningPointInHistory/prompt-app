@@ -802,6 +802,72 @@ function toggleRepairQuickPanel() {
   console.log("repairQuickPanel closed:", closed);
 }
 
+function enableRepairSearchQuickDrag() {
+
+  const panel =
+    get("repairSearchQuickPanel");
+
+  const header =
+    get("repairSearchQuickHeader");
+
+  if (!panel || !header) return;
+
+  let dragging = false;
+  let startY = 0;
+  let startTop = 0;
+
+  function start(e) {
+
+    dragging = true;
+
+    startY =
+      e.touches
+        ? e.touches[0].clientY
+        : e.clientY;
+
+    startTop =
+      parseInt(panel.style.top || "12", 10);
+  }
+
+  function move(e) {
+
+    if (!dragging) return;
+
+    const y =
+      e.touches
+        ? e.touches[0].clientY
+        : e.clientY;
+
+    const nextTop =
+      startTop + (y - startY);
+
+    const minTop = 8;
+
+    const maxTop =
+      window.innerHeight -
+      panel.offsetHeight -
+      20;
+
+    panel.style.top =
+      Math.min(
+        Math.max(minTop, nextTop),
+        Math.max(minTop, maxTop)
+      ) + "px";
+  }
+
+  function end() {
+    dragging = false;
+  }
+
+  header.addEventListener("mousedown", start);
+  document.addEventListener("mousemove", move);
+  document.addEventListener("mouseup", end);
+
+  header.addEventListener("touchstart", start);
+  document.addEventListener("touchmove", move);
+  document.addEventListener("touchend", end);
+}
+
 function enableRepairQuickDrag() {
 
   const panel =
