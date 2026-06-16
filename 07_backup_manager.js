@@ -135,27 +135,15 @@ function validateBackupHtml(html) {
   const source =
     String(html || "");
 
-  const currentName =
-    String(
-      typeof currentRepairFile !== "undefined"
-        ? currentRepairFile
-        : ""
-    ).toLowerCase();
-
-  console.log(
-    "validateBackupHtml",
-    {
-      currentRepairFile,
-      currentName,
-      isHtml: looksLikeHtml(source),
-      sourceHead: source.slice(0, 100)
-    }
-  );
+  const sourceTrim =
+    source.trim();
 
   const isHtml =
-    looksLikeHtml(source);
+    looksLikeHtml(sourceTrim) ||
+    sourceTrim.startsWith("<");
 
   if (!isHtml) {
+
     let jsOk = true;
     let jsError = "";
     let lineMatch = null;
@@ -163,6 +151,7 @@ function validateBackupHtml(html) {
     try {
       new Function(source);
     } catch (e) {
+
       jsOk = false;
 
       const stack =
@@ -201,9 +190,10 @@ function validateBackupHtml(html) {
     };
   }
 
-  const cleanHtml = source
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "");
+  const cleanHtml =
+    source
+      .replace(/<script[\s\S]*?<\/script>/gi, "")
+      .replace(/<style[\s\S]*?<\/style>/gi, "");
 
   const divOpen =
     (cleanHtml.match(/<div\b/gi) || []).length;
@@ -227,7 +217,9 @@ function validateBackupHtml(html) {
 
   const duplicateIds =
     [...new Set(
-      ids.filter((id, i) => ids.indexOf(id) !== i)
+      ids.filter((id, i) =>
+        ids.indexOf(id) !== i
+      )
     )];
 
   let jsOk = true;
@@ -236,16 +228,31 @@ function validateBackupHtml(html) {
   let errorColumn = null;
 
   try {
+
     const scripts =
       [...doc.querySelectorAll("script")];
 
     scripts.forEach(s => {
-      if (s.src) return;
-      new Function(s.textContent);
+
+      if (s.src) {
+        return;
+      }
+
+      const code =
+        String(s.textContent || "").trim();
+
+      if (!code) {
+        return;
+      }
+
+      new Function(code);
     });
+
   } catch (e) {
+
     jsOk = false;
-    jsError = e.message;
+    jsError =
+      e.message;
 
     const stack =
       String(e.stack || "");
@@ -263,14 +270,22 @@ function validateBackupHtml(html) {
   }
 
   return {
-    div_ok: divOpen === divClose,
-    div_open: divOpen,
-    div_close: divClose,
-    duplicate_ids: duplicateIds,
-    js_ok: jsOk,
-    js_error: jsError,
-    error_line: errorLine,
-    error_column: errorColumn
+    div_ok:
+      divOpen === divClose,
+    div_open:
+      divOpen,
+    div_close:
+      divClose,
+    duplicate_ids:
+      duplicateIds,
+    js_ok:
+      jsOk,
+    js_error:
+      jsError,
+    error_line:
+      errorLine,
+    error_column:
+      errorColumn
   };
 }
 
