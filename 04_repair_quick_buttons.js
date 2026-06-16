@@ -415,3 +415,22 @@ window.openRepairQuickFavoritePanel =
 
 window.updateRepairQuickFavoriteVisibility =
   updateRepairQuickFavoriteVisibility;
+
+/* ===============================
+   Repair Quick Favorite Auto Init
+=============================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  setTimeout(() => {
+
+    if (
+      typeof initRepairQuickFavoritePanel ===
+      "function"
+    ) {
+      initRepairQuickFavoritePanel();
+    }
+
+  }, 500);
+
+});
