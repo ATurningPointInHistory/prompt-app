@@ -334,21 +334,25 @@ function buildFunctionDependencyReport(source) {
   });
 
   const refs =
-    extractFunctionReferences(
-      text,
-      text
-    );
-  
+    typeof extractFunctionReferences === "function"
+      ? extractFunctionReferences(text, text)
+      : {
+          onclicks: [],
+          eventRefs: [],
+          windowRefs: [],
+          windowNames: []
+        };
+
   const onclicks =
-    refs.onclicks;
-  
+    refs.onclicks || [];
+
   const eventRefs =
-    refs.eventRefs;
-  
+    refs.eventRefs || [];
+
   const windowRefs =
     [
-      ...refs.windowNames,
-      ...refs.windowRefs
+      ...(refs.windowNames || []),
+      ...(refs.windowRefs || [])
     ];
 
   const domReadyRefs =
@@ -363,16 +367,11 @@ function buildFunctionDependencyReport(source) {
 
   const protectedFunctions =
     new Set([
-      ...(
-        config.protectedFunctions || []
-      ),
-      ...(
-        config.criticalFunctions || []
-      )
+      ...(config.protectedFunctions || []),
+      ...(config.criticalFunctions || [])
     ]);
 
   const result = [];
-
   const unused = [];
 
   uniqueFuncs.forEach(fn => {
@@ -396,15 +395,16 @@ function buildFunctionDependencyReport(source) {
           "\\s*\\(",
           "g"
         ).test(body);
-
       });
 
     const directCallCount =
-      countFunctionReferences(
-        text,
-        fn,
-        true
-      );
+      typeof countFunctionReferences === "function"
+        ? countFunctionReferences(
+            text,
+            fn,
+            true
+          )
+        : 0;
 
     const usedByOnclick =
       onclicks.includes(fn);
@@ -427,22 +427,21 @@ function buildFunctionDependencyReport(source) {
       !protectedFunctions.has(fn);
 
     if (isUnused) {
-    
-      const line = text
-        .slice(
-          0,
-          block
-            ? block.start
-            : 0
-        )
-        .split("\n")
-        .length;
-    
+
+      const line =
+        text
+          .slice(
+            0,
+            block ? block.start : 0
+          )
+          .split("\n")
+          .length;
+
       unused.push({
         name: fn,
         line
       });
-    
+
       return;
     }
 
@@ -467,10 +466,9 @@ function buildFunctionDependencyReport(source) {
 `${fn}
 ${info.join("\n")}`
     );
-
   });
 
-healthUnusedFunctions =
+  healthUnusedFunctions =
     [...unused];
 
   return [
@@ -485,9 +483,8 @@ healthUnusedFunctions =
     "",
     unused.length
       ? unused
-          .map(
-            item =>
-              `${item.name} (L${item.line})`
+          .map(item =>
+            `${item.name} (L${item.line})`
           )
           .join("\n")
       : "none",
