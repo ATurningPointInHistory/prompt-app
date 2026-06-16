@@ -411,8 +411,6 @@ function normalizeProjectConfig(config) {
 状態管理関数
 =============================== */
 
-let currentRepairFile = "";
-
 function setCurrentRepairFile(
   fileName
 ) {
