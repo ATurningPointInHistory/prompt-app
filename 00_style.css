@@ -533,24 +533,22 @@ body:not(.dark) .repair-tools-panel{
 .repair-tools-panel-body{
   overflow: auto;
 }
-
 /* ===============================
    Repair Quick Favorite Panel
    左中央固定・お気に入りボタン
 =============================== */
 
 .repair-quick-favorite-panel {
-
   position: fixed;
 
   left: 0;
   top: 50%;
   transform: translateY(-50%);
 
-  z-index: 10002;
+  z-index: 30000;
 
-  width: 74px;
-  max-height: 75vh;
+  width: 82px;
+  max-height: 74vh;
   overflow-y: auto;
 
   display: none;
@@ -566,29 +564,24 @@ body:not(.dark) .repair-tools-panel{
   border-left: none;
   border-radius: 0 10px 10px 0;
 
-  box-shadow: 0 6px 18px rgba(0,0,0,.3);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
 
-  transition: left .25s ease;
-
+  transition: left 0.25s ease;
 }
 
 .repair-quick-favorite-panel.closed {
-
-  left: -74px;
-
+  left: -82px;
 }
 
 .repair-quick-favorite-toggle {
-
   position: absolute;
 
   top: 50%;
-  right: -34px;
-
+  right: -32px;
   transform: translateY(-50%);
 
-  width: 34px;
-  height: 46px;
+  width: 32px;
+  height: 44px;
 
   padding: 0;
 
@@ -600,52 +593,36 @@ body:not(.dark) .repair-tools-panel{
   border: 1px solid var(--border);
   border-left: none;
 
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
 
-  cursor: pointer;
-
-  z-index: 10003;
-
+  z-index: 30001;
 }
 
 .repair-quick-favorite-title {
-
-  font-size: 11px;
-
-  text-align: center;
-
-  opacity: .75;
-
-  margin-bottom: 4px;
-
+  display: none;
 }
 
 .repair-quick-favorite-list {
-
   display: flex;
-
   flex-direction: column;
-
   gap: 6px;
-
 }
 
 .repair-quick-favorite-btn {
+  width: 68px;
+  min-height: 44px;
 
-  width: 60px;
-  height: 42px;
-
-  padding: 0;
+  padding: 4px 2px;
 
   border-radius: 8px;
 
-  font-size: 18px;
-
-  line-height: 1;
+  font-size: 11px;
+  line-height: 1.15;
 
   text-align: center;
 
+  white-space: normal;
 }
 
 /* ===============================
