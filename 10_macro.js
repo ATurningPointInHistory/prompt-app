@@ -490,6 +490,15 @@ ${index}
 🗑
 </button>
 
+<button
+onclick="
+addMacroDelayStep(
+'${name}',
+${index}
+)">
+⏱
+</button>
+
 </div>
 
 `
@@ -597,6 +606,51 @@ function moveMacroStepDown(
 
 }
 
+function addMacroDelayStep(name, index) {
+
+  const actions =
+    macroList[name];
+
+  if (!actions) {
+    return;
+  }
+
+  const msText =
+    prompt(
+      "停止時間 ms",
+      "1000"
+    );
+
+  if (msText === null) {
+    return;
+  }
+
+  const ms =
+    Number(msText);
+
+  if (!Number.isFinite(ms) || ms < 0) {
+    alert("数値で入力してください");
+    return;
+  }
+
+  actions.splice(
+    index + 1,
+    0,
+    {
+      type: "delay",
+      ms
+    }
+  );
+
+  localStorage.setItem(
+    "macroList",
+    JSON.stringify(macroList)
+  );
+
+  showMacroStepEditor(name);
+
+}
+
 async function runMacro(name) {
 
   const actions =
@@ -622,9 +676,7 @@ async function runMacro(name) {
 
     try {
 
-      if (
-        step.type === "input"
-      ) {
+      if (step.type === "input") {
 
         const value =
           prompt(
@@ -643,17 +695,26 @@ async function runMacro(name) {
         continue;
       }
 
-      if (
-        step.type === "action"
-      ) {
+      if (step.type === "delay") {
+
+        const ms =
+          Number(step.ms || 0);
+
+        if (ms > 0) {
+          await new Promise(resolve =>
+            setTimeout(resolve, ms)
+          );
+        }
+
+        continue;
+      }
+
+      if (step.type === "action") {
 
         const data =
           step.data || {};
 
-        if (
-          step.action ===
-          "searchRepairText"
-        ) {
+        if (step.action === "searchRepairText") {
 
           const box =
             get("repairSearch");
@@ -669,10 +730,7 @@ async function runMacro(name) {
           continue;
         }
 
-        if (
-          step.action ===
-          "searchAllRepairFiles"
-        ) {
+        if (step.action === "searchAllRepairFiles") {
 
           const box =
             get("repairSearch");
@@ -688,10 +746,7 @@ async function runMacro(name) {
           continue;
         }
 
-        if (
-          step.action ===
-          "openGlobalSearchResult"
-        ) {
+        if (step.action === "openGlobalSearchResult") {
 
           const index =
             typeof data.index === "number"
