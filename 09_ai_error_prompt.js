@@ -164,6 +164,39 @@ function generateErrorPrompt() {
       errorInfo
     );
 
+  if (typeof openFloatPanel === "function") {
+
+    openFloatPanel(
+      "📋 AIエラー調査プロンプト",
+      `
+<textarea
+id="aiErrorPromptOutput"
+rows="16"
+style="
+width:100%;
+height:60vh;
+font-family:monospace;
+font-size:11px;
+white-space:pre;
+overflow:auto;
+resize:vertical;
+"
+placeholder="Generated AI Error Prompt"
+></textarea>
+
+<div class="float-panel-actions">
+
+<button
+onclick="copyErrorPrompt()">
+📋 コピー
+</button>
+
+</div>
+`
+    );
+
+  }
+
   const output =
     typeof get === "function"
       ? get("aiErrorPromptOutput")
@@ -181,9 +214,7 @@ function generateErrorPrompt() {
   }
 
   return latestErrorPrompt;
-
 }
-
 function copyErrorPrompt() {
 
   const text =
