@@ -440,7 +440,7 @@ function showMacroStepEditor(name) {
     actions.map(
       (step, index) => `
 
-<div class="function-item">
+<div class="macro-step-row">
 
 <b>
 #${index + 1}
