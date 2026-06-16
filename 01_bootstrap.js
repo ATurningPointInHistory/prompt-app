@@ -228,6 +228,26 @@ placeholder="Generated AI Error Prompt"
 `;
 }
 
+function buildRepairToolsPanelHtml() {
+  return `
+<div id="repairToolsPanel" class="repair-tools-panel">
+
+  <div class="repair-tools-panel-header">
+    <span>修復ツール</span>
+
+    <button onclick="toggleRepairToolsPanel()">
+      ×
+    </button>
+  </div>
+
+  <div class="repair-tools-panel-body">
+    ${buildRepairToolsHtml()}
+  </div>
+
+</div>
+`;
+}
+
 function toggleToolsMenu(){
   const panel = get("floatPanel");
   if (panel.style.display !== "none") {
@@ -359,31 +379,6 @@ function openFloatPanel(title, bodyHtml){
       <span class="float-panel-title">
         ${title}
       </span>
-
-      <button
-      onclick="moveFloatPanelCorner('tl')">
-      ↖
-      </button>
-
-      <button
-      onclick="moveFloatPanelCorner('tr')">
-      ↗
-      </button>
-
-      <button
-      onclick="moveFloatPanelCorner('bl')">
-      ↙
-      </button>
-
-      <button
-      onclick="moveFloatPanelCorner('br')">
-      ↘
-      </button>
-
-      <button
-      onclick="resetFloatPanelPosition()">
-      □
-      </button>
 
       <button
       onclick="backFloatPanel()">
@@ -761,6 +756,32 @@ function updateRepairSearchQuickVisibility() {
       : "none";
 }
 
+function initRepairToolsPanel() {
+
+  if (get("repairToolsPanel")) {
+    updateRepairToolsPanelVisibility();
+    return;
+  }
+
+  const wrap =
+    document.createElement("div");
+
+  wrap.innerHTML =
+    buildRepairToolsPanelHtml();
+
+  const panel =
+    wrap.firstElementChild;
+
+  if (!panel) return;
+
+  panel.style.display =
+    "none";
+
+  document.body.appendChild(panel);
+
+  updateRepairToolsPanelVisibility();
+}
+
 function initRepairQuickPanel() {
   if (get("repairQuickPanel")) {
     updateRepairQuickPanelVisibility();
@@ -955,6 +976,19 @@ function enableRepairQuickDrag() {
     "touchend",
     end
   );
+}
+
+function updateRepairToolsPanelVisibility() {
+
+  const panel =
+    get("repairToolsPanel");
+
+  if (!panel) return;
+
+  panel.style.display =
+    isRepairMode()
+      ? "block"
+      : "none";
 }
 
 function updateRepairQuickPanelVisibility() {
