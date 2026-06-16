@@ -156,16 +156,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   try {
 
-    safeRun(loadSettings, "loadSettings");
-    safeRun(checkSafeMode, "checkSafeMode");
-    safeRun(initMobileConsole, "initMobileConsole");
-    safeRun(initRepairIde, "initRepairIde");
+    const startupTasks = [
+      ["loadSettings", "loadSettings"],
+      ["checkSafeMode", "checkSafeMode"],
+      ["initMobileConsole", "initMobileConsole"],
+      ["initRepairIde", "initRepairIde"],
+      ["initRepairSearchQuickPanel", "initRepairSearchQuickPanel"],
+      ["initImportFileEvents", "initImportFileEvents"],
+      ["updateRepairFloatingPanelsVisibility", "updateRepairFloatingPanelsVisibility"]
+    ];
 
-    safeRun(initRepairQuickPanel, "initRepairQuickPanel");
-    safeRun(initRepairSearchQuickPanel, "initRepairSearchQuickPanel");
+    startupTasks.forEach(([fnName, label]) => {
 
-    safeRun(initImportFileEvents, "initImportFileEvents");
-    safeRun(updateRepairFloatingPanelsVisibility, "updateRepairFloatingPanelsVisibility");
+      const fn =
+        window[fnName];
+
+      if (typeof fn === "function") {
+        safeRun(fn, label);
+      } else {
+        console.warn(label + " is not defined");
+      }
+
+    });
 
   } catch (e) {
 
