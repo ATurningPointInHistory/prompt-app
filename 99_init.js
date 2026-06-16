@@ -185,8 +185,17 @@ document.addEventListener("change", () => {
   safeRun(saveCurrentState, "saveCurrentState");
 });
 
-document.addEventListener(
-  "click",
-  recordMacroClick,
-  true
-);
+if (typeof recordMacroClick === "function") {
+
+  document.addEventListener(
+    "click",
+    recordMacroClick,
+    true
+  );
+
+} else {
+
+  console.warn(
+    "recordMacroClick is not defined"
+  );
+}
