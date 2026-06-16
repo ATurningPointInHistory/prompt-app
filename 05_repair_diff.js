@@ -704,8 +704,11 @@ function loadAndApplyRepairDiff() {
   const input =
     document.createElement("input");
 
-  input.type = "file";
-  input.accept = ".json,application/json";
+  input.type =
+    "file";
+
+  input.accept =
+    ".json,application/json";
 
   input.onchange = (event) => {
 
@@ -725,9 +728,17 @@ function loadAndApplyRepairDiff() {
         const diff =
           JSON.parse(reader.result);
 
+        const editor =
+          get("repairEditor");
+
+        if (!editor) {
+          alert("repairEditorが見つかりません");
+          return;
+        }
+
         const baseHtml =
           repairOriginalHtml ||
-          get("repairEditor").value;
+          editor.value;
 
         const patched =
           applyRepairDiff(
@@ -736,9 +747,6 @@ function loadAndApplyRepairDiff() {
           );
 
         if (!patched) return;
-
-        const editor =
-          get("repairEditor");
 
         repairUndoStack.push(
           editor.value
@@ -752,13 +760,23 @@ function loadAndApplyRepairDiff() {
         repairLastValue =
           patched;
 
-        updateLineNumbers();
-        updateCursorPosition();
-        autoSaveRepairDraft();
+        if (typeof updateLineNumbers === "function") {
+          updateLineNumbers();
+        }
 
-        updateRepairStatus(
-          "Diff適用: " + file.name
-        );
+        if (typeof updateCursorPosition === "function") {
+          updateCursorPosition();
+        }
+
+        if (typeof autoSaveRepairDraft === "function") {
+          autoSaveRepairDraft();
+        }
+
+        if (typeof updateRepairStatus === "function") {
+          updateRepairStatus(
+            "Diff適用: " + file.name
+          );
+        }
 
         alert(
           "Diffを適用しました\n\n" +
@@ -771,16 +789,13 @@ function loadAndApplyRepairDiff() {
           "Diff JSONの読み込み/適用に失敗しました\n\n" +
           e.message
         );
-
       }
-
     };
 
     reader.readAsText(
       file,
       "UTF-8"
     );
-
   };
 
   input.click();
