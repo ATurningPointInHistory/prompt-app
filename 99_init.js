@@ -161,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ["checkSafeMode", "checkSafeMode"],
       ["initMobileConsole", "initMobileConsole"],
       ["initRepairIde", "initRepairIde"],
-      ["initRepairQuickFavoritePanel", "initRepairQuickFavoritePanel"],
       ["initRepairSearchQuickPanel", "initRepairSearchQuickPanel"],
       ["initImportFileEvents", "initImportFileEvents"],
       ["updateRepairFloatingPanelsVisibility", "updateRepairFloatingPanelsVisibility"]
@@ -198,9 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "起動中にエラーが発生しました\n" +
       e.message
     );
-
   }
-
 });
 
 document.addEventListener("input", () => {
