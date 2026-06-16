@@ -331,12 +331,6 @@ function buildRepairToolsHtml() {
 📋 AIエラー調査プロンプトコピー
 </button>
 
-<textarea
-id="aiErrorPromptOutput"
-rows="10"
-placeholder="Generated AI Error Prompt"
-></textarea>
-
 <hr>
 
 <div class="small">💾 ファイル操作</div>
