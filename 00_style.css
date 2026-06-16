@@ -405,20 +405,19 @@ body:not(.dark) #floatPanel{
 }
 
 .float-panel-header{
-  position:sticky;
-  top:0;
-  z-index:2;
-  background:var(--card);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--card);
 
-  display:flex;
-  align-items:center;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 
-  gap:4px;
+  flex-wrap: wrap;   /* nowrap → wrap */
 
-  flex-wrap:nowrap;
-
-  margin-bottom:10px;
-  padding-bottom:8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
 }
 
 .float-panel-title{
