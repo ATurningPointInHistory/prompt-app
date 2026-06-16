@@ -158,6 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     safeRun(loadSettings, "loadSettings");
     safeRun(checkSafeMode, "checkSafeMode");
+    safeRun(initMobileConsole, "initMobileConsole");
     safeRun(initRepairIde, "initRepairIde");
 
     safeRun(initRepairQuickPanel, "initRepairQuickPanel");
