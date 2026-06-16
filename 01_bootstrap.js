@@ -60,21 +60,58 @@ function updatePanelButtonStates() {
    App Navigation / Tools Menu
 =============================== */
 function switchAppPage(mode) {
+
   closeFloatPanel();
-  get("appPage").style.display =
-    mode === "app" ? "block" : "none";
-  get("repairPage").style.display =
-    mode === "repair" ? "block" : "none";
-  get("appPageTab").classList.toggle(
-    "active",
-    mode === "app"
-  );
-  get("repairPageTab").classList.toggle(
-    "active",
-    mode === "repair"
-  );
-  if (mode === "repair") {
+
+  const appPage =
+    get("appPage");
+
+  const repairPage =
+    get("repairPage");
+
+  const appPageTab =
+    get("appPageTab");
+
+  const repairPageTab =
+    get("repairPageTab");
+
+  if (appPage) {
+    appPage.style.display =
+      mode === "app"
+        ? "block"
+        : "none";
+  }
+
+  if (repairPage) {
+    repairPage.style.display =
+      mode === "repair"
+        ? "block"
+        : "none";
+  }
+
+  if (appPageTab) {
+    appPageTab.classList.toggle(
+      "active",
+      mode === "app"
+    );
+  }
+
+  if (repairPageTab) {
+    repairPageTab.classList.toggle(
+      "active",
+      mode === "repair"
+    );
+  }
+
+  if (
+    mode === "repair" &&
+    typeof resetRepairEditorView === "function"
+  ) {
     resetRepairEditorView();
+  }
+
+  if (typeof updateRepairSearchQuickVisibility === "function") {
+    updateRepairSearchQuickVisibility();
   }
 }
 
@@ -425,6 +462,13 @@ function buildRepairSearchQuickHtml() {
 <div id="repairSearchQuickPanel"
      class="repair-search-quick-panel">
 
+    <div
+      id="repairSearchQuickHeader"
+      class="small"
+      style="cursor:move;">
+      <hr>move<hr>
+    </div>
+
   <button
     id="repairSearchQuickToggle"
     class="repair-search-quick-toggle"
@@ -533,6 +577,79 @@ function updateRepairSearchQuickVisibility() {
     isRepairMode()
       ? "flex"
       : "none";
+}
+
+function enableRepairSearchQuickDrag() {
+
+  const panel =
+    get("repairSearchQuickPanel");
+
+  const header =
+    get("repairSearchQuickHeader");
+
+  if (!panel || !header) {
+    return;
+  }
+
+  let dragging = false;
+  let startY = 0;
+  let startTop = 0;
+
+  function start(e) {
+
+    dragging = true;
+
+    startY =
+      e.touches
+        ? e.touches[0].clientY
+        : e.clientY;
+
+    startTop =
+      parseInt(
+        panel.style.top || "80",
+        10
+      );
+  }
+
+  function move(e) {
+
+    if (!dragging) {
+      return;
+    }
+
+    const y =
+      e.touches
+        ? e.touches[0].clientY
+        : e.clientY;
+
+    const nextTop =
+      startTop + (y - startY);
+
+    const minTop = 8;
+
+    const maxTop =
+      window.innerHeight -
+      panel.offsetHeight -
+      20;
+
+    panel.style.top =
+      Math.min(
+        Math.max(minTop, nextTop),
+        Math.max(minTop, maxTop)
+      ) + "px";
+  }
+
+  function end() {
+    dragging = false;
+  }
+
+  header.addEventListener("mousedown", start);
+  document.addEventListener("mousemove", move);
+  document.addEventListener("mouseup", end);
+
+  header.addEventListener("touchstart", start);
+  document.addEventListener("touchmove", move);
+  document.addEventListener("touchend", end);
 }
 
 function closeRepairPopups() {
