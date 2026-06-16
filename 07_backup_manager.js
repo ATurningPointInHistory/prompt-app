@@ -153,8 +153,7 @@ function validateBackupHtml(html) {
   );
 
   const isHtml =
-    looksLikeHtml(source) &&
-    !currentName.endsWith(".js");
+    looksLikeHtml(source);
 
   if (!isHtml) {
     let jsOk = true;
