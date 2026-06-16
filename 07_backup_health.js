@@ -178,14 +178,7 @@ async function showHtmlHealth() {
         document.documentElement.outerHTML;
 
   const isHtmlSource =
-  looksLikeHtml(source);
-
-  const currentName =
-    String(
-      typeof currentRepairFile !== "undefined"
-        ? currentRepairFile
-        : ""
-    ).toLowerCase();
+    looksLikeHtml(source);
 
   let externalJs = "";
 
