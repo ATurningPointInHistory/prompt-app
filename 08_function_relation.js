@@ -65,14 +65,18 @@ function showFunctionRelationMap() {
           .map(other => other.name);
 
       return {
-        name: block.name,
+        name:
+          block.name,
+
         calls,
+
         calledBy,
+
         line:
           text
             .slice(0, block.start)
             .split(/\r?\n/)
-            .length + 1
+            .length
       };
     });
 
