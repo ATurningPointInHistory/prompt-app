@@ -373,18 +373,25 @@ function updateRepairQuickFavoriteVisibility() {
   const panel =
     get("repairQuickFavoritePanel");
 
-  if (!panel) {
-    return;
-  }
+  const toggle =
+    get("repairQuickFavoriteToggle");
 
-  if (typeof isRepairMode === "function") {
+  const show =
+    typeof isRepairMode === "function" &&
+    isRepairMode();
+
+  if (panel) {
     panel.style.display =
-      isRepairMode()
+      show
         ? "flex"
         : "none";
-  } else {
-    panel.style.display =
-      "flex";
+  }
+
+  if (toggle) {
+    toggle.style.display =
+      show
+        ? "block"
+        : "none";
   }
 }
 
