@@ -193,6 +193,13 @@ function toggleRepairFavoriteButton(
   }
 
   renderRepairQuickFavoritePanel();
+
+  if (
+    typeof refreshRepairToolsPanel ===
+    "function"
+  ) {
+    refreshRepairToolsPanel();
+  }
 }
 
 /* ===============================
