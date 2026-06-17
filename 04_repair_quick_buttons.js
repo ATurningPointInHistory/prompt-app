@@ -296,46 +296,38 @@ function openRepairQuickFavoritePanel() {
 
 function renderRepairQuickFavoritePanel() {
 
-  const old =
-    get("repairQuickFavoritePanel");
+  const listBox =
+    get("repairQuickFavoriteList");
 
-  const wasClosed =
-    old &&
-    old.classList.contains("closed");
-
-  if (old) {
-    old.remove();
-  }
-
-  const wrap =
-    document.createElement("div");
-
-  wrap.innerHTML =
-    buildRepairQuickFavoriteHtml();
-
-  const panel =
-    wrap.firstElementChild;
-
-  if (!panel) {
+  if (!listBox) {
     return;
   }
 
-  if (wasClosed) {
-    panel.classList.add("closed");
+  const buttons =
+    getRepairQuickFavoriteButtons();
 
-    const toggle =
-      panel.querySelector(
-        "#repairQuickFavoriteToggle"
-      );
+  listBox.innerHTML =
+    buttons.map(item => {
 
-    if (toggle) {
-      toggle.textContent = "▶";
-    }
-  }
+      const title =
+        escapeHtml(item.title || "★");
 
-  document.body.appendChild(
-    panel
-  );
+      const label =
+        escapeHtml(item.label || item.action || "");
+
+      const action =
+        escapeHtml(item.action || "");
+
+      return `
+<button
+  class="repair-quick-favorite-btn"
+  title="${label}"
+  onclick="runRepairQuickFavoriteAction('${action}')">
+${title}
+</button>
+`;
+
+    }).join("");
 
   updateRepairQuickFavoriteVisibility();
 }
