@@ -1854,11 +1854,23 @@ function buildFavoriteButton(
   label = ""
 ) {
 
+  const exists =
+    getRepairQuickFavoriteButtons()
+      .some(
+        item =>
+          item.action === action
+      );
+
   return `
 
 <button
-class="favorite-btn"
-title="お気に入り"
+class="favorite-btn
+${exists ? " active" : ""}"
+title="${
+exists
+? "お気に入り解除"
+: "お気に入り追加"
+}"
 onclick="
 event.stopPropagation();
 toggleRepairFavoriteButton(
@@ -1866,7 +1878,7 @@ toggleRepairFavoriteButton(
 '${title}',
 '${label}'
 );">
-★
+${exists ? "★" : "☆"}
 </button>
 
 `;
