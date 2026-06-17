@@ -1844,6 +1844,35 @@ function importProjectConfig() {
   input.click();
 }
 
+/* ===============================
+   Favorite Button
+=============================== */
+
+function buildFavoriteButton(
+  action,
+  title,
+  label = ""
+) {
+
+  return `
+
+<button
+class="favorite-btn"
+title="お気に入り"
+onclick="
+event.stopPropagation();
+toggleRepairFavoriteButton(
+'${action}',
+'${title}',
+'${label}'
+);">
+★
+</button>
+
+`;
+
+}
+
 window.openProjectConfigManager =
   openProjectConfigManager;
 
