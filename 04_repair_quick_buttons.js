@@ -270,7 +270,10 @@ function openRepairQuickFavoritePanel() {
   const panel =
     get("repairQuickFavoritePanel");
 
-  if (!panel) {
+  const toggle =
+    get("repairQuickFavoriteToggle");
+
+  if (!panel || !toggle) {
     return;
   }
 
@@ -278,17 +281,12 @@ function openRepairQuickFavoritePanel() {
     "closed"
   );
 
-  // CSSで位置を制御するので
-  // style.left は使わない
-  panel.style.left = "";
+  toggle.classList.remove(
+    "closed"
+  );
 
-  const toggle =
-    get("repairQuickFavoriteToggle");
-
-  if (toggle) {
-    toggle.textContent =
-      "◀";
-  }
+  toggle.textContent =
+    "◀";
 
 }
 
@@ -354,6 +352,11 @@ function toggleRepairQuickFavoritePanel() {
     panel.classList.toggle(
       "closed"
     );
+
+  toggle.classList.toggle(
+    "closed",
+    closed
+  );
 
   toggle.textContent =
     closed
