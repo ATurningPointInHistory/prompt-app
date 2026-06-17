@@ -1873,6 +1873,58 @@ toggleRepairFavoriteButton(
 
 }
 
+/* ===============================
+   Repair Tool Button
+=============================== */
+
+function repairToolButton(
+  text,
+  action,
+  title,
+  label
+) {
+
+  const safeText =
+    escapeHtml(text);
+
+  const safeAction =
+    escapeHtml(action);
+
+  const safeTitle =
+    escapeHtml(title || text);
+
+  const safeLabel =
+    escapeHtml(label || text);
+
+  return `
+
+<div class="repair-tool-row">
+
+<button
+class="float-list-btn"
+onclick="${safeAction}()">
+${safeText}
+</button>
+
+<button
+class="favorite-btn"
+title="お気に入り"
+onclick="
+event.stopPropagation();
+toggleRepairFavoriteButton(
+'${safeAction}',
+'${safeTitle}',
+'${safeLabel}'
+);">
+★
+</button>
+
+</div>
+
+`;
+
+}
+
 window.openProjectConfigManager =
   openProjectConfigManager;
 
