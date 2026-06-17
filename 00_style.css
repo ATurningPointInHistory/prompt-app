@@ -596,6 +596,10 @@ body:not(.dark) .repair-tools-panel{
   left: -58px;
 }
 
+.repair-quick-favorite-panel.closed {
+  left: -58px;
+}
+
 .repair-quick-favorite-title {
   display: none;
 }
