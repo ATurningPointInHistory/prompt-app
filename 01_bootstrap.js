@@ -933,44 +933,43 @@ function buildRepairFileTools() {
   return `
 
 <div class="small">
-📂 ファイル
+💾 ファイル操作
 </div>
 
-<button
-class="float-list-btn"
-onclick="loadRepairHtml()">
-📖 HTML読込
-</button>
+${repairToolButton(
+  "📖 HTML読込",
+  "loadRepairHtml",
+  "📖",
+  "HTML読込"
+)}
 
-<button
-class="float-list-btn"
-onclick="backupPartialScript()">
-📦 JS部分読込
-</button>
+${repairToolButton(
+  "📦 JS部分読込",
+  "backupPartialScript",
+  "📦",
+  "JS部分読込"
+)}
 
-<button
-class="float-list-btn"
-onclick="copyRepairHtml()">
-📋 HTMLコピー
-</button>
+${repairToolButton(
+  "📋 HTMLコピー",
+  "copyRepairHtml",
+  "📋",
+  "HTMLコピー"
+)}
 
-<button
-class="float-list-btn"
-onclick="saveRepairHtml()">
-💾 現在ファイル保存
-</button>
+${repairToolButton(
+  "💾 現在ファイル保存",
+  "saveRepairHtml",
+  "💾",
+  "現在ファイル保存"
+)}
 
-<button
-class="float-list-btn"
-onclick="savePatchedRepairHtml()">
-💾 Patched HTML保存
-</button>
-
-<button
-class="float-list-btn"
-onclick="showMemoBox()">
-📝 Memo
-</button>
+${repairToolButton(
+  "💾 Patched HTML保存",
+  "savePatchedRepairHtml",
+  "💾",
+  "Patched HTML保存"
+)}
 
 <hr>
 
@@ -987,58 +986,78 @@ function buildRepairEditTools() {
   return `
 
 <div class="small">
-✏ 編集
+✏ 編集・整理
 </div>
 
-<button class="float-list-btn"
-onclick="undoRepairEdit()">
-↩ Undo
-</button>
+${repairToolButton(
+  "📦 関数選択",
+  "selectFunctionBlock",
+  "📦",
+  "関数選択"
+)}
 
-<button class="float-list-btn"
-onclick="redoRepairEdit()">
-↪ Redo
-</button>
+${repairToolButton(
+  "✏ 関数置換",
+  "replaceFunctionBlock",
+  "✏",
+  "関数置換"
+)}
 
-<button class="float-list-btn"
-onclick="indentRepairSelection()">
-➡ インデント
-</button>
+${repairToolButton(
+  "📚 コードブロック一覧",
+  "showFunctionList",
+  "📚",
+  "コードブロック一覧"
+)}
 
-<button class="float-list-btn"
-onclick="outdentRepairSelection()">
-⬅ アウトデント
-</button>
+${repairToolButton(
+  "↕ コードブロック並べ替え",
+  "showFunctionSortList",
+  "↕",
+  "コードブロック並べ替え"
+)}
 
-<button class="float-list-btn"
-onclick="toggleRepairAutoSave()">
-💾 AutoSave
-</button>
+${repairToolButton(
+  "👁 閲覧モード",
+  "openViewerMode",
+  "👁",
+  "閲覧モード"
+)}
 
-<button class="float-list-btn"
-onclick="selectFunctionBlock()">
-📦 関数選択
-</button>
+${repairToolButton(
+  "↩ Undo",
+  "undoRepairEdit",
+  "↩",
+  "Undo"
+)}
 
-<button class="float-list-btn"
-onclick="replaceFunctionBlock()">
-✏ 関数置換
-</button>
+${repairToolButton(
+  "↪ Redo",
+  "redoRepairEdit",
+  "↪",
+  "Redo"
+)}
 
-<button class="float-list-btn"
-onclick="showFunctionList()">
-📚 コードブロック一覧
-</button>
+${repairToolButton(
+  "➡ インデント",
+  "indentRepairSelection",
+  "➡",
+  "インデント"
+)}
 
-<button class="float-list-btn"
-onclick="showFunctionSortList()">
-↕ コードブロック並べ替え
-</button>
+${repairToolButton(
+  "⬅ アウトデント",
+  "outdentRepairSelection",
+  "⬅",
+  "アウトデント"
+)}
 
-<button class="float-list-btn"
-onclick="openViewerMode()">
-👁 閲覧モード
-</button>
+${repairToolButton(
+  "💾 AutoSave",
+  "toggleRepairAutoSave",
+  "💾",
+  "AutoSave"
+)}
 
 <hr>
 
@@ -1058,45 +1077,61 @@ function buildRepairSearchTools() {
 🔍 検索
 </div>
 
-<button class="float-list-btn"
-onclick="toggleRepairSearchPopup()">
-🔍 検索
-</button>
+${repairToolButton(
+  "🔍 検索",
+  "toggleRepairSearchPopup",
+  "🔍",
+  "検索"
+)}
 
-<button class="float-list-btn"
-onclick="toggleRepairReplacePopup()">
-🔁 置換
-</button>
+${repairToolButton(
+  "🔁 置換",
+  "toggleRepairReplacePopup",
+  "🔁",
+  "置換"
+)}
 
-<button class="float-list-btn"
-onclick="searchRepairNext()">
-⏭ 次へ
-</button>
+${repairToolButton(
+  "⏭ 次へ",
+  "searchRepairNext",
+  "⏭",
+  "次へ"
+)}
 
-<button class="float-list-btn"
-onclick="loadRepairSearchFiles()">
-📁 検索ファイル読込
-</button>
+${repairToolButton(
+  "📁 検索ファイル読込",
+  "loadRepairSearchFiles",
+  "📁",
+  "検索ファイル読込"
+)}
 
-<button class="float-list-btn"
-onclick="loadCurrentProjectSearchFiles()">
-📦 現在プロジェクト
-</button>
+${repairToolButton(
+  "📦 現在プロジェクト",
+  "loadCurrentProjectSearchFiles",
+  "📦",
+  "現在プロジェクト"
+)}
 
-<button class="float-list-btn"
-onclick="showRepairSearchFiles()">
-📋 読込一覧
-</button>
+${repairToolButton(
+  "📋 読込一覧",
+  "showRepairSearchFiles",
+  "📋",
+  "読込一覧"
+)}
 
-<button class="float-list-btn"
-onclick="showSearchHistory()">
-🕘 検索履歴
-</button>
+${repairToolButton(
+  "🕘 検索履歴",
+  "showSearchHistory",
+  "🕘",
+  "検索履歴"
+)}
 
-<button class="float-list-btn"
-onclick="searchAllRepairFiles()">
-📚 全ファイル検索
-</button>
+${repairToolButton(
+  "📚 全ファイル検索",
+  "searchAllRepairFiles",
+  "📚",
+  "全ファイル検索"
+)}
 
 <hr>
 
@@ -1113,38 +1148,43 @@ function buildRepairAiTools() {
   return `
 
 <div class="small">
-🤖 AI
+⚙ AI支援
 </div>
 
-<button
-class="float-list-btn"
-onclick="analyzeAiInstruction()">
-🧠 AI指示解析
-</button>
+${repairToolButton(
+  "⚙ Project Config",
+  "openProjectConfigManager",
+  "⚙",
+  "Project Config"
+)}
 
-<button
-class="float-list-btn"
-onclick="analyzeAiGeneratedCode()">
-🤖 AIコード解析
-</button>
+${repairToolButton(
+  "🧠 AI指示解析",
+  "analyzeAiInstruction",
+  "🧠",
+  "AI指示解析"
+)}
 
-<button
-class="float-list-btn"
-onclick="openErrorPromptInputPopup()">
-🧯 AIエラー調査
-</button>
+${repairToolButton(
+  "🤖 AIコード解析",
+  "analyzeAiGeneratedCode",
+  "🤖",
+  "AIコード解析"
+)}
 
-<button
-class="float-list-btn"
-onclick="copyErrorPrompt()">
-📋 AIエラープロンプトコピー
-</button>
+${repairToolButton(
+  "🧯 AIエラー調査プロンプト生成",
+  "openErrorPromptInputPopup",
+  "🧯",
+  "AIエラー調査プロンプト生成"
+)}
 
-<button
-class="float-list-btn"
-onclick="openProjectConfigManager()">
-⚙ Project Config
-</button>
+${repairToolButton(
+  "📋 AIエラー調査プロンプトコピー",
+  "copyErrorPrompt",
+  "📋",
+  "AIエラー調査プロンプトコピー"
+)}
 
 <hr>
 
@@ -1161,38 +1201,43 @@ function buildRepairHealthTools() {
   return `
 
 <div class="small">
-💚 診断
+💚 診断・確認
 </div>
 
-<button
-class="float-list-btn"
-onclick="showMobileConsole()">
-📱 Console
-</button>
+${repairToolButton(
+  "📱 Console",
+  "showMobileConsole",
+  "📱",
+  "Console"
+)}
 
-<button
-class="float-list-btn"
-onclick="showHtmlHealth()">
-💚 HTML HEALTH
-</button>
+${repairToolButton(
+  "💚 HTML HEALTH",
+  "showHtmlHealth",
+  "💚",
+  "HTML HEALTH"
+)}
 
-<button
-class="float-list-btn"
-onclick="diagnoseRepairHtml()">
-🩺 編集内容診断
-</button>
+${repairToolButton(
+  "🩺 編集内容診断",
+  "diagnoseRepairHtml",
+  "🩺",
+  "編集内容診断"
+)}
 
-<button
-class="float-list-btn"
-onclick="analyzeProjectJsDependency()">
-🧭 JS読込診断
-</button>
+${repairToolButton(
+  "🧭 JS読込診断",
+  "analyzeProjectJsDependency",
+  "🧭",
+  "JS読込診断"
+)}
 
-<button
-class="float-list-btn"
-onclick="showFunctionRelationMap()">
-🌳 関数関連図
-</button>
+${repairToolButton(
+  "🌳 関数関連図",
+  "showFunctionRelationMap",
+  "🌳",
+  "関数関連図"
+)}
 
 <hr>
 
@@ -1209,32 +1254,36 @@ function buildRepairDiffTools() {
   return `
 
 <div class="small">
-🧩 Diff
+🧩 Diff・差分
 </div>
 
-<button
-class="float-list-btn"
-onclick="showRepairDiff()">
-🧩 Function Diff
-</button>
+${repairToolButton(
+  "🧩 Function Diff",
+  "showRepairDiff",
+  "🧩",
+  "Function Diff"
+)}
 
-<button
-class="float-list-btn"
-onclick="showRepairLineDiff()">
-🧾 Line Diff
-</button>
+${repairToolButton(
+  "🧾 Line Diff",
+  "showRepairLineDiff",
+  "🧾",
+  "Line Diff"
+)}
 
-<button
-class="float-list-btn"
-onclick="saveRepairDiff()">
-💾 Diff保存
-</button>
+${repairToolButton(
+  "💾 Diff保存",
+  "saveRepairDiff",
+  "💾",
+  "Diff保存"
+)}
 
-<button
-class="float-list-btn"
-onclick="loadAndApplyRepairDiff()">
-📂 Diff適用
-</button>
+${repairToolButton(
+  "📂 Diff適用",
+  "loadAndApplyRepairDiff",
+  "📂",
+  "Diff適用"
+)}
 
 <hr>
 
@@ -1251,20 +1300,22 @@ function buildRepairCleanupTools() {
   return `
 
 <div class="small">
-🧹 整理
+🧹 削除・整理
 </div>
 
-<button
-class="float-list-btn"
-onclick="cleanupCandidates()">
-🧹 削除候補チェック
-</button>
+${repairToolButton(
+  "🧹 削除候補チェック",
+  "cleanupCandidates",
+  "🧹",
+  "削除候補チェック"
+)}
 
-<button
-class="float-list-btn"
-onclick="deleteCommentedCleanupBlocks()">
-🗑 コメント化済みを完全削除
-</button>
+${repairToolButton(
+  "🗑 コメント化済みを完全削除",
+  "deleteCommentedCleanupBlocks",
+  "🗑",
+  "コメント化済みを完全削除"
+)}
 
 <hr>
 
@@ -1284,29 +1335,33 @@ function buildRepairMacroTools() {
 🎬 マクロ
 </div>
 
-<button
-class="float-list-btn"
-onclick="startMacroRecording()">
-🔴 記録
-</button>
+${repairToolButton(
+  "🔴 記録",
+  "startMacroRecording",
+  "🔴",
+  "記録"
+)}
 
-<button
-class="float-list-btn"
-onclick="stopMacroRecording()">
-⏹ 保存
-</button>
+${repairToolButton(
+  "⏹ 保存",
+  "stopMacroRecording",
+  "⏹",
+  "保存"
+)}
 
-<button
-class="float-list-btn"
-onclick="showMacroList()">
-▶ 実行
-</button>
+${repairToolButton(
+  "▶ 実行",
+  "showMacroList",
+  "▶",
+  "実行"
+)}
 
-<button
-class="float-list-btn"
-onclick="addMacroInputStep()">
-⌨ 入力
-</button>
+${repairToolButton(
+  "⌨ 入力",
+  "addMacroInputStep",
+  "⌨",
+  "入力"
+)}
 
 <hr>
 
@@ -1326,29 +1381,33 @@ function buildRepairOtherTools() {
 ⚡ その他
 </div>
 
-<button
-class="float-list-btn"
-onclick="scrollRepairTop()">
-⏫ 最上部
-</button>
+${repairToolButton(
+  "⏫ 最上部",
+  "scrollRepairTop",
+  "⏫",
+  "最上部"
+)}
 
-<button
-class="float-list-btn"
-onclick="scrollRepairBottom()">
-⏬ 最下部
-</button>
+${repairToolButton(
+  "⏬ 最下部",
+  "scrollRepairBottom",
+  "⏬",
+  "最下部"
+)}
 
-<button
-class="float-list-btn"
-onclick="showMemoBox()">
-📝 Memo
-</button>
+${repairToolButton(
+  "📝 Memo",
+  "showMemoBox",
+  "📝",
+  "Memo"
+)}
 
-<button
-class="float-list-btn"
-onclick="reloadAppPage()">
-🔄 ページ更新
-</button>
+${repairToolButton(
+  "🔄 ページ更新",
+  "reloadAppPage",
+  "🔄",
+  "ページ更新"
+)}
 
 <hr>
 
