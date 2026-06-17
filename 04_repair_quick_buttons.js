@@ -442,12 +442,19 @@ list.length
 
 <div class="float-panel-actions">
 
-<button onclick="resetRepairFavoriteButtons()">
+<button
+onclick="resetRepairFavoriteButtons()">
 初期化
 </button>
 
-<button onclick="renderRepairQuickFavoritePanel()">
-再描画
+<button
+onclick="saveRepairFavoriteManager()">
+💾保存
+</button>
+
+<button
+onclick="closeFloatPanel()">
+✕閉じる
 </button>
 
 </div>
@@ -592,6 +599,36 @@ function resetRepairFavoriteButtons() {
 
   renderRepairQuickFavoritePanel();
   openRepairQuickFavoriteManager();
+
+}
+
+/* ===============================
+   Repair Favorite Save
+=============================== */
+
+function saveRepairFavoriteManager() {
+
+  const list =
+    getRepairQuickFavoriteButtons();
+
+  saveRepairQuickFavoriteButtons(
+    list
+  );
+
+  renderRepairQuickFavoritePanel();
+
+  if (
+    typeof refreshRepairToolsPanel ===
+    "function"
+  ) {
+    refreshRepairToolsPanel();
+  }
+
+  openRepairQuickFavoriteManager();
+
+  updateRepairStatus(
+    "お気に入り保存"
+  );
 
 }
 
