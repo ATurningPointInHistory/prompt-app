@@ -1896,6 +1896,16 @@ function repairToolButton(
   label
 ) {
 
+  const favorites =
+    typeof getRepairQuickFavoriteButtons === "function"
+      ? getRepairQuickFavoriteButtons()
+      : [];
+
+  const isFavorite =
+    favorites.some(item =>
+      item.action === action
+    );
+
   const safeText =
     escapeHtml(text);
 
@@ -1919,8 +1929,8 @@ ${safeText}
 </button>
 
 <button
-class="favorite-btn"
-title="お気に入り"
+class="favorite-btn ${isFavorite ? "active" : ""}"
+title="${isFavorite ? "お気に入り解除" : "お気に入り追加"}"
 onclick="
 event.stopPropagation();
 toggleRepairFavoriteButton(
@@ -1928,7 +1938,7 @@ toggleRepairFavoriteButton(
 '${safeTitle}',
 '${safeLabel}'
 );">
-★
+${isFavorite ? "★" : "☆"}
 </button>
 
 </div>
