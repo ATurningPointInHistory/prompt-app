@@ -201,48 +201,32 @@ function toggleRepairFavoriteButton(
 
 function buildRepairQuickFavoriteHtml() {
 
-  const list =
-    getRepairQuickFavoriteButtons();
-
   return `
+
+<button
+  id="repairQuickFavoriteToggle"
+  class="repair-quick-favorite-toggle"
+  onclick="toggleRepairQuickFavoritePanel()">
+◀
+</button>
+
 <div
   id="repairQuickFavoritePanel"
   class="repair-quick-favorite-panel">
-
-  <button
-    id="repairQuickFavoriteToggle"
-    class="repair-quick-favorite-toggle"
-    onclick="toggleRepairQuickFavoritePanel()">
-    ◀
-  </button>
 
   <div class="repair-quick-favorite-title">
     Quick
   </div>
 
-  <div class="repair-quick-favorite-list">
-
-    ${
-      list.length
-        ? list.map(item => `
-<button
-  class="repair-quick-favorite-btn"
-  title="${escapeHtml(item.label || item.title || item.action)}"
-  onclick="runRepairQuickFavoriteAction('${escapeHtml(item.action)}')">
-  ${escapeHtml(item.title || "★")}
-</button>
-        `).join("")
-        : `
-<div class="small">
-未登録
-</div>
-        `
-    }
-
+  <div
+    id="repairQuickFavoriteList"
+    class="repair-quick-favorite-list">
   </div>
 
 </div>
+
 `;
+
 }
 
 function initRepairQuickFavoritePanel() {
