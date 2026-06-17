@@ -1382,6 +1382,13 @@ function buildRepairOtherTools() {
 </div>
 
 ${repairToolButton(
+  "⭐ お気に入り管理",
+  "openRepairQuickFavoriteManager",
+  "⭐",
+  "お気に入り管理"
+)}
+
+${repairToolButton(
   "⏫ 最上部",
   "scrollRepairTop",
   "⏫",
