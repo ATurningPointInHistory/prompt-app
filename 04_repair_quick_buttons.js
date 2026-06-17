@@ -404,22 +404,28 @@ list.length
 
 <div class="repair-favorite-manager-row">
 
+  <button
+    class="repair-favorite-mini"
+    onclick="moveRepairFavoriteUp(${index})">
+    ↑
+  </button>
+
+  <button
+    class="repair-favorite-mini"
+    onclick="moveRepairFavoriteDown(${index})">
+    ↓
+  </button>
+
+  <button
+    class="repair-favorite-mini delete"
+    onclick="deleteRepairFavorite(${index})">
+    ✕
+  </button>
+
   <div class="repair-favorite-manager-title">
     ${escapeHtml(item.title || "★")}
     ${escapeHtml(item.label || item.action)}
   </div>
-
-  <button onclick="moveRepairFavoriteUp(${index})">
-    ↑
-  </button>
-
-  <button onclick="moveRepairFavoriteDown(${index})">
-    ↓
-  </button>
-
-  <button onclick="deleteRepairFavorite(${index})">
-    ❌
-  </button>
 
 </div>
 
