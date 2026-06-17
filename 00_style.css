@@ -238,6 +238,59 @@ body.dark button.active-panel {
 }
 
 /* ===============================
+   Favorite Manager
+=============================== */
+
+.repair-favorite-manager-row {
+
+  display: grid;
+
+  grid-template-columns:
+    22px
+    22px
+    22px
+    1fr;
+
+  gap: 4px;
+
+  align-items: center;
+
+  margin-bottom: 4px;
+
+}
+
+.repair-favorite-mini {
+
+  width: 22px;
+  height: 22px;
+
+  padding: 0;
+
+  border-radius: 3px;
+
+  font-size: 11px;
+
+}
+
+.repair-favorite-mini.delete {
+
+  background: #d9534f;
+
+}
+
+.repair-favorite-manager-title {
+
+  font-size: 12px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+}
+
+/* ===============================
    OUTPUT
 =============================== */
 
