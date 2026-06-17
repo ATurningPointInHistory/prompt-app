@@ -532,6 +532,8 @@ body:not(.dark) .repair-tools-panel{
 
 .repair-tools-panel-body{
   overflow: auto;
+}
+
 /* ===============================
    Repair Quick Favorite Panel
    左中央固定・お気に入りボタン
