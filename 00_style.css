@@ -241,10 +241,6 @@ body.dark button.active-panel {
    Favorite Manager
 =============================== */
 
-/* ===============================
-   Favorite Manager
-=============================== */
-
 .repair-favorite-manager-row {
 
   display: grid;
@@ -312,6 +308,7 @@ body.dark button.active-panel {
   border-radius: 3px;
 
 }
+
 /* ===============================
    OUTPUT
 =============================== */
@@ -748,18 +745,26 @@ body:not(.dark) .repair-tools-panel{
 }
 
 .repair-quick-favorite-btn {
-  width: 44px;
-  height: 38px;
-  min-height: 34px;
 
-  padding: 0;
+  width: 44px;
+  height: 40px;
+
+  padding: 2px 0;
+
   border-radius: 3px;
 
-  font-size: 12px;
-  line-height: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
-  text-align: center;
+  gap: 1px;
+
+  font-size: 10px;
+  line-height: 1.1;
+
   white-space: normal;
+
 }
 
 /* ===============================
