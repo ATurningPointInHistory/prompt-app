@@ -678,6 +678,9 @@ window.renameRepairFavoriteIcon =
 window.renameRepairFavoriteLabel =
   renameRepairFavoriteLabel;
 
+window.saveRepairFavoriteManager =
+  saveRepairFavoriteManager;
+
 /* ===============================
    Repair Quick Favorite Auto Init
 =============================== */
