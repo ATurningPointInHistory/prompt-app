@@ -592,8 +592,8 @@ body:not(.dark) .repair-tools-panel{
   z-index: 30001;
 }
 
-.repair-quick-favorite-panel.closed .repair-quick-favorite-toggle {
-  left: 0;
+.repair-quick-favorite-panel.closed {
+  left: -58px;
 }
 
 .repair-quick-favorite-title {
@@ -607,15 +607,18 @@ body:not(.dark) .repair-tools-panel{
 }
 
 .repair-quick-favorite-btn {
-  width:44px;
-  height:38px;
+  width: 44px;
+  height: 38px;
+  min-height: 34px;
+
   padding: 0;
-  border-radius: 6px;
-  font-size:12px;
+  border-radius: 3px;
+
+  font-size: 12px;
   line-height: 1;
+
   text-align: center;
   white-space: normal;
-  min-height: 34px;
 }
 
 /* ===============================
