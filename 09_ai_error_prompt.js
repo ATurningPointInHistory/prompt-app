@@ -24,22 +24,47 @@ function buildErrorInvestigationPrompt(
   const stack =
     errorInfo.stack || "";
 
+  const errorText =
+    [
+      message,
+      source,
+      line,
+      column,
+      stack
+    ].join("\n");
+
   const type =
-    message.includes("ReferenceError")
-      ? "ReferenceError"
-      : message.includes("TypeError")
-        ? "TypeError"
-        : message.includes("SyntaxError")
-          ? "SyntaxError"
-          : message.includes("Promise")
-            ? "Promise Error"
-            : "Unknown JS Error";
+    detectErrorType(
+      errorText
+    );
+
+  const relatedFunction =
+    extractErrorFunction(
+      errorText
+    );
+
+  const fileCandidate =
+    relatedFunction &&
+    typeof guessAiTargetFile === "function"
+      ? guessAiTargetFile(
+          relatedFunction
+        )
+      : "unknown";
+
+  const causeCandidates =
+    buildErrorCauseCandidates(
+      type
+    );
+
+  const repairHint =
+    buildRepairHint(
+      relatedFunction,
+      fileCandidate
+    );
 
   const targetFunction =
-    extractErrorField(
-      stack,
-      "at "
-    ) || "不明";
+    relatedFunction ||
+    "不明";
 
   const sourceFile =
     source ||
@@ -47,9 +72,38 @@ function buildErrorInvestigationPrompt(
       stack,
       ".js"
     ) ||
+    fileCandidate ||
     "不明";
 
   return `
+AI Error Report v1
+
+=== Error Type ===
+
+${type}
+
+=== Related Function ===
+
+${relatedFunction || "none"}
+
+=== File Candidate ===
+
+${fileCandidate}
+
+=== Cause Candidates ===
+
+${
+  causeCandidates
+    .map(item => "・" + item)
+    .join("\n")
+}
+
+=== Repair Hint ===
+
+${repairHint}
+
+=== AI Investigation Prompt ===
+
 役割：
 あなたは熟練したプロのJavaScriptエラー解析者兼ソフトウェアアーキテクトです。
 
@@ -89,6 +143,7 @@ ${stack || "不明"}
 
 ③ 調査対象ファイル
 - 修正すべき可能性が高いファイルを示してください。
+- 現時点の推定対象：${fileCandidate}
 
 ④ 調査対象関数
 - 重点的に確認すべき関数を示してください。
@@ -385,6 +440,190 @@ function getErrorPromptInputText() {
   return prompt(
     "JS Error情報を貼り付けてください"
   ) || "";
+
+}
+
+/* ===============================
+   Error Analysis Helpers
+=============================== */
+
+function detectErrorType(text) {
+
+  const source =
+    String(text || "");
+
+  if (/ReferenceError/i.test(source)) {
+    return "ReferenceError";
+  }
+
+  if (/TypeError/i.test(source)) {
+    return "TypeError";
+  }
+
+  if (/SyntaxError/i.test(source)) {
+    return "SyntaxError";
+  }
+
+  if (/RangeError/i.test(source)) {
+    return "RangeError";
+  }
+
+  if (/URIError/i.test(source)) {
+    return "URIError";
+  }
+
+  if (/EvalError/i.test(source)) {
+    return "EvalError";
+  }
+
+  if (/Promise/i.test(source)) {
+    return "Promise Error";
+  }
+
+  if (/Event/i.test(source)) {
+    return "Event Error";
+  }
+
+  return "Unknown";
+
+}
+
+function extractErrorFunction(text) {
+
+  const source =
+    String(text || "");
+
+  const patterns = [
+
+    /([a-zA-Z_$][\w$]*) is not defined/,
+
+    /at ([a-zA-Z_$][\w$]*)\s*\(/,
+
+    /function ([a-zA-Z_$][\w$]*)/
+
+  ];
+
+  for (const pattern of patterns) {
+
+    const match =
+      source.match(pattern);
+
+    if (
+      match &&
+      match[1]
+    ) {
+      return match[1];
+    }
+
+  }
+
+  return "";
+
+}
+
+function buildErrorCauseCandidates(
+  errorType
+) {
+
+  switch (errorType) {
+
+    case "ReferenceError":
+
+      return [
+
+        "関数が未定義",
+
+        "script読込順",
+
+        "構文エラーで読込停止",
+
+        "window登録漏れ"
+
+      ];
+
+    case "TypeError":
+
+      return [
+
+        "null参照",
+
+        "undefined参照",
+
+        "DOM取得失敗",
+
+        "戻り値不正"
+
+      ];
+
+    case "SyntaxError":
+
+      return [
+
+        "括弧不足",
+
+        "閉じ忘れ",
+
+        "カンマ不足",
+
+        "テンプレート文字列"
+
+      ];
+
+    default:
+
+      return [
+
+        "原因を手動調査"
+
+      ];
+
+  }
+
+}
+
+function buildRepairHint(
+  functionName,
+  fileName
+) {
+
+  const lines = [];
+
+  lines.push(
+    "① 関数が存在するか確認"
+  );
+
+  if (functionName) {
+
+    lines.push(
+      "② " +
+      functionName +
+      " の定義確認"
+    );
+
+  }
+
+  if (
+    fileName &&
+    fileName !== "unknown"
+  ) {
+
+    lines.push(
+      "③ " +
+      fileName +
+      " の読込確認"
+    );
+
+  }
+
+  lines.push(
+    "④ script読込順確認"
+  );
+
+  lines.push(
+    "⑤ Health診断実施"
+  );
+
+  return lines.join("\n");
 
 }
 
