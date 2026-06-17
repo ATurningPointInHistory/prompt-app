@@ -452,36 +452,76 @@ function detectErrorType(text) {
   const source =
     String(text || "");
 
-  if (/ReferenceError/i.test(source)) {
-    return "ReferenceError";
-  }
+  const rules = [
 
-  if (/TypeError/i.test(source)) {
-    return "TypeError";
-  }
+    {
+      type: "ReferenceError",
+      regex: /ReferenceError/i
+    },
 
-  if (/SyntaxError/i.test(source)) {
-    return "SyntaxError";
-  }
+    {
+      type: "TypeError",
+      regex: /TypeError/i
+    },
 
-  if (/RangeError/i.test(source)) {
-    return "RangeError";
-  }
+    {
+      type: "SyntaxError",
+      regex: /SyntaxError/i
+    },
 
-  if (/URIError/i.test(source)) {
-    return "URIError";
-  }
+    {
+      type: "RangeError",
+      regex: /RangeError/i
+    },
 
-  if (/EvalError/i.test(source)) {
-    return "EvalError";
-  }
+    {
+      type: "URIError",
+      regex: /URIError/i
+    },
 
-  if (/Promise/i.test(source)) {
-    return "Promise Error";
-  }
+    {
+      type: "EvalError",
+      regex: /EvalError/i
+    },
 
-  if (/Event/i.test(source)) {
-    return "Event Error";
+    {
+      type: "AggregateError",
+      regex: /AggregateError/i
+    },
+
+    {
+      type: "DOMException",
+      regex: /DOMException/i
+    },
+
+    {
+      type: "Promise Error",
+      regex:
+        /Unhandled Promise|PromiseRejection|Promise Error/i
+    },
+
+    {
+      type: "Event Error",
+      regex:
+        /Event Error|dispatchEvent|addEventListener/i
+    },
+
+    {
+      type: "Network Error",
+      regex:
+        /NetworkError|Failed to fetch|ERR_/i
+    }
+
+  ];
+
+  for (const rule of rules) {
+
+    if (
+      rule.regex.test(source)
+    ) {
+      return rule.type;
+    }
+
   }
 
   return "Unknown";
