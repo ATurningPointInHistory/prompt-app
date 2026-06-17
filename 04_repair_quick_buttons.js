@@ -422,10 +422,15 @@ list.length
     ✕
   </button>
 
-  <div class="repair-favorite-manager-title">
-    ${escapeHtml(item.title || "★")}
-    ${escapeHtml(item.label || item.action)}
-  </div>
+  <input
+    class="repair-favorite-icon-input"
+    value="${escapeHtml(item.title || "★")}"
+    onchange="renameRepairFavoriteIcon(${index}, this.value)">
+
+  <input
+    class="repair-favorite-name-input"
+    value="${escapeHtml(item.label || item.action)}"
+    onchange="renameRepairFavoriteLabel(${index}, this.value)">
 
 </div>
 
@@ -449,6 +454,42 @@ list.length
 
 `
   );
+}
+
+function renameRepairFavoriteIcon(
+  index,
+  value
+) {
+
+  const list =
+    getRepairQuickFavoriteButtons();
+
+  if (!list[index]) return;
+
+  list[index].title =
+    value.trim() || "★";
+
+  saveRepairQuickFavoriteButtons(list);
+  renderRepairQuickFavoritePanel();
+  openRepairQuickFavoriteManager();
+}
+
+function renameRepairFavoriteLabel(
+  index,
+  value
+) {
+
+  const list =
+    getRepairQuickFavoriteButtons();
+
+  if (!list[index]) return;
+
+  list[index].label =
+    value.trim() || list[index].action;
+
+  saveRepairQuickFavoriteButtons(list);
+  renderRepairQuickFavoritePanel();
+  openRepairQuickFavoriteManager();
 }
 
 /* ===============================
@@ -593,6 +634,12 @@ window.deleteRepairFavorite =
 
 window.resetRepairFavoriteButtons =
   resetRepairFavoriteButtons;
+
+window.renameRepairFavoriteIcon =
+  renameRepairFavoriteIcon;
+
+window.renameRepairFavoriteLabel =
+  renameRepairFavoriteLabel;
 
 /* ===============================
    Repair Quick Favorite Auto Init
