@@ -229,6 +229,22 @@ body.dark button.active-panel {
   margin-top: 6px;
 }
 
+.favorite-btn.active{
+
+  background:#ff9500;
+
+  color:white;
+
+}
+
+.favorite-btn:not(.active){
+
+  background:#555;
+
+  color:#ffd700;
+
+}
+
 /* ===============================
    OUTPUT
 =============================== */
