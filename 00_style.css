@@ -214,6 +214,21 @@ body.dark button.active-panel {
 
 }
 
+.repair-tool-row {
+  display: grid;
+  grid-template-columns: 1fr 28px;
+  gap: 4px;
+  align-items: center;
+}
+
+.repair-tool-row .float-list-btn {
+  margin-top: 6px;
+}
+
+.repair-tool-row .favorite-btn {
+  margin-top: 6px;
+}
+
 /* ===============================
    OUTPUT
 =============================== */
