@@ -182,6 +182,39 @@ body.dark button.active-panel {
 }
 
 /* ===============================
+   Favorite Button
+=============================== */
+
+.favorite-btn{
+
+  float:right;
+
+  width:22px;
+  height:22px;
+
+  padding:0;
+
+  margin-left:6px;
+
+  border-radius:3px;
+
+  font-size:12px;
+
+  background:#666;
+
+  color:#ffd700;
+
+  cursor:pointer;
+
+}
+
+.favorite-btn:hover{
+
+  background:#ff9500;
+
+}
+
+/* ===============================
    OUTPUT
 =============================== */
 
