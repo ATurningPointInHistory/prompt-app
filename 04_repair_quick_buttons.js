@@ -455,18 +455,23 @@ list.length
 
 <div class="float-panel-actions">
 
-<button
-onclick="resetRepairFavoriteButtons()">
+<button onclick="resetRepairFavoriteButtons()">
 初期化
 </button>
 
-<button
-onclick="saveRepairFavoriteManager()">
+<button onclick="saveRepairFavoriteManager()">
 💾保存
 </button>
 
-<button
-onclick="closeFloatPanel()">
+<button onclick="exportRepairFavoriteSettings()">
+Export
+</button>
+
+<button onclick="importRepairFavoriteSettings()">
+Import
+</button>
+
+<button onclick="closeFloatPanel()">
 ✕閉じる
 </button>
 
@@ -643,6 +648,115 @@ function saveRepairFavoriteManager() {
     "お気に入り保存"
   );
 
+}
+
+/* ===============================
+   Repair Favorite Export / Import
+=============================== */
+
+function exportRepairFavoriteSettings() {
+
+  const data = {
+    type: "repairQuickFavoriteButtons",
+    version: "1.0",
+    exportedAt: new Date().toISOString(),
+    buttons: getRepairQuickFavoriteButtons()
+  };
+
+  const text =
+    JSON.stringify(data, null, 2);
+
+  const blob =
+    new Blob(
+      [text],
+      { type: "application/json" }
+    );
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  a.download =
+    "repair_favorites_" +
+    new Date().toISOString().slice(0, 10) +
+    ".json";
+
+  a.click();
+
+  URL.revokeObjectURL(a.href);
+}
+
+function importRepairFavoriteSettings() {
+
+  const input =
+    document.createElement("input");
+
+  input.type = "file";
+  input.accept = ".json,application/json";
+
+  input.onchange = (event) => {
+
+    const file =
+      event.target.files &&
+      event.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader =
+      new FileReader();
+
+    reader.onload = () => {
+
+      try {
+
+        const data =
+          JSON.parse(reader.result);
+
+        const buttons =
+          Array.isArray(data)
+            ? data
+            : data.buttons;
+
+        if (!Array.isArray(buttons)) {
+          alert("お気に入り設定ではありません");
+          return;
+        }
+
+        saveRepairQuickFavoriteButtons(
+          buttons.slice(0, REPAIR_QUICK_MAX_COUNT)
+        );
+
+        renderRepairQuickFavoritePanel();
+
+        if (
+          typeof refreshRepairToolsPanel === "function"
+        ) {
+          refreshRepairToolsPanel();
+        }
+
+        openRepairQuickFavoriteManager();
+
+        updateRepairStatus(
+          "お気に入り設定を読み込みました"
+        );
+
+      } catch (e) {
+
+        alert(
+          "読み込みに失敗しました\n" +
+          e.message
+        );
+      }
+    };
+
+    reader.readAsText(file);
+  };
+
+  input.click();
 }
 
 /* ===============================
