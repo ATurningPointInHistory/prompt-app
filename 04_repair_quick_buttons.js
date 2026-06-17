@@ -461,6 +461,109 @@ list.length
 }
 
 /* ===============================
+   Repair Favorite Manager Actions
+=============================== */
+
+function moveRepairFavoriteUp(
+  index
+) {
+
+  if (index <= 0) {
+    return;
+  }
+
+  const list =
+    getRepairQuickFavoriteButtons();
+
+  [
+    list[index - 1],
+    list[index]
+  ] = [
+    list[index],
+    list[index - 1]
+  ];
+
+  saveRepairQuickFavoriteButtons(
+    list
+  );
+
+  renderRepairQuickFavoritePanel();
+  openRepairQuickFavoriteManager();
+
+}
+
+function moveRepairFavoriteDown(
+  index
+) {
+
+  const list =
+    getRepairQuickFavoriteButtons();
+
+  if (
+    index >=
+    list.length - 1
+  ) {
+    return;
+  }
+
+  [
+    list[index],
+    list[index + 1]
+  ] = [
+    list[index + 1],
+    list[index]
+  ];
+
+  saveRepairQuickFavoriteButtons(
+    list
+  );
+
+  renderRepairQuickFavoritePanel();
+  openRepairQuickFavoriteManager();
+
+}
+
+function deleteRepairFavorite(
+  index
+) {
+
+  const list =
+    getRepairQuickFavoriteButtons();
+
+  list.splice(
+    index,
+    1
+  );
+
+  saveRepairQuickFavoriteButtons(
+    list
+  );
+
+  renderRepairQuickFavoritePanel();
+  openRepairQuickFavoriteManager();
+
+}
+
+function resetRepairFavoriteButtons() {
+
+  if (
+    !confirm(
+      "お気に入りを初期状態へ戻しますか？"
+    )
+  ) {
+    return;
+  }
+
+  saveRepairQuickFavoriteButtons(
+    REPAIR_QUICK_DEFAULTS
+  );
+
+  renderRepairQuickFavoritePanel();
+  openRepairQuickFavoriteManager();
+
+}
+
+/* ===============================
    Repair Quick Favorite Expose
 =============================== */
 
@@ -484,6 +587,21 @@ window.openRepairQuickFavoritePanel =
 
 window.updateRepairQuickFavoriteVisibility =
   updateRepairQuickFavoriteVisibility;
+
+window.openRepairQuickFavoriteManager =
+  openRepairQuickFavoriteManager;
+
+window.moveRepairFavoriteUp =
+  moveRepairFavoriteUp;
+
+window.moveRepairFavoriteDown =
+  moveRepairFavoriteDown;
+
+window.deleteRepairFavorite =
+  deleteRepairFavorite;
+
+window.resetRepairFavoriteButtons =
+  resetRepairFavoriteButtons;
 
 /* ===============================
    Repair Quick Favorite Auto Init
