@@ -185,35 +185,6 @@ body.dark button.active-panel {
    Favorite Button
 =============================== */
 
-.favorite-btn{
-
-  float:right;
-
-  width:22px;
-  height:22px;
-
-  padding:0;
-
-  margin-left:6px;
-
-  border-radius:3px;
-
-  font-size:12px;
-
-  background:#666;
-
-  color:#ffd700;
-
-  cursor:pointer;
-
-}
-
-.favorite-btn:hover{
-
-  background:#ff9500;
-
-}
-
 .repair-tool-row {
   display: grid;
   grid-template-columns: 1fr 28px;
@@ -229,19 +200,40 @@ body.dark button.active-panel {
   margin-top: 6px;
 }
 
-.favorite-btn.active{
+.favorite-btn {
 
-  background:#ff9500;
+  float: right;
 
-  color:white;
+  width: 22px;
+  height: 22px;
+
+  padding: 0;
+
+  margin-left: 6px;
+
+  border-radius: 3px;
+
+  font-size: 12px;
+
+  cursor: pointer;
+
+  background: #555;
+  color: #ffd700;
+
+  transition: 0.15s;
 
 }
 
-.favorite-btn:not(.active){
+.favorite-btn.active {
 
-  background:#555;
+  background: #ff9800;
+  color: #fff;
 
-  color:#ffd700;
+}
+
+.favorite-btn:hover {
+
+  filter: brightness(0.95);
 
 }
 
