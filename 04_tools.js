@@ -1937,6 +1937,24 @@ toggleRepairFavoriteButton(
 
 }
 
+/* ===============================
+   Refresh Repair Tools
+=============================== */
+
+function refreshRepairToolsPanel() {
+
+  const panel =
+    get("floatPanel");
+
+  if (!panel) {
+    return;
+  }
+
+  panel.innerHTML =
+    buildRepairToolsHtml();
+
+}
+
 window.openProjectConfigManager =
   openProjectConfigManager;
 
