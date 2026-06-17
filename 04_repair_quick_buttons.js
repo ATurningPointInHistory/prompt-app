@@ -150,14 +150,6 @@ function toggleRepairFavoriteButton(
         item.action !== action
       );
 
-    saveRepairQuickFavoriteButtons(
-      next
-    );
-
-    alert(
-      "クイックから削除しました"
-    );
-
   } else {
 
     if (
@@ -175,28 +167,21 @@ function toggleRepairFavoriteButton(
     next = [
       ...list,
       {
-        title:
-          title || "★",
-        label:
-          label || title || action,
+        title: title || "★",
+        label: label || title || action,
         action
       }
     ];
-
-    saveRepairQuickFavoriteButtons(
-      next
-    );
-
-    alert(
-      "クイックに追加しました"
-    );
   }
+
+  saveRepairQuickFavoriteButtons(
+    next
+  );
 
   renderRepairQuickFavoritePanel();
 
   if (
-    typeof refreshRepairToolsPanel ===
-    "function"
+    typeof refreshRepairToolsPanel === "function"
   ) {
     refreshRepairToolsPanel();
   }
