@@ -563,14 +563,15 @@ body:not(.dark) .repair-tools-panel{
 }
 
 .repair-quick-favorite-toggle {
-  position: fixed;
-  left: 58px;
-  top: 110px;
-  transform: none;
+  position: absolute;
+  top: 50%;
+  right: -28px;
+  left: auto;
+  transform: translateY(-50%);
   width: 28px;
   height: 36px;
   padding: 0;
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 4px 4px 0;
   background: var(--card);
   color: var(--text);
   border: 1px solid var(--border);
