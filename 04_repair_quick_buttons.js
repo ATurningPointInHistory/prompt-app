@@ -277,6 +277,10 @@ function initRepairQuickFavoritePanel() {
   openRepairQuickFavoritePanel();
 }
 
+/* ===============================
+   Repair Quick Favorite Open
+=============================== */
+
 function openRepairQuickFavoritePanel() {
 
   const panel =
@@ -290,8 +294,9 @@ function openRepairQuickFavoritePanel() {
     "closed"
   );
 
-  panel.style.left =
-    "0px";
+  // CSSで位置を制御するので
+  // style.left は使わない
+  panel.style.left = "";
 
   const toggle =
     get("repairQuickFavoriteToggle");
@@ -300,6 +305,7 @@ function openRepairQuickFavoritePanel() {
     toggle.textContent =
       "◀";
   }
+
 }
 
 function renderRepairQuickFavoritePanel() {
