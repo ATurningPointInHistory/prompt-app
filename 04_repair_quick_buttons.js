@@ -305,23 +305,36 @@ function renderRepairQuickFavoritePanel() {
         escapeHtml(item.title || "★");
 
       const label =
-        escapeHtml(item.label || item.action || "");
+        escapeHtml(
+          item.label || item.action || ""
+        );
 
       const action =
         escapeHtml(item.action || "");
 
       return `
+
 <button
   class="repair-quick-favorite-btn"
   title="${label}"
   onclick="runRepairQuickFavoriteAction('${action}')">
-${title}
+
+  <span class="repair-quick-favorite-icon">
+    ${title}
+  </span>
+
+  <span class="repair-quick-favorite-label">
+    ${label}
+  </span>
+
 </button>
+
 `;
 
     }).join("");
 
   updateRepairQuickFavoriteVisibility();
+
 }
 
 function toggleRepairQuickFavoritePanel() {
