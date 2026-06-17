@@ -808,6 +808,12 @@ window.renameRepairFavoriteLabel =
 window.saveRepairFavoriteManager =
   saveRepairFavoriteManager;
 
+window.exportRepairFavoriteSettings =
+  exportRepairFavoriteSettings;
+
+window.importRepairFavoriteSettings =
+  importRepairFavoriteSettings;
+
 /* ===============================
    Repair Quick Favorite Auto Init
 =============================== */
