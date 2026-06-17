@@ -544,34 +544,22 @@ body:not(.dark) .repair-tools-panel{
   left: 0;
   top: 110px;
   transform: none;
-
   z-index: 30000;
-
   width: 58px;
   max-height: 70vh;
   overflow-y: auto;
   overflow-x: visible;
-
   display: none;
   flex-direction: column;
   gap: 4px;
-
   padding: 6px 4px;
-
   background: var(--card);
   color: var(--text);
-
   border: 1px solid var(--border);
   border-left: none;
   border-radius: 0 8px 8px 0;
-
   box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-
   transition: left 0.25s ease;
-}
-
-.repair-quick-favorite-panel.closed {
-  left: -58px;
 }
 
 .repair-quick-favorite-toggle {
@@ -590,10 +578,6 @@ body:not(.dark) .repair-tools-panel{
   font-size: 14px;
   line-height: 1;
   z-index: 30001;
-}
-
-.repair-quick-favorite-panel.closed {
-  left: -58px;
 }
 
 .repair-quick-favorite-panel.closed {
