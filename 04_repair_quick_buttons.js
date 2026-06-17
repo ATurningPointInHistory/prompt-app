@@ -229,6 +229,10 @@ function buildRepairQuickFavoriteHtml() {
 
 }
 
+/* ===============================
+   Repair Quick Favorite Init
+=============================== */
+
 function initRepairQuickFavoritePanel() {
 
   if (
@@ -245,20 +249,20 @@ function initRepairQuickFavoritePanel() {
   wrap.innerHTML =
     buildRepairQuickFavoriteHtml();
 
-  const panel =
-    wrap.firstElementChild;
-
-  if (!panel) {
-    return;
+  while (
+    wrap.firstElementChild
+  ) {
+    document.body.appendChild(
+      wrap.firstElementChild
+    );
   }
 
-  document.body.appendChild(
-    panel
-  );
+  renderRepairQuickFavoritePanel();
 
   updateRepairQuickFavoriteVisibility();
 
   openRepairQuickFavoritePanel();
+
 }
 
 /* ===============================
