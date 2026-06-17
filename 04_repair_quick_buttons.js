@@ -395,6 +395,72 @@ function updateRepairQuickFavoriteVisibility() {
 }
 
 /* ===============================
+   Repair Quick Favorite Manager
+=============================== */
+
+function openRepairQuickFavoriteManager() {
+
+  const list =
+    getRepairQuickFavoriteButtons();
+
+  openFloatPanel(
+    "⭐ お気に入り管理",
+    `
+
+<div class="small">
+登録数：${list.length} / ${REPAIR_QUICK_MAX_COUNT}
+</div>
+
+<div class="repair-favorite-manager">
+
+${
+list.length
+? list.map((item, index) => `
+
+<div class="repair-favorite-manager-row">
+
+  <div class="repair-favorite-manager-title">
+    ${escapeHtml(item.title || "★")}
+    ${escapeHtml(item.label || item.action)}
+  </div>
+
+  <button onclick="moveRepairFavoriteUp(${index})">
+    ↑
+  </button>
+
+  <button onclick="moveRepairFavoriteDown(${index})">
+    ↓
+  </button>
+
+  <button onclick="deleteRepairFavorite(${index})">
+    ❌
+  </button>
+
+</div>
+
+`).join("")
+: "お気に入りなし"
+}
+
+</div>
+
+<div class="float-panel-actions">
+
+<button onclick="resetRepairFavoriteButtons()">
+初期化
+</button>
+
+<button onclick="renderRepairQuickFavoritePanel()">
+再描画
+</button>
+
+</div>
+
+`
+  );
+}
+
+/* ===============================
    Repair Quick Favorite Expose
 =============================== */
 
