@@ -767,6 +767,30 @@ body:not(.dark) .repair-tools-panel{
 
 }
 
+.repair-quick-favorite-icon{
+
+  font-size:16px;
+  line-height:1;
+
+}
+
+.repair-quick-favorite-label{
+
+  font-size:9px;
+  line-height:1;
+
+  margin-top:2px;
+
+  max-width:40px;
+
+  overflow:hidden;
+
+  text-overflow:ellipsis;
+
+  white-space:nowrap;
+
+}
+
 /* ===============================
    REPAIR QUICK PANEL
 =============================== */
