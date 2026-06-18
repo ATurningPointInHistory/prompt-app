@@ -285,3 +285,9 @@ window.generateModuleRulesFromLoadedScripts =
 
 window.copyGeneratedModuleRule =
   copyGeneratedModuleRule;
+
+window.generateModuleAnalyzer =
+  generateModuleAnalyzer;
+
+window.copyModuleAnalysis =
+  copyModuleAnalysis;
