@@ -49,27 +49,6 @@ function classifyAiChanges(
     };
   }
 
-  const calledFunctions =
-    extractCalledFunctions(
-      code
-    );
-  
-  const dependencyTarget =
-    detectBestModuleFromCalls(
-      calledFunctions
-    );
-  
-  if (
-    dependencyTarget &&
-    dependencyTarget.score > 0
-  ) {
-    return {
-      file: dependencyTarget.file,
-      score: 80 + dependencyTarget.score,
-      reason: "dependency"
-    };
-  }
-
   const config =
     typeof getProjectConfig === "function"
       ? getProjectConfig()
@@ -374,23 +353,69 @@ function buildFunctionDependencyScore(
 
   let score = 0;
 
+  const file =
+    String(moduleRule.file || "")
+      .toLowerCase();
+
+  const words =
+    moduleRule.words.map(word =>
+      String(word || "")
+        .toLowerCase()
+    );
+
   calledFunctions.forEach(name => {
 
-    moduleRule.words.forEach(word => {
+    const lowerName =
+      String(name || "")
+        .toLowerCase();
+
+    words.forEach(word => {
 
       if (
-        String(name)
-          .toLowerCase()
-          .includes(
-            String(word).toLowerCase()
-          )
+        lowerName.includes(word)
       ) {
-
         score += 5;
-
       }
 
     });
+
+    if (
+      file.includes("repair") &&
+      lowerName.includes("repair")
+    ) {
+      score += 10;
+    }
+
+    if (
+      file.includes("search") &&
+      lowerName.includes("search")
+    ) {
+      score += 10;
+    }
+
+    if (
+      file.includes("macro") &&
+      lowerName.includes("macro")
+    ) {
+      score += 10;
+    }
+
+    if (
+      file.includes("health") &&
+      (
+        lowerName.includes("health") ||
+        lowerName.includes("diagnose")
+      )
+    ) {
+      score += 10;
+    }
+
+    if (
+      file.includes("ai") &&
+      lowerName.includes("ai")
+    ) {
+      score += 10;
+    }
 
   });
 
