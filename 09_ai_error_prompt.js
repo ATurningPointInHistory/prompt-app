@@ -183,18 +183,20 @@ ${stack || "不明"}
 function generateErrorPrompt() {
 
   const raw =
-    getErrorPromptInputText();
+    String(
+      getErrorPromptInputText() || ""
+    );
 
   if (!raw.trim()) {
     alert("エラー情報が空です");
-    return;
+    return "";
   }
 
   const errorInfo = {
     message:
       extractErrorField(raw, "message:") ||
       extractErrorField(raw, "Message:") ||
-      raw.split("\n")[0] ||
+      raw.split(/\r?\n/)[0] ||
       "",
 
     source:
@@ -216,7 +218,7 @@ function generateErrorPrompt() {
       extractAfterLabel(raw, "stack:") ||
       extractAfterLabel(raw, "Stack:") ||
       raw
-   };
+  };
 
   latestErrorPrompt =
     buildErrorInvestigationPrompt(
@@ -273,7 +275,9 @@ onclick="copyErrorPrompt()">
   }
 
   return latestErrorPrompt;
+
 }
+
 function copyErrorPrompt() {
 
   const text =
