@@ -255,6 +255,17 @@ function getProjectModuleRules() {
       ]
     },
     {
+      file: "09_ai_error_prompt.js",
+      priority:95,
+      words:[
+        "errorprompt",
+        "generateerrorprompt",
+        "builderror",
+        "repairhint",
+        "extracterror"
+      ]
+    },
+    {
       file: "10_macro.js",
       priority: 80,
       words: [
