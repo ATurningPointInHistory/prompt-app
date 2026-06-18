@@ -54,15 +54,19 @@ function runAiGeneratedCodeAnalysis() {
   const currentCode =
     editor.value;
 
-  const aiBlocks =
-    extractFunctionBlocksFromText(
-      aiCode
-    );
+    const aiBlocks =
+      filterTopLevelFunctionBlocks(
+        extractFunctionBlocksFromText(
+          aiCode
+        )
+      );
 
-  const currentBlocks =
-    extractFunctionBlocksFromText(
-      currentCode
-    );
+    const currentBlocks =
+      filterTopLevelFunctionBlocks(
+        extractFunctionBlocksFromText(
+          currentCode
+        )
+      );
 
   if (!aiBlocks.length) {
     alert("AI出力からfunctionを検出できませんでした");
