@@ -152,56 +152,75 @@ function buildModuleAnalysis(
   fileName = ""
 ) {
 
-  const functions =
-    extractFunctionNames(code);
+  const blocks =
+    extractFunctionBlocksFromText(
+      code
+    );
+
+  const result =
+    splitTopLevelFunctions(
+      blocks
+    );
+
+  const topLevel =
+    result.topLevel;
+
+  const nested =
+    result.nested;
 
   const keywords =
     extractModuleKeywords(code);
 
   const lines = [];
 
+  lines.push("MODULE ANALYSIS");
+  lines.push("");
+
+  lines.push("=== File ===");
+  lines.push(fileName || "unknown");
+  lines.push("");
+
+  lines.push("=== Function Count ===");
   lines.push(
-    "MODULE ANALYSIS"
+    String(
+      topLevel.length +
+      nested.length
+    )
+  );
+  lines.push("");
+
+  lines.push("=== Top Level Count ===");
+  lines.push(String(topLevel.length));
+  lines.push("");
+
+  lines.push("=== Nested Count ===");
+  lines.push(String(nested.length));
+  lines.push("");
+
+  lines.push("=== Keywords ===");
+  lines.push(
+    keywords.length
+      ? keywords.join(", ")
+      : "none"
+  );
+  lines.push("");
+
+  lines.push("=== Top Level Functions ===");
+
+  lines.push(
+    topLevel.length
+      ? topLevel.map(block => block.name).join("\n")
+      : "none"
   );
 
   lines.push("");
 
-  lines.push(
-    "=== File ==="
-  );
+  lines.push("=== Nested Functions ===");
 
   lines.push(
-    fileName || "unknown"
-  );
-
-  lines.push("");
-
-  lines.push(
-    "=== Function Count ==="
-  );
-
-  lines.push(
-    String(functions.length)
-  );
-
-  lines.push("");
-
-  lines.push(
-    "=== Keywords ==="
-  );
-
-  lines.push(
-    keywords.join(", ")
-  );
-
-  lines.push("");
-
-  lines.push(
-    "=== Functions ==="
-  );
-
-  functions.forEach(name =>
-    lines.push(name)
+    nested.length
+      ? nested.map(block => block.name).join("\n")
+      : "none"
   );
 
   return lines.join("\n");
@@ -273,6 +292,19 @@ function copyModuleAnalysis() {
     return;
 
   }
+
+  const ok =
+    copyTextFallback(
+      latestModuleAnalysis
+    );
+
+  alert(
+    ok
+      ? "Module Analysisをコピーしました"
+      : "コピー失敗"
+  );
+
+}
 
   copyTextFallback(
     latestModuleAnalysis
