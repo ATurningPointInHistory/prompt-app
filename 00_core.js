@@ -380,3 +380,48 @@ function splitTopLevelFunctions(
 
 }
 
+function splitTopLevelFunctions(
+  blocks = []
+) {
+
+  const topLevel = [];
+  const nested = [];
+
+  blocks.forEach(block => {
+
+    const parent =
+      blocks.find(other => {
+
+        if (other === block) {
+          return false;
+        }
+
+        return (
+          other.start < block.start &&
+          other.end > block.end
+        );
+
+      });
+
+    if (parent) {
+
+      nested.push(block);
+
+    } else {
+
+      topLevel.push(block);
+
+    }
+
+  });
+
+  return {
+
+    topLevel,
+
+    nested
+
+  };
+
+}
+
