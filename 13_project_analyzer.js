@@ -113,6 +113,173 @@ function copyGeneratedModuleRule() {
 
 }
 
+function extractModuleKeywords(code) {
+
+  const names =
+    extractFunctionNames(code);
+
+  const words =
+    new Set();
+
+  names.forEach(name => {
+
+    String(name)
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .split(/[^a-zA-Z0-9]+/)
+      .forEach(word => {
+
+        word =
+          word
+            .trim()
+            .toLowerCase();
+
+        if (
+          word.length >= 3
+        ) {
+          words.add(word);
+        }
+
+      });
+
+  });
+
+  return [...words].sort();
+
+}
+
+function buildModuleAnalysis(
+  code,
+  fileName = ""
+) {
+
+  const functions =
+    extractFunctionNames(code);
+
+  const keywords =
+    extractModuleKeywords(code);
+
+  const lines = [];
+
+  lines.push(
+    "MODULE ANALYSIS"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "=== File ==="
+  );
+
+  lines.push(
+    fileName || "unknown"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "=== Function Count ==="
+  );
+
+  lines.push(
+    String(functions.length)
+  );
+
+  lines.push("");
+
+  lines.push(
+    "=== Keywords ==="
+  );
+
+  lines.push(
+    keywords.join(", ")
+  );
+
+  lines.push("");
+
+  lines.push(
+    "=== Functions ==="
+  );
+
+  functions.forEach(name =>
+    lines.push(name)
+  );
+
+  return lines.join("\n");
+
+}
+
+function generateModuleAnalyzer() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    !editor.value.trim()
+  ) {
+
+    alert(
+      "Repair Editorへ読み込んでください"
+    );
+
+    return;
+
+  }
+
+  const report =
+    buildModuleAnalysis(
+      editor.value,
+      currentRepairFile
+    );
+
+  openFloatPanel(
+
+    "📊 Module Analyzer",
+
+    `
+<div class="float-panel-actions">
+
+<button
+onclick="copyModuleAnalysis()">
+📋 コピー
+</button>
+
+</div>
+
+<pre class="code-preview">
+${escapeHtml(report)}
+</pre>
+
+`
+
+  );
+
+  latestModuleAnalysis =
+    report;
+
+}
+
+let latestModuleAnalysis =
+  "";
+
+function copyModuleAnalysis() {
+
+  if (
+    !latestModuleAnalysis
+  ) {
+
+    alert("解析結果なし");
+
+    return;
+
+  }
+
+  copyTextFallback(
+    latestModuleAnalysis
+  );
+
+}
+
 window.generateModuleRulesFromLoadedScripts =
   generateModuleRulesFromLoadedScripts;
 
