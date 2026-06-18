@@ -97,6 +97,30 @@ function classifyAiChanges(
   };
 }
 
+function filterTopLevelFunctionBlocks(
+  blocks
+) {
+
+  return blocks.filter(block => {
+
+    if (block.type !== "function") {
+      return false;
+    }
+
+    const parent =
+      blocks.find(other =>
+        other !== block &&
+        other.type === "function" &&
+        other.start < block.start &&
+        other.end > block.end
+      );
+
+    return !parent;
+
+  });
+
+}
+
 function detectAiInputDuplicateFunctions() {
 
   if (
