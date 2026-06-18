@@ -32,6 +32,7 @@ function getProjectModuleRules() {
 
     {
       file: "00_core.js",
+      priority: 100,
       words: [
         "escape",
         "copy",
@@ -45,6 +46,7 @@ function getProjectModuleRules() {
     },
     {
       file: "01_bootstrap.js",
+      priority: 95,
       words: [
         "float",
         "panel",
@@ -56,6 +58,7 @@ function getProjectModuleRules() {
     },
     {
       file: "01_function_reference.js",
+      priority: 85,
       words: [
         "reference",
         "onclick",
@@ -67,6 +70,7 @@ function getProjectModuleRules() {
     },
     {
       file: "02_prompt.js",
+      priority: 80,
       words: [
         "prompt",
         "review",
@@ -77,6 +81,7 @@ function getProjectModuleRules() {
     },
     {
       file: "03_data.js",
+      priority: 85,
       words: [
         "save",
         "load",
@@ -87,6 +92,7 @@ function getProjectModuleRules() {
     },
     {
       file: "04_tools.js",
+      priority: 80,
       words: [
         "template",
         "danger",
@@ -98,6 +104,7 @@ function getProjectModuleRules() {
     },
     {
       file: "04_repair_quick_buttons.js",
+      priority: 90,
       words: [
         "favorite",
         "quick",
@@ -108,6 +115,7 @@ function getProjectModuleRules() {
     },
     {
       file: "05_repair.js",
+      priority: 100,
       words: [
         "repair",
         "undo",
@@ -119,6 +127,7 @@ function getProjectModuleRules() {
     },
     {
       file: "06_search.js",
+      priority: 95,
       words: [
         "search",
         "replace",
@@ -128,6 +137,7 @@ function getProjectModuleRules() {
     },
     {
       file: "07_health_dependency.js",
+      priority: 100,
       words: [
         "dependency",
         "bracket",
@@ -139,6 +149,7 @@ function getProjectModuleRules() {
     },
     {
       file: "07_health_diagnose.js",
+      priority: 100,
       words: [
         "diagnose",
         "summary",
@@ -149,6 +160,7 @@ function getProjectModuleRules() {
     },
     {
       file: "07_health_unused.js",
+      priority: 95,
       words: [
         "unused",
         "deletecandidate",
@@ -158,6 +170,7 @@ function getProjectModuleRules() {
     },
     {
       file: "07_backup_health.js",
+      priority: 100,
       words: [
         "health",
         "showhtmlhealth",
@@ -168,6 +181,7 @@ function getProjectModuleRules() {
     },
     {
       file: "07_backup_manager.js",
+      priority: 95,
       words: [
         "backup",
         "restore",
@@ -179,6 +193,7 @@ function getProjectModuleRules() {
     },
     {
       file: "08_function_relation.js",
+      priority: 95,
       words: [
         "relation",
         "functionrelation",
@@ -189,6 +204,7 @@ function getProjectModuleRules() {
     },
     {
       file: "08_ai_analyzer.js",
+      priority: 100,
       words: [
         "aianalyzer",
         "classify",
@@ -199,6 +215,7 @@ function getProjectModuleRules() {
     },
     {
       file: "08_ai_apply.js",
+      priority: 100,
       words: [
         "apply",
         "integrationdiff",
@@ -208,6 +225,7 @@ function getProjectModuleRules() {
     },
     {
       file: "08_ai_test.js",
+      priority: 100,
       words: [
         "autotest",
         "sandbox",
@@ -217,6 +235,7 @@ function getProjectModuleRules() {
     },
     {
       file: "08_ai_integrator.js",
+      priority: 100,
       words: [
         "integration",
         "aicode",
@@ -225,6 +244,7 @@ function getProjectModuleRules() {
     },
     {
       file: "09_ai_instruction.js",
+      priority: 95,
       words: [
         "instruction",
         "aiinstruction",
@@ -236,6 +256,7 @@ function getProjectModuleRules() {
     },
     {
       file: "10_macro.js",
+      priority: 80,
       words: [
         "macro",
         "recordmacro",
@@ -245,6 +266,7 @@ function getProjectModuleRules() {
     },
     {
       file: "11_mobile_console.js",
+      priority: 70,
       words: [
         "mobile",
         "console",
@@ -255,6 +277,7 @@ function getProjectModuleRules() {
     },
     {
       file: "12_memo_box.js",
+      priority: 60,
       words: [
         "memo",
         "memobox",
@@ -263,6 +286,7 @@ function getProjectModuleRules() {
     },
     {
       file: "99_init.js",
+      priority: 100,
       words: [
         "init",
         "domcontentloaded",
