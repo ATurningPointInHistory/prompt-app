@@ -314,32 +314,6 @@ function copyErrorPrompt() {
   );
 }
 
-function openErrorPromptInputPopup() {
-
-  openFloatPanel(
-    "🧯 AIエラー調査プロンプト生成",
-    `
-<textarea
-id="aiErrorPromptInput"
-style="
-width:100%;
-height:45vh;
-font-family:monospace;
-font-size:11px;
-white-space:pre;
-"
-placeholder="ここにエラー情報を貼り付け"
-></textarea>
-
-<div class="float-panel-actions">
-<button onclick="generateErrorPromptFromPopup()">
-生成
-</button>
-</div>
-`
-  );
-}
-
 function generateErrorPromptFromPopup() {
 
   const input =
@@ -350,43 +324,35 @@ function generateErrorPromptFromPopup() {
     return;
   }
 
-  localStorage.setItem(
-    "lastCrash",
-    JSON.stringify({
-      message: input.value,
-      stack: input.value,
-      time: new Date().toISOString()
-    })
-  );
-
   generateErrorPrompt();
+
 }
 
-function extractErrorField(
-  text,
-  keyword
-) {
+function getErrorPromptInputText() {
 
-  if (!text || !keyword) {
-    return "";
+  const ids = [
+    "aiErrorPromptInput",
+    "aiErrorInput",
+    "errorInput",
+    "jsErrorInput",
+    "repairEditor"
+  ];
+
+  for (const id of ids) {
+
+    const el =
+      typeof get === "function"
+        ? get(id)
+        : document.getElementById(id);
+
+    if (el && el.value) {
+      return el.value;
+    }
   }
 
-  const lines =
-    String(text)
-      .split(/\r?\n/);
-
-  const found =
-    lines.find(line =>
-      line.includes(keyword)
-    );
-
-  if (!found) {
-    return "";
-  }
-
-  return found
-    .replace(keyword, "")
-    .trim();
+  return prompt(
+    "JS Error情報を貼り付けてください"
+  ) || "";
 
 }
 
