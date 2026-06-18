@@ -386,33 +386,6 @@ function extractAfterLabel(
 
 }
 
-function getErrorPromptInputText() {
-
-  const ids = [
-    "aiErrorInput",
-    "errorInput",
-    "jsErrorInput",
-    "repairEditor"
-  ];
-
-  for (const id of ids) {
-
-    const el =
-      typeof get === "function"
-        ? get(id)
-        : document.getElementById(id);
-
-    if (el && el.value) {
-      return el.value;
-    }
-  }
-
-  return prompt(
-    "JS Error情報を貼り付けてください"
-  ) || "";
-
-}
-
 /* ===============================
    Error Analysis Helpers
 =============================== */
