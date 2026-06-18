@@ -29,19 +29,9 @@ function getProjectConfig() {
 function getProjectModuleRules() {
 
   return [
+
     {
-      file: "00_bootstrap.js",
-      words: [
-        "float",
-        "panel",
-        "menu",
-        "bootstrap",
-        "switchapp",
-        "tab"
-      ]
-    },
-    {
-      file: "01_core.js",
+      file: "00_core.js",
       words: [
         "escape",
         "copy",
@@ -53,7 +43,17 @@ function getProjectModuleRules() {
         "reference"
       ]
     },
-
+    {
+      file: "01_bootstrap.js",
+      words: [
+        "float",
+        "panel",
+        "menu",
+        "bootstrap",
+        "switchapp",
+        "tab"
+      ]
+    },
     {
       file: "01_function_reference.js",
       words: [
@@ -65,7 +65,6 @@ function getProjectModuleRules() {
         "countfunctionreferences"
       ]
     },
-
     {
       file: "02_prompt.js",
       words: [
@@ -95,6 +94,16 @@ function getProjectModuleRules() {
         "preset",
         "todo",
         "devlog"
+      ]
+    },
+    {
+      file: "04_repair_quick_buttons.js",
+      words: [
+        "favorite",
+        "quick",
+        "repairquick",
+        "quickbutton",
+        "quickfavorite"
       ]
     },
     {
@@ -223,6 +232,33 @@ function getProjectModuleRules() {
         "beforeafter",
         "primarytarget",
         "replacecandidate"
+      ]
+    },
+    {
+      file: "10_macro.js",
+      words: [
+        "macro",
+        "recordmacro",
+        "runmacro",
+        "macrostep"
+      ]
+    },
+    {
+      file: "11_mobile_console.js",
+      words: [
+        "mobile",
+        "console",
+        "log",
+        "error",
+        "eval"
+      ]
+    },
+    {
+      file: "12_memo_box.js",
+      words: [
+        "memo",
+        "memobox",
+        "note"
       ]
     },
     {
@@ -420,14 +456,15 @@ function normalizeProjectConfig(config) {
 function getProjectFunctionSearchFiles() {
 
   return [
-    "./00_bootstrap.js",
-    "./01_core.js",
+    "./00_core.js",
+    "./01_bootstrap.js",
     "./01_function_reference.js",
     "./01_project_config.js",
 
     "./02_prompt.js",
     "./03_data.js",
     "./04_tools.js",
+    "./04_repair_quick_buttons.js",
 
     "./05_repair_file.js",
     "./05_repair_function.js",
@@ -454,6 +491,10 @@ function getProjectFunctionSearchFiles() {
 
     "./09_ai_instruction.js",
     "./09_ai_error_prompt.js",
+
+    "./10_macro.js",
+    "./11_mobile_console.js",
+    "./12_memo_box.js",
 
     "./99_init.js"
   ];
