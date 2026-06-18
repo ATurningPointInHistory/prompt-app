@@ -325,15 +325,46 @@ function extractCalledFunctions(code) {
       ? getIgnoredFunctionCalls()
       : new Set();
 
+  const keepPrefixes = [
+    "repair",
+    "search",
+    "macro",
+    "health",
+    "diagnose",
+    "ai",
+    "backup",
+    "todo",
+    "memo"
+  ];
+
   return [
     ...new Set(
       [...String(code || "").matchAll(
         /\b([a-zA-Z_$][\w$]*)\s*\(/g
       )]
       .map(x => x[1])
-      .filter(name =>
-        !ignore.has(name)
-      )
+      .filter(name => {
+
+        if (!name) {
+          return false;
+        }
+
+        const lower =
+          String(name)
+            .toLowerCase();
+
+        const shouldKeep =
+          keepPrefixes.some(prefix =>
+            lower.includes(prefix)
+          );
+
+        if (shouldKeep) {
+          return true;
+        }
+
+        return !ignore.has(name);
+
+      })
     )
   ];
 
