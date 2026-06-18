@@ -49,6 +49,27 @@ function classifyAiChanges(
     };
   }
 
+  const calledFunctions =
+    extractCalledFunctions(
+      code
+    );
+  
+  const dependencyTarget =
+    detectBestModuleFromCalls(
+      calledFunctions
+    );
+  
+  if (
+    dependencyTarget &&
+    dependencyTarget.score > 0
+  ) {
+    return {
+      file: dependencyTarget.file,
+      score: 80 + dependencyTarget.score,
+      reason: "dependency"
+    };
+  }
+
   const config =
     typeof getProjectConfig === "function"
       ? getProjectConfig()
@@ -416,5 +437,3 @@ function detectBestModuleFromCalls(
   return best;
 
 }
-
-
