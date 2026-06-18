@@ -192,27 +192,31 @@ function generateErrorPrompt() {
 
   const errorInfo = {
     message:
-      extractAfterLabel(raw, "message") ||
-      extractAfterLabel(raw, "Message") ||
+      extractErrorField(raw, "message:") ||
+      extractErrorField(raw, "Message:") ||
       raw.split("\n")[0] ||
       "",
+
     source:
-      extractAfterLabel(raw, "source") ||
-      extractAfterLabel(raw, "Source") ||
+      extractErrorField(raw, "source:") ||
+      extractErrorField(raw, "Source:") ||
       "",
+
     line:
-      extractAfterLabel(raw, "line") ||
-      extractAfterLabel(raw, "Line") ||
+      extractErrorField(raw, "line:") ||
+      extractErrorField(raw, "Line:") ||
       "",
+
     column:
-      extractAfterLabel(raw, "column") ||
-      extractAfterLabel(raw, "Column") ||
+      extractErrorField(raw, "column:") ||
+      extractErrorField(raw, "Column:") ||
       "",
+
     stack:
-      extractAfterLabel(raw, "stack") ||
-      extractAfterLabel(raw, "Stack") ||
+      extractAfterLabel(raw, "stack:") ||
+      extractAfterLabel(raw, "Stack:") ||
       raw
-  };
+   };
 
   latestErrorPrompt =
     buildErrorInvestigationPrompt(
