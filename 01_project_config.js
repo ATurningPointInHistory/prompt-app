@@ -180,6 +180,16 @@ function getProjectModuleRules() {
       ]
     },
     {
+      file: "07_project_package.js",
+      priority:90,
+      words:[
+        "package",
+        "projectpackage",
+        "zip",
+        "exportproject"
+      ]
+    },
+    {
       file: "07_backup_manager.js",
       priority: 95,
       words: [
