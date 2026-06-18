@@ -318,4 +318,103 @@ function detectMissingCriticalFunctionsInText(text) {
 
 }
 
+function extractCalledFunctions(code) {
+
+  const ignore =
+    typeof getIgnoredFunctionCalls === "function"
+      ? getIgnoredFunctionCalls()
+      : new Set();
+
+  return [
+    ...new Set(
+      [...String(code || "").matchAll(
+        /\b([a-zA-Z_$][\w$]*)\s*\(/g
+      )]
+      .map(x => x[1])
+      .filter(name =>
+        !ignore.has(name)
+      )
+    )
+  ];
+
+}
+
+function buildFunctionDependencyScore(
+  calledFunctions,
+  moduleRule
+) {
+
+  if (
+    !moduleRule ||
+    !Array.isArray(moduleRule.words)
+  ) {
+    return 0;
+  }
+
+  let score = 0;
+
+  calledFunctions.forEach(name => {
+
+    moduleRule.words.forEach(word => {
+
+      if (
+        String(name)
+          .toLowerCase()
+          .includes(
+            String(word).toLowerCase()
+          )
+      ) {
+
+        score += 5;
+
+      }
+
+    });
+
+  });
+
+  return score;
+
+}
+
+function detectBestModuleFromCalls(
+  calledFunctions
+) {
+
+  const rules =
+    getProjectModuleRules();
+
+  let best = {
+    file: "unknown",
+    score: 0
+  };
+
+  rules.forEach(rule => {
+
+    const score =
+      buildFunctionDependencyScore(
+        calledFunctions,
+        rule
+      );
+
+    if (
+      score > best.score
+    ) {
+
+      best = {
+
+        file: rule.file,
+
+        score
+
+      };
+
+    }
+
+  });
+
+  return best;
+
+}
+
 
