@@ -605,3 +605,50 @@ function setCurrentRepairFile(
   }
 }
 
+/* ===============================
+② 共通取得関数追加
+=============================== */
+
+function getProjectAnalyzeSources(
+  mode = currentProjectAnalyzeMode
+) {
+
+  switch (mode) {
+
+    case "editor":
+
+      return [
+        {
+          fileName:
+            currentRepairFile ||
+            "Repair Editor",
+
+          code:
+            get("repairEditor")
+              ?.value || ""
+        }
+      ];
+
+    case "currentProject":
+
+    case "loadedFiles":
+
+      return Object.values(
+        repairSearchFileStore
+      ).map(file => ({
+
+        fileName:
+          file.fileName,
+
+        code:
+          file.text
+
+      }));
+
+    default:
+
+      return [];
+
+  }
+
+}
