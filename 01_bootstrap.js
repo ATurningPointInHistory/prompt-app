@@ -1234,6 +1234,20 @@ ${repairToolButton(
 )}
 
 ${repairToolButton(
+  "📊 Module Analyzer",
+  "generateModuleAnalyzer",
+  "📊",
+  "Module Analyzer"
+)}
+
+${repairToolButton(
+  "📄 Module Rule",
+  "generateModuleRulesFromLoadedScripts",
+  "📄",
+  "Module Rule"
+)}
+
+${repairToolButton(
   "🧯 AIエラー調査プロンプト生成",
   "openErrorPromptInputPopup",
   "🧯",
