@@ -97,6 +97,8 @@ function showMobileConsole() {
   <button onclick="checkFunctionExistsPrompt()">関数確認</button>
   <button onclick="runMobileConsoleEval()">JS実行</button>
 </div>
+<button onclick="showMobileConsoleHistory()">履歴</button>
+
 
 <pre class="code-preview">
 ${escapeHtml(
@@ -153,15 +155,21 @@ function checkFunctionExistsPrompt() {
 
 function runMobileConsoleEval() {
 
+  const defaultCode =
+    mobileConsoleHistory[0] ||
+    "typeof startMacroRecording";
+
   const code =
     prompt(
       "実行するJS",
-      "typeof startMacroRecording"
+      defaultCode
     );
 
   if (!code) {
     return;
   }
+
+  saveMobileConsoleHistory(code);
 
   try {
 
@@ -182,5 +190,55 @@ function runMobileConsoleEval() {
     );
 
   }
+
+}
+
+let mobileConsoleHistory =
+  JSON.parse(
+    localStorage.getItem("mobileConsoleHistory") ||
+    "[]"
+  );
+
+let mobileConsoleHistoryIndex =
+  -1;
+
+function saveMobileConsoleHistory(code) {
+
+  if (!code || !code.trim()) {
+    return;
+  }
+
+  mobileConsoleHistory =
+    mobileConsoleHistory.filter(item =>
+      item !== code
+    );
+
+  mobileConsoleHistory.unshift(code);
+
+  if (mobileConsoleHistory.length > 30) {
+    mobileConsoleHistory.length = 30;
+  }
+
+  localStorage.setItem(
+    "mobileConsoleHistory",
+    JSON.stringify(mobileConsoleHistory)
+  );
+
+}
+
+function showMobileConsoleHistory() {
+
+  if (!mobileConsoleHistory.length) {
+    alert("履歴なし");
+    return;
+  }
+
+  alert(
+    mobileConsoleHistory
+      .map((item, index) =>
+        (index + 1) + ". " + item
+      )
+      .join("\n\n")
+  );
 
 }
