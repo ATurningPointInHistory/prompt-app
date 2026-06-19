@@ -96,9 +96,8 @@ function showMobileConsole() {
   <button onclick="clearMobileConsole()">クリア</button>
   <button onclick="checkFunctionExistsPrompt()">関数確認</button>
   <button onclick="runMobileConsoleEval()">JS実行</button>
+  <button onclick="showMobileConsoleHistory()">履歴</button>
 </div>
-<button onclick="showMobileConsoleHistory()">履歴</button>
-
 
 <pre class="code-preview">
 ${escapeHtml(
