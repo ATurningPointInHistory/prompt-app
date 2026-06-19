@@ -709,6 +709,28 @@ async function runMacro(name) {
         continue;
       }
 
+      if (step.type === "function") {
+
+        const fn =
+          window[step.name];
+
+        if (typeof fn !== "function") {
+
+          alert(
+            "関数なし: " +
+            step.name
+          );
+
+          continue;
+
+        }
+
+        fn();
+
+        continue;
+
+      }
+
       if (step.type === "action") {
 
         const data =
@@ -767,26 +789,27 @@ async function runMacro(name) {
                   item.lineNumber === data.lineNumber
                 );
 
-          if (index >= 0) {
-            if (typeof openGlobalSearchResult === "function") {
-              openGlobalSearchResult(index);
-            }
-          } else {
-            console.warn(
-              "Macro search result not found",
-              data
-            );
+          if (
+            index >= 0 &&
+            typeof openGlobalSearchResult === "function"
+          ) {
+            openGlobalSearchResult(index);
           }
 
           continue;
         }
+
       }
 
       if (
         step.type === "onclick" &&
         step.code
       ) {
-        new Function(step.code)();
+
+        new Function(
+          step.code
+        )();
+
       }
 
     } catch (e) {
@@ -799,15 +822,22 @@ async function runMacro(name) {
 
       alert(
         "Macro実行エラー\n\n" +
-        (step.action || step.code || step.type || "") +
+        (step.action ||
+         step.name ||
+         step.code ||
+         step.type ||
+         "") +
         "\n\n" +
         e.message
       );
 
       break;
+
     }
+
   }
 
   macroRecording =
     wasRecording;
+
 }
