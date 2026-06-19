@@ -2,7 +2,6 @@
    FILE: 11_mobile_console.js
    Mobile Debug Console
 =============================== */
-
 let mobileConsoleLogs = [];
 
 let mobileConsoleInitialized = false;
