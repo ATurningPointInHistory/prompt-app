@@ -883,7 +883,9 @@ function buildDevConsoleQuickCommands() {
 
 }
 
-function insertDevConsoleCommand(code) {
+function insertDevConsoleCommand(
+  text
+) {
 
   const input =
     get("devConsoleInput");
@@ -892,13 +894,48 @@ function insertDevConsoleCommand(code) {
     return;
   }
 
+  const value =
+    input.value;
+
+  const pos =
+    input.selectionStart;
+
+  const left =
+    value.slice(
+      0,
+      pos
+    );
+
+  const right =
+    value.slice(
+      pos
+    );
+
+  const replaced =
+    left.replace(
+      /[A-Za-z0-9_$]*$/,
+      text
+    );
+
   input.value =
-    code;
+    replaced +
+    "()" +
+    right;
+
+  input.focus();
+
+  input.selectionStart =
+    replaced.length + 1;
+
+  input.selectionEnd =
+    replaced.length + 1;
 
   localStorage.setItem(
     "devConsoleLastInput",
-    code
+    input.value
   );
+
+  updateDevConsoleSuggestions();
 
 }
 
@@ -1196,25 +1233,12 @@ function getDevConsoleSuggestions(
     return [];
   }
 
-  const editor =
-    get("repairEditor");
-
-  if (!editor) {
-    return [];
-  }
-
-  const names =
-    extractFunctionNames(
-      editor.value
-    );
-
-  return [...new Set(names)]
+  return getDevConsoleCandidates()
     .filter(name =>
       name
         .toLowerCase()
         .includes(keyword)
     )
-    .sort()
     .slice(0, 20);
 
 }
@@ -1299,6 +1323,26 @@ function insertDevConsoleCommand(
       replaced.length;
 
   updateDevConsoleSuggestions();
+
+}
+
+function getDevConsoleCandidates() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return [];
+  }
+
+  const names =
+    extractFunctionNames(
+      editor.value
+    );
+
+  return [
+    ...new Set(names)
+  ].sort();
 
 }
 
