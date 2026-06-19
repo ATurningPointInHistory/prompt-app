@@ -223,6 +223,13 @@ function showMacroList() {
   openFloatPanel(
     "Macro",
     `
+
+<button
+  class="float-list-btn"
+  onclick="showMacroOrderEditor()">
+  ↕ 並び替え
+</button>
+
 <div class="macro-list">
 ${
   names.map(name => {
