@@ -1183,3 +1183,123 @@ function moveDevConsoleQuickDown(index) {
 
 }
 
+function getDevConsoleSuggestions(
+  keyword
+) {
+
+  keyword =
+    String(keyword || "")
+      .trim()
+      .toLowerCase();
+
+  if (!keyword) {
+    return [];
+  }
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return [];
+  }
+
+  const names =
+    extractFunctionNames(
+      editor.value
+    );
+
+  return [...new Set(names)]
+    .filter(name =>
+      name
+        .toLowerCase()
+        .includes(keyword)
+    )
+    .sort()
+    .slice(0, 20);
+
+}
+
+function updateDevConsoleSuggestions() {
+
+  const input =
+    get("devConsoleInput");
+
+  const box =
+    get("devConsoleSuggestion");
+
+  if (!input || !box) {
+    return;
+  }
+
+  const keyword =
+    input.value
+      .split(/[^A-Za-z0-9_$]/)
+      .pop();
+
+  const list =
+    getDevConsoleSuggestions(
+      keyword
+    );
+
+  box.innerHTML =
+    list.map(name => `
+
+<div
+class="search-result-line"
+onclick="
+insertDevConsoleCommand(
+${JSON.stringify(name)}
+)
+">
+
+${escapeHtml(name)}
+
+</div>
+
+`).join("");
+
+}
+
+function insertDevConsoleCommand(
+  text
+) {
+
+  const input =
+    get("devConsoleInput");
+
+  if (!input) {
+    return;
+  }
+
+  const value =
+    input.value;
+
+  const pos =
+    input.selectionStart;
+
+  const left =
+    value.slice(0, pos);
+
+  const right =
+    value.slice(pos);
+
+  const replaced =
+    left.replace(
+      /[A-Za-z0-9_$]*$/,
+      text
+    );
+
+  input.value =
+    replaced + right;
+
+  input.focus();
+
+  input.selectionStart =
+    input.selectionEnd =
+      replaced.length;
+
+  updateDevConsoleSuggestions();
+
+}
+
+
