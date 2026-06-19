@@ -323,3 +323,7 @@ window.generateModuleAnalyzer =
 
 window.copyModuleAnalysis =
   copyModuleAnalysis;
+
+console.log(
+  "13_project_analyzer loaded"
+);
