@@ -1392,4 +1392,75 @@ function getDevConsoleCandidates() {
 
 }
 
+function findFunctionInfo(
+  functionName,
+  code
+) {
+
+  const blocks =
+    extractFunctionBlocksFromText(
+      code
+    );
+
+  const block =
+    blocks.find(item =>
+      item.name === functionName
+    );
+
+  if (!block) {
+    return null;
+  }
+
+  return {
+
+    name:
+      block.name,
+
+    line:
+      block.startLine ||
+      block.line ||
+      0,
+
+    called:
+      extractCalledFunctions(
+        block.code || ""
+      ),
+
+    keywords:
+      extractModuleKeywords(
+        block.code || ""
+      )
+
+  };
+
+}
+
+function showDevConsoleFunctionInfo(
+  name
+) {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    return;
+  }
+
+  const info =
+    findFunctionInfo(
+      name,
+      editor.value
+    );
+
+  if (!info) {
+    return;
+  }
+
+  console.log(info);
+
+}
+
+window.findFunctionInfo =
+  findFunctionInfo;
+
 
