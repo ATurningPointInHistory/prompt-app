@@ -324,6 +324,7 @@ function getIgnoredFunctionCalls() {
     "alert",
     "confirm",
     "prompt",
+
     "trim",
     "filter",
     "map",
@@ -340,71 +341,61 @@ function getIgnoredFunctionCalls() {
     "replace",
     "toLowerCase",
     "toUpperCase",
+
     "querySelector",
     "querySelectorAll",
+
     "setItem",
+    "getItem",
+    "removeItem",
+
     "stringify",
+    "parse",
+
     "min",
     "max",
+
     "log",
+    "warn",
+    "error",
+
     "get",
     "add",
     "has",
+    "push",
+
     "if",
     "return",
-    "String",
-    "RegExp",
-    "Map",
-    "Set",
-    "push",
-    "test",
-    "b"
     "for",
     "while",
     "switch",
     "catch",
-    "Number",
-    "Boolean",
-    "Array",
-    "Object",
-    "JSON",
-    "Promise",
-    "Function",
-    "Date",
-    "Math",
-    "console",
-    "setTimeout",
-    "setInterval",
-    "clearTimeout",
-    "clearInterval",
-    "isArray",
-    "error",
-    "warn",
-    "resolve"
-    "while",
-    "switch",
-    "catch",
 
+    "String",
     "Number",
     "Boolean",
     "Array",
     "Object",
     "JSON",
+    "RegExp",
+    "Map",
+    "Set",
     "Promise",
     "Function",
     "Date",
     "Math",
     "Reflect",
+
     "setTimeout",
     "setInterval",
     "clearTimeout",
     "clearInterval",
+
     "isArray",
-    "console",
-    "warn",
-    "error",
+    "test",
     "resolve",
-    "reject"
+    "reject",
+    "b"
   ]);
 
 }
