@@ -568,17 +568,18 @@ body:not(.dark) #floatPanel{
 
 .float-panel-actions{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
-  margin-top:8px;
+  grid-template-columns:repeat(5,1fr);
+  gap:4px;
+  margin-top:6px;
 }
 
 .float-panel-actions button{
   width:100%;
-  height:42px;
+  height:28px;
   padding:0;
-  font-size:11px;
-  border-radius:2px;
+  font-size:9px;
+  border-radius:3px;
+  line-height:1.1;
 }
 
 .float-list-btn{
