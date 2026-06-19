@@ -1256,7 +1256,7 @@ function updateDevConsoleSuggestions() {
   }
 
   const pos =
-    input.selectionStart;
+    input.selectionStart || input.value.length;
 
   const left =
     input.value.slice(0, pos);
@@ -1265,6 +1265,11 @@ function updateDevConsoleSuggestions() {
     left
       .split(/[^A-Za-z0-9_$]/)
       .pop();
+
+  if (!keyword) {
+    box.innerHTML = "";
+    return;
+  }
 
   const list =
     getDevConsoleSuggestions(
@@ -1324,7 +1329,7 @@ function insertDevConsoleSuggestion(name) {
     input.value;
 
   const pos =
-    input.selectionStart;
+    input.selectionStart || value.length;
 
   const left =
     value.slice(0, pos);
@@ -1343,10 +1348,10 @@ function insertDevConsoleSuggestion(name) {
     "()" +
     right;
 
-  input.focus();
-
   const cursorPos =
     replacedLeft.length + 1;
+
+  input.focus();
 
   setTimeout(() => {
 
