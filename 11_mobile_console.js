@@ -154,21 +154,15 @@ function checkFunctionExistsPrompt() {
 
 function runMobileConsoleEval() {
 
-  const defaultCode =
-    mobileConsoleHistory[0] ||
-    "typeof startMacroRecording";
-
   const code =
     prompt(
       "実行するJS",
-      defaultCode
+      "typeof startMacroRecording"
     );
 
   if (!code) {
     return;
   }
-
-  saveMobileConsoleHistory(code);
 
   try {
 
@@ -176,6 +170,20 @@ function runMobileConsoleEval() {
       Function(
         "return (" + code + ")"
       )();
+
+    if (
+      typeof result === "object" &&
+      result !== null
+    ) {
+      alert(
+        JSON.stringify(
+          result,
+          null,
+          2
+        )
+      );
+      return;
+    }
 
     alert(
       String(result)
