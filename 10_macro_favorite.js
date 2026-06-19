@@ -363,6 +363,57 @@ function initMacroFavoritePanel() {
 
 }
 
+function showMacroOrderEditor() {
+
+  const names =
+    getFavoriteMacroNames();
+
+  if (!names.length) {
+    alert("表示中のMacroなし");
+    return;
+  }
+
+  openFloatPanel(
+    "Macro 並び替え",
+    `
+<div class="macro-list">
+${
+  names.map(name => {
+
+    const item =
+      normalizeMacroItem(name);
+
+    return `
+<div class="macro-row">
+
+<button
+  class="macro-mini-btn"
+  onclick='moveMacroFavoriteOrder(${JSON.stringify(name)}, -1)'>
+  ⬆
+</button>
+
+<button
+  class="macro-mini-btn"
+  onclick='moveMacroFavoriteOrder(${JSON.stringify(name)}, 1)'>
+  ⬇
+</button>
+
+<span class="macro-name">
+  ${escapeHtml(item.icon)}
+  ${escapeHtml(item.label || name)}
+</span>
+
+</div>
+`;
+
+  }).join("")
+}
+</div>
+`
+  );
+
+}
+
 window.buildRepairQuickMacroButtons =
   buildRepairQuickMacroButtons;
 
