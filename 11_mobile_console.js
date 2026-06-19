@@ -20,6 +20,55 @@ let devConsoleFavorites =
     []
   );
 
+let devConsoleQuickButtons =
+  loadJson(
+    "devConsoleQuickButtons",
+    [
+      {
+        title: "typeof",
+        code: "typeof "
+      },
+      {
+        title: "Function",
+        code: "showFunctionList()"
+      },
+      {
+        title: "Module",
+        code: "generateModuleAnalyzer()"
+      },
+      {
+        title: "Relation",
+        code: "showFunctionRelationMap()"
+      },
+      {
+        title: "Health",
+        code: "showHtmlHealth()"
+      },
+      {
+        title: "Search",
+        code: "searchAllRepairFiles()"
+      },
+      {
+        title: "Console",
+        code: "showMobileConsole()"
+      },
+      {
+        title: "Blocks",
+        code: "extractFunctionBlocksFromText(get('repairEditor').value)"
+      },
+      {
+        title: "Unused",
+        code: "cleanupCandidates()"
+      },
+      {
+        title: "Clear",
+        code: "clearMobileConsole()"
+      }
+    ]
+  );
+
+
+
 function initMobileConsole() {
 
   if (mobileConsoleInitialized) {
@@ -937,5 +986,127 @@ insertDevConsoleCommand(
 ${escapeHtml(name)}
 </div>
 `).join("");
+
+}
+
+function buildDevConsoleQuickCommands() {
+
+  return (
+    devConsoleQuickButtons
+      .map(item => `
+
+<button
+onclick='insertDevConsoleCommand(
+${JSON.stringify(item.code)}
+)'>
+
+${escapeHtml(item.title)}
+
+</button>
+
+`).join("")
+
+    +
+
+`
+<button
+onclick="showDevConsoleQuickEditor()">
+⚙
+</button>
+`
+  );
+
+}
+
+function saveDevConsoleQuickButtons() {
+
+  localStorage.setItem(
+
+    "devConsoleQuickButtons",
+
+    JSON.stringify(
+      devConsoleQuickButtons
+    )
+
+  );
+
+}
+
+function showDevConsoleQuickEditor() {
+
+  openFloatPanel(
+
+    "Quick Command",
+
+    `
+<div class="macro-list">
+
+${devConsoleQuickButtons.map(
+
+(item,index)=>`
+
+<div class="macro-row">
+
+<button
+class="macro-mini-btn"
+onclick="
+moveDevConsoleQuickUp(
+${index}
+)">
+⬆
+</button>
+
+<button
+class="macro-mini-btn"
+onclick="
+moveDevConsoleQuickDown(
+${index}
+)">
+⬇
+</button>
+
+<button
+class="macro-mini-btn"
+onclick="
+editDevConsoleQuick(
+${index}
+)">
+✏
+</button>
+
+<button
+class="macro-mini-btn"
+onclick="
+deleteDevConsoleQuick(
+${index}
+)">
+🗑
+</button>
+
+<span class="macro-name">
+
+${escapeHtml(item.title)}
+
+</span>
+
+</div>
+
+`
+
+).join("")}
+
+<hr>
+
+<button
+class="float-list-btn"
+onclick="
+addDevConsoleQuick()
+">
+➕ 追加
+</button>
+
+`
+
+  );
 
 }
