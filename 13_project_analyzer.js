@@ -473,12 +473,6 @@ function updateProjectFunctionDatabase(
 
 }
 
-function getCurrentProjectAnalyzeMode() {
-
-  return currentProjectAnalyzeMode;
-
-}
-
 function getFunctionDatabase() {
 
   return projectFunctionDatabase;
