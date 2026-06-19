@@ -1037,3 +1037,149 @@ ${
   );
 
 }
+
+function addDevConsoleQuick() {
+
+  const title =
+    prompt(
+      "ボタン名",
+      "New"
+    );
+
+  if (!title) {
+    return;
+  }
+
+  const code =
+    prompt(
+      "実行コード",
+      "showHtmlHealth()"
+    );
+
+  if (!code) {
+    return;
+  }
+
+  devConsoleQuickButtons.push({
+    title,
+    code
+  });
+
+  saveDevConsoleQuickButtons();
+
+  showDevConsoleQuickEditor();
+
+}
+
+function editDevConsoleQuick(index) {
+
+  const item =
+    devConsoleQuickButtons[index];
+
+  if (!item) {
+    return;
+  }
+
+  const title =
+    prompt(
+      "ボタン名",
+      item.title || ""
+    );
+
+  if (!title) {
+    return;
+  }
+
+  const code =
+    prompt(
+      "実行コード",
+      item.code || ""
+    );
+
+  if (!code) {
+    return;
+  }
+
+  devConsoleQuickButtons[index] = {
+    title,
+    code
+  };
+
+  saveDevConsoleQuickButtons();
+
+  showDevConsoleQuickEditor();
+
+}
+
+function deleteDevConsoleQuick(index) {
+
+  const item =
+    devConsoleQuickButtons[index];
+
+  if (!item) {
+    return;
+  }
+
+  if (
+    !confirm(
+      "削除しますか？\n\n" +
+      item.title
+    )
+  ) {
+    return;
+  }
+
+  devConsoleQuickButtons.splice(
+    index,
+    1
+  );
+
+  saveDevConsoleQuickButtons();
+
+  showDevConsoleQuickEditor();
+
+}
+
+function moveDevConsoleQuickUp(index) {
+
+  if (index <= 0) {
+    return;
+  }
+
+  [
+    devConsoleQuickButtons[index - 1],
+    devConsoleQuickButtons[index]
+  ] = [
+    devConsoleQuickButtons[index],
+    devConsoleQuickButtons[index - 1]
+  ];
+
+  saveDevConsoleQuickButtons();
+
+  showDevConsoleQuickEditor();
+
+}
+
+function moveDevConsoleQuickDown(index) {
+
+  if (
+    index >=
+    devConsoleQuickButtons.length - 1
+  ) {
+    return;
+  }
+
+  [
+    devConsoleQuickButtons[index],
+    devConsoleQuickButtons[index + 1]
+  ] = [
+    devConsoleQuickButtons[index + 1],
+    devConsoleQuickButtons[index]
+  ];
+
+  saveDevConsoleQuickButtons();
+
+  showDevConsoleQuickEditor();
+
+}
+
