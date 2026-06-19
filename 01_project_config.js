@@ -3,6 +3,9 @@
    Project Config
 =============================== */
 
+let currentProjectAnalyzeMode =
+  "editor";
+
 function getProjectConfig() {
 
   const saved =
