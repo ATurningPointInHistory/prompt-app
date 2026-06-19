@@ -410,8 +410,10 @@ function buildProjectFunctionDatabase(
           "",
 
         called:
-          extractCalledFunctions(
-            block.code || ""
+          filterProjectCalledFunctions(
+            extractCalledFunctions(
+              blockCode
+            )
           ),
 
         keywords:
