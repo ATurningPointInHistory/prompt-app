@@ -286,42 +286,44 @@ function getAnalyzeSourcesFromEditor() {
 
 function getAnalyzeSourcesFromCurrentProject() {
 
-  if (
-    Array.isArray(window.currentProjectSearchFiles)
-  ) {
-    return window.currentProjectSearchFiles
-      .map(file => ({
-        fileName:
-          file.name ||
-          file.fileName ||
-          "unknown",
-        code:
-          file.text ||
-          file.code ||
-          ""
-      }))
-      .filter(file =>
-        file.code
-      );
-  }
+  const candidates = [
+    window.currentProjectSearchFiles,
+    window.repairSearchFiles,
+    window.projectSearchFiles,
+    window.loadedProjectFiles,
+    window.currentProjectFiles,
+    window.searchFileList
+  ];
 
-  if (
-    Array.isArray(window.repairSearchFiles)
-  ) {
-    return window.repairSearchFiles
-      .map(file => ({
-        fileName:
-          file.name ||
-          file.fileName ||
-          "unknown",
-        code:
-          file.text ||
-          file.code ||
-          ""
-      }))
-      .filter(file =>
-        file.code
-      );
+  for (const list of candidates) {
+
+    if (!Array.isArray(list)) {
+      continue;
+    }
+
+    const sources =
+      list
+        .map(file => ({
+          fileName:
+            file.name ||
+            file.fileName ||
+            file.path ||
+            "unknown",
+          code:
+            file.text ||
+            file.code ||
+            file.content ||
+            file.value ||
+            ""
+        }))
+        .filter(file =>
+          file.code
+        );
+
+    if (sources.length) {
+      return sources;
+    }
+
   }
 
   return [];
