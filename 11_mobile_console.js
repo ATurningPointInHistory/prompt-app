@@ -145,6 +145,7 @@ Quick Command
 <textarea
   id="devConsoleInput"
   rows="8"
+  oninput="updateDevConsoleSuggestions()"
   style="
     width:100%;
     font-family:monospace;
@@ -156,6 +157,10 @@ Quick Command
   localStorage.getItem("devConsoleLastInput") ||
   "typeof startMacroRecording"
 )}</textarea>
+
+<div
+  id="devConsoleSuggestion">
+</div>
 
 <div class="small" style="margin-top:8px;">
 実行結果
@@ -171,7 +176,9 @@ Quick Command
     font-size:12px;
     white-space:pre;
   "
->${escapeHtml(devConsoleResult || "")}</textarea>
+>${escapeHtml(
+  devConsoleResult || ""
+)}</textarea>
 
 <div class="small" style="margin-top:8px;">
 Console Log
@@ -179,9 +186,11 @@ Console Log
 
 <pre class="code-preview">
 ${escapeHtml(
-  mobileConsoleLogs.map(log =>
-    `[${log.time}] ${log.type}\n${log.text}`
-  ).join("\n\n") || "ログなし"
+  mobileConsoleLogs
+    .map(log =>
+      `[${log.time}] ${log.type}\n${log.text}`
+    )
+    .join("\n\n") || "ログなし"
 )}
 </pre>
 `
