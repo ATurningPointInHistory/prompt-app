@@ -193,6 +193,50 @@ function copyModuleAnalysis() {
 
 }
 
+function findFunctionInfo(
+  functionName,
+  code
+) {
+
+  const blocks =
+    extractFunctionBlocksFromText(
+      code
+    );
+
+  const block =
+    blocks.find(item =>
+      item.name === functionName
+    );
+
+  if (!block) {
+    return null;
+  }
+
+  return {
+
+    name:
+      block.name,
+
+    line:
+      block.startLine ||
+      block.line ||
+      0,
+
+    called:
+      extractCalledFunctions(
+        block.code || ""
+      ),
+
+    keywords:
+      extractModuleKeywords(
+        block.code || ""
+      )
+
+  };
+
+}
+
+
 window.generateModuleRulesFromLoadedScripts =
   generateModuleRulesFromLoadedScripts;
 
