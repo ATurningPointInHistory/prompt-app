@@ -655,3 +655,11 @@ function getProjectAnalyzeSources(
   }
 
 }
+
+function getCurrentProjectAnalyzeMode() {
+
+  return currentProjectAnalyzeMode;
+
+}
+
+
