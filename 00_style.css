@@ -1908,3 +1908,19 @@ mark {
   overflow-x: hidden;
 
 }
+
+#devConsoleSuggestion{
+
+  margin-top:4px;
+
+  max-height:120px;
+
+  overflow-y:auto;
+
+  border:1px solid var(--border);
+
+  border-radius:6px;
+
+  background:rgba(0,122,255,.08);
+
+}
