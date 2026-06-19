@@ -1255,8 +1255,14 @@ function updateDevConsoleSuggestions() {
     return;
   }
 
+  const pos =
+    input.selectionStart;
+
+  const left =
+    input.value.slice(0, pos);
+
   const keyword =
-    input.value
+    left
       .split(/[^A-Za-z0-9_$]/)
       .pop();
 
@@ -1269,24 +1275,43 @@ function updateDevConsoleSuggestions() {
     list.map(name => `
 
 <div
-class="search-result-line"
-onclick="
-insertDevConsoleCommand(
-${JSON.stringify(name)}
-)
-">
-
-${escapeHtml(name)}
-
+  class="search-result-line"
+  onclick='insertDevConsoleSuggestion(${JSON.stringify(name)})'>
+  ${escapeHtml(name)}
 </div>
 
 `).join("");
 
 }
 
-function insertDevConsoleCommand(
-  text
-) {
+function insertDevConsoleCommand(code) {
+
+  const input =
+    get("devConsoleInput");
+
+  if (!input) {
+    return;
+  }
+
+  input.value =
+    code;
+
+  input.focus();
+
+  input.selectionStart =
+    input.selectionEnd =
+      input.value.length;
+
+  localStorage.setItem(
+    "devConsoleLastInput",
+    input.value
+  );
+
+  updateDevConsoleSuggestions();
+
+}
+
+function insertDevConsoleSuggestion(name) {
 
   const input =
     get("devConsoleInput");
@@ -1307,20 +1332,36 @@ function insertDevConsoleCommand(
   const right =
     value.slice(pos);
 
-  const replaced =
+  const replacedLeft =
     left.replace(
       /[A-Za-z0-9_$]*$/,
-      text
+      name
     );
 
   input.value =
-    replaced + right;
+    replacedLeft +
+    "()" +
+    right;
 
   input.focus();
 
-  input.selectionStart =
+  const cursorPos =
+    replacedLeft.length + 1;
+
+  setTimeout(() => {
+
+    input.selectionStart =
+      cursorPos;
+
     input.selectionEnd =
-      replaced.length;
+      cursorPos;
+
+  }, 0);
+
+  localStorage.setItem(
+    "devConsoleLastInput",
+    input.value
+  );
 
   updateDevConsoleSuggestions();
 
