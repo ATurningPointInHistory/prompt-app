@@ -390,11 +390,6 @@ function buildProjectFunctionDatabase(
         return;
       }
 
-      const blockCode =
-        block.code ||
-        block.block ||
-        "";
-
       database[block.name] = {
         name:
           block.name,
@@ -406,29 +401,22 @@ function buildProjectFunctionDatabase(
           block.line ||
           0,
 
-        start:
-          block.start ||
-          0,
-
-        end:
-          block.end ||
-          0,
-
         type:
           block.type ||
           "function",
 
         code:
-          blockCode,
+          block.code ||
+          "",
 
         called:
           extractCalledFunctions(
-            blockCode
+            block.code || ""
           ),
 
         keywords:
           extractModuleKeywords(
-            blockCode
+            block.code || ""
           )
       };
 
@@ -576,6 +564,19 @@ function getAnalyzeSourcesFromCurrentProject() {
   return Object.values(
     repairSearchFileStore
   );
+
+}
+
+function filterProjectCalledFunctions(names) {
+
+  const ignore =
+    getIgnoredFunctionCalls();
+
+  return (names || [])
+    .filter(name =>
+      name &&
+      !ignore.has(name)
+    );
 
 }
 
