@@ -445,6 +445,77 @@ function updateProjectFunctionDatabase(
 
 }
 
+function getFunctionDatabase() {
+
+  return projectFunctionDatabase;
+
+}
+
+function getFunctionInfoFromDatabase(
+  name
+) {
+
+  return (
+    projectFunctionDatabase[
+      name
+    ] || null
+  );
+
+}
+
+function getAllFunctionNames() {
+
+  return Object
+    .keys(
+      projectFunctionDatabase
+    )
+    .sort();
+
+}
+
+function searchFunctionDatabase(
+  keyword
+) {
+
+  keyword =
+    String(
+      keyword || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  if (!keyword) {
+    return [];
+  }
+
+  return Object
+    .values(
+      projectFunctionDatabase
+    )
+    .filter(item =>
+
+      item.name
+        .toLowerCase()
+        .includes(keyword)
+
+      ||
+
+      item.fileName
+        .toLowerCase()
+        .includes(keyword)
+
+      ||
+
+      item.keywords.some(word =>
+        word.includes(keyword)
+      )
+
+    );
+
+}
+
+
+
 window.buildProjectFunctionDatabase =
   buildProjectFunctionDatabase;
 
@@ -468,6 +539,18 @@ window.findFunctionInfo =
 
 window.getProjectAnalyzeSources =
   getProjectAnalyzeSources;
+
+window.getFunctionDatabase =
+  getFunctionDatabase;
+
+window.getFunctionInfoFromDatabase =
+  getFunctionInfoFromDatabase;
+
+window.getAllFunctionNames =
+  getAllFunctionNames;
+
+window.searchFunctionDatabase =
+  searchFunctionDatabase;
 
 console.log(
   "13_project_analyzer loaded"
