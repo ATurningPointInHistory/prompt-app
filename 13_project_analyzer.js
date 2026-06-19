@@ -249,6 +249,9 @@ window.generateModuleAnalyzer =
 window.copyModuleAnalysis =
   copyModuleAnalysis;
 
+window.findFunctionInfo =
+  findFunctionInfo;
+
 console.log(
   "13_project_analyzer loaded"
 );
