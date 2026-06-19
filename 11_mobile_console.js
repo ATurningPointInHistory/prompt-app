@@ -131,6 +131,17 @@ function showMobileConsole() {
   </button>
 
 </div>
+
+<div class="small" style="margin-top:8px;">
+Quick Command
+</div>
+
+<div class="float-panel-actions">
+
+  ${buildDevConsoleQuickCommands()}
+
+</div>
+
 <textarea
   id="devConsoleInput"
   rows="8"
@@ -786,5 +797,136 @@ function deleteDevConsoleFavorite(index) {
   );
 
   showDevConsoleFavorites();
+
+}
+
+function buildDevConsoleQuickCommands() {
+
+  const commands = [
+    {
+      label: "typeof",
+      code: "typeof "
+    },
+    {
+      label: "Health",
+      code: "showHtmlHealth()"
+    },
+    {
+      label: "Module",
+      code: "generateModuleAnalyzer()"
+    },
+    {
+      label: "Blocks",
+      code:
+`JSON.stringify(
+  extractFunctionBlocksFromText(
+    get("repairEditor").value
+  )[0],
+  null,
+  2
+)`
+    },
+    {
+      label: "Console",
+      code: "showMobileConsole()"
+    },
+    {
+      label: "Clear",
+      code: "clearMobileConsole()"
+    }
+  ];
+
+  return commands.map(item => `
+<button
+  onclick='insertDevConsoleCommand(${JSON.stringify(item.code)})'>
+  ${escapeHtml(item.label)}
+</button>
+`).join("");
+
+}
+
+function insertDevConsoleCommand(code) {
+
+  const input =
+    get("devConsoleInput");
+
+  if (!input) {
+    return;
+  }
+
+  input.value =
+    code;
+
+  localStorage.setItem(
+    "devConsoleLastInput",
+    code
+  );
+
+}
+
+function getDevConsoleSuggestions(
+  keyword
+) {
+
+  keyword =
+    String(keyword || "")
+      .trim();
+
+  if (!keyword) {
+    return [];
+  }
+
+  const names =
+    extractFunctionNames(
+      get("repairEditor")
+        ?.value || ""
+    );
+
+  return names
+    .filter(name =>
+      name
+        .toLowerCase()
+        .startsWith(
+          keyword.toLowerCase()
+        )
+    )
+    .slice(0, 15);
+
+}
+
+function updateDevConsoleSuggestions() {
+
+  const input =
+    get("devConsoleInput");
+
+  const list =
+    get("devConsoleSuggestion");
+
+  if (!input || !list) {
+    return;
+  }
+
+  const word =
+    input.value
+      .split(/[^A-Za-z0-9_$]/)
+      .pop();
+
+  const items =
+    getDevConsoleSuggestions(
+      word
+    );
+
+  list.innerHTML =
+    items.map(name => `
+<div
+class="search-result-line"
+onclick="
+insertDevConsoleCommand(
+'${name}'
+)
+">
+${escapeHtml(name)}
+</div>
+`).join("");
 
 }
