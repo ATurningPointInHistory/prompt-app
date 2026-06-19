@@ -306,12 +306,6 @@ function copyModuleAnalysis() {
 
 }
 
-  copyTextFallback(
-    latestModuleAnalysis
-  );
-
-}
-
 window.generateModuleRulesFromLoadedScripts =
   generateModuleRulesFromLoadedScripts;
 
