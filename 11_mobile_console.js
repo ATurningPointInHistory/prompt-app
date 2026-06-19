@@ -54,7 +54,7 @@ let devConsoleQuickButtons =
       },
       {
         title: "Blocks",
-        code: "extractFunctionBlocksFromText(get('repairEditor').value)"
+        code: "JSON.stringify(extractFunctionBlocksFromText(get(\"repairEditor\").value)[0], null, 2)"
       },
       {
         title: "Unused",
@@ -860,46 +860,26 @@ function deleteDevConsoleFavorite(index) {
 
 function buildDevConsoleQuickCommands() {
 
-  const commands = [
-    {
-      label: "typeof",
-      code: "typeof "
-    },
-    {
-      label: "Health",
-      code: "showHtmlHealth()"
-    },
-    {
-      label: "Module",
-      code: "generateModuleAnalyzer()"
-    },
-    {
-      label: "Blocks",
-      code:
-`JSON.stringify(
-  extractFunctionBlocksFromText(
-    get("repairEditor").value
-  )[0],
-  null,
-  2
-)`
-    },
-    {
-      label: "Console",
-      code: "showMobileConsole()"
-    },
-    {
-      label: "Clear",
-      code: "clearMobileConsole()"
-    }
-  ];
+  return (
+    devConsoleQuickButtons
+      .map(item => `
 
-  return commands.map(item => `
 <button
   onclick='insertDevConsoleCommand(${JSON.stringify(item.code)})'>
-  ${escapeHtml(item.label)}
+  ${escapeHtml(item.title)}
 </button>
-`).join("");
+
+`).join("")
+
+    +
+
+`
+<button
+  onclick="showDevConsoleQuickEditor()">
+  ⚙
+</button>
+`
+  );
 
 }
 
@@ -989,35 +969,6 @@ ${escapeHtml(name)}
 
 }
 
-function buildDevConsoleQuickCommands() {
-
-  return (
-    devConsoleQuickButtons
-      .map(item => `
-
-<button
-onclick='insertDevConsoleCommand(
-${JSON.stringify(item.code)}
-)'>
-
-${escapeHtml(item.title)}
-
-</button>
-
-`).join("")
-
-    +
-
-`
-<button
-onclick="showDevConsoleQuickEditor()">
-⚙
-</button>
-`
-  );
-
-}
-
 function saveDevConsoleQuickButtons() {
 
   localStorage.setItem(
@@ -1035,78 +986,54 @@ function saveDevConsoleQuickButtons() {
 function showDevConsoleQuickEditor() {
 
   openFloatPanel(
-
     "Quick Command",
-
     `
 <div class="macro-list">
-
-${devConsoleQuickButtons.map(
-
-(item,index)=>`
-
+${
+  devConsoleQuickButtons.map((item, index) => `
 <div class="macro-row">
 
 <button
-class="macro-mini-btn"
-onclick="
-moveDevConsoleQuickUp(
-${index}
-)">
-⬆
+  class="macro-mini-btn"
+  onclick="moveDevConsoleQuickUp(${index})">
+  ⬆
 </button>
 
 <button
-class="macro-mini-btn"
-onclick="
-moveDevConsoleQuickDown(
-${index}
-)">
-⬇
+  class="macro-mini-btn"
+  onclick="moveDevConsoleQuickDown(${index})">
+  ⬇
 </button>
 
 <button
-class="macro-mini-btn"
-onclick="
-editDevConsoleQuick(
-${index}
-)">
-✏
+  class="macro-mini-btn"
+  onclick="editDevConsoleQuick(${index})">
+  ✏
 </button>
 
 <button
-class="macro-mini-btn"
-onclick="
-deleteDevConsoleQuick(
-${index}
-)">
-🗑
+  class="macro-mini-btn"
+  onclick="deleteDevConsoleQuick(${index})">
+  🗑
 </button>
 
 <span class="macro-name">
-
-${escapeHtml(item.title)}
-
+  ${escapeHtml(item.title)}
 </span>
 
 </div>
-
-`
-
-).join("")}
+`).join("")
+}
+</div>
 
 <hr>
 
 <button
-class="float-list-btn"
-onclick="
-addDevConsoleQuick()
-">
-➕ 追加
+  class="float-list-btn"
+  onclick="addDevConsoleQuick()">
+  ➕ 追加
 </button>
-
 `
-
   );
 
 }
