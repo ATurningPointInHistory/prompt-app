@@ -3,6 +3,9 @@
    Project Analyzer
 =============================== */
 
+let currentProjectAnalyzeMode =
+  "editor";
+
 let projectFunctionDatabase = {};
 
 function generateModuleRulesFromLoadedScripts() {
