@@ -3,9 +3,6 @@
    Project Analyzer
 =============================== */
 
-let currentProjectAnalyzeMode =
-  "editor";
-
 let projectFunctionDatabase = {};
 
 function generateModuleRulesFromLoadedScripts() {
@@ -455,49 +452,30 @@ function updateProjectFunctionDatabase(
   mode = "editor"
 ) {
 
+  currentProjectAnalyzeMode =
+    mode;
+
   const sources =
     getProjectAnalyzeSources(
       mode
     );
-
-  if (
-    !sources ||
-    !sources.length
-  ) {
-
-    alert(
-      "解析対象がありません"
-    );
-
-    return {};
-
-  }
 
   const database =
     buildProjectFunctionDatabase(
       sources
     );
 
-  window.projectFunctionDatabase =
-    database;
-
-  updateRepairStatus(
-    "Function Database: " +
-    Object.keys(database).length +
-    "件"
-  );
-
-  alert(
-    "Function Database作成完了\n\n" +
-    "対象: " +
-    sources.length +
-    "ファイル\n" +
-    "関数: " +
-    Object.keys(database).length +
-    "件"
+  updateRepairStatus?.(
+    `Function DB : ${Object.keys(database).length}件 (${mode})`
   );
 
   return database;
+
+}
+
+function getCurrentProjectAnalyzeMode() {
+
+  return currentProjectAnalyzeMode;
 
 }
 
