@@ -390,6 +390,11 @@ function buildProjectFunctionDatabase(
         return;
       }
 
+      const blockCode =
+        block.code ||
+        block.block ||
+        "";
+
       database[block.name] = {
         name:
           block.name,
@@ -401,22 +406,29 @@ function buildProjectFunctionDatabase(
           block.line ||
           0,
 
+        start:
+          block.start ||
+          0,
+
+        end:
+          block.end ||
+          0,
+
         type:
           block.type ||
           "function",
 
         code:
-          block.code ||
-          "",
+          blockCode,
 
         called:
           extractCalledFunctions(
-            block.code || ""
+            blockCode
           ),
 
         keywords:
           extractModuleKeywords(
-            block.code || ""
+            blockCode
           )
       };
 
