@@ -581,10 +581,19 @@ function getAnalyzeSourcesFromCurrentProject() {
 
 }
 
-function filterProjectCalledFunctions(names) {
+function filterProjectCalledFunctions(
+  names
+) {
 
-  const ignore =
-    getIgnoredFunctionCalls();
+  let ignore =
+    new Set();
+
+  if (
+    typeof getIgnoredFunctionCalls === "function"
+  ) {
+    ignore =
+      getIgnoredFunctionCalls();
+  }
 
   return (names || [])
     .filter(name =>
