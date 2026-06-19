@@ -365,11 +365,19 @@ function buildProjectFunctionDatabase(
 
     const fileName =
       source.fileName ||
+      source.name ||
       "unknown";
 
     const code =
       source.code ||
+      source.text ||
+      source.content ||
+      source.value ||
       "";
+
+    if (!code) {
+      return;
+    }
 
     const blocks =
       extractFunctionBlocksFromText(
@@ -419,6 +427,9 @@ function buildProjectFunctionDatabase(
   projectFunctionDatabase =
     database;
 
+  window.projectFunctionDatabase =
+    database;
+
   return database;
 
 }
@@ -432,13 +443,39 @@ function updateProjectFunctionDatabase(
       mode
     );
 
+  if (
+    !sources ||
+    !sources.length
+  ) {
+
+    alert(
+      "解析対象がありません"
+    );
+
+    return {};
+
+  }
+
   const database =
     buildProjectFunctionDatabase(
       sources
     );
 
+  window.projectFunctionDatabase =
+    database;
+
+  updateRepairStatus(
+    "Function Database: " +
+    Object.keys(database).length +
+    "件"
+  );
+
   alert(
-    "Function Database作成: " +
+    "Function Database作成完了\n\n" +
+    "対象: " +
+    sources.length +
+    "ファイル\n" +
+    "関数: " +
     Object.keys(database).length +
     "件"
   );
