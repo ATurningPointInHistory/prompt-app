@@ -359,6 +359,28 @@ function getIgnoredFunctionCalls() {
     "push",
     "test",
     "b"
+    "for",
+    "while",
+    "switch",
+    "catch",
+    "Number",
+    "Boolean",
+    "Array",
+    "Object",
+    "JSON",
+    "Promise",
+    "Function",
+    "Date",
+    "Math",
+    "console",
+    "setTimeout",
+    "setInterval",
+    "clearTimeout",
+    "clearInterval",
+    "isArray",
+    "error",
+    "warn",
+    "resolve"
   ]);
 
 }
