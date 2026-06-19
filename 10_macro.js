@@ -71,6 +71,13 @@ function stopMacroRecording() {
     )
   );
 
+  if (
+    typeof refreshRepairQuickMacroButtons ===
+    "function"
+  ) {
+    refreshRepairQuickMacroButtons();
+  }
+
   updateRepairStatus(
     "Macro保存"
   );
@@ -96,8 +103,17 @@ function deleteMacro(name) {
 
   localStorage.setItem(
     "macroList",
-    JSON.stringify(macroList)
+    JSON.stringify(
+      macroList
+    )
   );
+
+  if (
+    typeof refreshRepairQuickMacroButtons ===
+    "function"
+  ) {
+    refreshRepairQuickMacroButtons();
+  }
 
   updateRepairStatus(
     "Macro削除: " + name
