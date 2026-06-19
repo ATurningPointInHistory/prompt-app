@@ -39,7 +39,9 @@ function stopMacroRecording() {
 
   macroRecording = false;
 
-  if (!currentMacroActions.length) {
+  if (
+    !currentMacroActions.length
+  ) {
     alert("記録なし");
     return;
   }
@@ -54,8 +56,15 @@ function stopMacroRecording() {
     return;
   }
 
-  macroList[name] =
-    [...currentMacroActions];
+  macroList[name] = {
+    name,
+    label: name,
+    icon: "▶",
+    favorite: true,
+    order: Object.keys(macroList).length,
+    category: "",
+    actions: [...currentMacroActions]
+  };
 
   localStorage.setItem(
     "macroList",
@@ -216,7 +225,19 @@ function showMacroList() {
     `
 <div class="macro-list">
 ${
-  names.map(name => `
+  names.map(name => {
+
+    const item =
+      typeof normalizeMacroItem === "function"
+        ? normalizeMacroItem(name)
+        : {
+            name,
+            label: name,
+            icon: "▶",
+            favorite: true
+          };
+
+    return `
 <div class="macro-row">
 
 <button
@@ -233,16 +254,30 @@ ${
 
 <button
   class="macro-mini-btn"
+  onclick='toggleMacroFavorite(${JSON.stringify(name)})'>
+  ${item.favorite ? "⭐" : "☆"}
+</button>
+
+<button
+  class="macro-mini-btn"
+  onclick='editMacroIcon(${JSON.stringify(name)})'>
+  ${escapeHtml(item.icon)}
+</button>
+
+<button
+  class="macro-mini-btn"
   onclick='deleteMacro(${JSON.stringify(name)})'>
   🗑
 </button>
 
-  <span class="macro-name">
-    ${escapeHtml(name)}
-  </span>
+<span class="macro-name">
+  ${escapeHtml(item.label || name)}
+</span>
 
 </div>
-`).join("")
+`;
+
+  }).join("")
 }
 </div>
 `
@@ -432,8 +467,15 @@ function showMacroEditor(name) {
 
 function showMacroStepEditor(name) {
 
-  const actions =
+  const macro =
     macroList[name];
+
+  const actions =
+    Array.isArray(macro)
+      ? macro
+      : macro && Array.isArray(macro.actions)
+        ? macro.actions
+        : null;
 
   if (!actions) {
     alert("Macroなし");
@@ -658,8 +700,15 @@ function addMacroDelayStep(name, index) {
 
 async function runMacro(name) {
 
-  const actions =
+  const macro =
     macroList[name];
+
+  const actions =
+    Array.isArray(macro)
+      ? macro
+      : macro && Array.isArray(macro.actions)
+        ? macro.actions
+        : null;
 
   if (!actions) {
     alert("Macroなし");
