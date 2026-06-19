@@ -7,8 +7,6 @@ let mobileConsoleLogs = [];
 
 let mobileConsoleInitialized = false;
 
-function initMobileConsole() {
-
 let devConsoleResult = "";
 
 let devConsoleHistory =
@@ -16,6 +14,14 @@ let devConsoleHistory =
     "devConsoleHistory",
     []
   );
+
+let devConsoleFavorites =
+  loadJson(
+    "devConsoleFavorites",
+    []
+  );
+
+function initMobileConsole() {
 
   if (mobileConsoleInitialized) {
     return;
@@ -27,12 +33,6 @@ let devConsoleHistory =
   hookMobileConsoleError();
 
 }
-
-let devConsoleFavorites =
-  loadJson(
-    "devConsoleFavorites",
-    []
-  );
 
 function hookMobileConsoleLog() {
 
