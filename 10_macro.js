@@ -39,16 +39,9 @@ function stopMacroRecording() {
 
   macroRecording = false;
 
-  if (
-    !currentMacroActions.length
-  ) {
-
-    alert(
-      "記録なし"
-    );
-
+  if (!currentMacroActions.length) {
+    alert("記録なし");
     return;
-
   }
 
   const name =
@@ -66,9 +59,7 @@ function stopMacroRecording() {
 
   localStorage.setItem(
     "macroList",
-    JSON.stringify(
-      macroList
-    )
+    JSON.stringify(macroList)
   );
 
   if (
@@ -103,9 +94,7 @@ function deleteMacro(name) {
 
   localStorage.setItem(
     "macroList",
-    JSON.stringify(
-      macroList
-    )
+    JSON.stringify(macroList)
   );
 
   if (
