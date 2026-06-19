@@ -306,6 +306,33 @@ function copyModuleAnalysis() {
 
 }
 
+function extractCalledFunctionsFromBlocks(
+  blocks
+) {
+
+  const calls =
+    new Set();
+
+  blocks.forEach(block => {
+
+    const list =
+      extractCalledFunctions(
+        block.code ||
+        ""
+      );
+
+    list.forEach(name => {
+
+      calls.add(name);
+
+    });
+
+  });
+
+  return [...calls].sort();
+
+}
+
 window.generateModuleRulesFromLoadedScripts =
   generateModuleRulesFromLoadedScripts;
 
