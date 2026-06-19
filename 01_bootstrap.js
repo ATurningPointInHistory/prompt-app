@@ -150,12 +150,16 @@ function buildRepairSearchQuickHtml() {
     ▶
   </button>
 
-  <div class="small repair-quick-title">
+  <div class="macro-quick-title">
     Macro
   </div>
 
   <div id="repairQuickMacroButtons">
-    ${buildRepairQuickMacroButtons()}
+    ${
+      typeof buildRepairQuickMacroButtons === "function"
+        ? buildRepairQuickMacroButtons()
+        : ""
+    }
   </div>
 
 </div>
@@ -246,10 +250,10 @@ function initRepairSearchQuickPanel() {
     updateRepairSearchQuickVisibility();
 
     if (
-      typeof enableRepairSearchQuickDrag ===
+      typeof refreshRepairQuickMacroButtons ===
       "function"
     ) {
-      enableRepairSearchQuickDrag();
+      refreshRepairQuickMacroButtons();
     }
 
     return;
@@ -278,11 +282,12 @@ function initRepairSearchQuickPanel() {
   updateRepairSearchQuickVisibility();
 
   if (
-    typeof enableRepairSearchQuickDrag ===
+    typeof refreshRepairQuickMacroButtons ===
     "function"
   ) {
-    enableRepairSearchQuickDrag();
+    refreshRepairQuickMacroButtons();
   }
+
 }
 
 function updateRepairSearchQuickVisibility() {
