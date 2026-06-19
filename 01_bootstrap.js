@@ -137,16 +137,11 @@ function isRepairMode() {
 
 
 function buildRepairSearchQuickHtml() {
-  return `
-<div id="repairSearchQuickPanel"
-     class="repair-search-quick-panel">
 
-    <div
-      id="repairSearchQuickHeader"
-      class="small"
-      style="cursor:move;">
-      <hr>move<hr>
-    </div>
+  return `
+<div
+  id="repairSearchQuickPanel"
+  class="repair-search-quick-panel">
 
   <button
     id="repairSearchQuickToggle"
@@ -155,9 +150,70 @@ function buildRepairSearchQuickHtml() {
     ▶
   </button>
 
+  <div class="small repair-quick-title">
+    Macro
+  </div>
+
+  <div id="repairQuickMacroButtons">
+    ${buildRepairQuickMacroButtons()}
+  </div>
 
 </div>
 `;
+
+}
+
+function buildRepairQuickMacroButtons() {
+
+  if (
+    typeof macroList !== "object" ||
+    !macroList
+  ) {
+    return `
+<button
+  class="float-list-btn"
+  onclick="showMacroList()">
+  ▶ Macro
+</button>
+`;
+  }
+
+  const names =
+    Object.keys(macroList);
+
+  if (!names.length) {
+    return `
+<button
+  class="float-list-btn"
+  onclick="showMacroList()">
+  ▶ Macro
+</button>
+`;
+  }
+
+  return names.map(name => `
+<button
+  class="float-list-btn"
+  title="${escapeHtml(name)}"
+  onclick='runMacro(${JSON.stringify(name)})'>
+  ▶ ${escapeHtml(name)}
+</button>
+`).join("");
+
+}
+
+function refreshRepairQuickMacroButtons() {
+
+  const box =
+    get("repairQuickMacroButtons");
+
+  if (!box) {
+    return;
+  }
+
+  box.innerHTML =
+    buildRepairQuickMacroButtons();
+
 }
 
 function toggleRepairSearchQuickPanel() {
