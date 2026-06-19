@@ -3,6 +3,8 @@
    Project Analyzer
 =============================== */
 
+let projectFunctionDatabase = {};
+
 function generateModuleRulesFromLoadedScripts() {
 
   const editor =
@@ -236,6 +238,218 @@ function findFunctionInfo(
 
 }
 
+function getProjectAnalyzeSources(
+  mode = "editor"
+) {
+
+  switch (mode) {
+
+    case "editor":
+      return getAnalyzeSourcesFromEditor();
+
+    case "currentProject":
+      return getAnalyzeSourcesFromCurrentProject();
+
+    case "loadedFiles":
+      return getAnalyzeSourcesFromLoadedFiles();
+
+    default:
+      return [];
+
+  }
+
+}
+
+function getAnalyzeSourcesFromEditor() {
+
+  const editor =
+    get("repairEditor");
+
+  if (
+    !editor ||
+    !editor.value
+  ) {
+    return [];
+  }
+
+  return [
+    {
+      fileName:
+        currentRepairFile ||
+        "Editor",
+      code:
+        editor.value
+    }
+  ];
+
+}
+
+function getAnalyzeSourcesFromCurrentProject() {
+
+  if (
+    Array.isArray(window.currentProjectSearchFiles)
+  ) {
+    return window.currentProjectSearchFiles
+      .map(file => ({
+        fileName:
+          file.name ||
+          file.fileName ||
+          "unknown",
+        code:
+          file.text ||
+          file.code ||
+          ""
+      }))
+      .filter(file =>
+        file.code
+      );
+  }
+
+  if (
+    Array.isArray(window.repairSearchFiles)
+  ) {
+    return window.repairSearchFiles
+      .map(file => ({
+        fileName:
+          file.name ||
+          file.fileName ||
+          "unknown",
+        code:
+          file.text ||
+          file.code ||
+          ""
+      }))
+      .filter(file =>
+        file.code
+      );
+  }
+
+  return [];
+
+}
+
+function getAnalyzeSourcesFromLoadedFiles() {
+
+  if (
+    Array.isArray(window.repairSearchFiles)
+  ) {
+    return window.repairSearchFiles
+      .map(file => ({
+        fileName:
+          file.name ||
+          file.fileName ||
+          "unknown",
+        code:
+          file.text ||
+          file.code ||
+          ""
+      }))
+      .filter(file =>
+        file.code
+      );
+  }
+
+  return [];
+
+}
+
+function buildProjectFunctionDatabase(
+  sources
+) {
+
+  const database = {};
+
+  (sources || []).forEach(source => {
+
+    const fileName =
+      source.fileName ||
+      "unknown";
+
+    const code =
+      source.code ||
+      "";
+
+    const blocks =
+      extractFunctionBlocksFromText(
+        code
+      );
+
+    blocks.forEach(block => {
+
+      if (!block.name) {
+        return;
+      }
+
+      database[block.name] = {
+        name:
+          block.name,
+
+        fileName,
+
+        line:
+          block.startLine ||
+          block.line ||
+          0,
+
+        type:
+          block.type ||
+          "function",
+
+        code:
+          block.code ||
+          "",
+
+        called:
+          extractCalledFunctions(
+            block.code || ""
+          ),
+
+        keywords:
+          extractModuleKeywords(
+            block.code || ""
+          )
+      };
+
+    });
+
+  });
+
+  projectFunctionDatabase =
+    database;
+
+  return database;
+
+}
+
+function updateProjectFunctionDatabase(
+  mode = "editor"
+) {
+
+  const sources =
+    getProjectAnalyzeSources(
+      mode
+    );
+
+  const database =
+    buildProjectFunctionDatabase(
+      sources
+    );
+
+  alert(
+    "Function Database作成: " +
+    Object.keys(database).length +
+    "件"
+  );
+
+  return database;
+
+}
+
+window.buildProjectFunctionDatabase =
+  buildProjectFunctionDatabase;
+
+window.updateProjectFunctionDatabase =
+  updateProjectFunctionDatabase;
 
 window.generateModuleRulesFromLoadedScripts =
   generateModuleRulesFromLoadedScripts;
@@ -251,6 +465,9 @@ window.copyModuleAnalysis =
 
 window.findFunctionInfo =
   findFunctionInfo;
+
+window.getProjectAnalyzeSources =
+  getProjectAnalyzeSources;
 
 console.log(
   "13_project_analyzer loaded"
