@@ -25,11 +25,20 @@ let devConsoleQuickButtons =
 function buildDevConsoleQuickCommands() {
 
   return devConsoleQuickButtons
-    .map((item, index) => `
+    .map((item, index) => {
+
+      const label =
+        item.label ||
+        item.title ||
+        "Cmd";
+
+      return `
 <button onclick="runDevConsoleQuickCommand(${index})">
-  ${escapeHtml(item.label)}
+  ${escapeHtml(label)}
 </button>
-`)
+`;
+
+    })
     .join("");
 
 }
