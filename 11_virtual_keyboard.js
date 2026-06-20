@@ -182,6 +182,39 @@ function moveVirtualKeyboardCursor(
 
 }
 
+function buildVirtualKeyboardHtml() {
+
+  return `
+<div class="virtual-keyboard">
+
+  <button onclick="insertVirtualKeyboardText('(')">(</button>
+  <button onclick="insertVirtualKeyboardText(')')">)</button>
+  <button onclick="insertVirtualKeyboardText('{')">{</button>
+  <button onclick="insertVirtualKeyboardText('}')">}</button>
+  <button onclick="insertVirtualKeyboardText('[')">[</button>
+  <button onclick="insertVirtualKeyboardText(']')">]</button>
+
+  <button onclick="insertVirtualKeyboardText('=>')">=&gt;</button>
+  <button onclick="insertVirtualKeyboardText('&&')">&amp;&amp;</button>
+  <button onclick="insertVirtualKeyboardText('||')">||</button>
+
+  <button onclick="insertVirtualKeyboardText(';')">;</button>
+  <button onclick="insertVirtualKeyboardText('.')">.</button>
+  <button onclick="insertVirtualKeyboardText(',')">,</button>
+
+  <button onclick="moveVirtualKeyboardCursor(-1)">◀</button>
+  <button onclick="moveVirtualKeyboardCursor(1)">▶</button>
+  <button onclick="virtualKeyboardBackspace()">⌫</button>
+  <button onclick="virtualKeyboardDelete()">Del</button>
+
+</div>
+`;
+
+}
+
+window.buildVirtualKeyboardHtml =
+  buildVirtualKeyboardHtml;
+
 window.setVirtualKeyboardTarget =
   setVirtualKeyboardTarget;
 
