@@ -730,11 +730,18 @@ function clearRepairSearchFiles() {
 
 function getRepairSearchFiles() {
 
+  if (
+    typeof repairSearchFileStore !== "object"
+  ) {
+    return [];
+  }
+
   return Object
     .values(
       repairSearchFileStore
     )
     .map(file => ({
+
       fileName:
         file.fileName ||
         "unknown",
@@ -742,6 +749,10 @@ function getRepairSearchFiles() {
       code:
         file.text ||
         ""
-    }));
+
+    }))
+    .filter(file =>
+      file.code
+    );
 
 }
