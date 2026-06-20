@@ -1,165 +1,41 @@
-function updateDevConsoleSuggestions() {
+let virtualKeyboardTarget =
+  "devConsoleInput";
 
-  const input =
-    get("devConsoleInput");
-
-  const box =
-    get("devConsoleSuggestion");
-
-  if (!input || !box) {
-    return;
-  }
-
-  const pos =
-    input.selectionStart || input.value.length;
-
-  const left =
-    input.value.slice(0, pos);
-
-  const keyword =
-    left
-      .split(/[^A-Za-z0-9_$]/)
-      .pop();
-
-  if (!keyword) {
-    box.innerHTML = "";
-    return;
-  }
-
-  const list =
-    getDevConsoleSuggestions(
-      keyword
-    );
-
-  box.innerHTML =
-    list.map(name => `
-
-<div
-  class="search-result-line"
-  onclick='insertDevConsoleSuggestion(${JSON.stringify(name)})'>
-  ${escapeHtml(name)}
-</div>
-
-`).join("");
-
-}
-
-function getDevConsoleCandidates() {
-
-  const editor =
-    get("repairEditor");
-
-  if (!editor) {
-    return [];
-  }
-
-  const names =
-    extractFunctionNames(
-      editor.value
-    );
-
-  return [
-    ...new Set(names)
-  ].sort();
-
-}
-
-function getDevConsoleSuggestions(
-  keyword
+function insertDevConsoleText(
+  text
 ) {
 
-  keyword =
-    String(keyword || "")
-      .trim()
-      .toLowerCase();
-
-  if (!keyword) {
-    return [];
-  }
-
-  return getDevConsoleCandidates()
-    .filter(name =>
-      name
-        .toLowerCase()
-        .includes(keyword)
-    )
-    .slice(0, 20);
-
-}
-
-function insertDevConsoleSuggestion(name) {
-
   const input =
     get("devConsoleInput");
 
   if (!input) {
     return;
   }
+
+  const start =
+    input.selectionStart || 0;
+
+  const end =
+    input.selectionEnd || start;
 
   const value =
-    input.value;
+    input.value || "";
+
+  input.value =
+    value.slice(0, start) +
+    text +
+    value.slice(end);
 
   const pos =
-    input.selectionStart || value.length;
-
-  const left =
-    value.slice(0, pos);
-
-  const right =
-    value.slice(pos);
-
-  const replacedLeft =
-    left.replace(
-      /[A-Za-z0-9_$]*$/,
-      name
-    );
-
-  input.value =
-    replacedLeft +
-    "()" +
-    right;
-
-  const cursorPos =
-    replacedLeft.length + 1;
-
-  input.focus();
-
-  setTimeout(() => {
-
-    input.selectionStart =
-      cursorPos;
-
-    input.selectionEnd =
-      cursorPos;
-
-  }, 0);
-
-  localStorage.setItem(
-    "devConsoleLastInput",
-    input.value
-  );
-
-  updateDevConsoleSuggestions();
-
-}
-
-function insertDevConsoleCommand(code) {
-
-  const input =
-    get("devConsoleInput");
-
-  if (!input) {
-    return;
-  }
-
-  input.value =
-    code;
+    start + text.length;
 
   input.focus();
 
   input.selectionStart =
-    input.selectionEnd =
-      input.value.length;
+    pos;
+
+  input.selectionEnd =
+    pos;
 
   localStorage.setItem(
     "devConsoleLastInput",
@@ -170,27 +46,197 @@ function insertDevConsoleCommand(code) {
 
 }
 
-function showDevConsoleFunctionInfo(
-  name
+function setVirtualKeyboardTarget(
+  id
 ) {
 
-  const editor =
-    get("repairEditor");
-
-  if (!editor) {
-    return;
-  }
-
-  const info =
-    findFunctionInfo(
-      name,
-      editor.value
-    );
-
-  if (!info) {
-    return;
-  }
-
-  console.log(info);
+  virtualKeyboardTarget =
+    id;
 
 }
+
+function getVirtualKeyboardTarget() {
+
+  return get(
+    virtualKeyboardTarget
+  );
+
+}
+
+insertVirtualKeyboardText(
+  text
+)
+
+virtualKeyboardBackspace()
+
+virtualKeyboardDelete()
+
+moveVirtualKeyboardCursor(
+  offset
+)
+
+onfocus="
+setVirtualKeyboardTarget(
+'devConsoleInput'
+)"
+
+
+function insertVirtualKeyboardText(
+  text
+) {
+
+  const input =
+    getVirtualKeyboardTarget();
+
+  if (!input) {
+    return;
+  }
+
+  const start =
+    input.selectionStart || 0;
+
+  const end =
+    input.selectionEnd || start;
+
+  input.value =
+    input.value.slice(0, start) +
+    text +
+    input.value.slice(end);
+
+  const pos =
+    start + text.length;
+
+  input.focus();
+
+  input.selectionStart =
+    pos;
+
+  input.selectionEnd =
+    pos;
+
+}
+
+function virtualKeyboardBackspace() {
+
+  const input =
+    getVirtualKeyboardTarget();
+
+  if (!input) {
+    return;
+  }
+
+  const start =
+    input.selectionStart || 0;
+
+  const end =
+    input.selectionEnd || start;
+
+  if (start !== end) {
+
+    input.value =
+      input.value.slice(0, start) +
+      input.value.slice(end);
+
+    input.selectionStart =
+      start;
+
+    input.selectionEnd =
+      start;
+
+    return;
+
+  }
+
+  if (start <= 0) {
+    return;
+  }
+
+  input.value =
+    input.value.slice(0, start - 1) +
+    input.value.slice(start);
+
+  input.focus();
+
+  input.selectionStart =
+    start - 1;
+
+  input.selectionEnd =
+    start - 1;
+
+}
+
+function virtualKeyboardDelete() {
+
+  const input =
+    getVirtualKeyboardTarget();
+
+  if (!input) {
+    return;
+  }
+
+  const start =
+    input.selectionStart || 0;
+
+  const end =
+    input.selectionEnd || start;
+
+  if (start !== end) {
+
+    input.value =
+      input.value.slice(0, start) +
+      input.value.slice(end);
+
+    input.selectionStart =
+      start;
+
+    input.selectionEnd =
+      start;
+
+    return;
+
+  }
+
+  input.value =
+    input.value.slice(0, start) +
+    input.value.slice(start + 1);
+
+  input.focus();
+
+  input.selectionStart =
+    start;
+
+  input.selectionEnd =
+    start;
+
+}
+
+function moveVirtualKeyboardCursor(
+  offset
+) {
+
+  const input =
+    getVirtualKeyboardTarget();
+
+  if (!input) {
+    return;
+  }
+
+  const pos =
+    Math.max(
+      0,
+      Math.min(
+        input.value.length,
+        (input.selectionStart || 0) + offset
+      )
+    );
+
+  input.focus();
+
+  input.selectionStart =
+    pos;
+
+  input.selectionEnd =
+    pos;
+
+}
+
