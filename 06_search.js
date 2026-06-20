@@ -160,33 +160,14 @@ function jumpToSearchHistory(
   line
 ) {
 
-  const file =
-    repairSearchFileStore[fileName];
-
-  if (!file) {
-    alert("ファイル未読込");
+  if (
+    !openRepairTarget(
+      fileName,
+      line
+    )
+  ) {
     return;
   }
-
-  const editor =
-    get("repairEditor");
-
-  if (!editor) {
-    alert("repairEditor が見つかりません");
-    return;
-  }
-
-  editor.value =
-    file.text;
-
-  setCurrentRepairFile(
-    file.fileName
-  );
-
-  updateLineNumbers();
-  updateCursorPosition();
-
-  jumpToLine(line);
 
   closeFloatPanel();
 
@@ -221,39 +202,13 @@ function openGlobalSearchResult(index) {
     );
   }
 
-  const file =
-    repairSearchFileStore[item.fileName];
-
-  if (!file) {
-    alert("対象ファイルが見つかりません");
-    return;
-  }
-
-  const editor =
-    get("repairEditor");
-
-  if (!editor) {
-    alert("repairEditor が見つかりません");
-    return;
-  }
-
-  editor.value =
-    file.text;
-
   if (
-    typeof setCurrentRepairFile ===
-    "function"
+    !openRepairTarget(
+      item.fileName,
+      item.lineNumber
+    )
   ) {
-
-    setCurrentRepairFile(
-      item.fileName
-    );
-
-  } else {
-
-    currentRepairFile =
-      item.fileName;
-
+    return;
   }
 
   const searchBox =
@@ -267,24 +222,6 @@ function openGlobalSearchResult(index) {
   }
 
   closeGlobalSearchModal();
-
-  if (
-    typeof updateLineNumbers ===
-    "function"
-  ) {
-    updateLineNumbers();
-  }
-
-  if (
-    typeof updateCursorPosition ===
-    "function"
-  ) {
-    updateCursorPosition();
-  }
-
-  jumpToLine(
-    item.lineNumber
-  );
 
   if (
     typeof updateRepairStatus ===
