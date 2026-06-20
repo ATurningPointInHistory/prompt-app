@@ -1938,3 +1938,25 @@ mark {
   color:white;
 
 }
+
+.virtual-keyboard {
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:4px;
+
+  margin:6px 0;
+
+}
+
+.virtual-keyboard button {
+
+  min-width:42px;
+
+  height:34px;
+
+  font-size:14px;
+
+}
