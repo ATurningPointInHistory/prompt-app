@@ -382,7 +382,10 @@ function buildProjectFunctionDatabase(
         line:
           block.startLine ||
           block.line ||
-          0,
+          calcLineNumberFromIndex(
+            code,
+            block.start || 0
+          ),
 
         start:
           block.start ||
