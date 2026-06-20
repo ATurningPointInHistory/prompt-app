@@ -619,40 +619,71 @@ function getProjectAnalyzeSources(
   switch (mode) {
 
     case "editor":
-
-      return [
-        {
-          fileName:
-            currentRepairFile ||
-            "Repair Editor",
-
-          code:
-            get("repairEditor")
-              ?.value || ""
-        }
-      ];
+      return getAnalyzeSourcesFromEditor();
 
     case "currentProject":
+      return getAnalyzeSourcesFromCurrentProject();
 
     case "loadedFiles":
-
-      return Object.values(
-        repairSearchFileStore
-      ).map(file => ({
-
-        fileName:
-          file.fileName,
-
-        code:
-          file.text
-
-      }));
+      return getAnalyzeSourcesFromLoadedFiles();
 
     default:
-
       return [];
 
   }
+
+}
+
+function getAnalyzeSourcesFromEditor() {
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor || !editor.value) {
+    return [];
+  }
+
+  return [
+    {
+      fileName:
+        currentRepairFile ||
+        "Repair Editor",
+      code:
+        editor.value
+    }
+  ];
+
+}
+
+function getAnalyzeSourcesFromCurrentProject() {
+
+  return getAnalyzeSourcesFromLoadedFiles();
+
+}
+
+function getAnalyzeSourcesFromLoadedFiles() {
+
+  if (
+    typeof repairSearchFileStore !== "object"
+  ) {
+    return [];
+  }
+
+  return Object
+    .values(
+      repairSearchFileStore
+    )
+    .map(file => ({
+      fileName:
+        file.fileName ||
+        "unknown",
+      code:
+        file.text ||
+        ""
+    }))
+    .filter(file =>
+      file.code
+    );
 
 }
 
@@ -670,5 +701,3 @@ function getCurrentProjectAnalyzeMode() {
   return currentProjectAnalyzeMode;
 
 }
-
-
