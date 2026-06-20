@@ -292,15 +292,43 @@ function getProjectModuleRules() {
     },
     {
       file: "11_mobile_console.js",
-      priority: 70,
+      priority: 90,
       words: [
-        "mobile",
+        "devconsole",
+        "mobileconsole",
         "console",
         "log",
         "error",
-        "eval"
+        "eval",
+        "execute",
+        "history",
+        "favorite"
       ]
     },
+    {
+      file: "11_mobile_console_suggest.js",
+      priority: 85,
+      words: [
+        "suggest",
+        "autocomplete",
+        "quick",
+        "command",
+        "candidate",
+        "completion"
+      ]
+    },
+    {
+      file: "11_virtual_keyboard.js",
+      priority: 80,
+      words: [
+        "virtual",
+        "keyboard",
+        "cursor",
+        "insert",
+        "backspace",
+        "delete"
+      ]
+    }
     {
       file: "12_memo_box.js",
       priority: 60,
@@ -581,6 +609,9 @@ function getProjectFunctionSearchFiles() {
 
     "./10_macro.js",
     "./11_mobile_console.js",
+    "./11_mobile_console_suggest.js",
+    "./11_virtual_keyboard.js",
+
     "./12_memo_box.js",
 
     "./99_init.js"
