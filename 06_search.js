@@ -6,7 +6,6 @@
    Global Search Cache
 =============================== */
 
-let repairSearchFileStore = {};
 let repairLastGlobalSearchKeyword = "";
 
 async function loadCurrentProjectSearchFiles() {
