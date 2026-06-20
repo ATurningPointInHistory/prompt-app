@@ -328,7 +328,7 @@ function getProjectModuleRules() {
         "backspace",
         "delete"
       ]
-    }
+    },
     {
       file: "12_memo_box.js",
       priority: 60,
