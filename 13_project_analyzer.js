@@ -380,12 +380,14 @@ function buildProjectFunctionDatabase(
         fileName,
 
         line:
-          block.startLine ||
-          block.line ||
-          calcLineNumberFromIndex(
-            code,
-            block.start || 0
-          ),
+          (
+            block.startLine ||
+            block.line ||
+            calcLineNumberFromIndex(
+              code,
+              block.start || 0
+            )
+          ) + 1,
 
         start:
           block.start ||
