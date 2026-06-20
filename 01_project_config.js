@@ -611,7 +611,7 @@ function setCurrentRepairFile(
 }
 
 /* ===============================
-② 共通取得関数追加
+共通取得関数追加
 =============================== */
 
 function getProjectAnalyzeSources(
@@ -733,5 +733,81 @@ function getRepairSearchFiles() {
     .filter(file =>
       file.code
     );
+
+}
+
+/* ===============================
+JUMP共通関数
+=============================== */
+
+function openRepairSearchFileAtLine(
+  fileName,
+  line
+) {
+
+  const file =
+    repairSearchFileStore[
+      fileName
+    ];
+
+  if (!file) {
+    alert(
+      "ファイル未読込\n\n" +
+      fileName
+    );
+    return false;
+  }
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    alert("repairEditor が見つかりません");
+    return false;
+  }
+
+  editor.value =
+    file.text ||
+    file.code ||
+    "";
+
+  if (
+    typeof setCurrentRepairFile ===
+    "function"
+  ) {
+    setCurrentRepairFile(
+      file.fileName ||
+      fileName
+    );
+  } else {
+    currentRepairFile =
+      file.fileName ||
+      fileName;
+  }
+
+  if (
+    typeof updateLineNumbers ===
+    "function"
+  ) {
+    updateLineNumbers();
+  }
+
+  if (
+    typeof updateCursorPosition ===
+    "function"
+  ) {
+    updateCursorPosition();
+  }
+
+  if (
+    typeof jumpToLine ===
+    "function"
+  ) {
+    jumpToLine(
+      Number(line) || 1
+    );
+  }
+
+  return true;
 
 }
