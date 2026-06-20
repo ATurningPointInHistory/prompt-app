@@ -730,8 +730,18 @@ function clearRepairSearchFiles() {
 
 function getRepairSearchFiles() {
 
-  return Object.values(
-    repairSearchFileStore
-  );
+  return Object
+    .values(
+      repairSearchFileStore
+    )
+    .map(file => ({
+      fileName:
+        file.fileName ||
+        "unknown",
+
+      code:
+        file.text ||
+        ""
+    }));
 
 }
