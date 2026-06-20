@@ -578,6 +578,14 @@ function enrichProjectFunctionDatabase(
           }
 
           if (
+            !Array.isArray(
+              target.calledBy
+            )
+          ) {
+            target.calledBy = [];
+          }
+
+          if (
             !target.calledBy.includes(
               caller.name
             )
@@ -587,7 +595,8 @@ function enrichProjectFunctionDatabase(
             );
           }
 
-          target.callCount++;
+          target.callCount =
+            Number(target.callCount || 0) + 1;
 
         });
 
