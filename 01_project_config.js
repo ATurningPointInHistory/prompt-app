@@ -703,3 +703,35 @@ function getCurrentProjectAnalyzeMode() {
   return currentProjectAnalyzeMode;
 
 }
+
+function registerRepairSearchFile(
+  fileName,
+  text
+) {
+
+  if (!fileName) {
+    return;
+  }
+
+  repairSearchFileStore[fileName] = {
+    fileName: fileName,
+    text: String(text || ""),
+    updatedAt: Date.now()
+  };
+
+}
+
+function clearRepairSearchFiles() {
+
+  repairSearchFileStore =
+    {};
+
+}
+
+function getRepairSearchFiles() {
+
+  return Object.values(
+    repairSearchFileStore
+  );
+
+}
