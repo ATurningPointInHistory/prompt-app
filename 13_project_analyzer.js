@@ -621,6 +621,40 @@ function enrichProjectFunctionDatabase(
 
 }
 
+/* ===============================
+   Jump To Function
+=============================== */
+
+function jumpToFunction(
+  functionName
+) {
+
+  const info =
+    getFunctionInfoFromDatabase(
+      functionName
+    );
+
+  if (!info) {
+
+    alert(
+      "Function Databaseにありません\n\n" +
+      functionName
+    );
+
+    return false;
+
+  }
+
+  return openRepairTarget(
+    info.fileName,
+    info.line
+  );
+
+}
+
+window.jumpToFunction =
+  jumpToFunction;
+
 window.buildProjectFunctionDatabase =
   buildProjectFunctionDatabase;
 
