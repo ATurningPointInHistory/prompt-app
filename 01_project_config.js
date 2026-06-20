@@ -842,3 +842,33 @@ function openRepairSearchFileAtLine(
   return true;
 
 }
+
+window.getProjectAnalyzeSources =
+  getProjectAnalyzeSources;
+
+window.getAnalyzeSourcesFromEditor =
+  getAnalyzeSourcesFromEditor;
+
+window.getAnalyzeSourcesFromCurrentProject =
+  getAnalyzeSourcesFromCurrentProject;
+
+window.getAnalyzeSourcesFromLoadedFiles =
+  getAnalyzeSourcesFromLoadedFiles;
+
+window.setCurrentProjectAnalyzeMode =
+  setCurrentProjectAnalyzeMode;
+
+window.getCurrentProjectAnalyzeMode =
+  getCurrentProjectAnalyzeMode;
+
+window.registerRepairSearchFile =
+  registerRepairSearchFile;
+
+window.clearRepairSearchFiles =
+  clearRepairSearchFiles;
+
+window.getRepairSearchFiles =
+  getRepairSearchFiles;
+
+window.openRepairSearchFileAtLine =
+  openRepairSearchFileAtLine;
