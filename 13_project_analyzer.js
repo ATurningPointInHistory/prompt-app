@@ -522,15 +522,7 @@ function searchFunctionDatabase(
 
 function getAnalyzeSourcesFromCurrentProject() {
 
-  if (
-    typeof repairSearchFileStore !== "object"
-  ) {
-    return [];
-  }
-
-  return Object.values(
-    repairSearchFileStore
-  );
+  return getRepairSearchFiles();
 
 }
 
