@@ -132,16 +132,6 @@ function showMobileConsole() {
 
 </div>
 
-<div class="small" style="margin-top:8px;">
-Quick Command
-</div>
-
-<div class="float-panel-actions">
-
-  ${buildDevConsoleQuickCommands()}
-
-</div>
-
   <textarea
     id="devConsoleInput"
     rows="8"
