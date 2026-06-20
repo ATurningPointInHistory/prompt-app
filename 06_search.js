@@ -342,23 +342,6 @@ function saveCurrentSearchEditorFile() {
 
 }
 
-function registerRepairSearchFile(
-  fileName,
-  text
-) {
-
-  if (!fileName) {
-    return;
-  }
-
-  repairSearchFileStore[fileName] = {
-    fileName: fileName,
-    text: String(text || ""),
-    updatedAt: Date.now()
-  };
-
-}
-
 function showRepairSearchFiles() {
 
   const names =
