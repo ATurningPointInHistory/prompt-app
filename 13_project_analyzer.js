@@ -416,6 +416,10 @@ function buildProjectFunctionDatabase(
 
   });
 
+  enrichProjectFunctionDatabase(
+    database
+  );
+
   projectFunctionDatabase =
     database;
 
@@ -548,6 +552,51 @@ function filterProjectCalledFunctions(
 
 }
 
+function enrichProjectFunctionDatabase(
+  database
+) {
+
+  Object.values(database)
+    .forEach(item => {
+
+      item.calledBy = [];
+      item.callCount = 0;
+
+    });
+
+  Object.values(database)
+    .forEach(caller => {
+
+      (caller.called || [])
+        .forEach(calledName => {
+
+          const target =
+            database[calledName];
+
+          if (!target) {
+            return;
+          }
+
+          if (
+            !target.calledBy.includes(
+              caller.name
+            )
+          ) {
+            target.calledBy.push(
+              caller.name
+            );
+          }
+
+          target.callCount++;
+
+        });
+
+    });
+
+  return database;
+
+}
+
 window.buildProjectFunctionDatabase =
   buildProjectFunctionDatabase;
 
@@ -583,6 +632,9 @@ window.getAllFunctionNames =
 
 window.searchFunctionDatabase =
   searchFunctionDatabase;
+
+window.enrichProjectFunctionDatabase =
+  enrichProjectFunctionDatabase;
 
 console.log(
   "13_project_analyzer loaded"
