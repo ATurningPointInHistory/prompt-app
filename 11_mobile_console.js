@@ -94,10 +94,6 @@ function showMobileConsole() {
     `
 <div class="float-panel-actions">
 
-  <button onclick="executeDevConsole()">
-    ▶ 実行
-  </button>
-
   <button onclick="pasteDevConsoleInput()">
     📋 Paste
   </button>
