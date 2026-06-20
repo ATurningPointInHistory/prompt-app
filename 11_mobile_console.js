@@ -132,12 +132,12 @@ function showMobileConsole() {
 
 </div>
 
-  <textarea
-    id="devConsoleInput"
-    rows="8"
-    onfocus="setVirtualKeyboardTarget('devConsoleInput')"
-    oninput="updateDevConsoleSuggestions()"
-    style="
+<textarea
+  id="devConsoleInput"
+  rows="8"
+  onfocus="setVirtualKeyboardTarget('devConsoleInput')"
+  oninput="updateDevConsoleSuggestions()"
+  style="
     width:100%;
     font-family:monospace;
     font-size:12px;
@@ -149,38 +149,33 @@ function showMobileConsole() {
   "typeof startMacroRecording"
 )}</textarea>
 
+<div class="small" style="margin-top:8px;">
+Quick Command
+</div>
+
+<div class="float-panel-actions">
+  ${buildDevConsoleQuickCommands()}
+</div>
+
 <div class="virtual-keyboard">
 
 <button onclick="insertVirtualKeyboardText('(')">(</button>
-
 <button onclick="insertVirtualKeyboardText(')')">)</button>
-
 <button onclick="insertVirtualKeyboardText('{')">{</button>
-
 <button onclick="insertVirtualKeyboardText('}')">}</button>
-
 <button onclick="insertVirtualKeyboardText('[')">[</button>
-
 <button onclick="insertVirtualKeyboardText(']')">]</button>
-
 <button onclick="insertVirtualKeyboardText('=>')">=&gt;</button>
-
 <button onclick="insertVirtualKeyboardText('&&')">&amp;&amp;</button>
-
 <button onclick="insertVirtualKeyboardText('||')">||</button>
-
 <button onclick="moveVirtualKeyboardCursor(-1)">◀</button>
-
 <button onclick="moveVirtualKeyboardCursor(1)">▶</button>
-
 <button onclick="virtualKeyboardBackspace()">⌫</button>
-
 <button onclick="virtualKeyboardDelete()">Del</button>
 
 </div>
 
-<div
-  id="devConsoleSuggestion">
+<div id="devConsoleSuggestion">
 </div>
 
 <div class="small" style="margin-top:8px;">
@@ -209,9 +204,9 @@ Console Log
 ${escapeHtml(
   mobileConsoleLogs
     .map(log =>
-      `[${log.time}] ${log.type}\n${log.text}`
+      `[${log.time}] ${log.type}\\n${log.text}`
     )
-    .join("\n\n") || "ログなし"
+    .join("\\n\\n") || "ログなし"
 )}
 </pre>
 `
