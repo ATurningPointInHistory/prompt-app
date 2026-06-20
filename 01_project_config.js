@@ -665,27 +665,7 @@ function getAnalyzeSourcesFromCurrentProject() {
 
 function getAnalyzeSourcesFromLoadedFiles() {
 
-  if (
-    typeof repairSearchFileStore !== "object"
-  ) {
-    return [];
-  }
-
-  return Object
-    .values(
-      repairSearchFileStore
-    )
-    .map(file => ({
-      fileName:
-        file.fileName ||
-        "unknown",
-      code:
-        file.text ||
-        ""
-    }))
-    .filter(file =>
-      file.code
-    );
+  return getRepairSearchFiles();
 
 }
 
@@ -741,15 +721,14 @@ function getRepairSearchFiles() {
       repairSearchFileStore
     )
     .map(file => ({
-
       fileName:
         file.fileName ||
         "unknown",
 
       code:
+        file.code ||
         file.text ||
         ""
-
     }))
     .filter(file =>
       file.code
