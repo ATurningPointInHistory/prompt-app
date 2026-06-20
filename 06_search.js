@@ -8,6 +8,82 @@
 
 let repairLastGlobalSearchKeyword = "";
 
+/* ===============================
+   Open Repair Target
+=============================== */
+
+function openRepairTarget(
+  fileName,
+  line = 1
+) {
+
+  const file =
+    repairSearchFileStore[
+      fileName
+    ];
+
+  if (!file) {
+    alert(
+      "ファイル未読込\n\n" +
+      fileName
+    );
+    return false;
+  }
+
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    alert("repairEditor が見つかりません");
+    return false;
+  }
+
+  editor.value =
+    file.text ||
+    file.code ||
+    "";
+
+  if (
+    typeof setCurrentRepairFile ===
+    "function"
+  ) {
+    setCurrentRepairFile(
+      file.fileName ||
+      fileName
+    );
+  } else {
+    currentRepairFile =
+      file.fileName ||
+      fileName;
+  }
+
+  if (
+    typeof updateLineNumbers ===
+    "function"
+  ) {
+    updateLineNumbers();
+  }
+
+  if (
+    typeof updateCursorPosition ===
+    "function"
+  ) {
+    updateCursorPosition();
+  }
+
+  if (
+    typeof jumpToLine ===
+    "function"
+  ) {
+    jumpToLine(
+      Number(line) || 1
+    );
+  }
+
+  return true;
+
+}
+
 async function loadCurrentProjectSearchFiles() {
 
   try {
