@@ -42,3 +42,21 @@ function insertDevConsoleText(
   updateDevConsoleSuggestions();
 
 }
+
+window.setVirtualKeyboardTarget =
+  setVirtualKeyboardTarget;
+
+window.getVirtualKeyboardTarget =
+  getVirtualKeyboardTarget;
+
+window.insertVirtualKeyboardText =
+  insertVirtualKeyboardText;
+
+window.virtualKeyboardBackspace =
+  virtualKeyboardBackspace;
+
+window.virtualKeyboardDelete =
+  virtualKeyboardDelete;
+
+window.moveVirtualKeyboardCursor =
+  moveVirtualKeyboardCursor;
