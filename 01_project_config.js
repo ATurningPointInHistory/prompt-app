@@ -3,6 +3,8 @@
    Project Config
 =============================== */
 
+let repairSearchFileStore = {};
+
 let currentProjectAnalyzeMode =
   "editor";
 
