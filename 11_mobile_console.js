@@ -142,11 +142,12 @@ Quick Command
 
 </div>
 
-<textarea
-  id="devConsoleInput"
-  rows="8"
-  oninput="updateDevConsoleSuggestions()"
-  style="
+  <textarea
+    id="devConsoleInput"
+    rows="8"
+    onfocus="setVirtualKeyboardTarget('devConsoleInput')"
+    oninput="updateDevConsoleSuggestions()"
+    style="
     width:100%;
     font-family:monospace;
     font-size:12px;
@@ -157,6 +158,36 @@ Quick Command
   localStorage.getItem("devConsoleLastInput") ||
   "typeof startMacroRecording"
 )}</textarea>
+
+<div class="virtual-keyboard">
+
+<button onclick="insertVirtualKeyboardText('(')">(</button>
+
+<button onclick="insertVirtualKeyboardText(')')">)</button>
+
+<button onclick="insertVirtualKeyboardText('{')">{</button>
+
+<button onclick="insertVirtualKeyboardText('}')">}</button>
+
+<button onclick="insertVirtualKeyboardText('[')">[</button>
+
+<button onclick="insertVirtualKeyboardText(']')">]</button>
+
+<button onclick="insertVirtualKeyboardText('=>')">=&gt;</button>
+
+<button onclick="insertVirtualKeyboardText('&&')">&amp;&amp;</button>
+
+<button onclick="insertVirtualKeyboardText('||')">||</button>
+
+<button onclick="moveVirtualKeyboardCursor(-1)">◀</button>
+
+<button onclick="moveVirtualKeyboardCursor(1)">▶</button>
+
+<button onclick="virtualKeyboardBackspace()">⌫</button>
+
+<button onclick="virtualKeyboardDelete()">Del</button>
+
+</div>
 
 <div
   id="devConsoleSuggestion">
