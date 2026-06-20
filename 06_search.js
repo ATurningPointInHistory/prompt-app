@@ -1315,3 +1315,22 @@ function replaceAllRepairText() {
 
   alert(`${count}件置換しました`);
 }
+
+function calcLineNumberFromIndex(
+  text,
+  index
+) {
+
+  if (
+    !text ||
+    index <= 0
+  ) {
+    return 1;
+  }
+
+  return text
+    .slice(0, index)
+    .split(/\r?\n/)
+    .length;
+
+}
