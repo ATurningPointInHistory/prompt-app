@@ -656,6 +656,15 @@ function getProjectAnalyzeSources(
 
 }
 
+function setCurrentProjectAnalyzeMode(
+  mode
+) {
+
+  currentProjectAnalyzeMode =
+    mode;
+
+}
+
 function getCurrentProjectAnalyzeMode() {
 
   return currentProjectAnalyzeMode;
