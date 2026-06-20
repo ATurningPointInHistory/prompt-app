@@ -434,8 +434,9 @@ function updateProjectFunctionDatabase(
   mode = "editor"
 ) {
 
-  currentProjectAnalyzeMode =
-    mode;
+  setCurrentProjectAnalyzeMode(
+    mode
+  );
 
   const sources =
     getProjectAnalyzeSources(
@@ -447,9 +448,23 @@ function updateProjectFunctionDatabase(
       sources
     );
 
-  updateRepairStatus?.(
-    `Function DB : ${Object.keys(database).length}件 (${mode})`
-  );
+  projectFunctionDatabase =
+    database;
+
+  window.projectFunctionDatabase =
+    database;
+
+  if (
+    typeof updateRepairStatus === "function"
+  ) {
+    updateRepairStatus(
+      "Function DB: " +
+      Object.keys(database).length +
+      "件 (" +
+      mode +
+      ")"
+    );
+  }
 
   return database;
 
