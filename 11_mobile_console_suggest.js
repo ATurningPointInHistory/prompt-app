@@ -1,6 +1,6 @@
 /* ===============================
    FILE: 11_mobile_console_suggest.js
-   Mobile Console Suggest / Quick Command
+   Mobile Console Suggest / History / Favorite
 =============================== */
 
 let devConsoleHistory =
