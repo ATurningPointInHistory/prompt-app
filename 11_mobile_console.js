@@ -98,6 +98,22 @@ function showMobileConsole() {
     ▶ 実行
   </button>
 
+  <button onclick="pasteDevConsoleInput()">
+    📋 Paste
+  </button>
+
+  <button onclick="executeDevConsole()">
+    ▶ Run
+  </button>
+
+  <button onclick="pasteAndRunDevConsole()">
+    ⚡ Paste&Run
+  </button>
+
+  <button onclick="clearDevConsoleInput()">
+    🗑 Clear
+  </button>
+
   <button onclick="saveDevConsoleFavorite()">
     ⭐ 保存
   </button>
@@ -419,5 +435,94 @@ function copyDevConsoleResult() {
       ? "実行結果をコピーしました"
       : "コピー失敗"
   );
+
+}
+
+async function pasteDevConsoleInput() {
+
+  const input =
+    get("devConsoleInput");
+
+  if (!input) {
+    alert("入力欄なし");
+    return false;
+  }
+
+  if (
+    !navigator.clipboard ||
+    !navigator.clipboard.readText
+  ) {
+    alert("クリップボード読取に未対応です");
+    return false;
+  }
+
+  try {
+
+    const text =
+      await navigator.clipboard.readText();
+
+    input.value =
+      text || "";
+
+    input.focus();
+
+    input.selectionStart =
+      input.selectionEnd =
+        input.value.length;
+
+    localStorage.setItem(
+      "devConsoleLastInput",
+      input.value
+    );
+
+    updateDevConsoleSuggestions();
+
+    return true;
+
+  } catch (e) {
+
+    alert(
+      "貼り付け失敗\n\n" +
+      e.message
+    );
+
+    return false;
+
+  }
+
+}
+
+function clearDevConsoleInput() {
+
+  const input =
+    get("devConsoleInput");
+
+  if (!input) {
+    return;
+  }
+
+  input.value = "";
+
+  localStorage.setItem(
+    "devConsoleLastInput",
+    ""
+  );
+
+  input.focus();
+
+  updateDevConsoleSuggestions();
+
+}
+
+async function pasteAndRunDevConsole() {
+
+  const ok =
+    await pasteDevConsoleInput();
+
+  if (!ok) {
+    return;
+  }
+
+  executeDevConsole();
 
 }
