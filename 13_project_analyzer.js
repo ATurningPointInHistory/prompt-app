@@ -238,28 +238,6 @@ function findFunctionInfo(
 
 }
 
-function getProjectAnalyzeSources(
-  mode = "editor"
-) {
-
-  switch (mode) {
-
-    case "editor":
-      return getAnalyzeSourcesFromEditor();
-
-    case "currentProject":
-      return getAnalyzeSourcesFromCurrentProject();
-
-    case "loadedFiles":
-      return getAnalyzeSourcesFromLoadedFiles();
-
-    default:
-      return [];
-
-  }
-
-}
-
 function getAnalyzeSourcesFromEditor() {
 
   const editor =
