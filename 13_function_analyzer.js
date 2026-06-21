@@ -231,21 +231,47 @@ function copyFunctionAnalyzerMinimalCode(
   name
 ) {
 
-  const code =
-    getFunctionAnalyzerMinimalCode(
-      name
-    );
+  const functionName =
+    name ||
+    window.currentFunctionAnalyzerName ||
+    get("functionAnalyzerSelect")?.value ||
+    "";
 
-  if (!code) {
-    alert("コードなし");
+  if (!functionName) {
+    alert("関数を選択してください");
     return;
   }
 
-  copyTextFallback(
-    code
-  );
+  if (
+    typeof getFunctionAnalyzerMinimalCode !== "function"
+  ) {
+    alert("getFunctionAnalyzerMinimalCode が未定義です");
+    return;
+  }
 
-  alert("関数コードをコピーしました");
+  const code =
+    getFunctionAnalyzerMinimalCode(
+      functionName
+    );
+
+  if (!code) {
+    alert(
+      "最小コードを取得できません\n\n" +
+      functionName
+    );
+    return;
+  }
+
+  const ok =
+    copyTextFallback(
+      code
+    );
+
+  alert(
+    ok
+      ? "最小コードをコピーしました"
+      : "コピー失敗"
+  );
 
 }
 
