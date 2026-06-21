@@ -306,14 +306,25 @@ function buildProjectFunctionDatabase(
       return;
     }
 
-    const blocks =
-      extractFunctionBlocksFromText(
-        code
+    let blocks = [];
+
+    try {
+      blocks =
+        extractFunctionBlocksFromText(
+          code
+        ) || [];
+    } catch (e) {
+      console.warn(
+        "extractFunctionBlocksFromText failed:",
+        fileName,
+        e
       );
+      return;
+    }
 
     blocks.forEach(block => {
 
-      if (!block.name) {
+      if (!block || !block.name) {
         return;
       }
 
@@ -323,10 +334,8 @@ function buildProjectFunctionDatabase(
         "";
 
       if (
-        typeof findFunctionBlockInText ===
-        "function"
+        typeof findFunctionBlockInText === "function"
       ) {
-
         const exactBlock =
           findFunctionBlockInText(
             blockCode,
@@ -340,60 +349,56 @@ function buildProjectFunctionDatabase(
           blockCode =
             exactBlock.code;
         }
-
       }
 
+      const line =
+        typeof block.startLine === "number"
+          ? block.startLine + 1
+          : typeof block.line === "number"
+            ? block.line + 1
+            : calcLineNumberFromIndex(
+                code,
+                block.start || 0
+              );
+
       database[block.name] = {
-        name:
-          block.name,
-
+        name: block.name,
         fileName,
-
-        line:
-          (
-            block.startLine ||
-            block.line ||
-            calcLineNumberFromIndex(
-              code,
-              block.start || 0
-            )
-          ) + 1,
-
-        start:
-          block.start ||
-          0,
-
-        end:
-          block.end ||
-          0,
-
-        type:
-          block.type ||
-          "function",
-
-        code:
-          blockCode,
+        line,
+        start: block.start || 0,
+        end: block.end || 0,
+        type: block.type || "function",
+        code: blockCode,
 
         called:
-          filterProjectCalledFunctions(
-            extractCalledFunctions(
-              blockCode
-            )
-          ),
+          typeof extractCalledFunctions === "function"
+            ? filterProjectCalledFunctions(
+                extractCalledFunctions(
+                  blockCode
+                )
+              )
+            : [],
 
         keywords:
-          extractModuleKeywords(
-            blockCode
-          )
+          typeof extractModuleKeywords === "function"
+            ? extractModuleKeywords(
+                blockCode
+              )
+            : []
       };
 
     });
 
   });
 
-  enrichProjectFunctionDatabase(
-    database
-  );
+  if (
+    typeof enrichProjectFunctionDatabase ===
+    "function"
+  ) {
+    enrichProjectFunctionDatabase(
+      database
+    );
+  }
 
   projectFunctionDatabase =
     database;
