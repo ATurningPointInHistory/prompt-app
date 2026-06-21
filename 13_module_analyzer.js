@@ -35,50 +35,6 @@ function extractModuleKeywords(code) {
 
 }
 
-function extractCalledFunctionsFromBlocks(
-  blocks
-) {
-
-  const calls =
-    new Set();
-
-  (blocks || []).forEach(block => {
-
-    const code =
-      block.code ||
-      block.block ||
-      block.text ||
-      "";
-
-    if (!code) {
-      return;
-    }
-
-    const list =
-      typeof extractCalledFunctions === "function"
-        ? extractCalledFunctions(code)
-        : [];
-
-    list.forEach(name => {
-      calls.add(name);
-    });
-
-  });
-
-  const ignore =
-    typeof getIgnoredFunctionCalls === "function"
-      ? getIgnoredFunctionCalls()
-      : new Set();
-
-  return [...calls]
-    .filter(name =>
-      name &&
-      !ignore.has(name)
-    )
-    .sort();
-
-}
-
 function buildModuleAnalysis(
   code,
   fileName = ""
