@@ -428,7 +428,13 @@ function getIgnoredFunctionCalls() {
     "test",
     "resolve",
     "reject",
-    "b"
+    "b",
+    "keys",
+    "values",
+    "entries",
+    "now",
+    "startsWith",
+    "endsWith"
   ]);
 
 }
