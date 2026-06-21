@@ -13,55 +13,51 @@ function getFunctionAnalyzerInfo(
     return null;
   }
 
+  let info = null;
+
   if (
     window.projectDatabase &&
-    projectDatabase.functions &&
-    projectDatabase.functions[name]
+    window.projectDatabase.functions &&
+    window.projectDatabase.functions[name]
   ) {
-    return projectDatabase.functions[name];
+    info =
+      window.projectDatabase.functions[name];
   }
 
   if (
-    window.projectFunctionDatabase &&
-    projectFunctionDatabase[name]
-  ) {
-    return projectFunctionDatabase[name];
-  }
-
-  if (
+    !info &&
     typeof updateProjectDatabase === "function"
   ) {
-
     const mode =
       typeof getCurrentProjectAnalyzeMode === "function"
         ? getCurrentProjectAnalyzeMode()
         : "currentProject";
 
-    updateProjectDatabase(
-      mode
-    );
+    const db =
+      updateProjectDatabase(mode);
 
     if (
-      window.projectDatabase &&
-      projectDatabase.functions &&
-      projectDatabase.functions[name]
+      db &&
+      db.functions &&
+      db.functions[name]
     ) {
-      return projectDatabase.functions[name];
+      info =
+        db.functions[name];
     }
-
-    if (
-      window.projectFunctionDatabase &&
-      projectFunctionDatabase[name]
-    ) {
-      return projectFunctionDatabase[name];
-    }
-
   }
 
-  return null;
+  if (
+    !info &&
+    window.projectFunctionDatabase &&
+    window.projectFunctionDatabase[name]
+  ) {
+    info =
+      window.projectFunctionDatabase[name];
+  }
+
+  return info;
 
 }
-
 function buildFunctionAnalyzerReport(
   name
 ) {
@@ -258,32 +254,50 @@ function jumpFunctionAnalyzer(
 ) {
 
   const info =
-    getFunctionAnalyzerInfo(
-      name
-    );
+    getFunctionAnalyzerInfo(name);
 
   if (!info) {
     alert("関数情報なし");
     return;
   }
 
+  const fileName =
+    String(info.fileName || "")
+      .replace(/\?v=.*$/, "");
+
+  const line =
+    Number(info.line || 1);
+
   if (
-    typeof openRepairTarget === "function"
-  ) {
-    openRepairTarget(
+    typeof openRepairSearchFileAtLine ===
+    "function" &&
+    openRepairSearchFileAtLine(
       info.fileName,
-      info.line || 1
-    );
+      line
+    )
+  ) {
+    return;
+  }
+
+  if (
+    typeof openRepairSearchFileAtLine ===
+    "function" &&
+    openRepairSearchFileAtLine(
+      fileName,
+      line
+    )
+  ) {
     return;
   }
 
   if (
     typeof jumpToFunction === "function"
   ) {
-    jumpToFunction(
-      name
-    );
+    jumpToFunction(name);
+    return;
   }
+
+  alert("ジャンプできませんでした");
 
 }
 
