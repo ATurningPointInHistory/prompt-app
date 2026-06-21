@@ -781,10 +781,10 @@ function getAnalyzeSourceModeLabel(
       return "Editor";
 
     case "currentProject":
-      return "Project";
+      return "Current Project";
 
     case "loadedFiles":
-      return "Loaded";
+      return "Downloaded";
 
     default:
       return "Unknown";
@@ -798,7 +798,7 @@ function buildAnalyzeSourceSelectorHtml(
 ) {
 
   const label =
-    options.label || "解析元";
+    options.label || "検索元";
 
   const onChange =
     options.onChange ||
@@ -807,51 +807,56 @@ function buildAnalyzeSourceSelectorHtml(
   const mode =
     typeof getCurrentProjectAnalyzeMode === "function"
       ? getCurrentProjectAnalyzeMode()
-      : "editor";
+      : "currentProject";
 
-  function activeClass(value) {
+  function radioMark(value) {
     return mode === value
-      ? " active"
-      : "";
+      ? "🔘"
+      : "⚪";
   }
 
   return `
 <div
   class="small"
   style="
-    display:flex;
-    align-items:center;
-    gap:6px;
     margin-top:8px;
     margin-bottom:4px;
-    flex-wrap:wrap;
   ">
 
-  <span>${escapeHtml(label)}</span>
-
-  <button
-    class="mini-btn${activeClass("editor")}"
-    onclick="${onChange}('editor')">
-    Editor
-  </button>
-
-  <button
-    class="mini-btn${activeClass("currentProject")}"
-    onclick="${onChange}('currentProject')">
-    Project
-  </button>
-
-  <button
-    class="mini-btn${activeClass("loadedFiles")}"
-    onclick="${onChange}('loadedFiles')">
-    Loaded
-  </button>
-
-  <span>
+  <div style="margin-bottom:4px;">
+    ${escapeHtml(label)}：
     ${escapeHtml(
       getAnalyzeSourceModeLabel(mode)
     )}
-  </span>
+  </div>
+
+  <div
+    style="
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      align-items:center;
+    ">
+
+    <button
+      class="mini-btn"
+      onclick="${onChange}('editor')">
+      ${radioMark("editor")} Editor
+    </button>
+
+    <button
+      class="mini-btn"
+      onclick="${onChange}('currentProject')">
+      ${radioMark("currentProject")} Current Project
+    </button>
+
+    <button
+      class="mini-btn"
+      onclick="${onChange}('loadedFiles')">
+      ${radioMark("loadedFiles")} Downloaded
+    </button>
+
+  </div>
 
 </div>
 `;
