@@ -78,22 +78,39 @@ function loadDevConsoleHistory(
   const code =
     devConsoleHistory[index];
 
-  const input =
-    get("devConsoleInput");
-
-  if (!code || !input) {
+  if (!code) {
     return;
   }
 
-  input.value =
-    code;
-
   localStorage.setItem(
     "devConsoleLastInput",
-    input.value
+    code
   );
 
   showMobileConsole();
+
+  setTimeout(() => {
+
+    const input =
+      get("devConsoleInput");
+
+    if (!input) {
+      return;
+    }
+
+    input.value =
+      code;
+
+    input.focus();
+
+    if (
+      typeof updateDevConsoleSuggestions ===
+      "function"
+    ) {
+      updateDevConsoleSuggestions();
+    }
+
+  }, 50);
 
 }
 
@@ -105,10 +122,16 @@ function runDevConsoleHistory(
     index
   );
 
-  setTimeout(
-    executeDevConsole,
-    50
-  );
+  setTimeout(() => {
+
+    if (
+      typeof executeDevConsole ===
+      "function"
+    ) {
+      executeDevConsole();
+    }
+
+  }, 120);
 
 }
 
@@ -188,22 +211,42 @@ function loadDevConsoleFavorite(
   const item =
     devConsoleFavorites[index];
 
-  const input =
-    get("devConsoleInput");
-
-  if (!item || !input) {
+  if (!item) {
     return;
   }
 
-  input.value =
+  const code =
     item.code || "";
 
   localStorage.setItem(
     "devConsoleLastInput",
-    input.value
+    code
   );
 
   showMobileConsole();
+
+  setTimeout(() => {
+
+    const input =
+      get("devConsoleInput");
+
+    if (!input) {
+      return;
+    }
+
+    input.value =
+      code;
+
+    input.focus();
+
+    if (
+      typeof updateDevConsoleSuggestions ===
+      "function"
+    ) {
+      updateDevConsoleSuggestions();
+    }
+
+  }, 50);
 
 }
 
