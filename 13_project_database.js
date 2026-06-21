@@ -191,41 +191,45 @@ function enrichProjectFunctionDatabaseV2(
     .values(functionDb || {})
     .forEach(fn => {
 
+      if (!fn || !fn.name) {
+        return;
+      }
+
       const code =
         fn.code || "";
+
+      const parameters =
+        extractFunctionParametersFromCode(
+          code
+        );
 
       result[fn.name] = {
         ...fn,
 
         source:
-          sourceMode,
+          sourceMode || "",
 
         section:
           guessFunctionSection(
-            fn.fileName,
-            fn.name
+            fn.fileName || "",
+            fn.name || ""
           ),
 
         role:
           guessFunctionRole(
-            fn.name
+            fn.name || ""
           ),
 
         summary:
           guessFunctionSummary(
-            fn.name,
-            fn.fileName
+            fn.name || "",
+            fn.fileName || ""
           ),
 
-        parameters:
-          extractFunctionParametersFromCode(
-            code
-          ),
+        parameters,
 
         parameterCount:
-          extractFunctionParametersFromCode(
-            code
-          ).length,
+          parameters.length,
 
         returnValue:
           guessFunctionReturnValue(
@@ -255,7 +259,7 @@ function enrichProjectFunctionDatabaseV2(
             : "",
 
         aiComment:
-          ""
+          fn.aiComment || ""
       };
 
     });
