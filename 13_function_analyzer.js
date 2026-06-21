@@ -231,73 +231,50 @@ function copyFunctionAnalyzerMinimalCode(
   name
 ) {
 
-  const info =
-    getFunctionAnalyzerInfo(
+  const code =
+    getFunctionAnalyzerMinimalCode(
       name
     );
 
-  if (!info || !info.code) {
+  if (!code) {
     alert("コードなし");
     return;
   }
 
   copyTextFallback(
-    info.code
+    code
   );
 
   alert("関数コードをコピーしました");
 
 }
 
-function jumpFunctionAnalyzer(
+function getFunctionAnalyzerMinimalCode(
   name
 ) {
 
   const info =
     getFunctionAnalyzerInfo(name);
 
-  if (!info) {
-    alert("関数情報なし");
-    return;
-  }
-
-  const fileName =
-    String(info.fileName || "")
-      .replace(/\?v=.*$/, "");
-
-  const line =
-    Number(info.line || 1);
-
-  if (
-    typeof openRepairSearchFileAtLine ===
-    "function" &&
-    openRepairSearchFileAtLine(
-      info.fileName,
-      line
-    )
-  ) {
-    return;
+  if (!info || !info.code) {
+    return "";
   }
 
   if (
-    typeof openRepairSearchFileAtLine ===
-    "function" &&
-    openRepairSearchFileAtLine(
-      fileName,
-      line
-    )
+    typeof findFunctionBlockInText === "function"
   ) {
-    return;
+    const block =
+      findFunctionBlockInText(
+        info.code,
+        name
+      );
+
+    if (block && block.code) {
+      return block.code;
+    }
   }
 
-  if (
-    typeof jumpToFunction === "function"
-  ) {
-    jumpToFunction(name);
-    return;
-  }
-
-  alert("ジャンプできませんでした");
+  return info.code;
 
 }
 
