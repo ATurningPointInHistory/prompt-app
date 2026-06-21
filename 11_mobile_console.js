@@ -87,51 +87,29 @@ function addMobileConsoleLog(type, text) {
 
 }
 
-function showMobileConsole() {
+function buildDevConsoleToolbarHtml() {
 
-  openFloatPanel(
-    "Mobile Dev Console",
-    `
+  return `
 <div class="float-panel-actions">
 
-  <button onclick="pasteDevConsoleInput()">
-    📋 Paste
-  </button>
-
-  <button onclick="executeDevConsole()">
-    ▶ Run
-  </button>
-
-  <button onclick="pasteAndRunDevConsole()">
-    ⚡ Paste&Run
-  </button>
-
-  <button onclick="clearDevConsoleInput()">
-    🗑 Clear
-  </button>
-
-  <button onclick="saveDevConsoleFavorite()">
-    ⭐ 保存
-  </button>
-
-  <button onclick="showDevConsoleFavorites()">
-    📂 Favorite
-  </button>
-
-  <button onclick="copyDevConsoleResult()">
-    📋 結果
-  </button>
-
-  <button onclick="showDevConsoleHistory()">
-    🕘 履歴
-  </button>
-
-  <button onclick="clearMobileConsole()">
-    🧹 ログ
-  </button>
+  <button onclick="pasteDevConsoleInput()">📋 Paste</button>
+  <button onclick="executeDevConsole()">▶ Run</button>
+  <button onclick="pasteAndRunDevConsole()">⚡ Paste&Run</button>
+  <button onclick="clearDevConsoleInput()">🗑 Clear</button>
+  <button onclick="saveDevConsoleFavorite()">⭐ 保存</button>
+  <button onclick="showDevConsoleFavorites()">📂 Favorite</button>
+  <button onclick="copyDevConsoleResult()">📋 結果</button>
+  <button onclick="showDevConsoleHistory()">🕘 履歴</button>
+  <button onclick="clearMobileConsole()">🧹 ログ</button>
 
 </div>
+`;
 
+}
+
+function buildDevConsoleInputHtml() {
+
+  return `
 <textarea
   id="devConsoleInput"
   rows="8"
@@ -148,12 +126,24 @@ function showMobileConsole() {
   localStorage.getItem("devConsoleLastInput") ||
   ""
 )}</textarea>
+`;
 
+}
+
+function buildDevConsoleSuggestionHtml() {
+
+  return `
 <div
   id="devConsoleSuggestion"
   class="dev-console-suggestion">
 </div>
+`;
 
+}
+
+function buildDevConsoleQuickCommandAreaHtml() {
+
+  return `
 <div class="small" style="margin-top:8px;">
 Quick Command
 </div>
@@ -163,11 +153,44 @@ Quick Command
   ${buildDevConsoleQuickCommands()}
 
 </div>
+`;
 
-${typeof buildVirtualKeyboardHtml === "function"
-  ? buildVirtualKeyboardHtml()
-  : ""}
+}
 
+function buildDevConsoleKeyboardHtml() {
+
+  if (
+    typeof buildVirtualKeyboardHtml ===
+    "function"
+  ) {
+    return buildVirtualKeyboardHtml();
+  }
+
+  return `
+<div class="virtual-keyboard">
+
+<button onclick="insertVirtualKeyboardText('(')">(</button>
+<button onclick="insertVirtualKeyboardText(')')">)</button>
+<button onclick="insertVirtualKeyboardText('{')">{</button>
+<button onclick="insertVirtualKeyboardText('}')">}</button>
+<button onclick="insertVirtualKeyboardText('[')">[</button>
+<button onclick="insertVirtualKeyboardText(']')">]</button>
+<button onclick="insertVirtualKeyboardText('=>')">=&gt;</button>
+<button onclick="insertVirtualKeyboardText('&&')">&amp;&amp;</button>
+<button onclick="insertVirtualKeyboardText('||')">||</button>
+<button onclick="moveVirtualKeyboardCursor(-1)">◀</button>
+<button onclick="moveVirtualKeyboardCursor(1)">▶</button>
+<button onclick="virtualKeyboardBackspace()">⌫</button>
+<button onclick="virtualKeyboardDelete()">Del</button>
+
+</div>
+`;
+
+}
+
+function buildDevConsoleResultHtml() {
+
+  return `
 <div class="small" style="margin-top:8px;">
 実行結果
 </div>
@@ -185,7 +208,13 @@ ${typeof buildVirtualKeyboardHtml === "function"
 >${escapeHtml(
   devConsoleResult || ""
 )}</textarea>
+`;
 
+}
+
+function buildDevConsoleLogHtml() {
+
+  return `
 <div class="small" style="margin-top:8px;">
 Console Log
 </div>
@@ -199,7 +228,29 @@ ${escapeHtml(
     .join("\n\n") || "ログなし"
 )}
 </pre>
-`
+`;
+
+}
+
+function buildMobileConsoleHtml() {
+
+  return `
+${buildDevConsoleToolbarHtml()}
+${buildDevConsoleInputHtml()}
+${buildDevConsoleSuggestionHtml()}
+${buildDevConsoleQuickCommandAreaHtml()}
+${buildDevConsoleKeyboardHtml()}
+${buildDevConsoleResultHtml()}
+${buildDevConsoleLogHtml()}
+`;
+
+}
+
+function showMobileConsole() {
+
+  openFloatPanel(
+    "Mobile Dev Console",
+    buildMobileConsoleHtml()
   );
 
 }
