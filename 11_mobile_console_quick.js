@@ -12,12 +12,8 @@ let devConsoleQuickButtons =
         code: "Object.keys(projectFunctionDatabase || {}).length"
       },
       {
-        label: "Load",
-        code: "loadCurrentProjectSearchFiles()"
-      },
-      {
-        label: "Update",
-        code: "updateProjectFunctionDatabase(\"currentProject\")"
+        label: "Refresh",
+        code: "refreshCurrentProjectFunctionDatabase()"
       },
       {
         label: "Health",
