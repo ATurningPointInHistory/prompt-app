@@ -3,106 +3,46 @@
    Dev Console Autocomplete
 =============================== */
 
-function getDevConsoleAutocompleteCandidates(
-  keyword
-) {
+function getDevConsoleAutocompleteWord() {
 
-  const word =
-    String(keyword || "")
-      .toLowerCase();
+  const input =
+    get("devConsoleInput");
 
-  if (!word) {
-    return [];
+  if (!input) {
+    return "";
   }
 
-  const results = [];
+  const text =
+    input.value || "";
 
-  const names =
-    typeof getAllFunctionNames === "function"
-      ? getAllFunctionNames()
-      : Object.keys(
-          window.projectFunctionDatabase || {}
-        );
+  const pos =
+    typeof input.selectionStart === "number"
+      ? input.selectionStart
+      : text.length;
 
-  names.forEach(name => {
+  const before =
+    text.slice(0, pos);
 
-    const text =
-      String(name || "");
+  const match =
+    before.match(
+      /([a-zA-Z_$][\w$]*)$/
+    );
 
-    const lower =
-      text.toLowerCase();
+  if (match) {
+    return match[1];
+  }
 
-    if (!lower.includes(word)) {
-      return;
-    }
+  const fallback =
+    text.match(
+      /([a-zA-Z_$][\w$]*)$/
+    );
 
-    const info =
-      typeof getFunctionInfoFromDatabase === "function"
-        ? getFunctionInfoFromDatabase(text)
-        : null;
-
-    results.push({
-      type: "function",
-      name: text,
-      label: text + "()",
-      insert: text + "()",
-      fileName:
-        info && info.fileName
-          ? info.fileName
-          : "",
-      line:
-        info && info.line
-          ? info.line
-          : 0,
-      score:
-        lower.startsWith(word)
-          ? 100
-          : lower.includes(word)
-            ? 50
-            : 0
-    });
-
-  });
-
-  [
-    "projectFunctionDatabase",
-    "repairSearchFileStore",
-    "repairGlobalSearchResults",
-    "repairSearchMatches",
-    "currentProjectAnalyzeMode",
-    "currentRepairFile",
-    "devConsoleResult"
-  ].forEach(name => {
-
-    const lower =
-      name.toLowerCase();
-
-    if (!lower.includes(word)) {
-      return;
-    }
-
-    results.push({
-      type: "variable",
-      name,
-      label: name,
-      insert: name,
-      fileName: "",
-      line: 0,
-      score:
-        lower.startsWith(word)
-          ? 80
-          : 30
-    });
-
-  });
-
-  return results
-    .sort((a, b) =>
-      b.score - a.score
-    )
-    .slice(0, 20);
+  return fallback
+    ? fallback[1]
+    : "";
 
 }
+
 function getDevConsoleAutocompleteCandidates(
   keyword
 ) {
