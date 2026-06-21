@@ -632,6 +632,160 @@ function jumpToFunction(
 
 }
 
+function buildProjectFunctionDatabase(
+  sources
+) {
+
+  const database = {};
+
+  (sources || []).forEach(source => {
+
+    const fileName =
+      source.fileName ||
+      source.name ||
+      "unknown";
+
+    const code =
+      source.code ||
+      source.text ||
+      source.content ||
+      source.value ||
+      "";
+
+    if (!code) {
+      return;
+    }
+
+    let blocks = [];
+
+    try {
+      blocks =
+        extractFunctionBlocksFromText(
+          code
+        ) || [];
+    } catch (e) {
+      console.warn(
+        "extractFunctionBlocksFromText failed:",
+        fileName,
+        e
+      );
+      return;
+    }
+
+    blocks.forEach(block => {
+
+      if (!block || !block.name) {
+        return;
+      }
+
+      let blockCode =
+        block.code ||
+        block.block ||
+        "";
+
+      database[block.name] = {
+        name: block.name,
+        fileName,
+        line:
+          calcLineNumberFromIndex(
+            code,
+            block.start || 0
+          ),
+        start: block.start || 0,
+        end: block.end || 0,
+        type: block.type || "function",
+        code: blockCode,
+        called:
+          typeof extractCalledFunctions === "function"
+            ? filterProjectCalledFunctions(
+                extractCalledFunctions(
+                  blockCode
+                )
+              )
+            : [],
+        keywords:
+          typeof extractModuleKeywords === "function"
+            ? extractModuleKeywords(
+                blockCode
+              )
+            : []
+      };
+
+    });
+
+  });
+
+  enrichProjectFunctionDatabase(
+    database
+  );
+
+  window.projectFunctionDatabase =
+    database;
+
+  return database;
+
+}
+
+function filterProjectCalledFunctions(
+  names
+) {
+
+  const ignore =
+    typeof getIgnoredFunctionCalls === "function"
+      ? getIgnoredFunctionCalls()
+      : new Set();
+
+  return [...new Set(names || [])]
+    .filter(name =>
+      name &&
+      !ignore.has(name)
+    );
+
+}
+
+function enrichProjectFunctionDatabase(
+  database
+) {
+
+  const entries =
+    Object.values(database || {});
+
+  entries.forEach(fn => {
+
+    fn.calledBy = [];
+
+  });
+
+  entries.forEach(fn => {
+
+    (fn.called || []).forEach(calledName => {
+
+      if (
+        database[calledName] &&
+        !database[calledName].calledBy.includes(
+          fn.name
+        )
+      ) {
+        database[calledName].calledBy.push(
+          fn.name
+        );
+      }
+
+    });
+
+  });
+
+}
+
+window.buildProjectFunctionDatabase =
+  buildProjectFunctionDatabase;
+
+window.filterProjectCalledFunctions =
+  filterProjectCalledFunctions;
+
+window.enrichProjectFunctionDatabase =
+  enrichProjectFunctionDatabase;
+
 window.jumpToFunction =
   jumpToFunction;
 
