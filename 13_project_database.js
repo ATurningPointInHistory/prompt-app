@@ -595,6 +595,13 @@ function updateProjectDatabase(
         : "editor"
     );
 
+  // ★追加
+  currentProjectAnalyzeMode =
+    useMode;
+
+  window.currentProjectAnalyzeMode =
+    useMode;
+
   const sources =
     typeof getProjectAnalyzeSources === "function"
       ? getProjectAnalyzeSources(
@@ -612,21 +619,27 @@ function updateProjectDatabase(
     buildProjectDatabase(
       sources,
       {
-        mode:
-          useMode
+        mode: useMode
       }
+    );
+
+  // ★追加（buildProjectDatabaseが返さない場合の保険）
+  db.functions =
+    db.functions ||
+    buildProjectFunctionDatabase(
+      sources
     );
 
   window.projectDatabase =
     db;
 
   window.projectFunctionDatabase =
-    db.functions || {};
+    db.functions;
 
   console.log(
     "updateProjectDatabase functions:",
     Object.keys(
-      db.functions || {}
+      db.functions
     ).length
   );
 
