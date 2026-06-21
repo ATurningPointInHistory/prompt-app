@@ -28,6 +28,36 @@ function getFunctionAnalyzerInfo(
     return projectFunctionDatabase[name];
   }
 
+  if (
+    typeof updateProjectDatabase === "function"
+  ) {
+
+    const mode =
+      typeof getCurrentProjectAnalyzeMode === "function"
+        ? getCurrentProjectAnalyzeMode()
+        : "currentProject";
+
+    updateProjectDatabase(
+      mode
+    );
+
+    if (
+      window.projectDatabase &&
+      projectDatabase.functions &&
+      projectDatabase.functions[name]
+    ) {
+      return projectDatabase.functions[name];
+    }
+
+    if (
+      window.projectFunctionDatabase &&
+      projectFunctionDatabase[name]
+    ) {
+      return projectFunctionDatabase[name];
+    }
+
+  }
+
   return null;
 
 }
