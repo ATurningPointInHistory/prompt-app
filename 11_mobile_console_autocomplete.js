@@ -12,19 +12,33 @@ function getDevConsoleAutocompleteWord() {
     return "";
   }
 
+  const text =
+    input.value || "";
+
   const pos =
-    input.selectionStart || 0;
+    typeof input.selectionStart === "number"
+      ? input.selectionStart
+      : text.length;
 
   const before =
-    input.value.slice(0, pos);
+    text.slice(0, pos);
 
   const match =
     before.match(
-      /[a-zA-Z_$][\w$]*$/
+      /([a-zA-Z_$][\w$]*)$/
     );
 
-  return match
-    ? match[0]
+  if (match) {
+    return match[1];
+  }
+
+  const fallback =
+    text.match(
+      /([a-zA-Z_$][\w$]*)$/
+    );
+
+  return fallback
+    ? fallback[1]
     : "";
 
 }
