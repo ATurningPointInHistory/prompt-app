@@ -35,17 +35,29 @@ function extractModuleKeywords(code) {
 
 }
 
-function extractCalledFunctionsFromBlocks(blocks) {
+function extractCalledFunctionsFromBlocks(
+  blocks
+) {
 
   const calls =
     new Set();
 
-  blocks.forEach(block => {
+  (blocks || []).forEach(block => {
+
+    const code =
+      block.code ||
+      block.block ||
+      block.text ||
+      "";
+
+    if (!code) {
+      return;
+    }
 
     const list =
-      extractCalledFunctions(
-        block.code || ""
-      );
+      typeof extractCalledFunctions === "function"
+        ? extractCalledFunctions(code)
+        : [];
 
     list.forEach(name => {
       calls.add(name);
@@ -53,7 +65,17 @@ function extractCalledFunctionsFromBlocks(blocks) {
 
   });
 
-  return [...calls].sort();
+  const ignore =
+    typeof getIgnoredFunctionCalls === "function"
+      ? getIgnoredFunctionCalls()
+      : new Set();
+
+  return [...calls]
+    .filter(name =>
+      name &&
+      !ignore.has(name)
+    )
+    .sort();
 
 }
 
