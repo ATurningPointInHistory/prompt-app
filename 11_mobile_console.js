@@ -236,6 +236,9 @@ function buildMobileConsoleHtml() {
 
   return `
 ${buildDevConsoleToolbarHtml()}
+${buildAnalyzeSourceSelectorHtml({
+  label: "編集エリア"
+})}
 ${buildDevConsoleInputHtml()}
 ${buildDevConsoleSuggestionHtml()}
 ${buildDevConsoleQuickCommandAreaHtml()}
