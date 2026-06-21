@@ -298,134 +298,6 @@ function getAnalyzeSourcesFromCurrentProject() {
 
 }
 
-function buildProjectFunctionDatabase(
-  sources
-) {
-
-  const database = {};
-
-  (sources || []).forEach(source => {
-
-    const fileName =
-      source.fileName ||
-      source.name ||
-      "unknown";
-
-    const code =
-      source.code ||
-      source.text ||
-      source.content ||
-      source.value ||
-      "";
-
-    if (!code) {
-      return;
-    }
-
-    let blocks = [];
-
-    try {
-      blocks =
-        extractFunctionBlocksFromText(
-          code
-        ) || [];
-    } catch (e) {
-      console.warn(
-        "extractFunctionBlocksFromText failed:",
-        fileName,
-        e
-      );
-      return;
-    }
-
-    blocks.forEach(block => {
-
-      if (!block || !block.name) {
-        return;
-      }
-
-      let blockCode =
-        block.code ||
-        block.block ||
-        "";
-
-      if (
-        typeof findFunctionBlockInText === "function"
-      ) {
-        const exactBlock =
-          findFunctionBlockInText(
-            blockCode,
-            block.name
-          );
-
-        if (
-          exactBlock &&
-          exactBlock.code
-        ) {
-          blockCode =
-            exactBlock.code;
-        }
-      }
-
-      const line =
-        typeof block.startLine === "number"
-          ? block.startLine + 1
-          : typeof block.line === "number"
-            ? block.line + 1
-            : calcLineNumberFromIndex(
-                code,
-                block.start || 0
-              );
-
-      database[block.name] = {
-        name: block.name,
-        fileName,
-        line,
-        start: block.start || 0,
-        end: block.end || 0,
-        type: block.type || "function",
-        code: blockCode,
-
-        called:
-          typeof extractCalledFunctions === "function"
-            ? filterProjectCalledFunctions(
-                extractCalledFunctions(
-                  blockCode
-                )
-              )
-            : [],
-
-        keywords:
-          typeof extractModuleKeywords === "function"
-            ? extractModuleKeywords(
-                blockCode
-              )
-            : []
-      };
-
-    });
-
-  });
-
-  if (
-    typeof enrichProjectFunctionDatabase ===
-    "function"
-  ) {
-    enrichProjectFunctionDatabase(
-      database
-    );
-  }
-
-  projectFunctionDatabase =
-    database;
-
-  window.projectFunctionDatabase =
-    database;
-
-  return database;
-
-}
-
 function updateProjectFunctionDatabase(
   mode = "editor"
 ) {
@@ -541,25 +413,114 @@ function getAnalyzeSourcesFromCurrentProject() {
 
 }
 
+function buildProjectFunctionDatabase(
+  sources
+) {
+
+  const database = {};
+
+  (sources || []).forEach(source => {
+
+    const fileName =
+      source.fileName ||
+      source.name ||
+      "unknown";
+
+    const code =
+      source.code ||
+      source.text ||
+      source.content ||
+      source.value ||
+      "";
+
+    if (!code) {
+      return;
+    }
+
+    let blocks = [];
+
+    try {
+      blocks =
+        extractFunctionBlocksFromText(code) || [];
+    } catch (e) {
+      console.warn(
+        "extractFunctionBlocksFromText failed:",
+        fileName,
+        e
+      );
+      return;
+    }
+
+    blocks.forEach(block => {
+
+      if (!block || !block.name) {
+        return;
+      }
+
+      const blockCode =
+        block.code ||
+        block.block ||
+        "";
+
+      database[block.name] = {
+        name: block.name,
+        fileName,
+        line:
+          typeof block.startLine === "number"
+            ? block.startLine
+            : typeof block.line === "number"
+              ? block.line
+              : calcLineNumberFromIndex(
+                  code,
+                  block.start || 0
+                ),
+        start: block.start || 0,
+        end: block.end || 0,
+        type: block.type || "function",
+        code: blockCode,
+        called:
+          typeof extractCalledFunctions === "function"
+            ? filterProjectCalledFunctions(
+                extractCalledFunctions(blockCode)
+              )
+            : [],
+        keywords:
+          typeof extractModuleKeywords === "function"
+            ? extractModuleKeywords(blockCode)
+            : []
+      };
+
+    });
+
+  });
+
+  enrichProjectFunctionDatabase(database);
+
+  projectFunctionDatabase =
+    database;
+
+  window.projectFunctionDatabase =
+    database;
+
+  return database;
+
+}
+
 function filterProjectCalledFunctions(
   names
 ) {
 
-  let ignore =
-    new Set();
-
-  if (
+  const ignore =
     typeof getIgnoredFunctionCalls === "function"
-  ) {
-    ignore =
-      getIgnoredFunctionCalls();
-  }
+      ? getIgnoredFunctionCalls()
+      : new Set();
 
-  return (names || [])
-    .filter(name =>
-      name &&
-      !ignore.has(name)
-    );
+  return [
+    ...new Set(names || [])
+  ].filter(name =>
+    name &&
+    !ignore.has(name)
+  );
 
 }
 
@@ -567,51 +528,35 @@ function enrichProjectFunctionDatabase(
   database
 ) {
 
-  Object.values(database)
-    .forEach(item => {
+  const entries =
+    Object.values(database || {});
 
-      item.calledBy = [];
-      item.callCount = 0;
+  entries.forEach(fn => {
+    fn.calledBy = [];
+    fn.callCount = 0;
+  });
 
-    });
+  entries.forEach(caller => {
 
-  Object.values(database)
-    .forEach(caller => {
+    (caller.called || []).forEach(calledName => {
 
-      (caller.called || [])
-        .forEach(calledName => {
+      const target =
+        database[calledName];
 
-          const target =
-            database[calledName];
+      if (!target) {
+        return;
+      }
 
-          if (!target) {
-            return;
-          }
+      if (!target.calledBy.includes(caller.name)) {
+        target.calledBy.push(caller.name);
+      }
 
-          if (
-            !Array.isArray(
-              target.calledBy
-            )
-          ) {
-            target.calledBy = [];
-          }
-
-          if (
-            !target.calledBy.includes(
-              caller.name
-            )
-          ) {
-            target.calledBy.push(
-              caller.name
-            );
-          }
-
-          target.callCount =
-            Number(target.callCount || 0) + 1;
-
-        });
+      target.callCount =
+        Number(target.callCount || 0) + 1;
 
     });
+
+  });
 
   return database;
 
@@ -648,150 +593,6 @@ function jumpToFunction(
 
 }
 
-function buildProjectFunctionDatabase(
-  sources
-) {
-
-  const database = {};
-
-  (sources || []).forEach(source => {
-
-    const fileName =
-      source.fileName ||
-      source.name ||
-      "unknown";
-
-    const code =
-      source.code ||
-      source.text ||
-      source.content ||
-      source.value ||
-      "";
-
-    if (!code) {
-      return;
-    }
-
-    let blocks = [];
-
-    try {
-      blocks =
-        extractFunctionBlocksFromText(
-          code
-        ) || [];
-    } catch (e) {
-      console.warn(
-        "extractFunctionBlocksFromText failed:",
-        fileName,
-        e
-      );
-      return;
-    }
-
-    blocks.forEach(block => {
-
-      if (!block || !block.name) {
-        return;
-      }
-
-      let blockCode =
-        block.code ||
-        block.block ||
-        "";
-
-      database[block.name] = {
-        name: block.name,
-        fileName,
-        line:
-          calcLineNumberFromIndex(
-            code,
-            block.start || 0
-          ),
-        start: block.start || 0,
-        end: block.end || 0,
-        type: block.type || "function",
-        code: blockCode,
-        called:
-          typeof extractCalledFunctions === "function"
-            ? filterProjectCalledFunctions(
-                extractCalledFunctions(
-                  blockCode
-                )
-              )
-            : [],
-        keywords:
-          typeof extractModuleKeywords === "function"
-            ? extractModuleKeywords(
-                blockCode
-              )
-            : []
-      };
-
-    });
-
-  });
-
-  enrichProjectFunctionDatabase(
-    database
-  );
-
-  window.projectFunctionDatabase =
-    database;
-
-  return database;
-
-}
-
-function filterProjectCalledFunctions(
-  names
-) {
-
-  const ignore =
-    typeof getIgnoredFunctionCalls === "function"
-      ? getIgnoredFunctionCalls()
-      : new Set();
-
-  return [...new Set(names || [])]
-    .filter(name =>
-      name &&
-      !ignore.has(name)
-    );
-
-}
-
-function enrichProjectFunctionDatabase(
-  database
-) {
-
-  const entries =
-    Object.values(database || {});
-
-  entries.forEach(fn => {
-
-    fn.calledBy = [];
-
-  });
-
-  entries.forEach(fn => {
-
-    (fn.called || []).forEach(calledName => {
-
-      if (
-        database[calledName] &&
-        !database[calledName].calledBy.includes(
-          fn.name
-        )
-      ) {
-        database[calledName].calledBy.push(
-          fn.name
-        );
-      }
-
-    });
-
-  });
-
-}
 
 window.buildProjectFunctionDatabase =
   buildProjectFunctionDatabase;
