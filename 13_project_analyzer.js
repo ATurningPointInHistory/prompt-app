@@ -264,24 +264,40 @@ function getAnalyzeSourcesFromEditor() {
 
 function getAnalyzeSourcesFromCurrentProject() {
 
-  const candidates = [
-    window.currentProjectSearchFiles,
-    window.repairSearchFiles,
-    window.projectSearchFiles,
-    window.loadedProjectFiles,
-    window.currentProjectFiles,
-    window.searchFileList
-  ];
+  if (
+    typeof getRepairSearchFiles === "function"
+  ) {
 
-  for (const list of candidates) {
+    const files =
+      getRepairSearchFiles();
 
-    if (!Array.isArray(list)) {
-      continue;
+    if (Array.isArray(files)) {
+      return files
+        .map(file => ({
+          fileName:
+            file.fileName ||
+            file.name ||
+            file.path ||
+            "unknown",
+          code:
+            file.code ||
+            file.text ||
+            file.content ||
+            file.value ||
+            ""
+        }))
+        .filter(source =>
+          source.fileName &&
+          source.code
+        );
     }
 
-    const sources =
-      list
-        .map(file => ({
+  }
+
+  return [];
+
+}
+
 function buildProjectFunctionDatabase(
   sources
 ) {
