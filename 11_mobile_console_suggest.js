@@ -258,10 +258,16 @@ function runDevConsoleFavorite(
     index
   );
 
-  setTimeout(
-    executeDevConsole,
-    50
-  );
+  setTimeout(() => {
+
+    if (
+      typeof executeDevConsole ===
+      "function"
+    ) {
+      executeDevConsole();
+    }
+
+  }, 120);
 
 }
 
