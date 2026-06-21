@@ -674,6 +674,15 @@ window.searchFunctionDatabase =
 window.enrichProjectFunctionDatabase =
   enrichProjectFunctionDatabase;
 
+window.filterProjectCalledFunctions =
+  filterProjectCalledFunctions;
+
+window.extractModuleKeywords =
+  extractModuleKeywords;
+
+window.extractCalledFunctionsFromBlocks =
+  extractCalledFunctionsFromBlocks;
+
 console.log(
   "13_project_analyzer loaded"
 );
