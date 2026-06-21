@@ -532,13 +532,25 @@ function enrichProjectFunctionDatabase(
     Object.values(database || {});
 
   entries.forEach(fn => {
-    fn.calledBy = [];
-    fn.callCount = 0;
+
+    fn.calledBy =
+      Array.isArray(fn.calledBy)
+        ? fn.calledBy
+        : [];
+
+    fn.callCount =
+      Number(fn.callCount || 0);
+
   });
 
   entries.forEach(caller => {
 
-    (caller.called || []).forEach(calledName => {
+    const calledList =
+      Array.isArray(caller.called)
+        ? caller.called
+        : [];
+
+    calledList.forEach(calledName => {
 
       const target =
         database[calledName];
@@ -547,8 +559,19 @@ function enrichProjectFunctionDatabase(
         return;
       }
 
-      if (!target.calledBy.includes(caller.name)) {
-        target.calledBy.push(caller.name);
+      target.calledBy =
+        Array.isArray(target.calledBy)
+          ? target.calledBy
+          : [];
+
+      if (
+        !target.calledBy.includes(
+          caller.name
+        )
+      ) {
+        target.calledBy.push(
+          caller.name
+        );
       }
 
       target.callCount =
