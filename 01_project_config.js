@@ -997,10 +997,10 @@ async function refreshCurrentProjectFunctionDatabase() {
   }
 
   if (
-    typeof updateProjectFunctionDatabase ===
+    typeof updateProjectDatabase ===
     "function"
   ) {
-    return updateProjectFunctionDatabase(
+    return updateProjectDatabase(
       "currentProject"
     );
   }
@@ -1008,6 +1008,9 @@ async function refreshCurrentProjectFunctionDatabase() {
   return null;
 
 }
+
+window.refreshCurrentProjectFunctionDatabase =
+  refreshCurrentProjectFunctionDatabase;
 
 window.refreshCurrentProjectFunctionDatabase =
   refreshCurrentProjectFunctionDatabase;
