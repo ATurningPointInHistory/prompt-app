@@ -843,6 +843,31 @@ function openRepairSearchFileAtLine(
 
 }
 
+async function refreshCurrentProjectFunctionDatabase() {
+
+  if (
+    typeof loadCurrentProjectSearchFiles ===
+    "function"
+  ) {
+    await loadCurrentProjectSearchFiles();
+  }
+
+  if (
+    typeof updateProjectFunctionDatabase ===
+    "function"
+  ) {
+    return updateProjectFunctionDatabase(
+      "currentProject"
+    );
+  }
+
+  return null;
+
+}
+
+window.refreshCurrentProjectFunctionDatabase =
+  refreshCurrentProjectFunctionDatabase;
+
 window.getProjectAnalyzeSources =
   getProjectAnalyzeSources;
 
