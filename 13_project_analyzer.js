@@ -282,57 +282,6 @@ function getAnalyzeSourcesFromCurrentProject() {
     const sources =
       list
         .map(file => ({
-          fileName:
-            file.name ||
-            file.fileName ||
-            file.path ||
-            "unknown",
-          code:
-            file.text ||
-            file.code ||
-            file.content ||
-            file.value ||
-            ""
-        }))
-        .filter(file =>
-          file.code
-        );
-
-    if (sources.length) {
-      return sources;
-    }
-
-  }
-
-  return [];
-
-}
-
-function getAnalyzeSourcesFromLoadedFiles() {
-
-  if (
-    Array.isArray(window.repairSearchFiles)
-  ) {
-    return window.repairSearchFiles
-      .map(file => ({
-        fileName:
-          file.name ||
-          file.fileName ||
-          "unknown",
-        code:
-          file.text ||
-          file.code ||
-          ""
-      }))
-      .filter(file =>
-        file.code
-      );
-  }
-
-  return [];
-
-}
-
 function buildProjectFunctionDatabase(
   sources
 ) {
@@ -368,10 +317,31 @@ function buildProjectFunctionDatabase(
         return;
       }
 
-      const blockCode =
+      let blockCode =
         block.code ||
         block.block ||
         "";
+
+      if (
+        typeof findFunctionBlockInText ===
+        "function"
+      ) {
+
+        const exactBlock =
+          findFunctionBlockInText(
+            blockCode,
+            block.name
+          );
+
+        if (
+          exactBlock &&
+          exactBlock.code
+        ) {
+          blockCode =
+            exactBlock.code;
+        }
+
+      }
 
       database[block.name] = {
         name:
