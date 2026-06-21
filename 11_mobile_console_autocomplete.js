@@ -3,43 +3,204 @@
    Dev Console Autocomplete
 =============================== */
 
-function getDevConsoleAutocompleteWord() {
+function getDevConsoleAutocompleteCandidates(
+  keyword
+) {
 
-  const input =
-    get("devConsoleInput");
+  const word =
+    String(keyword || "")
+      .toLowerCase();
 
-  if (!input) {
-    return "";
+  if (!word) {
+    return [];
   }
 
-  const text =
-    input.value || "";
+  const results = [];
 
-  const pos =
-    typeof input.selectionStart === "number"
-      ? input.selectionStart
-      : text.length;
+  const names =
+    typeof getAllFunctionNames === "function"
+      ? getAllFunctionNames()
+      : Object.keys(
+          window.projectFunctionDatabase || {}
+        );
 
-  const before =
-    text.slice(0, pos);
+  names.forEach(name => {
 
-  const match =
-    before.match(
-      /([a-zA-Z_$][\w$]*)$/
-    );
+    const text =
+      String(name || "");
 
-  if (match) {
-    return match[1];
+    const lower =
+      text.toLowerCase();
+
+    if (!lower.includes(word)) {
+      return;
+    }
+
+    const info =
+      typeof getFunctionInfoFromDatabase === "function"
+        ? getFunctionInfoFromDatabase(text)
+        : null;
+
+    results.push({
+      type: "function",
+      name: text,
+      label: text + "()",
+      insert: text + "()",
+      fileName:
+        info && info.fileName
+          ? info.fileName
+          : "",
+      line:
+        info && info.line
+          ? info.line
+          : 0,
+      score:
+        lower.startsWith(word)
+          ? 100
+          : lower.includes(word)
+            ? 50
+            : 0
+    });
+
+  });
+
+  [
+    "projectFunctionDatabase",
+    "repairSearchFileStore",
+    "repairGlobalSearchResults",
+    "repairSearchMatches",
+    "currentProjectAnalyzeMode",
+    "currentRepairFile",
+    "devConsoleResult"
+  ].forEach(name => {
+
+    const lower =
+      name.toLowerCase();
+
+    if (!lower.includes(word)) {
+      return;
+    }
+
+    results.push({
+      type: "variable",
+      name,
+      label: name,
+      insert: name,
+      fileName: "",
+      line: 0,
+      score:
+        lower.startsWith(word)
+          ? 80
+          : 30
+    });
+
+  });
+
+  return results
+    .sort((a, b) =>
+      b.score - a.score
+    )
+    .slice(0, 20);
+
+}
+function getDevConsoleAutocompleteCandidates(
+  keyword
+) {
+
+  const word =
+    String(keyword || "")
+      .toLowerCase();
+
+  if (!word) {
+    return [];
   }
 
-  const fallback =
-    text.match(
-      /([a-zA-Z_$][\w$]*)$/
-    );
+  const results = [];
 
-  return fallback
-    ? fallback[1]
-    : "";
+  const names =
+    typeof getAllFunctionNames === "function"
+      ? getAllFunctionNames()
+      : Object.keys(
+          window.projectFunctionDatabase || {}
+        );
+
+  names.forEach(name => {
+
+    const text =
+      String(name || "");
+
+    const lower =
+      text.toLowerCase();
+
+    if (!lower.includes(word)) {
+      return;
+    }
+
+    const info =
+      typeof getFunctionInfoFromDatabase === "function"
+        ? getFunctionInfoFromDatabase(text)
+        : null;
+
+    results.push({
+      type: "function",
+      name: text,
+      label: text + "()",
+      insert: text + "()",
+      fileName:
+        info && info.fileName
+          ? info.fileName
+          : "",
+      line:
+        info && info.line
+          ? info.line
+          : 0,
+      score:
+        lower.startsWith(word)
+          ? 100
+          : lower.includes(word)
+            ? 50
+            : 0
+    });
+
+  });
+
+  [
+    "projectFunctionDatabase",
+    "repairSearchFileStore",
+    "repairGlobalSearchResults",
+    "repairSearchMatches",
+    "currentProjectAnalyzeMode",
+    "currentRepairFile",
+    "devConsoleResult"
+  ].forEach(name => {
+
+    const lower =
+      name.toLowerCase();
+
+    if (!lower.includes(word)) {
+      return;
+    }
+
+    results.push({
+      type: "variable",
+      name,
+      label: name,
+      insert: name,
+      fileName: "",
+      line: 0,
+      score:
+        lower.startsWith(word)
+          ? 80
+          : 30
+    });
+
+  });
+
+  return results
+    .sort((a, b) =>
+      b.score - a.score
+    )
+    .slice(0, 20);
 
 }
 
