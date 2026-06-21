@@ -43,6 +43,22 @@ function getDevConsoleAutocompleteWord() {
 
 }
 
+function getDevConsoleAutocompleteUseCount(
+  name
+) {
+
+  const stats =
+    loadJson(
+      "devConsoleAutocompleteUseStats",
+      {}
+    );
+
+  return Number(
+    stats[name] || 0
+  );
+
+}
+
 function getDevConsoleAutocompleteCandidates(
   keyword
 ) {
@@ -72,7 +88,8 @@ function getDevConsoleAutocompleteCandidates(
     const lower =
       text.toLowerCase();
 
-    if (!lower.includes(word)) {
+    // 先頭一致だけ拾う
+    if (!lower.startsWith(word)) {
       return;
     }
 
@@ -95,11 +112,8 @@ function getDevConsoleAutocompleteCandidates(
           ? info.line
           : 0,
       score:
-        lower.startsWith(word)
-          ? 100
-          : lower.includes(word)
-            ? 50
-            : 0
+        1000 +
+        getDevConsoleAutocompleteUseCount(text)
     });
 
   });
@@ -117,7 +131,8 @@ function getDevConsoleAutocompleteCandidates(
     const lower =
       name.toLowerCase();
 
-    if (!lower.includes(word)) {
+    // 変数も先頭一致だけ
+    if (!lower.startsWith(word)) {
       return;
     }
 
@@ -129,9 +144,8 @@ function getDevConsoleAutocompleteCandidates(
       fileName: "",
       line: 0,
       score:
-        lower.startsWith(word)
-          ? 80
-          : 30
+        500 +
+        getDevConsoleAutocompleteUseCount(name)
     });
 
   });
@@ -141,6 +155,30 @@ function getDevConsoleAutocompleteCandidates(
       b.score - a.score
     )
     .slice(0, 20);
+
+}
+
+function saveDevConsoleAutocompleteUse(
+  name
+) {
+
+  if (!name) {
+    return;
+  }
+
+  const stats =
+    loadJson(
+      "devConsoleAutocompleteUseStats",
+      {}
+    );
+
+  stats[name] =
+    Number(stats[name] || 0) + 1;
+
+  localStorage.setItem(
+    "devConsoleAutocompleteUseStats",
+    JSON.stringify(stats)
+  );
 
 }
 
