@@ -593,15 +593,40 @@ function updateProjectDatabase(
 
   const sources =
     typeof getProjectAnalyzeSources === "function"
-      ? getProjectAnalyzeSources(useMode)
+      ? getProjectAnalyzeSources(
+          useMode
+        )
       : [];
 
-  return buildProjectDatabase(
-    sources,
-    {
-      mode: useMode
-    }
+  console.log(
+    "updateProjectDatabase sources:",
+    useMode,
+    sources.length
   );
+
+  const db =
+    buildProjectDatabase(
+      sources,
+      {
+        mode:
+          useMode
+      }
+    );
+
+  window.projectDatabase =
+    db;
+
+  window.projectFunctionDatabase =
+    db.functions || {};
+
+  console.log(
+    "updateProjectDatabase functions:",
+    Object.keys(
+      db.functions || {}
+    ).length
+  );
+
+  return db;
 
 }
 
