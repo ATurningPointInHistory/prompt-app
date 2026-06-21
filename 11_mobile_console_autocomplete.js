@@ -59,6 +59,22 @@ function getDevConsoleAutocompleteUseCount(
 
 }
 
+function getDevConsoleAutocompleteUseCount(
+  name
+) {
+
+  const stats =
+    loadJson(
+      "devConsoleAutocompleteUseStats",
+      {}
+    );
+
+  return Number(
+    stats[name] || 0
+  );
+
+}
+
 function getDevConsoleAutocompleteCandidates(
   keyword
 ) {
@@ -273,6 +289,64 @@ function getDevConsoleAutocompleteCandidates(
 
 }
 
+function applyDevConsoleAutocomplete(
+  index
+) {
+
+  const item =
+    window.devConsoleAutocompleteCandidates
+      ? window.devConsoleAutocompleteCandidates[index]
+      : null;
+
+  const input =
+    get("devConsoleInput");
+
+  if (!item || !input) {
+    return;
+  }
+
+  const pos =
+    input.selectionStart || 0;
+
+  const before =
+    input.value.slice(0, pos);
+
+  const after =
+    input.value.slice(pos);
+
+  const newBefore =
+    before.replace(
+      /[a-zA-Z_$][\w$]*$/,
+      item.insert
+    );
+
+  input.value =
+    newBefore + after;
+
+  const newPos =
+    newBefore.length;
+
+  input.focus();
+
+  input.selectionStart =
+    newPos;
+
+  input.selectionEnd =
+    newPos;
+
+  localStorage.setItem(
+    "devConsoleLastInput",
+    input.value
+  );
+
+  saveDevConsoleAutocompleteUse(
+    item.name
+  );
+
+  updateDevConsoleSuggestions();
+
+}
+
 function updateDevConsoleSuggestions() {
 
   const box =
@@ -359,60 +433,6 @@ function highlightDevConsoleAutocomplete(
     ),
     match => `<mark>${match}</mark>`
   );
-
-}
-
-function applyDevConsoleAutocomplete(
-  index
-) {
-
-  const item =
-    window.devConsoleAutocompleteCandidates
-      ? window.devConsoleAutocompleteCandidates[index]
-      : null;
-
-  const input =
-    get("devConsoleInput");
-
-  if (!item || !input) {
-    return;
-  }
-
-  const pos =
-    input.selectionStart || 0;
-
-  const before =
-    input.value.slice(0, pos);
-
-  const after =
-    input.value.slice(pos);
-
-  const newBefore =
-    before.replace(
-      /[a-zA-Z_$][\w$]*$/,
-      item.insert
-    );
-
-  input.value =
-    newBefore + after;
-
-  const newPos =
-    newBefore.length;
-
-  input.focus();
-
-  input.selectionStart =
-    newPos;
-
-  input.selectionEnd =
-    newPos;
-
-  localStorage.setItem(
-    "devConsoleLastInput",
-    input.value
-  );
-
-  updateDevConsoleSuggestions();
 
 }
 
