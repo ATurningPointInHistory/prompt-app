@@ -248,53 +248,6 @@ function deleteDevConsoleFavorite(
 
 }
 
-function updateDevConsoleSuggestions() {
-
-  const box =
-    get("devConsoleSuggestion");
-
-  const input =
-    get("devConsoleInput");
-
-  if (!box || !input) {
-    return;
-  }
-
-  const text =
-    input.value.trim();
-
-  if (!text) {
-    box.innerHTML = "";
-    return;
-  }
-
-  const names =
-    typeof getAllFunctionNames === "function"
-      ? getAllFunctionNames()
-      : [];
-
-  const hits =
-    names
-      .filter(name =>
-        name
-          .toLowerCase()
-          .includes(
-            text.toLowerCase()
-          )
-      )
-      .slice(0, 10);
-
-  box.innerHTML =
-    hits
-      .map(name => `
-<button onclick="jumpToFunction('${escapeHtml(name)}')">
-  ${escapeHtml(name)}
-</button>
-`)
-      .join("");
-
-}
-
 window.saveDevConsoleHistory =
   saveDevConsoleHistory;
 
@@ -321,6 +274,3 @@ window.runDevConsoleFavorite =
 
 window.deleteDevConsoleFavorite =
   deleteDevConsoleFavorite;
-
-window.updateDevConsoleSuggestions =
-  updateDevConsoleSuggestions;
