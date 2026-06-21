@@ -768,6 +768,145 @@ function getRepairSearchFiles() {
 }
 
 /* ===============================
+   Analyze Source Selector
+=============================== */
+
+function getAnalyzeSourceModeLabel(
+  mode
+) {
+
+  switch (mode) {
+
+    case "editor":
+      return "Editor";
+
+    case "currentProject":
+      return "Project";
+
+    case "loadedFiles":
+      return "Loaded";
+
+    default:
+      return "Unknown";
+
+  }
+
+}
+
+function buildAnalyzeSourceSelectorHtml(
+  options = {}
+) {
+
+  const label =
+    options.label || "解析元";
+
+  const onChange =
+    options.onChange ||
+    "changeAnalyzeSourceMode";
+
+  const mode =
+    typeof getCurrentProjectAnalyzeMode === "function"
+      ? getCurrentProjectAnalyzeMode()
+      : "editor";
+
+  function activeClass(value) {
+    return mode === value
+      ? " active"
+      : "";
+  }
+
+  return `
+<div
+  class="small"
+  style="
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-top:8px;
+    margin-bottom:4px;
+    flex-wrap:wrap;
+  ">
+
+  <span>${escapeHtml(label)}</span>
+
+  <button
+    class="mini-btn${activeClass("editor")}"
+    onclick="${onChange}('editor')">
+    Editor
+  </button>
+
+  <button
+    class="mini-btn${activeClass("currentProject")}"
+    onclick="${onChange}('currentProject')">
+    Project
+  </button>
+
+  <button
+    class="mini-btn${activeClass("loadedFiles")}"
+    onclick="${onChange}('loadedFiles')">
+    Loaded
+  </button>
+
+  <span>
+    ${escapeHtml(
+      getAnalyzeSourceModeLabel(mode)
+    )}
+  </span>
+
+</div>
+`;
+
+}
+
+async function changeAnalyzeSourceMode(
+  mode
+) {
+
+  if (
+    typeof setCurrentProjectAnalyzeMode ===
+    "function"
+  ) {
+    setCurrentProjectAnalyzeMode(
+      mode
+    );
+  }
+
+  if (
+    mode === "currentProject" &&
+    typeof refreshCurrentProjectFunctionDatabase ===
+      "function"
+  ) {
+
+    await refreshCurrentProjectFunctionDatabase();
+
+  } else if (
+    typeof updateProjectFunctionDatabase ===
+    "function"
+  ) {
+
+    updateProjectFunctionDatabase(
+      mode
+    );
+
+  }
+
+  if (
+    typeof updateDevConsoleSuggestions ===
+    "function"
+  ) {
+    updateDevConsoleSuggestions();
+  }
+
+  if (
+    typeof showMobileConsole ===
+    "function"
+  ) {
+    showMobileConsole();
+  }
+
+}
+
+/* ===============================
 JUMP共通関数
 =============================== */
 
@@ -894,6 +1033,15 @@ window.clearRepairSearchFiles =
 
 window.getRepairSearchFiles =
   getRepairSearchFiles;
+
+window.getAnalyzeSourceModeLabel =
+  getAnalyzeSourceModeLabel;
+
+window.buildAnalyzeSourceSelectorHtml =
+  buildAnalyzeSourceSelectorHtml;
+
+window.changeAnalyzeSourceMode =
+  changeAnalyzeSourceMode;
 
 window.openRepairSearchFileAtLine =
   openRepairSearchFileAtLine;
