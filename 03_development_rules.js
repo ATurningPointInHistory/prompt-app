@@ -200,33 +200,28 @@ function addDevelopmentRules(
     return;
   }
 
+  normalizeDevelopmentRules();
+
   const existingTexts =
     new Set(
-      developmentRules.map(rule =>
-        normalizeDevelopmentRuleText(rule)
+      developmentRules.map((rule, index) =>
+        normalizeDevelopmentRuleText(
+          formatDevelopmentRule(
+            rule,
+            index
+          )
+        )
       )
     );
 
   items.forEach(item => {
-
-    const normalized =
-      normalizeDevelopmentRuleText(
-        item
-      );
-
-    if (
-      !normalized ||
-      existingTexts.has(normalized)
-    ) {
-      return;
-    }
 
     const parsed =
       parseDevelopmentRuleText(
         item
       );
 
-    developmentRules.push({
+    const rule = {
       id:
         Date.now() +
         Math.random(),
@@ -253,9 +248,30 @@ function addDevelopmentRules(
       updated_at:
         new Date()
           .toISOString()
-    });
+    };
 
-    existingTexts.add(normalized);
+    const normalized =
+      normalizeDevelopmentRuleText(
+        formatDevelopmentRule(
+          rule,
+          developmentRules.length
+        )
+      );
+
+    if (
+      !normalized ||
+      existingTexts.has(normalized)
+    ) {
+      return;
+    }
+
+    developmentRules.push(
+      rule
+    );
+
+    existingTexts.add(
+      normalized
+    );
 
   });
 
@@ -273,6 +289,8 @@ function deleteDevelopmentRule(
   index
 ) {
 
+  normalizeDevelopmentRules();
+
   if (
     index < 0 ||
     index >= developmentRules.length
@@ -283,7 +301,10 @@ function deleteDevelopmentRule(
   if (
     !confirm(
       "このルールを削除しますか？\n\n" +
-      developmentRules[index]
+      formatDevelopmentRule(
+        developmentRules[index],
+        index
+      )
     )
   ) {
     return;
@@ -308,32 +329,45 @@ function editDevelopmentRule(
   index
 ) {
 
-  if (
-    index < 0 ||
-    index >= developmentRules.length
-  ) {
+  normalizeDevelopmentRules();
+
+  const rule =
+    developmentRules[index];
+
+  if (!rule) {
     return;
   }
 
-  const next =
+  const title =
     prompt(
-      "開発ルール編集",
-      developmentRules[index]
+      "開発ルール タイトル",
+      rule.title || ""
     );
 
-  if (next === null) {
+  if (title === null) {
     return;
   }
 
-  const value =
-    next.trim();
+  const body =
+    prompt(
+      "開発ルール 内容",
+      rule.body || ""
+    );
 
-  if (!value) {
+  if (body === null) {
     return;
   }
 
-  developmentRules[index] =
-    value;
+  rule.title =
+    title.trim() ||
+    "開発ルール";
+
+  rule.body =
+    body.trim();
+
+  rule.updated_at =
+    new Date()
+      .toISOString();
 
   saveDevelopmentRules();
 
@@ -670,7 +704,52 @@ function parseDevelopmentRuleText(
       match[2].trim()
   };
 
+function parseDevelopmentRuleText(
+  text
+) {
+
+  const raw =
+    String(text || "")
+      .trim();
+
+  const match =
+    raw.match(
+      /^【Rule\d+\s+(.+?)】\s*([\s\S]*)$/
+    );
+
+  if (!match) {
+    return {
+      title: "",
+      body: raw
+    };
+  }
+
+  return {
+    title:
+      match[1].trim(),
+
+    body:
+      match[2].trim()
+  };
+
 }
+
+function formatDevelopmentRule(
+  rule,
+  index
+) {
+
+  return (
+    "【Rule" +
+    (index + 1) +
+    " " +
+    (rule.title || "開発ルール") +
+    "】\n\n" +
+    (rule.body || "")
+  );
+
+}
+
 
 /* ===============================
    Global Export
@@ -708,3 +787,18 @@ window.addDevelopmentRuleObject =
 
 window.formatDevelopmentRule =
   formatDevelopmentRule;
+
+window.toggleDevelopmentRuleMenu =
+  toggleDevelopmentRuleMenu;
+
+window.promptAddDevelopmentRuleForm =
+  promptAddDevelopmentRuleForm;
+
+window.addDevelopmentRuleObject =
+  addDevelopmentRuleObject;
+
+window.formatDevelopmentRule =
+  formatDevelopmentRule;
+
+window.parseDevelopmentRuleText =
+  parseDevelopmentRuleText;
