@@ -704,34 +704,6 @@ function parseDevelopmentRuleText(
       match[2].trim()
   };
 
-function parseDevelopmentRuleText(
-  text
-) {
-
-  const raw =
-    String(text || "")
-      .trim();
-
-  const match =
-    raw.match(
-      /^【Rule\d+\s+(.+?)】\s*([\s\S]*)$/
-    );
-
-  if (!match) {
-    return {
-      title: "",
-      body: raw
-    };
-  }
-
-  return {
-    title:
-      match[1].trim(),
-
-    body:
-      match[2].trim()
-  };
-
 }
 
 function formatDevelopmentRule(
@@ -775,18 +747,6 @@ window.renderDevelopmentRules =
 
 window.copyDevelopmentRules =
   copyDevelopmentRules;
-
-window.toggleDevelopmentRuleMenu =
-  toggleDevelopmentRuleMenu;
-
-window.promptAddDevelopmentRuleForm =
-  promptAddDevelopmentRuleForm;
-
-window.addDevelopmentRuleObject =
-  addDevelopmentRuleObject;
-
-window.formatDevelopmentRule =
-  formatDevelopmentRule;
 
 window.toggleDevelopmentRuleMenu =
   toggleDevelopmentRuleMenu;
