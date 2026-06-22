@@ -1960,3 +1960,23 @@ mark {
   font-size:14px;
 
 }
+
+/* ===============================
+   .development rule
+=============================== */
+
+.development-rule-body{
+  white-space:pre-wrap;
+  font-size:13px;
+  margin:8px 0 0;
+}
+
+.development-rule-actions{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.development-rule-actions button{
+  flex:1;
+}
