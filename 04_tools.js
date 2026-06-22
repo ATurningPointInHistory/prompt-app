@@ -1445,42 +1445,6 @@ HTML HEALTHで確認したい。
 
 }
 
-function renderDevelopmentRules() {
-
-  openFloatPanel(
-    "📖 開発ルール",
-
-    `
-<div class="section-title">
-  📖 Development Rules
-</div>
-
-<div class="float-panel-actions">
-  <button onclick="promptAddDevelopmentRules()">
-    ＋追加
-  </button>
-
-  <button onclick="copyDevelopmentRules()">
-    📋コピー
-  </button>
-</div>
-
-<div id="developmentRulesList"></div>
-`
-  );
-
-  const box =
-    get("developmentRulesList");
-
-  if (!box) {
-    return;
-  }
-
-  box.innerHTML =
-    buildDevelopmentRulesHtml();
-
-}
-
 /* ===============================
    Code Navigation
 =============================== */
