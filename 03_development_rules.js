@@ -315,6 +315,8 @@ function editDevelopmentRule(
 
 function buildDevelopmentRulesHtml() {
 
+  normalizeDevelopmentRules();
+
   if (!developmentRules.length) {
     return `
 <div class="small-muted">
@@ -324,26 +326,37 @@ function buildDevelopmentRulesHtml() {
   }
 
   return developmentRules
-    .map((rule, index) => `
-<div class="backup-history-item">
+    .map((rule, index) => {
 
-  <pre class="code-preview"
-style="white-space:pre-wrap;max-height:220px;overflow:auto;">
-${escapeHtml(rule)}
-  </pre>
+      const title =
+        "Rule" +
+        (index + 1) +
+        " " +
+        (rule.title || "開発ルール");
 
-  <div>
-    <button onclick="editDevelopmentRule(${index})">
-      編集
-    </button>
+      return `
+<div class="todo-row">
 
-    <button onclick="deleteDevelopmentRule(${index})">
-      削除
-    </button>
+  <div class="todo-text">
+    <b>${escapeHtml(title)}</b>
+    <pre
+style="white-space:pre-wrap;font-size:11px;margin:6px 0 0;">
+${escapeHtml(rule.body || "")}
+    </pre>
   </div>
 
+  <button onclick="editDevelopmentRule(${index})">
+    編集
+  </button>
+
+  <button onclick="deleteDevelopmentRule(${index})">
+    削除
+  </button>
+
 </div>
-`)
+`;
+
+    })
     .join("");
 
 }
@@ -378,24 +391,12 @@ function renderDevelopmentRules() {
   class="todo-menu-grid"
   style="display:none;">
 
-  <button
-    onclick="promptAddDevelopmentRuleForm()">
+  <button onclick="promptAddDevelopmentRuleForm()">
     Rule
   </button>
 
-  <button
-    onclick="promptAddDevelopmentRules()">
+  <button onclick="promptAddDevelopmentRules()">
     一括
-  </button>
-
-  <button
-    onclick="editSelectedDevelopmentRule()">
-    編集
-  </button>
-
-  <button
-    onclick="deleteSelectedDevelopmentRule()">
-    削除
   </button>
 
 </div>
@@ -405,24 +406,8 @@ function renderDevelopmentRules() {
   class="todo-menu-grid"
   style="display:none;">
 
-  <button
-    onclick="copyDevelopmentRules()">
+  <button onclick="copyDevelopmentRules()">
     コピー
-  </button>
-
-  <button
-    onclick="exportDevelopmentRules()">
-    Export
-  </button>
-
-  <button
-    onclick="importDevelopmentRules()">
-    Import
-  </button>
-
-  <button
-    onclick="searchDevelopmentRules()">
-    検索
   </button>
 
 </div>
@@ -431,7 +416,6 @@ function renderDevelopmentRules() {
   id="developmentRulesList"
   class="todo-list">
 </div>
-
 `
 
   );
@@ -447,6 +431,46 @@ function renderDevelopmentRules() {
 
   box.innerHTML =
     buildDevelopmentRulesHtml();
+
+}
+
+function toggleDevelopmentRuleMenu(
+  type
+) {
+
+  const manage =
+    get("developmentRuleManageMenu");
+
+  const action =
+    get("developmentRuleActionMenu");
+
+  if (!manage || !action) {
+    return;
+  }
+
+  if (type === "manage") {
+
+    manage.style.display =
+      manage.style.display === "flex"
+        ? "none"
+        : "flex";
+
+    action.style.display =
+      "none";
+
+  }
+
+  if (type === "action") {
+
+    action.style.display =
+      action.style.display === "flex"
+        ? "none"
+        : "flex";
+
+    manage.style.display =
+      "none";
+
+  }
 
 }
 
@@ -476,9 +500,7 @@ function copyDevelopmentRules() {
   }
 
   const ok =
-    copyTextFallback(
-      text
-    );
+    copyTextFallback(text);
 
   alert(
     ok
@@ -691,6 +713,32 @@ function addDevelopmentRuleObject(
   saveDevelopmentRules();
 
   renderDevelopmentRules();
+
+}
+
+function formatDevelopmentRule(
+  rule,
+  index
+) {
+
+  normalizeDevelopmentRules();
+
+  const title =
+    rule.title ||
+    "開発ルール";
+
+  const body =
+    rule.body ||
+    "";
+
+  return (
+    "【Rule" +
+    (index + 1) +
+    " " +
+    title +
+    "】\n\n" +
+    body
+  );
 
 }
 
