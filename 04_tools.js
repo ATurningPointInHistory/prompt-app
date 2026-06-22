@@ -1445,6 +1445,12 @@ HTML HEALTHで確認したい。
 
 }
 
+function renderDevelopmentRules() {
+
+  openFloatPanel(
+    "📖 開発ルール",
+
+    `
 <div class="section-title">
   📖 Development Rules
 </div>
@@ -1460,6 +1466,20 @@ HTML HEALTHで確認したい。
 </div>
 
 <div id="developmentRulesList"></div>
+`
+  );
+
+  const box =
+    get("developmentRulesList");
+
+  if (!box) {
+    return;
+  }
+
+  box.innerHTML =
+    buildDevelopmentRulesHtml();
+
+}
 
 /* ===============================
    Code Navigation
