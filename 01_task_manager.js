@@ -289,34 +289,6 @@ async function runTask(
 }
 
 /* ===============================
-   Clear Task
-=============================== */
-
-function clearTask(
-  taskName
-) {
-
-  runningTasks.delete(
-    taskName
-  );
-
-  updateTaskButtons();
-
-}
-
-/* ===============================
-   Clear All Tasks
-=============================== */
-
-function clearAllTasks() {
-
-  runningTasks.clear();
-
-  updateTaskButtons();
-
-}
-
-/* ===============================
    Run Task Sync
 =============================== */
 
@@ -404,6 +376,34 @@ function runTaskSync(
     );
 
   }
+
+}
+
+/* ===============================
+   Clear Task
+=============================== */
+
+function clearTask(
+  taskName
+) {
+
+  runningTasks.delete(
+    taskName
+  );
+
+  updateTaskButtons();
+
+}
+
+/* ===============================
+   Clear All Tasks
+=============================== */
+
+function clearAllTasks() {
+
+  runningTasks.clear();
+
+  updateTaskButtons();
 
 }
 
