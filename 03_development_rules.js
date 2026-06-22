@@ -221,7 +221,39 @@ function addDevelopmentRules(
       return;
     }
 
-    developmentRules.push(item);
+    const parsed =
+      parseDevelopmentRuleText(
+        item
+      );
+
+    developmentRules.push({
+      id:
+        Date.now() +
+        Math.random(),
+
+      category:
+        "Architecture",
+
+      title:
+        parsed.title ||
+        parseDevelopmentRuleTitle(
+          item
+        ),
+
+      body:
+        parsed.body ||
+        parseDevelopmentRuleBody(
+          item
+        ),
+
+      created_at:
+        new Date()
+          .toISOString(),
+
+      updated_at:
+        new Date()
+          .toISOString()
+    });
 
     existingTexts.add(normalized);
 
@@ -554,112 +586,6 @@ function normalizeDevelopmentRuleText(
 
 }
 
-/* ===============================
-   Normalize Development Rules
-=============================== */
-
-function normalizeDevelopmentRules() {
-
-  developmentRules =
-    (developmentRules || [])
-      .map(rule => {
-
-        if (typeof rule === "string") {
-
-          const parsed =
-            parseDevelopmentRuleText(
-              rule
-            );
-
-          return {
-            title:
-              parsed.title ||
-              "開発ルール",
-
-            body:
-              parsed.body ||
-              rule,
-
-            created_at:
-              new Date()
-                .toISOString()
-          };
-
-        }
-
-        return {
-          title:
-            rule.title ||
-            "開発ルール",
-
-          body:
-            rule.body ||
-            "",
-
-          created_at:
-            rule.created_at ||
-            new Date()
-              .toISOString()
-        };
-
-      });
-
-}
-
-function parseDevelopmentRuleText(
-  text
-) {
-
-  const raw =
-    String(text || "")
-      .trim();
-
-  const match =
-    raw.match(
-      /^【Rule\d+\s+(.+?)】\s*([\s\S]*)$/
-    );
-
-  if (!match) {
-    return {
-      title: "",
-      body: raw
-    };
-  }
-
-  return {
-    title:
-      match[1].trim(),
-
-    body:
-      match[2].trim()
-  };
-
-}
-
-function formatDevelopmentRule(
-  rule,
-  index
-) {
-
-  const title =
-    rule.title ||
-    "開発ルール";
-
-  const body =
-    rule.body ||
-    "";
-
-  return (
-    "【Rule" +
-    (index + 1) +
-    " " +
-    title +
-    "】\n\n" +
-    body
-  );
-
-}
-
 function promptAddDevelopmentRuleForm() {
 
   const title =
@@ -713,32 +639,6 @@ function addDevelopmentRuleObject(
   saveDevelopmentRules();
 
   renderDevelopmentRules();
-
-}
-
-function formatDevelopmentRule(
-  rule,
-  index
-) {
-
-  normalizeDevelopmentRules();
-
-  const title =
-    rule.title ||
-    "開発ルール";
-
-  const body =
-    rule.body ||
-    "";
-
-  return (
-    "【Rule" +
-    (index + 1) +
-    " " +
-    title +
-    "】\n\n" +
-    body
-  );
 
 }
 
