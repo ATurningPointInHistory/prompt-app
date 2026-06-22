@@ -926,6 +926,10 @@ function buildNormalToolsHtml() {
 📚 開発履歴
 </button>
 
+<button class="float-list-btn" onclick="renderDevelopmentRules()">
+📖 開発ルール
+</button>
+
 <hr>
 
 <div class="small">🧹 その他</div>
