@@ -1965,16 +1965,17 @@ mark {
    .development rule
 =============================== */
 
-.development-rule-body{
-  white-space:pre-wrap;
-  font-size:13px;
-  margin:8px 0 0;
-}
-
 .development-rule-actions{
   display:flex;
   gap:8px;
-  margin-top:10px;
+  margin-top:12px;
+}
+
+.development-rule-body{
+  white-space:pre-wrap;
+  font-size:13px;
+  line-height:1.5;
+  margin-top:8px;
 }
 
 .development-rule-actions button{
