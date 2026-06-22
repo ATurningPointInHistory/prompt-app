@@ -1445,6 +1445,22 @@ HTML HEALTHで確認したい。
 
 }
 
+<div class="section-title">
+  📖 Development Rules
+</div>
+
+<div class="float-panel-actions">
+  <button onclick="promptAddDevelopmentRules()">
+    ＋追加
+  </button>
+
+  <button onclick="copyDevelopmentRules()">
+    📋コピー
+  </button>
+</div>
+
+<div id="developmentRulesList"></div>
+
 /* ===============================
    Code Navigation
 =============================== */
