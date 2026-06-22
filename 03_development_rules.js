@@ -17,6 +17,8 @@ normalizeDevelopmentRules();
 
 function saveDevelopmentRules() {
 
+  normalizeDevelopmentRules();
+
   localStorage.setItem(
     "developmentRules",
     JSON.stringify(
