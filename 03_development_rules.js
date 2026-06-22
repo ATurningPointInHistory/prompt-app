@@ -390,36 +390,43 @@ function buildDevelopmentRulesHtml() {
 </div>
 `;
   }
+      return developmentRules
+  .map((rule, index) => {
 
-  return developmentRules
-    .map((rule, index) => {
+    const title =
+      "Rule" +
+      (index + 1) +
+      " " +
+      (rule.title || "開発ルール");
 
-      const title =
-        "Rule" +
-        (index + 1) +
-        " " +
-        (rule.title || "開発ルール");
+    return `
 
-      return `
 <div class="todo-row">
 
   <div class="todo-text">
+
     <b>${escapeHtml(title)}</b>
-    <pre
-style="white-space:pre-wrap;font-size:11px;margin:6px 0 0;">
+
+    <pre class="development-rule-body">
 ${escapeHtml(rule.body || "")}
     </pre>
+
   </div>
 
-  <button onclick="editDevelopmentRule(${index})">
-    編集
-  </button>
+  <div class="development-rule-actions">
 
-  <button onclick="deleteDevelopmentRule(${index})">
-    削除
-  </button>
+    <button onclick="editDevelopmentRule(${index})">
+      編集
+    </button>
+
+    <button onclick="deleteDevelopmentRule(${index})">
+      削除
+    </button>
+
+  </div>
 
 </div>
+
 `;
 
     })
