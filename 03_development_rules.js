@@ -517,21 +517,23 @@ function toggleDevelopmentRuleMenu(
   if (type === "manage") {
 
     manage.style.display =
-      manage.style.display === "flex"
+      manage.style.display === "grid"
         ? "none"
-        : "flex";
+        : "grid";
 
     action.style.display =
       "none";
+
+    return;
 
   }
 
   if (type === "action") {
 
     action.style.display =
-      action.style.display === "flex"
+      action.style.display === "grid"
         ? "none"
-        : "flex";
+        : "grid";
 
     manage.style.display =
       "none";
