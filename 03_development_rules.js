@@ -33,11 +33,21 @@ function promptAddDevelopmentRules() {
   const text =
     prompt(
       "開発ルール追加\n\n" +
-      "改行で複数追加できます。\n\n" +
-      "例:\n" +
-      "Rule1 共通関数優先\n" +
-      "Rule2 buildとshowを分離\n" +
-      "Rule3 1000行前後で分割検討",
+      "【Rule番号】単位で追加できます。\n" +
+      "長いルール文もそのまま貼り付けOKです。\n\n" +
+      "例:\n\n" +
+      "【Rule1 共通関数優先】\n\n" +
+      "新しい関数を書く前に必ず確認する。\n\n" +
+      "① 既存関数がないか探す\n" +
+      "② build系を利用できないか探す\n" +
+      "③ 共通Utilityを利用できないか探す\n" +
+      "④ 無ければ新規作成\n\n" +
+      "-----------------------------------------\n\n" +
+      "【Rule2 build・show・update・executeの責務分離】\n\n" +
+      "buildXXXX()\n" +
+      "  ・データ生成のみ\n" +
+      "  ・HTML生成のみ\n" +
+      "  ・副作用禁止",
       ""
     );
 
