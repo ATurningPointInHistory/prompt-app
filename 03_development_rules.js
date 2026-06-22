@@ -55,31 +55,52 @@ function addDevelopmentRules(
   text
 ) {
 
+  const raw =
+    String(text || "").trim();
+
+  if (!raw) {
+    return;
+  }
+
   const items =
-    String(text || "")
-      .split(/\r?\n/)
-      .map(item =>
-        item.trim()
-      )
-      .filter(Boolean);
+    splitDevelopmentRulesText(
+      raw
+    );
 
   if (!items.length) {
     return;
   }
 
-  developmentRules =
-    [
-      ...developmentRules,
-      ...items
-    ];
+  const existingTexts =
+    new Set(
+      developmentRules.map(rule =>
+        normalizeDevelopmentRuleText(rule)
+      )
+    );
+
+  items.forEach(item => {
+
+    const normalized =
+      normalizeDevelopmentRuleText(
+        item
+      );
+
+    if (
+      !normalized ||
+      existingTexts.has(normalized)
+    ) {
+      return;
+    }
+
+    developmentRules.push(item);
+
+    existingTexts.add(normalized);
+
+  });
 
   saveDevelopmentRules();
 
-  if (
-    typeof renderDevelopmentRules === "function"
-  ) {
-    renderDevelopmentRules();
-  }
+  renderDevelopmentRules();
 
 }
 
@@ -175,18 +196,23 @@ function buildDevelopmentRulesHtml() {
 
   return developmentRules
     .map((rule, index) => `
-<div class="todo-item">
-  <div class="todo-text">
-    ${escapeHtml(rule)}
-  </div>
-  <div class="todo-actions">
+<div class="backup-history-item">
+
+  <pre class="code-preview"
+style="white-space:pre-wrap;max-height:220px;overflow:auto;">
+${escapeHtml(rule)}
+  </pre>
+
+  <div>
     <button onclick="editDevelopmentRule(${index})">
       編集
     </button>
+
     <button onclick="deleteDevelopmentRule(${index})">
       削除
     </button>
   </div>
+
 </div>
 `)
     .join("");
@@ -237,6 +263,50 @@ function copyDevelopmentRules() {
       ? "開発ルールをコピーしました"
       : "コピー失敗"
   );
+
+}
+
+function splitDevelopmentRulesText(
+  text
+) {
+
+  const normalized =
+    String(text || "")
+      .replace(/\r\n/g, "\n")
+      .trim();
+
+  if (!normalized) {
+    return [];
+  }
+
+  const blocks =
+    normalized
+      .split(
+        /\n(?=【Rule\d+\s)/
+      )
+      .map(block =>
+        block
+          .replace(
+            /^[-=]{5,}\s*/gm,
+            ""
+          )
+          .trim()
+      )
+      .filter(Boolean);
+
+  return blocks;
+
+}
+
+function normalizeDevelopmentRuleText(
+  text
+) {
+
+  return String(text || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 
 }
 
