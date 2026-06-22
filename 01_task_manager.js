@@ -317,6 +317,97 @@ function clearAllTasks() {
 }
 
 /* ===============================
+   Run Task Sync
+=============================== */
+
+function runTaskSync(
+  taskName,
+  label,
+  callback,
+  options = {}
+) {
+
+  if (
+    typeof callback !== "function"
+  ) {
+
+    alert(
+      "Task callback が未定義です"
+    );
+
+    return null;
+
+  }
+
+  if (
+    !startTask(
+      taskName,
+      label
+    )
+  ) {
+
+    return null;
+
+  }
+
+  const startedAt =
+    Date.now();
+
+  try {
+
+    const result =
+      callback();
+
+    if (
+      !options.silent
+    ) {
+
+      console.log(
+        "Task completed:",
+        taskName,
+        Date.now() -
+        startedAt +
+        "ms"
+      );
+
+    }
+
+    return result;
+
+  } catch (e) {
+
+    console.error(
+      "Task failed:",
+      taskName,
+      e
+    );
+
+    if (
+      !options.silentError
+    ) {
+
+      alert(
+        (label || taskName) +
+        " 失敗\n\n" +
+        e.message
+      );
+
+    }
+
+    return null;
+
+  } finally {
+
+    finishTask(
+      taskName,
+      label
+    );
+
+  }
+
+}
+
+/* ===============================
    Global Export
 =============================== */
 
@@ -349,6 +440,9 @@ window.clearTask =
 
 window.clearAllTasks =
   clearAllTasks;
+
+window.runTaskSync =
+  runTaskSync;
 
 console.log(
   "01_task_manager loaded"
