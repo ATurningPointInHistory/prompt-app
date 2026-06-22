@@ -657,15 +657,27 @@ function addDevelopmentRuleObject(
   normalizeDevelopmentRules();
 
   developmentRules.push({
+    id:
+      Date.now() +
+      Math.random(),
+
+    category:
+      "Architecture",
+
     title:
       String(title || "")
-        .trim(),
+        .trim() ||
+      "開発ルール",
 
     body:
       String(body || "")
         .trim(),
 
     created_at:
+      new Date()
+        .toISOString(),
+
+    updated_at:
       new Date()
         .toISOString()
   });
