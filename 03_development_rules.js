@@ -1,0 +1,266 @@
+/* ===============================
+   FILE: 03_development_rules.js
+   Development Rules Manager
+=============================== */
+
+/* ===============================
+   Development Rules
+=============================== */
+
+let developmentRules =
+  loadJson(
+    "developmentRules",
+    []
+  );
+
+function saveDevelopmentRules() {
+
+  localStorage.setItem(
+    "developmentRules",
+    JSON.stringify(
+      developmentRules
+    )
+  );
+
+}
+
+/* ===============================
+   Add Development Rules
+=============================== */
+
+function promptAddDevelopmentRules() {
+
+  const text =
+    prompt(
+      "開発ルール追加\n\n" +
+      "改行で複数追加できます。\n\n" +
+      "例:\n" +
+      "Rule1 共通関数優先\n" +
+      "Rule2 buildとshowを分離\n" +
+      "Rule3 1000行前後で分割検討",
+      ""
+    );
+
+  if (!text) {
+    return;
+  }
+
+  addDevelopmentRules(
+    text
+  );
+
+}
+
+function addDevelopmentRules(
+  text
+) {
+
+  const items =
+    String(text || "")
+      .split(/\r?\n/)
+      .map(item =>
+        item.trim()
+      )
+      .filter(Boolean);
+
+  if (!items.length) {
+    return;
+  }
+
+  developmentRules =
+    [
+      ...developmentRules,
+      ...items
+    ];
+
+  saveDevelopmentRules();
+
+  if (
+    typeof renderDevelopmentRules === "function"
+  ) {
+    renderDevelopmentRules();
+  }
+
+}
+
+/* ===============================
+   Delete Development Rule
+=============================== */
+
+function deleteDevelopmentRule(
+  index
+) {
+
+  if (
+    index < 0 ||
+    index >= developmentRules.length
+  ) {
+    return;
+  }
+
+  if (
+    !confirm(
+      "このルールを削除しますか？\n\n" +
+      developmentRules[index]
+    )
+  ) {
+    return;
+  }
+
+  developmentRules.splice(
+    index,
+    1
+  );
+
+  saveDevelopmentRules();
+
+  renderDevelopmentRules();
+
+}
+
+/* ===============================
+   Edit Development Rule
+=============================== */
+
+function editDevelopmentRule(
+  index
+) {
+
+  if (
+    index < 0 ||
+    index >= developmentRules.length
+  ) {
+    return;
+  }
+
+  const next =
+    prompt(
+      "開発ルール編集",
+      developmentRules[index]
+    );
+
+  if (next === null) {
+    return;
+  }
+
+  const value =
+    next.trim();
+
+  if (!value) {
+    return;
+  }
+
+  developmentRules[index] =
+    value;
+
+  saveDevelopmentRules();
+
+  renderDevelopmentRules();
+
+}
+
+/* ===============================
+   Build Development Rules Html
+=============================== */
+
+function buildDevelopmentRulesHtml() {
+
+  if (!developmentRules.length) {
+    return `
+<div class="small-muted">
+開発ルールなし
+</div>
+`;
+  }
+
+  return developmentRules
+    .map((rule, index) => `
+<div class="todo-item">
+  <div class="todo-text">
+    ${escapeHtml(rule)}
+  </div>
+  <div class="todo-actions">
+    <button onclick="editDevelopmentRule(${index})">
+      編集
+    </button>
+    <button onclick="deleteDevelopmentRule(${index})">
+      削除
+    </button>
+  </div>
+</div>
+`)
+    .join("");
+
+}
+
+/* ===============================
+   Render Development Rules
+=============================== */
+
+function renderDevelopmentRules() {
+
+  const box =
+    get("developmentRulesList");
+
+  if (!box) {
+    return;
+  }
+
+  box.innerHTML =
+    buildDevelopmentRulesHtml();
+
+}
+
+/* ===============================
+   Copy Development Rules
+=============================== */
+
+function copyDevelopmentRules() {
+
+  const text =
+    developmentRules.join(
+      "\n"
+    );
+
+  if (!text) {
+    alert("コピーするルールがありません");
+    return;
+  }
+
+  const ok =
+    copyTextFallback(
+      text
+    );
+
+  alert(
+    ok
+      ? "開発ルールをコピーしました"
+      : "コピー失敗"
+  );
+
+}
+
+/* ===============================
+   Global Export
+=============================== */
+
+window.promptAddDevelopmentRules =
+  promptAddDevelopmentRules;
+
+window.addDevelopmentRules =
+  addDevelopmentRules;
+
+window.deleteDevelopmentRule =
+  deleteDevelopmentRule;
+
+window.editDevelopmentRule =
+  editDevelopmentRule;
+
+window.buildDevelopmentRulesHtml =
+  buildDevelopmentRulesHtml;
+
+window.renderDevelopmentRules =
+  renderDevelopmentRules;
+
+window.copyDevelopmentRules =
+  copyDevelopmentRules;
