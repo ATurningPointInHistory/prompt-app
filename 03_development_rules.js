@@ -4,7 +4,7 @@
 =============================== */
 
 /* ===============================
-   Development Rules
+   Development Rules Data
 =============================== */
 
 let developmentRules =
@@ -12,6 +12,8 @@ let developmentRules =
     "developmentRules",
     []
   );
+
+normalizeDevelopmentRules();
 
 function saveDevelopmentRules() {
 
@@ -21,6 +23,121 @@ function saveDevelopmentRules() {
       developmentRules
     )
   );
+
+}
+
+/* ===============================
+   Parse Development Rule
+=============================== */
+
+function parseDevelopmentRuleTitle(
+  text
+) {
+
+  const match =
+    String(text || "")
+      .match(
+        /^【Rule\d+\s+(.+?)】/
+      );
+
+  if (match) {
+    return match[1].trim();
+  }
+
+  return String(text || "")
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .find(Boolean) ||
+    "開発ルール";
+
+}
+
+function parseDevelopmentRuleBody(
+  text
+) {
+
+  return String(text || "")
+    .replace(
+      /^【Rule\d+\s+.+?】\s*/,
+      ""
+    )
+    .trim();
+
+}
+
+/* ===============================
+   Normalize Development Rules
+=============================== */
+
+function normalizeDevelopmentRules() {
+
+  developmentRules =
+    (developmentRules || [])
+      .map(rule => {
+
+        if (
+          typeof rule === "string"
+        ) {
+
+          return {
+            id:
+              Date.now() +
+              Math.random(),
+
+            category:
+              "Architecture",
+
+            title:
+              parseDevelopmentRuleTitle(
+                rule
+              ),
+
+            body:
+              parseDevelopmentRuleBody(
+                rule
+              ),
+
+            created_at:
+              new Date()
+                .toISOString(),
+
+            updated_at:
+              new Date()
+                .toISOString()
+          };
+
+        }
+
+        return {
+          id:
+            rule.id ||
+            Date.now() +
+            Math.random(),
+
+          category:
+            rule.category ||
+            "Architecture",
+
+          title:
+            rule.title ||
+            "開発ルール",
+
+          body:
+            rule.body ||
+            "",
+
+          created_at:
+            rule.created_at ||
+            new Date()
+              .toISOString(),
+
+          updated_at:
+            rule.updated_at ||
+            new Date()
+              .toISOString()
+        };
+
+      });
 
 }
 
@@ -235,8 +352,92 @@ ${escapeHtml(rule)}
 
 function renderDevelopmentRules() {
 
+  openFloatPanel(
+
+    "📖 開発ルール",
+
+`
+<div class="todo-toolbar-top">
+
+  <button
+    onclick="toggleDevelopmentRuleMenu('manage')">
+    管理 ▼
+  </button>
+
+  <button
+    onclick="toggleDevelopmentRuleMenu('action')">
+    操作 ▼
+  </button>
+
+</div>
+
+<div
+  id="developmentRuleManageMenu"
+  class="todo-menu-grid"
+  style="display:none;">
+
+  <button
+    onclick="promptAddDevelopmentRuleForm()">
+    Rule
+  </button>
+
+  <button
+    onclick="promptAddDevelopmentRules()">
+    一括
+  </button>
+
+  <button
+    onclick="editSelectedDevelopmentRule()">
+    編集
+  </button>
+
+  <button
+    onclick="deleteSelectedDevelopmentRule()">
+    削除
+  </button>
+
+</div>
+
+<div
+  id="developmentRuleActionMenu"
+  class="todo-menu-grid"
+  style="display:none;">
+
+  <button
+    onclick="copyDevelopmentRules()">
+    コピー
+  </button>
+
+  <button
+    onclick="exportDevelopmentRules()">
+    Export
+  </button>
+
+  <button
+    onclick="importDevelopmentRules()">
+    Import
+  </button>
+
+  <button
+    onclick="searchDevelopmentRules()">
+    検索
+  </button>
+
+</div>
+
+<div
+  id="developmentRulesList"
+  class="todo-list">
+</div>
+
+`
+
+  );
+
   const box =
-    get("developmentRulesList");
+    get(
+      "developmentRulesList"
+    );
 
   if (!box) {
     return;
@@ -253,10 +454,19 @@ function renderDevelopmentRules() {
 
 function copyDevelopmentRules() {
 
+  normalizeDevelopmentRules();
+
   const text =
-    developmentRules.join(
-      "\n"
-    );
+    developmentRules
+      .map((rule, index) =>
+        formatDevelopmentRule(
+          rule,
+          index
+        )
+      )
+      .join(
+        "\n\n-----------------------------------------\n\n"
+      );
 
   if (!text) {
     alert("コピーするルールがありません");
@@ -317,6 +527,168 @@ function normalizeDevelopmentRuleText(
     .replace(/[ \t]+/g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+
+}
+
+/* ===============================
+   Normalize Development Rules
+=============================== */
+
+function normalizeDevelopmentRules() {
+
+  developmentRules =
+    (developmentRules || [])
+      .map(rule => {
+
+        if (typeof rule === "string") {
+
+          const parsed =
+            parseDevelopmentRuleText(
+              rule
+            );
+
+          return {
+            title:
+              parsed.title ||
+              "開発ルール",
+
+            body:
+              parsed.body ||
+              rule,
+
+            created_at:
+              new Date()
+                .toISOString()
+          };
+
+        }
+
+        return {
+          title:
+            rule.title ||
+            "開発ルール",
+
+          body:
+            rule.body ||
+            "",
+
+          created_at:
+            rule.created_at ||
+            new Date()
+              .toISOString()
+        };
+
+      });
+
+}
+
+function parseDevelopmentRuleText(
+  text
+) {
+
+  const raw =
+    String(text || "")
+      .trim();
+
+  const match =
+    raw.match(
+      /^【Rule\d+\s+(.+?)】\s*([\s\S]*)$/
+    );
+
+  if (!match) {
+    return {
+      title: "",
+      body: raw
+    };
+  }
+
+  return {
+    title:
+      match[1].trim(),
+
+    body:
+      match[2].trim()
+  };
+
+}
+
+function formatDevelopmentRule(
+  rule,
+  index
+) {
+
+  const title =
+    rule.title ||
+    "開発ルール";
+
+  const body =
+    rule.body ||
+    "";
+
+  return (
+    "【Rule" +
+    (index + 1) +
+    " " +
+    title +
+    "】\n\n" +
+    body
+  );
+
+}
+
+function promptAddDevelopmentRuleForm() {
+
+  const title =
+    prompt(
+      "開発ルール タイトル",
+      ""
+    );
+
+  if (!title) {
+    return;
+  }
+
+  const body =
+    prompt(
+      "開発ルール 内容",
+      ""
+    );
+
+  if (!body) {
+    return;
+  }
+
+  addDevelopmentRuleObject(
+    title,
+    body
+  );
+
+}
+
+function addDevelopmentRuleObject(
+  title,
+  body
+) {
+
+  normalizeDevelopmentRules();
+
+  developmentRules.push({
+    title:
+      String(title || "")
+        .trim(),
+
+    body:
+      String(body || "")
+        .trim(),
+
+    created_at:
+      new Date()
+        .toISOString()
+  });
+
+  saveDevelopmentRules();
+
+  renderDevelopmentRules();
 
 }
 
