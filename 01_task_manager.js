@@ -1,10 +1,37 @@
 /* ===============================
    FILE: 01_task_manager.js
-   Task Manager
+   Task Manager v2
+=============================== */
+
+/* ===============================
+   Task Names
+=============================== */
+
+const TASK = {
+  PROJECT_LOAD: "projectLoad",
+  MODULE_ANALYZE: "moduleAnalyze",
+  FUNCTION_ANALYZE: "functionAnalyze",
+  PROJECT_ANALYZE: "projectAnalyze",
+  PROJECT_MAINTENANCE: "projectMaintenance",
+  HEALTH: "health",
+  BACKUP: "backup",
+  AI_DEBUG: "aiDebug",
+  AI_INTEGRATION: "aiIntegration",
+  DEV_CONSOLE: "devConsole"
+};
+
+/* ===============================
+   Task State
 =============================== */
 
 const runningTasks =
   new Set();
+
+const taskButtons =
+  {};
+
+const taskLabels =
+  {};
 
 /* ===============================
    Task Status
@@ -20,6 +47,89 @@ function isTaskRunning(
 
 }
 
+function getRunningTasks() {
+
+  return [
+    ...runningTasks
+  ];
+
+}
+
+/* ===============================
+   Task Button
+=============================== */
+
+function setTaskButton(
+  taskName,
+  buttonId,
+  label = ""
+) {
+
+  if (!taskName || !buttonId) {
+    return;
+  }
+
+  taskButtons[taskName] =
+    buttonId;
+
+  if (label) {
+    taskLabels[taskName] =
+      label;
+  }
+
+  updateTaskButtons();
+
+}
+
+function updateTaskButtons() {
+
+  Object.keys(taskButtons)
+    .forEach(taskName => {
+
+      const button =
+        get(
+          taskButtons[taskName]
+        );
+
+      if (!button) {
+        return;
+      }
+
+      const label =
+        taskLabels[taskName] ||
+        button.dataset.originalLabel ||
+        button.textContent ||
+        taskName;
+
+      if (!button.dataset.originalLabel) {
+        button.dataset.originalLabel =
+          label;
+      }
+
+      if (
+        runningTasks.has(
+          taskName
+        )
+      ) {
+
+        button.disabled = true;
+
+        button.textContent =
+          label + "...";
+
+      } else {
+
+        button.disabled = false;
+
+        button.textContent =
+          button.dataset.originalLabel;
+
+      }
+
+    });
+
+}
+
 /* ===============================
    Start Task
 =============================== */
@@ -29,6 +139,11 @@ function startTask(
   label = ""
 ) {
 
+  const displayName =
+    label ||
+    taskLabels[taskName] ||
+    taskName;
+
   if (
     runningTasks.has(
       taskName
@@ -36,7 +151,7 @@ function startTask(
   ) {
 
     alert(
-      (label || taskName) +
+      displayName +
       " は実行中です"
     );
 
@@ -48,6 +163,17 @@ function startTask(
     taskName
   );
 
+  updateTaskButtons();
+
+  if (
+    typeof updateRepairStatus === "function"
+  ) {
+    updateRepairStatus(
+      displayName +
+      " 実行中..."
+    );
+  }
+
   return true;
 
 }
@@ -57,12 +183,29 @@ function startTask(
 =============================== */
 
 function finishTask(
-  taskName
+  taskName,
+  label = ""
 ) {
+
+  const displayName =
+    label ||
+    taskLabels[taskName] ||
+    taskName;
 
   runningTasks.delete(
     taskName
   );
+
+  updateTaskButtons();
+
+  if (
+    typeof updateRepairStatus === "function"
+  ) {
+    updateRepairStatus(
+      displayName +
+      " 完了"
+    );
+  }
 
 }
 
@@ -73,8 +216,16 @@ function finishTask(
 async function runTask(
   taskName,
   label,
-  callback
+  callback,
+  options = {}
 ) {
+
+  if (
+    typeof callback !== "function"
+  ) {
+    alert("Task callback が未定義です");
+    return null;
+  }
 
   if (
     !startTask(
@@ -85,47 +236,52 @@ async function runTask(
     return null;
   }
 
-  try {
+  const startedAt =
+    Date.now();
 
-    if (
-      typeof updateRepairStatus === "function"
-    ) {
-      updateRepairStatus(
-        (label || taskName) +
-        " 実行中..."
-      );
-    }
+  try {
 
     const result =
       await callback();
 
-    if (
-      typeof updateRepairStatus === "function"
-    ) {
-      updateRepairStatus(
-        (label || taskName) +
-        " 完了"
+    if (!options.silent) {
+
+      const elapsed =
+        Date.now() - startedAt;
+
+      console.log(
+        "Task completed:",
+        taskName,
+        elapsed + "ms"
       );
+
     }
 
     return result;
 
   } catch (e) {
 
-    console.error(e);
-
-    alert(
-      (label || taskName) +
-      " 失敗\n\n" +
-      e.message
+    console.error(
+      "Task failed:",
+      taskName,
+      e
     );
+
+    if (!options.silentError) {
+      alert(
+        (label || taskName) +
+        " 失敗\n\n" +
+        e.message
+      );
+    }
 
     return null;
 
   } finally {
 
     finishTask(
-      taskName
+      taskName,
+      label
     );
 
   }
@@ -140,9 +296,11 @@ function clearTask(
   taskName
 ) {
 
-  finishTask(
+  runningTasks.delete(
     taskName
   );
+
+  updateTaskButtons();
 
 }
 
@@ -154,14 +312,28 @@ function clearAllTasks() {
 
   runningTasks.clear();
 
+  updateTaskButtons();
+
 }
 
 /* ===============================
    Global Export
 =============================== */
 
+window.TASK =
+  TASK;
+
 window.isTaskRunning =
   isTaskRunning;
+
+window.getRunningTasks =
+  getRunningTasks;
+
+window.setTaskButton =
+  setTaskButton;
+
+window.updateTaskButtons =
+  updateTaskButtons;
 
 window.startTask =
   startTask;
@@ -181,4 +353,3 @@ window.clearAllTasks =
 console.log(
   "01_task_manager loaded"
 );
-
