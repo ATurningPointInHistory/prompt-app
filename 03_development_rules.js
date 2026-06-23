@@ -79,11 +79,6 @@ function parseDevelopmentRuleBody(
 
 function normalizeDevelopmentRules() {
 
-  const keyword =
-    developmentRuleSearch
-      .trim()
-      .toLowerCase();
-
   developmentRules =
     (developmentRules || [])
       .map(rule => {
@@ -394,6 +389,11 @@ function buildDevelopmentRulesHtml() {
 
   normalizeDevelopmentRules();
 
+  const keyword =
+    String(developmentRuleSearch || "")
+      .trim()
+      .toLowerCase();
+
   if (!developmentRules.length) {
     return `
 <div class="small-muted">
@@ -401,31 +401,63 @@ function buildDevelopmentRulesHtml() {
 </div>
 `;
   }
-      return developmentRules
-  .map((rule, index) => {
 
-    const selected =
-      selectedDevelopmentRuleId ===
-      rule.id;
+  const filteredRules =
+    developmentRules.filter(rule => {
 
-    const title =
-      "Rule" +
-      (index + 1) +
-      " " +
-      (rule.title || "開発ルール");
+      if (!keyword) {
+        return true;
+      }
 
+      return (
+        (rule.title || "")
+          .toLowerCase()
+          .includes(keyword)
+
+        ||
+
+        (rule.body || "")
+          .toLowerCase()
+          .includes(keyword)
+
+        ||
+
+        (rule.category || "")
+          .toLowerCase()
+          .includes(keyword)
+      );
+
+    });
+
+  if (!filteredRules.length) {
     return `
+<div class="small-muted">
+該当する開発ルールなし
+</div>
+`;
+  }
+
+  return filteredRules
+    .map((rule, index) => {
+
+      const title =
+        "Rule" +
+        (
+          developmentRules.indexOf(rule) +
+          1
+        ) +
+        " " +
+        (rule.title || "開発ルール");
+
+      const originalIndex =
+        developmentRules.indexOf(rule);
+
+      return `
 
 <div
   class="
     todo-row
     development-rule-row
-    ${selected ? "selected" : ""}
-  "
-  onclick="
-    selectDevelopmentRule(
-      '${rule.id}'
-    )
   ">
 
   <div class="todo-text">
@@ -440,11 +472,11 @@ ${escapeHtml(rule.body || "")}
 
   <div class="development-rule-actions">
 
-    <button onclick="editDevelopmentRule(${index})">
+    <button onclick="editDevelopmentRule(${originalIndex})">
       編集
     </button>
 
-    <button onclick="deleteDevelopmentRule(${index})">
+    <button onclick="deleteDevelopmentRule(${originalIndex})">
       削除
     </button>
 
@@ -522,8 +554,6 @@ function renderDevelopmentRules() {
     accept=".json"
     style="display:none"
     onchange="loadDevelopmentRulesFile(event)">
-
-
 
 </div>
 
@@ -945,3 +975,6 @@ window.importDevelopmentRules =
 
 window.loadDevelopmentRulesFile =
   loadDevelopmentRulesFile;
+
+window.updateDevelopmentRuleSearch =
+  updateDevelopmentRuleSearch;
