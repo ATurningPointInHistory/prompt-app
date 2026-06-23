@@ -262,3 +262,418 @@ function copyProjectJsHealth() {
       : "コピー失敗"
   );
 }
+
+/* ===============================
+   Project Package Manager
+=============================== */
+
+let projectPackageFiles = [];
+
+function showProjectPackageManager() {
+
+  projectPackageFiles =
+    getProjectPackageFileCandidates();
+
+  const panel =
+    get("floatPanel");
+
+  if (!panel) {
+    alert("floatPanel がありません");
+    return;
+  }
+
+  panel.style.display = "block";
+  panel.innerHTML =
+    buildProjectPackageManagerHtml();
+
+}
+
+function buildProjectPackageManagerHtml() {
+
+  const rows =
+    projectPackageFiles.map(file => `
+<div class="project-package-row">
+  <input
+    type="checkbox"
+    class="project-package-check"
+    value="${escapeHtml(file.path)}"
+    checked
+    onchange="updateProjectPackageReport()"
+  >
+  <div class="project-package-name">
+    ${escapeHtml(file.path)}
+  </div>
+  <div class="project-package-type">
+    ${escapeHtml(file.type)}
+  </div>
+</div>
+`).join("");
+
+  return `
+<div class="float-panel-header">
+  <div class="float-panel-title">📦 Project Package</div>
+  <button onclick="closeFloatPanel()">×</button>
+</div>
+
+<label>ZIP保存名</label>
+<input
+  id="projectPackageName"
+  placeholder="AIPro_v6.0_backup"
+  oninput="updateProjectPackageReport()"
+>
+
+<div class="project-package-actions">
+  <button onclick="selectAllProjectPackageFiles(true)">全選択</button>
+  <button onclick="selectAllProjectPackageFiles(false)">全解除</button>
+</div>
+
+<div style="margin-top:8px;">
+  ${rows}
+</div>
+
+<pre
+  id="projectPackageReport"
+  class="project-package-report"
+></pre>
+
+<button
+  class="float-list-btn"
+  onclick="executeSaveProjectPackage()"
+>
+📦 ZIP保存
+</button>
+`;
+
+}
+
+function updateProjectPackageReport() {
+
+  const selected =
+    getSelectedProjectPackageFiles();
+
+  const skipped =
+    projectPackageFiles.length -
+    selected.length;
+
+  const report =
+`Project Package
+
+Files : ${projectPackageFiles.length}
+Selected : ${selected.length}
+Skipped : ${skipped}
+Missing : 0
+Package Size : before save`;
+
+  const box =
+    get("projectPackageReport");
+
+  if (box) {
+    box.textContent = report;
+  }
+
+}
+
+function selectAllProjectPackageFiles(flag) {
+
+  document
+    .querySelectorAll(".project-package-check")
+    .forEach(check => {
+      check.checked = flag;
+    });
+
+  updateProjectPackageReport();
+
+}
+
+function getSelectedProjectPackageFiles() {
+
+  return [
+    ...document.querySelectorAll(
+      ".project-package-check:checked"
+    )
+  ].map(el => el.value);
+
+}
+
+function getProjectPackageFileCandidates() {
+
+  const files = [];
+
+  files.push({
+    path: "index.html",
+    type: "html",
+    source: "document"
+  });
+
+  document
+    .querySelectorAll("script[src]")
+    .forEach(script => {
+
+      const src =
+        script.getAttribute("src");
+
+      if (!src) {
+        return;
+      }
+
+      files.push({
+        path: cleanProjectPackagePath(src),
+        fetchPath: src,
+        type: "js",
+        source: "fetch"
+      });
+
+    });
+
+  document
+    .querySelectorAll("link[rel='stylesheet'][href]")
+    .forEach(link => {
+
+      const href =
+        link.getAttribute("href");
+
+      if (!href) {
+        return;
+      }
+
+      files.push({
+        path: cleanProjectPackagePath(href),
+        fetchPath: href,
+        type: "css",
+        source: "fetch"
+      });
+
+    });
+
+  files.push({
+    path: "project_info.json",
+    type: "json",
+    source: "generated"
+  });
+
+  return files;
+
+}
+
+async function executeSaveProjectPackage() {
+
+  try {
+
+    if (typeof JSZip === "undefined") {
+      alert("JSZip が読み込まれていません");
+      return;
+    }
+
+    const zip =
+      new JSZip();
+
+    const selectedPaths =
+      getSelectedProjectPackageFiles();
+
+    let missing = 0;
+
+    for (const file of projectPackageFiles) {
+
+      if (!selectedPaths.includes(file.path)) {
+        continue;
+      }
+
+      try {
+
+        const zipPath =
+          getProjectPackageZipPath(file);
+
+        if (file.source === "document") {
+
+          zip.file(
+            zipPath,
+            "<!DOCTYPE html>\n" +
+            document.documentElement.outerHTML
+          );
+
+          continue;
+        }
+
+        if (file.source === "generated") {
+
+          zip.file(
+            zipPath,
+            JSON.stringify(
+              buildProjectPackageInfo(),
+              null,
+              2
+            )
+          );
+
+          continue;
+        }
+
+        const res =
+          await fetch(file.fetchPath || file.path);
+
+        if (!res.ok) {
+          missing++;
+          continue;
+        }
+
+        const text =
+          await res.text();
+
+        zip.file(
+          zipPath,
+          text
+        );
+
+      } catch (e) {
+
+        missing++;
+
+        console.warn(
+          "Package file failed:",
+          file.path,
+          e
+        );
+
+      }
+
+    }
+
+    const blob =
+      await zip.generateAsync({
+        type: "blob"
+      });
+
+    const fileName =
+      getProjectPackageZipName();
+
+    downloadProjectPackageBlob(
+      blob,
+      fileName
+    );
+
+    alert(
+      `Project Package 保存完了\n\n` +
+      `Selected : ${selectedPaths.length}\n` +
+      `Missing : ${missing}\n` +
+      `Size : ${Math.round(blob.size / 1024)}KB`
+    );
+
+  } catch (e) {
+
+    alert(
+      "Project Package 保存に失敗しました\n\n" +
+      e.message
+    );
+
+  }
+
+}
+
+function getProjectPackageZipName() {
+
+  const input =
+    get("projectPackageName");
+
+  let name =
+    input && input.value.trim()
+      ? input.value.trim()
+      : "";
+
+  if (!name) {
+
+    const timestamp =
+      new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-");
+
+    name =
+      `AIPro_Project_${timestamp}`;
+
+  }
+
+  name =
+    name.replace(/[\\/:*?"<>|]/g, "_");
+
+  if (!name.endsWith(".zip")) {
+    name += ".zip";
+  }
+
+  return name;
+
+}
+
+function getProjectPackageZipPath(file) {
+
+  const name =
+    cleanProjectPackagePath(file.path);
+
+  switch (file.type) {
+
+    case "html":
+      return "html/" + name;
+
+    case "js":
+      return "js/" + name;
+
+    case "css":
+      return "css/" + name;
+
+    case "json":
+      return "data/" + name;
+
+    default:
+      return "other/" + name;
+
+  }
+
+}
+
+function cleanProjectPackagePath(path) {
+
+  return String(path || "")
+    .split("?")[0]
+    .replace(/^\.?\//, "");
+
+}
+
+function buildProjectPackageInfo() {
+
+  return {
+    app: "AIプロンプト生成Pro",
+    version: "v6.0",
+    createdAt: new Date().toISOString(),
+    files: projectPackageFiles.map(file => ({
+      path: file.path,
+      type: file.type,
+      source: file.source
+    }))
+  };
+
+}
+
+function downloadProjectPackageBlob(
+  blob,
+  fileName
+) {
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const a =
+    document.createElement("a");
+
+  a.href =
+    url;
+
+  a.download =
+    fileName;
+
+  document.body.appendChild(a);
+
+  a.click();
+
+  a.remove();
+
+  URL.revokeObjectURL(url);
+
+}
