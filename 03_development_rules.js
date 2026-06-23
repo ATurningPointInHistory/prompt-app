@@ -408,7 +408,17 @@ function buildDevelopmentRulesHtml() {
 
     return `
 
-<div class="todo-row development-rule-row">
+<div
+  class="
+    todo-row
+    development-rule-row
+    ${selected ? "selected" : ""}
+  "
+  onclick="
+    selectDevelopmentRule(
+      '${rule.id}'
+    )
+  ">
 
   <div class="todo-text">
 
@@ -804,3 +814,6 @@ window.formatDevelopmentRule =
 
 window.parseDevelopmentRuleText =
   parseDevelopmentRuleText;
+
+window.selectDevelopmentRule =
+  selectDevelopmentRule;
