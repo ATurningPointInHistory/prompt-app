@@ -84,11 +84,19 @@ function openRepairTarget(
 
 }
 
+/* ===============================
+   Load Current Project Search Files
+   現在ページからHTML / JS / CSSを検索・編集対象へ登録
+=============================== */
+
 async function loadCurrentProjectSearchFiles() {
 
   try {
 
-    if (typeof updateRepairStatus === "function") {
+    if (
+      typeof updateRepairStatus ===
+      "function"
+    ) {
       updateRepairStatus(
         "現在プロジェクト読込中..."
       );
@@ -100,14 +108,15 @@ async function loadCurrentProjectSearchFiles() {
       document.documentElement.outerHTML
     );
 
+    let loaded = 1;
+    let failed = 0;
+
     const scripts =
       [
         ...document.querySelectorAll(
           "script[src]"
         )
       ];
-
-    let loaded = 1;
 
     for (const script of scripts) {
 
@@ -118,45 +127,71 @@ async function loadCurrentProjectSearchFiles() {
         continue;
       }
 
-      try {
-
-        const res =
-          await fetch(src);
-
-        if (!res.ok) {
-          continue;
-        }
-
-        const text =
-          await res.text();
-
-        registerRepairSearchFile(
-          src,
-          text
+      const ok =
+        await loadCurrentProjectFileByFetch(
+          src
         );
 
+      if (ok) {
         loaded++;
-
-      } catch (e) {
-
-        console.warn(
-          "現在プロジェクトJS読込失敗:",
-          src,
-          e
-        );
-
+      } else {
+        failed++;
       }
 
     }
 
-    if (typeof updateRepairStatus === "function") {
+    const styles =
+      [
+        ...document.querySelectorAll(
+          "link[rel='stylesheet'][href]"
+        )
+      ];
+
+    for (const link of styles) {
+
+      const href =
+        link.getAttribute("href");
+
+      if (!href) {
+        continue;
+      }
+
+      const ok =
+        await loadCurrentProjectFileByFetch(
+          href
+        );
+
+      if (ok) {
+        loaded++;
+      } else {
+        failed++;
+      }
+
+    }
+
+    registerRepairSearchFile(
+      "project_info.json",
+      JSON.stringify(
+        buildCurrentProjectInfo(),
+        null,
+        2
+      )
+    );
+
+    loaded++;
+
+    if (
+      typeof updateRepairStatus ===
+      "function"
+    ) {
       updateRepairStatus(
-        `現在プロジェクト ${loaded}件読込`
+        `現在プロジェクト ${loaded}件読込 / 失敗 ${failed}件`
       );
     }
 
     alert(
-      `現在プロジェクト ${loaded}件を検索対象に登録しました`
+      `現在プロジェクト ${loaded}件を検索対象に登録しました\n\n` +
+      `失敗: ${failed}件`
     );
 
   } catch (e) {
@@ -167,6 +202,81 @@ async function loadCurrentProjectSearchFiles() {
     );
 
   }
+
+}
+
+/* ===============================
+   Load Current Project File By Fetch
+   JS / CSSなど外部ファイルを取得してProjectへ登録
+=============================== */
+
+async function loadCurrentProjectFileByFetch(
+  path
+) {
+
+  try {
+
+    const res =
+      await fetch(
+        path
+      );
+
+    if (!res.ok) {
+      return false;
+    }
+
+    const text =
+      await res.text();
+
+    registerRepairSearchFile(
+      cleanProjectFilePath(path),
+      text
+    );
+
+    return true;
+
+  } catch (e) {
+
+    console.warn(
+      "現在プロジェクト読込失敗:",
+      path,
+      e
+    );
+
+    return false;
+
+  }
+
+}
+
+/* ===============================
+   Clean Project File Path
+   ?v= などを除去してProject用ファイル名へ整形
+=============================== */
+
+function cleanProjectFilePath(
+  path
+) {
+
+  return String(path || "")
+    .split("?")[0]
+    .replace(/^\.?\//, "");
+
+}
+
+/* ===============================
+   Build Current Project Info
+   Project情報JSONを生成
+=============================== */
+
+function buildCurrentProjectInfo() {
+
+  return {
+    app: "AIプロンプト生成Pro",
+    version: "v6.0",
+    createdAt: new Date().toISOString(),
+    files: getProjectFileNames()
+  };
 
 }
 
