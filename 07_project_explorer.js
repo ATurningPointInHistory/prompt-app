@@ -5,56 +5,33 @@
 
 /*
 役割
-・現在プロジェクトのファイル一覧管理
-・Project Explorer表示
-・ファイル切替
-・Projectファイル選択
+・Projectファイル一覧表示
+・カテゴリ別表示
+・Repair Editorへのファイル切替
 
-責務
-build
-  ・HTML生成のみ
-
-show
-  ・Project Explorer表示
-
-update
-  ・Project Explorer更新
-  ・選択状態更新
-
-execute
-  ・ファイルを開く
-  ・Project操作実行
-
-共通利用
-・repairSearchFileStore
-・ProjectManager
-・Repair Editor
-・Project Package
-・Global Search
+利用する共通基盤
+・getProjectFileNames()
+・getProjectFilesByCategory()
+・saveCurrentSearchEditorFile()
+・openRepairTarget()
 
 注意
-・build系でDOM変更禁止
-・State更新はManager経由
-・UIは表示のみ
+・build系はHTML生成のみ
+・State更新は直接しない
 */
 
 /* ===============================
    Build Project Explorer HTML
 =============================== */
 
-function buildProjectExplorerHtml(
-  files
-) {
+function buildProjectExplorerHtml() {
 
-  const rows =
-    files.map(fileName => `
-<button
-  class="float-list-btn"
-  onclick="executeOpenProjectExplorerFile('${escapeJs(fileName)}')"
->
-📄 ${escapeHtml(fileName)}
-</button>
-`).join("");
+  const groups =
+    getProjectFilesByCategory();
+
+  const total =
+    getProjectFileNames()
+      .length;
 
   return `
 <div class="float-panel-header">
@@ -63,10 +40,74 @@ function buildProjectExplorerHtml(
 </div>
 
 <div class="small">
-  Files : ${files.length}
+  Files : ${total}
 </div>
 
-${rows || `<div class="small">ファイル未読込</div>`}
+${buildProjectExplorerCategoryHtml(
+  "📄 HTML",
+  groups.html
+)}
+
+${buildProjectExplorerCategoryHtml(
+  "📜 JavaScript",
+  groups.js
+)}
+
+${buildProjectExplorerCategoryHtml(
+  "🎨 CSS",
+  groups.css
+)}
+
+${buildProjectExplorerCategoryHtml(
+  "📦 JSON",
+  groups.json
+)}
+
+${buildProjectExplorerCategoryHtml(
+  "📁 Other",
+  groups.other
+)}
+`;
+
+}
+
+/* ===============================
+   Build Project Explorer Category HTML
+=============================== */
+
+function buildProjectExplorerCategoryHtml(
+  title,
+  files
+) {
+
+  if (!files || !files.length) {
+    return "";
+  }
+
+  const rows =
+    files.map(fileName => {
+
+      const active =
+        fileName === currentRepairFile
+          ? "▶ "
+          : "📄 ";
+
+      return `
+<button
+  class="float-list-btn"
+  onclick="executeOpenProjectExplorerFile('${escapeJs(fileName)}')"
+>
+${active}${escapeHtml(fileName)}
+</button>
+`;
+
+    }).join("");
+
+  return `
+<div class="tool-section-title">
+  ${escapeHtml(title)} (${files.length})
+</div>
+${rows}
 `;
 
 }
@@ -85,35 +126,39 @@ function showProjectExplorer() {
     return;
   }
 
-  const files =
-    Object.keys(
-      repairSearchFileStore || {}
-    );
-
   panel.style.display =
     "block";
 
   panel.innerHTML =
-    buildProjectExplorerHtml(
-      files
-    );
+    buildProjectExplorerHtml();
 
 }
 
 /* ===============================
-   Open Project File
+   Execute Open Project Explorer File
 =============================== */
 
 function executeOpenProjectExplorerFile(
   fileName
 ) {
 
-  saveCurrentSearchEditorFile();
+  if (
+    typeof saveCurrentSearchEditorFile ===
+    "function"
+  ) {
+    saveCurrentSearchEditorFile();
+  }
 
-  openRepairTarget(
-    fileName,
-    1
-  );
+  if (
+    !openRepairTarget(
+      fileName,
+      1
+    )
+  ) {
+    return;
+  }
+
+  showProjectExplorer();
 
   if (
     typeof updateRepairStatus ===
