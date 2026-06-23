@@ -1205,6 +1205,50 @@ const PROJECT_INFO = {
 
 };
 
+/* ===============================
+   Build Current Project Load Report
+=============================== */
+
+function buildCurrentProjectLoadReport(
+  loaded,
+  failed,
+  failedFiles
+) {
+
+  const lines = [];
+
+  lines.push(
+    `現在プロジェクト ${loaded}件を検索対象に登録しました`
+  );
+
+  lines.push("");
+
+  lines.push(
+    `失敗 : ${failed}件`
+  );
+
+  if (
+    failedFiles &&
+    failedFiles.length
+  ) {
+
+    lines.push("");
+
+    lines.push(
+      "=== Failed Files ==="
+    );
+
+    failedFiles.forEach(
+      file =>
+        lines.push(file)
+    );
+
+  }
+
+  return lines.join("\n");
+
+}
+
 window.refreshCurrentProjectFunctionDatabase =
   refreshCurrentProjectFunctionDatabase;
 
