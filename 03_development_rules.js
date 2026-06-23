@@ -815,39 +815,37 @@ function loadDevelopmentRulesFile(
   const file =
     event.target.files?.[0];
 
-  if (!file) {
-    return;
-  }
+  readJsonFile(
 
-  const reader =
-    new FileReader();
+    file,
 
-  reader.onload = () => {
-
-    try {
+    data => {
 
       developmentRules =
-        JSON.parse(
-          reader.result
-        );
+        data;
 
       saveDevelopmentRules();
 
       renderDevelopmentRules();
 
-      alert("Import完了");
+      alert(
+        "Import完了"
+      );
 
-    } catch {
+    },
 
-      alert("JSON読込失敗");
+    () => {
+
+      alert(
+        "JSON読込失敗"
+      );
 
     }
 
-  };
+  );
 
-  reader.readAsText(file);
-
-  event.target.value = "";
+  event.target.value =
+    "";
 
 }
 
