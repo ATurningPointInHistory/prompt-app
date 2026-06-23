@@ -464,6 +464,19 @@ async function executeSaveProjectPackage() {
       return;
     }
 
+    if (
+      typeof getProjectPackageFileText !==
+      "function"
+    ) {
+      alert(
+        "getProjectPackageFileText が見つかりません\n\n" +
+        "01_project_config.js の読み込み順を確認してください"
+      );
+      return;
+    }
+
+    saveCurrentSearchEditorFile();
+
     const zip =
       new JSZip();
 
@@ -474,54 +487,40 @@ async function executeSaveProjectPackage() {
 
     for (const file of projectPackageFiles) {
 
-      if (!selectedPaths.includes(file.path)) {
+      if (
+        !selectedPaths.includes(
+          file.path
+        )
+      ) {
         continue;
       }
 
       try {
 
         const zipPath =
-          getProjectPackageZipPath(file);
-
-        if (file.source === "document") {
-
-          zip.file(
-            zipPath,
-            "<!DOCTYPE html>\n" +
-            document.documentElement.outerHTML
+          getProjectPackageZipPath(
+            file
           );
 
-          continue;
-        }
-
-        if (file.source === "generated") {
-
-          zip.file(
-            zipPath,
-            JSON.stringify(
-              buildProjectPackageInfo(),
-              null,
-              2
-            )
+        const result =
+          await getProjectPackageFileText(
+            file
           );
 
-          continue;
-        }
+        if (
+          !result ||
+          !result.ok
+        ) {
 
-        const res =
-          await fetch(file.fetchPath || file.path);
-
-        if (!res.ok) {
           missing++;
-          continue;
-        }
 
-        const text =
-          await res.text();
+          continue;
+
+        }
 
         zip.file(
           zipPath,
-          text
+          result.text
         );
 
       } catch (e) {
