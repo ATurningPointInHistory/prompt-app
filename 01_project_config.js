@@ -1181,6 +1181,30 @@ function getProjectFilesByCategory() {
 
 }
 
+/* ===============================
+   Project Info
+   Project全体で共通利用する基本情報
+=============================== */
+
+const PROJECT_INFO = {
+
+  name:
+    "AIプロンプト生成Pro",
+
+  version:
+    "v6.0",
+
+  entryFile:
+    "index.html",
+
+  projectState:
+    "repairSearchFileStore",
+
+  createdBy:
+    "AI Prompt Generator Pro"
+
+};
+
 window.refreshCurrentProjectFunctionDatabase =
   refreshCurrentProjectFunctionDatabase;
 
