@@ -1205,6 +1205,13 @@ ${repairToolButton(
   "全ファイル検索"
 )}
 
+${repairToolButton(
+  "📁 Project Explorer",
+  "showProjectExplorer",
+  "📁",
+  "Explorer"
+)}
+
 <hr>
 
 `;
