@@ -401,7 +401,7 @@ function buildDevelopmentRulesHtml() {
 
     return `
 
-<div class="todo-row">
+<div class="todo-row development-rule-row">
 
   <div class="todo-text">
 
