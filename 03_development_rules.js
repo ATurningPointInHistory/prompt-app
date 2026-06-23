@@ -920,7 +920,15 @@ function updateDevelopmentRuleSearch(
   developmentRuleSearch =
     String(text || "");
 
-  renderDevelopmentRules();
+  const box =
+    get("developmentRulesList");
+
+  if (!box) {
+    return;
+  }
+
+  box.innerHTML =
+    buildDevelopmentRulesHtml();
 
 }
 
