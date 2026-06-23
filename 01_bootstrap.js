@@ -1178,6 +1178,13 @@ ${repairToolButton(
 )}
 
 ${repairToolButton(
+  "📦 Project Package",
+  "showProjectPackageManager",
+  "📦",
+  "Package"
+)}
+
+${repairToolButton(
   "📋 読込一覧",
   "showRepairSearchFiles",
   "📋",
