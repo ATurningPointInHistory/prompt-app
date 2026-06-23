@@ -500,6 +500,23 @@ function renderDevelopmentRules() {
     コピー
   </button>
 
+  <button onclick="exportDevelopmentRules()">
+    Export
+  </button>
+
+  <button onclick="importDevelopmentRules()">
+    Import
+  </button>
+
+  <input
+    id="developmentRuleImportFile"
+    type="file"
+    accept=".json"
+    style="display:none"
+    onchange="loadDevelopmentRulesFile(event)">
+
+
+
 </div>
 
 <div
@@ -761,6 +778,68 @@ function formatDevelopmentRule(
 }
 
 /* ===============================
+   Export Development Rules
+=============================== */
+
+function exportDevelopmentRules() {
+
+  normalizeDevelopmentRules();
+
+  downloadJsonFile(
+    developmentRules,
+    "development_rules.json"
+  );
+
+}
+
+/* ===============================
+   Load Development Rules File
+=============================== */
+
+function loadDevelopmentRulesFile(
+  event
+) {
+
+  const file =
+    event.target.files?.[0];
+
+  if (!file) {
+    return;
+  }
+
+  const reader =
+    new FileReader();
+
+  reader.onload = () => {
+
+    try {
+
+      developmentRules =
+        JSON.parse(
+          reader.result
+        );
+
+      saveDevelopmentRules();
+
+      renderDevelopmentRules();
+
+      alert("Import完了");
+
+    } catch {
+
+      alert("JSON読込失敗");
+
+    }
+
+  };
+
+  reader.readAsText(file);
+
+  event.target.value = "";
+
+}
+
+/* ===============================
    Select Development Rule
 =============================== */
 
@@ -817,3 +896,12 @@ window.parseDevelopmentRuleText =
 
 window.selectDevelopmentRule =
   selectDevelopmentRule;
+
+window.exportDevelopmentRules =
+  exportDevelopmentRules;
+
+window.importDevelopmentRules =
+  importDevelopmentRules;
+
+window.loadDevelopmentRulesFile =
+  loadDevelopmentRulesFile;
