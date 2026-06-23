@@ -927,6 +927,89 @@ async function refreshCurrentProjectFunctionDatabase() {
 
 }
 
+/* ===============================
+   Get Project Package File Text
+=============================== */
+
+async function getProjectPackageFileText(
+  file
+) {
+
+  const store =
+    repairSearchFileStore?.[
+      file.path
+    ];
+
+  if (
+    store &&
+    typeof store.text === "string"
+  ) {
+    return {
+      ok: true,
+      text: store.text,
+      source: "memory"
+    };
+  }
+
+  if (file.source === "document") {
+
+    return {
+      ok: true,
+      text:
+        "<!DOCTYPE html>\n" +
+        document.documentElement.outerHTML,
+      source: "document"
+    };
+
+  }
+
+  if (file.source === "generated") {
+
+    return {
+      ok: true,
+      text: JSON.stringify(
+        buildProjectPackageInfo(),
+        null,
+        2
+      ),
+      source: "generated"
+    };
+
+  }
+
+  try {
+
+    const res =
+      await fetch(
+        file.fetchPath ||
+        file.path
+      );
+
+    if (!res.ok) {
+
+      return {
+        ok: false
+      };
+
+    }
+
+    return {
+      ok: true,
+      text:
+        await res.text(),
+      source: "fetch"
+    };
+
+  } catch {
+
+    return {
+      ok: false
+    };
+
+  }
+
+}
+
 window.refreshCurrentProjectFunctionDatabase =
   refreshCurrentProjectFunctionDatabase;
 
