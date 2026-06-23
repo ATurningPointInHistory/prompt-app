@@ -201,40 +201,26 @@ body.dark button.active-panel {
 }
 
 .favorite-btn {
-
   float: right;
-
   width: 22px;
   height: 22px;
-
   padding: 0;
-
   margin-left: 6px;
-
   border-radius: 3px;
-
   font-size: 12px;
-
   cursor: pointer;
-
   background: #555;
   color: #ffd700;
-
   transition: 0.15s;
-
 }
 
 .favorite-btn.active {
-
   background: #ff9800;
   color: #fff;
-
 }
 
 .favorite-btn:hover {
-
   filter: brightness(0.95);
-
 }
 
 /* ===============================
@@ -242,71 +228,47 @@ body.dark button.active-panel {
 =============================== */
 
 .repair-favorite-manager-row {
-
   display: grid;
-
   grid-template-columns:
     22px
     22px
     22px
     34px
     1fr;
-
   gap: 4px;
-
   align-items: center;
-
   margin-bottom: 4px;
-
 }
 
 .repair-favorite-mini {
-
   width: 22px;
   height: 22px;
-
   padding: 0;
-
   border-radius: 3px;
-
   font-size: 11px;
-
 }
 
 .repair-favorite-mini.delete {
-
   background: #d9534f;
-
 }
 
 .repair-favorite-icon-input {
-
   width: 34px !important;
   height: 22px;
-
   margin: 0 !important;
   padding: 0 2px !important;
-
   text-align: center;
-
   font-size: 13px;
-
   border-radius: 3px;
-
 }
 
 .repair-favorite-name-input {
-
   width: 100% !important;
   height: 22px;
-
   margin: 0 !important;
   padding: 0 4px !important;
-
   font-size: 11px;
-
   border-radius: 3px;
-
 }
 
 /* ===============================
@@ -435,19 +397,20 @@ body.dark button.active-panel {
 }
 
 /* ===============================
-   TOOLS MENU
+   TOOLS BUTTON
 =============================== */
 
-#toolsBtn {
+#toolsBtn{
   position: fixed;
   right: 18px;
   bottom: 18px;
   z-index: 999;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
   padding: 0;
-  font-size: 18px;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 1;
   box-shadow: 0 4px 15px rgba(0,0,0,0.25);
 }
 
@@ -500,28 +463,21 @@ body.dark button.active-panel {
 
 #floatPanel{
   position: fixed;
-
   left: 70px;
   right: 110px;
   bottom: 88px;
   top: auto;
-
   z-index: 998;
-
   width: auto;
   max-width: none;
-
   max-height: 76vh;
   overflow: auto;
-
   background: rgba(36,37,38,0.88);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 15px;
   padding: 12px;
-
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
 }
 
@@ -535,13 +491,10 @@ body:not(.dark) #floatPanel{
   top: 0;
   z-index: 2;
   background: var(--card);
-
   display: flex;
   align-items: center;
   gap: 4px;
-
   flex-wrap: wrap;   /* nowrap → wrap */
-
   margin-bottom: 10px;
   padding-bottom: 8px;
 }
@@ -567,30 +520,19 @@ body:not(.dark) #floatPanel{
 }
 
 .float-panel-actions{
-
   display:grid;
-
   grid-template-columns:
     repeat(3,1fr);
-
   gap:6px;
-
   margin-top:8px;
-
 }
 
 .float-panel-actions button{
-
   width:100%;
-
   height:34px;
-
   padding:0;
-
   font-size:10px;
-
   border-radius:4px;
-
 }
 
 .float-list-btn{
@@ -626,7 +568,6 @@ body:not(.dark) #floatPanel{
   --repair-side-width: 60px;
   --repair-side-padding: 8px;
   --repair-side-total: 78px;
-
   --repair-bottom: 0px;
   --repair-tools-btn-space: 44px;
 }
@@ -637,24 +578,17 @@ body:not(.dark) #floatPanel{
 
 .repair-tools-panel{
   position: fixed;
-
   left: var(--repair-side-total);
   right: var(--repair-side-total);
   bottom: var(--repair-bottom);
-
   z-index: 999;
-
   display: none;
-
   max-height: 82vh;
   overflow: auto;
-
   background: rgba(36,37,38,0.88);
   border: 1px solid rgba(255,255,255,0.18);
-
   border-radius: 0;
   padding: 8px;
-
   box-shadow: none;
 }
 
@@ -681,33 +615,24 @@ body:not(.dark) .repair-tools-panel{
 
 .repair-quick-favorite-panel {
   position: fixed;
-
   left: 0;
   top: 110px;
   transform: none;
-
   z-index: 30000;
-
   width: 58px;
   max-height: 70vh;
   overflow-y: auto;
   overflow-x: hidden;
-
   display: none;
   flex-direction: column;
   gap: 4px;
-
   padding: 6px 4px;
-
   background: var(--card);
   color: var(--text);
-
   border: 1px solid var(--border);
   border-left: none;
   border-radius: 0 4px 4px 0;
-
   box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-
   transition: left 0.25s ease;
 }
 
@@ -717,28 +642,19 @@ body:not(.dark) .repair-tools-panel{
 
 .repair-quick-favorite-toggle {
   position: fixed;
-
   left: 58px;
   top: 110px;
-
   z-index: 30001;
-
   width: 28px;
   height: 36px;
-
   padding: 0;
-
   border-radius: 0 4px 4px 0;
-
   background: var(--card);
   color: var(--text);
-
   border: 1px solid var(--border);
   border-left: none;
-
   font-size: 14px;
   line-height: 1;
-
   transition: left 0.25s ease;
 }
 
@@ -757,50 +673,33 @@ body:not(.dark) .repair-tools-panel{
 }
 
 .repair-quick-favorite-btn {
-
   width: 44px;
   height: 40px;
-
   padding: 2px 0;
-
   border-radius: 3px;
-
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
   gap: 1px;
-
   font-size: 10px;
   line-height: 1.1;
-
   white-space: normal;
-
 }
 
 .repair-quick-favorite-icon{
-
   font-size:16px;
   line-height:1;
-
 }
 
 .repair-quick-favorite-label{
-
   font-size:9px;
   line-height:1;
-
   margin-top:2px;
-
   max-width:40px;
-
   overflow:hidden;
-
   text-overflow:ellipsis;
-
   white-space:nowrap;
-
 }
 
 /* ===============================
@@ -809,13 +708,10 @@ body:not(.dark) .repair-tools-panel{
 
 .repair-quick-panel{
   position: fixed;
-
   top: auto;
   bottom: var(--repair-bottom);
   left: var(--repair-side-left);
-
   z-index: 10000;
-
   width: var(--repair-side-width);
   background: var(--card);
   color: var(--text);
@@ -823,11 +719,9 @@ body:not(.dark) .repair-tools-panel{
   border-radius: 0;
   padding: var(--repair-side-padding);
   box-shadow: none;
-
   display: none;
   flex-direction: column;
   gap: 6px;
-
   transition: left 0.25s ease;
 }
 
@@ -840,17 +734,13 @@ body:not(.dark) .repair-tools-panel{
   top: 50%;
   right: -32px;
   transform: translateY(-50%);
-
   width: 30px;
   height: 30px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 0;
   line-height: 1;
-
   border-radius: 0;
   border: 1px solid var(--border);
   background: var(--card);
@@ -866,19 +756,6 @@ body:not(.dark) .repair-tools-panel{
   text-align: left;
 }
 
-
-/* ===============================
-   TOOLS BUTTON
-=============================== */
-
-#toolsBtn{
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border-radius: 50%;
-  font-size: 16px;
-  line-height: 1;
-}
 
 /* ===============================
    REPAIR SEARCH / REPLACE POPUP
@@ -1021,11 +898,11 @@ body:not(.dark) .repair-tools-panel{
 
 .health-action-btn {
   width: 100%;
-  height: 42px;
-  padding: 0;
-  font-size: 11px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 10px;
   border-radius: 2px;
-  text-align: center;
+  text-align: left;
 }
 
 .unused-row {
@@ -1359,18 +1236,13 @@ body:not(.dark) .repair-tools-panel{
 #repairSearchResult{
   display:none;
   max-height:80px;
-
   overflow-y:auto;
-
   margin-top:4px;
   padding:4px;
-
   border:1px solid var(--border);
   border-radius:8px;
-
   background:
     rgba(0,122,255,0.08);
-
   font-size:11px;
 }
 
@@ -1722,19 +1594,14 @@ mark {
 }
 
 .memo-tab.active {
-
   background:
     #2d8cff;
-
   color:
     white;
-
   border:
     1px solid #5ca9ff;
-
   font-weight:
     bold;
-
 }
 
 .repair-quick-title {
@@ -1812,153 +1679,94 @@ mark {
 =============================== */
 
 .repair-search-quick-panel{
-
   position: fixed;
-
   top: 0;
   right: 0;
-
   z-index: 10000;
-
   width: 60px;
   max-height: calc(100vh - 44px);
-
   display: none;
   flex-direction: column;
   gap: 6px;
-
   padding: 8px;
-
   background: var(--card);
   color: var(--text);
-
   border: 1px solid var(--border);
   border-radius: 0;
-
   box-shadow: none;
-
   overflow: visible;
-
   transition: right .25s ease;
-
 }
 
 .repair-search-quick-panel.closed{
-
   right: -60px;
-
 }
 
 .repair-search-quick-toggle{
-
   position: absolute;
-
   top: 50%;
   left: -30px;
-
   transform: translateY(-50%);
-
   z-index: 10001;
-
   width: 30px;
   height: 36px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 0;
-
   line-height: 1;
-
   border: 1px solid var(--border);
   border-radius: 4px 0 0 4px;
-
   background: var(--card);
   color: var(--text);
-
   cursor: pointer;
-
 }
 
 .repair-search-quick-panel .float-list-btn{
-
   font-size: 9px;
-
   padding: 2px;
-
   border-radius: 0;
-
   text-align: left;
-
 }
 
 #repairQuickMacroButtons{
-
   display: flex;
-
   flex-direction: column;
-
   gap: 4px;
-
   max-height: calc(100vh - 80px);
-
   overflow-y: auto;
-
   overflow-x: hidden;
-
 }
 
 #devConsoleSuggestion{
-
   max-height:140px;
-
   overflow-y:auto;
-
   border:1px solid var(--border);
-
   margin-top:4px;
-
   border-radius:6px;
-
 }
 
 #devConsoleSuggestion .search-result-line{
-
   padding:4px 6px;
-
   cursor:pointer;
-
 }
 
 #devConsoleSuggestion .search-result-line:hover{
-
   background:var(--accent);
-
   color:white;
-
 }
 
 .virtual-keyboard {
-
   display:flex;
-
   flex-wrap:wrap;
-
   gap:4px;
-
   margin:6px 0;
-
 }
 
 .virtual-keyboard button {
-
   min-width:42px;
-
   height:34px;
-
   font-size:14px;
-
 }
 
 /* ===============================
@@ -1983,10 +1791,8 @@ mark {
 }
 
 .development-rule-row.selected{
-
   border:
     2px solid #4da3ff;
-
   background:
     rgba(
       77,
