@@ -425,3 +425,181 @@ function splitTopLevelFunctions(
 
 }
 
+/* ===============================
+   Download JSON File
+=============================== */
+
+function downloadJsonFile(
+  data,
+  fileName = "data.json"
+) {
+
+  const blob =
+    new Blob(
+      [
+        JSON.stringify(
+          data,
+          null,
+          2
+        )
+      ],
+      {
+        type:
+          "application/json"
+      }
+    );
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+  const a =
+    document.createElement(
+      "a"
+    );
+
+  a.href =
+    url;
+
+  a.download =
+    fileName;
+
+  a.click();
+
+  URL.revokeObjectURL(
+    url
+  );
+
+}
+
+/* ===============================
+   Download JSON File
+=============================== */
+
+function downloadJsonFile(
+  data,
+  fileName = "data.json"
+) {
+
+  const json =
+    JSON.stringify(
+      data,
+      null,
+      2
+    );
+
+  const blob =
+    new Blob(
+      [json],
+      {
+        type:
+          "application/json"
+      }
+    );
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+  link.href =
+    url;
+
+  link.download =
+    fileName;
+
+  document.body.appendChild(
+    link
+  );
+
+  link.click();
+
+  document.body.removeChild(
+    link
+  );
+
+  URL.revokeObjectURL(
+    url
+  );
+
+}
+
+/* ===============================
+   Read JSON File
+=============================== */
+
+function readJsonFile(
+  file,
+  onSuccess,
+  onError
+) {
+
+  if (!file) {
+    return;
+  }
+
+  const reader =
+    new FileReader();
+
+  reader.onload =
+    () => {
+
+      try {
+
+        const data =
+          JSON.parse(
+            reader.result
+          );
+
+        if (
+          typeof onSuccess ===
+          "function"
+        ) {
+
+          onSuccess(
+            data
+          );
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+        if (
+          typeof onError ===
+          "function"
+        ) {
+
+          onError(
+            error
+          );
+
+        }
+
+      }
+
+    };
+
+  reader.readAsText(
+    file
+  );
+
+}
+
+window.downloadJsonFile =
+  downloadJsonFile;
+
+window.readJsonFile =
+  readJsonFile;
+
+window.downloadJsonFile =
+  downloadJsonFile;
