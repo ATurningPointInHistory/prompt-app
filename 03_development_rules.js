@@ -15,6 +15,9 @@ let developmentRules =
 
 normalizeDevelopmentRules();
 
+let selectedDevelopmentRuleId =
+  null;
+
 function saveDevelopmentRules() {
 
   normalizeDevelopmentRules();
@@ -393,6 +396,10 @@ function buildDevelopmentRulesHtml() {
       return developmentRules
   .map((rule, index) => {
 
+    const selected =
+      selectedDevelopmentRuleId ===
+      rule.id;
+
     const title =
       "Rule" +
       (index + 1) +
@@ -743,6 +750,20 @@ function formatDevelopmentRule(
 
 }
 
+/* ===============================
+   Select Development Rule
+=============================== */
+
+function selectDevelopmentRule(
+  id
+) {
+
+  selectedDevelopmentRuleId =
+    id;
+
+  renderDevelopmentRules();
+
+}
 
 /* ===============================
    Global Export
