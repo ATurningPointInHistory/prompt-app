@@ -1019,6 +1019,168 @@ function escapeJs(text) {
 
 }
 
+/* ===============================
+   Project Manager Common
+   repairSearchFileStore をProject共通データとして扱う
+=============================== */
+
+/* ===============================
+   Get Project File Names
+=============================== */
+
+function getProjectFileNames() {
+
+  if (
+    typeof repairSearchFileStore !==
+    "object" ||
+    !repairSearchFileStore
+  ) {
+    return [];
+  }
+
+  return Object.keys(
+    repairSearchFileStore
+  );
+
+}
+
+/* ===============================
+   Get Project Files
+=============================== */
+
+function getProjectFiles() {
+
+  return getProjectFileNames()
+    .map(fileName =>
+      getProjectFile(fileName)
+    )
+    .filter(Boolean);
+
+}
+
+/* ===============================
+   Get Project File
+=============================== */
+
+function getProjectFile(
+  fileName
+) {
+
+  if (
+    typeof repairSearchFileStore !==
+    "object" ||
+    !repairSearchFileStore
+  ) {
+    return null;
+  }
+
+  return repairSearchFileStore[
+    fileName
+  ] || null;
+
+}
+
+/* ===============================
+   Update Project File
+=============================== */
+
+function updateProjectFile(
+  fileName,
+  text
+) {
+
+  if (!fileName) {
+    return false;
+  }
+
+  if (
+    typeof registerRepairSearchFile ===
+    "function"
+  ) {
+
+    registerRepairSearchFile(
+      fileName,
+      text
+    );
+
+    return true;
+
+  }
+
+  repairSearchFileStore[fileName] = {
+    fileName,
+    text: String(text || ""),
+    updatedAt: Date.now()
+  };
+
+  return true;
+
+}
+
+/* ===============================
+   Get Project File Category
+=============================== */
+
+function getProjectFileCategory(
+  fileName
+) {
+
+  const name =
+    String(fileName || "")
+      .toLowerCase()
+      .split("?")[0];
+
+  if (name.endsWith(".html")) {
+    return "html";
+  }
+
+  if (name.endsWith(".js")) {
+    return "js";
+  }
+
+  if (name.endsWith(".css")) {
+    return "css";
+  }
+
+  if (name.endsWith(".json")) {
+    return "json";
+  }
+
+  return "other";
+
+}
+
+/* ===============================
+   Get Project Files By Category
+=============================== */
+
+function getProjectFilesByCategory() {
+
+  const groups = {
+    html: [],
+    js: [],
+    css: [],
+    json: [],
+    other: []
+  };
+
+  getProjectFileNames()
+    .forEach(fileName => {
+
+      const category =
+        getProjectFileCategory(
+          fileName
+        );
+
+      groups[category]
+        .push(fileName);
+
+    });
+
+  return groups;
+
+}
+
 window.refreshCurrentProjectFunctionDatabase =
   refreshCurrentProjectFunctionDatabase;
 
