@@ -668,12 +668,20 @@ function downloadProjectPackageBlob(
   a.download =
     fileName;
 
+  a.style.display =
+    "none";
+
   document.body.appendChild(a);
 
-  a.click();
+  setTimeout(() => {
 
-  a.remove();
+    a.click();
 
-  URL.revokeObjectURL(url);
+    setTimeout(() => {
+      a.remove();
+      URL.revokeObjectURL(url);
+    }, 1000);
+
+  }, 100);
 
 }
