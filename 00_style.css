@@ -1965,19 +1965,35 @@ mark {
    .development rule
 =============================== */
 
-.development-rule-actions{
+.development-rule-actions button{
+  flex:1;
+}
+
+.development-rule-row{
   display:flex;
-  gap:8px;
-  margin-top:12px;
+  flex-direction:column;
+  align-items:stretch;
+  width:100%;
+}
+
+.development-rule-row .todo-text{
+  width:100%;
+  max-width:100%;
 }
 
 .development-rule-body{
   white-space:pre-wrap;
+  word-break:break-word;
+  overflow-wrap:anywhere;
   font-size:13px;
   line-height:1.5;
-  margin-top:8px;
+  margin:8px 0 0;
+  width:100%;
 }
 
-.development-rule-actions button{
-  flex:1;
+.development-rule-actions{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+  width:100%;
 }
