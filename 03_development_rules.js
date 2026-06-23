@@ -18,6 +18,9 @@ normalizeDevelopmentRules();
 let selectedDevelopmentRuleId =
   null;
 
+let developmentRuleSearch =
+  "";
+
 function saveDevelopmentRules() {
 
   normalizeDevelopmentRules();
@@ -75,6 +78,11 @@ function parseDevelopmentRuleBody(
 =============================== */
 
 function normalizeDevelopmentRules() {
+
+  const keyword =
+    developmentRuleSearch
+      .trim()
+      .toLowerCase();
 
   developmentRules =
     (developmentRules || [])
@@ -519,6 +527,13 @@ function renderDevelopmentRules() {
 
 </div>
 
+<input
+  id="developmentRuleSearch"
+  class="input"
+  placeholder="🔍 Rule検索"
+  value="${escapeHtml(developmentRuleSearch)}"
+  oninput="updateDevelopmentRuleSearch(this.value)">
+
 <div
   id="developmentRulesList"
   class="todo-list">
@@ -859,6 +874,21 @@ function selectDevelopmentRule(
 
   selectedDevelopmentRuleId =
     id;
+
+  renderDevelopmentRules();
+
+}
+
+/* ===============================
+   Update Development Rule Search
+=============================== */
+
+function updateDevelopmentRuleSearch(
+  text
+) {
+
+  developmentRuleSearch =
+    String(text || "");
 
   renderDevelopmentRules();
 
