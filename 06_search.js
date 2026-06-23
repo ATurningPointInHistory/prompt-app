@@ -269,13 +269,33 @@ function cleanProjectFilePath(
    Project情報JSONを生成
 =============================== */
 
+/* ===============================
+   Build Current Project Info
+   Package / Maintenance / AI用のProject情報を生成
+=============================== */
+
 function buildCurrentProjectInfo() {
 
   return {
-    app: "AIプロンプト生成Pro",
-    version: "v6.0",
-    createdAt: new Date().toISOString(),
-    files: getProjectFileNames()
+    name:
+      PROJECT_INFO.name,
+
+    version:
+      PROJECT_INFO.version,
+
+    entryFile:
+      PROJECT_INFO.entryFile,
+
+    state:
+      PROJECT_INFO.projectState,
+
+    createdAt:
+      new Date().toISOString(),
+
+    files:
+      typeof getProjectFileNames === "function"
+        ? getProjectFileNames()
+        : []
   };
 
 }
