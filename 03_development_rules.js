@@ -793,6 +793,18 @@ function exportDevelopmentRules() {
 }
 
 /* ===============================
+   Import Development Rules
+=============================== */
+
+function importDevelopmentRules() {
+
+  get(
+    "developmentRuleImportFile"
+  )?.click();
+
+}
+
+/* ===============================
    Load Development Rules File
 =============================== */
 
