@@ -930,6 +930,12 @@ function buildNormalToolsHtml() {
 📖 開発ルール
 </button>
 
+
+<button class="float-list-btn"
+onclick="executeProjectValidation()">
+🧭 Validation
+</button>
+
 <hr>
 
 <div class="small">🧹 その他</div>
