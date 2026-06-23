@@ -89,6 +89,10 @@ function openRepairTarget(
    現在ページからHTML / JS / CSSを検索・編集対象へ登録
 =============================== */
 
+/* ===============================
+   Load Current Project Search Files
+=============================== */
+
 async function loadCurrentProjectSearchFiles() {
 
   try {
@@ -110,6 +114,12 @@ async function loadCurrentProjectSearchFiles() {
 
     let loaded = 1;
     let failed = 0;
+
+    const failedFiles = [];
+
+    /* ---------------------------
+       JavaScript
+    --------------------------- */
 
     const scripts =
       [
@@ -133,12 +143,24 @@ async function loadCurrentProjectSearchFiles() {
         );
 
       if (ok) {
+
         loaded++;
+
       } else {
+
         failed++;
+
+        failedFiles.push(
+          src
+        );
+
       }
 
     }
+
+    /* ---------------------------
+       CSS
+    --------------------------- */
 
     const styles =
       [
@@ -147,10 +169,12 @@ async function loadCurrentProjectSearchFiles() {
         )
       ];
 
-    for (const link of styles) {
+    for (const style of styles) {
 
       const href =
-        link.getAttribute("href");
+        style.getAttribute(
+          "href"
+        );
 
       if (!href) {
         continue;
@@ -162,12 +186,24 @@ async function loadCurrentProjectSearchFiles() {
         );
 
       if (ok) {
+
         loaded++;
+
       } else {
+
         failed++;
+
+        failedFiles.push(
+          href
+        );
+
       }
 
     }
+
+    /* ---------------------------
+       Project Info
+    --------------------------- */
 
     registerRepairSearchFile(
       "project_info.json",
@@ -190,8 +226,11 @@ async function loadCurrentProjectSearchFiles() {
     }
 
     alert(
-      `現在プロジェクト ${loaded}件を検索対象に登録しました\n\n` +
-      `失敗: ${failed}件`
+      buildCurrentProjectLoadReport(
+        loaded,
+        failed,
+        failedFiles
+      )
     );
 
   } catch (e) {
@@ -204,7 +243,6 @@ async function loadCurrentProjectSearchFiles() {
   }
 
 }
-
 /* ===============================
    Load Current Project File By Fetch
    JS / CSSなど外部ファイルを取得してProjectへ登録
@@ -269,33 +307,13 @@ function cleanProjectFilePath(
    Project情報JSONを生成
 =============================== */
 
-/* ===============================
-   Build Current Project Info
-   Package / Maintenance / AI用のProject情報を生成
-=============================== */
-
 function buildCurrentProjectInfo() {
 
   return {
-    name:
-      PROJECT_INFO.name,
-
-    version:
-      PROJECT_INFO.version,
-
-    entryFile:
-      PROJECT_INFO.entryFile,
-
-    state:
-      PROJECT_INFO.projectState,
-
-    createdAt:
-      new Date().toISOString(),
-
-    files:
-      typeof getProjectFileNames === "function"
-        ? getProjectFileNames()
-        : []
+    app: "AIプロンプト生成Pro",
+    version: "v6.0",
+    createdAt: new Date().toISOString(),
+    files: getProjectFileNames()
   };
 
 }
