@@ -1,11 +1,11 @@
 /* ===============================
-   Build Project Validation Todo Text
-   Validation ReportからTODO追加用テキストを生成
+   FILE: 07_project_validation.js
+   Project Validation
 =============================== */
 
 /* ===============================
-   FILE: 07_project_validation.js
-   Project Validation
+   Build Project Validation Todo Text
+   Validation ReportからTODO追加用テキストを生成
 =============================== */
 
 /*
@@ -51,22 +51,26 @@ function buildProjectValidationReport() {
   const loadedFiles =
     typeof getProjectFileNames === "function"
       ? getProjectFileNames()
+          .map(fileName =>
+            cleanProjectFilePath(
+              fileName
+            )
+          )
       : [];
 
-  const missingFiles = [];
-
-  scripts
-    .concat(css)
-    .forEach(fileName => {
-
-      if (
-        fileName &&
-        !loadedFiles.includes(fileName)
-      ) {
-        missingFiles.push(fileName);
-      }
-
-    });
+  const missingFiles =
+    [
+      ...new Set(
+        scripts
+          .concat(css)
+          .filter(fileName =>
+            fileName &&
+            !loadedFiles.includes(
+              fileName
+            )
+          )
+      )
+    ];
 
   const duplicateScripts =
     findDuplicateProjectItems(
@@ -84,6 +88,7 @@ function buildProjectValidationReport() {
     duplicateCss.length;
 
   return {
+
     score:
       Math.max(
         0,
@@ -105,6 +110,7 @@ function buildProjectValidationReport() {
 
     createdAt:
       new Date().toISOString()
+
   };
 
 }
