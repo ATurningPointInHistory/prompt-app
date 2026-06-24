@@ -94,19 +94,40 @@ function getCurrentProjectAnalyzeMode() {
 
 }
 
+/* ===============================
+   Register Repair Search File
+=============================== */
+
 function registerRepairSearchFile(
   fileName,
   text
 ) {
 
-  if (!fileName) {
+  const path =
+    cleanProjectFilePath(
+      fileName
+    );
+
+  if (!path) {
     return;
   }
 
-  repairSearchFileStore[fileName] = {
-    fileName: fileName,
-    text: String(text || ""),
-    updatedAt: Date.now()
+  repairSearchFileStore[path] = {
+
+    fileName:
+      path,
+
+    path,
+
+    text:
+      String(text || ""),
+
+    code:
+      String(text || ""),
+
+    updatedAt:
+      Date.now()
+
   };
 
 }
@@ -118,10 +139,16 @@ function clearRepairSearchFiles() {
 
 }
 
+/* ===============================
+   Get Repair Search Files
+=============================== */
+
 function getRepairSearchFiles() {
 
   if (
-    typeof repairSearchFileStore !== "object"
+    !repairSearchFileStore ||
+    typeof repairSearchFileStore !==
+      "object"
   ) {
     return [];
   }
@@ -130,16 +157,33 @@ function getRepairSearchFiles() {
     .values(
       repairSearchFileStore
     )
-    .map(file => ({
-      fileName:
-        file.fileName ||
-        "unknown",
+    .map(file => {
 
-      code:
-        file.code ||
-        file.text ||
-        ""
-    }))
+      const path =
+        cleanProjectFilePath(
+          file.path ||
+          file.fileName ||
+          ""
+        );
+
+      return {
+
+        ...file,
+
+        fileName:
+          path || "unknown",
+
+        path:
+          path || "unknown",
+
+        code:
+          file.code ||
+          file.text ||
+          ""
+
+      };
+
+    })
     .filter(file =>
       file.code
     );
@@ -492,30 +536,45 @@ function escapeJs(text) {
 function getProjectFileNames() {
 
   if (
+    !repairSearchFileStore ||
     typeof repairSearchFileStore !==
-    "object" ||
-    !repairSearchFileStore
+      "object"
   ) {
     return [];
   }
 
   return Object.keys(
     repairSearchFileStore
-  );
+  )
+    .filter(Boolean)
+    .sort();
 
 }
 
 /* ===============================
-   Get Project Files
+   Get Project File
 =============================== */
 
-function getProjectFiles() {
+function getProjectFile(
+  fileName
+) {
 
-  return getProjectFileNames()
-    .map(fileName =>
-      getProjectFile(fileName)
-    )
-    .filter(Boolean);
+  if (
+    !repairSearchFileStore ||
+    typeof repairSearchFileStore !==
+      "object"
+  ) {
+    return null;
+  }
+
+  const path =
+    cleanProjectFilePath(
+      fileName
+    );
+
+  return repairSearchFileStore[
+    path
+  ] || null;
 
 }
 
@@ -702,11 +761,21 @@ function buildProjectFileMap(
       return;
     }
 
-    map[
+    const path =
       cleanProjectFilePath(
-        file.fileName
-      )
-    ] = file;
+        file.fileName ||
+        file.path ||
+        ""
+      );
+
+    if (!path) {
+      return;
+    }
+
+    map[path] = {
+      ...file,
+      path
+    };
 
   });
 
@@ -725,69 +794,51 @@ function buildProjectState(
   const state = {
 
     files: [],
-
     fileMap: {},
 
     html: [],
-
     js: [],
-
     css: [],
-
     json: [],
-
     other: []
 
   };
 
   files.forEach(file => {
 
-    if (!file) {
+    if (!file || !file.path) {
       return;
     }
 
-    const path =
-      cleanProjectFilePath(
-        file.fileName ||
-        file.path ||
-        ""
-      );
+    state.files.push(file);
 
-    const item = {
+    state.fileMap[file.path] =
+      file;
 
-      ...file,
+    switch (
+      getProjectFileCategory(
+        file.path
+      )
+    ) {
 
-      path
+      case "html":
+        state.html.push(file);
+        break;
 
-    };
+      case "js":
+        state.js.push(file);
+        break;
 
-    state.files.push(
-      item
-    );
+      case "css":
+        state.css.push(file);
+        break;
 
-    state.fileMap[
-      path
-    ] = item;
+      case "json":
+        state.json.push(file);
+        break;
 
-    if (/\.html?$/i.test(path)) {
-
-      state.html.push(item);
-
-    } else if (/\.js$/i.test(path)) {
-
-      state.js.push(item);
-
-    } else if (/\.css$/i.test(path)) {
-
-      state.css.push(item);
-
-    } else if (/\.json$/i.test(path)) {
-
-      state.json.push(item);
-
-    } else {
-
-      state.other.push(item);
+      default:
+        state.other.push(file);
 
     }
 
