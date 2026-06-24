@@ -1829,3 +1829,13 @@ mark {
   white-space: pre-wrap;
   font-size: 11px;
 }
+
+.repair-search-suggest-item {
+  color: #f9fafb;
+  background: #1f2937;
+  padding: 8px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
