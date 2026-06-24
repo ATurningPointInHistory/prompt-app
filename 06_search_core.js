@@ -69,9 +69,14 @@ function searchRepairText() {
     searchRepairNext();
   }
 
-  updateRepairStatus(
-    `検索結果 ${matches.length}件`
-  );
+  if (
+    typeof updateRepairStatus ===
+    "function"
+  ) {
+    updateRepairStatus(
+      `検索結果 ${matches.length}件`
+    );
+  }
 
 }
 
