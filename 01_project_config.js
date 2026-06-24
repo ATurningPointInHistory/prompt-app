@@ -1249,6 +1249,34 @@ function buildCurrentProjectLoadReport(
 
 }
 
+/* ===============================
+   Build Project File Map
+=============================== */
+
+function buildProjectFileMap(
+  files = getProjectFiles()
+) {
+
+  const map = {};
+
+  files.forEach(file => {
+
+    if (!file) {
+      return;
+    }
+
+    map[
+      cleanProjectFilePath(
+        file.fileName
+      )
+    ] = file;
+
+  });
+
+  return map;
+
+}
+
 window.refreshCurrentProjectFunctionDatabase =
   refreshCurrentProjectFunctionDatabase;
 
