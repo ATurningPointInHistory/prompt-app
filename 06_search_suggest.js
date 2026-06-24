@@ -44,22 +44,25 @@ function updateRepairSearchSuggestions() {
 
   box.innerHTML =
     suggestions
-      .map(word => `
+      .map(word => {
+
+        const safeJs =
+          typeof escapeJs === "function"
+            ? escapeJs(word)
+            : String(word || "")
+                .replace(/\\/g, "\\\\")
+                .replace(/'/g, "\\'")
+                .replace(/\r?\n/g, "\\n");
+
+        return `
 <div
-  class="function-item"
-
-  onclick="selectRepairSearchSuggestion('${
-    typeof escapeJs === "function"
-      ? escapeJs(word)
-      : String(word || "")
-          .replace(/\\/g, "\\\\")
-          .replace(/'/g, "\\'")
-          .replace(/\r?\n/g, "\\n")
-  }')"
-
+  class="repair-search-suggest-item"
+  onclick="selectRepairSearchSuggestion('${safeJs}')">
   🔍 ${escapeHtml(word)}
 </div>
-`)
+`;
+
+      })
       .join("");
 
 }
