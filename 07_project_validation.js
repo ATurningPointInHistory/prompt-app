@@ -34,26 +34,42 @@ function buildProjectValidationReport() {
       ...document.querySelectorAll(
         "script[src]"
       )
-    ].map(script =>
-      cleanProjectFilePath(
-        script.getAttribute("src")
+    ]
+      .map(script =>
+        cleanProjectFilePath(
+          script.getAttribute("src")
+        )
       )
-    );
+      .filter(Boolean);
 
   const css =
     [
       ...document.querySelectorAll(
         "link[rel='stylesheet'][href]"
       )
-    ].map(link =>
-      cleanProjectFilePath(
-        link.getAttribute("href")
+    ]
+      .map(link =>
+        cleanProjectFilePath(
+          link.getAttribute("href")
+        )
       )
-    );
+      .filter(Boolean);
 
   const loadedFiles =
-    Object.keys(
-      state.fileMap
+    Object
+      .keys(
+        state.fileMap
+      )
+      .map(file =>
+        cleanProjectFilePath(
+          file
+        )
+      )
+      .filter(Boolean);
+
+  const loadedFileSet =
+    new Set(
+      loadedFiles
     );
 
   const missingFiles =
@@ -63,8 +79,10 @@ function buildProjectValidationReport() {
           .concat(css)
           .filter(fileName =>
             fileName &&
-            !loadedFiles.includes(
-              fileName
+            !loadedFileSet.has(
+              cleanProjectFilePath(
+                fileName
+              )
             )
           )
       )
@@ -210,8 +228,6 @@ Missing : ${report.missingFiles.length}
 Duplicate Script : ${report.duplicateScripts.length}
 Duplicate CSS : ${report.duplicateCss.length}
 Empty Files : ${(report.emptyFiles || []).length}
-
-Warnings : ${report.warnings || 0}
 Large Files : ${(report.largeFiles || []).length}
 </pre>
 
