@@ -21,6 +21,21 @@ let selectedDevelopmentRuleId =
 let developmentRuleSearch =
   "";
 
+const DEVELOPMENT_RULE_CATEGORIES = [
+  "Architecture",
+  "AI",
+  "UI",
+  "Coding",
+  "Review",
+  "Performance",
+  "Security",
+  "Database",
+  "Other"
+];
+
+let developmentRuleCategory =
+  "";
+
 function saveDevelopmentRules() {
 
   normalizeDevelopmentRules();
@@ -394,6 +409,9 @@ function buildDevelopmentRulesHtml() {
       .trim()
       .toLowerCase();
 
+  const category =
+    developmentRuleCategory;
+
   if (!developmentRules.length) {
     return `
 <div class="small-muted">
@@ -405,11 +423,14 @@ function buildDevelopmentRulesHtml() {
   const filteredRules =
     developmentRules.filter(rule => {
 
-      if (!keyword) {
-        return true;
-      }
+      const categoryMatch =
+        !category ||
+        rule.category === category;
 
-      return (
+      const keywordMatch =
+
+        !keyword ||
+
         (rule.title || "")
           .toLowerCase()
           .includes(keyword)
@@ -424,7 +445,11 @@ function buildDevelopmentRulesHtml() {
 
         (rule.category || "")
           .toLowerCase()
-          .includes(keyword)
+          .includes(keyword);
+
+      return (
+        categoryMatch &&
+        keywordMatch
       );
 
     });
@@ -556,6 +581,34 @@ function renderDevelopmentRules() {
     onchange="loadDevelopmentRulesFile(event)">
 
 </div>
+
+<select
+  id="developmentRuleCategory"
+  onchange="
+    updateDevelopmentRuleCategory(
+      this.value
+    )
+  ">
+
+  <option value="">
+    すべて
+  </option>
+
+  ${DEVELOPMENT_RULE_CATEGORIES
+    .map(category => `
+<option
+  value="${category}"
+  ${
+    developmentRuleCategory === category
+      ? "selected"
+      : ""
+  }>
+  ${category}
+</option>
+`)
+.join("")}
+
+</select>
 
 <input
   id="developmentRuleSearch"
@@ -932,6 +985,27 @@ function updateDevelopmentRuleSearch(
 
 }
 
+function updateDevelopmentRuleCategory(
+  category
+) {
+
+  developmentRuleCategory =
+    String(category || "");
+
+  const box =
+    get(
+      "developmentRulesList"
+    );
+
+  if (!box) {
+    return;
+  }
+
+  box.innerHTML =
+    buildDevelopmentRulesHtml();
+
+}
+
 /* ===============================
    Global Export
 =============================== */
@@ -986,3 +1060,6 @@ window.loadDevelopmentRulesFile =
 
 window.updateDevelopmentRuleSearch =
   updateDevelopmentRuleSearch;
+
+window.updateDevelopmentRuleCategory =
+  updateDevelopmentRuleCategory;
