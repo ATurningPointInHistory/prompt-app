@@ -394,7 +394,6 @@ function closeRepairPopups() {
     }
   });
 }
-
 function toggleRepairSearchPopup() {
 
   let box =
@@ -443,14 +442,8 @@ function toggleRepairSearchPopup() {
 
   <div
     id="repairSearchSuggestBox"
-    class="diagnose-box"
-    style="
-      display:none;
-      max-height:180px;
-      overflow:auto;
-      margin-top:6px;
-      margin-bottom:6px;
-    ">
+    class="repair-search-suggest-box"
+    style="display:none;">
   </div>
 
   <div id="repairSearchPopupResult"></div>
