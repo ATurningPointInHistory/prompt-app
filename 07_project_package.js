@@ -395,61 +395,59 @@ function getSelectedProjectPackageFiles() {
 
 }
 
+/* ===============================
+   Get Project Package File Candidates
+=============================== */
+
 function getProjectPackageFileCandidates() {
+
+  const state =
+    buildProjectState();
 
   const files = [];
 
-  files.push({
-    path: "index.html",
-    type: "html",
-    source: "document"
-  });
+  state.files.forEach(file => {
 
-  document
-    .querySelectorAll("script[src]")
-    .forEach(script => {
+    if (!file || !file.path) {
+      return;
+    }
 
-      const src =
-        script.getAttribute("src");
+    files.push({
 
-      if (!src) {
-        return;
-      }
+      path:
+        cleanProjectPackagePath(
+          file.path
+        ),
 
-      files.push({
-        path: cleanProjectPackagePath(src),
-        fetchPath: src,
-        type: "js",
-        source: "fetch"
-      });
+      fetchPath:
+        file.fetchPath ||
+        file.path,
 
-    });
+      type:
+        getProjectFileCategory(
+          file.path
+        ),
 
-  document
-    .querySelectorAll("link[rel='stylesheet'][href]")
-    .forEach(link => {
-
-      const href =
-        link.getAttribute("href");
-
-      if (!href) {
-        return;
-      }
-
-      files.push({
-        path: cleanProjectPackagePath(href),
-        fetchPath: href,
-        type: "css",
-        source: "fetch"
-      });
+      source:
+        "memory"
 
     });
 
-  files.push({
-    path: "project_info.json",
-    type: "json",
-    source: "generated"
   });
+
+  if (
+    !files.some(file =>
+      file.path === "project_info.json"
+    )
+  ) {
+
+    files.push({
+      path: "project_info.json",
+      type: "json",
+      source: "generated"
+    });
+
+  }
 
   return files;
 
