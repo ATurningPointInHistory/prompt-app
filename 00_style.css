@@ -1834,10 +1834,9 @@ mark {
   color: #f9fafb;
   background: #1f2937;
   padding: 3px 6px;
-  margin-bottom: 1px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
+  margin-bottom: 1;
+  font-size: 11px;
+  line-height: 1.1;
 }
 
 #repairSearchSuggestBox {
