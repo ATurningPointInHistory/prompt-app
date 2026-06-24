@@ -904,3 +904,18 @@ window.changeAnalyzeSourceMode =
 
 window.openRepairSearchFileAtLine =
   openRepairSearchFileAtLine;
+
+window.getProjectFileNames =
+  getProjectFileNames;
+
+window.getProjectFile =
+  getProjectFile;
+
+window.getProjectFiles =
+  getProjectFiles;
+
+window.updateProjectFile =
+  updateProjectFile;
+
+window.buildProjectState =
+  buildProjectState;
