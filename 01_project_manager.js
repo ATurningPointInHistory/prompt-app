@@ -1,7 +1,7 @@
 
 /* ===============================
-
-<script src="./01_project_manager.js
+   FILE: 01_project_manager.js
+   共通関数
 =============================== */
 
 
