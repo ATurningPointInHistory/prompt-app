@@ -359,6 +359,17 @@ function editDevelopmentRule(
     return;
   }
 
+  const category =
+    prompt(
+      "カテゴリ\n\n" +
+      DEVELOPMENT_RULE_CATEGORIES.join("\n"),
+      rule.category || "Architecture"
+    );
+
+  if (category === null) {
+    return;
+  }
+
   const title =
     prompt(
       "開発ルール タイトル",
@@ -378,6 +389,11 @@ function editDevelopmentRule(
   if (body === null) {
     return;
   }
+
+  rule.category =
+    DEVELOPMENT_RULE_CATEGORIES.includes(category)
+      ? category
+      : "Other";
 
   rule.title =
     title.trim() ||
@@ -496,6 +512,14 @@ ${escapeHtml(rule.body || "")}
   </div>
 
   <div class="development-rule-actions">
+
+    <button onclick="moveDevelopmentRule(${originalIndex}, -1)">
+      ↑
+    </button>
+
+    <button onclick="moveDevelopmentRule(${originalIndex}, 1)">
+      ↓
+    </button>
 
     <button onclick="editDevelopmentRule(${originalIndex})">
       編集
@@ -1007,6 +1031,44 @@ function updateDevelopmentRuleCategory(
 }
 
 /* ===============================
+   順位入れ替え関数
+=============================== */
+
+function moveDevelopmentRule(
+  index,
+  direction
+) {
+
+  normalizeDevelopmentRules();
+
+  const nextIndex =
+    index + direction;
+
+  if (
+    index < 0 ||
+    nextIndex < 0 ||
+    index >= developmentRules.length ||
+    nextIndex >= developmentRules.length
+  ) {
+    return;
+  }
+
+  const temp =
+    developmentRules[index];
+
+  developmentRules[index] =
+    developmentRules[nextIndex];
+
+  developmentRules[nextIndex] =
+    temp;
+
+  saveDevelopmentRules();
+
+  renderDevelopmentRules();
+
+}
+
+/* ===============================
    Global Export
 =============================== */
 
@@ -1063,3 +1125,6 @@ window.updateDevelopmentRuleSearch =
 
 window.updateDevelopmentRuleCategory =
   updateDevelopmentRuleCategory;
+
+window.moveDevelopmentRule =
+  moveDevelopmentRule;
