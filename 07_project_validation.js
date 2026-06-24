@@ -24,7 +24,133 @@
    Build Project Validation Report
 =============================== */
 
-buildProjectValidationReport
+function buildProjectValidationReport() {
+
+  const state =
+    buildProjectState();
+
+  const scripts =
+    [
+      ...document.querySelectorAll(
+        "script[src]"
+      )
+    ].map(script =>
+      cleanProjectFilePath(
+        script.getAttribute("src")
+      )
+    );
+
+  const css =
+    [
+      ...document.querySelectorAll(
+        "link[rel='stylesheet'][href]"
+      )
+    ].map(link =>
+      cleanProjectFilePath(
+        link.getAttribute("href")
+      )
+    );
+
+  const loadedFiles =
+    Object.keys(
+      state.fileMap
+    );
+
+  const missingFiles =
+    [
+      ...new Set(
+        scripts
+          .concat(css)
+          .filter(fileName =>
+            fileName &&
+            !loadedFiles.includes(
+              fileName
+            )
+          )
+      )
+    ];
+
+  const duplicateScripts =
+    findDuplicateProjectItems(
+      scripts
+    );
+
+  const duplicateCss =
+    findDuplicateProjectItems(
+      css
+    );
+
+  const emptyFiles =
+    state.files
+      .filter(file =>
+        !String(
+          file.text ||
+          file.code ||
+          ""
+        ).trim()
+      )
+      .map(file =>
+        file.path
+      );
+
+  const largeFiles =
+    state.files
+      .map(file => {
+
+        const lines =
+          String(
+            file.text ||
+            file.code ||
+            ""
+          ).split(/\r?\n/).length;
+
+        return {
+          path:
+            file.path,
+          lines
+        };
+
+      })
+      .filter(file =>
+        file.lines > 1000
+      );
+
+  const issueCount =
+    missingFiles.length +
+    duplicateScripts.length +
+    duplicateCss.length +
+    emptyFiles.length +
+    largeFiles.length;
+
+  return {
+
+    score:
+      Math.max(
+        0,
+        100 - issueCount * 10
+      ),
+
+    files:
+      loadedFiles.length,
+
+    scriptCount:
+      scripts.length,
+
+    cssCount:
+      css.length,
+
+    missingFiles,
+    duplicateScripts,
+    duplicateCss,
+    emptyFiles,
+    largeFiles,
+
+    createdAt:
+      new Date().toISOString()
+
+  };
+
+}
 /* ===============================
    Find Duplicate Project Items
 =============================== */
