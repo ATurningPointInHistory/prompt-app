@@ -119,8 +119,7 @@ function buildProjectValidationReport() {
     missingFiles.length +
     duplicateScripts.length +
     duplicateCss.length +
-    emptyFiles.length +
-    largeFiles.length;
+    emptyFiles.length;
 
   return {
 
@@ -129,6 +128,9 @@ function buildProjectValidationReport() {
         0,
         100 - issueCount * 10
       ),
+
+    warnings:
+      largeFiles.length,
 
     files:
       loadedFiles.length,
@@ -151,6 +153,7 @@ function buildProjectValidationReport() {
   };
 
 }
+
 /* ===============================
    Find Duplicate Project Items
 =============================== */
@@ -207,6 +210,8 @@ Missing : ${report.missingFiles.length}
 Duplicate Script : ${report.duplicateScripts.length}
 Duplicate CSS : ${report.duplicateCss.length}
 Empty Files : ${(report.emptyFiles || []).length}
+
+Warnings : ${report.warnings || 0}
 Large Files : ${(report.largeFiles || []).length}
 </pre>
 
