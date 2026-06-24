@@ -604,7 +604,6 @@ function escapeJs(text) {
 
 }
 
-
 window.downloadJsonFile =
   downloadJsonFile;
 
@@ -613,3 +612,6 @@ window.readJsonFile =
 
 window.downloadJsonFile =
   downloadJsonFile;
+
+window.escapeJs =
+  escapeJs;
