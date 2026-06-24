@@ -579,24 +579,51 @@ function getProjectFile(
 }
 
 /* ===============================
-   Get Project File
+   Get Project Files
 =============================== */
 
-function getProjectFile(
-  fileName
-) {
+function getProjectFiles() {
 
-  if (
-    typeof repairSearchFileStore !==
-    "object" ||
-    !repairSearchFileStore
-  ) {
-    return null;
-  }
+  return getProjectFileNames()
+    .map(fileName => {
 
-  return repairSearchFileStore[
-    fileName
-  ] || null;
+      const file =
+        getProjectFile(
+          fileName
+        );
+
+      if (!file) {
+        return null;
+      }
+
+      const path =
+        cleanProjectFilePath(
+          file.path ||
+          file.fileName ||
+          fileName
+        );
+
+      return {
+
+        ...file,
+
+        fileName:
+          path,
+
+        path,
+
+        code:
+          file.code ||
+          file.text ||
+          ""
+
+      };
+
+    })
+    .filter(file =>
+      file &&
+      file.path
+    );
 
 }
 
@@ -919,3 +946,36 @@ window.updateProjectFile =
 
 window.buildProjectState =
   buildProjectState;
+
+window.getProjectFileNames =
+  getProjectFileNames;
+
+window.getProjectFile =
+  getProjectFile;
+
+window.getProjectFiles =
+  getProjectFiles;
+
+window.updateProjectFile =
+  updateProjectFile;
+
+window.getProjectFileCategory =
+  getProjectFileCategory;
+
+window.getProjectFilesByCategory =
+  getProjectFilesByCategory;
+
+window.buildProjectFileMap =
+  buildProjectFileMap;
+
+window.buildProjectState =
+  buildProjectState;
+
+window.getProjectJavaScriptFiles =
+  getProjectJavaScriptFiles;
+
+window.getProjectPackageFileText =
+  getProjectPackageFileText;
+
+window.escapeJs =
+  escapeJs;
