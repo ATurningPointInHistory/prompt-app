@@ -7,27 +7,60 @@
    Search Panel
 =============================== */
 
-toggleRepairSearchBox
+function toggleRepairSearchBox() {
 
-function handleRepairSearchKey(e) {
-  if (e.key === "Enter") {
-    e.preventDefault();
+  openFloatPanel(
+    "検索",
+    `
+    <input
+      id="repairSearch"
+      placeholder="検索"
+      oninput="updateRepairSearchSuggestions()">
 
-    searchRepairText();
-  }
+    <div
+      id="repairSearchSuggestBox"
+      class="diagnose-box">
+    </div>
 
-  if (e.key === "Escape") {
-    e.preventDefault();
+    <div class="float-panel-actions">
+      <button onclick="searchRepairText()">🔍</button>
+      <button onclick="searchRepairPrev()">◀</button>
+      <button onclick="searchRepairNext()">▶</button>
+      <button onclick="clearRepairSearch()">✕</button>
+    </div>
+
+    <div
+      id="repairSearchResult"
+      class="diagnose-box"
+      style="display:none;">
+    </div>
+    `
+  );
+
+  setTimeout(() => {
+
+    const box =
+      get("repairSearch");
+
+    if (!box) {
+      return;
+    }
+
+    box.focus();
+    box.select();
+
+    box.onkeydown =
+      handleRepairSearchKey;
 
     if (
-      typeof closeFloatPanelKeepEditorSelection ===
+      typeof updateRepairSearchSuggestions ===
       "function"
     ) {
-      closeFloatPanelKeepEditorSelection();
-    } else {
-      closeFloatPanel();
+      updateRepairSearchSuggestions();
     }
-  }
+
+  }, 50);
+
 }
 
 function updateRepairFloatingPanelsVisibility() {
