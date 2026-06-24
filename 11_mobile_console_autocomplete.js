@@ -136,7 +136,6 @@ function getDevConsoleAutocompleteCandidates(
 
   [
     "projectFunctionDatabase",
-    "repairSearchFileStore",
     "repairGlobalSearchResults",
     "repairSearchMatches",
     "currentProjectAnalyzeMode",
