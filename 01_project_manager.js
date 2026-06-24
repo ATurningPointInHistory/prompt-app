@@ -1300,3 +1300,18 @@ window.getProjectJavaScriptFiles =
 
 window.getProjectPackageFileText =
   getProjectPackageFileText;
+
+window.openRepairTarget =
+  openRepairTarget;
+
+window.loadCurrentProjectSearchFiles =
+  loadCurrentProjectSearchFiles;
+
+window.loadCurrentProjectFileByFetch =
+  loadCurrentProjectFileByFetch;
+
+window.cleanProjectFilePath =
+  cleanProjectFilePath;
+
+window.buildCurrentProjectInfo =
+  buildCurrentProjectInfo;
