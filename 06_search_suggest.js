@@ -20,6 +20,7 @@ function updateRepairSearchSuggestions() {
 
   if (!keyword) {
     box.innerHTML = "";
+    box.style.display = "none";
     return;
   }
 
@@ -32,12 +33,21 @@ function updateRepairSearchSuggestions() {
       )
       .slice(0, 10);
 
+  if (!suggestions.length) {
+    box.innerHTML = "";
+    box.style.display = "none";
+    return;
+  }
+
+  box.style.display =
+    "block";
+
   box.innerHTML =
     suggestions
       .map(word => `
 <div
   class="function-item"
-  onclick="selectRepairSearchSuggestion('${escapeJsString(word)}')">
+  onclick="selectRepairSearchSuggestion('${escapeJs(word)}')">
   🔍 ${escapeHtml(word)}
 </div>
 `)
@@ -49,40 +59,134 @@ function collectRepairSearchSuggestions() {
 
   const words = [];
 
+  collectRepairSearchHistorySuggestions(
+    words
+  );
+
+  collectRepairSearchSourceSuggestions(
+    words
+  );
+
+  collectRepairSearchDatabaseSuggestions(
+    words
+  );
+
+  return normalizeRepairSearchSuggestions(
+    words
+  );
+
+}
+
+function collectRepairSearchHistorySuggestions(
+  words
+) {
+
   if (
-    Array.isArray(repairSearchHistory)
+    !Array.isArray(
+      repairSearchHistory
+    )
   ) {
-    repairSearchHistory.forEach(item => {
-      if (item.keyword) {
-        words.push(item.keyword);
-      }
-    });
+    return;
   }
 
-  const editor =
-    get("repairEditor");
+  repairSearchHistory.forEach(item => {
 
-  if (editor && editor.value) {
+    if (item && item.keyword) {
+      words.push(
+        item.keyword
+      );
+    }
+
+  });
+
+}
+
+function collectRepairSearchSourceSuggestions(
+  words
+) {
+
+  let sources = [];
+
+  if (
+    typeof getProjectAnalyzeSources ===
+    "function"
+  ) {
+
+    sources =
+      getProjectAnalyzeSources(
+        typeof getCurrentProjectAnalyzeMode === "function"
+          ? getCurrentProjectAnalyzeMode()
+          : "editor"
+      );
+
+  } else {
+
+    const editor =
+      get("repairEditor");
+
+    if (editor && editor.value) {
+      sources = [
+        {
+          fileName:
+            currentRepairFile ||
+            "Repair Editor",
+          code:
+            editor.value
+        }
+      ];
+    }
+
+  }
+
+  sources.forEach(source => {
+
+    const code =
+      source.code ||
+      source.text ||
+      "";
+
     words.push(
-      ...(
-        editor.value.match(
-          /[a-zA-Z_$][\w$]{2,}/g
-        ) || []
+      ...extractRepairSearchWordsFromText(
+        code
       )
     );
-  }
+
+  });
+
+}
+
+function collectRepairSearchDatabaseSuggestions(
+  words
+) {
 
   if (
-    typeof projectFunctionDatabase ===
-    "object" &&
-    projectFunctionDatabase
+    typeof projectFunctionDatabase !== "object" ||
+    !projectFunctionDatabase
   ) {
-    words.push(
-      ...Object.keys(
-        projectFunctionDatabase
-      )
-    );
+    return;
   }
+
+  words.push(
+    ...Object.keys(
+      projectFunctionDatabase
+    )
+  );
+
+}
+
+function extractRepairSearchWordsFromText(
+  text
+) {
+
+  return String(text || "")
+    .match(/[a-zA-Z_$][\w$]{2,}/g) ||
+    [];
+
+}
+
+function normalizeRepairSearchSuggestions(
+  words
+) {
 
   return [
     ...new Set(
@@ -94,11 +198,14 @@ function collectRepairSearchSuggestions() {
           word.length >= 2
         )
     )
-  ];
+  ]
+    .sort();
 
 }
 
-function selectRepairSearchSuggestion(word) {
+function selectRepairSearchSuggestion(
+  word
+) {
 
   const input =
     get("repairSearch");
@@ -111,6 +218,14 @@ function selectRepairSearchSuggestion(word) {
     word;
 
   input.focus();
+
+  const box =
+    get("repairSearchSuggestBox");
+
+  if (box) {
+    box.innerHTML = "";
+    box.style.display = "none";
+  }
 
   searchRepairText();
 
