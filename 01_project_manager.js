@@ -849,6 +849,17 @@ function buildProjectState(
 }
 
 /* ===============================
+   Get Project JavaScript Files
+=============================== */
+
+function getProjectJavaScriptFiles() {
+
+  return buildProjectState()
+    .js;
+
+}
+
+/* ===============================
    Export
 =============================== */
 
