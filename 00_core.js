@@ -595,6 +595,16 @@ function readJsonFile(
 
 }
 
+function escapeJs(text) {
+
+  return String(text || "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/\r?\n/g, "\\n");
+
+}
+
+
 window.downloadJsonFile =
   downloadJsonFile;
 
