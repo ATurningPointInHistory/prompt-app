@@ -797,8 +797,9 @@ function buildProjectState(
 
 }
 
-window.refreshCurrentProjectFunctionDatabase =
-  refreshCurrentProjectFunctionDatabase;
+/* ===============================
+   Export
+=============================== */
 
 window.refreshCurrentProjectFunctionDatabase =
   refreshCurrentProjectFunctionDatabase;
