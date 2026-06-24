@@ -58,7 +58,13 @@ function updateRepairSearchSuggestions() {
 <div
   class="repair-search-suggest-item"
   onclick="selectRepairSearchSuggestion('${safeJs}')">
-  🔍 ${escapeHtml(word)}
+
+  <span class="repair-search-suggest-icon">
+    🔍
+  </span>
+
+  ${escapeHtml(word)}
+
 </div>
 `;
 
