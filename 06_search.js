@@ -17,10 +17,15 @@ function openRepairTarget(
   line = 1
 ) {
 
-  const file =
-    repairSearchFileStore[
+  const path =
+    cleanProjectFilePath(
       fileName
-    ];
+    );
+
+  const file =
+    getProjectFile(
+      path
+    );
 
   if (!file) {
     alert(
@@ -48,13 +53,15 @@ function openRepairTarget(
     "function"
   ) {
     setCurrentRepairFile(
+      file.path ||
       file.fileName ||
-      fileName
+      path
     );
   } else {
     currentRepairFile =
+      file.path ||
       file.fileName ||
-      fileName;
+      path;
   }
 
   if (
@@ -503,12 +510,14 @@ function saveCurrentSearchEditorFile() {
 
 }
 
+/* ===============================
+   Show Repair Search Files
+=============================== */
+
 function showRepairSearchFiles() {
 
   const names =
-    Object.keys(
-      repairSearchFileStore
-    );
+    getProjectFileNames();
 
   if (!names.length) {
 
@@ -647,26 +656,32 @@ function searchAllRepairFiles() {
   repairLastGlobalSearchKeyword =
     keyword;
 
-  const fileNames =
-    Object.keys(
-      repairSearchFileStore
-    );
+  const state =
+    buildProjectState();
 
-  if (!fileNames.length) {
+  const files =
+    state.files;
+
+  if (!files.length) {
     alert("検索用ファイルが未読込です");
     return;
   }
 
   const results = [];
 
-  fileNames.forEach(fileName => {
+  files.forEach(file => {
 
-    const file =
-      repairSearchFileStore[fileName];
+    const fileName =
+      file.path ||
+      file.fileName ||
+      "unknown";
 
     const lines =
-      String(file.text || "")
-        .split("\n");
+      String(
+        file.text ||
+        file.code ||
+        ""
+      ).split("\n");
 
     lines.forEach((line, index) => {
 
