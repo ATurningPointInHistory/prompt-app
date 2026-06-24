@@ -4,9 +4,7 @@
 =============================== */
 
 let repairSearchHistory =
-  typeof repairSearchHistory !== "undefined"
-    ? repairSearchHistory
-    : [];
+  window.repairSearchHistory || [];
 
 function saveSearchHistory(
   file,
@@ -105,6 +103,9 @@ function loadSearchHistory() {
   }
 
 }
+
+window.repairSearchHistory =
+  repairSearchHistory;
 
 window.saveSearchHistory =
   saveSearchHistory;
