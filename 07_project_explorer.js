@@ -24,14 +24,14 @@
    Build Project Explorer HTML
 =============================== */
 
+/* ===============================
+   Build Project Explorer HTML
+=============================== */
+
 function buildProjectExplorerHtml() {
 
-  const groups =
-    getProjectFilesByCategory();
-
-  const total =
-    getProjectFileNames()
-      .length;
+  const state =
+    buildProjectState();
 
   return `
 <div class="float-panel-header">
@@ -40,32 +40,32 @@ function buildProjectExplorerHtml() {
 </div>
 
 <div class="small">
-  Files : ${total}
+  Files : ${state.files.length}
 </div>
 
 ${buildProjectExplorerCategoryHtml(
   "📄 HTML",
-  groups.html
+  state.html
 )}
 
 ${buildProjectExplorerCategoryHtml(
   "📜 JavaScript",
-  groups.js
+  state.js
 )}
 
 ${buildProjectExplorerCategoryHtml(
   "🎨 CSS",
-  groups.css
+  state.css
 )}
 
 ${buildProjectExplorerCategoryHtml(
   "📦 JSON",
-  groups.json
+  state.json
 )}
 
 ${buildProjectExplorerCategoryHtml(
   "📁 Other",
-  groups.other
+  state.other
 )}
 `;
 
@@ -85,10 +85,16 @@ function buildProjectExplorerCategoryHtml(
   }
 
   const rows =
-    files.map(fileName => {
+    files.map(file => {
+
+      const fileName =
+        file.path ||
+        file.fileName ||
+        "";
 
       const active =
-        fileName === currentRepairFile
+        fileName === currentRepairFile ||
+        file.fileName === currentRepairFile
           ? "▶ "
           : "📄 ";
 
