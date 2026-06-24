@@ -63,18 +63,29 @@ function handleRepairSearchKey(e) {
 
 function updateRepairFloatingPanelsVisibility() {
 
-  if (typeof updateRepairQuickPanelVisibility === "function") {
+  if (
+    typeof updateRepairQuickPanelVisibility ===
+    "function"
+  ) {
     updateRepairQuickPanelVisibility();
   }
 
-  if (typeof updateRepairSearchQuickVisibility === "function") {
+  if (
+    typeof updateRepairSearchQuickVisibility ===
+    "function"
+  ) {
     updateRepairSearchQuickVisibility();
   }
+
+  const repairMode =
+    typeof isRepairMode === "function"
+      ? isRepairMode()
+      : true;
 
   const searchPopup =
     get("repairSearchPopup");
 
-  if (searchPopup && !isRepairMode()) {
+  if (searchPopup && !repairMode) {
     searchPopup.style.display =
       "none";
   }
@@ -82,10 +93,11 @@ function updateRepairFloatingPanelsVisibility() {
   const replacePopup =
     get("repairReplacePopup");
 
-  if (replacePopup && !isRepairMode()) {
+  if (replacePopup && !repairMode) {
     replacePopup.style.display =
       "none";
   }
+
 }
 
 function renderRepairSearchResults(
@@ -114,7 +126,11 @@ function renderRepairSearchResults(
 
     if(
       safeKeyword &&
-      line.includes(safeKeyword)
+      line
+        .toLowerCase()
+        .includes(
+          safeKeyword.toLowerCase()
+        )
     ){
 
       results.push({
