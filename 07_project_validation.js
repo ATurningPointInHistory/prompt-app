@@ -48,15 +48,13 @@ function buildProjectValidationReport() {
       )
     );
 
+  const fileMap =
+    buildProjectFileMap();
+
   const loadedFiles =
-    typeof getProjectFileNames === "function"
-      ? getProjectFileNames()
-          .map(fileName =>
-            cleanProjectFilePath(
-              fileName
-            )
-          )
-      : [];
+    Object.keys(
+      fileMap
+    );
 
   const missingFiles =
     [
