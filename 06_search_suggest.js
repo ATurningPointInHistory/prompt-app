@@ -47,7 +47,16 @@ function updateRepairSearchSuggestions() {
       .map(word => `
 <div
   class="function-item"
-  onclick="selectRepairSearchSuggestion('${escapeJs(word)}')">
+
+  onclick="selectRepairSearchSuggestion('${
+    typeof escapeJs === "function"
+      ? escapeJs(word)
+      : String(word || "")
+          .replace(/\\/g, "\\\\")
+          .replace(/'/g, "\\'")
+          .replace(/\r?\n/g, "\\n")
+  }')"
+
   🔍 ${escapeHtml(word)}
 </div>
 `)
