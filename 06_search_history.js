@@ -106,3 +106,14 @@ function loadSearchHistory() {
 
 }
 
+window.saveSearchHistory =
+  saveSearchHistory;
+
+window.showSearchHistory =
+  showSearchHistory;
+
+window.jumpToSearchHistory =
+  jumpToSearchHistory;
+
+window.loadSearchHistory =
+  loadSearchHistory;
