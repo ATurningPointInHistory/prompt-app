@@ -1277,6 +1277,89 @@ function buildProjectFileMap(
 
 }
 
+/* ===============================
+   Build Project State
+=============================== */
+
+function buildProjectState(
+  files = getProjectFiles()
+) {
+
+  const state = {
+
+    files: [],
+
+    fileMap: {},
+
+    html: [],
+
+    js: [],
+
+    css: [],
+
+    json: [],
+
+    other: []
+
+  };
+
+  files.forEach(file => {
+
+    if (!file) {
+      return;
+    }
+
+    const path =
+      cleanProjectFilePath(
+        file.fileName ||
+        file.path ||
+        ""
+      );
+
+    const item = {
+
+      ...file,
+
+      path
+
+    };
+
+    state.files.push(
+      item
+    );
+
+    state.fileMap[
+      path
+    ] = item;
+
+    if (/\.html?$/i.test(path)) {
+
+      state.html.push(item);
+
+    } else if (/\.js$/i.test(path)) {
+
+      state.js.push(item);
+
+    } else if (/\.css$/i.test(path)) {
+
+      state.css.push(item);
+
+    } else if (/\.json$/i.test(path)) {
+
+      state.json.push(item);
+
+    } else {
+
+      state.other.push(item);
+
+    }
+
+  });
+
+  return state;
+
+}
+
 window.refreshCurrentProjectFunctionDatabase =
   refreshCurrentProjectFunctionDatabase;
 
