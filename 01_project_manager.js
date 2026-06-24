@@ -515,15 +515,6 @@ async function getProjectPackageFileText(
 
 }
 
-function escapeJs(text) {
-
-  return String(text || "")
-    .replace(/\\/g, "\\\\")
-    .replace(/'/g, "\\'")
-    .replace(/\r?\n/g, "\\n");
-
-}
-
 /* ===============================
    Project Manager Common
    repairSearchFileStore をProject共通データとして扱う
