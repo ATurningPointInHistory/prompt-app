@@ -510,52 +510,35 @@ function normalizeProjectConfig(config) {
 
 }
 
+/* ===============================
+   Get Project Function Search Files
+=============================== */
+
 function getProjectFunctionSearchFiles() {
+
+  if (
+    typeof buildProjectState ===
+      "function"
+  ) {
+
+    const jsFiles =
+      buildProjectState()
+        .js
+        .map(file =>
+          file.path
+        )
+        .filter(Boolean);
+
+    if (jsFiles.length) {
+      return jsFiles;
+    }
+
+  }
 
   return [
     "./00_core.js",
-    "./01_bootstrap.js",
-    "./01_function_reference.js",
     "./01_project_config.js",
-
-    "./02_prompt.js",
-    "./03_data.js",
-    "./04_tools.js",
-    "./04_repair_quick_buttons.js",
-
-    "./05_repair_file.js",
-    "./05_repair_function.js",
-    "./05_repair_sort.js",
-    "./05_repair_diff.js",
-    "./05_repair_cleanup.js",
-    "./05_repair.js",
-
-    "./06_search.js",
-
-    "./07_health_dependency.js",
-    "./07_health_diagnose.js",
-    "./07_health_unused.js",
-    "./07_backup_manager.js",
-    "./07_project_package.js",
-    "./07_safe_mode.js",
-    "./07_backup_health.js",
-
-    "./08_function_relation.js",
-    "./08_ai_analyzer.js",
-    "./08_ai_apply.js",
-    "./08_ai_test.js",
-    "./08_ai_integrator.js",
-
-    "./09_ai_instruction.js",
-    "./09_ai_error_prompt.js",
-
-    "./10_macro.js",
-    "./11_mobile_console.js",
-    "./11_mobile_console_suggest.js",
-    "./11_virtual_keyboard.js",
-
-    "./12_memo_box.js",
-
+    "./01_project_manager.js",
     "./99_init.js"
   ];
 
