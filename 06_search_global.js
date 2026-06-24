@@ -233,13 +233,22 @@ async function loadCurrentProjectSearchFiles() {
       );
     }
 
-    alert(
-      buildCurrentProjectLoadReport(
-        loaded,
-        failed,
-        failedFiles
-      )
-    );
+    if (
+      typeof buildCurrentProjectLoadReport ===
+      "function"
+    ) {
+      alert(
+        buildCurrentProjectLoadReport(
+          loaded,
+          failed,
+          failedFiles
+        )
+      );
+    } else {
+      alert(
+        `現在プロジェクト ${loaded}件読込 / 失敗 ${failed}件`
+      );
+    }
 
   } catch (e) {
 
@@ -633,9 +642,14 @@ function searchAllRepairFiles() {
     repairGlobalSearchResults
   );
 
-  updateRepairStatus(
-    `全検索結果 ${results.length}件`
-  );
+  if (
+    typeof updateRepairStatus ===
+    "function"
+  ) {
+    updateRepairStatus(
+      `全検索結果 ${results.length}件`
+    );
+  }
 
   showGlobalSearchModal();
 
@@ -755,7 +769,7 @@ function renderGlobalSearchModal() {
 
           <div class="global-search-hit">
             <span class="global-search-line-no">L${item.lineNumber}</span>
-            ★ ${escapeHtml(item.line)}
+            ${escapeHtml(item.line)}
           </div>
 
           <div>
