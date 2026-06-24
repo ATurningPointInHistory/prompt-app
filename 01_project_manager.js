@@ -967,6 +967,3 @@ window.getProjectJavaScriptFiles =
 
 window.getProjectPackageFileText =
   getProjectPackageFileText;
-
-window.escapeJs =
-  escapeJs;
