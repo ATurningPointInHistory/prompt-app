@@ -24,95 +24,7 @@
    Build Project Validation Report
 =============================== */
 
-function buildProjectValidationReport() {
-
-  const scripts =
-    [
-      ...document.querySelectorAll(
-        "script[src]"
-      )
-    ].map(script =>
-      cleanProjectFilePath(
-        script.getAttribute("src")
-      )
-    );
-
-  const css =
-    [
-      ...document.querySelectorAll(
-        "link[rel='stylesheet'][href]"
-      )
-    ].map(link =>
-      cleanProjectFilePath(
-        link.getAttribute("href")
-      )
-    );
-
-  const state =
-    buildProjectState();
-
-  const loadedFiles =
-    Object.keys(
-      state.fileMap
-    );
-
-  const missingFiles =
-    [
-      ...new Set(
-        scripts
-          .concat(css)
-          .filter(fileName =>
-            fileName &&
-            !loadedFiles.includes(
-              fileName
-            )
-          )
-      )
-    ];
-
-  const duplicateScripts =
-    findDuplicateProjectItems(
-      scripts
-    );
-
-  const duplicateCss =
-    findDuplicateProjectItems(
-      css
-    );
-
-  const issueCount =
-    missingFiles.length +
-    duplicateScripts.length +
-    duplicateCss.length;
-
-  return {
-
-    score:
-      Math.max(
-        0,
-        100 - issueCount * 10
-      ),
-
-    files:
-      loadedFiles.length,
-
-    scriptCount:
-      scripts.length,
-
-    cssCount:
-      css.length,
-
-    missingFiles,
-    duplicateScripts,
-    duplicateCss,
-
-    createdAt:
-      new Date().toISOString()
-
-  };
-
-}
-
+buildProjectValidationReport
 /* ===============================
    Find Duplicate Project Items
 =============================== */
@@ -168,6 +80,8 @@ CSS : ${report.cssCount}
 Missing : ${report.missingFiles.length}
 Duplicate Script : ${report.duplicateScripts.length}
 Duplicate CSS : ${report.duplicateCss.length}
+Empty Files : ${(report.emptyFiles || []).length}
+Large Files : ${(report.largeFiles || []).length}
 </pre>
 
 <button
@@ -190,6 +104,39 @@ ${buildProjectValidationSectionHtml(
   "Duplicate CSS",
   report.duplicateCss
 )}
+
+${buildProjectValidationSectionHtml(
+  "Empty Files",
+  report.emptyFiles || []
+)}
+
+${buildProjectValidationLargeFilesHtml(
+  report.largeFiles || []
+)}
+`;
+
+}
+
+function buildProjectValidationLargeFilesHtml(
+  files
+) {
+
+  if (!files || !files.length) {
+    return "";
+  }
+
+  return `
+<div class="tool-section-title">
+  Large Files
+</div>
+
+${files.map(file => `
+<div class="function-item">
+  📄 ${escapeHtml(file.path)}
+  <br>
+  <small>${file.lines} lines</small>
+</div>
+`).join("")}
 `;
 
 }
@@ -350,4 +297,3 @@ function executeAddProjectValidationTodos() {
   );
 
 }
-
