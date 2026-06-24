@@ -1,7 +1,12 @@
 /* ===============================
    FILE: 06_search_history.js
-   検索履歴 ※次工程で実装
+   検索履歴
 =============================== */
+
+let repairSearchHistory =
+  typeof repairSearchHistory !== "undefined"
+    ? repairSearchHistory
+    : [];
 
 function saveSearchHistory(
   file,
