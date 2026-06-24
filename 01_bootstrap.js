@@ -394,6 +394,7 @@ function closeRepairPopups() {
     }
   });
 }
+
 function toggleRepairSearchPopup() {
 
   let box =
@@ -427,7 +428,8 @@ function toggleRepairSearchPopup() {
 
     <input
       id="repairSearch"
-      placeholder="検索">
+      placeholder="検索"
+      oninput="updateRepairSearchSuggestions()">
 
     <button onclick="searchRepairText()">
       検索
@@ -439,10 +441,43 @@ function toggleRepairSearchPopup() {
 
   </div>
 
+  <div
+    id="repairSearchSuggestBox"
+    class="diagnose-box"
+    style="
+      display:none;
+      max-height:180px;
+      overflow:auto;
+      margin-top:6px;
+      margin-bottom:6px;
+    ">
+  </div>
+
   <div id="repairSearchPopupResult"></div>
   `;
 
   document.body.appendChild(box);
+
+  setTimeout(() => {
+
+    const input =
+      get("repairSearch");
+
+    if (!input) {
+      return;
+    }
+
+    input.focus();
+
+    if (
+      typeof updateRepairSearchSuggestions ===
+      "function"
+    ) {
+      updateRepairSearchSuggestions();
+    }
+
+  }, 50);
+
 }
 
 function toggleRepairReplacePopup() {
