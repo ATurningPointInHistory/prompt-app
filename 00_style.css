@@ -1830,18 +1830,30 @@ mark {
   font-size: 11px;
 }
 
-.repair-search-suggest-item {
-  color: #f9fafb;
-  background: #1f2937;
-  padding: 3px 6px;
-  margin-bottom: 1;
-  font-size: 11px;
-  line-height: 1.1;
-}
-
 #repairSearchSuggestBox {
   max-height: 120px;
   overflow-y: auto;
   padding: 2px;
 }
 
+.repair-search-suggest-box {
+  max-height: 120px;
+  overflow-y: auto;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  padding: 2px;
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 6px;
+}
+
+.repair-search-suggest-item {
+  color: #ffffff;
+  background: #1f2937;
+  padding: 2px 5px;
+  margin: 1px 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1.15;
+}
