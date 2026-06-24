@@ -24,10 +24,6 @@
    Build Project Explorer HTML
 =============================== */
 
-/* ===============================
-   Build Project Explorer HTML
-=============================== */
-
 function buildProjectExplorerHtml() {
 
   const state =
