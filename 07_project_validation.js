@@ -378,6 +378,21 @@ function buildProjectValidationTodoText(
     });
   }
 
+  if (
+    report.largeFiles &&
+    report.largeFiles.length
+  ) {
+
+    report.largeFiles.forEach(file => {
+
+      lines.push(
+        `分割候補: ${file.path} (${file.lines} lines)`
+      );
+
+    });
+
+  }
+
   return lines.join("\n");
 
 }
