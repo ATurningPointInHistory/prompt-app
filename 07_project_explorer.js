@@ -151,9 +151,23 @@ function executeOpenProjectExplorerFile(
     saveCurrentSearchEditorFile();
   }
 
+  const state =
+    buildProjectState();
+
+  const file =
+    state.fileMap[
+      cleanProjectFilePath(
+        fileName
+      )
+    ];
+
+  const targetName =
+    file?.fileName ||
+    fileName;
+
   if (
     !openRepairTarget(
-      fileName,
+      targetName,
       1
     )
   ) {
@@ -167,7 +181,7 @@ function executeOpenProjectExplorerFile(
     "function"
   ) {
     updateRepairStatus(
-      `${fileName} を開きました`
+      `${targetName} を開きました`
     );
   }
 
