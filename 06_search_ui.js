@@ -7,38 +7,7 @@
    Search Panel
 =============================== */
 
-function toggleRepairSearchBox() {
-  openFloatPanel(
-    "検索",
-    `
-    <input
-      id="repairSearch"
-      placeholder="検索">
-
-    <div class="float-panel-actions">
-      <button onclick="searchRepairText()">🔍</button>
-      <button onclick="searchRepairPrev()">◀</button>
-      <button onclick="searchRepairNext()">▶</button>
-      <button onclick="clearRepairSearch()">✕</button>
-    </div>
-
-    <div
-      id="repairSearchResult"
-      class="diagnose-box"
-      style="display:none;">
-    </div>
-    `
-  );
-
-  setTimeout(() => {
-    const box = get("repairSearch");
-    if (!box) return;
-
-    box.focus();
-    box.select();
-    box.onkeydown = handleRepairSearchKey;
-  }, 50);
-}
+toggleRepairSearchBox
 
 function handleRepairSearchKey(e) {
   if (e.key === "Enter") {
