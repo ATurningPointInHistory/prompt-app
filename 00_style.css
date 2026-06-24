@@ -1848,12 +1848,20 @@ mark {
 }
 
 .repair-search-suggest-item {
+  display: flex;
+  align-items: center;
   color: #ffffff;
   background: #1f2937;
   padding: 2px 5px;
   margin: 1px 0;
   border-radius: 4px;
-  cursor: pointer;
   font-size: 11px;
   line-height: 1.15;
+}
+
+.repair-search-suggest-icon {
+  display: inline-block;
+  width: 40px;
+  flex-shrink: 0;
+  text-align: center;
 }
