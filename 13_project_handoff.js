@@ -354,9 +354,7 @@ function buildProjectSummary() {
     getProjectFunctionDatabase();
 
   const functionDatabase =
-    database.functions ||
-    window.projectFunctionDatabase ||
-    {};
+    getProjectFunctionDatabase();
 
   const mode =
     typeof getCurrentProjectAnalyzeMode ===
@@ -977,10 +975,7 @@ function buildButtonRelationReport() {
           lines.push("File");
 
           lines.push(
-            info.file ||
-            info.fileName ||
-            info.path ||
-            "unknown"
+            getFunctionFileName(info)
           );
 
         } else {
@@ -1139,7 +1134,7 @@ function buildReverseCallGraphReport() {
     const calledBy =
       filterSelfFunctionCalls(
         name,
-        info.calledBy || []
+        getFunctionCalledByList(info)
       );
 
     if (!calledBy.length) {
@@ -1210,15 +1205,13 @@ function buildDependencyTreeReport() {
     const called =
       filterSelfFunctionCalls(
         name,
-        info.called ||
-        info.calledFunctions ||
-        []
+        getFunctionCalledList(info)
       );
     
     const calledBy =
       filterSelfFunctionCalls(
         name,
-        info.calledBy || []
+        getFunctionCalledByList(info)
       );
 
     lines.push(
@@ -1230,9 +1223,7 @@ function buildDependencyTreeReport() {
     );
 
     lines.push(
-      info.file ||
-      info.fileName ||
-      "unknown"
+      getFunctionFileName(info)
     );
 
     lines.push(
@@ -1312,9 +1303,7 @@ function buildModuleDependencyReport() {
     .forEach(info => {
 
       const fileName =
-        info.file ||
-        info.fileName ||
-        "unknown";
+        getFunctionFileName(info);
 
       if (!modules[fileName]) {
         modules[fileName] = {
@@ -1326,15 +1315,11 @@ function buildModuleDependencyReport() {
       modules[fileName]
         .functions
         .push(
-          info.name ||
-          info.functionName ||
-          "unknown"
+          getFunctionName(info)
         );
 
       const called =
-        info.called ||
-        info.calledFunctions ||
-        [];
+        getFunctionCalledList(info);
 
       called.forEach(fn => {
         modules[fileName]
@@ -1575,13 +1560,10 @@ function buildRecommendedRepairOrderReport() {
       }
 
       const called =
-        info.called ||
-        info.calledFunctions ||
-        [];
+        getFunctionCalledList(info);
 
       const calledBy =
-        info.calledBy ||
-        [];
+        getFunctionCalledByList(info);
 
       let risk =
         "LOW";
@@ -1607,9 +1589,7 @@ function buildRecommendedRepairOrderReport() {
       );
 
       lines.push(
-        info.file ||
-        info.fileName ||
-        "unknown"
+        getFunctionFileName(info)
       );
 
       lines.push(
