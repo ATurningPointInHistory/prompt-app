@@ -171,6 +171,9 @@ function buildAiHandoffReport() {
   const lines = [];
 
 
+
+  lines.push(buildProjectEntryPointReport());
+  lines.push("");
   lines.push(buildProjectSummary());
   lines.push("");
   lines.push("AI HANDOFF REPORT");
@@ -453,6 +456,118 @@ function buildProjectSummary() {
             .length
         : 0
     )
+  );
+
+  return lines.join("\n");
+
+}
+
+/* ===============================
+   Entry Point Report
+=============================== */
+
+function buildProjectEntryPointReport() {
+
+  const lines = [];
+
+  lines.push(
+    "=== Entry Points ==="
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Application"
+  );
+
+  lines.push(
+    "index.html"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Startup"
+  );
+
+  lines.push(
+    "99_init.js"
+  );
+
+  lines.push(
+    "↓"
+  );
+
+  lines.push(
+    "initRepairIde()"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Page Switch"
+  );
+
+  lines.push(
+    "01_bootstrap.js"
+  );
+
+  lines.push(
+    "↓"
+  );
+
+  lines.push(
+    "switchAppPage()"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Repair"
+  );
+
+  lines.push(
+    "loadRepairHtml()"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Project"
+  );
+
+  lines.push(
+    "loadCurrentProjectSearchFiles()"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Database"
+  );
+
+  lines.push(
+    "updateProjectDatabase()"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Health"
+  );
+
+  lines.push(
+    "showHtmlHealth()"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "AI"
+  );
+
+  lines.push(
+    "analyzeAiGeneratedCode()"
   );
 
   return lines.join("\n");
