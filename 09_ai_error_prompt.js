@@ -568,6 +568,15 @@ function buildErrorCauseCandidates(
 
 }
 
+function openErrorPromptInputPopup() {
+
+  generateErrorPrompt();
+
+}
+
+window.openErrorPromptInputPopup =
+  openErrorPromptInputPopup;
+
 function buildRepairHint(
   functionName,
   fileName
