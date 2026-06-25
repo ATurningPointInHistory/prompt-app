@@ -299,19 +299,19 @@ function buildAnalyzeSourceSelectorHtml(
     ">
 
     <button
-      class="mini-btn"
+      class="analyze-source-mini-btn"
       onclick="${onChange}('editor')">
       ${radioMark("editor")} Editor
     </button>
 
     <button
-      class="mini-btn"
+      class="analyze-source-mini-btn"
       onclick="${onChange}('currentProject')">
       ${radioMark("currentProject")} Current Project
     </button>
 
     <button
-      class="mini-btn"
+      class="analyze-source-mini-btn"
       onclick="${onChange}('loadedFiles')">
       ${radioMark("loadedFiles")} Downloaded
     </button>
