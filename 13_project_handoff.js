@@ -186,6 +186,8 @@ function buildAiHandoffReport() {
   lines.push("");
   lines.push(buildProjectSourceFlowReport());
   lines.push("");
+  lines.push(buildSharedStoreReport());
+  lines.push("");
   lines.push(buildProjectManagerReport());
   lines.push("");
   lines.push(buildAnalyzerFlowReport());
@@ -568,6 +570,112 @@ function buildProjectEntryPointReport() {
 
   lines.push(
     "analyzeAiGeneratedCode()"
+  );
+
+  return lines.join("\n");
+
+}
+
+/* ===============================
+   Shared Store Report
+=============================== */
+
+function buildSharedStoreReport() {
+
+  const lines = [];
+
+  lines.push(
+    "=== Shared Store ==="
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Project Store"
+  );
+
+  lines.push(
+    "- repairSearchFileStore"
+  );
+
+  lines.push(
+    "- projectDatabase"
+  );
+
+  lines.push(
+    "- projectFunctionDatabase"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Current State"
+  );
+
+  lines.push(
+    "- currentRepairFile"
+  );
+
+  lines.push(
+    "- currentProjectAnalyzeMode"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Repair"
+  );
+
+  lines.push(
+    "- repairUndoStack"
+  );
+
+  lines.push(
+    "- repairRedoStack"
+  );
+
+  lines.push(
+    "- repairSearchHistory"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Task"
+  );
+
+  lines.push(
+    "- runningTasks"
+  );
+
+  lines.push(
+    "- TASK"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Shared Functions"
+  );
+
+  lines.push(
+    "registerRepairSearchFile()"
+  );
+
+  lines.push(
+    "getProjectFiles()"
+  );
+
+  lines.push(
+    "buildProjectState()"
+  );
+
+  lines.push(
+    "updateProjectDatabase()"
+  );
+
+  lines.push(
+    "getProjectAnalyzeSources()"
   );
 
   return lines.join("\n");
