@@ -1438,3 +1438,6 @@ window.renderRepairAnalyzeSourceSelector =
 
 window.changeRepairAnalyzeSourceMode =
   changeRepairAnalyzeSourceMode;
+
+window.buildRepairAnalyzeSourceToolHtml =
+  buildRepairAnalyzeSourceToolHtml;
