@@ -496,23 +496,6 @@ function getProjectCoreFunctions() {
 
 }
 
-const targetFunctions = [
-  ...getProjectCoreFunctions(),
-  "getHtmlHealthSource",
-  "buildModuleAnalysis"
-];
-
-const targetFunctions = [
-  ...getProjectCoreFunctions(),
-  "getRepairSearchFiles",
-  "registerRepairSearchFile",
-  "updateLineNumbers",
-  "updateCursorPosition"
-];
-
-const targetFunctions =
-  getProjectCoreFunctions();
-
 function getDefaultProjectConfig() {
 
   return {
