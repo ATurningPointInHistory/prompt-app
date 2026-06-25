@@ -23,8 +23,7 @@ function buildProjectSourceFlowReport() {
     sources
       .map(source =>
         source.fileName || "unknown"
-      )
-      .slice(0, 30);
+      );
 
   return `
 === Project Source Flow ===
