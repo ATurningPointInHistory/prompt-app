@@ -198,6 +198,66 @@ function buildAnalyzerDependencies(
 }
 
 /* ===============================
+   Function Info Helpers
+=============================== */
+
+function getProjectFunctionDatabase() {
+
+  return (
+    window.projectDatabase?.functions ||
+    window.projectFunctionDatabase ||
+    {}
+  );
+
+}
+
+function getFunctionCalledList(
+  info
+) {
+
+  return (
+    info?.called ||
+    info?.calledFunctions ||
+    []
+  );
+
+}
+
+function getFunctionFileName(
+  info
+) {
+
+  return (
+    info?.file ||
+    info?.fileName ||
+    info?.path ||
+    "unknown"
+  );
+
+}
+
+function filterSelfFunctionCalls(
+  functionName,
+  calls
+) {
+
+  const ignore =
+    typeof getIgnoredFunctionCalls ===
+      "function"
+      ? getIgnoredFunctionCalls()
+      : new Set();
+
+  return (calls || [])
+    .filter(name =>
+      name &&
+      name !== functionName &&
+      !ignore.has(name)
+    )
+    .sort();
+
+}
+
+/* ===============================
    Global Export
 =============================== */
 
