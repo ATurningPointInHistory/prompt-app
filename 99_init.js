@@ -145,7 +145,13 @@ function initRepairIde() {
   updateCursor();
   safeRun(enableRepairEditorTabIndent, "enableRepairEditorTabIndent");
 
-  console.log("initRepairIde initialized");
+  safeRun(
+    renderRepairAnalyzeSourceSelector,
+    "renderRepairAnalyzeSourceSelector"
+  );
+
+console.log("initRepairIde initialized");
+
 }
 
 /* ===============================
