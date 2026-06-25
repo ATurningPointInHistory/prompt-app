@@ -1330,6 +1330,15 @@ async function changeRepairAnalyzeSourceMode(
 
 }
 
+function buildRepairAnalyzeSourceToolHtml() {
+
+  return buildAnalyzeSourceSelectorHtml({
+    label: "解析対象",
+    onChange: "changeAnalyzeSourceMode"
+  });
+
+}
+
 /* ===============================
    Export
 =============================== */
