@@ -1244,14 +1244,6 @@ function buildCurrentProjectInfo() {
    Export
 =============================== */
 
-/* ===============================
-   Export
-=============================== */
-
-/* ===============================
-   Export
-=============================== */
-
 window.refreshCurrentProjectFunctionDatabase =
   refreshCurrentProjectFunctionDatabase;
 
