@@ -200,7 +200,15 @@ function toggleHealthSection(id) {
 async function showHtmlHealth() {
 
   const healthSource =
-    getHtmlHealthSource();
+    typeof getHtmlHealthSource === "function"
+      ? getHtmlHealthSource()
+      : {
+          type: "Runtime DOM",
+          fileName: "document.documentElement",
+          source:
+            "<!DOCTYPE html>\n" +
+            document.documentElement.outerHTML
+        };
 
   const source =
     healthSource.source;
@@ -263,12 +271,23 @@ async function showHtmlHealth() {
       )
     )];
 
+  const refs =
+    isHtmlSource &&
+    typeof extractFunctionReferences === "function"
+      ? extractFunctionReferences(
+          jsForCheck,
+          source
+        )
+      : {
+          onclicks: [],
+          eventRefs: [],
+          windowRefs: [],
+          windowNames: [],
+          labelFors: []
+        };
+
   const onclicks =
-    isHtmlSource
-      ? [...source.matchAll(
-          /onclick=["']([a-zA-Z0-9_$]+)\(/g
-        )].map(x => x[1])
-      : [];
+    refs.onclicks;
 
   const undefinedFns =
     [...new Set(
