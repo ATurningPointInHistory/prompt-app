@@ -173,11 +173,22 @@ function buildAiHandoffReport() {
   lines.push("AI HANDOFF REPORT");
   lines.push("");
 
+  /* ===============================
+     Project
+  ============================== */
+
   lines.push(buildProjectSummary());
   lines.push("");
 
   lines.push(buildProjectEntryPointReport());
   lines.push("");
+
+  lines.push(buildProjectArchitectureReport());
+  lines.push("");
+
+  /* ===============================
+     Source
+  ============================== */
 
   lines.push(buildProjectSourceFlowReport());
   lines.push("");
@@ -188,7 +199,14 @@ function buildAiHandoffReport() {
   lines.push(buildProjectManagerReport());
   lines.push("");
 
+  /* ===============================
+     Analyze
+  ============================== */
+
   lines.push(buildAnalyzerFlowReport());
+  lines.push("");
+
+  lines.push(buildButtonRelationReport());
   lines.push("");
 
   lines.push(buildProjectDatabaseFlowReport());
@@ -198,6 +216,32 @@ function buildAiHandoffReport() {
   lines.push("");
 
   lines.push(buildAiIntegrationFlowReport());
+  lines.push("");
+
+  /* ===============================
+     Dependency
+  ============================== */
+
+  lines.push(buildCallGraphReport());
+  lines.push("");
+
+  lines.push(buildReverseCallGraphReport());
+  lines.push("");
+
+  lines.push(buildDependencyTreeReport());
+  lines.push("");
+
+  lines.push(buildModuleDependencyReport());
+  lines.push("");
+
+  /* ===============================
+     AI
+  ============================== */
+
+  lines.push(buildAiRepairGuideReport());
+  lines.push("");
+
+  lines.push(buildRecommendedRepairOrderReport());
   lines.push("");
 
   return lines.join("\n");
@@ -788,6 +832,101 @@ applyAiIntegration()
 
 showHtmlHealth()
 `;
+
+}
+
+/* ===============================
+   Button Relation
+=============================== */
+
+function buildButtonRelationReport() {
+
+  const lines = [];
+
+  lines.push(
+    "=== Button Relation ==="
+  );
+  lines.push("");
+
+  const html =
+    document.documentElement
+      ?.outerHTML || "";
+
+  const buttons =
+    [...html.matchAll(
+      /onclick="([^"]+)"/g
+    )];
+
+  if (!buttons.length) {
+
+    lines.push(
+      "No onclick found."
+    );
+
+    return lines.join("\n");
+
+  }
+
+  buttons.forEach(match => {
+
+    const onclick =
+      match[1];
+
+    const func =
+      onclick
+        .split("(")[0]
+        .trim();
+
+    lines.push(
+      "Button"
+    );
+
+    lines.push(
+      "↓"
+    );
+
+    lines.push(
+      onclick
+    );
+
+    lines.push(
+      "↓"
+    );
+
+    lines.push(
+      func + "()"
+    );
+
+    if (
+      typeof getFunctionInfoFromDatabase ===
+      "function"
+    ) {
+
+      const info =
+        getFunctionInfoFromDatabase(
+          func
+        );
+
+      if (info) {
+
+        lines.push(
+          "↓"
+        );
+
+        lines.push(
+          info.file ||
+          "unknown"
+        );
+
+      }
+
+    }
+
+    lines.push("");
+
+  });
+
+  return lines.join("\n");
 
 }
 
