@@ -1865,3 +1865,12 @@ mark {
   flex-shrink: 0;
   text-align: center;
 }
+
+.analyze-source-mini-btn {
+  font-size: 11px;
+  padding: 2px 6px;
+  min-height: 24px;
+  border-radius: 6px;
+  line-height: 1.2;
+
+}
