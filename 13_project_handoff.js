@@ -931,6 +931,677 @@ function buildButtonRelationReport() {
 }
 
 /* ===============================
+   Call Graph Report
+=============================== */
+
+function buildCallGraphReport() {
+
+  const database =
+    window.projectDatabase?.functions ||
+    window.projectFunctionDatabase ||
+    {};
+
+  const targetFunctions = [
+    "showHtmlHealth",
+    "getHtmlHealthSource",
+    "getProjectAnalyzeSources",
+    "updateProjectDatabase",
+    "buildProjectDatabase",
+    "generateModuleAnalyzer",
+    "buildModuleAnalysis",
+    "analyzeAiGeneratedCode",
+    "runAiGeneratedCodeAnalysis",
+    "applyAiIntegration",
+    "loadRepairHtml",
+    "openRepairTarget"
+  ];
+
+  const lines = [];
+
+  lines.push(
+    "=== Call Graph ==="
+  );
+
+  lines.push("");
+
+  if (
+    !database ||
+    !Object.keys(database).length
+  ) {
+    lines.push(
+      "skip: projectFunctionDatabase not loaded"
+    );
+
+    return lines.join("\n");
+  }
+
+  targetFunctions.forEach(name => {
+
+    const info =
+      database[name];
+
+    if (!info) {
+      return;
+    }
+
+    lines.push(
+      name + "()"
+    );
+
+    lines.push(
+      "↓"
+    );
+
+    const called =
+      info.called ||
+      info.calledFunctions ||
+      [];
+
+    if (!called.length) {
+
+      lines.push(
+        "no calls"
+      );
+
+    } else {
+
+      called
+        .slice(0, 20)
+        .forEach(fn => {
+          lines.push(
+            "- " + fn + "()"
+          );
+        });
+
+    }
+
+    lines.push("");
+
+  });
+
+  return lines.join("\n");
+
+}
+
+/* ===============================
+   Reverse Call Graph Report
+=============================== */
+
+function buildReverseCallGraphReport() {
+
+  const database =
+    window.projectDatabase?.functions ||
+    window.projectFunctionDatabase ||
+    {};
+
+  const targetFunctions = [
+    "getProjectAnalyzeSources",
+    "getRepairSearchFiles",
+    "registerRepairSearchFile",
+    "buildProjectState",
+    "updateProjectDatabase",
+    "showHtmlHealth",
+    "validateBackupHtml",
+    "openRepairTarget",
+    "updateLineNumbers",
+    "updateCursorPosition",
+    "applyAiIntegration",
+    "runAiAutoTest"
+  ];
+
+  const lines = [];
+
+  lines.push(
+    "=== Reverse Call Graph ==="
+  );
+
+  lines.push("");
+
+  if (
+    !database ||
+    !Object.keys(database).length
+  ) {
+    lines.push(
+      "skip: projectFunctionDatabase not loaded"
+    );
+
+    return lines.join("\n");
+  }
+
+  targetFunctions.forEach(name => {
+
+    const info =
+      database[name];
+
+    if (!info) {
+      return;
+    }
+
+    lines.push(
+      name + "()"
+    );
+
+    lines.push(
+      "Called By:"
+    );
+
+    const calledBy =
+      info.calledBy ||
+      [];
+
+    if (!calledBy.length) {
+
+      lines.push(
+        "- none"
+      );
+
+    } else {
+
+      calledBy
+        .slice(0, 20)
+        .forEach(fn => {
+          lines.push(
+            "- " + fn + "()"
+          );
+        });
+
+    }
+
+    lines.push("");
+
+  });
+
+  return lines.join("\n");
+
+}
+
+/* ===============================
+   Dependency Tree Report
+=============================== */
+
+function buildDependencyTreeReport() {
+
+  const database =
+    window.projectDatabase?.functions ||
+    window.projectFunctionDatabase ||
+    {};
+
+  const targetFunctions = [
+    "getProjectAnalyzeSources",
+    "buildProjectState",
+    "updateProjectDatabase",
+    "showHtmlHealth",
+    "generateModuleAnalyzer",
+    "analyzeAiGeneratedCode",
+    "applyAiIntegration",
+    "loadRepairHtml",
+    "openRepairTarget",
+    "showAiHandoffReport"
+  ];
+
+  const lines = [];
+
+  lines.push(
+    "=== Dependency Tree ==="
+  );
+
+  lines.push("");
+
+  if (
+    !database ||
+    !Object.keys(database).length
+  ) {
+    lines.push(
+      "skip: projectFunctionDatabase not loaded"
+    );
+
+    return lines.join("\n");
+  }
+
+  targetFunctions.forEach(name => {
+
+    const info =
+      database[name];
+
+    if (!info) {
+      return;
+    }
+
+    const called =
+      info.called ||
+      info.calledFunctions ||
+      [];
+
+    const calledBy =
+      info.calledBy ||
+      [];
+
+    lines.push(
+      name + "()"
+    );
+
+    lines.push(
+      "File:"
+    );
+
+    lines.push(
+      info.file ||
+      info.fileName ||
+      "unknown"
+    );
+
+    lines.push(
+      "Calls:"
+    );
+
+    if (called.length) {
+      called
+        .slice(0, 15)
+        .forEach(fn => {
+          lines.push(
+            "- " + fn + "()"
+          );
+        });
+    } else {
+      lines.push(
+        "- none"
+      );
+    }
+
+    lines.push(
+      "Called By:"
+    );
+
+    if (calledBy.length) {
+      calledBy
+        .slice(0, 15)
+        .forEach(fn => {
+          lines.push(
+            "- " + fn + "()"
+          );
+        });
+    } else {
+      lines.push(
+        "- none"
+      );
+    }
+
+    lines.push("");
+
+  });
+
+  return lines.join("\n");
+
+}
+
+/* ===============================
+   Module Dependency Report
+=============================== */
+
+function buildModuleDependencyReport() {
+
+  const database =
+    window.projectDatabase?.functions ||
+    window.projectFunctionDatabase ||
+    {};
+
+  const lines = [];
+
+  lines.push(
+    "=== Module Dependency ==="
+  );
+
+  lines.push("");
+
+  if (
+    !database ||
+    !Object.keys(database).length
+  ) {
+    lines.push(
+      "skip: projectFunctionDatabase not loaded"
+    );
+
+    return lines.join("\n");
+  }
+
+  const modules = {};
+
+  Object.values(database)
+    .forEach(info => {
+
+      const fileName =
+        info.file ||
+        info.fileName ||
+        "unknown";
+
+      if (!modules[fileName]) {
+        modules[fileName] = {
+          functions: [],
+          calls: new Set()
+        };
+      }
+
+      modules[fileName]
+        .functions
+        .push(
+          info.name ||
+          info.functionName ||
+          "unknown"
+        );
+
+      const called =
+        info.called ||
+        info.calledFunctions ||
+        [];
+
+      called.forEach(fn => {
+        modules[fileName]
+          .calls
+          .add(fn);
+      });
+
+    });
+
+  Object.keys(modules)
+    .sort()
+    .slice(0, 40)
+    .forEach(fileName => {
+
+      const item =
+        modules[fileName];
+
+      lines.push(
+        fileName
+      );
+
+      lines.push(
+        "Functions:"
+      );
+
+      item.functions
+        .slice(0, 12)
+        .forEach(fn => {
+          lines.push(
+            "- " + fn + "()"
+          );
+        });
+
+      if (
+        item.functions.length > 12
+      ) {
+        lines.push(
+          "... +" +
+          (
+            item.functions.length - 12
+          ) +
+          " more"
+        );
+      }
+
+      lines.push(
+        "Calls:"
+      );
+
+      const calls =
+        [...item.calls];
+
+      if (!calls.length) {
+        lines.push(
+          "- none"
+        );
+      } else {
+        calls
+          .slice(0, 12)
+          .forEach(fn => {
+            lines.push(
+              "- " + fn + "()"
+            );
+          });
+      }
+
+      lines.push("");
+
+    });
+
+  return lines.join("\n");
+
+}
+
+/* ===============================
+   AI Repair Guide Report
+=============================== */
+
+function buildAiRepairGuideReport() {
+
+  const lines = [];
+
+  lines.push(
+    "=== AI Repair Guide ==="
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Rule 1"
+  );
+  lines.push(
+    "- Modify one function at a time."
+  );
+  lines.push("");
+
+  lines.push(
+    "Rule 2"
+  );
+  lines.push(
+    "- Reuse existing common functions whenever possible."
+  );
+  lines.push("");
+
+  lines.push(
+    "Rule 3"
+  );
+  lines.push(
+    "- Do not rename public functions unless required."
+  );
+  lines.push("");
+
+  lines.push(
+    "Rule 4"
+  );
+  lines.push(
+    "- Preserve window exports."
+  );
+  lines.push("");
+
+  lines.push(
+    "Rule 5"
+  );
+  lines.push(
+    "- Keep build/show/update/execute separation."
+  );
+  lines.push("");
+
+  lines.push(
+    "Rule 6"
+  );
+  lines.push(
+    "- After modifications update Project Database."
+  );
+  lines.push("");
+
+  lines.push(
+    "Rule 7"
+  );
+  lines.push(
+    "- Run HTML Health."
+  );
+  lines.push("");
+
+  lines.push(
+    "Rule 8"
+  );
+  lines.push(
+    "- Run Project Validation."
+  );
+  lines.push("");
+
+  lines.push(
+    "Rule 9"
+  );
+  lines.push(
+    "- Run Module Analyzer."
+  );
+  lines.push("");
+
+  lines.push(
+    "Rule 10"
+  );
+  lines.push(
+    "- Run Function Analyzer."
+  );
+  lines.push("");
+
+  lines.push(
+    "Rule 11"
+  );
+  lines.push(
+    "- Run AI Auto Test."
+  );
+  lines.push("");
+
+  lines.push(
+    "Rule 12"
+  );
+  lines.push(
+    "- Verify Health Score before completion."
+  );
+
+  return lines.join("\n");
+
+}
+
+/* ===============================
+   Recommended Repair Order Report
+=============================== */
+
+function buildRecommendedRepairOrderReport() {
+
+  const database =
+    window.projectDatabase?.functions ||
+    window.projectFunctionDatabase ||
+    {};
+
+  const lines = [];
+
+  lines.push(
+    "=== Recommended Repair Order ==="
+  );
+
+  lines.push("");
+
+  if (
+    !database ||
+    !Object.keys(database).length
+  ) {
+    lines.push(
+      "skip: projectFunctionDatabase not loaded"
+    );
+
+    return lines.join("\n");
+  }
+
+  const priorityFunctions = [
+    "getProjectAnalyzeSources",
+    "buildProjectState",
+    "updateProjectDatabase",
+    "buildProjectDatabase",
+    "showHtmlHealth",
+    "executeProjectValidation",
+    "generateModuleAnalyzer",
+    "showFunctionAnalyzer",
+    "analyzeAiGeneratedCode",
+    "runAiAutoTest",
+    "applyAiIntegration",
+    "showAiHandoffReport"
+  ];
+
+  priorityFunctions
+    .forEach((name, index) => {
+
+      const info =
+        database[name];
+
+      if (!info) {
+        return;
+      }
+
+      const called =
+        info.called ||
+        info.calledFunctions ||
+        [];
+
+      const calledBy =
+        info.calledBy ||
+        [];
+
+      let risk =
+        "LOW";
+
+      if (
+        calledBy.length >= 10 ||
+        called.length >= 10
+      ) {
+        risk = "HIGH";
+      } else if (
+        calledBy.length >= 5 ||
+        called.length >= 5
+      ) {
+        risk = "MEDIUM";
+      }
+
+      lines.push(
+        String(index + 1) + ". " + name + "()"
+      );
+
+      lines.push(
+        "File:"
+      );
+
+      lines.push(
+        info.file ||
+        info.fileName ||
+        "unknown"
+      );
+
+      lines.push(
+        "Risk:"
+      );
+
+      lines.push(
+        risk
+      );
+
+      lines.push(
+        "Reason:"
+      );
+
+      lines.push(
+        "- called: " + called.length
+      );
+
+      lines.push(
+        "- calledBy: " + calledBy.length
+      );
+
+      lines.push("");
+
+    });
+
+  return lines.join("\n");
+
+}
+
+/* ===============================
    Global Export
 =============================== */
 
