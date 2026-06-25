@@ -1760,6 +1760,252 @@ class="code-preview"></pre>
 
 }
 
+/* ===============================
+   AI Report Manager
+=============================== */
+
+function showAiReportManager() {
+
+  if (
+    typeof openFloatPanel !== "function"
+  ) {
+    alert("openFloatPanel が見つかりません");
+    return;
+  }
+
+  openFloatPanel(
+    "AI Report Manager",
+    buildAiReportManagerHtml()
+  );
+
+}
+
+/* ===============================
+   Build AI Report Manager HTML
+=============================== */
+
+function buildAiReportManagerHtml() {
+
+  return `
+<div class="float-panel-actions">
+
+<label>
+<input
+type="checkbox"
+id="aiReportSummary"
+checked>
+Project Summary
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportArchitecture"
+checked>
+Project Architecture
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportSourceFlow"
+checked>
+Project Source Flow
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportManager"
+checked>
+Project Manager
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportAnalyzer"
+checked>
+Analyzer Flow
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportButton"
+checked>
+Button Relation
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportCall"
+checked>
+Call Graph
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportReverse"
+checked>
+Reverse Call Graph
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportDependency"
+checked>
+Dependency Tree
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportModule"
+checked>
+Module Dependency
+</label>
+
+<hr>
+
+<button
+onclick="generateSelectedAiReport()">
+📄 Generate
+</button>
+
+<button
+onclick="copySelectedAiReport()">
+📋 Copy
+</button>
+
+</div>
+
+<pre
+id="aiReportOutput"
+class="code-preview">
+Select Generate.
+</pre>
+`;
+
+}
+
+/* ===============================
+   Generate Selected AI Report
+=============================== */
+
+function generateSelectedAiReport() {
+
+  const lines = [];
+
+  if (
+    get("aiReportSummary")?.checked
+  ) {
+    lines.push(
+      buildProjectSummary()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportArchitecture")?.checked
+  ) {
+    lines.push(
+      buildProjectArchitectureReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportSourceFlow")?.checked
+  ) {
+    lines.push(
+      buildProjectSourceFlowReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportManager")?.checked
+  ) {
+    lines.push(
+      buildProjectManagerReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportAnalyzer")?.checked
+  ) {
+    lines.push(
+      buildAnalyzerFlowReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportButton")?.checked
+  ) {
+    lines.push(
+      buildButtonRelationReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportCall")?.checked
+  ) {
+    lines.push(
+      buildCallGraphReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportReverse")?.checked
+  ) {
+    lines.push(
+      buildReverseCallGraphReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportDependency")?.checked
+  ) {
+    lines.push(
+      buildDependencyTreeReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportModule")?.checked
+  ) {
+    lines.push(
+      buildModuleDependencyReport()
+    );
+    lines.push("");
+  }
+
+  const text =
+    lines.join("\n");
+
+  window.latestAiHandoffReport =
+    text;
+
+  const output =
+    get("aiReportOutput");
+
+  if (output) {
+    output.textContent =
+      text;
+  }
+
+}
+
 function showAiReportManager() {
 
   openFloatPanel(
