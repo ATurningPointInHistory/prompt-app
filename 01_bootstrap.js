@@ -1294,10 +1294,10 @@ ${repairToolButton(
 )}
 
 ${repairToolButton(
-  "🧭 AI Architect,
+  "🧭 AI Architect",
   "showAiHandoffReport",
   "🧭",
-  "🧭 AI Architect"
+  "AI Architect"
 )}
 
 ${repairToolButton(
