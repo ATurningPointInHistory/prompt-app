@@ -350,11 +350,14 @@ function buildProjectSummary() {
           json: []
         };
 
+  const database =
+    window.projectDatabase ||
+    {};
+
   const functionDatabase =
-    typeof getProjectFunctionDatabase ===
-      "function"
-      ? getProjectFunctionDatabase()
-      : {};
+    database.functions ||
+    window.projectFunctionDatabase ||
+    {};
 
   const mode =
     typeof getCurrentProjectAnalyzeMode ===
@@ -1009,24 +1012,14 @@ function buildButtonRelationReport() {
 function buildCallGraphReport() {
 
   const database =
-    typeof getProjectFunctionDatabase ===
-      "function"
-      ? getProjectFunctionDatabase()
-      : {};
-  
+    window.projectDatabase?.functions ||
+    window.projectFunctionDatabase ||
+    {};
+
   const targetFunctions = [
-    "showHtmlHealth",
+    ...getProjectCoreFunctions(),
     "getHtmlHealthSource",
-    "getProjectAnalyzeSources",
-    "updateProjectDatabase",
-    "buildProjectDatabase",
-    "generateModuleAnalyzer",
-    "buildModuleAnalysis",
-    "analyzeAiGeneratedCode",
-    "runAiGeneratedCodeAnalysis",
-    "applyAiIntegration",
-    "loadRepairHtml",
-    "openRepairTarget"
+    "buildModuleAnalysis"
   ];
 
   const lines = [];
@@ -1068,7 +1061,9 @@ function buildCallGraphReport() {
     const called =
       filterSelfFunctionCalls(
         name,
-        getFunctionCalledList(info)
+        info.called ||
+        info.calledFunctions ||
+        []
       );
 
     if (!called.length) {
@@ -1104,24 +1099,16 @@ function buildCallGraphReport() {
 function buildReverseCallGraphReport() {
 
   const database =
-    typeof getProjectFunctionDatabase ===
-      "function"
-      ? getProjectFunctionDatabase()
-      : {};
+    window.projectDatabase?.functions ||
+    window.projectFunctionDatabase ||
+    {};
 
   const targetFunctions = [
-    "getProjectAnalyzeSources",
+    ...getProjectCoreFunctions(),
     "getRepairSearchFiles",
     "registerRepairSearchFile",
-    "buildProjectState",
-    "updateProjectDatabase",
-    "showHtmlHealth",
-    "validateBackupHtml",
-    "openRepairTarget",
     "updateLineNumbers",
-    "updateCursorPosition",
-    "applyAiIntegration",
-    "runAiAutoTest"
+    "updateCursorPosition"
   ];
 
   const lines = [];
@@ -1163,7 +1150,7 @@ function buildReverseCallGraphReport() {
     const calledBy =
       filterSelfFunctionCalls(
         name,
-        getFunctionCalledByList(info)
+        info.calledBy || []
       );
 
     if (!calledBy.length) {
@@ -1203,18 +1190,8 @@ function buildDependencyTreeReport() {
     window.projectFunctionDatabase ||
     {};
 
-  const targetFunctions = [
-    "getProjectAnalyzeSources",
-    "buildProjectState",
-    "updateProjectDatabase",
-    "showHtmlHealth",
-    "generateModuleAnalyzer",
-    "analyzeAiGeneratedCode",
-    "applyAiIntegration",
-    "loadRepairHtml",
-    "openRepairTarget",
-    "showAiHandoffReport"
-  ];
+  const targetFunctions =
+    getProjectCoreFunctions();
 
   const lines = [];
 
@@ -1688,17 +1665,10 @@ function filterSelfFunctionCalls(
   calls
 ) {
 
-  const ignored =
-    typeof getIgnoredFunctionCalls ===
-      "function"
-      ? getIgnoredFunctionCalls()
-      : new Set();
-
   return (calls || [])
     .filter(call =>
       call &&
-      call !== functionName &&
-      !ignored.has(call)
+      call !== functionName
     );
 
 }
