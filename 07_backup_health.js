@@ -199,16 +199,11 @@ function toggleHealthSection(id) {
 
 async function showHtmlHealth() {
 
-  const editor =
-    get("repairEditor");
+  const healthSource =
+    getHtmlHealthSource();
 
   const source =
-    isRepairMode() &&
-    editor &&
-    editor.value.trim()
-      ? editor.value
-      : "<!DOCTYPE html>\n" +
-        document.documentElement.outerHTML;
+    healthSource.source;
 
   const isHtmlSource =
     looksLikeHtml(source);
@@ -313,6 +308,12 @@ async function showHtmlHealth() {
 
   let result =
 `HTML HEALTH REPORT
+=== Diagnose Source ===
+${healthSource.type}
+
+=== File ===
+${healthSource.fileName}
+
 === Source Type ===
 ${isHtmlSource ? "HTML" : "JavaScript"}
 
