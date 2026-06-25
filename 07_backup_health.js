@@ -507,41 +507,6 @@ window.latestHealthSummaryResult =
   );
 }
 
-/* ===============================
-   HTML Health Source Resolver
-=============================== */
-
-function getHtmlHealthSource() {
-
-  const editor =
-    get("repairEditor");
-
-  if (
-    isRepairMode() &&
-    editor &&
-    editor.value.trim()
-  ) {
-    return {
-      type: "Repair Editor",
-      fileName:
-        currentRepairFile ||
-        "Repair Editor",
-      source:
-        editor.value
-    };
-  }
-
-  return {
-    type: "Runtime DOM",
-    fileName:
-      "document.documentElement",
-    source:
-      "<!DOCTYPE html>\n" +
-      document.documentElement.outerHTML
-  };
-
-}
-
 function sanitizeFileNamePart(text) {
   return String(text || "")
     .trim()
