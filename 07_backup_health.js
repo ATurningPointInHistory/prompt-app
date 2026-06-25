@@ -14,14 +14,19 @@ async function collectExternalScriptText(html) {
 
   const doc =
     parser.parseFromString(
-      html,
+      String(html || ""),
       "text/html"
     );
 
   const scripts =
-    [...doc.querySelectorAll(
-      'script[src]'
-    )];
+    [
+      ...doc.querySelectorAll(
+        "script[src]"
+      )
+    ];
+
+  const loadedSrcSet =
+    new Set();
 
   const texts = [];
 
@@ -30,32 +35,55 @@ async function collectExternalScriptText(html) {
     const src =
       script.getAttribute("src");
 
-    if (!src) continue;
+    if (!src) {
+      continue;
+    }
 
     if (/^https?:\/\//i.test(src)) {
       continue;
     }
+
+    const key =
+      String(src)
+        .split("?")[0]
+        .trim();
+
+    if (!key) {
+      continue;
+    }
+
+    if (
+      loadedSrcSet.has(key)
+    ) {
+      continue;
+    }
+
+    loadedSrcSet.add(key);
 
     try {
 
       const res =
         await fetch(src);
 
-      if (res.ok) {
+      if (!res.ok) {
+        continue;
+      }
 
-        texts.push(
+      const text =
+        await res.text();
+
+      texts.push(
 `/* ===== ${src} ===== */
 
-${await res.text()}`
-        );
-
-      }
+${text}`
+      );
 
     } catch (e) {
 
       console.warn(
         "JS load failed:",
-        src
+        src,
+        e
       );
 
     }
@@ -63,6 +91,7 @@ ${await res.text()}`
   }
 
   return texts.join("\n\n");
+
 }
 
 /* ===============================
