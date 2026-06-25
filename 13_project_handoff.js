@@ -170,6 +170,9 @@ function buildAiHandoffReport() {
 
   const lines = [];
 
+
+  lines.push(buildProjectSummary());
+  lines.push("");
   lines.push("AI HANDOFF REPORT");
   lines.push("");
   lines.push("Project:");
@@ -269,6 +272,190 @@ ${escapeHtml(text)}
   }
 
   alert(text);
+
+}
+
+/* ===============================
+   Project Summary
+=============================== */
+
+function buildProjectSummary() {
+
+  const state =
+    typeof buildProjectState ===
+      "function"
+      ? buildProjectState()
+      : {
+          files: [],
+          html: [],
+          js: [],
+          css: [],
+          json: []
+        };
+
+  const database =
+    window.projectDatabase ||
+    {};
+
+  const functionDatabase =
+    database.functions ||
+    window.projectFunctionDatabase ||
+    {};
+
+  const mode =
+    typeof getCurrentProjectAnalyzeMode ===
+      "function"
+      ? getCurrentProjectAnalyzeMode()
+      : "unknown";
+
+  const lines = [];
+
+  lines.push(
+    "=== Project Summary ==="
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Project:"
+  );
+
+  lines.push(
+    PROJECT_INFO?.name ||
+    "Unknown"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Version:"
+  );
+
+  lines.push(
+    PROJECT_INFO?.version ||
+    "Unknown"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Analyze Mode:"
+  );
+
+  lines.push(
+    typeof getAnalyzeSourceModeLabel ===
+      "function"
+      ? getAnalyzeSourceModeLabel(
+          mode
+        )
+      : mode
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Files:"
+  );
+
+  lines.push(
+    String(
+      state.files.length
+    )
+  );
+
+  lines.push("");
+
+  lines.push(
+    "HTML:"
+  );
+
+  lines.push(
+    String(
+      state.html.length
+    )
+  );
+
+  lines.push("");
+
+  lines.push(
+    "JavaScript:"
+  );
+
+  lines.push(
+    String(
+      state.js.length
+    )
+  );
+
+  lines.push("");
+
+  lines.push(
+    "CSS:"
+  );
+
+  lines.push(
+    String(
+      state.css.length
+    )
+  );
+
+  lines.push("");
+
+  lines.push(
+    "JSON:"
+  );
+
+  lines.push(
+    String(
+      state.json.length
+    )
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Functions:"
+  );
+
+  lines.push(
+    String(
+      Object.keys(
+        functionDatabase
+      ).length
+    )
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Database:"
+  );
+
+  lines.push(
+    Object.keys(
+      functionDatabase
+    ).length
+      ? "Loaded"
+      : "Not Loaded"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Repair Store:"
+  );
+
+  lines.push(
+    String(
+      typeof getRepairSearchFiles ===
+        "function"
+        ? getRepairSearchFiles()
+            .length
+        : 0
+    )
+  );
+
+  return lines.join("\n");
 
 }
 
