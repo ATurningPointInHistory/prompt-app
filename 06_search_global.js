@@ -68,11 +68,16 @@ function openGlobalSearchResult(index) {
     );
   }
 
-  saveSearchHistory(
-    item.fileName,
-    item.lineNumber,
-    repairLastGlobalSearchKeyword
-  );
+  if (
+    typeof saveSearchHistory ===
+    "function"
+  ) {
+    saveSearchHistory(
+      item.fileName,
+      item.lineNumber,
+      repairLastGlobalSearchKeyword
+    );
+  }
 
 }
 
