@@ -258,6 +258,147 @@ function filterSelfFunctionCalls(
 }
 
 /* ===============================
+   Function Called List
+=============================== */
+
+function getFunctionCalledList(
+  info
+) {
+
+  return (
+    info?.called ||
+    info?.calledFunctions ||
+    []
+  );
+
+}
+
+/* ===============================
+   Function Called By List
+=============================== */
+
+function getFunctionCalledByList(
+  info
+) {
+
+  return (
+    info?.calledBy ||
+    []
+  );
+
+}
+
+/* ===============================
+   Project Function Database
+=============================== */
+
+function getProjectFunctionDatabase() {
+
+  return (
+    window.projectDatabase?.functions ||
+    window.projectFunctionDatabase ||
+    {}
+  );
+
+}
+
+/* ===============================
+   Has Project Function Database
+=============================== */
+
+function hasProjectFunctionDatabase(
+  database = getProjectFunctionDatabase()
+) {
+
+  return Boolean(
+    database &&
+    Object.keys(database).length
+  );
+
+}
+
+/* ===============================
+   Function Called List
+=============================== */
+
+function getFunctionCalledList(
+  info
+) {
+
+  return (
+    info?.called ||
+    info?.calledFunctions ||
+    []
+  );
+
+}
+
+/* ===============================
+   Function Called By List
+=============================== */
+
+function getFunctionCalledByList(
+  info
+) {
+
+  return (
+    info?.calledBy ||
+    []
+  );
+
+}
+
+/* ===============================
+   Function File Name
+=============================== */
+
+function getFunctionFileName(
+  info
+) {
+
+  return (
+    info?.file ||
+    info?.fileName ||
+    info?.path ||
+    "unknown"
+  );
+
+}
+
+/* ===============================
+   Function Name
+=============================== */
+
+function getFunctionName(
+  info
+) {
+
+  return (
+    info?.name ||
+    info?.functionName ||
+    "unknown"
+  );
+
+}
+
+/* ===============================
+   Filter Self Function Calls
+=============================== */
+
+function filterSelfFunctionCalls(
+  name,
+  list = []
+) {
+
+  return list.filter(
+    item =>
+      item &&
+      item !== name
+  );
+
+}
+
+/* ===============================
    Global Export
 =============================== */
 
