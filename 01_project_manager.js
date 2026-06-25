@@ -338,20 +338,18 @@ async function changeAnalyzeSourceMode(
 
   if (mode === "currentProject") {
 
-  const files =
-    typeof getRepairSearchFiles === "function"
-      ? getRepairSearchFiles()
-      : [];
+    const files =
+      typeof getRepairSearchFiles === "function"
+        ? getRepairSearchFiles()
+        : [];
 
-  if (!files.length) {
+    if (!files.length) {
 
-    if (
-      typeof refreshCurrentProjectFunctionDatabase ===
-      "function"
-    ) {
-
-      await refreshCurrentProjectFunctionDatabase();
-
+      if (
+        typeof refreshCurrentProjectFunctionDatabase ===
+        "function"
+      ) {
+        await refreshCurrentProjectFunctionDatabase();
       }
 
     } else if (
@@ -363,9 +361,25 @@ async function changeAnalyzeSourceMode(
         "currentProject"
       );
 
+    } else if (
+      typeof updateProjectFunctionDatabase ===
+      "function"
+    ) {
+
+      updateProjectFunctionDatabase(
+        "currentProject"
+      );
+
     }
 
-  }
+  } else if (
+    typeof updateProjectDatabase ===
+    "function"
+  ) {
+
+    updateProjectDatabase(
+      mode
+    );
 
   } else if (
     typeof updateProjectFunctionDatabase ===
@@ -387,14 +401,20 @@ async function changeAnalyzeSourceMode(
 
   if (
     typeof renderRepairAnalyzeSourceSelector ===
-      "function"
+    "function"
   ) {
     renderRepairAnalyzeSourceSelector();
   }
 
   if (
-    typeof showMobileConsole ===
-      "function" &&
+    typeof refreshRepairToolsPanel ===
+    "function"
+  ) {
+    refreshRepairToolsPanel();
+  }
+
+  if (
+    typeof showMobileConsole === "function" &&
     get("devConsoleInput")
   ) {
     showMobileConsole();
