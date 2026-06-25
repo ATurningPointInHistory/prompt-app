@@ -1869,19 +1869,12 @@ function generateSelectedAiReport() {
   const output =
     get("aiReportOutput");
 
-  if (output) {
+    if (output) {
     output.textContent =
       text;
   }
 
-}
-
-function showAiReportManager() {
-
-  openFloatPanel(
-    "AI Report Manager",
-    buildAiReportManagerHtml()
-  );
+  return text;
 
 }
 
