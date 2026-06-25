@@ -132,14 +132,17 @@ function setCurrentProjectAnalyzeMode(
   mode
 ) {
 
-  currentProjectAnalyzeMode =
-    mode;
+  window.currentProjectAnalyzeMode =
+    mode || "editor";
 
 }
 
 function getCurrentProjectAnalyzeMode() {
 
-  return currentProjectAnalyzeMode;
+  return (
+    window.currentProjectAnalyzeMode ||
+    "editor"
+  );
 
 }
 
