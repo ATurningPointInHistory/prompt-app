@@ -1630,136 +1630,6 @@ function buildRecommendedRepairOrderReport() {
 
 }
 
-function buildAiReportManagerHtml() {
-
-  return `
-<div class="float-panel-actions">
-
-<label>
-<input
-type="checkbox"
-id="reportSummary"
-checked>
-Summary
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="reportArchitecture"
-checked>
-Architecture
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="reportSourceFlow"
-checked>
-Source Flow
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="reportSharedStore"
-checked>
-Shared Store
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="reportProjectManager"
-checked>
-Project Manager
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="reportAnalyzerFlow"
-checked>
-Analyzer Flow
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="reportButtonRelation"
-checked>
-Button Relation
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="reportCallGraph"
-checked>
-Call Graph
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="reportReverseCallGraph"
-checked>
-Reverse Call Graph
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="reportDependencyTree"
-checked>
-Dependency Tree
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="reportModuleDependency"
-checked>
-Module Dependency
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="reportRepairGuide"
-checked>
-AI Repair Guide
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="reportRepairOrder"
-checked>
-Recommended Repair Order
-</label>
-
-<hr>
-
-<button
-onclick="generateSelectedAiReport()">
-📄 Generate
-</button>
-
-<button
-onclick="copySelectedAiReport()">
-📋 Copy
-</button>
-
-<pre
-id="aiReportOutput"
-class="code-preview"></pre>
-
-</div>
-`;
-
-}
-
 /* ===============================
    AI Report Manager
 =============================== */
@@ -2020,7 +1890,19 @@ function copySelectedAiReport() {
   const text =
     generateSelectedAiReport();
 
-  copyTextFallback(text);
+  if (!text) {
+    alert("コピーするレポートがありません");
+    return;
+  }
+
+  const ok =
+    copyTextFallback(text);
+
+  alert(
+    ok
+      ? "コピー完了"
+      : "コピー失敗"
+  );
 
 }
 
