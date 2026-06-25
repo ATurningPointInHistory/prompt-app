@@ -169,40 +169,41 @@ function buildRepairSearchQuickHtml() {
 
 function buildRepairQuickMacroButtons() {
 
-  if (
-    typeof macroList !== "object" ||
-    !macroList
-  ) {
-    return `
-<button
-  class="float-list-btn"
-  onclick="showMacroList()">
-  ▶ Macro
-</button>
-`;
-  }
-
   const names =
-    Object.keys(macroList);
+    getFavoriteMacroNames();
 
   if (!names.length) {
     return `
 <button
-  class="float-list-btn"
+  class="macro-quick-btn"
   onclick="showMacroList()">
-  ▶ Macro
+  <span class="macro-quick-icon">▶</span>
+  <span class="macro-quick-label">Macro</span>
 </button>
 `;
   }
 
-  return names.map(name => `
+  return names.map(name => {
+
+    const item =
+      normalizeMacroItem(name);
+
+    return `
 <button
-  class="float-list-btn"
-  title="${escapeHtml(name)}"
-  onclick='runMacro(${JSON.stringify(name)})'>
-  ▶ ${escapeHtml(name)}
+  class="macro-quick-btn"
+  title="${escapeHtml(item.label)}"
+  onclick='runMacro(${JSON.stringify(name)})'
+  oncontextmenu='event.preventDefault(); openMacroFavoriteMenu(${JSON.stringify(name)});'>
+  <span class="macro-quick-icon">
+    ${escapeHtml(item.icon)}
+  </span>
+  <span class="macro-quick-label">
+    ${escapeHtml(item.label)}
+  </span>
 </button>
-`).join("");
+`;
+
+  }).join("");
 
 }
 
