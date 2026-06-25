@@ -5,6 +5,19 @@
 =============================== */
 
 /* ===============================
+   Repair Search File Store Fallback
+=============================== */
+
+if (
+  !window.repairSearchFileStore ||
+  typeof window.repairSearchFileStore !==
+    "object"
+) {
+  window.repairSearchFileStore =
+    {};
+}
+
+/* ===============================
    Project Analyze Mode Fallback
 =============================== */
 
