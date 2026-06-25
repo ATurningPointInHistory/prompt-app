@@ -79,20 +79,6 @@ function getFavoriteMacroNames() {
 
 }
 
-function refreshRepairQuickMacroButtons() {
-
-  const box =
-    get("repairQuickMacroButtons");
-
-  if (!box) {
-    return;
-  }
-
-  box.innerHTML =
-    buildRepairQuickMacroButtons();
-
-}
-
 function toggleMacroFavorite(name) {
 
   if (!macroList[name]) {
