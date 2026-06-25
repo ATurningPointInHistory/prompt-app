@@ -211,20 +211,6 @@ function getProjectFunctionDatabase() {
 
 }
 
-function getFunctionCalledList(
-  info
-) {
-
-  return (
-    info?.called ||
-    info?.calledFunctions ||
-    []
-  );
-
-}
-
-
-
 /* ===============================
    Function Called List
 =============================== */
