@@ -375,7 +375,7 @@ function buildProjectSummary() {
   );
 
   lines.push(
-    PROJECT_INFO?.name ||
+    window.PROJECT_INFO?.name ||
     "Unknown"
   );
 
