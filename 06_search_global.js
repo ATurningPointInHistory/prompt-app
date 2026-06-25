@@ -20,6 +20,14 @@ function openGlobalSearchResult(index) {
     return;
   }
 
+  const editor =
+    get("repairEditor");
+
+  if (!editor) {
+    alert("Repair Editorが見つかりません");
+    return;
+  }
+
   if (
     typeof recordMacroAction ===
     "function"
@@ -39,22 +47,56 @@ function openGlobalSearchResult(index) {
   }
 
   if (
-    !openRepairTarget(
-      item.fileName,
-      item.lineNumber
-    )
+    typeof setCurrentRepairFile ===
+    "function"
   ) {
-    return;
+    setCurrentRepairFile(
+      item.fileName
+    );
+  }
+
+  editor.value =
+    item.fileText || "";
+
+  if (
+    typeof registerRepairSearchFile ===
+    "function"
+  ) {
+    registerRepairSearchFile(
+      item.fileName,
+      editor.value
+    );
+  }
+
+  if (
+    typeof updateLineNumbers ===
+    "function"
+  ) {
+    updateLineNumbers();
+  }
+
+  if (
+    typeof updateCursorPosition ===
+    "function"
+  ) {
+    updateCursorPosition();
+  }
+
+  if (
+    typeof jumpToLine ===
+    "function"
+  ) {
+    jumpToLine(
+      item.lineNumber
+    );
   }
 
   const searchBox =
     get("repairSearch");
 
   if (searchBox) {
-
     searchBox.value =
       repairLastGlobalSearchKeyword || "";
-
   }
 
   closeGlobalSearchModal();
@@ -289,6 +331,13 @@ function searchAllRepairFiles() {
       results.push({
 
         fileName,
+
+        fileText:
+          String(
+            file.text ||
+            file.code ||
+            ""
+          ),
 
         lineNumber:
           index + 1,
