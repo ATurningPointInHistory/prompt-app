@@ -59,22 +59,6 @@ function getDevConsoleAutocompleteUseCount(
 
 }
 
-function getDevConsoleAutocompleteUseCount(
-  name
-) {
-
-  const stats =
-    loadJson(
-      "devConsoleAutocompleteUseStats",
-      {}
-    );
-
-  return Number(
-    stats[name] || 0
-  );
-
-}
-
 function getDevConsoleAutocompleteCandidates(
   keyword
 ) {
