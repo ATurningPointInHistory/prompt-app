@@ -903,6 +903,7 @@ function buildButtonRelationReport() {
   lines.push(
     "=== Button Relation ==="
   );
+
   lines.push("");
 
   const html =
@@ -915,73 +916,61 @@ function buildButtonRelationReport() {
     )];
 
   if (!buttons.length) {
-
     lines.push(
       "No onclick found."
     );
 
     return lines.join("\n");
-
   }
 
-  buttons.forEach(match => {
+  buttons
+    .slice(0, 80)
+    .forEach(match => {
 
-    const onclick =
-      match[1];
+      const onclick =
+        match[1];
 
-    const func =
-      onclick
-        .split("(")[0]
-        .trim();
+      const func =
+        onclick
+          .split("(")[0]
+          .trim();
 
-    lines.push(
-      "Button"
-    );
+      lines.push("Button");
+      lines.push("↓");
+      lines.push(onclick);
+      lines.push("↓");
+      lines.push(func + "()");
 
-    lines.push(
-      "↓"
-    );
+      if (
+        typeof getFunctionInfoFromDatabase ===
+        "function"
+      ) {
 
-    lines.push(
-      onclick
-    );
+        const info =
+          getFunctionInfoFromDatabase(
+            func
+          );
 
-    lines.push(
-      "↓"
-    );
+        lines.push("↓");
 
-    lines.push(
-      func + "()"
-    );
-
-    if (
-      typeof getFunctionInfoFromDatabase ===
-      "function"
-    ) {
-
-      const info =
-        getFunctionInfoFromDatabase(
-          func
-        );
-
-      if (info) {
-
-        lines.push(
-          "↓"
-        );
-
-        lines.push(
-          info.file ||
-          "unknown"
-        );
+        if (info) {
+          lines.push(
+            info.file ||
+            info.fileName ||
+            info.path ||
+            "unknown"
+          );
+        } else {
+          lines.push(
+            "not found in function database"
+          );
+        }
 
       }
 
-    }
+      lines.push("");
 
-    lines.push("");
-
-  });
+    });
 
   return lines.join("\n");
 
@@ -1050,9 +1039,13 @@ function buildCallGraphReport() {
     );
 
     const called =
+    (
       info.called ||
       info.calledFunctions ||
-      [];
+      []
+    ).filter(fn =>
+      fn !== name
+    );
 
     if (!called.length) {
 
@@ -1143,8 +1136,12 @@ function buildReverseCallGraphReport() {
     );
 
     const calledBy =
+    (
       info.calledBy ||
-      [];
+      []
+    ).filter(fn =>
+      fn !== name
+   );
 
     if (!calledBy.length) {
 
