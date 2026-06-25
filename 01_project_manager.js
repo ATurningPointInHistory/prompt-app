@@ -37,7 +37,7 @@ function setCurrentRepairFile(
   fileName
 ) {
 
-  currentRepairFile =
+  window.currentRepairFile =
     fileName || "";
 
   const label =
@@ -47,8 +47,9 @@ function setCurrentRepairFile(
 
   if (label) {
     label.textContent =
-      currentRepairFile || "未選択";
+      window.currentRepairFile || "未選択";
   }
+
 }
 
 /* ===============================
@@ -89,7 +90,7 @@ function getAnalyzeSourcesFromEditor() {
   return [
     {
       fileName:
-        currentRepairFile ||
+        window.currentRepairFile ||
         "Repair Editor",
       code:
         editor.value
