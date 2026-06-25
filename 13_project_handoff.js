@@ -1277,7 +1277,133 @@ function buildDependencyTreeReport() {
    Module Dependency Report
 =============================== */
 
-buildModuleDependencyReport
+function buildModuleDependencyReport() {
+
+  const database =
+    getProjectFunctionDatabase();
+
+  const lines = [];
+
+  lines.push(
+    "=== Module Dependency ==="
+  );
+
+  lines.push("");
+
+  if (
+    !hasProjectFunctionDatabase(database)
+  ) {
+    lines.push(
+      "skip: projectFunctionDatabase not loaded"
+    );
+
+    return lines.join("\n");
+  }
+
+  const modules = {};
+
+  Object.values(database)
+    .forEach(info => {
+
+      const fileName =
+        getFunctionFileName(info);
+
+      const functionName =
+        getFunctionName(info);
+
+      if (!modules[fileName]) {
+        modules[fileName] = {
+          functions: [],
+          calls: new Set()
+        };
+      }
+
+      modules[fileName]
+        .functions
+        .push(
+          functionName
+        );
+
+      const called =
+        filterSelfFunctionCalls(
+          functionName,
+          getFunctionCalledList(info)
+        );
+
+      called.forEach(fn => {
+        modules[fileName]
+          .calls
+          .add(fn);
+      });
+
+    });
+
+  Object.keys(modules)
+    .sort()
+    .slice(0, 40)
+    .forEach(fileName => {
+
+      const item =
+        modules[fileName];
+
+      lines.push(
+        fileName
+      );
+
+      lines.push(
+        "Functions:"
+      );
+
+      item.functions
+        .slice(0, 12)
+        .forEach(fn => {
+          lines.push(
+            "- " + fn + "()"
+          );
+        });
+
+      if (
+        item.functions.length > 12
+      ) {
+        lines.push(
+          "... +" +
+          (
+            item.functions.length - 12
+          ) +
+          " more"
+        );
+      }
+
+      lines.push(
+        "Calls:"
+      );
+
+      const calls =
+        [...item.calls]
+          .sort();
+
+      if (!calls.length) {
+        lines.push(
+          "- none"
+        );
+      } else {
+        calls
+          .slice(0, 12)
+          .forEach(fn => {
+            lines.push(
+              "- " + fn + "()"
+            );
+          });
+      }
+
+      lines.push("");
+
+    });
+
+  return lines.join("\n");
+
+}
+
 /* ===============================
    AI Repair Guide Report
 =============================== */
