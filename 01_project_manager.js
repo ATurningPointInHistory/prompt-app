@@ -1290,6 +1290,27 @@ function buildCurrentProjectInfo() {
 }
 
 /* ===============================
+   切替ボタン
+=============================== */
+
+function renderRepairAnalyzeSourceSelector() {
+
+  const box =
+    get("repairAnalyzeSourceSelector");
+
+  if (!box) {
+    return;
+  }
+
+  box.innerHTML =
+    buildAnalyzeSourceSelectorHtml({
+      label: "解析対象",
+      onChange: "changeRepairAnalyzeSourceMode"
+    });
+
+}
+
+/* ===============================
    Export
 =============================== */
 
