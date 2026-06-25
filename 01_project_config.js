@@ -5,7 +5,8 @@
 
 let repairSearchFileStore = {};
 
-let currentProjectAnalyzeMode =
+window.currentProjectAnalyzeMode =
+  window.currentProjectAnalyzeMode ||
   "editor";
 
 /* ===============================
