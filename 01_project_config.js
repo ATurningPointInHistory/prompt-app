@@ -3,7 +3,8 @@
    Project Config
 =============================== */
 
-let repairSearchFileStore = {};
+window.repairSearchFileStore =
+  window.repairSearchFileStore || {};
 
 window.currentProjectAnalyzeMode =
   window.currentProjectAnalyzeMode ||
