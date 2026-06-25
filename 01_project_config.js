@@ -15,7 +15,7 @@ window.currentProjectAnalyzeMode =
    Project全体で共通利用する基本情報
 =============================== */
 
-const PROJECT_INFO = {
+  window.PROJECT_INFO = {
 
   name:
     "AIプロンプト生成Pro",
