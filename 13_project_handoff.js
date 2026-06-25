@@ -189,6 +189,16 @@ function buildAiHandoffReport() {
   lines.push("");
 
   lines.push(buildAnalyzerFlowReport());
+  lines.push("");
+
+  lines.push(buildProjectDatabaseFlowReport());
+  lines.push("");
+
+  lines.push(buildRepairFlowReport());
+  lines.push("");
+
+  lines.push(buildAiIntegrationFlowReport());
+  lines.push("");
 
   return lines.join("\n");
 
@@ -677,6 +687,107 @@ function buildSharedStoreReport() {
   );
 
   return lines.join("\n");
+
+}
+
+/* ===============================
+   Project Database Flow
+=============================== */
+
+function buildProjectDatabaseFlowReport() {
+
+  return `=== Database Flow ===
+
+repairSearchFileStore
+↓
+getProjectFiles()
+↓
+buildProjectState()
+↓
+getProjectAnalyzeSources()
+↓
+buildProjectDatabase()
+↓
+projectDatabase
+↓
+projectFunctionDatabase
+`;
+
+}
+
+/* ===============================
+   Repair Flow
+=============================== */
+
+function buildRepairFlowReport() {
+
+  return `=== Repair Flow ===
+
+loadRepairHtml()
+↓
+repairEditor
+
+↓
+
+saveCurrentSearchEditorFile()
+
+↓
+
+registerRepairSearchFile()
+
+↓
+
+repairSearchFileStore
+
+↓
+
+Project Explorer
+
+↓
+
+Analyzer
+`;
+
+}
+
+/* ===============================
+   AI Integration Flow
+=============================== */
+
+function buildAiIntegrationFlowReport() {
+
+  return `=== AI Integration Flow ===
+
+analyzeAiGeneratedCode()
+
+↓
+
+classifyAiChanges()
+
+↓
+
+buildAiIntegrationReport()
+
+↓
+
+showAiIntegrationDiff()
+
+↓
+
+testAiIntegrationSandbox()
+
+↓
+
+runAiAutoTest()
+
+↓
+
+applyAiIntegration()
+
+↓
+
+showHtmlHealth()
+`;
 
 }
 
