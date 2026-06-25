@@ -1655,6 +1655,19 @@ function buildRecommendedRepairOrderReport() {
 
 }
 
+function filterSelfFunctionCalls(
+  functionName,
+  calls
+) {
+
+  return (calls || [])
+    .filter(call =>
+      call &&
+      call !== functionName
+    );
+
+}
+
 /* ===============================
    Global Export
 =============================== */
