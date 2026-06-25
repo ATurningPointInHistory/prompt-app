@@ -351,16 +351,19 @@ function buildProjectSummary() {
         };
 
   const functionDatabase =
-  typeof getProjectFunctionDatabase ===
-    "function"
-    ? getProjectFunctionDatabase()
-    : {};
+    typeof getProjectFunctionDatabase ===
+      "function"
+      ? getProjectFunctionDatabase()
+      : {};
 
   const mode =
     typeof getCurrentProjectAnalyzeMode ===
       "function"
       ? getCurrentProjectAnalyzeMode()
       : "unknown";
+
+  const projectInfo =
+    window.PROJECT_INFO || {};
 
   const lines = [];
 
@@ -375,7 +378,7 @@ function buildProjectSummary() {
   );
 
   lines.push(
-    window.PROJECT_INFO?.name ||
+    projectInfo.name ||
     "Unknown"
   );
 
@@ -386,7 +389,7 @@ function buildProjectSummary() {
   );
 
   lines.push(
-    PROJECT_INFO?.version ||
+    projectInfo.version ||
     "Unknown"
   );
 
