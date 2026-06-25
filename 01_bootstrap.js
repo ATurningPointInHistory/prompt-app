@@ -997,6 +997,8 @@ function buildRepairToolsHtml() {
 
   return `
 
+${buildRepairAnalyzeSourceToolHtml()}
+
 ${buildRepairHealthTools()}
 
 ${buildRepairAiTools()}
