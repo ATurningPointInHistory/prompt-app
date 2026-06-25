@@ -238,30 +238,6 @@ function findFunctionInfo(
 
 }
 
-function getAnalyzeSourcesFromEditor() {
-
-  const editor =
-    get("repairEditor");
-
-  if (
-    !editor ||
-    !editor.value
-  ) {
-    return [];
-  }
-
-  return [
-    {
-      fileName:
-        currentRepairFile ||
-        "Editor",
-      code:
-        editor.value
-    }
-  ];
-
-}
-
 function getAnalyzeSourcesFromCurrentProject() {
 
   if (
