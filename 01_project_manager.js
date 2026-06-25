@@ -1225,6 +1225,55 @@ function cleanProjectFilePath(
 }
 
 /* ===============================
+   Get HTML Health Source
+=============================== */
+
+function getHtmlHealthSource(
+  mode = currentProjectAnalyzeMode
+) {
+
+  const sources =
+    typeof getProjectAnalyzeSources === "function"
+      ? getProjectAnalyzeSources(mode)
+      : [];
+
+  const htmlSource =
+    sources.find(source =>
+      source &&
+      source.code &&
+      (
+        String(source.fileName || "")
+          .toLowerCase()
+          .endsWith(".html") ||
+        looksLikeHtml(source.code)
+      )
+    );
+
+  if (htmlSource) {
+    return {
+      type:
+        getAnalyzeSourceModeLabel(mode),
+      fileName:
+        htmlSource.fileName ||
+        "unknown",
+      source:
+        htmlSource.code
+    };
+  }
+
+  return {
+    type:
+      "Runtime DOM",
+    fileName:
+      "document.documentElement",
+    source:
+      "<!DOCTYPE html>\n" +
+      document.documentElement.outerHTML
+  };
+
+}
+
+/* ===============================
    Build Current Project Info
    Project情報JSONを生成
 =============================== */
@@ -1330,3 +1379,6 @@ window.cleanProjectFilePath =
 
 window.buildCurrentProjectInfo =
   buildCurrentProjectInfo;
+
+window.getHtmlHealthSource =
+  getHtmlHealthSource;
