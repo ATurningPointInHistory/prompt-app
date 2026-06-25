@@ -144,12 +144,6 @@ function initRepairIde() {
   safeRun(updateLineNumbers, "updateLineNumbers");
   updateCursor();
   safeRun(enableRepairEditorTabIndent, "enableRepairEditorTabIndent");
-
-  safeRun(
-    renderRepairAnalyzeSourceSelector,
-    "renderRepairAnalyzeSourceSelector"
-  );
-
 console.log("initRepairIde initialized");
 
 }
