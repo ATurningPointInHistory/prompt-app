@@ -43,7 +43,7 @@ function setCurrentRepairFile(
 =============================== */
 
 function getProjectAnalyzeSources(
-  mode = currentProjectAnalyzeMode
+  mode = getCurrentProjectAnalyzeMode()
 ) {
 
   switch (mode) {
@@ -164,7 +164,7 @@ function registerRepairSearchFile(
     return;
   }
 
-  repairSearchFileStore[path] = {
+  window.repairSearchFileStore[path] = {
 
     fileName:
       path,
@@ -186,7 +186,7 @@ function registerRepairSearchFile(
 
 function clearRepairSearchFiles() {
 
-  repairSearchFileStore =
+  window.repairSearchFileStore =
     {};
 
 }
@@ -198,8 +198,8 @@ function clearRepairSearchFiles() {
 function getRepairSearchFiles() {
 
   if (
-    !repairSearchFileStore ||
-    typeof repairSearchFileStore !==
+    !window.repairSearchFileStore ||
+    typeof window.repairSearchFileStore !==
       "object"
   ) {
     return [];
@@ -207,7 +207,7 @@ function getRepairSearchFiles() {
 
   return Object
     .values(
-      repairSearchFileStore
+      window.repairSearchFileStore
     )
     .map(file => {
 
@@ -447,7 +447,7 @@ function openRepairSearchFileAtLine(
 ) {
 
   const file =
-    repairSearchFileStore[
+    window.repairSearchFileStore[
       fileName
     ];
 
@@ -544,7 +544,7 @@ async function getProjectPackageFileText(
 ) {
 
   const store =
-    repairSearchFileStore?.[
+    window.repairSearchFileStore?.[
       file.path
     ];
 
@@ -630,15 +630,15 @@ async function getProjectPackageFileText(
 function getProjectFileNames() {
 
   if (
-    !repairSearchFileStore ||
-    typeof repairSearchFileStore !==
+    !window.repairSearchFileStore ||
+    typeof window.repairSearchFileStore !==
       "object"
   ) {
     return [];
   }
 
   return Object.keys(
-    repairSearchFileStore
+    window.repairSearchFileStore
   )
     .filter(Boolean)
     .sort();
@@ -654,8 +654,8 @@ function getProjectFile(
 ) {
 
   if (
-    !repairSearchFileStore ||
-    typeof repairSearchFileStore !==
+    !window.repairSearchFileStore ||
+    typeof window.repairSearchFileStore !==
       "object"
   ) {
     return null;
@@ -666,7 +666,7 @@ function getProjectFile(
       fileName
     );
 
-  return repairSearchFileStore[
+  return window.repairSearchFileStore[
     path
   ] || null;
 
@@ -748,7 +748,7 @@ function updateProjectFile(
 
   }
 
-  repairSearchFileStore[fileName] = {
+  window.repairSearchFileStore[fileName] = {
     fileName,
     text: String(text || ""),
     updatedAt: Date.now()
@@ -1295,7 +1295,7 @@ function cleanProjectFilePath(
 =============================== */
 
 function getHtmlHealthSource(
-  mode = currentProjectAnalyzeMode
+  mode = getCurrentProjectAnalyzeMode()
 ) {
 
   const sources =
