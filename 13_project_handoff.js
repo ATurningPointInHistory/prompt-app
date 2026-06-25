@@ -170,26 +170,24 @@ function buildAiHandoffReport() {
 
   const lines = [];
 
+  lines.push("AI HANDOFF REPORT");
+  lines.push("");
 
+  lines.push(buildProjectSummary());
+  lines.push("");
 
   lines.push(buildProjectEntryPointReport());
   lines.push("");
-  lines.push(buildProjectSummary());
-  lines.push("");
-  lines.push("AI HANDOFF REPORT");
-  lines.push("");
-  lines.push("Project:");
-  lines.push("AIプロンプト生成Pro");
-  lines.push("");
-  lines.push("Version:");
-  lines.push("v6.0");
-  lines.push("");
+
   lines.push(buildProjectSourceFlowReport());
   lines.push("");
+
   lines.push(buildSharedStoreReport());
   lines.push("");
+
   lines.push(buildProjectManagerReport());
   lines.push("");
+
   lines.push(buildAnalyzerFlowReport());
 
   return lines.join("\n");
