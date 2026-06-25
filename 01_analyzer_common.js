@@ -223,18 +223,7 @@ function getFunctionCalledList(
 
 }
 
-function getFunctionFileName(
-  info
-) {
 
-  return (
-    info?.file ||
-    info?.fileName ||
-    info?.path ||
-    "unknown"
-  );
-
-}
 
 /* ===============================
    Function Called List
@@ -247,21 +236,6 @@ function getFunctionCalledList(
   return (
     info?.called ||
     info?.calledFunctions ||
-    []
-  );
-
-}
-
-/* ===============================
-   Function Called By List
-=============================== */
-
-function getFunctionCalledByList(
-  info
-) {
-
-  return (
-    info?.calledBy ||
     []
   );
 
@@ -349,7 +323,6 @@ function getFunctionName(
 /* ===============================
    Filter Self Function Calls
 =============================== */
-
 function filterSelfFunctionCalls(
   functionName,
   calls
