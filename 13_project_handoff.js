@@ -351,7 +351,10 @@ function buildProjectSummary() {
         };
 
   const functionDatabase =
-    getProjectFunctionDatabase();
+  typeof getProjectFunctionDatabase ===
+    "function"
+    ? getProjectFunctionDatabase()
+    : {};
 
   const mode =
     typeof getCurrentProjectAnalyzeMode ===
