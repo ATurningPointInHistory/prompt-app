@@ -378,35 +378,6 @@ function getProjectModuleRules() {
 }
 
 /* ===============================
-   Project Core Functions
-=============================== */
-
-function getProjectCoreFunctions() {
-
-  return [
-    "getProjectAnalyzeSources",
-    "buildProjectState",
-    "updateProjectDatabase",
-    "buildProjectDatabase",
-
-    "showHtmlHealth",
-    "validateBackupHtml",
-
-    "loadRepairHtml",
-    "openRepairTarget",
-
-    "generateModuleAnalyzer",
-    "showFunctionAnalyzer",
-
-    "analyzeAiGeneratedCode",
-    "runAiGeneratedCodeAnalysis",
-    "runAiAutoTest",
-    "applyAiIntegration"
-  ];
-
-}
-
-/* ===============================
    AIが消してはいけない重要関数
 =============================== */
 
