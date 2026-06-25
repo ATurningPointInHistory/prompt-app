@@ -363,8 +363,16 @@ async function changeAnalyzeSourceMode(
   }
 
   if (
+    typeof renderRepairAnalyzeSourceSelector ===
+      "function"
+  ) {
+    renderRepairAnalyzeSourceSelector();
+  }
+
+  if (
     typeof showMobileConsole ===
-    "function"
+      "function" &&
+    get("devConsoleInput")
   ) {
     showMobileConsole();
   }
