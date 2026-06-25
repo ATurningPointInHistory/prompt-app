@@ -1310,6 +1310,18 @@ function renderRepairAnalyzeSourceSelector() {
 
 }
 
+async function changeRepairAnalyzeSourceMode(
+  mode
+) {
+
+  await changeAnalyzeSourceMode(
+    mode
+  );
+
+  renderRepairAnalyzeSourceSelector();
+
+}
+
 /* ===============================
    Export
 =============================== */
@@ -1403,3 +1415,9 @@ window.buildCurrentProjectInfo =
 
 window.getHtmlHealthSource =
   getHtmlHealthSource;
+
+window.renderRepairAnalyzeSourceSelector =
+  renderRepairAnalyzeSourceSelector;
+
+window.changeRepairAnalyzeSourceMode =
+  changeRepairAnalyzeSourceMode;
