@@ -334,6 +334,12 @@ function saveRepairHtml() {
     );
   }
 
+  if (
+    typeof renderRepairAnalyzeSourceSelector ==="function"
+  ) {
+    renderRepairAnalyzeSourceSelector();
+  }
+
   alert(
     "保存完了\n\n" +
     filename
