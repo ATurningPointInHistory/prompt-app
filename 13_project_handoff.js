@@ -351,8 +351,7 @@ function buildProjectSummary() {
         };
 
   const database =
-    window.projectDatabase ||
-    {};
+    getProjectFunctionDatabase();
 
   const functionDatabase =
     database.functions ||
@@ -1012,9 +1011,7 @@ function buildButtonRelationReport() {
 function buildCallGraphReport() {
 
   const database =
-    window.projectDatabase?.functions ||
-    window.projectFunctionDatabase ||
-    {};
+    getProjectFunctionDatabase();
 
   const targetFunctions = [
     ...getProjectCoreFunctions(),
@@ -1099,9 +1096,7 @@ function buildCallGraphReport() {
 function buildReverseCallGraphReport() {
 
   const database =
-    window.projectDatabase?.functions ||
-    window.projectFunctionDatabase ||
-    {};
+    getProjectFunctionDatabase();
 
   const targetFunctions = [
     ...getProjectCoreFunctions(),
@@ -1186,9 +1181,7 @@ function buildReverseCallGraphReport() {
 function buildDependencyTreeReport() {
 
   const database =
-    window.projectDatabase?.functions ||
-    window.projectFunctionDatabase ||
-    {};
+    getProjectFunctionDatabase();
 
   const targetFunctions =
     getProjectCoreFunctions();
@@ -1300,9 +1293,7 @@ function buildDependencyTreeReport() {
 function buildModuleDependencyReport() {
 
   const database =
-    window.projectDatabase?.functions ||
-    window.projectFunctionDatabase ||
-    {};
+    getProjectFunctionDatabase();
 
   const lines = [];
 
@@ -1546,9 +1537,7 @@ function buildAiRepairGuideReport() {
 function buildRecommendedRepairOrderReport() {
 
   const database =
-    window.projectDatabase?.functions ||
-    window.projectFunctionDatabase ||
-    {};
+    getProjectFunctionDatabase();
 
   const lines = [];
 
@@ -1657,19 +1646,6 @@ function buildRecommendedRepairOrderReport() {
     });
 
   return lines.join("\n");
-
-}
-
-function filterSelfFunctionCalls(
-  functionName,
-  calls
-) {
-
-  return (calls || [])
-    .filter(call =>
-      call &&
-      call !== functionName
-    );
 
 }
 
