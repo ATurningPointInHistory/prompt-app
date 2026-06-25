@@ -236,27 +236,6 @@ function getFunctionFileName(
 
 }
 
-function filterSelfFunctionCalls(
-  functionName,
-  calls
-) {
-
-  const ignore =
-    typeof getIgnoredFunctionCalls ===
-      "function"
-      ? getIgnoredFunctionCalls()
-      : new Set();
-
-  return (calls || [])
-    .filter(name =>
-      name &&
-      name !== functionName &&
-      !ignore.has(name)
-    )
-    .sort();
-
-}
-
 /* ===============================
    Function Called List
 =============================== */
@@ -372,15 +351,23 @@ function getFunctionName(
 =============================== */
 
 function filterSelfFunctionCalls(
-  name,
-  list = []
+  functionName,
+  calls
 ) {
 
-  return list.filter(
-    item =>
-      item &&
-      item !== name
-  );
+  const ignore =
+    typeof getIgnoredFunctionCalls ===
+      "function"
+      ? getIgnoredFunctionCalls()
+      : new Set();
+
+  return (calls || [])
+    .filter(name =>
+      name &&
+      name !== functionName &&
+      !ignore.has(name)
+    )
+    .sort();
 
 }
 
