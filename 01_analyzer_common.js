@@ -201,6 +201,16 @@ function buildAnalyzerDependencies(
    Function Info Helpers
 =============================== */
 
+function getProjectFunctionDatabase() {
+
+  return (
+    window.projectDatabase?.functions ||
+    window.projectFunctionDatabase ||
+    {}
+  );
+
+}
+
 function getFunctionCalledList(
   info
 ) {
@@ -213,7 +223,39 @@ function getFunctionCalledList(
 
 }
 
+function getFunctionFileName(
+  info
+) {
 
+  return (
+    info?.file ||
+    info?.fileName ||
+    info?.path ||
+    "unknown"
+  );
+
+}
+
+function filterSelfFunctionCalls(
+  functionName,
+  calls
+) {
+
+  const ignore =
+    typeof getIgnoredFunctionCalls ===
+      "function"
+      ? getIgnoredFunctionCalls()
+      : new Set();
+
+  return (calls || [])
+    .filter(name =>
+      name &&
+      name !== functionName &&
+      !ignore.has(name)
+    )
+    .sort();
+
+}
 
 /* ===============================
    Function Called List
@@ -247,20 +289,6 @@ function getFunctionCalledByList(
 }
 
 /* ===============================
-   Project Function Database
-=============================== */
-
-function getProjectFunctionDatabase() {
-
-  return (
-    window.projectDatabase?.functions ||
-    window.projectFunctionDatabase ||
-    {}
-  );
-
-}
-
-/* ===============================
    Has Project Function Database
 =============================== */
 
@@ -271,6 +299,37 @@ function hasProjectFunctionDatabase(
   return Boolean(
     database &&
     Object.keys(database).length
+  );
+
+}
+
+/* ===============================
+   Function Called List
+=============================== */
+
+function getFunctionCalledList(
+  info
+) {
+
+  return (
+    info?.called ||
+    info?.calledFunctions ||
+    []
+  );
+
+}
+
+/* ===============================
+   Function Called By List
+=============================== */
+
+function getFunctionCalledByList(
+  info
+) {
+
+  return (
+    info?.calledBy ||
+    []
   );
 
 }
@@ -311,24 +370,17 @@ function getFunctionName(
 /* ===============================
    Filter Self Function Calls
 =============================== */
+
 function filterSelfFunctionCalls(
-  functionName,
-  calls
+  name,
+  list = []
 ) {
 
-  const ignore =
-    typeof getIgnoredFunctionCalls ===
-      "function"
-      ? getIgnoredFunctionCalls()
-      : new Set();
-
-  return (calls || [])
-    .filter(name =>
-      name &&
-      name !== functionName &&
-      !ignore.has(name)
-    )
-    .sort();
+  return list.filter(
+    item =>
+      item &&
+      item !== name
+  );
 
 }
 
