@@ -463,6 +463,54 @@ function getSystemIgnoreIds() {
 
 }
 
+/* ===============================
+   AIに見せたい代表関数
+=============================== */
+
+function getProjectCoreFunctions() {
+
+  return [
+
+    "getProjectAnalyzeSources",
+    "buildProjectState",
+    "updateProjectDatabase",
+    "buildProjectDatabase",
+
+    "showHtmlHealth",
+    "validateBackupHtml",
+
+    "loadRepairHtml",
+    "openRepairTarget",
+
+    "generateModuleAnalyzer",
+    "showFunctionAnalyzer",
+
+    "analyzeAiGeneratedCode",
+    "runAiGeneratedCodeAnalysis",
+    "runAiAutoTest",
+    "applyAiIntegration"
+
+  ];
+
+}
+
+const targetFunctions = [
+  ...getProjectCoreFunctions(),
+  "getHtmlHealthSource",
+  "buildModuleAnalysis"
+];
+
+const targetFunctions = [
+  ...getProjectCoreFunctions(),
+  "getRepairSearchFiles",
+  "registerRepairSearchFile",
+  "updateLineNumbers",
+  "updateCursorPosition"
+];
+
+const targetFunctions =
+  getProjectCoreFunctions();
+
 function getDefaultProjectConfig() {
 
   return {
