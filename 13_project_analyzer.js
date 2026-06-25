@@ -238,42 +238,6 @@ function findFunctionInfo(
 
 }
 
-function getAnalyzeSourcesFromCurrentProject() {
-
-  if (
-    typeof getRepairSearchFiles === "function"
-  ) {
-
-    const files =
-      getRepairSearchFiles();
-
-    if (Array.isArray(files)) {
-      return files
-        .map(file => ({
-          fileName:
-            file.fileName ||
-            file.name ||
-            file.path ||
-            "unknown",
-          code:
-            file.code ||
-            file.text ||
-            file.content ||
-            file.value ||
-            ""
-        }))
-        .filter(source =>
-          source.fileName &&
-          source.code
-        );
-    }
-
-  }
-
-  return [];
-
-}
-
 function updateProjectFunctionDatabase(
   mode = "editor"
 ) {
@@ -380,12 +344,6 @@ function searchFunctionDatabase(
       )
 
     );
-
-}
-
-function getAnalyzeSourcesFromCurrentProject() {
-
-  return getRepairSearchFiles();
 
 }
 
