@@ -5,6 +5,18 @@
 =============================== */
 
 /* ===============================
+   Project Analyze Mode Fallback
+=============================== */
+
+if (
+  typeof window.currentProjectAnalyzeMode ===
+    "undefined"
+) {
+  window.currentProjectAnalyzeMode =
+    "editor";
+}
+
+/* ===============================
 状態管理関数
 =============================== */
 
