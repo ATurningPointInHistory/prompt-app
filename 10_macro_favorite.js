@@ -79,46 +79,6 @@ function getFavoriteMacroNames() {
 
 }
 
-function buildRepairQuickMacroButtons() {
-
-  const names =
-    getFavoriteMacroNames();
-
-  if (!names.length) {
-    return `
-<button
-  class="macro-quick-btn"
-  onclick="showMacroList()">
-  <span class="macro-quick-icon">▶</span>
-  <span class="macro-quick-label">Macro</span>
-</button>
-`;
-  }
-
-  return names.map(name => {
-
-    const item =
-      normalizeMacroItem(name);
-
-    return `
-<button
-  class="macro-quick-btn"
-  title="${escapeHtml(item.label)}"
-  onclick='runMacro(${JSON.stringify(name)})'
-  oncontextmenu='event.preventDefault(); openMacroFavoriteMenu(${JSON.stringify(name)});'>
-  <span class="macro-quick-icon">
-    ${escapeHtml(item.icon)}
-  </span>
-  <span class="macro-quick-label">
-    ${escapeHtml(item.label)}
-  </span>
-</button>
-`;
-
-  }).join("");
-
-}
-
 function refreshRepairQuickMacroButtons() {
 
   const box =
