@@ -201,16 +201,6 @@ function buildAnalyzerDependencies(
    Function Info Helpers
 =============================== */
 
-function getProjectFunctionDatabase() {
-
-  return (
-    window.projectDatabase?.functions ||
-    window.projectFunctionDatabase ||
-    {}
-  );
-
-}
-
 function getFunctionCalledList(
   info
 ) {
