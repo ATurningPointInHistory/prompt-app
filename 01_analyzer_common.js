@@ -243,22 +243,6 @@ function hasProjectFunctionDatabase(
 }
 
 /* ===============================
-   Function Called List
-=============================== */
-
-function getFunctionCalledList(
-  info
-) {
-
-  return (
-    info?.called ||
-    info?.calledFunctions ||
-    []
-  );
-
-}
-
-/* ===============================
    Function Called By List
 =============================== */
 
