@@ -350,9 +350,6 @@ function buildProjectSummary() {
           json: []
         };
 
-  const database =
-    getProjectFunctionDatabase();
-
   const functionDatabase =
     getProjectFunctionDatabase();
 
