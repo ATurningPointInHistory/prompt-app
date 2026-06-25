@@ -336,13 +336,36 @@ async function changeAnalyzeSourceMode(
     );
   }
 
-  if (
-    mode === "currentProject" &&
-    typeof refreshCurrentProjectFunctionDatabase ===
-      "function"
-  ) {
+  if (mode === "currentProject") {
 
-    await refreshCurrentProjectFunctionDatabase();
+  const files =
+    typeof getRepairSearchFiles === "function"
+      ? getRepairSearchFiles()
+      : [];
+
+  if (!files.length) {
+
+    if (
+      typeof refreshCurrentProjectFunctionDatabase ===
+      "function"
+    ) {
+
+      await refreshCurrentProjectFunctionDatabase();
+
+      }
+
+    } else if (
+      typeof updateProjectDatabase ===
+      "function"
+    ) {
+
+      updateProjectDatabase(
+        "currentProject"
+      );
+
+    }
+
+  }
 
   } else if (
     typeof updateProjectFunctionDatabase ===
