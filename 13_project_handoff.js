@@ -955,9 +955,7 @@ function buildButtonRelationReport() {
           const called =
             filterSelfFunctionCalls(
               func,
-              info.called ||
-              info.calledFunctions ||
-              []
+              getFunctionCalledList(info)
             );
 
           lines.push("↓");
@@ -1028,8 +1026,7 @@ function buildCallGraphReport() {
   lines.push("");
 
   if (
-    !database ||
-    !Object.keys(database).length
+    !hasProjectFunctionDatabase(database)
   ) {
     lines.push(
       "skip: projectFunctionDatabase not loaded"
@@ -1058,9 +1055,7 @@ function buildCallGraphReport() {
     const called =
       filterSelfFunctionCalls(
         name,
-        info.called ||
-        info.calledFunctions ||
-        []
+        getFunctionCalledList(info)
       );
 
     if (!called.length) {
@@ -1115,8 +1110,7 @@ function buildReverseCallGraphReport() {
   lines.push("");
 
   if (
-    !database ||
-    !Object.keys(database).length
+    !hasProjectFunctionDatabase(database)
   ) {
     lines.push(
       "skip: projectFunctionDatabase not loaded"
@@ -1195,8 +1189,7 @@ function buildDependencyTreeReport() {
   lines.push("");
 
   if (
-    !database ||
-    !Object.keys(database).length
+    !hasProjectFunctionDatabase(database)
   ) {
     lines.push(
       "skip: projectFunctionDatabase not loaded"
@@ -1304,8 +1297,7 @@ function buildModuleDependencyReport() {
   lines.push("");
 
   if (
-    !database ||
-    !Object.keys(database).length
+    !hasProjectFunctionDatabase(database)
   ) {
     lines.push(
       "skip: projectFunctionDatabase not loaded"
@@ -1548,8 +1540,7 @@ function buildRecommendedRepairOrderReport() {
   lines.push("");
 
   if (
-    !database ||
-    !Object.keys(database).length
+    !hasProjectFunctionDatabase(database)
   ) {
     lines.push(
       "skip: projectFunctionDatabase not loaded"
