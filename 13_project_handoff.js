@@ -1630,6 +1630,154 @@ function buildRecommendedRepairOrderReport() {
 
 }
 
+function buildAiReportManagerHtml() {
+
+  return `
+<div class="float-panel-actions">
+
+<label>
+<input
+type="checkbox"
+id="reportSummary"
+checked>
+Summary
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="reportArchitecture"
+checked>
+Architecture
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="reportSourceFlow"
+checked>
+Source Flow
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="reportSharedStore"
+checked>
+Shared Store
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="reportProjectManager"
+checked>
+Project Manager
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="reportAnalyzerFlow"
+checked>
+Analyzer Flow
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="reportButtonRelation"
+checked>
+Button Relation
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="reportCallGraph"
+checked>
+Call Graph
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="reportReverseCallGraph"
+checked>
+Reverse Call Graph
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="reportDependencyTree"
+checked>
+Dependency Tree
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="reportModuleDependency"
+checked>
+Module Dependency
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="reportRepairGuide"
+checked>
+AI Repair Guide
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="reportRepairOrder"
+checked>
+Recommended Repair Order
+</label>
+
+<hr>
+
+<button
+onclick="generateSelectedAiReport()">
+📄 Generate
+</button>
+
+<button
+onclick="copySelectedAiReport()">
+📋 Copy
+</button>
+
+<pre
+id="aiReportOutput"
+class="code-preview"></pre>
+
+</div>
+`;
+
+}
+
+function showAiReportManager() {
+
+  openFloatPanel(
+    "AI Report Manager",
+    buildAiReportManagerHtml()
+  );
+
+}
+
+function copySelectedAiReport() {
+
+  const text =
+    generateSelectedAiReport();
+
+  copyTextFallback(text);
+
+}
+
 /* ===============================
    Global Export
 =============================== */
@@ -1651,6 +1799,15 @@ window.copyAiHandoffReport =
 
 window.showAiHandoffReport =
   showAiHandoffReport;
+
+window.showAiReportManager =
+  showAiReportManager;
+
+window.generateSelectedAiReport =
+  generateSelectedAiReport;
+
+window.copySelectedAiReport =
+  copySelectedAiReport;
 
 console.log(
   "13_project_handoff loaded"
