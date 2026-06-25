@@ -336,49 +336,6 @@ let macroList =
     {}
   );
 
-function splitTopLevelFunctions(
-  blocks
-) {
-
-  const topLevel = [];
-  const nested = [];
-
-  blocks.forEach(block => {
-
-    const parent =
-      blocks.find(other => {
-
-        if (other === block) {
-          return false;
-        }
-
-        return (
-          block.start > other.start &&
-          block.end < other.end
-        );
-
-      });
-
-    if (parent) {
-
-      nested.push(block);
-
-    } else {
-
-      topLevel.push(block);
-
-    }
-
-  });
-
-  return {
-
-    topLevel,
-    nested
-
-  };
-
-}
 
 function splitTopLevelFunctions(
   blocks = []
