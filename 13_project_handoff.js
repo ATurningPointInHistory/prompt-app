@@ -350,14 +350,11 @@ function buildProjectSummary() {
           json: []
         };
 
-  const database =
-    window.projectDatabase ||
-    {};
-
   const functionDatabase =
-    database.functions ||
-    window.projectFunctionDatabase ||
-    {};
+    typeof getProjectFunctionDatabase ===
+      "function"
+      ? getProjectFunctionDatabase()
+      : {};
 
   const mode =
     typeof getCurrentProjectAnalyzeMode ===
@@ -1012,10 +1009,11 @@ function buildButtonRelationReport() {
 function buildCallGraphReport() {
 
   const database =
-    window.projectDatabase?.functions ||
-    window.projectFunctionDatabase ||
-    {};
-
+    typeof getProjectFunctionDatabase ===
+      "function"
+      ? getProjectFunctionDatabase()
+      : {};
+  
   const targetFunctions = [
     "showHtmlHealth",
     "getHtmlHealthSource",
@@ -1070,9 +1068,7 @@ function buildCallGraphReport() {
     const called =
       filterSelfFunctionCalls(
         name,
-        info.called ||
-        info.calledFunctions ||
-        []
+        getFunctionCalledList(info)
       );
 
     if (!called.length) {
@@ -1108,9 +1104,10 @@ function buildCallGraphReport() {
 function buildReverseCallGraphReport() {
 
   const database =
-    window.projectDatabase?.functions ||
-    window.projectFunctionDatabase ||
-    {};
+    typeof getProjectFunctionDatabase ===
+      "function"
+      ? getProjectFunctionDatabase()
+      : {};
 
   const targetFunctions = [
     "getProjectAnalyzeSources",
@@ -1166,7 +1163,7 @@ function buildReverseCallGraphReport() {
     const calledBy =
       filterSelfFunctionCalls(
         name,
-        info.calledBy || []
+        getFunctionCalledByList(info)
       );
 
     if (!calledBy.length) {
@@ -1691,10 +1688,17 @@ function filterSelfFunctionCalls(
   calls
 ) {
 
+  const ignored =
+    typeof getIgnoredFunctionCalls ===
+      "function"
+      ? getIgnoredFunctionCalls()
+      : new Set();
+
   return (calls || [])
     .filter(call =>
       call &&
-      call !== functionName
+      call !== functionName &&
+      !ignored.has(call)
     );
 
 }
