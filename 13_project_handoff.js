@@ -517,6 +517,63 @@ function buildProjectSummary() {
 }
 
 /* ===============================
+   Project Architecture Report
+=============================== */
+
+function buildProjectArchitectureReport() {
+
+  return `=== Project Architecture ===
+
+index.html
+↓
+01_bootstrap.js
+↓
+Repair IDE / Normal Mode
+
+Repair IDE
+↓
+05_repair_*.js
+↓
+repairEditor
+↓
+Project Manager
+↓
+repairSearchFileStore
+↓
+Project Database
+
+Project Manager
+↓
+01_project_manager.js
+↓
+getProjectAnalyzeSources()
+↓
+Analyzer
+
+Analyzer
+↓
+13_project_database.js
+↓
+projectDatabase
+↓
+projectFunctionDatabase
+
+Health
+↓
+07_health_*.js
+↓
+HTML Health / Validation
+
+AI
+↓
+08_ai_*.js / 09_ai_*.js
+↓
+AI Analyzer / AI Integration / AutoTest
+`;
+
+}
+
+/* ===============================
    Entry Point Report
 =============================== */
 
