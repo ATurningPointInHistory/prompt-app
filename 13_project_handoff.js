@@ -951,19 +951,48 @@ function buildButtonRelationReport() {
             func
           );
 
-        lines.push("↓");
-
         if (info) {
+
+          const called =
+            filterSelfFunctionCalls(
+              func,
+              info.called ||
+              info.calledFunctions ||
+              []
+            );
+
+          lines.push("↓");
+          lines.push("Calls");
+
+          if (called.length) {
+            called
+              .slice(0, 10)
+              .forEach(fn => {
+                lines.push(
+                  "- " + fn + "()"
+                );
+              });
+          } else {
+            lines.push("- none");
+          }
+
+          lines.push("↓");
+          lines.push("File");
+
           lines.push(
             info.file ||
             info.fileName ||
             info.path ||
             "unknown"
           );
+
         } else {
+
+          lines.push("↓");
           lines.push(
             "not found in function database"
           );
+
         }
 
       }
@@ -1039,13 +1068,12 @@ function buildCallGraphReport() {
     );
 
     const called =
-    (
-      info.called ||
-      info.calledFunctions ||
-      []
-    ).filter(fn =>
-      fn !== name
-    );
+      filterSelfFunctionCalls(
+        name,
+        info.called ||
+        info.calledFunctions ||
+        []
+      );
 
     if (!called.length) {
 
@@ -1136,12 +1164,10 @@ function buildReverseCallGraphReport() {
     );
 
     const calledBy =
-    (
-      info.calledBy ||
-      []
-    ).filter(fn =>
-      fn !== name
-   );
+      filterSelfFunctionCalls(
+        name,
+        info.calledBy || []
+      );
 
     if (!calledBy.length) {
 
@@ -1222,13 +1248,18 @@ function buildDependencyTreeReport() {
     }
 
     const called =
-      info.called ||
-      info.calledFunctions ||
-      [];
-
+      filterSelfFunctionCalls(
+        name,
+        info.called ||
+        info.calledFunctions ||
+        []
+      );
+    
     const calledBy =
-      info.calledBy ||
-      [];
+      filterSelfFunctionCalls(
+        name,
+        info.calledBy || []
+      );
 
     lines.push(
       name + "()"
