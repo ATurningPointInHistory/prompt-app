@@ -375,6 +375,10 @@ function getProjectModuleRules() {
   ];
 }
 
+/* ===============================
+   AIが消してはいけない重要関数
+=============================== */
+
 function getCriticalFunctionNames() {
 
   return new Set([
@@ -391,6 +395,10 @@ function getCriticalFunctionNames() {
   ]);
 
 }
+
+/* ===============================
+   修正保護対象
+=============================== */
 
 function getProtectedFunctionNames() {
 
@@ -417,6 +425,10 @@ function getProtectedFunctionNames() {
   ]);
 }
 
+/* ===============================
+   Health等で無視
+=============================== */
+
 function getSystemIgnoreFunctions() {
 
   return new Set([
@@ -431,6 +443,10 @@ function getSystemIgnoreFunctions() {
   ]);
 
 }
+
+/* ===============================
+   ID無視
+=============================== */
 
 function getSystemIgnoreIds() {
 
