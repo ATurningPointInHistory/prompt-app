@@ -185,4 +185,11 @@ function executeOpenProjectExplorerFile(
     );
   }
 
+  if (
+    typeof renderRepairAnalyzeSourceSelector ===
+    "function"
+  ) {
+    renderRepairAnalyzeSourceSelector();
+  }
+
 }
