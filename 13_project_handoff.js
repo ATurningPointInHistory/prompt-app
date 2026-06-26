@@ -1996,6 +1996,24 @@ function generateSelectedAiReport() {
 }
 
 /* ===============================
+   Copy Selected AI Report
+=============================== */
+
+function copySelectedAiReport() {
+
+  const text =
+    generateSelectedAiReport();
+
+  if (!text) {
+    alert("コピーするAI Reportがありません");
+    return;
+  }
+
+  copyTextFallback(text);
+
+}
+
+/* ===============================
    Global Export
 =============================== */
 
@@ -2022,6 +2040,9 @@ window.showAiReportManager =
 
 window.generateSelectedAiReport =
   generateSelectedAiReport;
+
+window.copySelectedAiReport =
+  copySelectedAiReport;
 
 window.copySelectedAiReport =
   copySelectedAiReport;
