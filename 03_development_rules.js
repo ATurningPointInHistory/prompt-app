@@ -452,9 +452,14 @@ function addDevelopmentRules(
         Math.random(),
 
       category:
-        DEVELOPMENT_RULE_CATEGORIES.includes(
-          parsed.category
-        )
+
+      parsed.category ||
+
+      guessDevelopmentRuleCategory(
+        parsed.title,
+        parsed.body
+      ),
+
           ? parsed.category
           : "Other",
 
