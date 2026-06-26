@@ -1657,7 +1657,7 @@ function showAiReportManager() {
 function buildAiReportManagerHtml() {
 
   return `
-<div class="float-panel-actions">
+<div class="ai-report-manager">
 
 <label>
 <input
