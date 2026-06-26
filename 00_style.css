@@ -1874,3 +1874,22 @@ mark {
   line-height: 1.2;
 
 }
+
+/* ===============================
+   ai report
+=============================== */
+
+.ai-report-manager label {
+  display: block;
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.ai-report-manager input[type="checkbox"] {
+  transform: scale(1.2);
+  margin-right: 6px;
+}
+
+.ai-report-manager button {
+  margin: 6px 4px 8px 0;
+}
