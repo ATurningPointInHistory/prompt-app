@@ -195,21 +195,20 @@ function normalizeDevelopmentRules() {
               Math.random(),
 
             category:
-
-              rule.category ||
-
-              guessDevelopmentRuleCategory(
-                rule.title,
-                rule.body
-              ),
+              DEVELOPMENT_RULE_CATEGORIES.includes(
+                parsed.category
+              )
+                ? parsed.category
+                : guessDevelopmentRuleCategory(
+                    parsed.title,
+                    parsed.body
+                  ),
 
             priority:
-
-              rule.priority ||
-
+              parsed.priority ||
               guessDevelopmentRulePriority(
-                rule.title,
-                rule.body
+                parsed.title,
+                parsed.body
               ),
 
             status:
@@ -222,15 +221,12 @@ function normalizeDevelopmentRules() {
               parsed.related || [],
 
             keywords:
-
-              Array.isArray(rule.keywords)
-
-              ? rule.keywords
-
-              : guessDevelopmentRuleKeywords(
-                  rule.title,
-                  rule.body
-              ),
+              parsed.keywords.length
+                ? parsed.keywords
+                : guessDevelopmentRuleKeywords(
+                    parsed.title,
+                    parsed.body
+                  ),
 
             title:
               parsed.title ||
@@ -472,45 +468,38 @@ function addDevelopmentRules(
         Math.random(),
 
       category:
-
-      parsed.category ||
-
-      guessDevelopmentRuleCategory(
-        parsed.title,
-        parsed.body
-      ),
-
+        DEVELOPMENT_RULE_CATEGORIES.includes(
+          parsed.category
+        )
           ? parsed.category
-          : "Other",
+          : guessDevelopmentRuleCategory(
+              parsed.title,
+              parsed.body
+            ),
 
       priority:
-
-      parsed.priority ||
-
-      guessDevelopmentRulePriority(
-        parsed.title,
-        parsed.body
-      ),
+        parsed.priority ||
+        guessDevelopmentRulePriority(
+          parsed.title,
+          parsed.body
+        ),
 
       status:
         parsed.status || "Active",
-
+    
       version:
         parsed.version || "3.0",
-
+    
       related:
         parsed.related || [],
-
+    
       keywords:
-
-      parsed.keywords.length
-
-      ? parsed.keywords
-
-      : guessDevelopmentRuleKeywords(
-          parsed.title,
-          parsed.body
-      ),
+        parsed.keywords.length
+          ? parsed.keywords
+          : guessDevelopmentRuleKeywords(
+              parsed.title,
+              parsed.body
+            ),
 
       title:
         parsed.title ||
