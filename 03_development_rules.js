@@ -1088,6 +1088,21 @@ function addDevelopmentRuleObject(
     category:
       "Architecture",
 
+    priority:
+      "",
+
+    status:
+      "Active",
+
+    version:
+      "3.0",
+
+    related:
+      [],
+
+    keywords:
+      [],
+
     title:
       String(title || "")
         .trim() ||
