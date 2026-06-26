@@ -195,10 +195,22 @@ function normalizeDevelopmentRules() {
               Math.random(),
 
             category:
-              parsed.category || "Architecture",
+
+              rule.category ||
+
+              guessDevelopmentRuleCategory(
+                rule.title,
+                rule.body
+              ),
 
             priority:
-              parsed.priority || "",
+
+              rule.priority ||
+
+              guessDevelopmentRulePriority(
+                rule.title,
+                rule.body
+              ),
 
             status:
               parsed.status || "Active",
@@ -210,7 +222,15 @@ function normalizeDevelopmentRules() {
               parsed.related || [],
 
             keywords:
-              parsed.keywords || [],
+
+              Array.isArray(rule.keywords)
+
+              ? rule.keywords
+
+              : guessDevelopmentRuleKeywords(
+                  rule.title,
+                  rule.body
+              ),
 
             title:
               parsed.title ||
@@ -464,7 +484,13 @@ function addDevelopmentRules(
           : "Other",
 
       priority:
-        parsed.priority || "",
+
+      parsed.priority ||
+
+      guessDevelopmentRulePriority(
+        parsed.title,
+        parsed.body
+      ),
 
       status:
         parsed.status || "Active",
@@ -476,7 +502,15 @@ function addDevelopmentRules(
         parsed.related || [],
 
       keywords:
-        parsed.keywords || [],
+
+      parsed.keywords.length
+
+      ? parsed.keywords
+
+      : guessDevelopmentRuleKeywords(
+          parsed.title,
+          parsed.body
+      ),
 
       title:
         parsed.title ||
