@@ -30,6 +30,8 @@ const DEVELOPMENT_RULE_CATEGORIES = [
   "Performance",
   "Security",
   "Database",
+  "Testing",
+  "Project",
   "Other"
 ];
 
@@ -53,38 +55,117 @@ function saveDevelopmentRules() {
    Parse Development Rule
 =============================== */
 
-function parseDevelopmentRuleTitle(
-  text
-) {
+function parseDevelopmentRuleText(text) {
+
+  const raw =
+    String(text || "").trim();
 
   const match =
-    String(text || "")
-      .match(
-        /^【Rule\d+\s+(.+?)】/
-      );
+    raw.match(
+      /^【Rule\d+\s+(.+?)】\s*([\s\S]*)$/
+    );
 
-  if (match) {
-    return match[1].trim();
-  }
+  const title =
+    match
+      ? match[1].trim()
+      : "";
 
-  return String(text || "")
-    .split(/\r?\n/)
-    .map(line => line.trim())
-    .find(Boolean) ||
-    "開発ルール";
+  const content =
+    match
+      ? match[2].trim()
+      : raw;
+
+  const bodyMatch =
+    content.match(
+      /内容：\s*([\s\S]*)$/ 
+    );
+
+  const metaText =
+    bodyMatch
+      ? content.slice(0, bodyMatch.index).trim()
+      : "";
+
+  const body =
+    bodyMatch
+      ? bodyMatch[1].trim()
+      : content.trim();
+
+  return {
+    title,
+    category:
+      extractDevelopmentRuleField(
+        metaText,
+        "category"
+      ) || "Architecture",
+
+    priority:
+      extractDevelopmentRuleField(
+        metaText,
+        "priority"
+      ) || "",
+
+    status:
+      extractDevelopmentRuleField(
+        metaText,
+        "status"
+      ) || "Active",
+
+    version:
+      extractDevelopmentRuleField(
+        metaText,
+        "version"
+      ) || "3.0",
+
+    related:
+      splitDevelopmentRuleMetaList(
+        extractDevelopmentRuleField(
+          metaText,
+          "related"
+        )
+      ),
+
+    keywords:
+      splitDevelopmentRuleMetaList(
+        extractDevelopmentRuleField(
+          metaText,
+          "keywords"
+        )
+      ),
+
+    body
+  };
 
 }
 
-function parseDevelopmentRuleBody(
+function extractDevelopmentRuleField(
+  text,
+  name
+) {
+
+  const pattern =
+    new RegExp(
+      name +
+      "：\\s*([\\s\\S]*?)(?=\\n\\s*(category|priority|status|version|related|keywords|内容)：|$)",
+      "i"
+    );
+
+  const match =
+    String(text || "").match(pattern);
+
+  return match
+    ? match[1].trim()
+    : "";
+
+}
+
+function splitDevelopmentRuleMetaList(
   text
 ) {
 
   return String(text || "")
-    .replace(
-      /^【Rule\d+\s+.+?】\s*/,
-      ""
-    )
-    .trim();
+    .split(/[\n,、]+/)
+    .map(item => item.trim())
+    .filter(Boolean);
 
 }
 
@@ -98,9 +179,15 @@ function normalizeDevelopmentRules() {
     (developmentRules || [])
       .map(rule => {
 
+        const now =
+          new Date().toISOString();
+
         if (
           typeof rule === "string"
         ) {
+
+          const parsed =
+            parseDevelopmentRuleText(rule);
 
           return {
             id:
@@ -108,25 +195,36 @@ function normalizeDevelopmentRules() {
               Math.random(),
 
             category:
-              "Architecture",
+              parsed.category || "Architecture",
+
+            priority:
+              parsed.priority || "",
+
+            status:
+              parsed.status || "Active",
+
+            version:
+              parsed.version || "3.0",
+
+            related:
+              parsed.related || [],
+
+            keywords:
+              parsed.keywords || [],
 
             title:
-              parseDevelopmentRuleTitle(
-                rule
-              ),
+              parsed.title ||
+              parseDevelopmentRuleTitle(rule),
 
             body:
-              parseDevelopmentRuleBody(
-                rule
-              ),
+              parsed.body ||
+              parseDevelopmentRuleBody(rule),
 
             created_at:
-              new Date()
-                .toISOString(),
+              now,
 
             updated_at:
-              new Date()
-                .toISOString()
+              now
           };
 
         }
@@ -141,6 +239,29 @@ function normalizeDevelopmentRules() {
             rule.category ||
             "Architecture",
 
+          priority:
+            rule.priority || "",
+
+          status:
+            rule.status || "Active",
+
+          version:
+            rule.version || "3.0",
+
+          related:
+            Array.isArray(rule.related)
+              ? rule.related
+              : splitDevelopmentRuleMetaList(
+                  rule.related
+                ),
+
+          keywords:
+            Array.isArray(rule.keywords)
+              ? rule.keywords
+              : splitDevelopmentRuleMetaList(
+                  rule.keywords
+                ),
+
           title:
             rule.title ||
             "開発ルール",
@@ -151,16 +272,77 @@ function normalizeDevelopmentRules() {
 
           created_at:
             rule.created_at ||
-            new Date()
-              .toISOString(),
+            now,
 
           updated_at:
             rule.updated_at ||
-            new Date()
-              .toISOString()
+            now
         };
 
       });
+
+}
+
+function formatDevelopmentRule(
+  rule,
+  index
+) {
+
+  return (
+    "【Rule" +
+    String(index + 1).padStart(3, "0") +
+    " " +
+    (rule.title || "開発ルール") +
+    "】\n\n" +
+
+    "category：\n" +
+    (rule.category || "Architecture") +
+    "\n\n" +
+
+    "priority：\n" +
+    (rule.priority || "") +
+    "\n\n" +
+
+    "status：\n" +
+    (rule.status || "Active") +
+    "\n\n" +
+
+    "version：\n" +
+    (rule.version || "3.0") +
+    "\n\n" +
+
+    "related：\n" +
+    (
+      Array.isArray(rule.related)
+        ? rule.related.join("\n")
+        : String(rule.related || "")
+    ) +
+    "\n\n" +
+
+    "keywords：\n" +
+    (
+      Array.isArray(rule.keywords)
+        ? rule.keywords.join("\n")
+        : String(rule.keywords || "")
+    ) +
+    "\n\n" +
+
+    "内容：\n\n" +
+    (rule.body || "")
+  );
+
+}
+
+function parseDevelopmentRuleBody(
+  text
+) {
+
+  return String(text || "")
+    .replace(
+      /^【Rule\d+\s+.+?】\s*/,
+      ""
+    )
+    .trim();
 
 }
 
@@ -248,7 +430,26 @@ function addDevelopmentRules(
         Math.random(),
 
       category:
-        "Architecture",
+        DEVELOPMENT_RULE_CATEGORIES.includes(
+          parsed.category
+        )
+          ? parsed.category
+          : "Other",
+
+      priority:
+        parsed.priority || "",
+
+      status:
+        parsed.status || "Active",
+
+      version:
+        parsed.version || "3.0",
+
+      related:
+        parsed.related || [],
+
+      keywords:
+        parsed.keywords || [],
 
       title:
         parsed.title ||
@@ -463,9 +664,40 @@ function buildDevelopmentRulesHtml() {
           .toLowerCase()
           .includes(keyword);
 
+        ||
+
+        (rule.priority || "")
+          .toLowerCase()
+          .includes(keyword)
+
+        ||
+
+        (rule.status || "")
+          .toLowerCase()
+          .includes(keyword)
+
+        ||
+
+        (rule.version || "")
+          .toLowerCase()
+          .includes(keyword)
+
+        ||
+
+        (rule.related || [])
+          .join(" ")
+          .toLowerCase()
+          .includes(keyword)
+ 
+        ||
+
+        (rule.keywords || [])
+          .join(" ")
+          .toLowerCase()
+          .includes(keyword)
+
       return (
-        categoryMatch &&
-        keywordMatch
+        categoryMatch && keywordMatch
       );
 
     });
@@ -850,52 +1082,6 @@ function addDevelopmentRuleObject(
   saveDevelopmentRules();
 
   renderDevelopmentRules();
-
-}
-
-function parseDevelopmentRuleText(
-  text
-) {
-
-  const raw =
-    String(text || "")
-      .trim();
-
-  const match =
-    raw.match(
-      /^【Rule\d+\s+(.+?)】\s*([\s\S]*)$/
-    );
-
-  if (!match) {
-    return {
-      title: "",
-      body: raw
-    };
-  }
-
-  return {
-    title:
-      match[1].trim(),
-
-    body:
-      match[2].trim()
-  };
-
-}
-
-function formatDevelopmentRule(
-  rule,
-  index
-) {
-
-  return (
-    "【Rule" +
-    (index + 1) +
-    " " +
-    (rule.title || "開発ルール") +
-    "】\n\n" +
-    (rule.body || "")
-  );
 
 }
 
