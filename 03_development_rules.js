@@ -333,6 +333,28 @@ function formatDevelopmentRule(
 
 }
 
+function parseDevelopmentRuleTitle(
+  text
+) {
+
+  const match =
+    String(text || "")
+      .match(
+        /^【Rule\d+\s+(.+?)】/
+      );
+
+  if (match) {
+    return match[1].trim();
+  }
+
+  return String(text || "")
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .find(Boolean) ||
+    "開発ルール";
+
+}
+
 function parseDevelopmentRuleBody(
   text
 ) {
@@ -662,7 +684,7 @@ function buildDevelopmentRulesHtml() {
 
         (rule.category || "")
           .toLowerCase()
-          .includes(keyword);
+          .includes(keyword)
 
         ||
 
@@ -684,17 +706,22 @@ function buildDevelopmentRulesHtml() {
 
         ||
 
-        (rule.related || [])
-          .join(" ")
+        (Array.isArray(rule.related)
+          ? rule.related.join(" ")
+          : String(rule.related || "")
+        )
           .toLowerCase()
           .includes(keyword)
- 
+
         ||
 
-        (rule.keywords || [])
-          .join(" ")
+        (Array.isArray(rule.keywords)
+          ? rule.keywords.join(" ")
+          : String(rule.keywords || "")
+        )
+
           .toLowerCase()
-          .includes(keyword)
+          .includes(keyword);
 
       return (
         categoryMatch && keywordMatch
