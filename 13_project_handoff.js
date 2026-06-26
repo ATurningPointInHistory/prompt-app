@@ -1670,6 +1670,14 @@ Project Summary
 <label>
 <input
 type="checkbox"
+id="aiReportEntry"
+checked>
+Entry Points
+</label><br>
+
+<label>
+<input
+type="checkbox"
 id="aiReportArchitecture"
 checked>
 Project Architecture
@@ -1686,6 +1694,14 @@ Project Source Flow
 <label>
 <input
 type="checkbox"
+id="aiReportSharedStore"
+checked>
+Shared Store
+</label><br>
+
+<label>
+<input
+type="checkbox"
 id="aiReportManager"
 checked>
 Project Manager
@@ -1697,6 +1713,30 @@ type="checkbox"
 id="aiReportAnalyzer"
 checked>
 Analyzer Flow
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportDatabase"
+checked>
+Database Flow
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportRepair"
+checked>
+Repair Flow
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportIntegration"
+checked>
+AI Integration Flow
 </label><br>
 
 <label>
@@ -1737,27 +1777,41 @@ type="checkbox"
 id="aiReportModule"
 checked>
 Module Dependency
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportGuide"
+checked>
+AI Repair Guide
+</label><br>
+
+<label>
+<input
+type="checkbox"
+id="aiReportOrder"
+checked>
+Recommended Repair Order
 </label>
 
 <hr>
 
-<button
-onclick="generateSelectedAiReport()">
+<button onclick="generateSelectedAiReport()">
 📄 Generate
 </button>
 
-<button
-onclick="copySelectedAiReport()">
+<button onclick="copySelectedAiReport()">
 📋 Copy
 </button>
-
-</div>
 
 <pre
 id="aiReportOutput"
 class="code-preview">
 Select Generate.
 </pre>
+
+</div>
 `;
 
 }
@@ -1775,6 +1829,15 @@ function generateSelectedAiReport() {
   ) {
     lines.push(
       buildProjectSummary()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportEntry")?.checked
+  ) {
+    lines.push(
+      buildProjectEntryPointReport()
     );
     lines.push("");
   }
@@ -1798,6 +1861,15 @@ function generateSelectedAiReport() {
   }
 
   if (
+    get("aiReportSharedStore")?.checked
+  ) {
+    lines.push(
+      buildSharedStoreReport()
+    );
+    lines.push("");
+  }
+
+  if (
     get("aiReportManager")?.checked
   ) {
     lines.push(
@@ -1811,6 +1883,33 @@ function generateSelectedAiReport() {
   ) {
     lines.push(
       buildAnalyzerFlowReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportDatabase")?.checked
+  ) {
+    lines.push(
+      buildProjectDatabaseFlowReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportRepair")?.checked
+  ) {
+    lines.push(
+      buildRepairFlowReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportIntegration")?.checked
+  ) {
+    lines.push(
+      buildAiIntegrationFlowReport()
     );
     lines.push("");
   }
@@ -1860,6 +1959,24 @@ function generateSelectedAiReport() {
     lines.push("");
   }
 
+  if (
+    get("aiReportGuide")?.checked
+  ) {
+    lines.push(
+      buildAiRepairGuideReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportOrder")?.checked
+  ) {
+    lines.push(
+      buildRecommendedRepairOrderReport()
+    );
+    lines.push("");
+  }
+
   const text =
     lines.join("\n");
 
@@ -1869,33 +1986,12 @@ function generateSelectedAiReport() {
   const output =
     get("aiReportOutput");
 
-    if (output) {
+  if (output) {
     output.textContent =
       text;
   }
 
   return text;
-
-}
-
-function copySelectedAiReport() {
-
-  const text =
-    generateSelectedAiReport();
-
-  if (!text) {
-    alert("コピーするレポートがありません");
-    return;
-  }
-
-  const ok =
-    copyTextFallback(text);
-
-  alert(
-    ok
-      ? "コピー完了"
-      : "コピー失敗"
-  );
 
 }
 
