@@ -1302,6 +1302,14 @@ ${repairToolButton(
   "AI Architect"
 )}
 
+
+${repairToolButton(
+  "🤖 AI Report Manager",
+  "showAiReportManager",
+  "🤖",
+  "AI Report Manager"
+)}
+
 ${repairToolButton(
   "📄 Module Rule",
   "generateModuleRulesFromLoadedScripts",
