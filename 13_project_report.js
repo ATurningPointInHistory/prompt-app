@@ -1483,6 +1483,9 @@ window.buildProjectManagerReport =
 window.buildAnalyzerFlowReport =
   buildAnalyzerFlowReport;
 
+window.buildAnalyzerStructureReport =
+  buildAnalyzerStructureReport;
+
 window.buildRepairFlowReport =
   buildRepairFlowReport;
 
