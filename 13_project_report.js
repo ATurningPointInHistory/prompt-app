@@ -620,6 +620,41 @@ related files
 }
 
 /* ===============================
+   Repair Flow
+=============================== */
+
+function buildRepairFlowReport() {
+
+  return `=== Repair Flow ===
+
+loadRepairHtml()
+↓
+repairEditor
+
+↓
+
+saveCurrentSearchEditorFile()
+
+↓
+
+registerRepairSearchFile()
+
+↓
+
+repairSearchFileStore
+
+↓
+
+Project Explorer
+
+↓
+
+Analyzer
+`;
+
+}
+
+/* ===============================
    Project Database Flow
 =============================== */
 
