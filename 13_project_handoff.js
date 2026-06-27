@@ -174,26 +174,6 @@ function copyAiHandoffReport() {
 }
 
 /* ===============================
-   AI Report Manager
-=============================== */
-
-function showAiReportManager() {
-
-  if (
-    typeof openFloatPanel !== "function"
-  ) {
-    alert("openFloatPanel が見つかりません");
-    return;
-  }
-
-  openFloatPanel(
-    "AI Report Manager",
-    buildAiReportManagerHtml()
-  );
-
-}
-
-/* ===============================
    Build AI Report Manager HTML
 =============================== */
 
@@ -572,41 +552,6 @@ function copySelectedAiReport() {
   }
 
   copyTextFallback(text);
-
-}
-
-/* ===============================
-   Repair Flow
-=============================== */
-
-function buildRepairFlowReport() {
-
-  return `=== Repair Flow ===
-
-loadRepairHtml()
-↓
-repairEditor
-
-↓
-
-saveCurrentSearchEditorFile()
-
-↓
-
-registerRepairSearchFile()
-
-↓
-
-repairSearchFileStore
-
-↓
-
-Project Explorer
-
-↓
-
-Analyzer
-`;
 
 }
 
