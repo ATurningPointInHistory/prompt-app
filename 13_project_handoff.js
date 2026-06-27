@@ -359,25 +359,25 @@ Select Generate.
 
 }
 
+/* ===============================
+   AI Report Manager
+=============================== */
 
+function showAiReportManager() {
 
+  if (
+    typeof openFloatPanel !== "function"
+  ) {
+    alert("openFloatPanel が見つかりません");
+    return;
+  }
 
+  openFloatPanel(
+    "AI Report Manager",
+    buildAiReportManagerHtml()
+  );
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 
 /* ===============================
    Generate Selected AI Report
