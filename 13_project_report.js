@@ -1457,3 +1457,62 @@ function buildRecommendedRepairOrderReport() {
   return lines.join("\n");
 
 }
+
+/* ===============================
+   Global Export
+=============================== */
+
+window.buildProjectSummary =
+  buildProjectSummary;
+
+window.buildProjectEntryPointReport =
+  buildProjectEntryPointReport;
+
+window.buildProjectArchitectureReport =
+  buildProjectArchitectureReport;
+
+window.buildProjectSourceFlowReport =
+  buildProjectSourceFlowReport;
+
+window.buildSharedStoreReport =
+  buildSharedStoreReport;
+
+window.buildProjectManagerReport =
+  buildProjectManagerReport;
+
+window.buildAnalyzerFlowReport =
+  buildAnalyzerFlowReport;
+
+window.buildRepairFlowReport =
+  buildRepairFlowReport;
+
+window.buildProjectDatabaseFlowReport =
+  buildProjectDatabaseFlowReport;
+
+window.buildAiIntegrationFlowReport =
+  buildAiIntegrationFlowReport;
+
+window.buildButtonRelationReport =
+  buildButtonRelationReport;
+
+window.buildCallGraphReport =
+  buildCallGraphReport;
+
+window.buildReverseCallGraphReport =
+  buildReverseCallGraphReport;
+
+window.buildDependencyTreeReport =
+  buildDependencyTreeReport;
+
+window.buildModuleDependencyReport =
+  buildModuleDependencyReport;
+
+window.buildAiRepairGuideReport =
+  buildAiRepairGuideReport;
+
+window.buildRecommendedRepairOrderReport =
+  buildRecommendedRepairOrderReport;
+
+console.log(
+  "13_project_report loaded"
+);
