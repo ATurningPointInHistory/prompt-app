@@ -1659,141 +1659,44 @@ function buildAiReportManagerHtml() {
   return `
 <div class="ai-report-manager">
 
-<label>
-<input
-type="checkbox"
-id="aiReportSummary"
-checked>
-Project Summary
-</label><br>
+<h3>AI Report Manager</h3>
 
-<label>
-<input
-type="checkbox"
-id="aiReportEntry"
-checked>
-Entry Points
-</label><br>
+<div class="report-section">
+  <h4>Project</h4>
 
-<label>
-<input
-type="checkbox"
-id="aiReportArchitecture"
-checked>
-Project Architecture
-</label><br>
+  <label><input type="checkbox" id="aiReportSummary" checked> Project Summary</label><br>
+  <label><input type="checkbox" id="aiReportEntry" checked> Entry Points</label><br>
+  <label><input type="checkbox" id="aiReportArchitecture" checked> Project Architecture</label><br>
+  <label><input type="checkbox" id="aiReportSourceFlow" checked> Project Source Flow</label><br>
+  <label><input type="checkbox" id="aiReportSharedStore" checked> Shared Store</label><br>
+  <label><input type="checkbox" id="aiReportManager" checked> Project Manager</label><br>
+</div>
 
-<label>
-<input
-type="checkbox"
-id="aiReportSourceFlow"
-checked>
-Project Source Flow
-</label><br>
+<div class="report-section">
+  <h4>Flow</h4>
 
-<label>
-<input
-type="checkbox"
-id="aiReportSharedStore"
-checked>
-Shared Store
-</label><br>
+  <label><input type="checkbox" id="aiReportAnalyzer" checked> Analyzer Flow</label><br>
+  <label><input type="checkbox" id="aiReportDatabase" checked> Database Flow</label><br>
+  <label><input type="checkbox" id="aiReportRepair" checked> Repair Flow</label><br>
+  <label><input type="checkbox" id="aiReportIntegration" checked> AI Integration Flow</label><br>
+</div>
 
-<label>
-<input
-type="checkbox"
-id="aiReportManager"
-checked>
-Project Manager
-</label><br>
+<div class="report-section">
+  <h4>Dependency</h4>
 
-<label>
-<input
-type="checkbox"
-id="aiReportAnalyzer"
-checked>
-Analyzer Flow
-</label><br>
+  <label><input type="checkbox" id="aiReportButton" checked> Button Relation</label><br>
+  <label><input type="checkbox" id="aiReportCall" checked> Call Graph</label><br>
+  <label><input type="checkbox" id="aiReportReverse" checked> Reverse Call Graph</label><br>
+  <label><input type="checkbox" id="aiReportDependency" checked> Dependency Tree</label><br>
+  <label><input type="checkbox" id="aiReportModule" checked> Module Dependency</label><br>
+</div>
 
-<label>
-<input
-type="checkbox"
-id="aiReportDatabase"
-checked>
-Database Flow
-</label><br>
+<div class="report-section">
+  <h4>AI Repair</h4>
 
-<label>
-<input
-type="checkbox"
-id="aiReportRepair"
-checked>
-Repair Flow
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="aiReportIntegration"
-checked>
-AI Integration Flow
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="aiReportButton"
-checked>
-Button Relation
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="aiReportCall"
-checked>
-Call Graph
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="aiReportReverse"
-checked>
-Reverse Call Graph
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="aiReportDependency"
-checked>
-Dependency Tree
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="aiReportModule"
-checked>
-Module Dependency
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="aiReportGuide"
-checked>
-AI Repair Guide
-</label><br>
-
-<label>
-<input
-type="checkbox"
-id="aiReportOrder"
-checked>
-Recommended Repair Order
-</label>
+  <label><input type="checkbox" id="aiReportGuide" checked> AI Repair Guide</label><br>
+  <label><input type="checkbox" id="aiReportOrder" checked> Recommended Repair Order</label>
+</div>
 
 <hr>
 
@@ -1815,7 +1718,6 @@ Select Generate.
 `;
 
 }
-
 /* ===============================
    Generate Selected AI Report
 =============================== */
@@ -1878,11 +1780,20 @@ function generateSelectedAiReport() {
     lines.push("");
   }
 
-  if (
+    if (
     get("aiReportAnalyzer")?.checked
   ) {
     lines.push(
       buildAnalyzerFlowReport()
+    );
+    lines.push("");
+  }
+
+  if (
+    get("aiReportAnalyzerStructure")?.checked
+  ) {
+    lines.push(
+      buildAnalyzerStructureReport()
     );
     lines.push("");
   }
