@@ -623,6 +623,68 @@ function buildRepairHint(
 
 }
 
+function extractErrorField(
+  text,
+  label
+) {
+
+  if (!text || !label) {
+    return "";
+  }
+
+  const source =
+    String(text || "");
+
+  const key =
+    String(label || "").trim();
+
+  if (!key) {
+    return "";
+  }
+
+  const escapedKey =
+    key.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&"
+    );
+
+  const pattern =
+    new RegExp(
+      "^\\s*" +
+      escapedKey +
+      "\\s*[:：]?\\s*(.*)$",
+      "im"
+    );
+
+  const match =
+    source.match(pattern);
+
+  if (
+    match &&
+    match[1]
+  ) {
+    return match[1].trim();
+  }
+
+  if (
+    key === ".js"
+  ) {
+
+    const fileMatch =
+      source.match(
+        /([./\w-]+\.js(?:\?v=[\w.-]+)?)/i
+      );
+
+    return fileMatch
+      ? fileMatch[1].trim()
+      : "";
+
+  }
+
+  return "";
+
+}
+
 if (typeof generateErrorPrompt === "function") {
   window.generateErrorPrompt =
     generateErrorPrompt;
