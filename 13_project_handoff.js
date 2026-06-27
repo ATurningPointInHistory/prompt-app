@@ -554,19 +554,108 @@ function copySelectedAiReport() {
   copyTextFallback(text);
 
 }
+/* ===============================
+   Analyzer Structure Report
+=============================== */
+
+function buildAnalyzerStructureReport() {
+
+  return `=== Analyzer Structure ===
+
+Function Analyzer
+
+Entry
+showFunctionAnalyzer()
+
+Uses
+Project Function Database
+Repair Editor
+currentRepairFile
+
+Calls
+getFunctionInfoFromDatabase()
+jumpToFunction()
+
+Output
+Function detail
+Calls / Called By
+Dependencies
+AI handoff information
+
+
+Module Analyzer
+
+Entry
+generateModuleAnalyzer()
+
+Uses
+Project sources
+Top level functions
+Nested functions
+Module keywords
+
+Calls
+extractCodeBlocksFromText()
+extractModuleKeywords()
+extractCalledFunctionsFromBlocks()
+
+Output
+Module role
+Summary
+Function count
+Dependencies
+Risk
+AI summary
+
+
+Project Analyzer
+
+Entry
+updateProjectDatabase()
+
+Uses
+Project sources
+Project files
+Project functions
+Project modules
+
+Calls
+buildProjectDatabase()
+buildProjectFunctionDatabase()
+buildProjectModuleDatabase()
+buildProjectDatabaseStatistics()
+
+Output
+Project Database
+Function Database
+Module Database
+Project statistics
+
+
+AI Report Manager
+
+Entry
+showAiReportManager()
+
+Uses
+Project Database
+Report builder functions
+Selected checkbox state
+
+Calls
+buildAiReportManagerHtml()
+generateSelectedAiReport()
+copySelectedAiReport()
+
+Output
+Selected AI report
+AI handoff text
+`;
+}
 
 /* ===============================
    Global Export
 =============================== */
-
-window.buildProjectSourceFlowReport =
-  buildProjectSourceFlowReport;
-
-window.buildProjectManagerReport =
-  buildProjectManagerReport;
-
-window.buildAnalyzerFlowReport =
-  buildAnalyzerFlowReport;
 
 window.buildAiHandoffReport =
   buildAiHandoffReport;
@@ -577,14 +666,14 @@ window.copyAiHandoffReport =
 window.showAiHandoffReport =
   showAiHandoffReport;
 
+window.buildAiReportManagerHtml =
+  buildAiReportManagerHtml;
+
 window.showAiReportManager =
   showAiReportManager;
 
 window.generateSelectedAiReport =
   generateSelectedAiReport;
-
-window.copySelectedAiReport =
-  copySelectedAiReport;
 
 window.copySelectedAiReport =
   copySelectedAiReport;
