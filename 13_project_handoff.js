@@ -529,6 +529,15 @@ function generateSelectedAiReport() {
     lines.push("");
   }
 
+  if (
+    get("aiReportAnalyzer")?.checked
+  ) {
+    lines.push(
+      buildAnalyzerFlowReport()
+    );
+    lines.push("");
+  }
+
     if (
     get("aiReportAnalyzerStructure")?.checked
   ) {
