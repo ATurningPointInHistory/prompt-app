@@ -1,3 +1,6 @@
+/* ===============================
+   12_memo_box.js
+=============================== */
 
 /* ===============================
    Memo Box
@@ -16,9 +19,6 @@ const MEMO_BOX_STATUSES = [
   "Done",
   "Archive"
 ];
-/* ===============================
-   Memo Box
-=============================== */
 
 let memoBoxList =
   loadJson(
@@ -61,6 +61,8 @@ function selectMemoBox(index) {
 
 function saveMemoBoxCurrent() {
 
+  normalizeMemoBoxes();
+
   if (
     memoBoxActiveIndex < 0 ||
     memoBoxActiveIndex >= memoBoxList.length
@@ -68,22 +70,39 @@ function saveMemoBoxCurrent() {
     memoBoxActiveIndex = 0;
   }
 
+  const current =
+    memoBoxList[
+      memoBoxActiveIndex
+    ] || {};
+
   const name =
     get("memoBoxName")
-      ?.value || "";
+      ?.value ||
+    current.name ||
+    "";
 
   const text =
     get("memoBoxText")
-      ?.value || "";
+      ?.value ||
+    current.text ||
+    "";
+
+  const status =
+    get("memoBoxStatus")
+      ?.value ||
+    current.status ||
+    "Active";
 
   memoBoxList[
     memoBoxActiveIndex
   ] = {
     name,
-    text
+    text,
+    status
   };
 
   saveMemoBoxes();
+
 }
 
 function useMemoForSearch() {
@@ -354,6 +373,24 @@ function loadMemoBoxesFile(
 
   event.target.value =
     "";
+
+}
+
+function normalizeMemoBoxes() {
+
+  memoBoxList =
+    (memoBoxList || [])
+      .map((memo, index) => ({
+        name:
+          memo.name ||
+          "メモ" + (index + 1),
+
+        text:
+          memo.text || "",
+
+        status:
+          memo.status || "Active"
+      }));
 
 }
 
