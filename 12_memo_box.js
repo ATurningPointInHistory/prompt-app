@@ -11,6 +11,12 @@ let memoBoxStatusFilter =
 let memoBoxSearch =
   "";
 
+let memoBoxTypeFilter =
+  "";
+
+let memoBoxSeriesFilter =
+  "";
+
 let memoBoxList =
   loadJson(
     "memoBoxList",
@@ -250,9 +256,17 @@ function showMemoBox() {
 
   normalizeMemoBoxes();
 
+  const filtered =
+    filterMemoBoxes();
+
   const tabs =
-    memoBoxList
-      .map((item, index) => `
+    filtered
+      .map(item => {
+
+        const index =
+          memoBoxList.indexOf(item);
+
+        return `
 <button
   class="memo-tab ${
     index === memoBoxActiveIndex
@@ -262,7 +276,9 @@ function showMemoBox() {
   onclick="selectMemoBox(${index})">
 ${escapeHtml(item.name || "メモ")}
 </button>
-`)
+`;
+
+      })
       .join("");
 
   const current =
@@ -289,73 +305,164 @@ ${escapeHtml(item.name || "メモ")}
 
   openFloatPanel(
     "MEMO BOX",
-    `
+`
+<div class="memo-filter">
+
+Type
+<select
+id="memoFilterType"
+onchange="
+memoBoxTypeFilter=this.value;
+showMemoBox();
+">
+
+<option value="">
+All
+</option>
+
+${MEMO_BOX_TYPES.map(v=>`
+<option
+value="${v}"
+${memoBoxTypeFilter===v?"selected":""}>
+${v}
+</option>
+`).join("")}
+
+</select>
+
+Status
+<select
+id="memoFilterStatus"
+onchange="
+memoBoxStatusFilter=this.value;
+showMemoBox();
+">
+
+<option value="">
+All
+</option>
+
+${MEMO_BOX_STATUSES.map(v=>`
+<option
+value="${v}"
+${memoBoxStatusFilter===v?"selected":""}>
+${v}
+</option>
+`).join("")}
+
+</select>
+
+Series
+<select
+id="memoFilterSeries"
+onchange="
+memoBoxSeriesFilter=this.value;
+showMemoBox();
+">
+
+<option value="">
+All
+</option>
+
+${MEMO_BOX_SERIES.map(v=>`
+<option
+value="${v}"
+${memoBoxSeriesFilter===v?"selected":""}>
+${v||"All"}
+</option>
+`).join("")}
+
+</select>
+
+</div>
+
+<input
+id="memoSearch"
+class="input"
+placeholder="Search"
+value="${escapeHtml(memoBoxSearch)}"
+oninput="
+memoBoxSearch=this.value;
+showMemoBox();
+">
+
+<br><br>
+
 <div class="memo-tabs">
 
 ${tabs}
 
 <button
-  class="memo-tab"
-  onclick="addMemoBox()">
+class="memo-tab"
+onclick="addMemoBox()">
 ＋
 </button>
 
 </div>
 
 <input
-  id="memoBoxName"
-  class="memo-name-input"
-  value="${escapeHtml(current.name || "")}">
+id="memoBoxName"
+class="memo-name-input"
+value="${escapeHtml(current.name||"")}">
 
 <br><br>
 
 <div class="memo-meta">
 
 Type
+
 <select id="memoBoxType">
-${MEMO_BOX_TYPES.map(v => `
+
+${MEMO_BOX_TYPES.map(v=>`
 <option
 value="${v}"
-${v === type ? "selected" : ""}>
+${v===type?"selected":""}>
 ${v}
 </option>
 `).join("")}
+
 </select>
 
 Status
+
 <select id="memoBoxStatus">
-${MEMO_BOX_STATUSES.map(v => `
+
+${MEMO_BOX_STATUSES.map(v=>`
 <option
 value="${v}"
-${v === status ? "selected" : ""}>
+${v===status?"selected":""}>
 ${v}
 </option>
 `).join("")}
+
 </select>
 
 Series
+
 <select id="memoBoxSeries">
-${MEMO_BOX_SERIES.map(v => `
+
+${MEMO_BOX_SERIES.map(v=>`
 <option
 value="${v}"
-${v === series ? "selected" : ""}>
-${v || "Seriesなし"}
+${v===series?"selected":""}>
+${v||"Seriesなし"}
 </option>
 `).join("")}
+
 </select>
 
 </div>
 
 <input
-  id="memoBoxKeywords"
-  class="input"
-  placeholder="tag1, tag2"
-  value="${escapeHtml(keywords)}">
+id="memoBoxKeywords"
+class="input"
+placeholder="tag1, tag2"
+value="${escapeHtml(keywords)}">
 
 <textarea
-  id="memoBoxText"
-  class="memo-textarea"
-  rows="12">${escapeHtml(current.text || "")}</textarea>
+id="memoBoxText"
+class="memo-textarea"
+rows="12">${escapeHtml(current.text||"")}</textarea>
 
 <div class="memo-actions">
 
@@ -384,11 +491,11 @@ Import
 </button>
 
 <input
-  id="memoBoxImportFile"
-  type="file"
-  accept=".json"
-  style="display:none"
-  onchange="loadMemoBoxesFile(event)">
+id="memoBoxImportFile"
+type="file"
+accept=".json"
+style="display:none"
+onchange="loadMemoBoxesFile(event)">
 
 </div>
 `
@@ -540,6 +647,55 @@ function normalizeMemoBoxes() {
         ""
 
     }));
+
+}
+
+function filterMemoBoxes() {
+
+  const keyword =
+    memoBoxSearch
+      .trim()
+      .toLowerCase();
+
+  return memoBoxList.filter(item => {
+
+    if (
+      memoBoxStatusFilter &&
+      item.status !== memoBoxStatusFilter
+    ) {
+      return false;
+    }
+
+    if (
+      memoBoxTypeFilter &&
+      item.type !== memoBoxTypeFilter
+    ) {
+      return false;
+    }
+
+    if (
+      memoBoxSeriesFilter &&
+      item.series !== memoBoxSeriesFilter
+    ) {
+      return false;
+    }
+
+    if (!keyword) {
+      return true;
+    }
+
+    const text =
+      [
+        item.name,
+        item.text,
+        ...(item.keywords || [])
+      ]
+        .join(" ")
+        .toLowerCase();
+
+    return text.includes(keyword);
+
+  });
 
 }
 
