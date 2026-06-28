@@ -198,6 +198,10 @@ function deleteMemoBox() {
 
 function showMemoBox() {
 
+  saveMemoBoxCurrent();
+
+  normalizeMemoBoxes();
+
   const tabs =
     memoBoxList
       .map((item, index) => `
@@ -222,6 +226,7 @@ ${escapeHtml(item.name)}
     "MEMO BOX",
     `
 <div class="memo-tabs">
+
 ${tabs}
 
 <button
@@ -229,12 +234,74 @@ ${tabs}
   onclick="addMemoBox()">
 ＋
 </button>
+
 </div>
 
 <input
   id="memoBoxName"
   class="memo-name-input"
   value="${escapeHtml(current.name)}">
+
+<br><br>
+
+<select
+  id="memoBoxStatus">
+
+<option value="Active"
+${
+current.status === "Active"
+? "selected"
+: ""
+}>
+Active
+</option>
+
+<option value="TODO"
+${
+current.status === "TODO"
+? "selected"
+: ""
+}>
+TODO
+</option>
+
+<option value="Working"
+${
+current.status === "Working"
+? "selected"
+: ""
+}>
+Working
+</option>
+
+<option value="Done"
+${
+current.status === "Done"
+? "selected"
+: ""
+}>
+Done
+</option>
+
+<option value="Handoff"
+${
+current.status === "Handoff"
+? "selected"
+: ""
+}>
+Handoff
+</option>
+
+<option value="Archive"
+${
+current.status === "Archive"
+? "selected"
+: ""
+}>
+Archive
+</option>
+
+</select>
 
 <textarea
   id="memoBoxText"
