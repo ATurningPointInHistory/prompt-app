@@ -259,7 +259,7 @@ function showMemoBox() {
   const filtered =
     filterMemoBoxes();
 
-  const tabs =
+  const memoCards =
     filtered
       .map(item => {
 
@@ -267,15 +267,33 @@ function showMemoBox() {
           memoBoxList.indexOf(item);
 
         return `
-<button
-  class="memo-tab ${
+<div
+  class="memo-card ${
     index === memoBoxActiveIndex
       ? "active"
       : ""
   }"
   onclick="selectMemoBox(${index})">
-${escapeHtml(item.name || "メモ")}
-</button>
+
+  <div class="memo-card-title">
+    ${escapeHtml(item.name || "メモ")}
+  </div>
+
+  <div class="memo-card-meta">
+    <span>${escapeHtml(item.type || "Idea")}</span>
+    <span>${escapeHtml(item.status || "Inbox")}</span>
+    <span>${escapeHtml(item.series || "-")}</span>
+  </div>
+
+  <div class="memo-card-keywords">
+    ${escapeHtml(
+      Array.isArray(item.keywords)
+        ? item.keywords.join(", ")
+        : ""
+    )}
+  </div>
+
+</div>
 `;
 
       })
@@ -306,149 +324,44 @@ ${escapeHtml(item.name || "メモ")}
   openFloatPanel(
     "MEMO BOX",
 `
-<div class="memo-filter">
-
-Type
-<select
-id="memoFilterType"
-onchange="
-memoBoxTypeFilter=this.value;
-showMemoBox();
-">
-
-<option value="">
-All
-</option>
-
-${MEMO_BOX_TYPES.map(v=>`
-<option
-value="${v}"
-${memoBoxTypeFilter===v?"selected":""}>
-${v}
-</option>
-`).join("")}
-
-</select>
-
-Status
-<select
-id="memoFilterStatus"
-onchange="
-memoBoxStatusFilter=this.value;
-showMemoBox();
-">
-
-<option value="">
-All
-</option>
-
-${MEMO_BOX_STATUSES.map(v=>`
-<option
-value="${v}"
-${memoBoxStatusFilter===v?"selected":""}>
-${v}
-</option>
-`).join("")}
-
-</select>
-
-Series
-<select
-id="memoFilterSeries"
-onchange="
-memoBoxSeriesFilter=this.value;
-showMemoBox();
-">
-
-<option value="">
-All
-</option>
-
-${MEMO_BOX_SERIES.map(v=>`
-<option
-value="${v}"
-${memoBoxSeriesFilter===v?"selected":""}>
-${v||"All"}
-</option>
-`).join("")}
-
-</select>
-
-</div>
-
-<input
-id="memoSearch"
-class="input"
-placeholder="Search"
-value="${escapeHtml(memoBoxSearch)}"
-oninput="
-memoBoxSearch=this.value;
-showMemoBox();
-">
-
-<br><br>
-
-<div class="memo-tabs">
-
-${tabs}
-
-<button
-class="memo-tab"
-onclick="addMemoBox()">
-＋
-</button>
-
-</div>
-
 <input
 id="memoBoxName"
 class="memo-name-input"
-value="${escapeHtml(current.name||"")}">
+placeholder="Memo title"
+value="${escapeHtml(current.name || "")}">
 
 <br><br>
 
 <div class="memo-meta">
 
-Type
-
 <select id="memoBoxType">
-
-${MEMO_BOX_TYPES.map(v=>`
+${MEMO_BOX_TYPES.map(v => `
 <option
 value="${v}"
-${v===type?"selected":""}>
+${v === type ? "selected" : ""}>
 ${v}
 </option>
 `).join("")}
-
 </select>
-
-Status
 
 <select id="memoBoxStatus">
-
-${MEMO_BOX_STATUSES.map(v=>`
+${MEMO_BOX_STATUSES.map(v => `
 <option
 value="${v}"
-${v===status?"selected":""}>
+${v === status ? "selected" : ""}>
 ${v}
 </option>
 `).join("")}
-
 </select>
 
-Series
-
 <select id="memoBoxSeries">
-
-${MEMO_BOX_SERIES.map(v=>`
+${MEMO_BOX_SERIES.map(v => `
 <option
 value="${v}"
-${v===series?"selected":""}>
-${v||"Seriesなし"}
+${v === series ? "selected" : ""}>
+${v || "Seriesなし"}
 </option>
 `).join("")}
-
 </select>
 
 </div>
@@ -462,16 +375,12 @@ value="${escapeHtml(keywords)}">
 <textarea
 id="memoBoxText"
 class="memo-textarea"
-rows="12">${escapeHtml(current.text||"")}</textarea>
+rows="12">${escapeHtml(current.text || "")}</textarea>
 
 <div class="memo-actions">
 
 <button onclick="saveMemoBoxCurrent()">
 💾保存
-</button>
-
-<button onclick="useMemoForSearch()">
-🔍検索
 </button>
 
 <button onclick="copyMemoBox()">
@@ -482,6 +391,10 @@ rows="12">${escapeHtml(current.text||"")}</textarea>
 🗑削除
 </button>
 
+<button onclick="addMemoBox()">
+＋新規
+</button>
+
 <button onclick="exportMemoBoxes()">
 Export
 </button>
@@ -490,14 +403,110 @@ Export
 Import
 </button>
 
+</div>
+
+<hr>
+
+<details>
+<summary>
+Filter / Search
+</summary>
+
+<div class="memo-filter">
+
+<select
+id="memoFilterType"
+onchange="
+memoBoxTypeFilter=this.value;
+showMemoBox();
+">
+
+<option value="">
+Type: All
+</option>
+
+${MEMO_BOX_TYPES.map(v => `
+<option
+value="${v}"
+${memoBoxTypeFilter === v ? "selected" : ""}>
+Type: ${v}
+</option>
+`).join("")}
+
+</select>
+
+<select
+id="memoFilterStatus"
+onchange="
+memoBoxStatusFilter=this.value;
+showMemoBox();
+">
+
+<option value="">
+Status: All
+</option>
+
+${MEMO_BOX_STATUSES.map(v => `
+<option
+value="${v}"
+${memoBoxStatusFilter === v ? "selected" : ""}>
+Status: ${v}
+</option>
+`).join("")}
+
+</select>
+
+<select
+id="memoFilterSeries"
+onchange="
+memoBoxSeriesFilter=this.value;
+showMemoBox();
+">
+
+<option value="">
+Series: All
+</option>
+
+${MEMO_BOX_SERIES.map(v => `
+<option
+value="${v}"
+${memoBoxSeriesFilter === v ? "selected" : ""}>
+Series: ${v || "なし"}
+</option>
+`).join("")}
+
+</select>
+
+<input
+id="memoSearch"
+class="input"
+placeholder="Search"
+value="${escapeHtml(memoBoxSearch)}"
+oninput="
+memoBoxSearch=this.value;
+showMemoBox();
+">
+
+</div>
+
+</details>
+
+<div class="memo-list">
+
+${memoCards || `
+<div class="small-muted">
+該当メモなし
+</div>
+`}
+
+</div>
+
 <input
 id="memoBoxImportFile"
 type="file"
 accept=".json"
 style="display:none"
 onchange="loadMemoBoxesFile(event)">
-
-</div>
 `
   );
 
