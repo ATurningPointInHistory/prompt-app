@@ -286,6 +286,7 @@ function buildAiReportManagerHtml() {
 <input
 type="checkbox"
 id="aiReportSummary"
+data-package="repair,analysis,architecture,database,ai,full"
 checked>
 Project Summary
 </label><br>
@@ -294,6 +295,7 @@ Project Summary
 <input
 type="checkbox"
 id="aiReportEntry"
+data-package="repair,full"
 checked>
 Entry Points
 </label><br>
@@ -302,6 +304,7 @@ Entry Points
 <input
 type="checkbox"
 id="aiReportArchitecture"
+data-package="architecture,full"
 checked>
 Project Architecture
 </label><br>
@@ -310,6 +313,7 @@ Project Architecture
 <input
 type="checkbox"
 id="aiReportSourceFlow"
+data-package="architecture,full"
 checked>
 Project Source Flow
 </label><br>
@@ -318,6 +322,7 @@ Project Source Flow
 <input
 type="checkbox"
 id="aiReportSharedStore"
+data-package="architecture,database,full"
 checked>
 Shared Store
 </label><br>
@@ -326,6 +331,7 @@ Shared Store
 <input
 type="checkbox"
 id="aiReportManager"
+data-package="architecture,full"
 checked>
 Project Manager
 </label><br>
@@ -334,6 +340,7 @@ Project Manager
 <input
 type="checkbox"
 id="aiReportAnalyzer"
+data-package="analysis,full"
 checked>
 Analyzer Flow
 </label><br>
@@ -342,6 +349,7 @@ Analyzer Flow
 <input
 type="checkbox"
 id="aiReportAnalyzerStructure"
+data-package="analysis,full"
 checked>
 Analyzer Structure
 </label><br>
@@ -350,6 +358,7 @@ Analyzer Structure
 <input
 type="checkbox"
 id="aiReportDatabase"
+data-package="architecture,database,full"
 checked>
 Database Flow
 </label><br>
@@ -358,6 +367,7 @@ Database Flow
 <input
 type="checkbox"
 id="aiReportRepair"
+data-package="repair,full"
 checked>
 Repair Flow
 </label><br>
@@ -366,6 +376,7 @@ Repair Flow
 <input
 type="checkbox"
 id="aiReportIntegration"
+data-package="ai,full"
 checked>
 AI Integration Flow
 </label><br>
@@ -374,6 +385,7 @@ AI Integration Flow
 <input
 type="checkbox"
 id="aiReportButton"
+data-package="debug,full"
 checked>
 Button Relation
 </label><br>
@@ -382,6 +394,7 @@ Button Relation
 <input
 type="checkbox"
 id="aiReportCall"
+data-package="analysis,debug,full"
 checked>
 Call Graph
 </label><br>
@@ -390,6 +403,7 @@ Call Graph
 <input
 type="checkbox"
 id="aiReportReverse"
+data-package="analysis,debug,full"
 checked>
 Reverse Call Graph
 </label><br>
@@ -398,6 +412,7 @@ Reverse Call Graph
 <input
 type="checkbox"
 id="aiReportDependency"
+data-package="analysis,architecture,database,debug,full"
 checked>
 Dependency Tree
 </label><br>
@@ -406,6 +421,7 @@ Dependency Tree
 <input
 type="checkbox"
 id="aiReportModule"
+data-package="analysis,full"
 checked>
 Module Dependency
 </label><br>
@@ -414,6 +430,7 @@ Module Dependency
 <input
 type="checkbox"
 id="aiReportGuide"
+data-package="repair,ai,full"
 checked>
 AI Repair Guide
 </label><br>
@@ -422,9 +439,52 @@ AI Repair Guide
 <input
 type="checkbox"
 id="aiReportOrder"
+data-package="repair,ai,full"
 checked>
 Recommended Repair Order
 </label>
+
+<hr>
+
+<b>Handoff Package</b><br>
+
+<select
+id="aiReportPackage"
+onchange="applyAiHandoffPackage()">
+
+<option value="">
+Custom
+</option>
+
+<option value="repair">
+Repair
+</option>
+
+<option value="analysis">
+Analysis
+</option>
+
+<option value="architecture">
+Architecture
+</option>
+
+<option value="database">
+Database
+</option>
+
+<option value="ai">
+AI Integration
+</option>
+
+<option value="debug">
+Debug
+</option>
+
+<option value="full">
+Full Project
+</option>
+
+</select>
 
 <hr>
 
@@ -444,6 +504,42 @@ Select Generate.
 
 </div>
 `;
+
+}
+
+function applyAiHandoffPackage() {
+
+  const select =
+    get("aiReportPackage");
+
+  const packageName =
+    select ? select.value : "";
+
+  const checks =
+    [
+      ...document.querySelectorAll(
+        ".ai-report-manager input[type='checkbox'][data-package]"
+      )
+    ];
+
+  checks.forEach(input => {
+
+    if (!packageName) {
+      return;
+    }
+
+    const packages =
+      String(
+        input.dataset.package || ""
+      )
+        .split(",")
+        .map(item => item.trim())
+        .filter(Boolean);
+
+    input.checked =
+      packages.includes(packageName);
+
+  });
 
 }
 
