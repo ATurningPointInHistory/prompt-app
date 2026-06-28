@@ -198,8 +198,6 @@ function deleteMemoBox() {
 
 function showMemoBox() {
 
-  saveMemoBoxCurrent();
-
   normalizeMemoBoxes();
 
   const tabs =
