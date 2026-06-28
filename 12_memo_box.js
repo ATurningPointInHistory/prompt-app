@@ -2,23 +2,14 @@
    12_memo_box.js
 =============================== */
 
-/* ===============================
-   Memo Box
-=============================== */
+let memoBoxActiveIndex =
+  0;
 
 let memoBoxStatusFilter =
   "";
 
 let memoBoxSearch =
   "";
-
-const MEMO_BOX_STATUSES = [
-  "Active",
-  "Draft",
-  "Todo",
-  "Done",
-  "Archive"
-];
 
 let memoBoxList =
   loadJson(
@@ -35,7 +26,64 @@ let memoBoxList =
     ]
   );
 
-let memoBoxActiveIndex = 0;
+const MEMO_BOX_STATUSES = [
+  "Inbox",
+  "Active",
+  "Draft",
+  "Todo",
+  "Review",
+  "Done",
+  "Official",
+  "Hold",
+  "Rejected",
+  "Archive"
+];
+
+const MEMO_BOX_TYPES = [
+  "Idea",
+  "Rule",
+  "Design",
+  "Core",
+  "Architecture",
+  "Specification",
+  "Implementation",
+  "Bug",
+  "Handoff",
+  "Report",
+  "Guide"
+];
+
+const MEMO_BOX_STATUSES = [
+  "Inbox",
+  "Draft",
+  "Review",
+  "Adopted",
+  "Official",
+  "Hold",
+  "Rejected",
+  "Archived"
+];
+
+const MEMO_BOX_SERIES = [
+  "",
+  "DESIGN",
+  "CORE",
+  "ARCH",
+  "KNOW",
+  "META",
+  "WORK",
+  "RULE",
+  "MGR",
+  "ANLY",
+  "PLUG",
+  "API",
+  "DB",
+  "GUIDE"
+];
+
+/* ===============================
+   Memo Box
+=============================== */
 
 function selectMemoBox(index) {
 
@@ -63,8 +111,6 @@ function saveMemoBoxes() {
 
 function saveMemoBoxCurrent() {
 
-  normalizeMemoBoxes();
-
   if (
     memoBoxActiveIndex < 0 ||
     memoBoxActiveIndex >= memoBoxList.length
@@ -77,30 +123,56 @@ function saveMemoBoxCurrent() {
       memoBoxActiveIndex
     ] || {};
 
-  const name =
-    get("memoBoxName")
-      ?.value ||
-    current.name ||
-    "";
-
-  const text =
-    get("memoBoxText")
-      ?.value ||
-    current.text ||
-    "";
-
-  const status =
-    get("memoBoxStatus")
-      ?.value ||
-    current.status ||
-    "Active";
-
   memoBoxList[
     memoBoxActiveIndex
   ] = {
-    name,
-    text,
-    status
+
+    ...current,
+
+    name:
+      get("memoBoxName")
+        ?.value || "",
+
+    text:
+      get("memoBoxText")
+        ?.value || "",
+
+    type:
+      get("memoBoxType")
+        ?.value ||
+
+      current.type ||
+
+      "Idea",
+
+    status:
+      get("memoBoxStatus")
+        ?.value ||
+
+      current.status ||
+
+      "Inbox",
+
+    series:
+      get("memoBoxSeries")
+        ?.value ||
+
+      current.series ||
+
+      "",
+
+    keywords:
+      (
+        get("memoBoxKeywords")
+          ?.value || ""
+      )
+        .split(",")
+        .map(v => v.trim())
+        .filter(Boolean),
+
+    updatedAt:
+      new Date().toISOString()
+
   };
 
   saveMemoBoxes();
@@ -199,7 +271,7 @@ function showMemoBox() {
       : ""
   }"
   onclick="selectMemoBox(${index})">
-${escapeHtml(item.name)}
+${escapeHtml(item.name || "メモ")}
 </button>
 `)
       .join("");
@@ -207,7 +279,24 @@ ${escapeHtml(item.name)}
   const current =
     memoBoxList[
       memoBoxActiveIndex
-    ];
+    ] || {};
+
+  const type =
+    current.type ||
+    "Idea";
+
+  const status =
+    current.status ||
+    "Inbox";
+
+  const series =
+    current.series ||
+    "";
+
+  const keywords =
+    (
+      current.keywords || []
+    ).join(", ");
 
   openFloatPanel(
     "MEMO BOX",
@@ -227,73 +316,57 @@ ${tabs}
 <input
   id="memoBoxName"
   class="memo-name-input"
-  value="${escapeHtml(current.name)}">
+  value="${escapeHtml(current.name || "")}">
 
 <br><br>
 
-<select
-  id="memoBoxStatus">
+<div class="memo-meta">
 
-<option value="Active"
-${
-current.status === "Active"
-? "selected"
-: ""
-}>
-Active
+Type
+<select id="memoBoxType">
+${MEMO_BOX_TYPES.map(v => `
+<option
+value="${v}"
+${v === type ? "selected" : ""}>
+${v}
 </option>
-
-<option value="TODO"
-${
-current.status === "TODO"
-? "selected"
-: ""
-}>
-TODO
-</option>
-
-<option value="Working"
-${
-current.status === "Working"
-? "selected"
-: ""
-}>
-Working
-</option>
-
-<option value="Done"
-${
-current.status === "Done"
-? "selected"
-: ""
-}>
-Done
-</option>
-
-<option value="Handoff"
-${
-current.status === "Handoff"
-? "selected"
-: ""
-}>
-Handoff
-</option>
-
-<option value="Archive"
-${
-current.status === "Archive"
-? "selected"
-: ""
-}>
-Archive
-</option>
-
+`).join("")}
 </select>
+
+Status
+<select id="memoBoxStatus">
+${MEMO_BOX_STATUSES.map(v => `
+<option
+value="${v}"
+${v === status ? "selected" : ""}>
+${v}
+</option>
+`).join("")}
+</select>
+
+Series
+<select id="memoBoxSeries">
+${MEMO_BOX_SERIES.map(v => `
+<option
+value="${v}"
+${v === series ? "selected" : ""}>
+${v || "Seriesなし"}
+</option>
+`).join("")}
+</select>
+
+</div>
+
+<input
+  id="memoBoxKeywords"
+  class="input"
+  placeholder="tag1, tag2"
+  value="${escapeHtml(keywords)}">
 
 <textarea
   id="memoBoxText"
   class="memo-textarea"
-  rows="12">${escapeHtml(current.text)}</textarea>
+  rows="12">${escapeHtml(current.text || "")}</textarea>
 
 <div class="memo-actions">
 
@@ -449,18 +522,35 @@ function loadMemoBoxesFile(
 function normalizeMemoBoxes() {
 
   memoBoxList =
-    (memoBoxList || [])
-      .map((memo, index) => ({
-        name:
-          memo.name ||
-          "メモ" + (index + 1),
+    (memoBoxList || []).map(item => ({
 
-        text:
-          memo.text || "",
+      name:
+        item.name || "",
 
-        status:
-          memo.status || "Active"
-      }));
+      text:
+        item.text || "",
+
+      type:
+        item.type || "Idea",
+
+      status:
+        item.status || "Inbox",
+
+      series:
+        item.series || "",
+
+      keywords:
+        Array.isArray(
+          item.keywords
+        )
+          ? item.keywords
+          : [],
+
+      updatedAt:
+        item.updatedAt ||
+        ""
+
+    }));
 
 }
 
