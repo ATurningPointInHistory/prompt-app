@@ -438,6 +438,15 @@ AI Repair Guide
 <label>
 <input
 type="checkbox"
+id="aiReportMemo"
+data-package="repair,analysis,architecture,database,ai,debug,full"
+checked>
+Memo Handoff
+</label><br>
+
+<label>
+<input
+type="checkbox"
 id="aiReportOrder"
 data-package="repair,ai,full"
 checked>
@@ -725,6 +734,15 @@ function generateSelectedAiReport() {
   }
 
   if (
+    get("aiReportMemo")?.checked
+  ) {
+    lines.push(
+      buildMemoHandoffReport()
+    );
+    lines.push("");
+  }
+
+  if (
     get("aiReportOrder")?.checked
   ) {
     lines.push(
@@ -852,6 +870,9 @@ window.copySelectedAiReport =
 
 window.buildAnalyzerStructureReport =
   buildAnalyzerStructureReport;
+
+window.buildMemoHandoffReport =
+  buildMemoHandoffReport;
 
 console.log(
   "13_project_handoff loaded"
