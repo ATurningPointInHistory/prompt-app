@@ -32,6 +32,8 @@ function saveMemoBoxes() {
 
 function selectMemoBox(index) {
 
+  saveMemoBoxCurrent();
+
   memoBoxActiveIndex =
     index;
 
@@ -142,8 +144,6 @@ function deleteMemoBox() {
 }
 
 function showMemoBox() {
-
-  saveMemoBoxCurrent();
 
   const tabs =
     memoBoxList
