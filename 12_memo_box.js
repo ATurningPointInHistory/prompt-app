@@ -1,3 +1,21 @@
+
+/* ===============================
+   Memo Box
+=============================== */
+
+let memoBoxStatusFilter =
+  "";
+
+let memoBoxSearch =
+  "";
+
+const MEMO_BOX_STATUSES = [
+  "Active",
+  "Draft",
+  "Todo",
+  "Done",
+  "Archive"
+];
 /* ===============================
    Memo Box
 =============================== */
