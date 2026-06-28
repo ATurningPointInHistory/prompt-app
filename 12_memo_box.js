@@ -59,6 +59,19 @@ function selectMemoBox(index) {
 
 }
 
+function saveMemoBoxes() {
+
+  normalizeMemoBoxes();
+
+  localStorage.setItem(
+    "memoBoxList",
+    JSON.stringify(
+      memoBoxList
+    )
+  );
+
+}
+
 function saveMemoBoxCurrent() {
 
   normalizeMemoBoxes();
@@ -142,7 +155,10 @@ function addMemoBox() {
     name:
       `メモ${memoBoxList.length + 1}`,
 
-    text: ""
+    text: "",
+
+    status:
+      "Active"
 
   });
 
