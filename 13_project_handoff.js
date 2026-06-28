@@ -843,6 +843,29 @@ function buildMemoHandoffReport() {
 
 }
 
+function saveAiReportToMemo() {
+
+  const text =
+    generateSelectedAiReport();
+
+  if (!text) {
+    return;
+  }
+
+  saveMemoBoxCurrent();
+
+  memoBoxList[
+    memoBoxActiveIndex
+  ].text = text;
+
+  saveMemoBoxes();
+
+  alert(
+    "現在のMemoへ保存しました。"
+  );
+
+}
+
 /* ===============================
    Global Export
 =============================== */
