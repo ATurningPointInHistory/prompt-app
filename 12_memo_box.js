@@ -37,17 +37,6 @@ let memoBoxList =
 
 let memoBoxActiveIndex = 0;
 
-function saveMemoBoxes() {
-
-  localStorage.setItem(
-    "memoBoxList",
-    JSON.stringify(
-      memoBoxList
-    )
-  );
-
-}
-
 function selectMemoBox(index) {
 
   saveMemoBoxCurrent();
