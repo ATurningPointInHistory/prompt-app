@@ -26,19 +26,6 @@ let memoBoxList =
     ]
   );
 
-const MEMO_BOX_STATUSES = [
-  "Inbox",
-  "Active",
-  "Draft",
-  "Todo",
-  "Review",
-  "Done",
-  "Official",
-  "Hold",
-  "Rejected",
-  "Archive"
-];
-
 const MEMO_BOX_TYPES = [
   "Idea",
   "Rule",
@@ -55,13 +42,15 @@ const MEMO_BOX_TYPES = [
 
 const MEMO_BOX_STATUSES = [
   "Inbox",
+  "Active",
   "Draft",
+  "Todo",
   "Review",
-  "Adopted",
+  "Done",
   "Official",
   "Hold",
   "Rejected",
-  "Archived"
+  "Archive"
 ];
 
 const MEMO_BOX_SERIES = [
