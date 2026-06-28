@@ -568,3 +568,12 @@ window.importMemoBoxes =
 
 window.loadMemoBoxesFile =
   loadMemoBoxesFile;
+
+window.showMemoBox =
+  showMemoBox;
+
+window.selectMemoBox =
+  selectMemoBox;
+
+window.saveMemoBoxCurrent =
+  saveMemoBoxCurrent;
