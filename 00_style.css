@@ -1536,6 +1536,49 @@ mark {
   border-radius: 4px;
 }
 
+.memo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.memo-card {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #555;
+  background: #2b2b2b;
+  cursor: pointer;
+}
+
+.memo-card.active {
+  border: 2px solid #4aa3ff;
+}
+
+.memo-card-title {
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.memo-card-meta {
+  margin-top: 4px;
+  font-size: 11px;
+  opacity: .8;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.memo-card-keywords {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #7fc3ff;
+}
+
+/* ===============================
+   macro
+=============================== */
+
 .macro-list {
   display: flex;
   flex-direction: column;
@@ -1894,45 +1937,3 @@ mark {
   margin: 6px 4px 8px 0;
 }
 
-/* ===============================
-   memo
-=============================== */
-
-.memo-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.memo-card {
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #555;
-  background: #2b2b2b;
-  cursor: pointer;
-}
-
-.memo-card.active {
-  border: 2px solid #4aa3ff;
-}
-
-.memo-card-title {
-  font-weight: bold;
-  font-size: 15px;
-}
-
-.memo-card-meta {
-  margin-top: 4px;
-  font-size: 11px;
-  opacity: .8;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.memo-card-keywords {
-  margin-top: 4px;
-  font-size: 11px;
-  color: #7fc3ff;
-}
