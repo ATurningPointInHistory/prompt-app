@@ -209,3 +209,26 @@ ${tabs}
   );
 
 }
+
+function getMemoBoxList() {
+
+  return memoBoxList || [];
+
+}
+
+function getActiveMemoBox() {
+
+  return (
+    memoBoxList[
+      memoBoxActiveIndex
+    ] ||
+    null
+  );
+
+}
+
+window.getMemoBoxList =
+  getMemoBoxList;
+
+window.getActiveMemoBox =
+  getActiveMemoBox;
