@@ -769,6 +769,62 @@ function copySelectedAiReport() {
 
 }
 
+function buildMemoHandoffReport() {
+
+  const list =
+    typeof getMemoBoxList === "function"
+      ? getMemoBoxList()
+      : [];
+
+  const lines = [];
+
+  lines.push("=== Memo Handoff ===");
+  lines.push("");
+
+  if (!list.length) {
+    lines.push("none");
+    return lines.join("\n");
+  }
+
+  list.forEach((memo, index) => {
+
+    if (
+      !memo ||
+      !String(memo.text || "").trim()
+    ) {
+      return;
+    }
+
+    lines.push(
+      "Memo " + (index + 1)
+    );
+
+    lines.push(
+      "Name:"
+    );
+
+    lines.push(
+      memo.name || "memo"
+    );
+
+    lines.push("");
+
+    lines.push(
+      "Text:"
+    );
+
+    lines.push(
+      memo.text
+    );
+
+    lines.push("");
+
+  });
+
+  return lines.join("\n");
+
+}
+
 /* ===============================
    Global Export
 =============================== */
