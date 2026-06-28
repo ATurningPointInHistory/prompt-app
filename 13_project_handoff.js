@@ -505,6 +505,10 @@ Full Project
 📋 Copy
 </button>
 
+<button onclick="saveAiReportToMemo()">
+📝 Memo
+</button>
+
 <pre
 id="aiReportOutput"
 class="code-preview">
