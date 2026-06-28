@@ -143,6 +143,8 @@ function deleteMemoBox() {
 
 function showMemoBox() {
 
+  saveMemoBoxCurrent();
+
   const tabs =
     memoBoxList
       .map((item, index) => `
@@ -204,6 +206,21 @@ ${tabs}
 🗑削除
 </button>
 
+<button onclick="exportMemoBoxes()">
+Export
+</button>
+
+<button onclick="importMemoBoxes()">
+Import
+</button>
+
+<input
+  id="memoBoxImportFile"
+  type="file"
+  accept=".json"
+  style="display:none"
+  onchange="loadMemoBoxesFile(event)">
+
 </div>
 `
   );
@@ -227,8 +244,112 @@ function getActiveMemoBox() {
 
 }
 
+function exportMemoBoxes() {
+
+  saveMemoBoxCurrent();
+
+  downloadJsonFile(
+    memoBoxList,
+    "memo_boxes.json"
+  );
+
+}
+
+function importMemoBoxes() {
+
+  if (
+    !confirm(
+      "現在のメモを上書きします。続行しますか？"
+    )
+  ) {
+    return;
+  }
+
+  const input =
+    get("memoBoxImportFile");
+
+  if (!input) {
+    return;
+  }
+
+  input.value = "";
+
+  input.click();
+
+}
+
+function loadMemoBoxesFile(
+  event
+) {
+
+  const file =
+    event.target.files?.[0];
+
+  if (!file) {
+    return;
+  }
+
+  readJsonFile(
+
+    file,
+
+    data => {
+
+      if (!Array.isArray(data)) {
+        alert("Memo JSON形式が不正です");
+        return;
+      }
+
+      memoBoxList =
+        data
+          .map(item => ({
+            name:
+              item.name || "メモ",
+            text:
+              item.text || ""
+          }));
+
+      if (!memoBoxList.length) {
+        memoBoxList = [
+          {
+            name: "メモ1",
+            text: ""
+          }
+        ];
+      }
+
+      memoBoxActiveIndex = 0;
+
+      saveMemoBoxes();
+
+      showMemoBox();
+
+      alert("Memo Import完了");
+
+    },
+
+    () => {
+      alert("Memo JSON読込失敗");
+    }
+
+  );
+
+  event.target.value =
+    "";
+
+}
+
 window.getMemoBoxList =
   getMemoBoxList;
 
 window.getActiveMemoBox =
   getActiveMemoBox;
+
+window.exportMemoBoxes =
+  exportMemoBoxes;
+
+window.importMemoBoxes =
+  importMemoBoxes;
+
+window.loadMemoBoxesFile =
+  loadMemoBoxesFile;
