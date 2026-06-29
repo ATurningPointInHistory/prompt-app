@@ -9,7 +9,20 @@
 
 function getArchitectureDatabase() {
 
-  return window.architectureDatabase || {
+  if (
+    typeof architectureDatabase !== "undefined" &&
+    architectureDatabase
+  ) {
+    return architectureDatabase;
+  }
+
+  if (
+    window.architectureDatabase
+  ) {
+    return window.architectureDatabase;
+  }
+
+  return {
     version: "",
     objects: {},
     relationships: [],
@@ -21,6 +34,7 @@ function getArchitectureDatabase() {
     }
   };
 
+}
 }
 
 /* ===============================
