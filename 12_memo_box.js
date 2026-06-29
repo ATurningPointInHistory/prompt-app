@@ -725,6 +725,8 @@ function extractMemoTitle(
 
 function saveMemoEditor() {
 
+  normalizeMemoBoxes();
+
   const indexText =
     get("memoEditorIndex")?.value || "";
 
@@ -758,21 +760,30 @@ function saveMemoEditor() {
       get("memoBoxText")?.value || ""
   };
 
-    if (
+  if (
     index >= 0 &&
-    memoBoxList[index]
+    index < memoBoxList.length
   ) {
-    memoBoxList[index] = memo;
+
+    memoBoxList[index] = {
+      ...memoBoxList[index],
+      ...memo
+    };
+
     memoBoxActiveIndex = index;
+
   } else {
+
     memoBoxList.unshift(memo);
     memoBoxActiveIndex = 0;
+
   }
 
   saveMemoBoxLastDefaults(
     memo
   );
 
+  normalizeMemoBoxes();
   saveMemoBoxes();
   showMemoBox();
 
