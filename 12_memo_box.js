@@ -17,6 +17,9 @@ let memoBoxTypeFilter =
 let memoBoxSeriesFilter =
   "";
 
+let memoBoxSelected =
+  new Set();
+
 let memoBoxList =
   loadJson(
     "memoBoxList",
@@ -391,6 +394,21 @@ rows="12">${escapeHtml(current.text || "")}</textarea>
 🗑削除
 </button>
 
+<button
+onclick="selectAllMemoBoxes()">
+☑All
+</button>
+
+<button
+onclick="clearMemoSelection()">
+☐Clear
+</button>
+
+<button
+onclick="deleteSelectedMemoBoxes()">
+🗑選択削除
+</button>
+
 <button onclick="addMemoBox()">
 ＋新規
 </button>
@@ -509,6 +527,73 @@ style="display:none"
 onchange="loadMemoBoxesFile(event)">
 `
   );
+
+}
+
+function toggleMemoSelection(
+  index,
+  checked
+) {
+
+  if (checked) {
+    memoBoxSelected.add(index);
+  } else {
+    memoBoxSelected.delete(index);
+  }
+
+}
+
+function selectAllMemoBoxes() {
+
+  memoBoxSelected.clear();
+
+  memoBoxList.forEach(
+    (_, index) =>
+      memoBoxSelected.add(index)
+  );
+
+  showMemoBox();
+
+}
+
+function clearMemoSelection() {
+
+  memoBoxSelected.clear();
+
+  showMemoBox();
+
+}
+
+function deleteSelectedMemoBoxes() {
+
+  if (
+    !memoBoxSelected.size
+  ) {
+    alert("選択されていません");
+    return;
+  }
+
+  if (
+    !confirm(
+      `${memoBoxSelected.size}件削除しますか？`
+    )
+  ) {
+    return;
+  }
+
+  memoBoxList =
+    memoBoxList.filter(
+      (_, index) =>
+        !memoBoxSelected.has(index)
+    );
+
+  memoBoxSelected.clear();
+
+  memoBoxActiveIndex = 0;
+
+  saveMemoBoxes();
+
+  showMemoBox();
 
 }
 
