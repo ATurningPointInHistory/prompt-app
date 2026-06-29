@@ -214,7 +214,8 @@ function buildFunctionRelationV3Report(
   lines.push("=== AI Minimal Code ===");
   lines.push(
     getFunctionRelationV3MinimalCode(
-      targetFunctionName
+      targetFunctionName,
+      2
     )
   );
 
