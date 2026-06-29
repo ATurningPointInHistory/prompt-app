@@ -275,25 +275,49 @@ function showMemoBox() {
     index === memoBoxActiveIndex
       ? "active"
       : ""
-  }"
-  onclick="selectMemoBox(${index})">
+  }">
 
-  <div class="memo-card-title">
-    ${escapeHtml(item.name || "メモ")}
+  <div class="memo-card-select">
+
+    <input
+      type="checkbox"
+      ${
+        memoBoxSelected.has(index)
+          ? "checked"
+          : ""
+      }
+      onclick="event.stopPropagation()"
+      onchange="
+        toggleMemoSelection(
+          ${index},
+          this.checked
+        )
+      ">
+
   </div>
 
-  <div class="memo-card-meta">
-    <span>${escapeHtml(item.type || "Idea")}</span>
-    <span>${escapeHtml(item.status || "Inbox")}</span>
-    <span>${escapeHtml(item.series || "-")}</span>
-  </div>
+  <div
+    class="memo-card-body"
+    onclick="selectMemoBox(${index})">
 
-  <div class="memo-card-keywords">
-    ${escapeHtml(
-      Array.isArray(item.keywords)
-        ? item.keywords.join(", ")
-        : ""
-    )}
+    <div class="memo-card-title">
+      ${escapeHtml(item.name || "メモ")}
+    </div>
+
+    <div class="memo-card-meta">
+      <span>${escapeHtml(item.type || "Idea")}</span>
+      <span>${escapeHtml(item.status || "Inbox")}</span>
+      <span>${escapeHtml(item.series || "-")}</span>
+    </div>
+
+    <div class="memo-card-keywords">
+      ${escapeHtml(
+        Array.isArray(item.keywords)
+          ? item.keywords.join(", ")
+          : ""
+      )}
+    </div>
+
   </div>
 
 </div>
@@ -394,18 +418,15 @@ rows="12">${escapeHtml(current.text || "")}</textarea>
 🗑削除
 </button>
 
-<button
-onclick="selectAllMemoBoxes()">
+<button onclick="selectAllMemoBoxes()">
 ☑All
 </button>
 
-<button
-onclick="clearMemoSelection()">
+<button onclick="clearMemoSelection()">
 ☐Clear
 </button>
 
-<button
-onclick="deleteSelectedMemoBoxes()">
+<button onclick="deleteSelectedMemoBoxes()">
 🗑選択削除
 </button>
 
