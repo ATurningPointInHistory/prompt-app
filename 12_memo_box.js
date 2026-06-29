@@ -647,12 +647,37 @@ async function pasteMemoText() {
     const textarea =
       get("memoBoxText");
 
-    if (!textarea) {
-      return;
+    if (textarea) {
+
+      textarea.value = text;
+
     }
 
-    textarea.value = text;
-    textarea.focus();
+    const title =
+      extractMemoTitle(
+        text
+      );
+
+    const input =
+      get("memoBoxName");
+
+    if (
+      input &&
+      (
+        !input.value ||
+        input.value ===
+        memoBoxLastDefaults?.name
+      )
+    ) {
+
+      input.value =
+        title;
+
+      input.focus();
+
+      input.select();
+
+    }
 
   } catch (error) {
 
