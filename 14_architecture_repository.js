@@ -70,45 +70,54 @@ function findArchitectureObjects(
   return objects.filter(object => {
 
     if (
-      filter.type &&
-      object.type !== filter.type
+      !matchArchitectureValue(
+        object.type,
+        filter.type
+      )
     ) {
       return false;
     }
 
     if (
-      filter.category &&
-      object.category !== filter.category
+      !matchArchitectureValue(
+        object.category,
+        filter.category
+      )
     ) {
       return false;
     }
 
     if (
-      filter.layer &&
-      object.layer !== filter.layer
+      !matchArchitectureValue(
+        object.layer,
+        filter.layer
+      )
     ) {
       return false;
     }
 
     if (
-      filter.status &&
-      object.status !== filter.status
+      !matchArchitectureValue(
+        object.status,
+        filter.status
+      )
     ) {
       return false;
     }
 
     if (
-      filter.priority &&
-      object.priority !== filter.priority
+      !matchArchitectureValue(
+        object.priority,
+        filter.priority
+      )
     ) {
       return false;
     }
 
     if (
-      filter.tag &&
-      !(
-        Array.isArray(object.tags) &&
-        object.tags.includes(filter.tag)
+      !matchArchitectureTags(
+        object.tags,
+        filter.tag
       )
     ) {
       return false;
@@ -161,6 +170,48 @@ function findArchitectureObjectsByTag(
 }
 
 /* ===============================
+   Repository Match Utility
+=============================== */
+
+function matchArchitectureValue(
+  actual,
+  expected
+) {
+
+  if (!expected) {
+    return true;
+  }
+
+  return String(actual || "")
+    .toLowerCase() ===
+    String(expected || "")
+      .toLowerCase();
+
+}
+
+function matchArchitectureTags(
+  tags,
+  expected
+) {
+
+  if (!expected) {
+    return true;
+  }
+
+  if (!Array.isArray(tags)) {
+    return false;
+  }
+
+  return tags.some(tag =>
+    String(tag || "")
+      .toLowerCase() ===
+    String(expected || "")
+      .toLowerCase()
+  );
+
+}
+
+/* ===============================
    Relationship Repository
 =============================== */
 
@@ -192,22 +243,28 @@ function findArchitectureRelationships(
     .filter(relationship => {
 
       if (
-        filter.source &&
-        relationship.source !== filter.source
+        !matchArchitectureValue(
+          relationship.source,
+          filter.source
+        )
       ) {
         return false;
       }
 
       if (
-        filter.target &&
-        relationship.target !== filter.target
+        !matchArchitectureValue(
+          relationship.target,
+          filter.target
+        )
       ) {
         return false;
       }
 
       if (
-        filter.type &&
-        relationship.type !== filter.type
+        !matchArchitectureValue(
+          relationship.type,
+          filter.type
+        )
       ) {
         return false;
       }
