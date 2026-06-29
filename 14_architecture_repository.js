@@ -35,7 +35,6 @@ function getArchitectureDatabase() {
   };
 
 }
-}
 
 /* ===============================
    Object Repository
