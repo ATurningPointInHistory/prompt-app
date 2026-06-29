@@ -1,6 +1,7 @@
 /* ===============================
-   FILE: 14_architecture_repository.js
    Architecture Repository
+   Repository v1
+   Read Only Layer
 =============================== */
 
 /* ===============================
@@ -33,6 +34,48 @@ function getArchitectureDatabase() {
       updatedAt: ""
     }
   };
+
+}
+
+/* ===============================
+   Repository Match Utility
+=============================== */
+
+function matchArchitectureValue(
+  actual,
+  expected
+) {
+
+  if (!expected) {
+    return true;
+  }
+
+  return String(actual || "")
+    .toLowerCase() ===
+    String(expected || "")
+      .toLowerCase();
+
+}
+
+function matchArchitectureTags(
+  tags,
+  expected
+) {
+
+  if (!expected) {
+    return true;
+  }
+
+  if (!Array.isArray(tags)) {
+    return false;
+  }
+
+  return tags.some(tag =>
+    String(tag || "")
+      .toLowerCase() ===
+    String(expected || "")
+      .toLowerCase()
+  );
 
 }
 
@@ -166,48 +209,6 @@ function findArchitectureObjectsByTag(
   return findArchitectureObjects({
     tag
   });
-
-}
-
-/* ===============================
-   Repository Match Utility
-=============================== */
-
-function matchArchitectureValue(
-  actual,
-  expected
-) {
-
-  if (!expected) {
-    return true;
-  }
-
-  return String(actual || "")
-    .toLowerCase() ===
-    String(expected || "")
-      .toLowerCase();
-
-}
-
-function matchArchitectureTags(
-  tags,
-  expected
-) {
-
-  if (!expected) {
-    return true;
-  }
-
-  if (!Array.isArray(tags)) {
-    return false;
-  }
-
-  return tags.some(tag =>
-    String(tag || "")
-      .toLowerCase() ===
-    String(expected || "")
-      .toLowerCase()
-  );
 
 }
 
@@ -375,6 +376,12 @@ function getArchitectureStatistics() {
 
 window.getArchitectureDatabase =
   getArchitectureDatabase;
+
+window.matchArchitectureValue =
+  matchArchitectureValue;
+
+window.matchArchitectureTags =
+  matchArchitectureTags;
 
 window.findArchitectureObject =
   findArchitectureObject;
