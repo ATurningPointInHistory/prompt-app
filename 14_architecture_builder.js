@@ -1,5 +1,5 @@
 /* ===============================
-   Build Architecture DB From Project
+   Build Architecture Database From Project
 =============================== */
 
 function buildArchitectureDatabaseFromProject() {
@@ -11,7 +11,9 @@ function buildArchitectureDatabaseFromProject() {
   }
 
   if (!window.projectDatabase) {
-    alert("Project Database がありません");
+    alert(
+      "Project Database がありません"
+    );
     return;
   }
 
@@ -23,7 +25,7 @@ function buildArchitectureDatabaseFromProject() {
 
   buildArchitectureRelationshipsFromProject();
 
-  // ★最後に1回だけ実行
+  // 一括登録完了後に1回だけ実行
   rebuildArchitectureIndexes();
 
   saveArchitectureDatabase();
@@ -33,51 +35,71 @@ function buildArchitectureDatabaseFromProject() {
 }
 
 /* ===============================
-   Register Files
+   Register Project Files As Objects
 =============================== */
 
-registerArchitectureObject(
-  {
-    id:
-      `FILE:${file.fileName}`,
+function registerProjectFilesAsObjects() {
 
-    type:
-      "File",
+  const files =
+    window.projectDatabase.files || {};
 
-    title:
-      file.fileName,
+  Object.values(files).forEach(file => {
 
-    summary:
-      `File / lines: ${file.lineCount || 0}`,
+    registerArchitectureObject(
+      {
+        id:
+          `FILE:${file.fileName}`,
 
-    layer:
-      "Project Layer",
+        type:
+          "File",
 
-    category:
-      "File",
+        title:
+          file.fileName,
 
-    priority:
-      "Normal",
+        summary:
+          `File / lines: ${file.lineCount || 0}`,
 
-    tags:
-      ["file"],
+        description:
+          file.fileName || "",
 
-    metadata: {
-      lineCount:
-        file.lineCount || 0,
+        layer:
+          "Project Layer",
 
-      charCount:
-        file.charCount || 0
-    }
-  },
-  {
-    rebuild: false,
-    save: false
-  }
-);
+        category:
+          "File",
+
+        priority:
+          "Normal",
+
+        tags:
+          ["file"],
+
+        metadata: {
+          fileName:
+            file.fileName || "",
+
+          lineCount:
+            file.lineCount || 0,
+
+          charCount:
+            file.charCount || 0,
+
+          updatedAt:
+            file.updatedAt || ""
+        }
+      },
+      {
+        rebuild: false,
+        save: false
+      }
+    );
+
+  });
+
+}
 
 /* ===============================
-   Register Modules
+   Register Project Modules As Objects
 =============================== */
 
 function registerProjectModulesAsObjects() {
@@ -87,51 +109,78 @@ function registerProjectModulesAsObjects() {
 
   Object.values(modules).forEach(module => {
 
-    registerArchitectureObject({
-      id:
-        `MODULE:${module.fileName}`,
+    registerArchitectureObject(
+      {
+        id:
+          `MODULE:${module.fileName}`,
 
-      type:
-        "Module",
+        type:
+          "Module",
 
-      title:
-        module.fileName,
+        title:
+          module.fileName,
 
-      summary:
-        module.summary || "",
+        summary:
+          module.summary || "",
 
-      description:
-        module.role || "",
+        description:
+          module.role || "",
 
-      layer:
-        "Project Layer",
+        layer:
+          "Project Layer",
 
-      category:
-        "Module",
+        category:
+          "Module",
 
-      priority:
-        "Normal",
+        priority:
+          "Normal",
 
-      tags:
-        module.keywords || ["module"],
+        tags:
+          module.keywords || [
+            "module"
+          ],
 
-      metadata: {
-        functionCount:
-          module.functionCount || 0,
+        metadata: {
 
-        lineCount:
-          module.lineCount || 0,
+          fileName:
+            module.fileName || "",
 
-        risk:
-          module.risk || ""
+          functionCount:
+            module.functionCount || 0,
+
+          lineCount:
+            module.lineCount || 0,
+
+          risk:
+            module.risk || "",
+
+          role:
+            module.role || ""
+
+        }
+
+      },
+      {
+        rebuild: false,
+        save: false
       }
-    });
+    );
 
     addArchitectureRelationship(
+
       `MODULE:${module.fileName}`,
+
       `FILE:${module.fileName}`,
+
       "ContainedIn",
-      "Module belongs to file"
+
+      "Module belongs to file",
+
+      {
+        rebuild: false,
+        save: false
+      }
+
     );
 
   });
@@ -139,7 +188,7 @@ function registerProjectModulesAsObjects() {
 }
 
 /* ===============================
-   Register Functions
+   Register Project Functions As Objects
 =============================== */
 
 function registerProjectFunctionsAsObjects() {
@@ -149,51 +198,74 @@ function registerProjectFunctionsAsObjects() {
 
   Object.values(functions).forEach(fn => {
 
-    registerArchitectureObject({
-      id:
-        `FUNCTION:${fn.name}`,
+    registerArchitectureObject(
+      {
+        id:
+          `FUNCTION:${fn.name}`,
 
-      type:
-        "Function",
+        type:
+          "Function",
 
-      title:
-        fn.name,
+        title:
+          fn.name,
 
-      summary:
-        fn.summary || "",
+        summary:
+          fn.summary || "",
 
-      description:
-        fn.role || "",
+        description:
+          fn.role || "",
 
-      layer:
-        "Project Layer",
+        layer:
+          "Project Layer",
 
-      category:
-        fn.section || "Function",
+        category:
+          fn.section || "Function",
 
-      priority:
-        fn.handoffPriority || "Normal",
+        priority:
+          fn.handoffPriority || "Normal",
 
-      tags:
-        fn.keywords || ["function"],
+        tags:
+          fn.keywords || [
+            "function"
+          ],
 
-      metadata: {
-        fileName:
-          fn.fileName || "",
+        metadata: {
 
-        line:
-          fn.line || 0,
+          fileName:
+            fn.fileName || "",
 
-        risk:
-          fn.risk || "",
+          line:
+            fn.line || 0,
 
-        callCount:
-          fn.callCount || 0,
+          start:
+            fn.start || 0,
 
-        parameters:
-          fn.parameters || []
+          end:
+            fn.end || 0,
+
+          risk:
+            fn.risk || "",
+
+          callCount:
+            fn.callCount || 0,
+
+          parameters:
+            fn.parameters || [],
+
+          returnValue:
+            fn.returnValue || "",
+
+          moduleRole:
+            fn.moduleRole || ""
+
+        }
+
+      },
+      {
+        rebuild: false,
+        save: false
       }
-    });
+    );
 
     if (fn.fileName) {
 
@@ -201,14 +273,22 @@ function registerProjectFunctionsAsObjects() {
         `FUNCTION:${fn.name}`,
         `MODULE:${fn.fileName}`,
         "ContainedIn",
-        "Function belongs to module"
+        "Function belongs to module",
+        {
+          rebuild: false,
+          save: false
+        }
       );
 
       addArchitectureRelationship(
         `FUNCTION:${fn.name}`,
         `FILE:${fn.fileName}`,
         "ContainedIn",
-        "Function belongs to file"
+        "Function belongs to file",
+        {
+          rebuild: false,
+          save: false
+        }
       );
 
     }
@@ -218,7 +298,7 @@ function registerProjectFunctionsAsObjects() {
 }
 
 /* ===============================
-   Build Function Call Relationships
+   Build Architecture Relationships From Project
 =============================== */
 
 function buildArchitectureRelationshipsFromProject() {
@@ -228,7 +308,12 @@ function buildArchitectureRelationshipsFromProject() {
 
   Object.values(functions).forEach(fn => {
 
-    (fn.called || []).forEach(calledName => {
+    const calledList =
+      Array.isArray(fn.called)
+        ? fn.called
+        : [];
+
+    calledList.forEach(calledName => {
 
       if (
         functions[calledName]
@@ -238,7 +323,11 @@ function buildArchitectureRelationshipsFromProject() {
           `FUNCTION:${fn.name}`,
           `FUNCTION:${calledName}`,
           "Calls",
-          "Function calls another function"
+          "Function calls another function",
+          {
+            rebuild: false,
+            save: false
+          }
         );
 
       }
