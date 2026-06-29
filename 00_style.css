@@ -1575,6 +1575,27 @@ mark {
   color: #7fc3ff;
 }
 
+.memo-editor-top-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: inherit;
+  padding-bottom: 8px;
+}
+
+.memo-editor-meta-row {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.memo-editor-meta-row select {
+  flex: 1;
+  min-width: 0;
+}
 /* ===============================
    macro
 =============================== */
