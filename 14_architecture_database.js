@@ -105,7 +105,8 @@ function normalizeArchitectureObject(
 =============================== */
 
 function registerArchitectureObject(
-  object = {}
+  object = {},
+  options = {}
 ) {
 
   const item =
@@ -117,9 +118,17 @@ function registerArchitectureObject(
     item.id
   ] = item;
 
-  rebuildArchitectureIndexes();
+  if (
+    options.rebuild !== false
+  ) {
+    rebuildArchitectureIndexes();
+  }
 
-  saveArchitectureDatabase();
+  if (
+    options.save !== false
+  ) {
+    saveArchitectureDatabase();
+  }
 
   return item;
 
@@ -192,7 +201,8 @@ function addArchitectureRelationship(
   source,
   target,
   type = "RelatedTo",
-  reason = ""
+  reason = "",
+  options = {}
 ) {
 
   if (!source || !target) {
@@ -223,9 +233,17 @@ function addArchitectureRelationship(
   architectureDatabase.relationships
     .push(rel);
 
-  rebuildArchitectureIndexes();
+  if (
+    options.rebuild !== false
+  ) {
+    rebuildArchitectureIndexes();
+  }
 
-  saveArchitectureDatabase();
+  if (
+    options.save !== false
+  ) {
+    saveArchitectureDatabase();
+  }
 
   return rel;
 
