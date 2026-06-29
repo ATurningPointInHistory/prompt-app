@@ -544,14 +544,24 @@ id="memoEditorIndex"
 type="hidden"
 value="${isNew ? "" : index}">
 
-<div class="memo-editor-top-actions">
-  <button onclick="saveMemoEditor()">
-    💾保存
-  </button>
+<<div class="memo-editor-top-actions">
 
-  <button onclick="showMemoBox()">
-    ←戻る
-  </button>
+<button onclick="saveMemoEditor()">
+💾保存
+</button>
+
+<button onclick="showMemoBox()">
+←戻る
+</button>
+
+<button onclick="pasteMemoText()">
+📋本文
+</button>
+
+<button onclick="selectMemoTitle()">
+🔤題名
+</button>
+
 </div>
 
 <input
@@ -608,6 +618,49 @@ class="memo-textarea"
 rows="16">${escapeHtml(current.text || "")}</textarea>
 `
   );
+
+}
+
+function selectMemoTitle() {
+
+  const input =
+    get("memoBoxName");
+
+  if (!input) {
+    return;
+  }
+
+  input.focus();
+  input.select();
+
+}
+
+async function pasteMemoText() {
+
+  try {
+
+    const text =
+      await navigator
+        .clipboard
+        .readText();
+
+    const textarea =
+      get("memoBoxText");
+
+    if (!textarea) {
+      return;
+    }
+
+    textarea.value = text;
+    textarea.focus();
+
+  } catch (error) {
+
+    alert(
+      "クリップボードを読み取れません。"
+    );
+
+  }
 
 }
 
