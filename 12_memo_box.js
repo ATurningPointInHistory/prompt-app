@@ -270,15 +270,13 @@ function showMemoBox() {
           memoBoxList.indexOf(item);
 
         return `
-<div
-  class="memo-card ${
-    index === memoBoxActiveIndex
-      ? "active"
-      : ""
-  }">
+<div class="memo-card ${
+  index === memoBoxActiveIndex
+    ? "active"
+    : ""
+}">
 
   <div class="memo-card-select">
-
     <input
       type="checkbox"
       ${
@@ -293,7 +291,6 @@ function showMemoBox() {
           this.checked
         )
       ">
-
   </div>
 
   <div
@@ -320,93 +317,26 @@ function showMemoBox() {
 
   </div>
 
+  <button onclick="openMemoEditor(${index})">
+    ✏編集
+  </button>
+
 </div>
 `;
 
       })
       .join("");
 
-  const current =
-    memoBoxList[
-      memoBoxActiveIndex
-    ] || {};
-
-  const type =
-    current.type ||
-    "Idea";
-
-  const status =
-    current.status ||
-    "Inbox";
-
-  const series =
-    current.series ||
-    "";
-
-  const keywords =
-    (
-      current.keywords || []
-    ).join(", ");
-
   openFloatPanel(
     "MEMO BOX",
 `
-<input
-id="memoBoxName"
-class="memo-name-input"
-placeholder="Memo title"
-value="${escapeHtml(current.name || "")}">
-
-<br><br>
-
-<div class="memo-meta">
-
-<select id="memoBoxType">
-${MEMO_BOX_TYPES.map(v => `
-<option
-value="${v}"
-${v === type ? "selected" : ""}>
-${v}
-</option>
-`).join("")}
-</select>
-
-<select id="memoBoxStatus">
-${MEMO_BOX_STATUSES.map(v => `
-<option
-value="${v}"
-${v === status ? "selected" : ""}>
-${v}
-</option>
-`).join("")}
-</select>
-
-<select id="memoBoxSeries">
-${MEMO_BOX_SERIES.map(v => `
-<option
-value="${v}"
-${v === series ? "selected" : ""}>
-${v || "Seriesなし"}
-</option>
-`).join("")}
-</select>
-
-</div>
-
-<input
-id="memoBoxKeywords"
-class="input"
-placeholder="tag1, tag2"
-value="${escapeHtml(keywords)}">
-
-<textarea
-id="memoBoxText"
-class="memo-textarea"
-rows="12">${escapeHtml(current.text || "")}</textarea>
-
 <div class="memo-actions">
 
-<button onclick="saveMemoBoxCurrent()">
+<button onclick="openMemoEditor()">
+＋新規
+</button>
+
+<button onclick="saveMemoBoxes()">
 💾保存
 </button>
 
@@ -428,10 +358,6 @@ rows="12">${escapeHtml(current.text || "")}</textarea>
 
 <button onclick="deleteSelectedMemoBoxes()">
 🗑選択削除
-</button>
-
-<button onclick="addMemoBox()">
-＋新規
 </button>
 
 <button onclick="exportMemoBoxes()">
@@ -548,6 +474,165 @@ style="display:none"
 onchange="loadMemoBoxesFile(event)">
 `
   );
+
+}
+
+function openMemoEditor(index = null) {
+
+  normalizeMemoBoxes();
+
+  const isNew =
+    index === null ||
+    index === undefined ||
+    index < 0;
+
+  const current =
+    isNew
+      ? {}
+      : memoBoxList[index] || {};
+
+  const type =
+    current.type ||
+    "Idea";
+
+  const status =
+    current.status ||
+    "Inbox";
+
+  const series =
+    current.series ||
+    "";
+
+  const keywords =
+    (
+      current.keywords || []
+    ).join(", ");
+
+  openFloatPanel(
+    isNew ? "MEMO EDIT - NEW" : "MEMO EDIT",
+`
+<input
+id="memoEditorIndex"
+type="hidden"
+value="${isNew ? "" : index}">
+
+<input
+id="memoBoxName"
+class="memo-name-input"
+placeholder="Memo title"
+value="${escapeHtml(current.name || "")}">
+
+<br><br>
+
+<div class="memo-meta">
+
+<select id="memoBoxType">
+${MEMO_BOX_TYPES.map(v => `
+<option
+value="${v}"
+${v === type ? "selected" : ""}>
+${v}
+</option>
+`).join("")}
+</select>
+
+<select id="memoBoxStatus">
+${MEMO_BOX_STATUSES.map(v => `
+<option
+value="${v}"
+${v === status ? "selected" : ""}>
+${v}
+</option>
+`).join("")}
+</select>
+
+<select id="memoBoxSeries">
+${MEMO_BOX_SERIES.map(v => `
+<option
+value="${v}"
+${v === series ? "selected" : ""}>
+${v || "Seriesなし"}
+</option>
+`).join("")}
+</select>
+
+</div>
+
+<input
+id="memoBoxKeywords"
+class="input"
+placeholder="tag1, tag2"
+value="${escapeHtml(keywords)}">
+
+<textarea
+id="memoBoxText"
+class="memo-textarea"
+rows="16">${escapeHtml(current.text || "")}</textarea>
+
+<div class="memo-actions">
+
+<button onclick="saveMemoEditor()">
+💾保存
+</button>
+
+<button onclick="showMemoBox()">
+←戻る
+</button>
+
+</div>
+`
+  );
+
+}
+
+function saveMemoEditor() {
+
+  const indexText =
+    get("memoEditorIndex")?.value || "";
+
+  const index =
+    indexText === ""
+      ? -1
+      : Number(indexText);
+
+  const memo = {
+    name:
+      get("memoBoxName")?.value || "メモ",
+
+    type:
+      get("memoBoxType")?.value || "Idea",
+
+    status:
+      get("memoBoxStatus")?.value || "Inbox",
+
+    series:
+      get("memoBoxSeries")?.value || "",
+
+    keywords:
+      String(
+        get("memoBoxKeywords")?.value || ""
+      )
+        .split(",")
+        .map(v => v.trim())
+        .filter(Boolean),
+
+    text:
+      get("memoBoxText")?.value || ""
+  };
+
+  if (
+    index >= 0 &&
+    memoBoxList[index]
+  ) {
+    memoBoxList[index] = memo;
+    memoBoxActiveIndex = index;
+  } else {
+    memoBoxList.unshift(memo);
+    memoBoxActiveIndex = 0;
+  }
+
+  saveMemoBoxes();
+  showMemoBox();
 
 }
 
