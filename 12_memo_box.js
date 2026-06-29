@@ -138,6 +138,13 @@ function saveMemoBoxes() {
 function saveMemoBoxCurrent() {
 
   if (
+    !get("memoBoxName") ||
+    !get("memoBoxText")
+  ) {
+    return;
+  }
+
+  if (
     memoBoxActiveIndex < 0 ||
     memoBoxActiveIndex >= memoBoxList.length
   ) {
@@ -544,7 +551,7 @@ id="memoEditorIndex"
 type="hidden"
 value="${isNew ? "" : index}">
 
-<<div class="memo-editor-top-actions">
+<div class="memo-editor-top-actions">
 
 <button onclick="saveMemoEditor()">
 💾保存
