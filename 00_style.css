@@ -1596,6 +1596,35 @@ mark {
   flex: 1;
   min-width: 0;
 }
+
+.memo-name-input {
+  font-size: 13px;
+  padding: 5px 7px;
+  margin: 0 0 4px 0;
+}
+
+.memo-editor-meta-row {
+  display: flex;
+  gap: 4px;
+  margin: 4px 0;
+}
+
+.memo-editor-meta-row select {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  padding: 4px 4px;
+}
+
+#memoBoxKeywords {
+  font-size: 12px;
+  padding: 5px 7px;
+  margin: 4px 0;
+}
+
+#memoBoxText {
+  margin-top: 4px;
+}
 /* ===============================
    macro
 =============================== */
