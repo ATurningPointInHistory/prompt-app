@@ -729,7 +729,11 @@ function extractMemoTitle(
       idPattern.test(lines[i + 1])
     ) {
 
-      if (lines[i + 2]) {
+      if (
+        lines[i + 2] &&
+        !specPattern.test(lines[i + 2]) &&
+        !idPattern.test(lines[i + 2])
+      ) {
         return `${lines[i + 1]} ${lines[i + 2]}`;
       }
 
