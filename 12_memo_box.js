@@ -706,7 +706,38 @@ function extractMemoTitle(
       .map(line =>
         line.trim()
       )
-      .filter(Boolean);
+      .filter(line =>
+        line &&
+        !/^=+$/.test(line)
+      );
+
+  const specPattern =
+    /Specification/i;
+
+  const idPattern =
+    /^[A-Z][A-Z0-9_-]*-\d+$/;
+
+  for (
+    let i = 0;
+    i < lines.length;
+    i++
+  ) {
+
+    if (
+      specPattern.test(lines[i]) &&
+      lines[i + 1] &&
+      idPattern.test(lines[i + 1])
+    ) {
+
+      if (lines[i + 2]) {
+        return `${lines[i + 1]} ${lines[i + 2]}`;
+      }
+
+      return `${lines[i]} ${lines[i + 1]}`;
+
+    }
+
+  }
 
   for (
     const line of lines
@@ -716,9 +747,7 @@ function extractMemoTitle(
       /Specification\s+\d+/i
         .test(line)
     ) {
-
       return line;
-
     }
 
   }
