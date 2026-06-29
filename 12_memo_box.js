@@ -79,6 +79,34 @@ const MEMO_BOX_SERIES = [
   "GUIDE"
 ];
 
+let memoBoxLastDefaults =
+  loadJson(
+    "memoBoxLastDefaults",
+    {}
+  );
+
+function saveMemoBoxLastDefaults(
+  memo
+) {
+
+  memoBoxLastDefaults = {
+    name:
+      memo.name || "",
+    type:
+      memo.type || "Idea",
+    status:
+      memo.status || "Inbox",
+    series:
+      memo.series || ""
+  };
+
+  localStorage.setItem(
+    "memoBoxLastDefaults",
+    JSON.stringify(memoBoxLastDefaults)
+  );
+
+}
+
 /* ===============================
    Memo Box
 =============================== */
@@ -488,7 +516,7 @@ function openMemoEditor(index = null) {
 
   const current =
     isNew
-      ? {}
+      ? memoBoxLastDefaults || {}
       : memoBoxList[index] || {};
 
   const type =
@@ -516,15 +544,25 @@ id="memoEditorIndex"
 type="hidden"
 value="${isNew ? "" : index}">
 
+<div class="memo-editor-top-actions">
+  <button onclick="saveMemoEditor()">
+    💾保存
+  </button>
+
+  <button onclick="showMemoBox()">
+    ←戻る
+  </button>
+</div>
+
 <input
 id="memoBoxName"
 class="memo-name-input"
 placeholder="Memo title"
-value="${escapeHtml(current.name || "")}">
+value="${escapeHtml(current.name || "")}"
+onfocus="this.select()"
+onclick="this.select()">
 
-<br><br>
-
-<div class="memo-meta">
+<div class="memo-editor-meta-row">
 
 <select id="memoBoxType">
 ${MEMO_BOX_TYPES.map(v => `
@@ -568,18 +606,6 @@ value="${escapeHtml(keywords)}">
 id="memoBoxText"
 class="memo-textarea"
 rows="16">${escapeHtml(current.text || "")}</textarea>
-
-<div class="memo-actions">
-
-<button onclick="saveMemoEditor()">
-💾保存
-</button>
-
-<button onclick="showMemoBox()">
-←戻る
-</button>
-
-</div>
 `
   );
 
@@ -620,7 +646,7 @@ function saveMemoEditor() {
       get("memoBoxText")?.value || ""
   };
 
-  if (
+    if (
     index >= 0 &&
     memoBoxList[index]
   ) {
@@ -630,6 +656,10 @@ function saveMemoEditor() {
     memoBoxList.unshift(memo);
     memoBoxActiveIndex = 0;
   }
+
+  saveMemoBoxLastDefaults(
+    memo
+  );
 
   saveMemoBoxes();
   showMemoBox();
