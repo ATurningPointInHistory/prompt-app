@@ -689,6 +689,40 @@ async function pasteMemoText() {
 
 }
 
+function extractMemoTitle(
+  text
+) {
+
+  const lines =
+    String(text || "")
+      .split(/\r?\n/)
+      .map(line =>
+        line.trim()
+      )
+      .filter(Boolean);
+
+  for (
+    const line of lines
+  ) {
+
+    if (
+      /Specification\s+\d+/i
+        .test(line)
+    ) {
+
+      return line;
+
+    }
+
+  }
+
+  return (
+    lines[0] ||
+    "メモ"
+  );
+
+}
+
 function saveMemoEditor() {
 
   const indexText =
