@@ -223,7 +223,8 @@ function buildFunctionRelationV3Report(
 }
 
 function getFunctionRelationV3MinimalCode(
-  targetFunctionName
+  targetFunctionName,
+  level = 2
 ) {
 
   const info =
@@ -241,21 +242,49 @@ function getFunctionRelationV3MinimalCode(
   const functions =
     database.functions || {};
 
-  const names =
-    [
+  const targetFile =
+    info.target.fileName;
+
+  let names = [];
+
+  if (level === 1) {
+
+    names = [
+      info.target.name
+    ];
+
+  } else if (level === 2) {
+
+    names = [
+      info.target.name,
+      ...info.callees.filter(name =>
+        functions[name] &&
+        functions[name].fileName === targetFile
+      )
+    ];
+
+  } else {
+
+    names = [
       info.target.name,
       ...info.callees
-    ].filter(Boolean);
+    ];
+
+  }
+
+  names =
+    [
+      ...new Set(names)
+    ].filter(name =>
+      functions[name] &&
+      functions[name].code
+    );
 
   return names
     .map(name => {
 
       const item =
         functions[name];
-
-      if (!item || !item.code) {
-        return "";
-      }
 
       return [
         "/* ===============================",
@@ -266,7 +295,6 @@ function getFunctionRelationV3MinimalCode(
       ].join("\n");
 
     })
-    .filter(Boolean)
     .join("\n\n");
 
 }
