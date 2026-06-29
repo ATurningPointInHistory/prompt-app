@@ -1,5 +1,5 @@
 /* ===============================
-   Architecture Repository
+   FILE: 14_architecture_database.js
    Repository v1
    Read Only Layer
 =============================== */
@@ -371,6 +371,163 @@ function getArchitectureStatistics() {
 }
 
 /* ===============================
+   Architecture Repository Search
+=============================== */
+
+function normalizeArchitectureSearchText(
+  value
+) {
+
+  return String(value || "")
+    .toLowerCase();
+
+}
+
+function stringifyArchitectureSearchValue(
+  value
+) {
+
+  if (
+    value === null ||
+    typeof value === "undefined"
+  ) {
+    return "";
+  }
+
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return String(value);
+  }
+
+  if (
+    Array.isArray(value)
+  ) {
+    return value
+      .map(item =>
+        stringifyArchitectureSearchValue(
+          item
+        )
+      )
+      .join(" ");
+  }
+
+  if (
+    typeof value === "object"
+  ) {
+    return Object.values(value)
+      .map(item =>
+        stringifyArchitectureSearchValue(
+          item
+        )
+      )
+      .join(" ");
+  }
+
+  return "";
+
+}
+
+function buildArchitectureObjectSearchText(
+  object = {}
+) {
+
+  return normalizeArchitectureSearchText(
+    [
+      object.id,
+      object.type,
+      object.title,
+      object.summary,
+      object.description,
+      object.version,
+      object.status,
+      object.priority,
+      object.layer,
+      object.category,
+      stringifyArchitectureSearchValue(
+        object.tags
+      ),
+      stringifyArchitectureSearchValue(
+        object.metadata
+      )
+    ].join(" ")
+  );
+
+}
+
+function searchArchitectureObjects(
+  keyword = "",
+  options = {}
+) {
+
+  const word =
+    normalizeArchitectureSearchText(
+      keyword
+    ).trim();
+
+  if (!word) {
+    return [];
+  }
+
+  const objects =
+    findArchitectureObjects(
+      options.filter || {}
+    );
+
+  const limit =
+    Number(options.limit || 100);
+
+  return objects
+    .filter(object =>
+      buildArchitectureObjectSearchText(
+        object
+      ).includes(word)
+    )
+    .slice(0, limit);
+
+}
+
+function searchArchitectureObjectsByType(
+  keyword = "",
+  type = "",
+  options = {}
+) {
+
+  return searchArchitectureObjects(
+    keyword,
+    {
+      ...options,
+      filter: {
+        ...(options.filter || {}),
+        type
+      }
+    }
+  );
+
+}
+
+function searchArchitectureObjectsByLayer(
+  keyword = "",
+  layer = "",
+  options = {}
+) {
+
+  return searchArchitectureObjects(
+    keyword,
+    {
+      ...options,
+      filter: {
+        ...(options.filter || {}),
+        layer
+      }
+    }
+  );
+
+}
+
+/* ===============================
    Global Export
 =============================== */
 
@@ -430,3 +587,21 @@ window.countArchitectureRelationships =
 
 window.getArchitectureStatistics =
   getArchitectureStatistics;
+
+window.normalizeArchitectureSearchText =
+  normalizeArchitectureSearchText;
+
+window.stringifyArchitectureSearchValue =
+  stringifyArchitectureSearchValue;
+
+window.buildArchitectureObjectSearchText =
+  buildArchitectureObjectSearchText;
+
+window.searchArchitectureObjects =
+  searchArchitectureObjects;
+
+window.searchArchitectureObjectsByType =
+  searchArchitectureObjectsByType;
+
+window.searchArchitectureObjectsByLayer =
+  searchArchitectureObjectsByLayer;
