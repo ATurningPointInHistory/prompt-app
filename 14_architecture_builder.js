@@ -16,11 +16,16 @@ function buildArchitectureDatabaseFromProject() {
   }
 
   registerProjectFilesAsObjects();
+
   registerProjectModulesAsObjects();
+
   registerProjectFunctionsAsObjects();
+
   buildArchitectureRelationshipsFromProject();
 
+  // ★最後に1回だけ実行
   rebuildArchitectureIndexes();
+
   saveArchitectureDatabase();
 
   return buildArchitectureDatabaseReport();
@@ -31,50 +36,45 @@ function buildArchitectureDatabaseFromProject() {
    Register Files
 =============================== */
 
-function registerProjectFilesAsObjects() {
+registerArchitectureObject(
+  {
+    id:
+      `FILE:${file.fileName}`,
 
-  const files =
-    window.projectDatabase.files || {};
+    type:
+      "File",
 
-  Object.values(files).forEach(file => {
+    title:
+      file.fileName,
 
-    registerArchitectureObject({
-      id:
-        `FILE:${file.fileName}`,
+    summary:
+      `File / lines: ${file.lineCount || 0}`,
 
-      type:
-        "File",
+    layer:
+      "Project Layer",
 
-      title:
-        file.fileName,
+    category:
+      "File",
 
-      summary:
-        `File / lines: ${file.lineCount || 0}`,
+    priority:
+      "Normal",
 
-      layer:
-        "Project Layer",
+    tags:
+      ["file"],
 
-      category:
-        "File",
+    metadata: {
+      lineCount:
+        file.lineCount || 0,
 
-      priority:
-        "Normal",
-
-      tags:
-        ["file"],
-
-      metadata: {
-        lineCount:
-          file.lineCount || 0,
-
-        charCount:
-          file.charCount || 0
-      }
-    });
-
-  });
-
-}
+      charCount:
+        file.charCount || 0
+    }
+  },
+  {
+    rebuild: false,
+    save: false
+  }
+);
 
 /* ===============================
    Register Modules
