@@ -1625,6 +1625,38 @@ mark {
 #memoBoxText {
   margin-top: 4px;
 }
+
+.memo-card-summary {
+  display: none;
+}
+
+.memo-card-keywords {
+  display: none;
+}
+
+.memo-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.memo-card-actions button {
+  padding: 8px 12px;
+  font-size: 13px;
+  min-height: 34px;
+}
+
+.memo-link-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  min-height: 30px;
+  margin: 3px 4px 3px 0;
+}
+
+.memo-card .small-muted {
+  font-size: 11px;
+  opacity: 0.75;
+}
 /* ===============================
    macro
 =============================== */
