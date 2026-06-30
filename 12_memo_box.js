@@ -1206,14 +1206,15 @@ function loadMemoBoxesFile(
       }
 
       memoBoxList =
-        data
-          .map(item => ({
-            ...item,
-            name:
-              item.name || "メモ",
-            text:
-              item.text || ""
-          }));
+        data.map(item => ({
+          ...item,
+          name:
+            item.name || "メモ",
+          text:
+            item.text || ""
+        }));
+
+      normalizeMemoBoxes();
 
       if (!memoBoxList.length) {
         memoBoxList = [
@@ -1376,13 +1377,25 @@ function filterMemoBoxes() {
     }
 
     const text =
-      [
-        item.name,
-        item.text,
-        ...(item.keywords || [])
-      ]
-        .join(" ")
-        .toLowerCase();
+    [
+      item.id,
+      item.name,
+      item.summary,
+      item.text,
+      item.knowledgeType,
+      item.category,
+      item.type,
+      item.status,
+      item.series,
+      item.priority,
+      item.stability,
+      item.decisionLevel,
+      item.version,
+      ...(item.keywords || []),
+      ...(item.relationships || [])
+    ]
+    .join(" ")
+    .toLowerCase();
 
     return text.includes(keyword);
 
