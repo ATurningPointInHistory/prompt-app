@@ -456,6 +456,10 @@ function buildArchitectureObjectSearchText(
 
 }
 
+/* ===============================
+   Search Objects
+=============================== */
+
 function searchArchitectureObjects(
   keyword = "",
   options = {}
