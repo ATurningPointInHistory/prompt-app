@@ -551,6 +551,7 @@ function openMemoEditor(index = null) {
 
   const type =
     current.type ||
+    current.knowledgeType ||
     "Idea";
 
   const status =
@@ -564,6 +565,11 @@ function openMemoEditor(index = null) {
   const keywords =
     (
       current.keywords || []
+    ).join(", ");
+
+  const relationships =
+    (
+      current.relationships || []
     ).join(", ");
 
   openFloatPanel(
@@ -595,12 +601,62 @@ value="${isNew ? "" : index}">
 </div>
 
 <input
+id="memoBoxId"
+class="input"
+placeholder="Knowledge ID"
+value="${escapeHtml(current.id || "")}">
+
+<input
 id="memoBoxName"
 class="memo-name-input"
 placeholder="Memo title"
 value="${escapeHtml(current.name || "")}"
 onfocus="this.select()"
 onclick="this.select()">
+
+<textarea
+id="memoBoxSummary"
+class="input"
+rows="2"
+placeholder="Summary">${escapeHtml(current.summary || "")}</textarea>
+
+<div class="memo-editor-meta-row">
+
+<input
+id="memoBoxCategory"
+class="input"
+placeholder="Category"
+value="${escapeHtml(current.category || "")}">
+
+<input
+id="memoBoxVersion"
+class="input"
+placeholder="Version"
+value="${escapeHtml(current.version || "")}">
+
+</div>
+
+<div class="memo-editor-meta-row">
+
+<input
+id="memoBoxPriority"
+class="input"
+placeholder="Priority"
+value="${escapeHtml(current.priority || "")}">
+
+<input
+id="memoBoxStability"
+class="input"
+placeholder="Stability"
+value="${escapeHtml(current.stability || "")}">
+
+</div>
+
+<input
+id="memoBoxDecisionLevel"
+class="input"
+placeholder="Decision Level"
+value="${escapeHtml(current.decisionLevel || "")}">
 
 <div class="memo-editor-meta-row">
 
@@ -641,6 +697,12 @@ id="memoBoxKeywords"
 class="input"
 placeholder="tag1, tag2"
 value="${escapeHtml(keywords)}">
+
+<input
+id="memoBoxRelationships"
+class="input"
+placeholder="Relationships"
+value="${escapeHtml(relationships)}">
 
 <textarea
 id="memoBoxText"
