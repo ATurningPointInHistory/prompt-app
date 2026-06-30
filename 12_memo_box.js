@@ -1454,6 +1454,21 @@ function openMemoById(id) {
 
 }
 
+function copyMemoBoxByIndex(index) {
+
+  const memo =
+    memoBoxList[index];
+
+  if (!memo) {
+    return;
+  }
+
+  copyTextFallback(
+    memo.text || ""
+  );
+
+}
+
 window.findMemoById =
   findMemoById;
 
@@ -1483,3 +1498,6 @@ window.selectMemoBox =
 
 window.saveMemoBoxCurrent =
   saveMemoBoxCurrent;
+
+window.copyMemoBoxByIndex =
+  copyMemoBoxByIndex;
