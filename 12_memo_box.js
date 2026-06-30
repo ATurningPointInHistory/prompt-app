@@ -1136,11 +1136,39 @@ function normalizeMemoBoxes() {
   memoBoxList =
     (memoBoxList || []).map(item => ({
 
+      /* ==========================
+         Basic
+      ========================== */
+
+      id:
+        item.id || "",
+
       name:
         item.name || "",
 
+      summary:
+        item.summary || "",
+
       text:
         item.text || "",
+
+      /* ==========================
+         Knowledge
+      ========================== */
+
+      knowledgeType:
+        item.knowledgeType ||
+
+        item.type ||
+
+        "Memo",
+
+      category:
+        item.category || "",
+
+      /* ==========================
+         Memo
+      ========================== */
 
       type:
         item.type || "Idea",
@@ -1151,6 +1179,26 @@ function normalizeMemoBoxes() {
       series:
         item.series || "",
 
+      /* ==========================
+         Metadata
+      ========================== */
+
+      priority:
+        item.priority || "",
+
+      stability:
+        item.stability || "",
+
+      decisionLevel:
+        item.decisionLevel || "",
+
+      version:
+        item.version || "",
+
+      /* ==========================
+         Relations
+      ========================== */
+
       keywords:
         Array.isArray(
           item.keywords
@@ -1158,9 +1206,22 @@ function normalizeMemoBoxes() {
           ? item.keywords
           : [],
 
+      relationships:
+        Array.isArray(
+          item.relationships
+        )
+          ? item.relationships
+          : [],
+
+      /* ==========================
+         History
+      ========================== */
+
+      createdAt:
+        item.createdAt || "",
+
       updatedAt:
-        item.updatedAt ||
-        ""
+        item.updatedAt || ""
 
     }));
 
