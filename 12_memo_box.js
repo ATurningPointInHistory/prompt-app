@@ -658,6 +658,10 @@ async function pasteMemoText() {
 
       textarea.value = text;
 
+      applyDocumentHeaderToMemoEditor(
+        text
+      );
+
     }
 
     const title =
