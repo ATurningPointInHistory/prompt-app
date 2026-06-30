@@ -105,13 +105,52 @@ function buildKnowledgeIndexes() {
 
   repositoryDatabase.byId = {};
 
+  repositoryDatabase.duplicates = {};
+
   repositoryDatabase.objects.forEach(object => {
 
-    repositoryDatabase.byId[
-      object.id
-    ] = object;
+    const id =
+      object.id;
+
+    if (!id) {
+      return;
+    }
+
+    const current =
+      repositoryDatabase.byId[id];
+
+    if (!current) {
+
+      repositoryDatabase.byId[id] =
+        object;
+
+      return;
+
+    }
+
+    if (
+      !repositoryDatabase.duplicates[id]
+    ) {
+      repositoryDatabase.duplicates[id] = [
+        current
+      ];
+    }
+
+    repositoryDatabase.duplicates[id]
+      .push(object);
+
+    repositoryDatabase.byId[id] =
+      chooseBetterKnowledgeObject(
+        current,
+        object
+      );
 
   });
+
+  repositoryDatabase.objects =
+    Object.values(
+      repositoryDatabase.byId
+    );
 
 }
 
