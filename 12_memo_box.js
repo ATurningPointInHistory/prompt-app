@@ -68,6 +68,7 @@ const MEMO_BOX_SERIES = [
   "CORE",
   "ARCH",
   "KNOW",
+  "KNOWLEDGE",
   "META",
   "WORK",
   "RULE",
