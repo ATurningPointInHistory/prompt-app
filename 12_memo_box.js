@@ -642,6 +642,73 @@ function selectMemoTitle() {
 
 }
 
+function applyDocumentHeaderToMemoEditor(
+  text
+) {
+
+  if (
+    typeof parseDocumentHeader !== "function"
+  ) {
+    return;
+  }
+
+  const metadata =
+    parseDocumentHeader(text);
+
+  setMemoEditorValue(
+    "memoBoxName",
+    metadata.name
+  );
+
+  setMemoEditorValue(
+    "memoBoxType",
+    metadata.knowledgeType
+  );
+
+  setMemoEditorValue(
+    "memoBoxStatus",
+    metadata.status
+  );
+
+  setMemoEditorValue(
+    "memoBoxSeries",
+    metadata.series
+  );
+
+  setMemoEditorValue(
+    "memoBoxKeywords",
+    Array.isArray(metadata.keywords)
+      ? metadata.keywords.join(", ")
+      : metadata.keywords
+  );
+
+}
+
+function setMemoEditorValue(
+  id,
+  value
+) {
+
+  if (
+    value === undefined ||
+    value === null ||
+    value === ""
+  ) {
+    return;
+  }
+
+  const el =
+    get(id);
+
+  if (!el) {
+    return;
+  }
+
+  el.value =
+    String(value);
+
+}
+
 async function pasteMemoText() {
 
   try {
@@ -683,6 +750,57 @@ async function pasteMemoText() {
 
       input.value =
         title;
+
+      input.focus();
+
+      input.select();
+
+    }
+
+  } catch (error) {
+
+    alert(
+      "クリップボードを読み取れません。"
+    );
+
+  }
+
+}
+
+async function pasteMemoText() {
+
+  try {
+
+    const text =
+      await navigator
+        .clipboard
+        .readText();
+
+    const textarea =
+      get("memoBoxText");
+
+    if (textarea) {
+
+      textarea.value = text;
+
+      applyDocumentHeaderToMemoEditor(
+        text
+      );
+
+    }
+
+    const input =
+      get("memoBoxName");
+
+    if (
+      input &&
+      !input.value
+    ) {
+
+      input.value =
+        extractMemoTitle(
+          text
+        );
 
       input.focus();
 
