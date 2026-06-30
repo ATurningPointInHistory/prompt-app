@@ -22,23 +22,23 @@ function parseDocumentHeader(text) {
 
   lines.forEach(line => {
 
-    const match =
+    const keyMatch =
       line.match(
         /^([A-Za-z][A-Za-z0-9_ -]*):\s*(.*)$/
       );
 
-    if (match) {
+    if (keyMatch) {
 
       currentKey =
         normalizeDocumentHeaderKey(
-          match[1]
+          keyMatch[1]
         );
 
       if (currentKey) {
 
         metadata[currentKey] =
           cleanDocumentHeaderValue(
-            match[2]
+            keyMatch[2] || ""
           );
 
       }
@@ -52,11 +52,14 @@ function parseDocumentHeader(text) {
       line.trim()
     ) {
 
+      const currentValue =
+        metadata[currentKey] || "";
+
       metadata[currentKey] =
         cleanDocumentHeaderValue(
-          metadata[currentKey] +
-          "\n" +
-          line.trim()
+          currentValue
+            ? currentValue + "\n" + line.trim()
+            : line.trim()
         );
 
     }
