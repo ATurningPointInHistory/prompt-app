@@ -351,6 +351,27 @@ function showMemoBox() {
   `
     : ""}
 
+
+  ${item.relationships?.length
+  ? `
+  <div class="memo-card-links">
+
+  ${item.relationships
+  .map(id => `
+  <button
+  onclick="
+  event.stopPropagation();
+  openMemoById('${escapeJs(id)}');
+  ">
+  ${escapeHtml(id)}
+  </button>
+  `)
+  .join("")}
+
+  </div>
+  `
+  : ""}
+
   <div class="memo-card-keywords">
     ${escapeHtml(
       Array.isArray(item.keywords)
@@ -1402,6 +1423,42 @@ function filterMemoBoxes() {
   });
 
 }
+
+function findMemoById(id) {
+
+  return memoBoxList.find(
+    memo => memo.id === id
+  ) || null;
+
+}
+
+function openMemoById(id) {
+
+  const index =
+    memoBoxList.findIndex(
+      memo => memo.id === id
+    );
+
+  if (index < 0) {
+
+    alert(
+      "Knowledge Objectが見つかりません。\n\n" +
+      id
+    );
+
+    return;
+
+  }
+
+  openMemoEditor(index);
+
+}
+
+window.findMemoById =
+  findMemoById;
+
+window.openMemoById =
+  openMemoById;
 
 window.getMemoBoxList =
   getMemoBoxList;
