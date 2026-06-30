@@ -154,6 +154,55 @@ function buildKnowledgeIndexes() {
 
 }
 
+function chooseBetterKnowledgeObject(
+  a,
+  b
+) {
+
+  const scoreA =
+    scoreKnowledgeObject(a);
+
+  const scoreB =
+    scoreKnowledgeObject(b);
+
+  return scoreB > scoreA
+    ? b
+    : a;
+
+}
+
+function scoreKnowledgeObject(object) {
+
+  let score = 0;
+
+  if (object.status === "Official") {
+    score += 50;
+  }
+
+  if (object.summary) {
+    score += 20;
+  }
+
+  if (object.relationships?.length) {
+    score += 20;
+  }
+
+  if (object.series) {
+    score += 10;
+  }
+
+  if (object.category) {
+    score += 10;
+  }
+
+  if (object.version) {
+    score += 10;
+  }
+
+  return score;
+
+}
+
 /* ===============================
    Dependency
 =============================== */
