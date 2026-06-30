@@ -682,6 +682,8 @@ function applyDocumentHeaderToMemoEditor(
       ? metadata.keywords.join(", ")
       : metadata.keywords
   );
+  window.memoBoxParsedMetadata =
+    metadata;
 
 }
 
@@ -840,64 +842,108 @@ function saveMemoEditor() {
       ? -1
       : Number(indexText);
 
-  const memo = {
-    name:
-      get("memoBoxName")?.value || "メモ",
+  const metadata =
+  window.memoBoxParsedMetadata || {};
 
-    type:
-      get("memoBoxType")?.value || "Idea",
+const memo = {
 
-    status:
-      get("memoBoxStatus")?.value || "Inbox",
+  id:
+    metadata.id || "",
 
-    series:
-      get("memoBoxSeries")?.value || "",
+  name:
+    get("memoBoxName")?.value || "メモ",
 
-    keywords:
-      String(
-        get("memoBoxKeywords")?.value || ""
-      )
-        .split(",")
-        .map(v => v.trim())
-        .filter(Boolean),
+  summary:
+    metadata.summary || "",
 
-    text:
-      get("memoBoxText")?.value || ""
+  text:
+    get("memoBoxText")?.value || "",
+
+  knowledgeType:
+    metadata.knowledgeType ||
+
+    get("memoBoxType")?.value ||
+
+    "Memo",
+
+  category:
+    metadata.category || "",
+
+  type:
+    get("memoBoxType")?.value || "Idea",
+
+  status:
+    get("memoBoxStatus")?.value || "Inbox",
+
+  series:
+    get("memoBoxSeries")?.value || "",
+
+  priority:
+    metadata.priority || "",
+
+  stability:
+    metadata.stability || "",
+
+  decisionLevel:
+    metadata.decisionLevel || "",
+
+  version:
+    metadata.version || "",
+
+  keywords:
+    metadata.keywords ||
+
+    String(
+      get("memoBoxKeywords")?.value || ""
+    )
+      .split(",")
+      .map(v => v.trim())
+      .filter(Boolean),
+
+  relationships:
+    metadata.relationships || [],
+
+  createdAt:
+    metadata.createdAt || "",
+
+  updatedAt:
+    new Date().toISOString()
+
   };
 
-  if (
-    index >= 0 &&
-    index < memoBoxList.length
-  ) {
+    if (
+      index >= 0 &&
+      index < memoBoxList.length
+    ) {
 
-    memoBoxList[index] = {
-      ...memoBoxList[index],
-      ...memo
-    };
+      memoBoxList[index] = {
+        ...memoBoxList[index],
+        ...memo
+      };
 
-    memoBoxActiveIndex = index;
+      memoBoxActiveIndex = index;
 
-  } else {
+    } else {
 
-    memoBoxList.unshift(memo);
-    memoBoxActiveIndex = 0;
+      memoBoxList.unshift(memo);
+      memoBoxActiveIndex = 0;
+
+    }
+
+    saveMemoBoxLastDefaults(
+      memo
+    );
+
+    normalizeMemoBoxes();
+    saveMemoBoxes();
+    showMemoBox();
 
   }
 
-  saveMemoBoxLastDefaults(
-    memo
-  );
-
-  normalizeMemoBoxes();
-  saveMemoBoxes();
-  showMemoBox();
-
-}
-
-function toggleMemoSelection(
-  index,
-  checked
-) {
+  function toggleMemoSelection(
+    index,
+    checked
+  ) {
 
   if (checked) {
     memoBoxSelected.add(index);
