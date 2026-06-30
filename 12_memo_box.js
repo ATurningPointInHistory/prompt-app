@@ -1510,3 +1510,15 @@ window.saveMemoBoxCurrent =
 
 window.copyMemoBoxByIndex =
   copyMemoBoxByIndex;
+
+window.openMemoEditor = openMemoEditor;
+window.saveMemoEditor = saveMemoEditor;
+window.pasteMemoText = pasteMemoText;
+window.selectMemoTitle = selectMemoTitle;
+
+window.deleteMemoBox = deleteMemoBox;
+window.selectAllMemoBoxes = selectAllMemoBoxes;
+window.clearMemoSelection = clearMemoSelection;
+window.deleteSelectedMemoBoxes = deleteSelectedMemoBoxes;
+window.toggleMemoSelection = toggleMemoSelection;
+window.copyMemoBox = copyMemoBox; = copyMemoBox;
