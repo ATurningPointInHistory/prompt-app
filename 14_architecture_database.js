@@ -148,52 +148,6 @@ function getArchitectureObject(
 }
 
 /* ===============================
-   Search Objects
-=============================== */
-
-function searchArchitectureObjects(
-  keyword = ""
-) {
-
-  const q =
-    String(keyword || "")
-      .trim()
-      .toLowerCase();
-
-  const list =
-    Object.values(
-      architectureDatabase.objects || {}
-    );
-
-  if (!q) {
-    return list;
-  }
-
-  return list.filter(item => {
-
-    const text =
-      [
-        item.id,
-        item.type,
-        item.title,
-        item.summary,
-        item.description,
-        item.category,
-        item.layer,
-        item.status,
-        item.priority,
-        ...(item.tags || [])
-      ]
-        .join(" ")
-        .toLowerCase();
-
-    return text.includes(q);
-
-  });
-
-}
-
-/* ===============================
    Relationship
 =============================== */
 
