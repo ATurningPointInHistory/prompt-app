@@ -842,10 +842,16 @@ function saveMemoEditor() {
       ? -1
       : Number(indexText);
 
-  const metadata =
-  window.memoBoxParsedMetadata || {};
+  const text =
+    get("memoBoxText")?.value || "";
 
-const memo = {
+  const metadata =
+    typeof parseDocumentHeader ===
+  "function"
+      ? parseDocumentHeader(text)
+      : {};
+
+  const memo = {
 
   id:
     metadata.id || "",
@@ -857,7 +863,7 @@ const memo = {
     metadata.summary || "",
 
   text:
-    get("memoBoxText")?.value || "",
+    text,
 
   knowledgeType:
     metadata.knowledgeType ||
