@@ -614,10 +614,15 @@ value="${escapeHtml(current.name || "")}"
 onfocus="this.select()"
 onclick="this.select()">
 
+<details>
+<summary>
+Knowledge Metadata
+</summary>
+
 <textarea
 id="memoBoxSummary"
 class="input"
-rows="2"
+rows="1"
 placeholder="Summary">${escapeHtml(current.summary || "")}</textarea>
 
 <div class="memo-editor-meta-row">
@@ -704,10 +709,12 @@ class="input"
 placeholder="Relationships"
 value="${escapeHtml(relationships)}">
 
+</details>
+
 <textarea
 id="memoBoxText"
 class="memo-textarea"
-rows="16">${escapeHtml(current.text || "")}</textarea>
+rows="20">${escapeHtml(current.text || "")}</textarea>
 `
   );
 
