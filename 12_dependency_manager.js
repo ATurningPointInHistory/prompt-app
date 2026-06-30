@@ -203,6 +203,38 @@ function scoreKnowledgeObject(object) {
 
 }
 
+function getKnowledgeBaseOrder(object) {
+
+  const id =
+    object.id || "";
+
+  const title =
+    object.title || "";
+
+  const text =
+    id + " " + title;
+
+  if (/VER-/.test(text)) return 0;
+
+  if (/DESIGN-000/.test(text)) return 10;
+  if (/DESIGN-001/.test(text)) return 11;
+  if (/DESIGN-002/.test(text)) return 12;
+  if (/DESIGN-003/.test(text)) return 13;
+  if (/AI Scalability/i.test(text)) return 14;
+
+  if (/CORE-/.test(text)) return 20;
+
+  if (/PLATFORM-|PLAT-/.test(text)) return 30;
+
+  if (/ARCHITECTURE-|ARCH-/.test(text)) return 40;
+  if (/DATABASE-/.test(text)) return 45;
+
+  if (/KERNEL-/.test(text)) return 50;
+
+  if (/ENGINE-/.test(text)) return 60;
+
+  if
+
 /* ===============================
    Dependency
 =============================== */
