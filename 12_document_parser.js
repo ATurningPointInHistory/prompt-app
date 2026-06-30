@@ -35,8 +35,12 @@ function parseDocumentHeader(text) {
         );
 
       if (currentKey) {
+
         metadata[currentKey] =
-          match[2].trim();
+          cleanDocumentHeaderValue(
+            match[2]
+          );
+
       }
 
       return;
@@ -47,8 +51,14 @@ function parseDocumentHeader(text) {
       currentKey &&
       line.trim()
     ) {
-      metadata[currentKey] +=
-        "\n" + line.trim();
+
+      metadata[currentKey] =
+        cleanDocumentHeaderValue(
+          metadata[currentKey] +
+          "\n" +
+          line.trim()
+        );
+
     }
 
   });
@@ -64,6 +74,16 @@ function parseDocumentHeader(text) {
     );
 
   return metadata;
+
+}
+
+function cleanDocumentHeaderValue(
+  value
+) {
+
+  return String(value || "")
+    .replace(/^\s+/, "")
+    .replace(/\s+$/, "");
 
 }
 
