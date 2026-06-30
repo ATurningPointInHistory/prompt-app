@@ -732,64 +732,6 @@ async function pasteMemoText() {
 
     }
 
-    const title =
-      extractMemoTitle(
-        text
-      );
-
-    const input =
-      get("memoBoxName");
-
-    if (
-      input &&
-      (
-        !input.value ||
-        input.value ===
-        memoBoxLastDefaults?.name
-      )
-    ) {
-
-      input.value =
-        title;
-
-      input.focus();
-
-      input.select();
-
-    }
-
-  } catch (error) {
-
-    alert(
-      "クリップボードを読み取れません。"
-    );
-
-  }
-
-}
-
-async function pasteMemoText() {
-
-  try {
-
-    const text =
-      await navigator
-        .clipboard
-        .readText();
-
-    const textarea =
-      get("memoBoxText");
-
-    if (textarea) {
-
-      textarea.value = text;
-
-      applyDocumentHeaderToMemoEditor(
-        text
-      );
-
-    }
-
     const input =
       get("memoBoxName");
 
@@ -1095,6 +1037,7 @@ function loadMemoBoxesFile(
       memoBoxList =
         data
           .map(item => ({
+            ...item,
             name:
               item.name || "メモ",
             text:
