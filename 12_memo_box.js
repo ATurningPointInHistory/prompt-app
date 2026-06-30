@@ -329,76 +329,85 @@ function showMemoBox() {
       ">
   </div>
 
-  <div
+    <div
     class="memo-card-body"
     onclick="selectMemoBox(${index})">
 
-  <div class="memo-card-title">
+    <div class="memo-card-title">
 
-    ${item.id
-      ? `<div class="small-muted">${escapeHtml(item.id)}</div>`
+      ${item.id
+        ? `<div class="small-muted">${escapeHtml(item.id)}</div>`
+        : ""}
+
+      ${escapeHtml(item.name || "メモ")}
+
+    </div>
+
+    <div class="memo-card-meta">
+
+      <span>${escapeHtml(item.knowledgeType || item.type || "-")}</span>
+      <span>${escapeHtml(item.status || "-")}</span>
+      <span>${escapeHtml(item.series || "-")}</span>
+
+      ${item.version
+        ? `<span>v${escapeHtml(item.version)}</span>`
+        : ""}
+
+    </div>
+
+    ${item.createdAt
+      ? `
+    <div class="small-muted memo-card-date">
+      ${escapeHtml(item.createdAt)}
+    </div>
+    `
       : ""}
 
-    ${escapeHtml(item.name || "メモ")}
+    ${item.keywords?.length
+      ? `
+    <div class="small-muted memo-card-keywords">
+      ${escapeHtml(item.keywords.join(", "))}
+    </div>
+    `
+      : ""}
 
-  </div>
+    ${item.relationships?.length
+      ? `
+    <div class="memo-card-links">
 
-  ${item.summary
-    ? `
-  <div class="memo-card-summary">
-    ${escapeHtml(item.summary)}
-  </div>
-  `
-    : ""}
+    ${item.relationships
+      .map(id => `
+      <button
+      class="memo-link-btn"
+      onclick="
+      event.stopPropagation();
+      openMemoById('${escapeJs(id)}');
+      ">
+      ${escapeHtml(id)}
+      </button>
+      `)
+      .join("")}
 
-
-  ${item.relationships?.length
-  ? `
-  <div class="memo-card-links">
-
-  ${item.relationships
-  .map(id => `
-  <button
-  onclick="
-  event.stopPropagation();
-  openMemoById('${escapeJs(id)}');
-  ">
-  ${escapeHtml(id)}
-  </button>
-  `)
-  .join("")}
-
-  </div>
-  `
-  : ""}
-
-  <div class="memo-card-keywords">
-    ${escapeHtml(
-      Array.isArray(item.keywords)
-        ? item.keywords.join(", ")
-        : ""
-    )}
-  </div>
-
-  <div class="memo-card-meta">
-
-    <span>${escapeHtml(item.knowledgeType || item.type)}</span>
-
-    <span>${escapeHtml(item.status || "-")}</span>
-
-    <span>${escapeHtml(item.series || "-")}</span>
-
-    ${item.version
-      ? `<span>v${escapeHtml(item.version)}</span>`
+    </div>
+    `
       : ""}
 
   </div>
 
-  </div>
+  <div class="memo-card-actions">
 
-  <button onclick="openMemoEditor(${index})">
-    ✏編集
-  </button>
+    <button onclick="openMemoEditor(${index})">
+      ✏編集
+    </button>
+
+    <button onclick="
+      event.stopPropagation();
+      copyMemoBoxByIndex(${index});
+    ">
+      📋コピー
+    </button>
+
+  </div>
 
 </div>
 `;
