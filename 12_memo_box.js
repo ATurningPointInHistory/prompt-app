@@ -333,23 +333,45 @@ function showMemoBox() {
     class="memo-card-body"
     onclick="selectMemoBox(${index})">
 
-    <div class="memo-card-title">
-      ${escapeHtml(item.name || "メモ")}
-    </div>
+  <div class="memo-card-title">
 
-    <div class="memo-card-meta">
-      <span>${escapeHtml(item.type || "Idea")}</span>
-      <span>${escapeHtml(item.status || "Inbox")}</span>
-      <span>${escapeHtml(item.series || "-")}</span>
-    </div>
+    ${item.id
+      ? `<div class="small-muted">${escapeHtml(item.id)}</div>`
+      : ""}
 
-    <div class="memo-card-keywords">
-      ${escapeHtml(
-        Array.isArray(item.keywords)
-          ? item.keywords.join(", ")
-          : ""
-      )}
-    </div>
+    ${escapeHtml(item.name || "メモ")}
+
+  </div>
+
+  ${item.summary
+    ? `
+  <div class="memo-card-summary">
+    ${escapeHtml(item.summary)}
+  </div>
+  `
+    : ""}
+
+  <div class="memo-card-keywords">
+    ${escapeHtml(
+      Array.isArray(item.keywords)
+        ? item.keywords.join(", ")
+        : ""
+    )}
+  </div>
+
+  <div class="memo-card-meta">
+
+    <span>${escapeHtml(item.knowledgeType || item.type)}</span>
+
+    <span>${escapeHtml(item.status || "-")}</span>
+
+    <span>${escapeHtml(item.series || "-")}</span>
+
+    ${item.version
+      ? `<span>v${escapeHtml(item.version)}</span>`
+      : ""}
+
+  </div>
 
   </div>
 
