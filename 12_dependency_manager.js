@@ -28,7 +28,9 @@ function buildKnowledgeObjects() {
   const list =
     typeof getMemoBoxList === "function"
       ? getMemoBoxList()
-      : [];
+      : JSON.parse(
+          localStorage.getItem("memoBoxList") || "[]"
+        );
 
   return list
     .map((memo, index) => ({
