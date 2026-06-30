@@ -934,6 +934,9 @@ const memo = {
       memo
     );
 
+    window.memoBoxParsedMetadata =
+      null;
+
     normalizeMemoBoxes();
     saveMemoBoxes();
     showMemoBox();
