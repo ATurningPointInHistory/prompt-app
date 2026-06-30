@@ -937,67 +937,92 @@ function saveMemoEditor() {
 
   const memo = {
 
-  id:
-    metadata.id || "",
+    id:
+      metadata.id ||
+      get("memoBoxId")?.value ||
+      "",
 
-  name:
-    get("memoBoxName")?.value || "メモ",
+    name:
+      get("memoBoxName")?.value || "メモ",
 
-  summary:
-    metadata.summary || "",
+    summary:
+      metadata.summary ||
+      get("memoBoxSummary")?.value ||
+      "",
 
-  text:
-    text,
+    text:
+      text,
 
-  knowledgeType:
-    metadata.knowledgeType ||
+    knowledgeType:
+      metadata.knowledgeType ||
+      get("memoBoxType")?.value ||
+      "Memo",
 
-    get("memoBoxType")?.value ||
+    category:
+      metadata.category ||
+      get("memoBoxCategory")?.value ||
+      "",
 
-    "Memo",
+    type:
+      get("memoBoxType")?.value || "Idea",
 
-  category:
-    metadata.category || "",
+    status:
+      metadata.status ||
+      get("memoBoxStatus")?.value ||
+      "Inbox",
 
-  type:
-    get("memoBoxType")?.value || "Idea",
+    series:
+      metadata.series ||
+      get("memoBoxSeries")?.value ||
+      "",
 
-  status:
-    get("memoBoxStatus")?.value || "Inbox",
+    priority:
+      metadata.priority ||
+      get("memoBoxPriority")?.value ||
+      "",
 
-  series:
-    get("memoBoxSeries")?.value || "",
+    stability:
+      metadata.stability ||
+      get("memoBoxStability")?.value ||
+      "",
 
-  priority:
-    metadata.priority || "",
+    decisionLevel:
+      metadata.decisionLevel ||
+      get("memoBoxDecisionLevel")?.value ||
+      "",
 
-  stability:
-    metadata.stability || "",
+    version:
+      metadata.version ||
+      get("memoBoxVersion")?.value ||
+      "",
 
-  decisionLevel:
-    metadata.decisionLevel || "",
+    keywords:
+      metadata.keywords?.length
+        ? metadata.keywords
+        : String(
+            get("memoBoxKeywords")?.value || ""
+          )
+            .split(",")
+            .map(v => v.trim())
+            .filter(Boolean),
 
-  version:
-    metadata.version || "",
+    relationships:
+      metadata.relationships?.length
+        ? metadata.relationships
+        : String(
+            get("memoBoxRelationships")?.value || ""
+          )
+            .split(",")
+            .map(v => v.trim())
+            .filter(Boolean),
 
-  keywords:
-    metadata.keywords ||
+    createdAt:
+      metadata.createdAt ||
+      memoBoxList[index]?.createdAt ||
+      new Date().toISOString(),
 
-    String(
-      get("memoBoxKeywords")?.value || ""
-    )
-      .split(",")
-      .map(v => v.trim())
-      .filter(Boolean),
-
-  relationships:
-    metadata.relationships || [],
-
-  createdAt:
-    metadata.createdAt || "",
-
-  updatedAt:
-    new Date().toISOString()
+    updatedAt:
+      new Date().toISOString()
 
   };
 
