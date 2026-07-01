@@ -4,24 +4,14 @@
 =============================== */
 
 const repositoryDatabase = {
-
   objects: [],
-
   byId: {},
-
   parents: {},
-
   children: {},
-
   roots: [],
-
-  readOrder: []
-
+  readOrder: [],
+  duplicates: {}
 };
-
-/* ===============================
-   Build
-=============================== */
 
 function buildKnowledgeObjects() {
 
@@ -39,9 +29,7 @@ function buildKnowledgeObjects() {
 
       id:
         memo.id ||
-        extractKnowledgeIdFromTitle(
-          memo.name
-        ) ||
+        extractKnowledgeIdFromTitle(memo.name) ||
         "",
 
       title:
@@ -62,9 +50,7 @@ function buildKnowledgeObjects() {
         memo.category || "",
 
       knowledgeType:
-        memo.knowledgeType ||
-        memo.type ||
-        "",
+        memo.knowledgeType || memo.type || "",
 
       priority:
         memo.priority || "",
@@ -76,9 +62,7 @@ function buildKnowledgeObjects() {
         memo.version || ""
 
     }))
-    .filter(object =>
-      object.id
-    );
+    .filter(object => object.id);
 
 }
 
@@ -88,7 +72,6 @@ function buildKnowledgeRepository() {
     buildKnowledgeObjects();
 
   buildKnowledgeIndexes();
-
   buildDependencyGraph();
 
   repositoryDatabase.roots =
@@ -104,42 +87,25 @@ function buildKnowledgeRepository() {
 function buildKnowledgeIndexes() {
 
   repositoryDatabase.byId = {};
-
   repositoryDatabase.duplicates = {};
 
   repositoryDatabase.objects.forEach(object => {
 
-    const id =
-      object.id;
-
-    if (!id) {
-      return;
-    }
-
     const current =
-      repositoryDatabase.byId[id];
+      repositoryDatabase.byId[object.id];
 
     if (!current) {
-
-      repositoryDatabase.byId[id] =
-        object;
-
+      repositoryDatabase.byId[object.id] = object;
       return;
-
     }
 
-    if (
-      !repositoryDatabase.duplicates[id]
-    ) {
-      repositoryDatabase.duplicates[id] = [
-        current
-      ];
+    if (!repositoryDatabase.duplicates[object.id]) {
+      repositoryDatabase.duplicates[object.id] = [current];
     }
 
-    repositoryDatabase.duplicates[id]
-      .push(object);
+    repositoryDatabase.duplicates[object.id].push(object);
 
-    repositoryDatabase.byId[id] =
+    repositoryDatabase.byId[object.id] =
       chooseBetterKnowledgeObject(
         current,
         object
@@ -148,26 +114,16 @@ function buildKnowledgeIndexes() {
   });
 
   repositoryDatabase.objects =
-    Object.values(
-      repositoryDatabase.byId
-    );
+    Object.values(repositoryDatabase.byId);
 
 }
 
-function chooseBetterKnowledgeObject(
-  a,
-  b
-) {
+function chooseBetterKnowledgeObject(a, b) {
 
-  const scoreA =
-    scoreKnowledgeObject(a);
-
-  const scoreB =
-    scoreKnowledgeObject(b);
-
-  return scoreB > scoreA
-    ? b
-    : a;
+  return scoreKnowledgeObject(b) >
+    scoreKnowledgeObject(a)
+      ? b
+      : a;
 
 }
 
@@ -175,69 +131,16 @@ function scoreKnowledgeObject(object) {
 
   let score = 0;
 
-  if (object.status === "Official") {
-    score += 50;
-  }
-
-  if (object.summary) {
-    score += 20;
-  }
-
-  if (object.relationships?.length) {
-    score += 20;
-  }
-
-  if (object.series) {
-    score += 10;
-  }
-
-  if (object.category) {
-    score += 10;
-  }
-
-  if (object.version) {
-    score += 10;
-  }
+  if (object.status === "Official") score += 50;
+  if (object.summary) score += 20;
+  if (object.relationships?.length) score += 20;
+  if (object.series) score += 10;
+  if (object.category) score += 10;
+  if (object.version) score += 10;
 
   return score;
 
 }
-
-function getKnowledgeBaseOrder(object) {
-
-  const id =
-    object.id || "";
-
-  const title =
-    object.title || "";
-
-  const text =
-    id + " " + title;
-
-  if (/VER-/.test(text)) return 0;
-
-  if (/DESIGN-000/.test(text)) return 10;
-  if (/DESIGN-001/.test(text)) return 11;
-  if (/DESIGN-002/.test(text)) return 12;
-  if (/DESIGN-003/.test(text)) return 13;
-  if (/AI Scalability/i.test(text)) return 14;
-
-  if (/CORE-/.test(text)) return 20;
-
-  if (/PLATFORM-|PLAT-/.test(text)) return 30;
-
-  if (/ARCHITECTURE-|ARCH-/.test(text)) return 40;
-  if (/DATABASE-/.test(text)) return 45;
-
-  if (/KERNEL-/.test(text)) return 50;
-
-  if (/ENGINE-/.test(text)) return 60;
-
-  if
-
-/* ===============================
-   Dependency
-=============================== */
 
 function buildDependencyGraph() {
 
@@ -245,34 +148,20 @@ function buildDependencyGraph() {
   repositoryDatabase.children = {};
 
   repositoryDatabase.objects.forEach(object => {
-
-    repositoryDatabase.parents[
-      object.id
-    ] = [];
-
-    repositoryDatabase.children[
-      object.id
-    ] = [];
-
+    repositoryDatabase.parents[object.id] = [];
+    repositoryDatabase.children[object.id] = [];
   });
 
   repositoryDatabase.objects.forEach(object => {
 
     object.relationships.forEach(parentId => {
 
-      if (
-        !repositoryDatabase.byId[parentId]
-      ) {
+      if (!repositoryDatabase.byId[parentId]) {
         return;
       }
 
-      repositoryDatabase.parents[
-        object.id
-      ].push(parentId);
-
-      repositoryDatabase.children[
-        parentId
-      ].push(object.id);
+      repositoryDatabase.parents[object.id].push(parentId);
+      repositoryDatabase.children[parentId].push(object.id);
 
     });
 
@@ -284,69 +173,88 @@ function findRootKnowledgeObjects() {
 
   return repositoryDatabase.objects
     .filter(object =>
-      !repositoryDatabase.parents[
-        object.id
-      ]?.length
+      !repositoryDatabase.parents[object.id]?.length
     )
-    .map(object =>
-      object.id
-    );
+    .map(object => object.id);
 
 }
 
 function findChildKnowledgeObjects(id) {
 
-  return (
-    repositoryDatabase.children[id] || []
-  );
+  return repositoryDatabase.children[id] || [];
 
 }
 
-/* ===============================
-   Sort
-=============================== */
+function getKnowledgeBaseOrder(object) {
+
+  const text =
+    `${object.id || ""} ${object.title || ""}`;
+
+  if (/VER-/.test(text)) return 0;
+
+  if (/DESIGN-000/.test(text)) return 10;
+  if (/DESIGN-001/.test(text)) return 11;
+  if (/DESIGN-002/.test(text)) return 12;
+  if (/DESIGN-003/.test(text)) return 13;
+  if (/AI Scalability/i.test(text)) return 14;
+
+  if (/CORE-/.test(text)) return 20;
+  if (/PLATFORM-|PLAT-/.test(text)) return 30;
+
+  if (/ARCHITECTURE-|ARCH-/.test(text)) return 40;
+  if (/DATABASE-/.test(text)) return 45;
+
+  if (/KERNEL-/.test(text)) return 50;
+  if (/ENGINE-/.test(text)) return 60;
+
+  if (/ORCHESTRATOR-/.test(text)) return 70;
+  if (/INTENT-/.test(text)) return 71;
+  if (/CONTEXT-/.test(text)) return 72;
+  if (/RETRIEVAL-/.test(text)) return 73;
+
+  if (/REGISTRY-/.test(text)) return 80;
+
+  if (/DOCUMENT-/.test(text)) return 90;
+  if (/KNOWLEDGE-|KNOW-/.test(text)) return 91;
+  if (/META-/.test(text)) return 92;
+
+  if (/MGR-|MANAGER-/.test(text)) return 100;
+  if (/BUILDER-/.test(text)) return 101;
+  if (/REPOSITORY-/.test(text)) return 102;
+
+  if (/RULE-/.test(text)) return 110;
+  if (/WORK-/.test(text)) return 111;
+  if (/GUIDE-/.test(text)) return 112;
+  if (/PLUG-/.test(text)) return 113;
+  if (/ANLY-/.test(text)) return 114;
+
+  return 999;
+
+}
 
 function sortKnowledgeObjects() {
 
-  const visited =
-    new Set();
+  return repositoryDatabase.objects
+    .slice()
+    .sort((a, b) => {
 
-  const result = [];
+      const orderA =
+        getKnowledgeBaseOrder(a);
 
-  function visit(id) {
+      const orderB =
+        getKnowledgeBaseOrder(b);
 
-    if (visited.has(id)) {
-      return;
-    }
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
 
-    visited.add(id);
+      return String(a.id || "")
+        .localeCompare(String(b.id || ""));
 
-    const children =
-      repositoryDatabase.children[id] || [];
-
-    result.push(id);
-
-    children.forEach(childId =>
-      visit(childId)
-    );
-
-  }
-
-  repositoryDatabase.roots.forEach(id =>
-    visit(id)
-  );
-
-  repositoryDatabase.objects.forEach(object =>
-    visit(object.id)
-  );
-
-  return result;
+    })
+    .map(object => object.id);
 
 }
-
-/* ===============================
-   Output
-=============================== */
 
 function buildKnowledgeReadOrder() {
 
@@ -354,29 +262,21 @@ function buildKnowledgeReadOrder() {
 
   const lines = [];
 
-  lines.push(
-    "=================================="
-  );
-  lines.push(
-    "AI Read Order"
-  );
-  lines.push(
-    "=================================="
-  );
+  lines.push("==================================");
+  lines.push("AI Read Order");
+  lines.push("==================================");
   lines.push("");
 
-  repositoryDatabase.readOrder.forEach(
-    (id, index) => {
+  repositoryDatabase.readOrder.forEach((id, index) => {
 
-      const object =
-        repositoryDatabase.byId[id];
+    const object =
+      repositoryDatabase.byId[id];
 
-      lines.push(
-        `${String(index + 1).padStart(2, "0")} ${id} ${object?.title || ""}`
-      );
+    lines.push(
+      `${String(index + 1).padStart(2, "0")} ${id} ${object?.title || ""}`
+    );
 
-    }
-  );
+  });
 
   return lines.join("\n");
 
@@ -387,13 +287,9 @@ function showKnowledgeReadOrder() {
   const text =
     buildKnowledgeReadOrder();
 
-  if (
-    typeof openFloatPanel === "function"
-  ) {
-
-    openFloatPanel(
-      "AI Read Order",
-      `
+  openFloatPanel(
+    "AI Read Order",
+    `
 <div class="memo-actions">
   <button onclick="copyKnowledgeReadOrder()">
     📋コピー
@@ -404,28 +300,17 @@ function showKnowledgeReadOrder() {
 ${escapeHtml(text)}
 </pre>
 `
-    );
-
-    return;
-
-  }
-
-  alert(text);
+  );
 
 }
 
 function copyKnowledgeReadOrder() {
 
-  const text =
-    buildKnowledgeReadOrder();
-
-  copyTextFallback(text);
+  copyTextFallback(
+    buildKnowledgeReadOrder()
+  );
 
 }
-
-/* ===============================
-   Utility
-=============================== */
 
 function extractKnowledgeIdFromTitle(title) {
 
@@ -434,45 +319,19 @@ function extractKnowledgeIdFromTitle(title) {
       /[A-Z][A-Z0-9_]*-\d+/
     );
 
-  return match
-    ? match[0]
-    : "";
+  return match ? match[0] : "";
 
 }
 
-/* ===============================
-   Global Export
-=============================== */
-
-window.repositoryDatabase =
-  repositoryDatabase;
-
-window.buildKnowledgeObjects =
-  buildKnowledgeObjects;
-
-window.buildKnowledgeRepository =
-  buildKnowledgeRepository;
-
-window.buildKnowledgeIndexes =
-  buildKnowledgeIndexes;
-
-window.buildDependencyGraph =
-  buildDependencyGraph;
-
-window.findRootKnowledgeObjects =
-  findRootKnowledgeObjects;
-
-window.findChildKnowledgeObjects =
-  findChildKnowledgeObjects;
-
-window.sortKnowledgeObjects =
-  sortKnowledgeObjects;
-
-window.buildKnowledgeReadOrder =
-  buildKnowledgeReadOrder;
-
-window.showKnowledgeReadOrder =
-  showKnowledgeReadOrder;
-
-window.copyKnowledgeReadOrder =
-  copyKnowledgeReadOrder;
+window.repositoryDatabase = repositoryDatabase;
+window.buildKnowledgeObjects = buildKnowledgeObjects;
+window.buildKnowledgeRepository = buildKnowledgeRepository;
+window.buildKnowledgeIndexes = buildKnowledgeIndexes;
+window.buildDependencyGraph = buildDependencyGraph;
+window.findRootKnowledgeObjects = findRootKnowledgeObjects;
+window.findChildKnowledgeObjects = findChildKnowledgeObjects;
+window.getKnowledgeBaseOrder = getKnowledgeBaseOrder;
+window.sortKnowledgeObjects = sortKnowledgeObjects;
+window.buildKnowledgeReadOrder = buildKnowledgeReadOrder;
+window.showKnowledgeReadOrder = showKnowledgeReadOrder;
+window.copyKnowledgeReadOrder = copyKnowledgeReadOrder;
