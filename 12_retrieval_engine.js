@@ -63,7 +63,7 @@ function findPrerequisiteKnowledge(id) {
   return result;
 }
 
-function findImpactKnowledge(id) {
+function findPrerequisiteKnowledge(id) {
 
   buildKnowledgeRepository();
 
@@ -78,23 +78,26 @@ function findImpactKnowledge(id) {
 
     visited.add(currentId);
 
-    const children =
-      repositoryDatabase.children[currentId] || [];
+    const parents =
+      repositoryDatabase.parents[currentId] || [];
 
-    children.forEach(childId => {
+    parents.forEach(parentId =>
+      visit(parentId)
+    );
 
-      const object =
-        repositoryDatabase.byId[childId];
+    const object =
+      repositoryDatabase.byId[currentId];
 
-      if (object) {
-        result.push(object);
-      }
-
-      visit(childId);
-
-    });
+    if (object) {
+      result.push(object);
+    }
 
   }
+
+  getDefaultPrerequisiteIds(id)
+    .forEach(defaultId =>
+      visit(defaultId)
+    );
 
   visit(id);
 
