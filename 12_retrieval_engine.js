@@ -24,43 +24,36 @@ function findChildKnowledge(id) {
     .filter(Boolean);
 }
 
-function findPrerequisiteKnowledge(id) {
+function visitPrerequisiteKnowledge(
+  currentId,
+  visited,
+  result
+) {
 
-  buildKnowledgeRepository();
+  if (visited.has(currentId)) {
+    return;
+  }
 
-  const result = [];
-  const visited = new Set();
+  visited.add(currentId);
 
-  function visit(currentId) {
+  const parents =
+    repositoryDatabase.parents[currentId] || [];
 
-    if (visited.has(currentId)) {
-      return;
-    }
+  parents.forEach(parentId =>
+    visitPrerequisiteKnowledge(
+      parentId,
+      visited,
+      result
+    )
+  );
 
-    visited.add(currentId);
+  const object =
+    repositoryDatabase.byId[currentId];
 
-    const parents =
-      repositoryDatabase.parents[currentId] || [];
+  if (object) {
+    result.push(object);
+  }
 
-    parents.forEach(parentId =>
-      visit(parentId)
-    );
-
-    const object =
-      repositoryDatabase.byId[currentId];
-
-    if (object) {
-      result.push(object);
-    }
-
-  getDefaultPrerequisiteIds(id)
-    .forEach(defaultId =>
-      visit(defaultId)
-    );
-
-  visit(id);
-
-  return result;
 }
 
 function findPrerequisiteKnowledge(id) {
@@ -70,36 +63,71 @@ function findPrerequisiteKnowledge(id) {
   const result = [];
   const visited = new Set();
 
-  function visit(currentId) {
-
-    if (visited.has(currentId)) {
-      return;
-    }
-
-    visited.add(currentId);
-
-    const parents =
-      repositoryDatabase.parents[currentId] || [];
-
-    parents.forEach(parentId =>
-      visit(parentId)
+  getDefaultPrerequisiteIds(id)
+    .forEach(defaultId =>
+      visitPrerequisiteKnowledge(
+        defaultId,
+        visited,
+        result
+      )
     );
 
+  visitPrerequisiteKnowledge(
+    id,
+    visited,
+    result
+  );
+
+  return result;
+
+}
+
+function visitImpactKnowledge(
+  currentId,
+  visited,
+  result
+) {
+
+  if (visited.has(currentId)) {
+    return;
+  }
+
+  visited.add(currentId);
+
+  const children =
+    repositoryDatabase.children[currentId] || [];
+
+  children.forEach(childId => {
+
     const object =
-      repositoryDatabase.byId[currentId];
+      repositoryDatabase.byId[childId];
 
     if (object) {
       result.push(object);
     }
 
-  }
-
-  getDefaultPrerequisiteIds(id)
-    .forEach(defaultId =>
-      visit(defaultId)
+    visitImpactKnowledge(
+      childId,
+      visited,
+      result
     );
 
-  visit(id);
+  });
+
+}
+
+function findImpactKnowledge(id) {
+
+  buildKnowledgeRepository();
+
+  const result = [];
+  const visited = new Set();
+
+  visitImpactKnowledge(
+    id,
+    visited,
+    result
+  );
 
   return result;
 
@@ -174,49 +202,6 @@ function findKnowledgeByKeyword(keyword) {
     return text.includes(q);
 
   });
-
-}
-
-function getDefaultPrerequisiteIds(targetId) {
-
-  const id =
-    String(targetId || "");
-
-  const defaults = [
-    "VER-001",
-    "DESIGN-000",
-    "DESIGN-001",
-    "DESIGN-002",
-    "DESIGN-003",
-    "CORE-001"
-  ];
-
-  if (
-    /PLAT|PLATFORM|ARCH|DATABASE|KERNEL|ENGINE|REGISTRY|ORCHESTRATOR|INTENT|CONTEXT|RETRIEVAL/.test(id)
-  ) {
-    defaults.push(
-      "PLAT-001",
-      "ARCH-010"
-    );
-  }
-
-  if (
-    /DATABASE|KERNEL|ENGINE|REGISTRY|ORCHESTRATOR|INTENT|CONTEXT|RETRIEVAL/.test(id)
-  ) {
-    defaults.push(
-      "DATABASE-001"
-    );
-  }
-
-  if (
-    /ENGINE|REGISTRY|ORCHESTRATOR|INTENT|CONTEXT|RETRIEVAL/.test(id)
-  ) {
-    defaults.push(
-      "KERNEL-001"
-    );
-  }
-
-  return defaults;
 
 }
 
