@@ -205,6 +205,52 @@ function findKnowledgeByKeyword(keyword) {
 
 }
 
+function getDefaultPrerequisiteIds(targetId) {
+
+  const id =
+    String(targetId || "");
+
+  const defaults = [
+    "VER-001",
+    "DESIGN-000",
+    "DESIGN-001",
+    "DESIGN-002",
+    "DESIGN-003",
+    "CORE-001"
+  ];
+
+  if (
+    /PLAT|PLATFORM|ARCH|DATABASE|KERNEL|ENGINE|REGISTRY|ORCHESTRATOR|INTENT|CONTEXT|RETRIEVAL/
+      .test(id)
+  ) {
+    defaults.push(
+      "PLAT-001",
+      "ARCH-010"
+    );
+  }
+
+  if (
+    /DATABASE|KERNEL|ENGINE|REGISTRY|ORCHESTRATOR|INTENT|CONTEXT|RETRIEVAL/
+      .test(id)
+  ) {
+    defaults.push(
+      "DATABASE-001"
+    );
+  }
+
+  if (
+    /ENGINE|REGISTRY|ORCHESTRATOR|INTENT|CONTEXT|RETRIEVAL/
+      .test(id)
+  ) {
+    defaults.push(
+      "KERNEL-001"
+    );
+  }
+
+  return defaults;
+
+}
+
 window.findKnowledgeById =
   findKnowledgeById;
 
@@ -231,3 +277,6 @@ window.findKnowledgeByCategory =
 
 window.findKnowledgeByKeyword =
   findKnowledgeByKeyword;
+
+window.getDefaultPrerequisiteIds =
+  getDefaultPrerequisiteIds;
