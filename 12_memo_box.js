@@ -1521,4 +1521,5 @@ window.selectAllMemoBoxes = selectAllMemoBoxes;
 window.clearMemoSelection = clearMemoSelection;
 window.deleteSelectedMemoBoxes = deleteSelectedMemoBoxes;
 window.toggleMemoSelection = toggleMemoSelection;
-window.copyMemoBox = copyMemoBox; = copyMemoBox;
+window.copyMemoBox =
+  copyMemoBox;
