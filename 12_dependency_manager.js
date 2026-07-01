@@ -323,6 +323,224 @@ function extractKnowledgeIdFromTitle(title) {
 
 }
 
+function buildKnowledgeTree() {
+
+  buildKnowledgeRepository();
+
+  const lines = [];
+
+  lines.push("==================================");
+  lines.push("Knowledge Dependency Tree");
+  lines.push("==================================");
+  lines.push("");
+
+  repositoryDatabase.roots.forEach(id => {
+    appendKnowledgeTreeLine(
+      lines,
+      id,
+      0,
+      new Set()
+    );
+  });
+
+  return lines.join("\n");
+
+}
+
+function appendKnowledgeTreeLine(
+  lines,
+  id,
+  depth,
+  visited
+) {
+
+  const object =
+    repositoryDatabase.byId[id];
+
+  if (!object) {
+    return;
+  }
+
+  const indent =
+    "  ".repeat(depth);
+
+  lines.push(
+    `${indent}${depth ? "└─ " : ""}${id} ${object.title || ""}`
+  );
+
+  if (visited.has(id)) {
+    lines.push(
+      `${indent}  ⚠ circular reference`
+    );
+    return;
+  }
+
+  visited.add(id);
+
+  const children =
+    repositoryDatabase.children[id] || [];
+
+  children.forEach(childId => {
+    appendKnowledgeTreeLine(
+      lines,
+      childId,
+      depth + 1,
+      new Set(visited)
+    );
+  });
+
+}
+
+function showKnowledgeTree() {
+
+  const text =
+    buildKnowledgeTree();
+
+  openFloatPanel(
+    "Knowledge Tree",
+    `
+<div class="memo-actions">
+  <button onclick="copyKnowledgeTree()">
+    📋コピー
+  </button>
+</div>
+
+<pre class="code-preview">
+${escapeHtml(text)}
+</pre>
+`
+  );
+
+}
+
+function copyKnowledgeTree() {
+
+  copyTextFallback(
+    buildKnowledgeTree()
+  );
+
+}
+
+function findMissingKnowledgeObjects() {
+
+  buildKnowledgeRepository();
+
+  const missing = [];
+
+  repositoryDatabase.objects.forEach(object => {
+
+    object.relationships.forEach(id => {
+
+      if (!repositoryDatabase.byId[id]) {
+        missing.push({
+          from: object.id,
+          missing: id
+        });
+      }
+
+    });
+
+  });
+
+  return missing;
+
+}
+
+function buildKnowledgeHealthReport() {
+
+  buildKnowledgeRepository();
+
+  const missing =
+    findMissingKnowledgeObjects();
+
+  const duplicateIds =
+    Object.keys(
+      repositoryDatabase.duplicates || {}
+    );
+
+  const lines = [];
+
+  lines.push("==================================");
+  lines.push("Repository Health");
+  lines.push("==================================");
+  lines.push("");
+
+  lines.push(
+    `Knowledge Objects : ${repositoryDatabase.objects.length}`
+  );
+
+  lines.push(
+    `Root Objects      : ${repositoryDatabase.roots.length}`
+  );
+
+  lines.push(
+    `Duplicate IDs     : ${duplicateIds.length}`
+  );
+
+  lines.push(
+    `Missing IDs       : ${missing.length}`
+  );
+
+  lines.push("");
+
+  if (duplicateIds.length) {
+    lines.push("Duplicate IDs");
+    lines.push("----------------------------------");
+
+    duplicateIds.forEach(id => {
+      lines.push(id);
+    });
+
+    lines.push("");
+  }
+
+  if (missing.length) {
+    lines.push("Missing Relationships");
+    lines.push("----------------------------------");
+
+    missing.forEach(item => {
+      lines.push(
+        `${item.from} -> ${item.missing}`
+      );
+    });
+
+    lines.push("");
+  }
+
+  return lines.join("\n");
+
+}
+
+function showKnowledgeHealthReport() {
+
+  const text =
+    buildKnowledgeHealthReport();
+
+  openFloatPanel(
+    "Repository Health",
+    `
+<div class="memo-actions">
+  <button onclick="copyKnowledgeHealthReport()">
+    📋コピー
+  </button>
+</div>
+
+<pre class="code-preview">
+${escapeHtml(text)}
+</pre>
+`
+  );
+
+}
+
+function copyKnowledgeHealthReport() {
+
+  copyTextFallback(
+    buildKnowledgeHealthReport()
+  );
+
+}
+
 window.repositoryDatabase = repositoryDatabase;
 window.buildKnowledgeObjects = buildKnowledgeObjects;
 window.buildKnowledgeRepository = buildKnowledgeRepository;
@@ -335,3 +553,17 @@ window.sortKnowledgeObjects = sortKnowledgeObjects;
 window.buildKnowledgeReadOrder = buildKnowledgeReadOrder;
 window.showKnowledgeReadOrder = showKnowledgeReadOrder;
 window.copyKnowledgeReadOrder = copyKnowledgeReadOrder;
+window.buildKnowledgeTree =
+  buildKnowledgeTree;
+window.showKnowledgeTree =
+  showKnowledgeTree;
+window.copyKnowledgeTree =
+  copyKnowledgeTree;
+window.findMissingKnowledgeObjects =
+  findMissingKnowledgeObjects;
+window.buildKnowledgeHealthReport =
+  buildKnowledgeHealthReport;
+window.showKnowledgeHealthReport =
+  showKnowledgeHealthReport;
+window.copyKnowledgeHealthReport =
+  copyKnowledgeHealthReport;
