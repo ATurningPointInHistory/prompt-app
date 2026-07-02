@@ -973,6 +973,16 @@ onclick="executeProjectValidation()">
 📝 Memo
 </button>
 
+<button class="float-list-btn"
+onclick="generateModuleRulesFromLoadedScripts()">
+📄 Module Rule
+</button>
+
+<button class="float-list-btn"
+onclick="copyMemoTitleList()">
+📋タイトル一覧
+</button>
+
 <button class="float-list-btn" onclick="clearOutput()">
 🧹 出力クリア
 </button>
@@ -1308,13 +1318,6 @@ ${repairToolButton(
   "showAiReportManager",
   "🤖",
   "AI Report Manager"
-)}
-
-${repairToolButton(
-  "📄 Module Rule",
-  "generateModuleRulesFromLoadedScripts",
-  "📄",
-  "Module Rule"
 )}
 
 ${repairToolButton(
