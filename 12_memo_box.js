@@ -1494,6 +1494,29 @@ function copyMemoBoxByIndex(index) {
 
 }
 
+function copyMemoTitleList() {
+
+  normalizeMemoBoxes();
+
+  const text =
+    memoBoxList
+      .map((memo, index) => {
+        const no =
+          String(index + 1).padStart(2, "0");
+
+        const id =
+          memo.id
+            ? memo.id + " "
+            : "";
+
+        return `${no} ${id}${memo.name || "メモ"}`;
+      })
+      .join("\n");
+
+  copyTextFallback(text);
+
+}
+
 window.findMemoById =
   findMemoById;
 
@@ -1547,3 +1570,6 @@ window.deleteSelectedMemoBoxes = deleteSelectedMemoBoxes;
 window.toggleMemoSelection = toggleMemoSelection;
 
 window.copyMemoBox = copyMemoBox;
+
+window.copyMemoTitleList =
+  copyMemoTitleList;
