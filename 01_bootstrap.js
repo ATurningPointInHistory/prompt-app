@@ -1331,6 +1331,13 @@ ${repairToolButton(
   "AIエラー調査プロンプトコピー"
 )}
 
+${repairToolButton(
+  "📑 Repository順",
+  "sortMemoBoxesBySimpleRepositoryOrder",
+  "📑",
+  "Repository順"
+)}
+
 <hr>
 
 `;
