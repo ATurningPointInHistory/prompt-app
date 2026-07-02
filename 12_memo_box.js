@@ -49,6 +49,15 @@ const MEMO_BOX_TYPES = [
   "Guide"
 ];
 
+/* ===============================
+   Status.      意味
+   Official     現行の正式仕様
+   Historical   設計履歴として保存する文書
+   Deprecated   過去の正式仕様だが使用非推奨
+   Archive.     保管のみ
+   Rejected.    採用されなかった案
+=============================== */
+
 const MEMO_BOX_STATUSES = [
   "Inbox",
   "Active",
@@ -57,6 +66,7 @@ const MEMO_BOX_STATUSES = [
   "Review",
   "Done",
   "Official",
+  "Historical",
   "Hold",
   "Rejected",
   "Archive"
