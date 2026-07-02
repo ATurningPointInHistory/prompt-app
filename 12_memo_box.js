@@ -35,59 +35,65 @@ let memoBoxList =
     ]
   );
 
+/* ===============================
+   Type
+   メモ・Knowledge Objectの種類
+=============================== */
+
 const MEMO_BOX_TYPES = [
-  "Idea",
-  "Rule",
-  "Design",
-  "Core",
-  "Architecture",
-  "Specification",
-  "Implementation",
-  "Bug",
-  "Handoff",
-  "Report",
-  "Guide"
+  "Idea",             // アイデア・検討案
+  "Rule",             // ルール・ポリシー
+  "Design",           // 設計思想・設計原則
+  "Core",             // Platform全体の基本原則
+  "Architecture",     // アーキテクチャ設計
+  "Specification",    // 正式仕様書
+  "Implementation",   // 実装仕様・実装計画
+  "Bug",              // 不具合・修正記録
+  "Handoff",          // AI・開発引き継ぎ
+  "Report",           // 調査・分析・レビュー
+  "Guide"             // 利用ガイド・開発ガイド
 ];
 
 /* ===============================
-   Status.      意味
-   Official     現行の正式仕様
-   Historical   設計履歴として保存する文書
-   Deprecated   過去の正式仕様だが使用非推奨
-   Archive.     保管のみ
-   Rejected.    採用されなかった案
+   Status
+   文書・メモのライフサイクル
 =============================== */
 
 const MEMO_BOX_STATUSES = [
-  "Inbox",
-  "Active",
-  "Draft",
-  "Todo",
-  "Review",
-  "Done",
-  "Official",
-  "Historical",
-  "Hold",
-  "Rejected",
-  "Archive"
+  "Inbox",        // 未整理
+  "Active",       // 作業中
+  "Draft",        // 下書き
+  "Todo",         // 作成予定
+  "Review",       // レビュー中
+  "Done",         // 作業完了
+  "Official",     // 現行の正式仕様
+  "Historical",   // 設計履歴・参考資料
+  "Hold",         // 保留
+  "Rejected",     // 不採用
+  "Archive"       // 保管のみ
 ];
 
+/* ===============================
+   Series
+   文書シリーズ・Knowledge分類
+=============================== */
+
 const MEMO_BOX_SERIES = [
-  "",
-  "DESIGN",
-  "CORE",
-  "ARCH",
-  "KNOW",
-  "KNOWLEDGE",
-  "META",
-  "WORK",
-  "RULE",
-  "MGR",
-  "ANLY",
-  "PLUG",
-  "API",
-  "DB",
-  "GUIDE"
+  "",             // Seriesなし
+  "DESIGN",       // Design Philosophy
+  "CORE",         // Platform Philosophy
+  "ARCH",         // Architecture
+  "KNOW",         // Knowledge Architecture
+  "KNOWLEDGE",    // Knowledge Specification
+  "META",         // Metadata
+  "WORK",         // Workflow
+  "RULE",         // Rule
+  "MGR",          // Manager
+  "ANLY",         // Analyzer
+  "PLUG",         // Plugin
+  "API",          // API
+  "DB",           // Database
+  "GUIDE"         // Guide
 ];
 
 let memoBoxLastDefaults =
