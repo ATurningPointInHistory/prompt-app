@@ -469,3 +469,12 @@ window.splitDocumentCsv =
 
 window.testDocumentHeaderParser =
   testDocumentHeaderParser;
+
+window.extractMetadataBlock =
+  extractMetadataBlock;
+
+window.parseLinePairDocumentHeader =
+  parseLinePairDocumentHeader;
+
+window.parseColonDocumentHeader =
+  parseColonDocumentHeader;
