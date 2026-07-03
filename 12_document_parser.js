@@ -16,7 +16,7 @@ function parseDocumentHeader(text) {
     );
 
   let metadata =
-    parseColonDocumentHeader(
+    parseLinePairDocumentHeader(
       header
     );
 
@@ -27,7 +27,7 @@ function parseDocumentHeader(text) {
   ) {
 
     metadata =
-      parseLinePairDocumentHeader(
+      parseColonDocumentHeader(
         header
       );
 
