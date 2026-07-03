@@ -3,6 +3,8 @@
    Document Parser System
 =============================== */
 
+alert("12_document_parser.js start");
+
 function parseLinePairDocumentHeader(header) {
 
   const metadata = {};
@@ -326,6 +328,8 @@ Test body.
   return result;
 
 }
+
+alert("12_document_parser.js end");
 
 window.parseDocumentHeader =
   parseDocumentHeader;
