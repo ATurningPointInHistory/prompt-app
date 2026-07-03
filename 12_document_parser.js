@@ -3,6 +3,8 @@
    Document Parser System
 =============================== */
 
+alert("12_document_parser.js start");
+
 function parseDocumentHeader(text) {
 
   const source =
@@ -503,3 +505,5 @@ window.parseLinePairDocumentHeader =
 
 window.parseColonDocumentHeader =
   parseColonDocumentHeader;
+
+alert("12_document_parser.js end");
