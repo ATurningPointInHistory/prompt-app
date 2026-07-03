@@ -7,6 +7,10 @@
    Error Handler
 =============================== */
 
+<script>
+alert("document parser load check");
+</script>
+
 window.onerror = function(
   message,
   source,
