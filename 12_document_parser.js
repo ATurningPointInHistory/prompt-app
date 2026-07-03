@@ -73,7 +73,6 @@ function parseLinePairDocumentHeader(header) {
       "status",
       "priority",
       "stability",
-      "tags",
       "keywords",
       "relationships",
       "workflow",
