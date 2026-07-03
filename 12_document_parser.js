@@ -280,11 +280,17 @@ function normalizeDocumentHeaderKey(key) {
 function splitDocumentCsv(value) {
 
   if (Array.isArray(value)) {
-    return value;
+    return value
+      .flatMap(item =>
+        String(item || "")
+          .split(/,|\r?\n/)
+      )
+      .map(v => v.trim())
+      .filter(Boolean);
   }
 
   return String(value || "")
-    .split(",")
+    .split(/,|\r?\n/)
     .map(v => v.trim())
     .filter(Boolean);
 
