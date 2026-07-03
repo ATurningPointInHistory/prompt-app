@@ -3,103 +3,129 @@
    Document Parser System
 =============================== */
 
-function parseDocumentHeader(text) {
-
-  const source =
-    String(text || "");
-
-  const header =
-    extractMetadataBlock(
-      extractDocumentHeaderBlock(
-        source
-      )
-    );
-
-  let metadata =
-    parseLinePairDocumentHeader(
-      header
-    );
-
-  if (
-    !metadata.id &&
-    !metadata.name &&
-    !metadata.summary
-  ) {
-
-    metadata =
-      parseColonDocumentHeader(
-        header
-      );
-
-  }
-
-  metadata.keywords =
-    splitDocumentCsv(
-      metadata.keywords
-    );
-
-  metadata.relationships =
-    splitDocumentCsv(
-      metadata.relationships
-    );
-
-  return metadata;
-
-}
-
-function parseColonDocumentHeader(header) {
+function parseLinePairDocumentHeader(header) {
 
   const metadata = {};
 
   const lines =
     String(header || "")
-      .split(/\r?\n/);
-
-  let currentKey = "";
-
-  lines.forEach(line => {
-
-    const keyMatch =
-      line.match(
-        /^([A-Za-z][A-Za-z0-9_ -]*):\s*(.*)$/
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(line =>
+        line &&
+        !/^-+$/.test(line) &&
+        !/^=+$/.test(line)
       );
 
-    if (keyMatch) {
+  const metadataKeys =
+    new Set([
+      "id",
+      "title",
+      "summary",
+      "version",
+      "layer",
+      "category",
+      "knowledgetype",
+      "status",
+      "priority",
+      "stability",
+      "tags",
+      "keywords",
+      "relationships",
+      "workflow",
+      "rules",
+      "owner",
+      "created",
+      "updated",
+      "decisionlevel"
+    ]);
 
-      currentKey =
-        normalizeDocumentHeaderKey(
-          keyMatch[1]
-        );
+  const singleValueKeys =
+    new Set([
+      "id",
+      "title",
+      "summary",
+      "version",
+      "layer",
+      "category",
+      "knowledgetype",
+      "status",
+      "priority",
+      "stability",
+      "owner",
+      "created",
+      "updated",
+      "decisionlevel"
+    ]);
 
-      if (currentKey) {
-        metadata[currentKey] =
-          cleanDocumentHeaderValue(
-            keyMatch[2] || ""
-          );
+  for (
+    let i = 0;
+    i < lines.length;
+    i++
+  ) {
+
+    const raw =
+      lines[i];
+
+    const key =
+      raw
+        .toLowerCase()
+        .replace(/\s+/g, "");
+
+    if (!metadataKeys.has(key)) {
+      continue;
+    }
+
+    const normalizedKey =
+      normalizeDocumentHeaderKey(raw);
+
+    if (!normalizedKey) {
+      continue;
+    }
+
+    const values = [];
+
+    let j =
+      i + 1;
+
+    for (
+      ;
+      j < lines.length;
+      j++
+    ) {
+
+      const next =
+        lines[j];
+
+      const nextKey =
+        next
+          .toLowerCase()
+          .replace(/\s+/g, "");
+
+      if (
+        metadataKeys.has(nextKey)
+      ) {
+        break;
       }
 
-      return;
+      values.push(next);
 
     }
 
     if (
-      currentKey &&
-      line.trim()
+      singleValueKeys.has(key)
     ) {
-
-      const currentValue =
-        metadata[currentKey] || "";
-
-      metadata[currentKey] =
-        cleanDocumentHeaderValue(
-          currentValue
-            ? currentValue + "\n" + line.trim()
-            : line.trim()
-        );
-
+      metadata[normalizedKey] =
+        values[0] || "";
+    } else {
+      metadata[normalizedKey] =
+        values.join("\n").trim();
     }
 
-  });
+    i =
+      j - 1;
+
+  }
 
   return metadata;
 
