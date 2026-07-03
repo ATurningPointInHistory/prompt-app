@@ -196,8 +196,33 @@ function parseLinePairDocumentHeader(header) {
 
     }
 
-    metadata[normalizedKey] =
-      values.join("\n").trim();
+    if (
+      [
+        "id",
+        "name",
+        "version",
+        "layer",
+        "category",
+        "knowledgeType",
+        "status",
+        "priority",
+        "stability",
+        "decisionLevel",
+        "owner",
+        "createdAt",
+        "updatedAt"
+      ].includes(normalizedKey)
+    ) {
+
+      metadata[normalizedKey] =
+        values[0] || "";
+
+    } else {
+
+      metadata[normalizedKey] =
+        values.join("\n").trim();
+
+    }
 
     i =
       j - 1;
