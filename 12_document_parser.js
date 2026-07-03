@@ -487,8 +487,6 @@ Test body.
 
 }
 
-alert("12_document_parser.js end");
-
 window.parseDocumentHeader =
   parseDocumentHeader;
 
