@@ -3,8 +3,6 @@
    Document Parser System
 =============================== */
 
-alert("12_document_parser.js start");
-
 function parseDocumentHeader(text) {
 
   const source =
@@ -158,15 +156,11 @@ function parseLinePairDocumentHeader(header) {
 
     }
 
-    if (
-      singleValueKeys.has(key)
-    ) {
-      metadata[normalizedKey] =
-        values[0] || "";
-    } else {
-      metadata[normalizedKey] =
-        values.join("\n").trim();
-    }
+    metadata[normalizedKey] =
+      parseMetadataValue(
+        normalizedKey,
+        values
+      );
 
     i =
       j - 1;
@@ -340,6 +334,57 @@ function normalizeDocumentHeaderKey(key) {
   };
 
   return map[normalized] || "";
+
+}
+
+function parseMetadataValue(
+  key,
+  values
+) {
+
+  const list =
+    Array.isArray(values)
+      ? values
+      : [];
+
+  const text =
+    list.join("\n").trim();
+
+  if (key === "version") {
+    return (
+      list.find(v =>
+        /^\d+(\.\d+)*$/.test(v)
+      ) || ""
+    );
+  }
+
+  if (key === "id") {
+    return (
+      list.find(v =>
+        /^[A-Z][A-Z0-9_-]*-\d+$/.test(v)
+      ) || list[0] || ""
+    );
+  }
+
+  if (
+    [
+      "name",
+      "layer",
+      "category",
+      "knowledgeType",
+      "status",
+      "priority",
+      "stability",
+      "decisionLevel",
+      "owner",
+      "createdAt",
+      "updatedAt"
+    ].includes(key)
+  ) {
+    return list[0] || "";
+  }
+
+  return text;
 
 }
 
