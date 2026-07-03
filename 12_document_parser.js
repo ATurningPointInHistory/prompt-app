@@ -5,6 +5,50 @@
 
 alert("12_document_parser.js start");
 
+function parseDocumentHeader(text) {
+
+  const source =
+    String(text || "");
+
+  const header =
+    extractMetadataBlock(
+      extractDocumentHeaderBlock(
+        source
+      )
+    );
+
+  let metadata =
+    parseLinePairDocumentHeader(
+      header
+    );
+
+  if (
+    !metadata.id &&
+    !metadata.name &&
+    !metadata.summary
+  ) {
+
+    metadata =
+      parseColonDocumentHeader(
+        header
+      );
+
+  }
+
+  metadata.keywords =
+    splitDocumentCsv(
+      metadata.keywords
+    );
+
+  metadata.relationships =
+    splitDocumentCsv(
+      metadata.relationships
+    );
+
+  return metadata;
+
+}
+
 function parseLinePairDocumentHeader(header) {
 
   const metadata = {};
@@ -140,6 +184,66 @@ function cleanDocumentHeaderValue(
   return String(value || "")
     .replace(/^\s+/, "")
     .replace(/\s+$/, "");
+
+}
+
+function parseColonDocumentHeader(header) {
+
+  const metadata = {};
+
+  const lines =
+    String(header || "")
+      .split(/\r?\n/);
+
+  let currentKey = "";
+
+  lines.forEach(line => {
+
+    const keyMatch =
+      line.match(
+        /^([A-Za-z][A-Za-z0-9_ -]*):\s*(.*)$/
+      );
+
+    if (keyMatch) {
+
+      currentKey =
+        normalizeDocumentHeaderKey(
+          keyMatch[1]
+        );
+
+      if (currentKey) {
+
+        metadata[currentKey] =
+          cleanDocumentHeaderValue(
+            keyMatch[2] || ""
+          );
+
+      }
+
+      return;
+
+    }
+
+    if (
+      currentKey &&
+      line.trim()
+    ) {
+
+      const currentValue =
+        metadata[currentKey] || "";
+
+      metadata[currentKey] =
+        cleanDocumentHeaderValue(
+          currentValue
+            ? currentValue + "\n" + line.trim()
+            : line.trim()
+        );
+
+    }
+
+  });
+
+  return metadata;
 
 }
 
