@@ -9,8 +9,10 @@ function parseDocumentHeader(text) {
     String(text || "");
 
   const header =
-    extractDocumentHeaderBlock(
-      source
+    extractMetadataBlock(
+      extractDocumentHeaderBlock(
+        source
+      )
     );
 
   let metadata =
@@ -239,6 +241,51 @@ function extractDocumentHeaderBlock(text) {
   return match
     ? match[1].trim()
     : source;
+
+}
+
+function extractMetadataBlock(text) {
+
+  const lines =
+    String(text || "")
+      .split(/\r?\n/);
+
+  let start = -1;
+  let end = lines.length;
+
+  for (
+    let i = 0;
+    i < lines.length;
+    i++
+  ) {
+
+    const line =
+      lines[i].trim();
+
+    if (
+      /^metadata$/i.test(line)
+    ) {
+      start = i + 1;
+      continue;
+    }
+
+    if (
+      start >= 0 &&
+      /^body$/i.test(line)
+    ) {
+      end = i;
+      break;
+    }
+
+  }
+
+  if (start < 0) {
+    return text;
+  }
+
+  return lines
+    .slice(start, end)
+    .join("\n");
 
 }
 
