@@ -119,8 +119,6 @@ function parseLinePairDocumentHeader(header) {
         !/^=+$/.test(line)
       );
 
-  let inMetadata = false;
-
   const metadataKeys =
     new Set([
       "id",
@@ -158,19 +156,6 @@ function parseLinePairDocumentHeader(header) {
         .toLowerCase()
         .replace(/\s+/g, "");
 
-    if (key === "metadata") {
-      inMetadata = true;
-      continue;
-    }
-
-    if (key === "body") {
-      break;
-    }
-
-    if (!inMetadata) {
-      continue;
-    }
-
     if (!metadataKeys.has(key)) {
       continue;
     }
@@ -184,8 +169,11 @@ function parseLinePairDocumentHeader(header) {
 
     const values = [];
 
+    let j =
+      i + 1;
+
     for (
-      let j = i + 1;
+      ;
       j < lines.length;
       j++
     ) {
@@ -199,7 +187,6 @@ function parseLinePairDocumentHeader(header) {
           .replace(/\s+/g, "");
 
       if (
-        nextKey === "body" ||
         metadataKeys.has(nextKey)
       ) {
         break;
@@ -211,6 +198,9 @@ function parseLinePairDocumentHeader(header) {
 
     metadata[normalizedKey] =
       values.join("\n").trim();
+
+    i =
+      j - 1;
 
   }
 
