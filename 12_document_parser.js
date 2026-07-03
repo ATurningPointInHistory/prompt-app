@@ -13,10 +13,45 @@ function parseDocumentHeader(text) {
       source
     );
 
+  let metadata =
+    parseColonDocumentHeader(
+      header
+    );
+
+  if (
+    !metadata.id &&
+    !metadata.name &&
+    !metadata.summary
+  ) {
+
+    metadata =
+      parseLinePairDocumentHeader(
+        header
+      );
+
+  }
+
+  metadata.keywords =
+    splitDocumentCsv(
+      metadata.keywords
+    );
+
+  metadata.relationships =
+    splitDocumentCsv(
+      metadata.relationships
+    );
+
+  return metadata;
+
+}
+
+function parseColonDocumentHeader(header) {
+
   const metadata = {};
 
   const lines =
-    header.split(/\r?\n/);
+    String(header || "")
+      .split(/\r?\n/);
 
   let currentKey = "";
 
@@ -35,12 +70,10 @@ function parseDocumentHeader(text) {
         );
 
       if (currentKey) {
-
         metadata[currentKey] =
           cleanDocumentHeaderValue(
             keyMatch[2] || ""
           );
-
       }
 
       return;
@@ -66,15 +99,118 @@ function parseDocumentHeader(text) {
 
   });
 
-  metadata.keywords =
-    splitDocumentCsv(
-      metadata.keywords
-    );
+  return metadata;
 
-  metadata.relationships =
-    splitDocumentCsv(
-      metadata.relationships
-    );
+}
+
+function parseLinePairDocumentHeader(header) {
+
+  const metadata = {};
+
+  const lines =
+    String(header || "")
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(line =>
+        line &&
+        !/^-+$/.test(line) &&
+        !/^=+$/.test(line)
+      );
+
+  let inMetadata = false;
+
+  const metadataKeys =
+    new Set([
+      "id",
+      "title",
+      "summary",
+      "version",
+      "layer",
+      "category",
+      "knowledgetype",
+      "status",
+      "priority",
+      "stability",
+      "tags",
+      "keywords",
+      "relationships",
+      "workflow",
+      "rules",
+      "owner",
+      "created",
+      "updated",
+      "decisionlevel"
+    ]);
+
+  for (
+    let i = 0;
+    i < lines.length;
+    i++
+  ) {
+
+    const raw =
+      lines[i];
+
+    const key =
+      raw
+        .toLowerCase()
+        .replace(/\s+/g, "");
+
+    if (key === "metadata") {
+      inMetadata = true;
+      continue;
+    }
+
+    if (key === "body") {
+      break;
+    }
+
+    if (!inMetadata) {
+      continue;
+    }
+
+    if (!metadataKeys.has(key)) {
+      continue;
+    }
+
+    const normalizedKey =
+      normalizeDocumentHeaderKey(raw);
+
+    if (!normalizedKey) {
+      continue;
+    }
+
+    const values = [];
+
+    for (
+      let j = i + 1;
+      j < lines.length;
+      j++
+    ) {
+
+      const next =
+        lines[j];
+
+      const nextKey =
+        next
+          .toLowerCase()
+          .replace(/\s+/g, "");
+
+      if (
+        nextKey === "body" ||
+        metadataKeys.has(nextKey)
+      ) {
+        break;
+      }
+
+      values.push(next);
+
+    }
+
+    metadata[normalizedKey] =
+      values.join("\n").trim();
+
+  }
 
   return metadata;
 
@@ -118,6 +254,8 @@ function normalizeDocumentHeaderKey(key) {
     id: "id",
     title: "name",
     summary: "summary",
+    version: "version",
+    layer: "layer",
     series: "series",
     knowledgetype: "knowledgeType",
     category: "category",
@@ -125,12 +263,14 @@ function normalizeDocumentHeaderKey(key) {
     priority: "priority",
     stability: "stability",
     decisionlevel: "decisionLevel",
-    version: "version",
     created: "createdAt",
     updated: "updatedAt",
     tags: "keywords",
     keywords: "keywords",
-    relationships: "relationships"
+    relationships: "relationships",
+    workflow: "workflow",
+    rules: "rules",
+    owner: "owner"
   };
 
   return map[normalized] || "";
