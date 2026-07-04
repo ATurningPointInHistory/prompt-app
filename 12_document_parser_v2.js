@@ -3,50 +3,6 @@
    Document Parser System
 =============================== */
 
-function parseDocumentHeader(text) {
-
-  const source =
-    String(text || "");
-
-  const header =
-    extractMetadataBlock(
-      extractDocumentHeaderBlock(
-        source
-      )
-    );
-
-  let metadata =
-    parseLinePairDocumentHeader(
-      header
-    );
-
-  if (
-    !metadata.id &&
-    !metadata.name &&
-    !metadata.summary
-  ) {
-
-    metadata =
-      parseColonDocumentHeader(
-        header
-      );
-
-  }
-
-  metadata.keywords =
-    splitDocumentCsv(
-      metadata.keywords
-    );
-
-  metadata.relationships =
-    splitDocumentCsv(
-      metadata.relationships
-    );
-
-  return metadata;
-
-}
-
 function parseLinePairDocumentHeader(header) {
 
   const metadata = {};
@@ -74,27 +30,10 @@ function parseLinePairDocumentHeader(header) {
       "priority",
       "stability",
       "keywords",
+      "tags",
       "relationships",
       "workflow",
       "rules",
-      "owner",
-      "created",
-      "updated",
-      "decisionlevel"
-    ]);
-
-  const singleValueKeys =
-    new Set([
-      "id",
-      "title",
-      "summary",
-      "version",
-      "layer",
-      "category",
-      "knowledgetype",
-      "status",
-      "priority",
-      "stability",
       "owner",
       "created",
       "updated",
@@ -168,25 +107,6 @@ function parseLinePairDocumentHeader(header) {
       metadata[normalizedKey] =
         parsedValue;
     }
-
-    i =
-      j - 1;
-
-    const parsedValue =
-      parseMetadataValue(
-        normalizedKey,
-        values
-      );
-
-    if (
-      parsedValue ||
-      metadata[normalizedKey] === undefined
-    ) {
-      metadata[normalizedKey] =
-        parsedValue;
-    }
-
-      );
 
     i =
       j - 1;
