@@ -155,15 +155,22 @@ function parseLinePairDocumentHeader(header) {
 
     }
 
-    if (normalizedKey === "version") {
-      console.log({
-        values,
-        parsed: parseMetadataValue(
-          normalizedKey,
-          values
-        )
-      });
+    const parsedValue =
+      parseMetadataValue(
+        normalizedKey,
+        values
+      );
+
+    if (
+      parsedValue ||
+      metadata[normalizedKey] === undefined
+    ) {
+      metadata[normalizedKey] =
+        parsedValue;
     }
+
+    i =
+      j - 1;
 
     const parsedValue =
       parseMetadataValue(
