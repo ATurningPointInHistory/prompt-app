@@ -1560,6 +1560,96 @@ function copyMemoTitleList() {
 
 }
 
+function refreshMemoMetadataFromText() {
+
+  normalizeMemoBoxes();
+
+  memoBoxList =
+    memoBoxList.map(memo => {
+
+      if (
+        typeof parseDocumentHeader !== "function"
+      ) {
+        return memo;
+      }
+
+      const metadata =
+        parseDocumentHeader(
+          memo.text || ""
+        );
+
+      if (
+        !metadata.id &&
+        !metadata.name
+      ) {
+        return memo;
+      }
+
+      return {
+        ...memo,
+
+        id:
+          metadata.id || memo.id || "",
+
+        name:
+          metadata.name || memo.name || "メモ",
+
+        summary:
+          metadata.summary || memo.summary || "",
+
+        knowledgeType:
+          metadata.knowledgeType ||
+          memo.knowledgeType ||
+          memo.type ||
+          "Memo",
+
+        category:
+          metadata.category || memo.category || "",
+
+        status:
+          metadata.status || memo.status || "Inbox",
+
+        series:
+          metadata.series || memo.series || "",
+
+        priority:
+          metadata.priority || memo.priority || "",
+
+        stability:
+          metadata.stability || memo.stability || "",
+
+        decisionLevel:
+          metadata.decisionLevel ||
+          memo.decisionLevel ||
+          "",
+
+        version:
+          metadata.version || memo.version || "",
+
+        keywords:
+          metadata.keywords?.length
+            ? metadata.keywords
+            : memo.keywords || [],
+
+        relationships:
+          metadata.relationships?.length
+            ? metadata.relationships
+            : memo.relationships || [],
+
+        updatedAt:
+          new Date().toISOString()
+
+      };
+
+    });
+
+  saveMemoBoxes();
+  showMemoBox();
+
+  alert("Metadata更新完了");
+
+}
+
 window.findMemoById =
   findMemoById;
 
@@ -1616,3 +1706,6 @@ window.copyMemoBox = copyMemoBox;
 
 window.copyMemoTitleList =
   copyMemoTitleList;
+
+window.refreshMemoMetadataFromText =
+  refreshMemoMetadataFromText;
