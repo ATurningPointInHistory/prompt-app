@@ -400,58 +400,70 @@ function splitDocumentCsv(value) {
 function testDocumentHeaderParser() {
 
   const sample = `
-==================================================
-Document Header
-==================================================
+========================================
+Knowledge Object 001
+========================================
 
-ID:
-DOCUMENT-001
+Metadata
+----------------------------------------
 
-Title:
-Document Header Specification
+ID
 
-Summary:
-Defines the standard metadata header format.
+VER-001
 
-Series:
-DOCUMENT
+Title
 
-KnowledgeType:
-Specification
+Version Strategy
 
-Category:
-Document
+Summary
 
-Status:
-Draft
+Defines the official version management strategy.
 
-Priority:
-High
+Version
 
-Stability:
-Stable
-
-DecisionLevel:
-Approved
-
-Version:
 1.0
 
-Created:
-2026-06-30
+Layer
 
-Updated:
-2026-06-30
+Core
 
-Tags:
-Document, Header, Metadata
+Category
 
-Relationships:
-DOCUMENT-000, KNOWLEDGE-001
+CORE
 
-==================================================
+KnowledgeType
+
+Specification
+
+Status
+
+Official
+
+Priority
+
+Critical
+
+Stability
+
+Stable
+
+Keywords
+
+Version Strategy
+
+Semantic Version
+
+Relationships
+
+DESIGN-000
+
+CORE-001
+
+----------------------------------------
+Body
+----------------------------------------
+
 Purpose
-==================================================
 
 Test body.
 `;
