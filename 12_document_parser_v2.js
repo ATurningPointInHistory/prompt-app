@@ -3,6 +3,50 @@
    Document Parser System
 =============================== */
 
+function parseDocumentHeader(text) {
+
+  const source =
+    String(text || "");
+
+  const header =
+    extractMetadataBlock(
+      extractDocumentHeaderBlock(
+        source
+      )
+    );
+
+  let metadata =
+    parseLinePairDocumentHeader(
+      header
+    );
+
+  if (
+    !metadata.id &&
+    !metadata.name &&
+    !metadata.summary
+  ) {
+
+    metadata =
+      parseColonDocumentHeader(
+        header
+      );
+
+  }
+
+  metadata.keywords =
+    splitDocumentCsv(
+      metadata.keywords
+    );
+
+  metadata.relationships =
+    splitDocumentCsv(
+      metadata.relationships
+    );
+
+  return metadata;
+
+}
+
 function parseLinePairDocumentHeader(header) {
 
   const metadata = {};
