@@ -165,10 +165,20 @@ function parseLinePairDocumentHeader(header) {
       });
     }
 
-    metadata[normalizedKey] =
+    const parsedValue =
       parseMetadataValue(
         normalizedKey,
         values
+      );
+
+    if (
+      parsedValue ||
+      metadata[normalizedKey] === undefined
+    ) {
+      metadata[normalizedKey] =
+        parsedValue;
+    }
+
       );
 
     i =
