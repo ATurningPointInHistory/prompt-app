@@ -251,10 +251,13 @@ function copyMemoBox() {
 
   saveMemoBoxCurrent();
 
-  copyTextFallback(
+  const memo =
     memoBoxList[
       memoBoxActiveIndex
-    ].text
+    ];
+
+  copyTextFallback(
+    buildMemoCopyText(memo)
   );
 
 }
@@ -1532,7 +1535,7 @@ function copyMemoBoxByIndex(index) {
   }
 
   copyTextFallback(
-    memo.text || ""
+    buildMemoCopyText(memo)
   );
 
 }
@@ -1647,6 +1650,37 @@ function refreshMemoMetadataFromText() {
   showMemoBox();
 
   alert("Metadata更新完了");
+
+}
+
+function extractBoxHeaderTitle(text) {
+
+  const match =
+    String(text || "").match(
+      /={5,}\s*\n\s*([^\n]+?)\s*\n\s*={5,}/
+    );
+
+  return match
+    ? match[1].trim()
+    : "";
+
+}
+
+function buildMemoCopyText(memo) {
+
+  const body =
+    memo?.text || "";
+
+  const title =
+    extractBoxHeaderTitle(body) ||
+    memo?.name ||
+    "メモ";
+
+  return [
+    title,
+    "",
+    body
+  ].join("\n");
 
 }
 
