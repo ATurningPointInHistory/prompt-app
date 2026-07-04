@@ -794,8 +794,18 @@ function applyDocumentHeaderToMemoEditor(
     parseDocumentHeader(text);
 
   setMemoEditorValue(
+    "memoBoxId",
+    metadata.id
+  );
+
+  setMemoEditorValue(
     "memoBoxName",
     metadata.name
+  );
+
+  setMemoEditorValue(
+    "memoBoxSummary",
+    metadata.summary
   );
 
   setMemoEditorValue(
@@ -814,11 +824,44 @@ function applyDocumentHeaderToMemoEditor(
   );
 
   setMemoEditorValue(
+    "memoBoxCategory",
+    metadata.category
+  );
+
+  setMemoEditorValue(
+    "memoBoxVersion",
+    metadata.version
+  );
+
+  setMemoEditorValue(
+    "memoBoxPriority",
+    metadata.priority
+  );
+
+  setMemoEditorValue(
+    "memoBoxStability",
+    metadata.stability
+  );
+
+  setMemoEditorValue(
+    "memoBoxDecisionLevel",
+    metadata.decisionLevel
+  );
+
+  setMemoEditorValue(
     "memoBoxKeywords",
     Array.isArray(metadata.keywords)
       ? metadata.keywords.join(", ")
       : metadata.keywords
   );
+
+  setMemoEditorValue(
+    "memoBoxRelationships",
+    Array.isArray(metadata.relationships)
+      ? metadata.relationships.join(", ")
+      : metadata.relationships
+  );
+
   window.memoBoxParsedMetadata =
     metadata;
 
