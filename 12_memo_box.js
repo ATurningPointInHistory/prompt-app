@@ -179,6 +179,15 @@ function saveMemoBoxCurrent() {
 
     ...current,
 
+    boxTitle:
+      get("memoBoxBoxTitle")
+        ?.value ||
+      extractBoxHeaderTitle(
+        get("memoBoxText")?.value || ""
+      ) ||
+      current.boxTitle ||
+      "",
+
     name:
       get("memoBoxName")
         ?.value || "",
@@ -650,6 +659,15 @@ value="${isNew ? "" : index}">
 </div>
 
 <input
+id="memoBoxBoxTitle"
+class="input"
+placeholder="Knowledge Object Title"
+value="${escapeHtml(
+  current.boxTitle ||
+  extractBoxHeaderTitle(current.text || "")
+)}">
+
+<input
 id="memoBoxId"
 class="input"
 placeholder="Knowledge ID"
@@ -915,6 +933,11 @@ async function pasteMemoText() {
         text
       );
 
+      setMemoEditorValue(
+        "memoBoxBoxTitle",
+        extractBoxHeaderTitle(text)
+      );
+
     }
 
     const input =
@@ -1035,6 +1058,11 @@ function saveMemoEditor() {
       : {};
 
   const memo = {
+
+    boxTitle:
+      get("memoBoxBoxTitle")?.value ||
+      extractBoxHeaderTitle(text) ||
+      "",
 
     id:
       metadata.id ||
@@ -1346,6 +1374,9 @@ function normalizeMemoBoxes() {
       /* ==========================
          Basic
       ========================== */
+
+      boxTitle:
+        item.boxTitle || "",
 
       id:
         item.id || "",
