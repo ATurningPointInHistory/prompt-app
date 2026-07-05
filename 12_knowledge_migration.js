@@ -105,18 +105,27 @@ function patchAllMemoKnowledgeObjectsV7() {
 
       return {
         ...memo,
-        text: newText
+        text: newText,
+        updatedAt: new Date().toISOString()
       };
 
     });
 
-  saveJson(
-    "memoBoxList",
-    memoBoxList
-  );
+  if (typeof normalizeMemoBoxes === "function") {
+    normalizeMemoBoxes();
+  }
 
-  if (typeof renderMemoBoxList === "function") {
-    renderMemoBoxList();
+  if (typeof saveMemoBoxes === "function") {
+    saveMemoBoxes();
+  } else {
+    localStorage.setItem(
+      "memoBoxList",
+      JSON.stringify(memoBoxList)
+    );
+  }
+
+  if (typeof showMemoBox === "function") {
+    showMemoBox();
   }
 
   console.log(
