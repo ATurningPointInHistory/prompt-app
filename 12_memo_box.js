@@ -363,6 +363,10 @@ function showMemoBox() {
 
     <div class="memo-card-title">
 
+            ${item.boxTitle
+        ? `<div class="small-muted">${escapeHtml(item.boxTitle)}</div>`
+        : ""}
+
       ${item.id
         ? `<div class="small-muted">${escapeHtml(item.id)}</div>`
         : ""}
