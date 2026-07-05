@@ -126,3 +126,12 @@ function patchAllMemoKnowledgeObjectsV7() {
   );
 
 }
+
+window.patchKnowledgeObjectTextV7 =
+  patchKnowledgeObjectTextV7;
+
+window.addMissingMetadataFieldV7 =
+  addMissingMetadataFieldV7;
+
+window.patchAllMemoKnowledgeObjectsV7 =
+  patchAllMemoKnowledgeObjectsV7;
