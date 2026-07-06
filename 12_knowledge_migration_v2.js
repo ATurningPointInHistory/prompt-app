@@ -1,5 +1,5 @@
 /* ===============================
-   12_knowledge_migration.js
+   12_knowledge_migration_v2.js
    AI Prompt OS v7.0
    Changed Specification Patch v1
 =============================== */
