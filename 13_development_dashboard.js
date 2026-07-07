@@ -1,76 +1,86 @@
 /* ===============================
    FILE: 13_development_dashboard.js
-   Development Dashboard v1
+   AI Prompt OS v7.0
+   Development Dashboard
 =============================== */
 
 /* ===============================
-   Dashboard Check Config
+   Dashboard Registry
 =============================== */
 
-const DEVELOPMENT_DASHBOARD_CHECKS = [
+const DEVELOPMENT_DASHBOARD_MODULES = [
   {
-    phase: "Migration Engine",
-    items: [
-      {
-        name: "Scan",
-        fn: "scanKnowledgeMigration"
-      },
-      {
-        name: "Preview",
-        fn: "previewKnowledgeMigration"
-      },
-      {
-        name: "Execute",
-        fn: "executeKnowledgeMigration"
-      },
-      {
-        name: "Validation",
-        fn: "validateKnowledgeMigration"
-      },
-      {
-        name: "Report",
-        fn: "buildKnowledgeMigrationReport"
-      }
-    ]
+    id: "Migration",
+    name: "Migration Engine",
+    statusApi: "getMigrationStatus",
+    fallback: {
+      version: "7.0.0",
+      total: 8,
+      capabilities: [
+        "Registry",
+        "Scanner",
+        "Preview",
+        "Executor",
+        "Validator",
+        "Reporter",
+        "Rollback",
+        "History"
+      ],
+      nextTask: "scanKnowledgeMigration"
+    }
   },
   {
-    phase: "Repository Manager",
-    items: [
-      {
-        name: "Repository Manager",
-        fn: "getRepositoryManagerStatus"
-      },
-      {
-        name: "Repository Status",
-        fn: "getRepositoryStatus"
-      }
-    ]
+    id: "Repository",
+    name: "Repository Core",
+    statusApi: "getRepositoryStatus",
+    fallback: {
+      version: "7.0.0",
+      total: 4,
+      capabilities: [
+        "Repository Manager",
+        "Repository Database",
+        "Repository Cache",
+        "Repository Settings"
+      ],
+      nextTask: "createRepositoryManager"
+    }
   },
   {
-    phase: "Development Dashboard",
-    items: [
-      {
-        name: "Function Check",
-        fn: "checkDevelopmentFunction"
-      },
-      {
-        name: "Dashboard Build",
-        fn: "buildDevelopmentDashboard"
-      },
-      {
-        name: "Dashboard Report",
-        fn: "buildDevelopmentDashboardReport"
-      },
-      {
-        name: "Dashboard Show",
-        fn: "showDevelopmentDashboard"
-      }
-    ]
+    id: "Validation",
+    name: "Validation Engine",
+    statusApi: "getValidationStatus",
+    fallback: {
+      version: "7.0.0",
+      total: 4,
+      capabilities: [
+        "Metadata Validation",
+        "Relationship Validation",
+        "Dependency Validation",
+        "Repository Validation"
+      ],
+      nextTask: "validateKnowledgeMigration"
+    }
+  },
+  {
+    id: "Publication",
+    name: "Publication Engine",
+    statusApi: "getPublicationStatus",
+    fallback: {
+      version: "7.0.0",
+      total: 4,
+      capabilities: [
+        "Package Export",
+        "Publication Index",
+        "AI Handoff Generator",
+        "Official Summary Generator"
+      ],
+      nextTask: "buildPublicationIndex"
+    }
   }
 ];
 
 /* ===============================
-   Function Check
+   Utility
 =============================== */
 
 function checkDevelopmentFunction(name) {
@@ -79,146 +89,638 @@ function checkDevelopmentFunction(name) {
 
 }
 
-/* ===============================
-   Build Dashboard Data
-=============================== */
+function calculateProgress(implemented, total) {
 
-function buildDevelopmentDashboard() {
+  const done =
+    Number(implemented || 0);
 
-  const phases =
-    DEVELOPMENT_DASHBOARD_CHECKS.map(group => {
+  const max =
+    Number(total || 0);
 
-      const items =
-        group.items.map(item => {
+  if (!max) {
+    return 0;
+  }
 
-          const exists =
-            checkDevelopmentFunction(item.fn);
+  return Math.round(
+    done / max * 100
+  );
 
-          return {
-            name: item.name,
-            fn: item.fn,
-            exists: exists,
-            status: exists ? "OK" : "MISSING"
-          };
+}
 
-        });
+function buildProgressBar(progress) {
 
-      const total =
-        items.length;
+  const value =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        Number(progress || 0)
+      )
+    );
 
-      const ok =
-        items.filter(item => item.exists).length;
+  const filled =
+    Math.round(value / 10);
 
-      const progress =
-        total
-          ? Math.round((ok / total) * 100)
-          : 0;
+  const empty =
+    10 - filled;
 
-      return {
-        phase: group.phase,
-        total: total,
-        ok: ok,
-        missing: total - ok,
-        progress: progress,
-        items: items
-      };
+  return "█".repeat(filled) +
+    "□".repeat(empty);
 
-    });
+}
 
-  const total =
-    phases.reduce((sum, phase) => sum + phase.total, 0);
+function calculateHealth(status) {
 
-  const ok =
-    phases.reduce((sum, phase) => sum + phase.ok, 0);
+  if (!status) {
+    return 0;
+  }
 
-  const progress =
-    total
-      ? Math.round((ok / total) * 100)
+  const base =
+    Number(status.health || 0);
+
+  const errors =
+    Array.isArray(status.errors)
+      ? status.errors.length
       : 0;
 
+  const warnings =
+    Array.isArray(status.warnings)
+      ? status.warnings.length
+      : 0;
+
+  let health =
+    base || 100;
+
+  health -= errors * 20;
+  health -= warnings * 5;
+
+  return Math.max(
+    0,
+    Math.min(100, health)
+  );
+
+}
+
+/* ===============================
+   Fallback Status
+=============================== */
+
+function buildFallbackModuleStatus(moduleConfig) {
+
+  const fallback =
+    moduleConfig.fallback || {};
+
+  const capabilities =
+    fallback.capabilities || [];
+
   return {
-    title: "Development Dashboard",
-    version: "1.0.0",
-    currentPhase: "Development Dashboard Phase",
-    total: total,
-    ok: ok,
-    missing: total - ok,
-    progress: progress,
-    phases: phases,
-    updatedAt: new Date().toISOString()
+    id: moduleConfig.id,
+    name: moduleConfig.name,
+    version: fallback.version || "1.0.0",
+
+    status: "Not Implemented",
+    ready: false,
+
+    health: 0,
+
+    implemented: 0,
+    total: fallback.total || capabilities.length || 0,
+
+    capabilities:
+      capabilities.map(name => ({
+        id: name,
+        name: name,
+        implemented: false
+      })),
+
+    warnings: [
+      "Status API not found: " + moduleConfig.statusApi
+    ],
+    errors: [],
+
+    nextTask: fallback.nextTask || "",
+
+    dependsOn: [],
+    message: "Module status API is not implemented yet.",
+
+    updatedAt: Date.now()
   };
 
 }
 
 /* ===============================
-   Build Copyable Report
+   Status Collector
 =============================== */
 
-function buildDevelopmentDashboardReport() {
+function collectDevelopmentDashboardStatuses() {
 
-  const dashboard =
-    buildDevelopmentDashboard();
+  return DEVELOPMENT_DASHBOARD_MODULES.map(moduleConfig => {
+
+    const apiName =
+      moduleConfig.statusApi;
+
+    if (
+      apiName &&
+      typeof window[apiName] === "function"
+    ) {
+
+      try {
+
+        const status =
+          window[apiName]();
+
+        return normalizeDashboardStatus(
+          status,
+          moduleConfig
+        );
+
+      } catch (error) {
+
+        const fallback =
+          buildFallbackModuleStatus(moduleConfig);
+
+        fallback.status = "Error";
+        fallback.ready = false;
+        fallback.errors.push(
+          String(error.message || error)
+        );
+        fallback.message =
+          "Status API execution failed.";
+
+        return fallback;
+
+      }
+
+    }
+
+    return buildFallbackModuleStatus(
+      moduleConfig
+    );
+
+  });
+
+}
+
+function normalizeDashboardStatus(status, moduleConfig) {
+
+  const fallback =
+    buildFallbackModuleStatus(moduleConfig);
+
+  const merged =
+    Object.assign(
+      {},
+      fallback,
+      status || {}
+    );
+
+  merged.id =
+    merged.id || moduleConfig.id;
+
+  merged.name =
+    merged.name || moduleConfig.name;
+
+  merged.warnings =
+    Array.isArray(merged.warnings)
+      ? merged.warnings
+      : [];
+
+  merged.errors =
+    Array.isArray(merged.errors)
+      ? merged.errors
+      : [];
+
+  merged.dependsOn =
+    Array.isArray(merged.dependsOn)
+      ? merged.dependsOn
+      : [];
+
+  merged.capabilities =
+    Array.isArray(merged.capabilities)
+      ? merged.capabilities
+      : [];
+
+  merged.implemented =
+    Number(merged.implemented || 0);
+
+  merged.total =
+    Number(merged.total || 0);
+
+  merged.health =
+    calculateHealth(merged);
+
+  merged.updatedAt =
+    merged.updatedAt || Date.now();
+
+  return merged;
+
+}
+
+/* ===============================
+   Dashboard Calculation
+=============================== */
+
+function calculateOverallProgress(statuses) {
+
+  const total =
+    statuses.reduce(
+      (sum, item) =>
+        sum + Number(item.total || 0),
+      0
+    );
+
+  const implemented =
+    statuses.reduce(
+      (sum, item) =>
+        sum + Number(item.implemented || 0),
+      0
+    );
+
+  return calculateProgress(
+    implemented,
+    total
+  );
+
+}
+
+function calculateOverallHealth(statuses) {
+
+  if (!statuses.length) {
+    return 0;
+  }
+
+  const total =
+    statuses.reduce(
+      (sum, item) =>
+        sum + Number(item.health || 0),
+      0
+    );
+
+  return Math.round(
+    total / statuses.length
+  );
+
+}
+
+function countDashboardWarnings(statuses) {
+
+  return statuses.reduce(
+    (sum, item) =>
+      sum + (
+        Array.isArray(item.warnings)
+          ? item.warnings.length
+          : 0
+      ),
+    0
+  );
+
+}
+
+function countDashboardErrors(statuses) {
+
+  return statuses.reduce(
+    (sum, item) =>
+      sum + (
+        Array.isArray(item.errors)
+          ? item.errors.length
+          : 0
+      ),
+    0
+  );
+
+}
+
+/* ===============================
+   Roadmap
+=============================== */
+
+function buildNextTask(statuses) {
+
+  const target =
+    statuses.find(item =>
+      item.nextTask &&
+      calculateProgress(
+        item.implemented,
+        item.total
+      ) < 100
+    );
+
+  return target
+    ? target.nextTask
+    : "No next task.";
+}
+
+function buildRoadmap(statuses) {
+
+  return statuses
+    .filter(item =>
+      calculateProgress(
+        item.implemented,
+        item.total
+      ) < 100
+    )
+    .map(item => ({
+      id: item.id,
+      name: item.name,
+      progress: calculateProgress(
+        item.implemented,
+        item.total
+      ),
+      nextTask: item.nextTask || ""
+    }));
+
+}
+
+function sortDashboardModules(statuses) {
+
+  return statuses.slice().sort((a, b) => {
+
+    const pa =
+      calculateProgress(
+        a.implemented,
+        a.total
+      );
+
+    const pb =
+      calculateProgress(
+        b.implemented,
+        b.total
+      );
+
+    return pa - pb;
+
+  });
+
+}
+
+/* ===============================
+   Report Builder
+=============================== */
+
+function buildDashboardReport() {
+
+  const statuses =
+    collectDevelopmentDashboardStatuses();
+
+  const sorted =
+    sortDashboardModules(statuses);
+
+  const overallProgress =
+    calculateOverallProgress(statuses);
+
+  const overallHealth =
+    calculateOverallHealth(statuses);
+
+  const warnings =
+    countDashboardWarnings(statuses);
+
+  const errors =
+    countDashboardErrors(statuses);
+
+  const nextTask =
+    buildNextTask(sorted);
 
   const lines = [];
 
-  lines.push("========================================");
-  lines.push("AI Prompt OS v7.0");
-  lines.push("Development Dashboard Report");
-  lines.push("========================================");
-  lines.push("");
-  lines.push("Current Phase");
-  lines.push(dashboard.currentPhase);
-  lines.push("");
-  lines.push("Overall Progress");
-  lines.push(dashboard.progress + "%");
-  lines.push("");
-  lines.push("Implemented");
-  lines.push(dashboard.ok + " / " + dashboard.total);
-  lines.push("");
-  lines.push("Missing");
-  lines.push(String(dashboard.missing));
+  lines.push(
+    "========================================"
+  );
+  lines.push(
+    "AI Prompt OS Development Dashboard"
+  );
+  lines.push(
+    "========================================"
+  );
   lines.push("");
 
-  dashboard.phases.forEach(phase => {
+  sorted.forEach(item => {
 
-    lines.push("----------------------------------------");
-    lines.push(phase.phase);
-    lines.push("----------------------------------------");
-    lines.push("Progress: " + phase.progress + "%");
-    lines.push("");
-
-    phase.items.forEach(item => {
-      lines.push(
-        "[" + item.status + "] " +
-        item.name +
-        " : " +
-        item.fn
+    const progress =
+      calculateProgress(
+        item.implemented,
+        item.total
       );
-    });
+
+    lines.push(item.name);
+    lines.push("");
+    lines.push(
+      buildProgressBar(progress) +
+        " " +
+        progress +
+        "%"
+    );
+    lines.push(
+      "Health: " + item.health + "%"
+    );
+    lines.push(
+      "Status: " + item.status
+    );
+
+    if (item.nextTask) {
+      lines.push(
+        "Next: " + item.nextTask
+      );
+    }
 
     lines.push("");
 
   });
 
-  lines.push("Updated");
-  lines.push(dashboard.updatedAt);
+  lines.push(
+    "----------------------------------------"
+  );
   lines.push("");
-  lines.push("========================================");
-  lines.push("END");
-  lines.push("========================================");
+  lines.push("Overall");
+  lines.push("");
+  lines.push(
+    buildProgressBar(overallProgress) +
+      " " +
+      overallProgress +
+      "%"
+  );
+  lines.push("");
+  lines.push(
+    "Health"
+  );
+  lines.push(
+    overallHealth + "%"
+  );
+  lines.push("");
+  lines.push(
+    "Warnings"
+  );
+  lines.push(String(warnings));
+  lines.push("");
+  lines.push(
+    "Errors"
+  );
+  lines.push(String(errors));
+  lines.push("");
+  lines.push(
+    "----------------------------------------"
+  );
+  lines.push("");
+  lines.push(
+    "Current Phase"
+  );
+  lines.push(
+    "Repository Implementation"
+  );
+  lines.push("");
+  lines.push(
+    "Next"
+  );
+  lines.push(nextTask);
+  lines.push("");
+  lines.push(
+    "========================================"
+  );
 
   return lines.join("\n");
 
 }
 
+function copyDashboardReport() {
+
+  const report =
+    buildDashboardReport();
+
+  if (
+    navigator.clipboard &&
+    navigator.clipboard.writeText
+  ) {
+
+    navigator.clipboard.writeText(report);
+
+  }
+
+  return report;
+
+}
+
 /* ===============================
-   Show Dashboard
+   UI
 =============================== */
+
+function buildDevelopmentDashboardHtml() {
+
+  const statuses =
+    collectDevelopmentDashboardStatuses();
+
+  const overallProgress =
+    calculateOverallProgress(statuses);
+
+  const overallHealth =
+    calculateOverallHealth(statuses);
+
+  const warnings =
+    countDashboardWarnings(statuses);
+
+  const errors =
+    countDashboardErrors(statuses);
+
+  let html = "";
+
+  html += "<div class='dashboard-box'>";
+  html += "<h2>Development Dashboard</h2>";
+
+  html += "<div>";
+  html += "<b>Overall</b><br>";
+  html += buildProgressBar(overallProgress);
+  html += " " + overallProgress + "%<br>";
+  html += "Health: " + overallHealth + "%<br>";
+  html += "Warnings: " + warnings + "<br>";
+  html += "Errors: " + errors + "<br>";
+  html += "</div>";
+
+  html += "<hr>";
+
+  statuses.forEach(item => {
+
+    const progress =
+      calculateProgress(
+        item.implemented,
+        item.total
+      );
+
+    html += "<div class='dashboard-module'>";
+    html += "<h3>" + item.name + "</h3>";
+    html += "<div>";
+    html += buildProgressBar(progress);
+    html += " " + progress + "%";
+    html += "</div>";
+    html += "<div>Status: " + item.status + "</div>";
+    html += "<div>Health: " + item.health + "%</div>";
+
+    if (item.nextTask) {
+      html += "<div>Next: " + item.nextTask + "</div>";
+    }
+
+    if (item.warnings.length) {
+      html += "<div>Warnings: " +
+        item.warnings.length +
+        "</div>";
+    }
+
+    if (item.errors.length) {
+      html += "<div>Errors: " +
+        item.errors.length +
+        "</div>";
+    }
+
+    html += "</div>";
+
+  });
+
+  html += "<hr>";
+  html += "<button onclick='showDevelopmentDashboardReport()'>";
+  html += "Report";
+  html += "</button> ";
+
+  html += "<button onclick='copyDashboardReport()'>";
+  html += "Copy Report";
+  html += "</button>";
+
+  html += "</div>";
+
+  return html;
+
+}
 
 function showDevelopmentDashboard() {
 
+  const target =
+    document.getElementById(
+      "developmentDashboard"
+    );
+
+  if (!target) {
+
+    console.log(
+      buildDashboardReport()
+    );
+
+    return;
+
+  }
+
+  target.innerHTML =
+    buildDevelopmentDashboardHtml();
+
+}
+
+function showDevelopmentDashboardReport() {
+
   const report =
-    buildDevelopmentDashboardReport();
+    buildDashboardReport();
+
+  const target =
+    document.getElementById(
+      "developmentDashboardReport"
+    );
+
+  if (target) {
+    target.textContent = report;
+  }
 
   console.log(report);
 
@@ -227,21 +729,132 @@ function showDevelopmentDashboard() {
 }
 
 /* ===============================
-   Short Status API
+   Simple Status APIs
+   Temporary self-check versions
 =============================== */
 
-function getDevelopmentDashboardStatus() {
+function getMigrationStatus() {
 
-  const dashboard =
-    buildDevelopmentDashboard();
+  const checks = [
+    {
+      id: "Registry",
+      name: "Migration Registry",
+      fn: "getKnowledgeMigrationRegistry"
+    },
+    {
+      id: "Scanner",
+      name: "Scanner",
+      fn: "scanKnowledgeMigration"
+    },
+    {
+      id: "Preview",
+      name: "Preview",
+      fn: "previewKnowledgeMigration"
+    },
+    {
+      id: "Executor",
+      name: "Executor",
+      fn: "executeKnowledgeMigration"
+    },
+    {
+      id: "Validator",
+      name: "Validator",
+      fn: "validateKnowledgeMigration"
+    },
+    {
+      id: "Reporter",
+      name: "Reporter",
+      fn: "buildKnowledgeMigrationReport"
+    },
+    {
+      id: "Rollback",
+      name: "Rollback",
+      fn: "rollbackKnowledgeMigration"
+    },
+    {
+      id: "History",
+      name: "History",
+      fn: "getKnowledgeMigrationHistory"
+    }
+  ];
+
+  const capabilities =
+    checks.map(item => ({
+      id: item.id,
+      name: item.name,
+      implemented:
+        checkDevelopmentFunction(item.fn),
+      functionName: item.fn
+    }));
+
+  const implemented =
+    capabilities.filter(item =>
+      item.implemented
+    ).length;
+
+  const warnings = [];
+
+  if (!checkDevelopmentFunction("scanKnowledgeMigration")) {
+    warnings.push(
+      "scanKnowledgeMigration is not implemented."
+    );
+  }
 
   return {
-    name: "Development Dashboard",
-    version: dashboard.version,
-    ready: true,
-    health: dashboard.progress,
-    progress: dashboard.progress,
-    missing: dashboard.missing
+    id: "Migration",
+    name: "Migration Engine",
+    version: "7.0.0",
+
+    status:
+      implemented > 0
+        ? "Working"
+        : "Not Implemented",
+
+    ready:
+      checkDevelopmentFunction(
+        "scanKnowledgeMigration"
+      ),
+
+    health:
+      implemented > 0
+        ? 90
+        : 0,
+
+    implemented: implemented,
+    total: checks.length,
+
+    capabilities: capabilities,
+
+    warnings: warnings,
+    errors: [],
+
+    nextTask:
+      getNextMissingCapabilityName(
+        capabilities
+      ),
+
+    dependsOn: [
+      "Memo Box",
+      "Document Parser"
+    ],
+
+    message:
+      "Migration Engine status generated by Dashboard self-check.",
+
+    updatedAt: Date.now()
   };
+
+}
+
+function getNextMissingCapabilityName(capabilities) {
+
+  const missing =
+    capabilities.find(item =>
+      !item.implemented
+    );
+
+  return missing
+    ? missing.functionName || missing.name
+    : "Completed";
 
 }
