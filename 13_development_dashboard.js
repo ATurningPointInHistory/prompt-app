@@ -894,3 +894,91 @@ function getNextMissingCapabilityName(capabilities) {
     : "Completed";
 
 }
+
+/* ===============================
+   Migration Registry
+=============================== */
+
+function getKnowledgeMigrationRegistry() {
+
+  return {
+
+    version: "7.0.0",
+
+    replacements: [
+
+      {
+        from: "IMPORT-001",
+        to: "TRANSFER-001"
+      },
+
+      {
+        from: "LOGGING-001",
+        to: "OBSERVABILITY-001"
+      },
+
+      {
+        from: "SEARCH-001",
+        to: "RETRIEVAL-001"
+      },
+
+      {
+        from: "DATABASE-001",
+        to: "REPOSITORY-001"
+      },
+
+      {
+        from: "SETTING-001",
+        to: "CONFIGURATION-001"
+      },
+
+      {
+        from: "TEST-001",
+        to: "VALIDATION-001"
+      },
+
+      {
+        from: "QUALITY-001",
+        to: "VALIDATION-001"
+      },
+
+      {
+        from: "AUDIT-001",
+        to: "OBSERVABILITY-001"
+      },
+
+      {
+        from: "MONITORING-001",
+        to: "OBSERVABILITY-001"
+      },
+
+      {
+        from: "HEALTH-001",
+        to: "OBSERVABILITY-001"
+      }
+
+    ],
+
+    metadataFields: [
+
+      "Authority",
+      "DependsOn",
+      "Provides"
+
+    ],
+
+    rules: {
+
+      preserveMemoCount: true,
+
+      preserveUserText: true,
+
+      overwriteKnownRulesOnly: true,
+
+      useSaveMemoBoxes: true
+
+    }
+
+  };
+
+}
