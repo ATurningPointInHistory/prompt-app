@@ -728,6 +728,42 @@ function showDevelopmentDashboardReport() {
 
 }
 
+function getDevelopmentDashboardStatus() {
+
+  const dashboard =
+    buildDevelopmentDashboard();
+
+  return {
+    id: "DevelopmentDashboard",
+    name: "Development Dashboard",
+    version: dashboard.version,
+
+    status: "Ready",
+    ready: true,
+
+    health: dashboard.progress,
+
+    implemented: dashboard.ok,
+    total: dashboard.total,
+
+    warnings: [],
+    errors: [],
+
+    nextTask:
+      dashboard.missing > 0
+        ? "Implement missing dashboard checks."
+        : "Completed",
+
+    dependsOn: [],
+
+    message:
+      "Development Dashboard self-check is available.",
+
+    updatedAt: Date.now()
+  };
+
+}
+
 /* ===============================
    Simple Status APIs
    Temporary self-check versions
