@@ -1274,6 +1274,18 @@ function deleteSelectedMemoBoxes() {
     return;
   }
 
+  const lockedItems =
+    [...memoBoxSelected].filter(index =>
+      isMemoLocked(memoBoxList[index])
+    );
+
+  if (lockedItems.length) {
+    alert(
+      "ロック中のメモが含まれているため削除できません。"
+    );
+    return;
+  }
+
   if (
     !confirm(
       `${memoBoxSelected.size}件削除しますか？`
@@ -1496,6 +1508,16 @@ function normalizeMemoBoxes() {
         )
           ? item.relationships
           : [],
+
+      /* ==========================
+         locked
+      ========================== */
+
+      locked:
+        item.locked === true,
+
+      migrationLocked:
+        item.migrationLocked === true,
 
       /* ==========================
          History
