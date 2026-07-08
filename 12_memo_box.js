@@ -1893,16 +1893,6 @@ function getMemoMetadataCreated(metadata) {
 
 }
 
-function getMemoMetadataTitle(metadata) {
-
-  return (
-    metadata.title ||
-    metadata.name ||
-    ""
-  );
-
-}
-
 window.findMemoById =
   findMemoById;
 
