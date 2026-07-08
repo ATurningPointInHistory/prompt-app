@@ -1529,3 +1529,6 @@ window.changeRepairAnalyzeSourceMode =
 
 window.buildRepairAnalyzeSourceToolHtml =
   buildRepairAnalyzeSourceToolHtml;
+
+window.isMemoLocked =
+  isMemoLocked;
