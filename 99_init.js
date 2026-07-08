@@ -31,7 +31,7 @@ window.onerror = function(
     console.warn("lastCrash save failed", e);
   }
 
-  if (!DEBUG_MODE) return;
+  if (typeof DEBUG_MODE !== "undefined" && !DEBUG_MODE) return;
 
   const box = get("debugBox");
   if (!box) return;
