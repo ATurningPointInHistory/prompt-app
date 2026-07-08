@@ -982,3 +982,80 @@ function getKnowledgeMigrationRegistry() {
   };
 
 }
+
+/* ===============================
+   Migration Scanner
+=============================== */
+
+function scanKnowledgeMigration() {
+
+  const registry =
+    getKnowledgeMigrationRegistry();
+
+  const list =
+    typeof getMemoBoxList === "function"
+      ? getMemoBoxList()
+      : memoBoxList;
+
+  const results = [];
+
+  list.forEach((memo, index) => {
+
+    const text =
+      [
+        memo.id,
+        memo.name,
+        memo.title,
+        memo.summary,
+        memo.text,
+        memo.relationships,
+        memo.dependsOn,
+        memo.provides
+      ]
+        .join("\n");
+
+    const replacements =
+      registry.replacements.filter(rule =>
+        text.includes(rule.from)
+      );
+
+    const missingMetadata =
+      registry.metadataFields.filter(field => {
+
+        const key =
+          field.charAt(0).toLowerCase() +
+          field.slice(1);
+
+        return !memo[key];
+
+      });
+
+    if (
+      replacements.length ||
+      missingMetadata.length
+    ) {
+
+      results.push({
+        index: index,
+        id: memo.id || "",
+        name: memo.name || "",
+        title: memo.title || "",
+        replacements: replacements,
+        missingMetadata: missingMetadata
+      });
+
+    }
+
+  });
+
+  return {
+    version: registry.version,
+    checked: list.length,
+    candidates: results.length,
+    results: results,
+    changed: false,
+    message: "Scan completed. No data was modified.",
+    updatedAt: Date.now()
+  };
+
+}
