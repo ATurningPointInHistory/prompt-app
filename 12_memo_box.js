@@ -1265,10 +1265,10 @@ function saveMemoEditor() {
       index < memoBoxList.length
     ) {
 
-      memoBoxList[index] = {
-        ...memoBoxList[index],
-        ...memo
-      };
+      updateMemo(
+        index,
+        memo
+      );
 
       memoBoxActiveIndex = index;
 
