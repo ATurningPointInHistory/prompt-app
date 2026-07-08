@@ -1513,6 +1513,37 @@ function deleteMemo(index) {
 }
 
 /* ===============================
+   Memo Create
+=============================== */
+
+function createMemo(
+  memo = {}
+) {
+
+  if (
+    !Array.isArray(memoBoxList)
+  ) {
+    return -1;
+  }
+
+  memoBoxList.unshift({
+
+    ...memo,
+
+    createdAt:
+      memo.createdAt ||
+      new Date().toISOString(),
+
+    updatedAt:
+      new Date().toISOString()
+
+  });
+
+  return 0;
+
+}
+
+/* ===============================
    Export
 =============================== */
 
@@ -1623,3 +1654,6 @@ window.updateMemo =
 
 window.deleteMemo =
   deleteMemo;
+
+window.createMemo =
+  createMemo;
