@@ -1419,10 +1419,7 @@ function isMemoLocked(memo) {
 
   return (
     memo.locked === true ||
-    memo.migrationLocked === true ||
-    memo.status === "Official" ||
-    memo.status === "Historical" ||
-    memo.status === "Archive"
+    memo.migrationLocked === true
   );
 
 }
