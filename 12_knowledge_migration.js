@@ -1,7 +1,72 @@
 /* ===============================
    12_knowledge_migration.js
    AI Prompt OS v7.0
-   Changed Specification Patch v1
+   Knowledge Migration Engine v2
+=============================== */
+
+/* ===============================
+   Migration Registry
+=============================== */
+
+function getKnowledgeMigrationRegistry() {
+
+  return {
+
+    version:
+      "2.0.0",
+
+    replacements: [
+      { from: "IMPORT-001", to: "TRANSFER-001" },
+      { from: "LOGGING-001", to: "OBSERVABILITY-001" },
+      { from: "SEARCH-001", to: "RETRIEVAL-001" },
+      { from: "DATABASE-001", to: "REPOSITORY-001" },
+      { from: "SETTING-001", to: "CONFIGURATION-001" },
+      { from: "TEST-001", to: "VALIDATION-001" },
+      { from: "QUALITY-001", to: "VALIDATION-001" },
+      { from: "AUDIT-001", to: "OBSERVABILITY-001" },
+      { from: "MONITORING-001", to: "OBSERVABILITY-001" },
+      { from: "HEALTH-001", to: "OBSERVABILITY-001" }
+    ],
+
+    metadataFields: [
+      {
+        field: "Authority:",
+        insertAfter: "DecisionLevel:"
+      },
+      {
+        field: "DependsOn:",
+        insertAfter: "Authority:"
+      },
+      {
+        field: "Provides:",
+        insertAfter: "DependsOn:"
+      }
+    ]
+
+  };
+
+}
+
+/* ===============================
+   Memo List Access
+=============================== */
+
+function getKnowledgeMigrationMemoList() {
+
+  if (Array.isArray(memoBoxList)) {
+    return memoBoxList;
+  }
+
+  if (typeof getMemoBoxList === "function") {
+    return getMemoBoxList();
+  }
+
+  return [];
+
+}
+
+/* ===============================
+   Text Patch
 =============================== */
 
 function patchKnowledgeObjectTextV7(text) {
@@ -9,54 +74,40 @@ function patchKnowledgeObjectTextV7(text) {
   let source =
     String(text || "");
 
-  const replaceMap = [
-    ["IMPORT-001", "TRANSFER-001"],
-    ["LOGGING-001", "OBSERVABILITY-001"],
-    ["SEARCH-001", "RETRIEVAL-001"],
-    ["DATABASE-001", "REPOSITORY-001"],
-    ["SETTING-001", "CONFIGURATION-001"],
-    ["TEST-001", "VALIDATION-001"],
-    ["QUALITY-001", "VALIDATION-001"],
-    ["AUDIT-001", "OBSERVABILITY-001"],
-    ["MONITORING-001", "OBSERVABILITY-001"],
-    ["HEALTH-001", "OBSERVABILITY-001"]
-  ];
+  const registry =
+    getKnowledgeMigrationRegistry();
 
-  replaceMap.forEach(pair => {
-    const from = pair[0];
-    const to = pair[1];
+  registry.replacements.forEach(rule => {
+
+    if (!rule.from) {
+      return;
+    }
 
     source =
-      source.replace(
-        new RegExp(from, "g"),
-        to
-      );
+      source
+        .split(rule.from)
+        .join(rule.to);
+
   });
 
-  source =
-    addMissingMetadataFieldV7(
-      source,
-      "Authority:",
-      "DecisionLevel:"
-    );
+  registry.metadataFields.forEach(rule => {
 
-  source =
-    addMissingMetadataFieldV7(
-      source,
-      "DependsOn:",
-      "Authority:"
-    );
+    source =
+      addMissingMetadataFieldV7(
+        source,
+        rule.field,
+        rule.insertAfter
+      );
 
-  source =
-    addMissingMetadataFieldV7(
-      source,
-      "Provides:",
-      "DependsOn:"
-    );
+  });
 
   return source;
 
 }
+
+/* ===============================
+   Add Missing Metadata Field
+=============================== */
 
 function addMissingMetadataFieldV7(
   text,
@@ -67,7 +118,10 @@ function addMissingMetadataFieldV7(
   const source =
     String(text || "");
 
-  if (source.includes(field)) {
+  if (
+    !field ||
+    source.includes(field)
+  ) {
     return source;
   }
 
@@ -82,54 +136,95 @@ function addMissingMetadataFieldV7(
 
 }
 
-function patchAllMemoKnowledgeObjectsV7() {
+/* ===============================
+   Scan Migration Candidates
+=============================== */
 
-  if (!Array.isArray(memoBoxList)) {
-    console.warn("memoBoxList が見つかりません。");
-    return {
-      updated: 0,
-      skipped: 0
-    };
-  }
+function scanKnowledgeMigration() {
 
-  let count = 0;
-  let skipped = 0;
+  const list =
+    getKnowledgeMigrationMemoList();
 
-  memoBoxList =
-    memoBoxList.map((memo, index) => {
+  const registry =
+    getKnowledgeMigrationRegistry();
 
-      if (!memo) {
-        skipped++;
-        return memo;
+  const results = [];
+
+  list.forEach((memo, index) => {
+
+    if (!memo) {
+      return;
+    }
+
+    if (
+      typeof isMemoLocked === "function" &&
+      isMemoLocked(memo)
+    ) {
+      return;
+    }
+
+    const text =
+      String(memo.text || "");
+
+    if (!text) {
+      return;
+    }
+
+    const matched = [];
+
+    registry.replacements.forEach(rule => {
+
+      if (text.includes(rule.from)) {
+        matched.push({
+          from: rule.from,
+          to: rule.to
+        });
       }
-
-      if (
-        typeof isMemoLocked === "function" &&
-        isMemoLocked(memo)
-      ) {
-        skipped++;
-        return memo;
-      }
-
-      const oldText =
-        String(memo.text || "");
-
-      const newText =
-        patchKnowledgeObjectTextV7(oldText);
-
-      if (oldText !== newText) {
-        count++;
-
-        return {
-          ...memo,
-          text: newText,
-          updatedAt: Date.now()
-        };
-      }
-
-      return memo;
 
     });
+
+    registry.metadataFields.forEach(rule => {
+
+      if (
+        !text.includes(rule.field) &&
+        text.includes(rule.insertAfter)
+      ) {
+        matched.push({
+          field: rule.field,
+          insertAfter: rule.insertAfter
+        });
+      }
+
+    });
+
+    if (matched.length) {
+
+      results.push({
+        index: index,
+        id: memo.id || "",
+        name: memo.name || "",
+        title: memo.title || "",
+        matches: matched
+      });
+
+    }
+
+  });
+
+  return {
+    checked: list.length,
+    candidates: results.length,
+    results: results,
+    updatedAt: Date.now()
+  };
+
+}
+
+/* ===============================
+   Finalize Save
+=============================== */
+
+function finalizeKnowledgeMigrationSave(list) {
 
   if (typeof normalizeMemoBoxes === "function") {
     normalizeMemoBoxes();
@@ -140,7 +235,7 @@ function patchAllMemoKnowledgeObjectsV7() {
   } else {
     localStorage.setItem(
       "memoBoxList",
-      JSON.stringify(memoBoxList)
+      JSON.stringify(list)
     );
   }
 
@@ -148,77 +243,131 @@ function patchAllMemoKnowledgeObjectsV7() {
     showMemoBox();
   }
 
+}
+
+/* ===============================
+   Execute Migration
+=============================== */
+
+function executeKnowledgeMigration() {
+
+  const list =
+    getKnowledgeMigrationMemoList();
+
+  if (!Array.isArray(list)) {
+
+    return {
+      updated: 0,
+      checked: 0,
+      error: "memoBoxList not found."
+    };
+
+  }
+
+  const scan =
+    scanKnowledgeMigration();
+
+  if (!scan.results.length) {
+
+    return {
+      updated: 0,
+      checked: scan.checked,
+      candidates: 0,
+      message: "No migration candidates.",
+      updatedAt: Date.now()
+    };
+
+  }
+
+  let updated = 0;
+  let skipped = 0;
+
+  scan.results.forEach(result => {
+
+    const memo =
+      list[result.index];
+
+    if (
+      !memo ||
+      typeof memo.text !== "string"
+    ) {
+      skipped++;
+      return;
+    }
+
+    const oldText =
+      memo.text;
+
+    const newText =
+      patchKnowledgeObjectTextV7(oldText);
+
+    if (oldText !== newText) {
+
+      memo.text =
+        newText;
+
+      memo.updatedAt =
+        Date.now();
+
+      updated++;
+
+    }
+
+  });
+
+  finalizeKnowledgeMigrationSave(list);
+
   console.log(
-    "Knowledge Object patch completed:",
-    count,
+    "Knowledge Migration completed:",
+    updated,
     "items updated,",
     skipped,
     "items skipped"
   );
 
   return {
-    updated: count,
-    skipped: skipped
-  };
-
-}
-
-/* ===============================
-   Migration Execute
-=============================== */
-
-function executeKnowledgeMigration() {
-
-  if (
-    typeof patchAllMemoKnowledgeObjectsV7 !== "function"
-  ) {
-    return {
-      updated: 0,
-      skipped: 0,
-      error: "patchAllMemoKnowledgeObjectsV7 is not found."
-    };
-  }
-
-  const result =
-    patchAllMemoKnowledgeObjectsV7();
-
-  return {
-    updated:
-      result?.updated || 0,
-
-    skipped:
-      result?.skipped || 0,
-
+    checked: scan.checked,
+    candidates: scan.candidates,
+    updated: updated,
+    skipped: skipped,
     message:
-      "Knowledge migration executed.",
-
-    updatedAt:
-      Date.now()
+      updated
+        ? "Migration completed."
+        : "No changes.",
+    updatedAt: Date.now()
   };
 
 }
 
 /* ===============================
-   Migration Validation
+   Validate Migration
 =============================== */
 
 function validateKnowledgeMigration() {
 
-  if (!Array.isArray(memoBoxList)) {
+  const list =
+    getKnowledgeMigrationMemoList();
+
+  if (!Array.isArray(list)) {
 
     return {
       valid: false,
       checked: 0,
+      errorCount: 1,
       errors: [
         "memoBoxList not found."
-      ]
+      ],
+      updatedAt: Date.now()
     };
 
   }
 
+  const registry =
+    getKnowledgeMigrationRegistry();
+
   const errors = [];
 
-  memoBoxList.forEach((memo, index) => {
+  list.forEach((memo, index) => {
 
     if (!memo) {
       errors.push(
@@ -227,53 +376,56 @@ function validateKnowledgeMigration() {
       return;
     }
 
-    if (!memo.text) {
+    const text =
+      String(memo.text || "");
+
+    if (!text) {
       return;
     }
 
-    const text =
-      String(memo.text);
+    registry.replacements.forEach(rule => {
 
-    if (
-      text.includes("IMPORT-001") ||
-      text.includes("SEARCH-001") ||
-      text.includes("DATABASE-001") ||
-      text.includes("SETTING-001") ||
-      text.includes("TEST-001") ||
-      text.includes("QUALITY-001") ||
-      text.includes("AUDIT-001") ||
-      text.includes("MONITORING-001") ||
-      text.includes("HEALTH-001") ||
-      text.includes("LOGGING-001")
-    ) {
+      if (text.includes(rule.from)) {
 
-      errors.push(
-        `${memo.id || memo.name || index} : old IDs remain.`
-      );
+        errors.push(
+          `${memo.id || memo.name || index} : old ID remains: ${rule.from}`
+        );
 
-    }
+      }
+
+    });
 
   });
 
   return {
-
-    valid:
-      errors.length === 0,
-
-    checked:
-      memoBoxList.length,
-
-    errorCount:
-      errors.length,
-
-    errors,
-
-    updatedAt:
-      Date.now()
-
+    valid: errors.length === 0,
+    checked: list.length,
+    errorCount: errors.length,
+    errors: errors,
+    updatedAt: Date.now()
   };
 
 }
+
+/* ===============================
+   Compatibility Wrapper
+=============================== */
+
+function patchAllMemoKnowledgeObjectsV7() {
+
+  return executeKnowledgeMigration();
+
+}
+
+/* ===============================
+   Export
+=============================== */
+
+window.getKnowledgeMigrationRegistry =
+  getKnowledgeMigrationRegistry;
+
+window.getKnowledgeMigrationMemoList =
+  getKnowledgeMigrationMemoList;
 
 window.patchKnowledgeObjectTextV7 =
   patchKnowledgeObjectTextV7;
@@ -281,11 +433,17 @@ window.patchKnowledgeObjectTextV7 =
 window.addMissingMetadataFieldV7 =
   addMissingMetadataFieldV7;
 
-window.patchAllMemoKnowledgeObjectsV7 =
-  patchAllMemoKnowledgeObjectsV7;
+window.scanKnowledgeMigration =
+  scanKnowledgeMigration;
 
 window.executeKnowledgeMigration =
   executeKnowledgeMigration;
 
 window.validateKnowledgeMigration =
   validateKnowledgeMigration;
+
+window.patchAllMemoKnowledgeObjectsV7 =
+  patchAllMemoKnowledgeObjectsV7;
+
+window.finalizeKnowledgeMigrationSave =
+  finalizeKnowledgeMigrationSave;
