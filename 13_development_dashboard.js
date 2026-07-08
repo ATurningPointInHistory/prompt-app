@@ -1056,3 +1056,132 @@ function scanKnowledgeMigration() {
   };
 
 }
+
+/* ===============================
+   Migration Preview
+=============================== */
+
+function previewKnowledgeMigration() {
+
+  const scan =
+    scanKnowledgeMigration();
+
+  const lines = [];
+
+  lines.push(
+    "========================================"
+  );
+
+  lines.push(
+    "Knowledge Migration Preview"
+  );
+
+  lines.push(
+    "========================================"
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Checked : " +
+    scan.checked
+  );
+
+  lines.push(
+    "Candidates : " +
+    scan.candidates
+  );
+
+  lines.push("");
+
+  if (!scan.results.length) {
+
+    lines.push(
+      "No migration candidates."
+    );
+
+    return lines.join("\n");
+
+  }
+
+  scan.results.forEach(item => {
+
+    lines.push(
+      "----------------------------------------"
+    );
+
+    lines.push(
+      "Index : " + item.index
+    );
+
+    lines.push(
+      "ID : " +
+      (item.id || "(none)")
+    );
+
+    lines.push(
+      "Name : " +
+      (item.name || "(unnamed)")
+    );
+
+    lines.push("");
+
+    lines.push(
+      "Replacement Preview"
+    );
+
+    item.replacements.forEach(rule => {
+
+      lines.push(
+        "  " +
+        rule.from +
+        " -> " +
+        rule.to
+      );
+
+    });
+
+    if (
+      item.missingMetadata &&
+      item.missingMetadata.length
+    ) {
+
+      lines.push("");
+
+      lines.push(
+        "Missing Metadata"
+      );
+
+      item.missingMetadata.forEach(field => {
+
+        lines.push(
+          "  - " + field
+        );
+
+      });
+
+    }
+
+    lines.push("");
+
+  });
+
+  lines.push(
+    "========================================"
+  );
+
+  lines.push(
+    "Preview Only"
+  );
+
+  lines.push(
+    "No data has been modified."
+  );
+
+  lines.push(
+    "========================================"
+  );
+
+  return lines.join("\n");
+
+}
