@@ -1801,12 +1801,17 @@ function buildMemoCopyText(memo) {
    Toggle Memo Lock
 =============================== */
 
-function toggleMemoLock() {
+function toggleMemoLock(index = null) {
 
-  const index =
-    Number(
-      get("memoEditorIndex")?.value
-    );
+  if (
+    index === null ||
+    index === undefined
+  ) {
+    index =
+      Number(
+        get("memoEditorIndex")?.value
+      );
+  }
 
   if (
     Number.isNaN(index) ||
@@ -1827,7 +1832,7 @@ function toggleMemoLock() {
 
   saveMemoBoxes();
 
-  openMemoEditor(index);
+  showMemoBox();
 
 }
 
