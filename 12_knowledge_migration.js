@@ -194,7 +194,85 @@ function executeKnowledgeMigration() {
 
 }
 
+/* ===============================
+   Migration Validation
+=============================== */
 
+function validateKnowledgeMigration() {
+
+  if (!Array.isArray(memoBoxList)) {
+
+    return {
+      valid: false,
+      checked: 0,
+      errors: [
+        "memoBoxList not found."
+      ]
+    };
+
+  }
+
+  const errors = [];
+
+  memoBoxList.forEach((memo, index) => {
+
+    if (!memo) {
+      errors.push(
+        `#${index} Memo not found.`
+      );
+      return;
+    }
+
+    if (!memo.text) {
+      return;
+    }
+
+    const text =
+      String(memo.text);
+
+    if (
+      text.includes("IMPORT-001") ||
+      text.includes("SEARCH-001") ||
+      text.includes("DATABASE-001") ||
+      text.includes("SETTING-001") ||
+      text.includes("TEST-001") ||
+      text.includes("QUALITY-001") ||
+      text.includes("AUDIT-001") ||
+      text.includes("MONITORING-001") ||
+      text.includes("HEALTH-001") ||
+      text.includes("LOGGING-001")
+    ) {
+
+      errors.push(
+        `${memo.id || memo.name || index} : old IDs remain.`
+      );
+
+    }
+
+  });
+
+  return {
+
+    valid:
+      errors.length === 0,
+
+    checked:
+      memoBoxList.length,
+
+    errorCount:
+      errors.length,
+
+    errors,
+
+    updatedAt:
+      Date.now()
+
+  };
+
+}
+
+window.validateKnowledgeMigration =
+  validateKnowledgeMigration;
 
 window.patchKnowledgeObjectTextV7 =
   patchKnowledgeObjectTextV7;
