@@ -1425,6 +1425,55 @@ function isMemoLocked(memo) {
 }
 
 /* ===============================
+   Memo Update
+=============================== */
+
+function updateMemo(
+  index,
+  data = {}
+) {
+
+  if (
+    !Array.isArray(memoBoxList)
+  ) {
+    return false;
+  }
+
+  if (
+    index < 0 ||
+    index >= memoBoxList.length
+  ) {
+    return false;
+  }
+
+  const memo =
+    memoBoxList[index];
+
+  if (
+    isMemoLocked(memo)
+  ) {
+    console.warn(
+      "This memo is locked."
+    );
+    return false;
+  }
+
+  memoBoxList[index] = {
+
+    ...memo,
+
+    ...data,
+
+    updatedAt:
+      new Date().toISOString()
+
+  };
+
+  return true;
+
+}
+
+/* ===============================
    Export
 =============================== */
 
@@ -1529,3 +1578,6 @@ window.buildRepairAnalyzeSourceToolHtml =
 
 window.isMemoLocked =
   isMemoLocked;
+
+window.updateMemo =
+  updateMemo;
