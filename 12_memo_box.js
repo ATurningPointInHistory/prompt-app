@@ -183,61 +183,93 @@ function saveMemoBoxCurrent() {
       memoBoxActiveIndex
     ] || {};
 
-  memoBoxList[
+    memoBoxList[
     memoBoxActiveIndex
   ] = {
 
     ...current,
 
     boxTitle:
-      get("memoBoxBoxTitle")
-        ?.value ||
+      get("memoBoxBoxTitle")?.value ||
       extractBoxHeaderTitle(
         get("memoBoxText")?.value || ""
       ) ||
       current.boxTitle ||
       "",
 
+    id:
+      get("memoBoxId")?.value ||
+      current.id ||
+      "",
+
     name:
-      get("memoBoxName")
-        ?.value || "",
+      get("memoBoxName")?.value ||
+      "",
+
+    summary:
+      get("memoBoxSummary")?.value ||
+      current.summary ||
+      "",
 
     text:
-      get("memoBoxText")
-        ?.value || "",
+      get("memoBoxText")?.value ||
+      "",
+
+    knowledgeType:
+      get("memoBoxType")?.value ||
+      current.knowledgeType ||
+      current.type ||
+      "Memo",
+
+    category:
+      get("memoBoxCategory")?.value ||
+      current.category ||
+      "",
 
     type:
-      get("memoBoxType")
-        ?.value ||
-
+      get("memoBoxType")?.value ||
       current.type ||
-
       "Idea",
 
     status:
-      get("memoBoxStatus")
-        ?.value ||
-
+      get("memoBoxStatus")?.value ||
       current.status ||
-
       "Inbox",
 
     series:
-      get("memoBoxSeries")
-        ?.value ||
-
+      get("memoBoxSeries")?.value ||
       current.series ||
+      "",
 
+    priority:
+      get("memoBoxPriority")?.value ||
+      current.priority ||
+      "",
+
+    stability:
+      get("memoBoxStability")?.value ||
+      current.stability ||
+      "",
+
+    decisionLevel:
+      get("memoBoxDecisionLevel")?.value ||
+      current.decisionLevel ||
+      "",
+
+    version:
+      get("memoBoxVersion")?.value ||
+      current.version ||
       "",
 
     keywords:
-      (
-        get("memoBoxKeywords")
-          ?.value || ""
-      )
-        .split(",")
-        .map(v => v.trim())
-        .filter(Boolean),
+      normalizeMemoArrayValue(
+        get("memoBoxKeywords")?.value
+      ),
+
+    relationships:
+      normalizeMemoArrayValue(
+        get("memoBoxRelationships")?.value
+      ),
 
     updatedAt:
       new Date().toISOString()
