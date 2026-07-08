@@ -154,6 +154,16 @@ function saveMemoBoxes() {
 
 function saveMemoBoxCurrent() {
 
+  const memo =
+    getActiveMemoBox
+      ? getActiveMemoBox()
+      : memoBoxList[memoBoxActiveIndex];
+
+  if (isMemoLocked(memo)) {
+    console.warn("This memo is locked.");
+    return false;
+  }
+
   if (
     !get("memoBoxName") ||
     !get("memoBoxText")
@@ -295,6 +305,14 @@ function addMemoBox() {
 }
 
 function deleteMemoBox() {
+
+  const memo =
+    memoBoxList[memoBoxActiveIndex];
+
+  if (isMemoLocked(memo)) {
+    console.warn("This memo is locked and cannot be deleted.");
+    return false;
+  }
 
   if (
     memoBoxList.length <= 1
@@ -611,6 +629,20 @@ function openMemoEditor(index = null) {
       ? memoBoxLastDefaults || {}
       : memoBoxList[index] || {};
 
+  const locked =
+    !isNew &&
+    isMemoLocked(current);
+
+  const lockedAttr =
+    locked
+      ? "readonly"
+      : "";
+
+  const lockedDisabledAttr =
+    locked
+      ? "disabled"
+      : "";
+
   const type =
     current.type ||
     current.knowledgeType ||
@@ -669,13 +701,13 @@ placeholder="Knowledge Object Title"
 value="${escapeHtml(
   current.boxTitle ||
   extractBoxHeaderTitle(current.text || "")
-)}">
+)}" ${lockedAttr}>
 
 <input
 id="memoBoxId"
 class="input"
 placeholder="Knowledge ID"
-value="${escapeHtml(current.id || "")}">
+value="${escapeHtml(current.id || "")}" ${lockedAttr}>
 
 <input
 id="memoBoxName"
@@ -683,7 +715,7 @@ class="memo-name-input"
 placeholder="Memo title"
 value="${escapeHtml(current.name || "")}"
 onfocus="this.select()"
-onclick="this.select()">
+onclick="this.select()" ${lockedAttr}>
 
 <details>
 <summary>
@@ -694,7 +726,7 @@ Knowledge Metadata
 id="memoBoxSummary"
 class="input"
 rows="1"
-placeholder="Summary">${escapeHtml(current.summary || "")}</textarea>
+placeholder="Summary" ${lockedAttr}>${escapeHtml(current.summary || "")}</textarea>
 
 <div class="memo-editor-meta-row">
 
@@ -702,13 +734,13 @@ placeholder="Summary">${escapeHtml(current.summary || "")}</textarea>
 id="memoBoxCategory"
 class="input"
 placeholder="Category"
-value="${escapeHtml(current.category || "")}">
+value="${escapeHtml(current.category || "")}" ${lockedAttr}>
 
 <input
 id="memoBoxVersion"
 class="input"
 placeholder="Version"
-value="${escapeHtml(current.version || "")}">
+value="${escapeHtml(current.version || "")}" ${lockedAttr}>
 
 </div>
 
@@ -718,13 +750,13 @@ value="${escapeHtml(current.version || "")}">
 id="memoBoxPriority"
 class="input"
 placeholder="Priority"
-value="${escapeHtml(current.priority || "")}">
+value="${escapeHtml(current.priority || "")}" ${lockedAttr}>
 
 <input
 id="memoBoxStability"
 class="input"
 placeholder="Stability"
-value="${escapeHtml(current.stability || "")}">
+value="${escapeHtml(current.stability || "")}" ${lockedAttr}>
 
 </div>
 
@@ -732,11 +764,11 @@ value="${escapeHtml(current.stability || "")}">
 id="memoBoxDecisionLevel"
 class="input"
 placeholder="Decision Level"
-value="${escapeHtml(current.decisionLevel || "")}">
+value="${escapeHtml(current.decisionLevel || "")}" ${lockedAttr}>
 
 <div class="memo-editor-meta-row">
 
-<select id="memoBoxType">
+<select id="memoBoxType" ${lockedDisabledAttr}>
 ${MEMO_BOX_TYPES.map(v => `
 <option
 value="${v}"
@@ -746,7 +778,7 @@ ${v}
 `).join("")}
 </select>
 
-<select id="memoBoxStatus">
+<select id="memoBoxStatus" ${lockedDisabledAttr}>
 ${MEMO_BOX_STATUSES.map(v => `
 <option
 value="${v}"
@@ -756,7 +788,7 @@ ${v}
 `).join("")}
 </select>
 
-<select id="memoBoxSeries">
+<select id="memoBoxSeries" ${lockedDisabledAttr}>
 ${MEMO_BOX_SERIES.map(v => `
 <option
 value="${v}"
@@ -772,20 +804,21 @@ ${v || "Seriesなし"}
 id="memoBoxKeywords"
 class="input"
 placeholder="tag1, tag2"
-value="${escapeHtml(keywords)}">
+value="${escapeHtml(keywords)}" ${lockedAttr}>
 
 <input
 id="memoBoxRelationships"
 class="input"
 placeholder="Relationships"
-value="${escapeHtml(relationships)}">
+value="${escapeHtml(relationships)}" ${lockedAttr}>
 
 </details>
 
 <textarea
 id="memoBoxText"
 class="memo-textarea"
-rows="20">${escapeHtml(current.text || "")}</textarea>
+rows="20" 
+${lockedAttr}>${escapeHtml(current.text || "")}</textarea>
 `
   );
 
@@ -1051,6 +1084,15 @@ function saveMemoEditor() {
     indexText === ""
       ? -1
       : Number(indexText);
+
+  if (
+    index >= 0 &&
+    index < memoBoxList.length &&
+    isMemoLocked(memoBoxList[index])
+  ) {
+    console.warn("This memo is locked.");
+    return false;
+  }
 
   const text =
     get("memoBoxText")?.value || "";
