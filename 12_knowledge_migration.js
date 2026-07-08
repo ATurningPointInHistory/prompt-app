@@ -112,11 +112,15 @@ function patchAllMemoKnowledgeObjectsV7() {
       if (oldText !== newText) {
         count++;
 
-        return {
-          ...memo,
-          text: newText,
-          updatedAt: new Date().toISOString()
-        };
+        updateMemo(
+          index,
+          {
+            text: newText
+          }
+        );
+
+        return memoBoxList[index];
+
       }
 
       return memo;
