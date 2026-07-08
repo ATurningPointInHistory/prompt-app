@@ -389,6 +389,7 @@ function showMemoBox() {
         ? `<div class="small-muted">${escapeHtml(item.id)}</div>`
         : ""}
 
+      ${isMemoLocked(item) ? "🔏 " : "🖋 "}
       ${escapeHtml(item.name || "メモ")}
 
     </div>
@@ -446,8 +447,10 @@ function showMemoBox() {
 
   <div class="memo-card-actions">
 
-    <button onclick="openMemoEditor(${index})">
-      ✏編集
+    <button onclick="openMemoEditor($ {index})">
+      ${isMemoLocked(item)
+        ? "🔏ロック中"
+        : "🖋編集"}
     </button>
 
     <button onclick="
