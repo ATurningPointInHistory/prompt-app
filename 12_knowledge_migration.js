@@ -86,14 +86,22 @@ function patchAllMemoKnowledgeObjectsV7() {
 
   if (!Array.isArray(memoBoxList)) {
     console.warn("memoBoxList が見つかりません。");
-    return;
+    return {
+      updated: 0,
+      skipped: 0
+    };
   }
 
   let count = 0;
   let skipped = 0;
 
   memoBoxList =
-    memoBoxList.map(memo => {
+    memoBoxList.map((memo, index) => {
+
+      if (!memo) {
+        skipped++;
+        return memo;
+      }
 
       if (
         typeof isMemoLocked === "function" &&
@@ -112,15 +120,11 @@ function patchAllMemoKnowledgeObjectsV7() {
       if (oldText !== newText) {
         count++;
 
-        updateMemo(
-          index,
-          {
-            text: newText
-          }
-        );
-
-        return memoBoxList[index];
-
+        return {
+          ...memo,
+          text: newText,
+          updatedAt: Date.now()
+        };
       }
 
       return memo;
