@@ -359,6 +359,7 @@ function showMemoBox() {
 }">
 
   <div class="memo-card-select">
+
     <input
       type="checkbox"
       ${
@@ -373,6 +374,16 @@ function showMemoBox() {
           this.checked
         )
       ">
+
+    <button
+      class="memo-lock-btn"
+      onclick="
+        event.stopPropagation();
+        toggleMemoLock(${index});
+      ">
+      ${isMemoLocked(item) ? "🔏" : "🖋"}
+    </button>
+
   </div>
 
     <div
@@ -1786,6 +1797,40 @@ function buildMemoCopyText(memo) {
 
 }
 
+/* ===============================
+   Toggle Memo Lock
+=============================== */
+
+function toggleMemoLock() {
+
+  const index =
+    Number(
+      get("memoEditorIndex")?.value
+    );
+
+  if (
+    Number.isNaN(index) ||
+    index < 0 ||
+    index >= memoBoxList.length
+  ) {
+    return;
+  }
+
+  const memo =
+    memoBoxList[index];
+
+  memo.locked =
+    !memo.locked;
+
+  memo.updatedAt =
+    new Date().toISOString();
+
+  saveMemoBoxes();
+
+  openMemoEditor(index);
+
+}
+
 window.findMemoById =
   findMemoById;
 
@@ -1845,3 +1890,6 @@ window.copyMemoTitleList =
 
 window.refreshMemoMetadataFromText =
   refreshMemoMetadataFromText;
+
+window.toggleMemoLock =
+  toggleMemoLock;
