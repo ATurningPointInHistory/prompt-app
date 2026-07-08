@@ -1824,6 +1824,11 @@ function toggleMemoLock(index = null) {
   const memo =
     memoBoxList[index];
 
+  if (memo.migrationLocked === true) {
+    alert("Migration Lock中のため変更できません。");
+    return;
+  }
+
   memo.locked =
     !memo.locked;
 
@@ -1833,6 +1838,16 @@ function toggleMemoLock(index = null) {
   saveMemoBoxes();
 
   showMemoBox();
+
+}
+
+function getMemoMetadataTitle(metadata) {
+
+  return (
+    metadata.title ||
+    metadata.name ||
+    ""
+  );
 
 }
 
