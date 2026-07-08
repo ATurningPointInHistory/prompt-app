@@ -1319,3 +1319,19 @@ function executeKnowledgeMigration() {
   };
 
 }
+
+function isMemoLocked(memo) {
+
+  if (!memo) {
+    return true;
+  }
+
+  return (
+    memo.locked === true ||
+    memo.migrationLocked === true ||
+    memo.status === "Official" ||
+    memo.status === "Historical" ||
+    memo.status === "Archive"
+  );
+
+}
