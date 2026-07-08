@@ -29,7 +29,7 @@ let functionSortFilter = "all";
 let pinnedLine = null;
 let repairOriginalHtml = "";
 
-const APP_VERSION = "v5.8.3";
+const APP_VERSION = "v7.0.0";
 const DEBUG_MODE = true;
 const CHANGELOG = [
   "Health Garbage Check誤検知削減",
@@ -518,9 +518,6 @@ window.downloadJsonFile =
 
 window.readJsonFile =
   readJsonFile;
-
-window.downloadJsonFile =
-  downloadJsonFile;
 
 window.escapeJs =
   escapeJs;
