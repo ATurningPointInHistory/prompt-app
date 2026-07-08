@@ -1,3 +1,7 @@
+/* ===============================
+   01_memo_manager.js
+=============================== */
+
 function isMemoLocked(memo) {
 
   if (!memo) {
@@ -129,3 +133,15 @@ function createMemo(
   return 0;
 
 }
+
+window.isMemoLocked =
+  isMemoLocked;
+
+window.updateMemo =
+  updateMemo;
+
+window.deleteMemo =
+  deleteMemo;
+
+window.createMemo =
+  createMemo;
