@@ -1030,10 +1030,7 @@ function scanKnowledgeMigration() {
 
       });
 
-    if (
-      replacements.length ||
-      missingMetadata.length
-    ) {
+    if (replacements.length) {
 
       results.push({
         index: index,
