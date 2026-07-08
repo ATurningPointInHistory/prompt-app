@@ -1474,6 +1474,45 @@ function updateMemo(
 }
 
 /* ===============================
+   Memo Delete
+=============================== */
+
+function deleteMemo(index) {
+
+  if (
+    !Array.isArray(memoBoxList)
+  ) {
+    return false;
+  }
+
+  if (
+    index < 0 ||
+    index >= memoBoxList.length
+  ) {
+    return false;
+  }
+
+  if (
+    isMemoLocked(
+      memoBoxList[index]
+    )
+  ) {
+    console.warn(
+      "This memo is locked."
+    );
+    return false;
+  }
+
+  memoBoxList.splice(
+    index,
+    1
+  );
+
+  return true;
+
+}
+
+/* ===============================
    Export
 =============================== */
 
@@ -1581,3 +1620,6 @@ window.isMemoLocked =
 
 window.updateMemo =
   updateMemo;
+
+window.deleteMemo =
+  deleteMemo;
