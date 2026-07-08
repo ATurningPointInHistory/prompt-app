@@ -1515,14 +1515,3 @@ window.changeRepairAnalyzeSourceMode =
 window.buildRepairAnalyzeSourceToolHtml =
   buildRepairAnalyzeSourceToolHtml;
 
-window.isMemoLocked =
-  isMemoLocked;
-
-window.updateMemo =
-  updateMemo;
-
-window.deleteMemo =
-  deleteMemo;
-
-window.createMemo =
-  createMemo;
