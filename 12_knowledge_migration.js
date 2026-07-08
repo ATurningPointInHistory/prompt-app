@@ -271,9 +271,6 @@ function validateKnowledgeMigration() {
 
 }
 
-window.validateKnowledgeMigration =
-  validateKnowledgeMigration;
-
 window.patchKnowledgeObjectTextV7 =
   patchKnowledgeObjectTextV7;
 
@@ -285,3 +282,6 @@ window.patchAllMemoKnowledgeObjectsV7 =
 
 window.executeKnowledgeMigration =
   executeKnowledgeMigration;
+
+window.validateKnowledgeMigration =
+  validateKnowledgeMigration;
