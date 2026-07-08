@@ -1,4 +1,5 @@
 /* ===============================
+   12_knowledge_migration.js
    AI Prompt OS v7.0
    Changed Specification Patch v1
 =============================== */
@@ -89,9 +90,18 @@ function patchAllMemoKnowledgeObjectsV7() {
   }
 
   let count = 0;
+  let skipped = 0;
 
   memoBoxList =
     memoBoxList.map(memo => {
+
+      if (
+        typeof isMemoLocked === "function" &&
+        isMemoLocked(memo)
+      ) {
+        skipped++;
+        return memo;
+      }
 
       const oldText =
         String(memo.text || "");
@@ -101,13 +111,15 @@ function patchAllMemoKnowledgeObjectsV7() {
 
       if (oldText !== newText) {
         count++;
+
+        return {
+          ...memo,
+          text: newText,
+          updatedAt: new Date().toISOString()
+        };
       }
 
-      return {
-        ...memo,
-        text: newText,
-        updatedAt: new Date().toISOString()
-      };
+      return memo;
 
     });
 
@@ -131,8 +143,15 @@ function patchAllMemoKnowledgeObjectsV7() {
   console.log(
     "Knowledge Object patch completed:",
     count,
-    "items updated"
+    "items updated,",
+    skipped,
+    "items skipped"
   );
+
+  return {
+    updated: count,
+    skipped: skipped
+  };
 
 }
 
