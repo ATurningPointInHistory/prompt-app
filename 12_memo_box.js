@@ -283,6 +283,9 @@ function copyMemoBox() {
 
 function addMemoBox() {
 
+  const defaults =
+    memoBoxLastDefaults || {};
+
   memoBoxList.push({
 
     name:
@@ -290,8 +293,24 @@ function addMemoBox() {
 
     text: "",
 
+    type:
+      defaults.type || "Idea",
+
     status:
-      "Active"
+      defaults.status || "Active",
+
+    series:
+      defaults.series || "",
+
+    keywords: [],
+
+    relationships: [],
+
+    createdAt:
+      new Date().toISOString(),
+
+    updatedAt:
+      new Date().toISOString()
 
   });
 
@@ -872,7 +891,7 @@ function applyDocumentHeaderToMemoEditor(
 
   setMemoEditorValue(
     "memoBoxName",
-    metadata.name
+    getMemoMetadataTitle(metadata)
   );
 
   setMemoEditorValue(
@@ -1130,7 +1149,9 @@ function saveMemoEditor() {
       "",
 
     name:
-      get("memoBoxName")?.value || "メモ",
+      getMemoMetadataTitle(metadata) ||
+      get("memoBoxName")?.value ||
+      "メモ",
 
     summary:
       metadata.summary ||
@@ -1185,26 +1206,20 @@ function saveMemoEditor() {
 
     keywords:
       metadata.keywords?.length
-        ? metadata.keywords
-        : String(
+        ? normalizeMemoArrayValue(metadata.keywords)
+        : normalizeMemoArrayValue(
             get("memoBoxKeywords")?.value || ""
-          )
-            .split(",")
-            .map(v => v.trim())
-            .filter(Boolean),
+          ),
 
     relationships:
       metadata.relationships?.length
-        ? metadata.relationships
-        : String(
+        ? normalizeMemoArrayValue(metadata.relationships)
+        : normalizeMemoArrayValue(
             get("memoBoxRelationships")?.value || ""
-          )
-            .split(",")
-            .map(v => v.trim())
-            .filter(Boolean),
+          ),
 
     createdAt:
-      metadata.createdAt ||
+      getMemoMetadataCreated(metadata) ||
       memoBoxList[index]?.createdAt ||
       new Date().toISOString(),
 
@@ -1696,9 +1711,9 @@ function refreshMemoMetadataFromText() {
 
       if (
         !metadata.id &&
-        !metadata.name
+        !getMemoMetadataTitle(metadata)
       ) {
-        return memo;
+         return memo;
       }
 
       return {
@@ -1708,7 +1723,9 @@ function refreshMemoMetadataFromText() {
           metadata.id || memo.id || "",
 
         name:
-          metadata.name || memo.name || "メモ",
+          getMemoMetadataTitle(metadata) ||
+          memo.name ||
+          "メモ",
 
         summary:
           metadata.summary || memo.summary || "",
@@ -1744,12 +1761,12 @@ function refreshMemoMetadataFromText() {
 
         keywords:
           metadata.keywords?.length
-            ? metadata.keywords
+            ? normalizeMemoArrayValue(metadata.keywords)
             : memo.keywords || [],
 
         relationships:
           metadata.relationships?.length
-            ? metadata.relationships
+            ? normalizeMemoArrayValue(metadata.relationships)
             : memo.relationships || [],
 
         updatedAt:
@@ -1838,6 +1855,41 @@ function toggleMemoLock(index = null) {
   saveMemoBoxes();
 
   showMemoBox();
+
+}
+
+function normalizeMemoArrayValue(value) {
+
+  if (Array.isArray(value)) {
+    return value
+      .map(v => String(v).trim())
+      .filter(Boolean);
+  }
+
+  return String(value || "")
+    .split(",")
+    .map(v => v.trim())
+    .filter(Boolean);
+
+}
+
+function getMemoMetadataTitle(metadata) {
+
+  return (
+    metadata.title ||
+    metadata.name ||
+    ""
+  );
+
+}
+
+function getMemoMetadataCreated(metadata) {
+
+  return (
+    metadata.createdAt ||
+    metadata.created ||
+    ""
+  );
 
 }
 
