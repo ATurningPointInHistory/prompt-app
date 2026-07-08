@@ -1273,8 +1273,8 @@ function saveMemoEditor() {
 
     } else {
 
-      memoBoxList.unshift(memo);
-      memoBoxActiveIndex = 0;
+      memoBoxActiveIndex =
+        createMemo(memo);
 
     }
 
