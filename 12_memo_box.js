@@ -458,7 +458,7 @@ function showMemoBox() {
 
   <div class="memo-card-actions">
 
-    <button onclick="openMemoEditor($ {index})">
+    <button onclick="openMemoEditor(${index})">
       ${isMemoLocked(item)
         ? "🔏ロック中"
         : "🖋編集"}
