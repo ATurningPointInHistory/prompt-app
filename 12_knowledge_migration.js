@@ -159,6 +159,43 @@ function patchAllMemoKnowledgeObjectsV7() {
 
 }
 
+/* ===============================
+   Migration Execute
+=============================== */
+
+function executeKnowledgeMigration() {
+
+  if (
+    typeof patchAllMemoKnowledgeObjectsV7 !== "function"
+  ) {
+    return {
+      updated: 0,
+      skipped: 0,
+      error: "patchAllMemoKnowledgeObjectsV7 is not found."
+    };
+  }
+
+  const result =
+    patchAllMemoKnowledgeObjectsV7();
+
+  return {
+    updated:
+      result?.updated || 0,
+
+    skipped:
+      result?.skipped || 0,
+
+    message:
+      "Knowledge migration executed.",
+
+    updatedAt:
+      Date.now()
+  };
+
+}
+
+
+
 window.patchKnowledgeObjectTextV7 =
   patchKnowledgeObjectTextV7;
 
@@ -167,3 +204,6 @@ window.addMissingMetadataFieldV7 =
 
 window.patchAllMemoKnowledgeObjectsV7 =
   patchAllMemoKnowledgeObjectsV7;
+
+window.executeKnowledgeMigration =
+  executeKnowledgeMigration;
