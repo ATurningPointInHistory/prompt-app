@@ -371,9 +371,8 @@ function deleteMemoBox() {
     return;
   }
 
-  memoBoxList.splice(
-    memoBoxActiveIndex,
-    1
+  deleteMemo(
+    memoBoxActiveIndex
   );
 
   memoBoxActiveIndex =
@@ -1335,8 +1334,12 @@ function deleteSelectedMemoBoxes() {
     return;
   }
 
+  const indexes =
+    [...memoBoxSelected]
+      .sort((a, b) => b - a);
+
   const lockedItems =
-    [...memoBoxSelected].filter(index =>
+    indexes.filter(index =>
       isMemoLocked(memoBoxList[index])
     );
 
@@ -1355,11 +1358,18 @@ function deleteSelectedMemoBoxes() {
     return;
   }
 
-  memoBoxList =
-    memoBoxList.filter(
-      (_, index) =>
-        !memoBoxSelected.has(index)
-    );
+  let deleted = 0;
+
+  indexes.forEach(index => {
+
+    if (
+      typeof deleteMemo === "function" &&
+      deleteMemo(index)
+    ) {
+      deleted++;
+    }
+
+  });
 
   memoBoxSelected.clear();
 
@@ -1368,6 +1378,11 @@ function deleteSelectedMemoBoxes() {
   saveMemoBoxes();
 
   showMemoBox();
+
+  console.log(
+    "Selected memos deleted:",
+    deleted
+  );
 
 }
 
