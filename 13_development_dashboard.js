@@ -1394,28 +1394,26 @@ function calculateDashboardProgress(
 
 function buildMigrationStatus() {
 
-  const implemented = [
+  const status =
+    calculateImplementationProgress([
 
-    "Registry",
-    "Scanner",
-    "Preview",
-    "Executor",
-    "Validator"
+      "getKnowledgeMigrationRegistry",
 
-  ];
+      "scanKnowledgeMigration",
 
-  const total = [
+      "previewKnowledgeMigration",
 
-    "Registry",
-    "Scanner",
-    "Preview",
-    "Executor",
-    "Validator",
-    "Reporter",
-    "Rollback",
-    "History"
+      "executeKnowledgeMigration",
 
-  ];
+      "validateKnowledgeMigration",
+
+      "buildKnowledgeMigrationReport",
+
+      "rollbackKnowledgeMigration",
+
+      "showKnowledgeMigrationHistory"
+
+    ]);
 
   return {
 
@@ -1425,22 +1423,19 @@ function buildMigrationStatus() {
       "Migration Engine",
 
     implemented:
-      implemented.length,
+      status.implemented,
 
     total:
-      total.length,
+      status.total,
 
     progress:
-      Math.round(
-        implemented.length /
-        total.length *
-        100
-      ),
+      status.progress,
 
-    health: 90,
+    health:
+      status.progress,
 
     nextTask:
-      "Reporter"
+      ""
 
   };
 
