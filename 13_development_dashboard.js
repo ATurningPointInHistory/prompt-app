@@ -1331,3 +1331,42 @@ function buildDevelopmentProgressBar(progress) {
   );
 
 }
+
+/* ===============================
+   Development Dashboard Status
+=============================== */
+
+function buildDevelopmentDashboardStatus() {
+
+  const modules = [
+
+    buildMigrationStatus(),
+
+    buildRepositoryStatus(),
+
+    buildValidationStatus(),
+
+    buildPublicationStatus()
+
+  ];
+
+  return {
+
+    updatedAt:
+      new Date().toISOString(),
+
+    modules,
+
+    progress:
+      calculateDashboardProgress(
+        modules
+      ),
+
+    health:
+      calculateDashboardHealth(
+        modules
+      )
+
+  };
+
+}
