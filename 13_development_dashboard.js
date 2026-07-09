@@ -1525,3 +1525,49 @@ function calculateDashboardHealth(
   );
 
 }
+
+/* ===============================
+   Development Status Utility
+=============================== */
+
+function isImplementedFunction(
+  name
+) {
+
+  return (
+    typeof window[name] ===
+    "function"
+  );
+
+}
+
+function calculateImplementationProgress(
+  functions
+) {
+
+  const total =
+    functions.length;
+
+  const implemented =
+    functions.filter(
+      isImplementedFunction
+    ).length;
+
+  return {
+
+    implemented,
+
+    total,
+
+    progress:
+      total
+        ? Math.round(
+            implemented /
+            total *
+            100
+          )
+        : 0
+
+  };
+
+}
