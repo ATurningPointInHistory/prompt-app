@@ -1487,3 +1487,41 @@ function buildPublicationStatus() {
   };
 
 }
+
+/* ===============================
+   Dashboard Health Calculation
+=============================== */
+
+function calculateDashboardHealth(
+  modules
+) {
+
+  if (
+    !Array.isArray(modules) ||
+    !modules.length
+  ) {
+    return 0;
+  }
+
+  const validModules =
+    modules.filter(item =>
+      item &&
+      typeof item.health === "number"
+    );
+
+  if (!validModules.length) {
+    return 0;
+  }
+
+  const total =
+    validModules.reduce(
+      (sum, item) =>
+        sum + item.health,
+      0
+    );
+
+  return Math.round(
+    total / validModules.length
+  );
+
+}
