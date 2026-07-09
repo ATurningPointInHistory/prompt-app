@@ -1370,3 +1370,120 @@ function buildDevelopmentDashboardStatus() {
   };
 
 }
+
+function calculateDashboardProgress(
+  modules
+) {
+
+  if (!modules.length) {
+    return 0;
+  }
+
+  const total =
+    modules.reduce(
+      (sum, item) =>
+        sum + item.progress,
+      0
+    );
+
+  return Math.round(
+    total / modules.length
+  );
+
+}
+
+function buildMigrationStatus() {
+
+  const implemented = [
+
+    "Registry",
+    "Scanner",
+    "Preview",
+    "Executor",
+    "Validator"
+
+  ];
+
+  const total = [
+
+    "Registry",
+    "Scanner",
+    "Preview",
+    "Executor",
+    "Validator",
+    "Reporter",
+    "Rollback",
+    "History"
+
+  ];
+
+  return {
+
+    id: "Migration",
+
+    name:
+      "Migration Engine",
+
+    implemented:
+      implemented.length,
+
+    total:
+      total.length,
+
+    progress:
+      Math.round(
+        implemented.length /
+        total.length *
+        100
+      ),
+
+    health: 90,
+
+    nextTask:
+      "Reporter"
+
+  };
+
+}
+
+function buildRepositoryStatus() {
+
+  return {
+    id: "Repository",
+    name: "Repository Core",
+    implemented: 0,
+    total: 0,
+    progress: 0,
+    health: 100,
+    nextTask: ""
+  };
+
+}
+
+function buildValidationStatus() {
+
+  return {
+    id: "Validation",
+    name: "Validation Engine",
+    implemented: 0,
+    total: 0,
+    progress: 0,
+    health: 100,
+    nextTask: ""
+  };
+
+}
+
+function buildPublicationStatus() {
+
+  return {
+    id: "Publication",
+    name: "Publication Engine",
+    implemented: 0,
+    total: 0,
+    progress: 0,
+    health: 100,
+    nextTask: ""
+  };
+
+}
