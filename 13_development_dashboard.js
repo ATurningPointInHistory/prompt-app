@@ -1185,3 +1185,149 @@ function previewKnowledgeMigration() {
   return lines.join("\n");
 
 }
+
+/* ===============================
+   Development Progress Bar Chart
+=============================== */
+
+function showDevelopmentProgressBarChart(source) {
+
+  const items =
+    resolveDevelopmentProgressItems(source);
+
+  const lines = [
+    "==================================",
+    "Development Progress",
+    "==================================",
+    ""
+  ];
+
+  if (!items.length) {
+    lines.push("No development progress data.");
+  }
+
+  items.forEach(item => {
+
+    const progress =
+      normalizeDevelopmentProgress(item);
+
+    lines.push(
+      String(item.name || item.id || "Unknown").padEnd(24, " ") +
+      " " +
+      buildDevelopmentProgressBar(progress) +
+      " " +
+      progress + "%"
+    );
+
+  });
+
+  const result =
+    lines.join("\n");
+
+  const target =
+    document.getElementById("developmentProgressBarChart") ||
+    document.getElementById("developmentDashboardOutput");
+
+  if (target) {
+    target.textContent = result;
+  }
+
+  console.log(result);
+
+  return result;
+
+}
+
+function resolveDevelopmentProgressItems(source) {
+
+  if (Array.isArray(source)) {
+    return source;
+  }
+
+  if (source && Array.isArray(source.modules)) {
+    return source.modules;
+  }
+
+  if (source && Array.isArray(source.items)) {
+    return source.items;
+  }
+
+  if (source && typeof source === "object") {
+    return Object.values(source);
+  }
+
+  if (
+    typeof getDevelopmentDashboardModules === "function"
+  ) {
+    return getDevelopmentDashboardModules();
+  }
+
+  if (
+    typeof developmentDashboardModules !== "undefined" &&
+    Array.isArray(developmentDashboardModules)
+  ) {
+    return developmentDashboardModules;
+  }
+
+  if (
+    typeof developmentDashboardRegistry !== "undefined"
+  ) {
+    return Object.values(developmentDashboardRegistry);
+  }
+
+  return [];
+
+}
+
+function normalizeDevelopmentProgress(item) {
+
+  if (!item) {
+    return 0;
+  }
+
+  if (typeof item.progress === "number") {
+    return clampDevelopmentProgress(item.progress);
+  }
+
+  if (
+    typeof item.implemented === "number" &&
+    typeof item.total === "number" &&
+    item.total > 0
+  ) {
+    return clampDevelopmentProgress(
+      Math.round(
+        item.implemented / item.total * 100
+      )
+    );
+  }
+
+  return 0;
+
+}
+
+function clampDevelopmentProgress(value) {
+
+  return Math.max(
+    0,
+    Math.min(
+      100,
+      Math.round(Number(value || 0))
+    )
+  );
+
+}
+
+function buildDevelopmentProgressBar(progress) {
+
+  const total =
+    10;
+
+  const filled =
+    Math.round(progress / 10);
+
+  return (
+    "█".repeat(filled) +
+    "□".repeat(total - filled)
+  );
+
+}
