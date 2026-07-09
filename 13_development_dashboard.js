@@ -1566,3 +1566,43 @@ function calculateImplementationProgress(
   };
 
 }
+
+function buildKnowledgeMigrationReport() {
+
+  const scan =
+    typeof scanKnowledgeMigration === "function"
+      ? scanKnowledgeMigration()
+      : {
+          checked: 0,
+          candidates: []
+        };
+
+  const candidates =
+    Array.isArray(scan.candidates)
+      ? scan.candidates
+      : [];
+
+  const lines = [];
+
+  lines.push("==================================");
+  lines.push("Knowledge Migration Report");
+  lines.push("==================================");
+  lines.push("");
+  lines.push("Checked: " + (scan.checked || 0));
+  lines.push("Candidates: " + candidates.length);
+  lines.push("");
+
+  if (!candidates.length) {
+    lines.push("No migration candidates.");
+    return lines.join("\n");
+  }
+
+  candidates.forEach((item, index) => {
+    lines.push((index + 1) + ". " + (item.id || item.name || "Unknown"));
+    lines.push("Reason: " + (item.reason || ""));
+    lines.push("");
+  });
+
+  return lines.join("\n");
+
+}
