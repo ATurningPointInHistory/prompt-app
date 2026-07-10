@@ -308,6 +308,43 @@ function waitDevConsoleReady(
 
 }
 
+/* ===============================
+   Autocomplete Score
+=============================== */
+
+function calculateDevConsoleAutocompleteScore(
+  name,
+  keyword
+) {
+
+  const text =
+    String(name || "")
+      .toLowerCase();
+
+  const word =
+    String(keyword || "")
+      .toLowerCase();
+
+  if (!text || !word) {
+    return -1;
+  }
+
+  if (text === word) {
+    return 3000;
+  }
+
+  if (text.startsWith(word)) {
+    return 2000;
+  }
+
+  if (text.includes(word)) {
+    return 1000;
+  }
+
+  return -1;
+
+}
+
 window.saveDevConsoleHistory =
   saveDevConsoleHistory;
 
