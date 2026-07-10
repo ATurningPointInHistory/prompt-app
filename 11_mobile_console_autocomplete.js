@@ -112,8 +112,10 @@ function getDevConsoleAutocompleteCandidates(
           ? info.line
           : 0,
       score:
-        1000 +
-        getDevConsoleAutocompleteUseCount(text)
+        matchScore +
+        getDevConsoleAutocompleteUseCount(
+          text
+        )
     });
 
   });
@@ -143,8 +145,10 @@ function getDevConsoleAutocompleteCandidates(
       fileName: "",
       line: 0,
       score:
-        500 +
-        getDevConsoleAutocompleteUseCount(name)
+        matchScore +
+        getDevConsoleAutocompleteUseCount(
+          name
+        )
     });
 
   });
