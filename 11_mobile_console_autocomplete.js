@@ -85,11 +85,13 @@ function getDevConsoleAutocompleteCandidates(
     const text =
       String(name || "");
 
-    const lower =
-      text.toLowerCase();
+    const matchScore =
+      calculateDevConsoleAutocompleteScore(
+        text,
+        word
+      );
 
-    // 先頭一致だけ拾う
-    if (!lower.startsWith(word)) {
+    if (matchScore < 0) {
       return;
     }
 
@@ -129,11 +131,13 @@ function getDevConsoleAutocompleteCandidates(
     "devConsoleResult"
   ].forEach(name => {
 
-    const lower =
-      name.toLowerCase();
+    const matchScore =
+      calculateDevConsoleAutocompleteScore(
+        name,
+        word
+      );
 
-    // 変数も先頭一致だけ
-    if (!lower.startsWith(word)) {
+    if (matchScore < 0) {
       return;
     }
 
