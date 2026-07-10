@@ -42,7 +42,12 @@ function buildDevConsoleQuickCommands() {
   const buttons =
     devConsoleQuickButtons
       .map((item, index) => `
-<button onclick="runDevConsoleQuickCommand(${index})">
+<button
+  onclick="loadDevConsoleQuickCommand(${index})"
+  oncontextmenu="
+    runDevConsoleQuickCommand(${index});
+    return false;
+  ">
   ${escapeHtml(item.label || "Cmd")}
 </button>
 `)
@@ -50,6 +55,7 @@ function buildDevConsoleQuickCommands() {
 
   return `
 ${buttons}
+
 <button onclick="showDevConsoleQuickEditor()">
   ⚙ Edit
 </button>
@@ -57,27 +63,20 @@ ${buttons}
 
 }
 
-function runDevConsoleQuickCommand(index) {
+function runDevConsoleQuickCommand(
+  index
+) {
 
   const item =
     devConsoleQuickButtons[index];
 
-  const input =
-    get("devConsoleInput");
-
-  if (!item || !input) {
-    return;
+  if (!item) {
+    return false;
   }
 
-  input.value =
-    item.code || "";
-
-  localStorage.setItem(
-    "devConsoleLastInput",
-    input.value
+  return runDevConsoleCode(
+    item.code || ""
   );
-
-  input.focus();
 
 }
 
@@ -219,6 +218,27 @@ function moveDevConsoleQuickDown(index) {
 
 }
 
+/* ===============================
+   Load Quick Command
+=============================== */
+
+function loadDevConsoleQuickCommand(
+  index
+) {
+
+  const item =
+    devConsoleQuickButtons[index];
+
+  if (!item) {
+    return false;
+  }
+
+  return setDevConsoleInput(
+    item.code || ""
+  );
+
+}
+
 window.buildDevConsoleQuickCommands =
   buildDevConsoleQuickCommands;
 
@@ -245,3 +265,6 @@ window.moveDevConsoleQuickDown =
 
 window.saveDevConsoleQuickButtons =
   saveDevConsoleQuickButtons;
+
+window.loadDevConsoleQuickCommand =
+  loadDevConsoleQuickCommand;
