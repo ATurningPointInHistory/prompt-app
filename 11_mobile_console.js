@@ -90,19 +90,75 @@ function addMobileConsoleLog(type, text) {
 function buildDevConsoleToolbarHtml() {
 
   return `
+
+<div class="small">
+入力
+</div>
+
 <div class="float-panel-actions">
 
-  <button onclick="pasteDevConsoleInput()">📋 Paste</button>
-  <button onclick="executeDevConsole()">▶ Run</button>
-  <button onclick="pasteAndRunDevConsole()">⚡ Paste&Run</button>
-  <button onclick="clearDevConsoleInput()">🗑 Clear</button>
-  <button onclick="saveDevConsoleFavorite()">⭐ 保存</button>
-  <button onclick="showDevConsoleFavorites()">📂 Favorite</button>
-  <button onclick="copyDevConsoleResult()">📋 結果</button>
-  <button onclick="showDevConsoleHistory()">🕘 履歴</button>
-  <button onclick="clearMobileConsole()">🧹 ログ</button>
+  <button onclick="pasteDevConsoleInput()">
+    📋 Paste
+  </button>
+
+  <button onclick="clearDevConsoleInput()">
+    🗑 Clear
+  </button>
 
 </div>
+
+<div class="small" style="margin-top:6px;">
+実行
+</div>
+
+<div class="float-panel-actions">
+
+  <button onclick="executeDevConsole()">
+    ▶ Run
+  </button>
+
+  <button onclick="pasteAndRunDevConsole()">
+    ⚡ Paste&Run
+  </button>
+
+</div>
+
+<div class="small" style="margin-top:6px;">
+保存
+</div>
+
+<div class="float-panel-actions">
+
+  <button onclick="saveDevConsoleFavorite()">
+    ⭐ 保存
+  </button>
+
+  <button onclick="showDevConsoleFavorites()">
+    📂 Favorite
+  </button>
+
+  <button onclick="showDevConsoleHistory()">
+    🕘 履歴
+  </button>
+
+</div>
+
+<div class="small" style="margin-top:6px;">
+出力
+</div>
+
+<div class="float-panel-actions">
+
+  <button onclick="copyDevConsoleResult()">
+    📋 結果
+  </button>
+
+  <button onclick="clearMobileConsole()">
+    🧹 ログ
+  </button>
+
+</div>
+
 `;
 
 }
