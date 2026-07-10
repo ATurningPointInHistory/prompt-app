@@ -145,3 +145,124 @@ function searchFunctionHelp(
     );
 
 }
+
+/* ===============================
+   Get Function Help
+=============================== */
+
+function getFunctionHelp(
+  functionName
+) {
+
+  const name =
+    String(functionName || "")
+      .trim();
+
+  if (!name) {
+    return null;
+  }
+
+  const database =
+    getProjectFunctionDatabase();
+
+  if (
+    !database ||
+    typeof database !== "object"
+  ) {
+    return null;
+  }
+
+  if (
+    database[name]
+  ) {
+
+    const info =
+      database[name];
+
+    return {
+      ...info,
+
+      name:
+        getFunctionName(info) !==
+        "unknown"
+          ? getFunctionName(info)
+          : name,
+
+      file:
+        getFunctionFileName(
+          info
+        ),
+
+      called:
+        getFunctionCalledList(
+          info
+        ),
+
+      calledBy:
+        getFunctionCalledByList(
+          info
+        )
+    };
+
+  }
+
+  const normalized =
+    name.toLowerCase();
+
+  const entry =
+    Object.entries(database)
+      .find(([key, info]) => {
+
+        const actualName =
+          getFunctionName(
+            info
+          );
+
+        return (
+          String(key)
+            .toLowerCase() ===
+            normalized ||
+
+          String(actualName)
+            .toLowerCase() ===
+            normalized
+        );
+
+      });
+
+  if (!entry) {
+    return null;
+  }
+
+  const key =
+    entry[0];
+
+  const info =
+    entry[1] || {};
+
+  return {
+    ...info,
+
+    name:
+      getFunctionName(info) !==
+      "unknown"
+        ? getFunctionName(info)
+        : key,
+
+    file:
+      getFunctionFileName(
+        info
+      ),
+
+    called:
+      getFunctionCalledList(
+        info
+      ),
+
+    calledBy:
+      getFunctionCalledByList(
+        info
+      )
+  };
+
+}
