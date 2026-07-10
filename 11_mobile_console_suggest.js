@@ -98,20 +98,22 @@ function runDevConsoleHistory(
   index
 ) {
 
-  loadDevConsoleHistory(
-    index
-  );
+  const code =
+    devConsoleHistory[index];
 
-  setTimeout(() => {
+  if (!code) {
+    return;
+  }
 
-    if (
-      typeof executeDevConsole ===
-      "function"
-    ) {
-      executeDevConsole();
-    }
+  showMobileConsole();
 
-  }, 120);
+  waitDevConsoleReady(() => {
+
+    runDevConsoleCode(
+      code
+    );
+
+  });
 
 }
 
@@ -121,7 +123,9 @@ function saveDevConsoleFavorite() {
     get("devConsoleInput");
 
   const code =
-    input ? input.value.trim() : "";
+    input
+      ? input.value.trim()
+      : "";
 
   if (!code) {
     alert("保存する入力がありません");
@@ -138,10 +142,23 @@ function saveDevConsoleFavorite() {
     return;
   }
 
+  devConsoleFavorites =
+    devConsoleFavorites.filter(
+      item =>
+        item &&
+        item.code !== code
+    );
+
   devConsoleFavorites.unshift({
     name,
     code
   });
+
+  if (
+    devConsoleFavorites.length > 50
+  ) {
+    devConsoleFavorites.length = 50;
+  }
 
   localStorage.setItem(
     "devConsoleFavorites",
@@ -195,38 +212,15 @@ function loadDevConsoleFavorite(
     return;
   }
 
-  const code =
-    item.code || "";
-
-  localStorage.setItem(
-    "devConsoleLastInput",
-    code
-  );
-
   showMobileConsole();
 
-  setTimeout(() => {
+  waitDevConsoleReady(() => {
 
-    const input =
-      get("devConsoleInput");
+    setDevConsoleInput(
+      item.code || ""
+    );
 
-    if (!input) {
-      return;
-    }
-
-    input.value =
-      code;
-
-    input.focus();
-
-    if (
-      typeof updateDevConsoleSuggestions ===
-      "function"
-    ) {
-      updateDevConsoleSuggestions();
-    }
-
-  }, 50);
+  });
 
 }
 
@@ -234,20 +228,22 @@ function runDevConsoleFavorite(
   index
 ) {
 
-  loadDevConsoleFavorite(
-    index
-  );
+  const item =
+    devConsoleFavorites[index];
 
-  setTimeout(() => {
+  if (!item) {
+    return;
+  }
 
-    if (
-      typeof executeDevConsole ===
-      "function"
-    ) {
-      executeDevConsole();
-    }
+  showMobileConsole();
 
-  }, 120);
+  waitDevConsoleReady(() => {
+
+    runDevConsoleCode(
+      item.code || ""
+    );
+
+  });
 
 }
 
