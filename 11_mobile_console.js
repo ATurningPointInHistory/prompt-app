@@ -313,7 +313,8 @@ function executeDevConsole() {
   }
 
   const code =
-    input.value.trim();
+    String(input.value || "")
+      .trim();
 
   if (!code) {
     alert("実行コードなし");
@@ -325,7 +326,12 @@ function executeDevConsole() {
     code
   );
 
-  saveDevConsoleHistory(code);
+  if (
+    typeof saveDevConsoleHistory ===
+    "function"
+  ) {
+    saveDevConsoleHistory(code);
+  }
 
   const logs = [];
 
@@ -338,86 +344,24 @@ function executeDevConsole() {
   const originalError =
     console.error;
 
-  function capture(type, args) {
+  const startedAt =
+    performance.now();
+
+  function capture(
+    type,
+    args
+  ) {
 
     logs.push(
       "[" + type + "] " +
-      args.map(formatDevConsoleValue)
+      args
+        .map(formatDevConsoleValue)
         .join(" ")
     );
 
   }
 
-  try {
-
-    console.log =
-      function(...args) {
-        capture("log", args);
-        originalLog.apply(console, args);
-      };
-
-    console.warn =
-      function(...args) {
-        capture("warn", args);
-        originalWarn.apply(console, args);
-      };
-
-    console.error =
-      function(...args) {
-        capture("error", args);
-        originalError.apply(console, args);
-      };
-
-    let result;
-
-    try {
-
-      result =
-        Function(
-          `"use strict";
-return (
-${code}
-);`
-        )();
-
-    } catch (expressionError) {
-
-      result =
-        Function(
-          `"use strict";
-${code}
-`
-        )();
-
-    }
-
-    const output = [];
-
-    if (logs.length) {
-      output.push("=== Console ===");
-      output.push(logs.join("\n"));
-      output.push("");
-    }
-
-    output.push("=== Result ===");
-    output.push(
-      formatDevConsoleValue(result)
-    );
-
-    devConsoleResult =
-      output.join("\n");
-
-  } catch (e) {
-
-    devConsoleResult =
-      [
-        "=== Error ===",
-        e.name + ": " + e.message,
-        "",
-        e.stack || ""
-      ].join("\n");
-
-  } finally {
+  function restoreConsole() {
 
     console.log =
       originalLog;
@@ -430,14 +374,259 @@ ${code}
 
   }
 
-  if (resultBox) {
-    resultBox.value =
-      devConsoleResult;
+  function updateResultBox() {
+
+    if (resultBox) {
+      resultBox.value =
+        devConsoleResult;
+    }
+
+  }
+
+  function buildSuccessOutput(
+    result
+  ) {
+
+    const elapsed =
+      performance.now() -
+      startedAt;
+
+    const output = [];
+
+    if (logs.length) {
+
+      output.push(
+        "=== Console ==="
+      );
+
+      output.push(
+        logs.join("\n")
+      );
+
+    }
+
+    const hasResult =
+      result !== undefined;
+
+    if (
+      hasResult ||
+      !logs.length
+    ) {
+
+      if (output.length) {
+        output.push("");
+      }
+
+      output.push(
+        "=== Result ==="
+      );
+
+      output.push(
+        formatDevConsoleValue(result)
+      );
+
+    }
+
+    output.push("");
+    output.push(
+      "Execution: " +
+      elapsed.toFixed(2) +
+      " ms"
+    );
+
+    devConsoleResult =
+      output.join("\n");
+
+    updateResultBox();
+
+  }
+
+  function buildErrorOutput(
+    error
+  ) {
+
+    const elapsed =
+      performance.now() -
+      startedAt;
+
+    const output = [];
+
+    if (logs.length) {
+
+      output.push(
+        "=== Console ==="
+      );
+
+      output.push(
+        logs.join("\n")
+      );
+
+      output.push("");
+
+    }
+
+    output.push(
+      "=== Error ==="
+    );
+
+    output.push(
+      formatDevConsoleError(error)
+    );
+
+    output.push("");
+    output.push(
+      "Execution: " +
+      elapsed.toFixed(2) +
+      " ms"
+    );
+
+    devConsoleResult =
+      output.join("\n");
+
+    updateResultBox();
+
+  }
+
+  try {
+
+    console.log =
+      function(...args) {
+
+        capture(
+          "log",
+          args
+        );
+
+        originalLog.apply(
+          console,
+          args
+        );
+
+      };
+
+    console.warn =
+      function(...args) {
+
+        capture(
+          "warn",
+          args
+        );
+
+        originalWarn.apply(
+          console,
+          args
+        );
+
+      };
+
+    console.error =
+      function(...args) {
+
+        capture(
+          "error",
+          args
+        );
+
+        originalError.apply(
+          console,
+          args
+        );
+
+      };
+
+    const result =
+      executeDevConsoleCode(
+        code
+      );
+
+    if (
+      result &&
+      typeof result.then ===
+      "function"
+    ) {
+
+      result
+        .then(value => {
+
+          restoreConsole();
+
+          buildSuccessOutput(
+            value
+          );
+
+        })
+        .catch(error => {
+
+          restoreConsole();
+
+          buildErrorOutput(
+            error
+          );
+
+        });
+
+      return;
+
+    }
+
+    restoreConsole();
+
+    buildSuccessOutput(
+      result
+    );
+
+  } catch (error) {
+
+    restoreConsole();
+
+    buildErrorOutput(
+      error
+    );
+
   }
 
 }
 
-function formatDevConsoleValue(value) {
+/* ===============================
+   Execute Dev Console Code
+=============================== */
+
+function executeDevConsoleCode(
+  code
+) {
+
+  const source =
+    String(code || "")
+      .trim();
+
+  if (!source) {
+    return undefined;
+  }
+
+  try {
+
+    return Function(
+      `"use strict";
+return (
+${source}
+);`
+    )();
+
+  } catch (expressionError) {
+
+    return Function(
+      `"use strict";
+${source}
+`
+    )();
+
+  }
+
+}
+
+function formatDevConsoleValue(
+  value
+) {
 
   if (value === undefined) {
     return "undefined";
@@ -448,23 +637,213 @@ function formatDevConsoleValue(value) {
   }
 
   if (
-    typeof value === "object" ||
+    value instanceof Error
+  ) {
+    return formatDevConsoleError(
+      value
+    );
+  }
+
+  if (
+    typeof value === "string"
+  ) {
+    return value;
+  }
+
+  if (
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    typeof value === "bigint"
+  ) {
+    return String(value);
+  }
+
+  if (
+    typeof value === "symbol"
+  ) {
+    return value.toString();
+  }
+
+  if (
     typeof value === "function"
   ) {
 
+    return [
+      "[Function]",
+      value.name
+        ? "Name: " + value.name
+        : "Anonymous",
+      "",
+      String(value)
+    ].join("\n");
+
+  }
+
+  if (
+    typeof value === "object"
+  ) {
+
     try {
+
       return JSON.stringify(
         value,
-        null,
+        createDevConsoleJsonReplacer(),
         2
       );
-    } catch (e) {
-      return String(value);
+
+    } catch (error) {
+
+      try {
+        return String(value);
+      } catch (stringError) {
+        return "[Unserializable Object]";
+      }
+
     }
 
   }
 
   return String(value);
+
+}
+
+/* ===============================
+   Dev Console JSON Replacer
+=============================== */
+
+function createDevConsoleJsonReplacer() {
+
+  const visited =
+    new WeakSet();
+
+  return function(
+    key,
+    value
+  ) {
+
+    if (
+      typeof value === "bigint"
+    ) {
+      return value.toString() + "n";
+    }
+
+    if (
+      typeof value === "function"
+    ) {
+      return (
+        "[Function " +
+        (value.name || "anonymous") +
+        "]"
+      );
+    }
+
+    if (
+      typeof value === "undefined"
+    ) {
+      return "[undefined]";
+    }
+
+    if (
+      typeof value === "symbol"
+    ) {
+      return value.toString();
+    }
+
+    if (
+      value instanceof Error
+    ) {
+      return {
+        name:
+          value.name,
+        message:
+          value.message,
+        stack:
+          value.stack || ""
+      };
+    }
+
+    if (
+      value &&
+      typeof value === "object"
+    ) {
+
+      if (
+        visited.has(value)
+      ) {
+        return "[Circular]";
+      }
+
+      visited.add(value);
+
+    }
+
+    return value;
+
+  };
+
+}
+
+/* ===============================
+   Format Dev Console Error
+=============================== */
+
+function formatDevConsoleError(
+  error
+) {
+
+  if (!error) {
+    return "Unknown Error";
+  }
+
+  if (
+    typeof error === "string"
+  ) {
+    return error;
+  }
+
+  const name =
+    error.name ||
+    "Error";
+
+  const message =
+    error.message ||
+    String(error);
+
+  const lines = [
+    name + ": " + message
+  ];
+
+  if (error.stack) {
+
+    const stack =
+      String(error.stack);
+
+    if (
+      !stack.startsWith(
+        name + ": " + message
+      )
+    ) {
+      lines.push("");
+      lines.push(stack);
+    } else {
+
+      const stackLines =
+        stack.split(/\r?\n/);
+
+      if (stackLines.length > 1) {
+        lines.push("");
+        lines.push(
+          stackLines
+            .slice(1)
+            .join("\n")
+        );
+      }
+
+    }
+
+  }
+
+  return lines.join("\n");
 
 }
 
