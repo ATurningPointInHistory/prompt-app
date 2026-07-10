@@ -8,6 +8,9 @@ let mobileConsoleInitialized = false;
 
 let devConsoleResult = "";
 
+let devConsoleExecuting =
+  false;
+
 function initMobileConsole() {
 
   if (mobileConsoleInitialized) {
@@ -355,6 +358,14 @@ function checkFunctionExistsPrompt() {
 
 }
 
+/* ===============================
+   Execute Dev Console
+=============================== */
+
+/* ===============================
+   Execute Dev Console
+=============================== */
+
 function executeDevConsole() {
 
   const input =
@@ -377,218 +388,55 @@ function executeDevConsole() {
     return;
   }
 
-  localStorage.setItem(
-    "devConsoleLastInput",
-    code
-  );
+  if (devConsoleExecuting) {
+    alert("コンソールを実行中です");
+    return;
+  }
 
-  if (
-    typeof saveDevConsoleHistory ===
-    "function"
-  ) {
-    saveDevConsoleHistory(
+  try {
+
+    localStorage.setItem(
+      "devConsoleLastInput",
       code
     );
-  }
-
-  const logs = [];
-
-  const originalLog =
-    console.log;
-
-  const originalWarn =
-    console.warn;
-
-  const originalError =
-    console.error;
-
-  const startedAt =
-    performance.now();
-
-  function capture(
-    type,
-    args
-  ) {
-
-    logs.push(
-      "[" + type + "] " +
-      args
-        .map(formatDevConsoleValue)
-        .join(" ")
-    );
-
-  }
-
-  function restoreConsole() {
-
-    console.log =
-      originalLog;
-
-    console.warn =
-      originalWarn;
-
-    console.error =
-      originalError;
-
-  }
-
-  function updateResult(
-    text
-  ) {
-
-    devConsoleResult =
-      text;
-
-    if (resultBox) {
-      resultBox.value =
-        text;
-    }
-
-  }
-
-  function buildSuccessText(
-    result
-  ) {
-
-    const lines = [];
-
-    if (logs.length) {
-
-      lines.push(
-        "=== Console ==="
-      );
-
-      lines.push(
-        logs.join("\n")
-      );
-
-    }
 
     if (
-      result !== undefined ||
-      !logs.length
+      typeof saveDevConsoleHistory ===
+      "function"
     ) {
 
-      if (lines.length) {
-        lines.push("");
-      }
-
-      lines.push(
-        "=== Result ==="
-      );
-
-      lines.push(
-        formatDevConsoleValue(
-          result
-        )
+      saveDevConsoleHistory(
+        code
       );
 
     }
 
-    lines.push("");
-    lines.push(
-      "Execution: " +
-      (
-        performance.now() -
-        startedAt
-      ).toFixed(2) +
-      " ms"
-    );
+  } catch (error) {
 
-    return lines.join("\n");
-
-  }
-
-  function buildErrorText(
-    error
-  ) {
-
-    const lines = [];
-
-    if (logs.length) {
-
-      lines.push(
-        "=== Console ==="
-      );
-
-      lines.push(
-        logs.join("\n")
-      );
-
-      lines.push("");
-
-    }
-
-    lines.push(
-      "=== Error ==="
-    );
-
-    lines.push(
+    alert(
+      "実行準備に失敗しました\n\n" +
       formatDevConsoleError(
         error
       )
     );
 
-    lines.push("");
-    lines.push(
-      "Execution: " +
-      (
-        performance.now() -
-        startedAt
-      ).toFixed(2) +
-      " ms"
-    );
-
-    return lines.join("\n");
+    return;
 
   }
 
+  const context =
+    createDevConsoleExecutionContext(
+      resultBox
+    );
+
+  devConsoleExecuting =
+    true;
+
   try {
 
-    console.log =
-      function(...args) {
-
-        capture(
-          "log",
-          args
-        );
-
-        originalLog.apply(
-          console,
-          args
-        );
-
-      };
-
-    console.warn =
-      function(...args) {
-
-        capture(
-          "warn",
-          args
-        );
-
-        originalWarn.apply(
-          console,
-          args
-        );
-
-      };
-
-    console.error =
-      function(...args) {
-
-        capture(
-          "error",
-          args
-        );
-
-        originalError.apply(
-          console,
-          args
-        );
-
-      };
+    hookDevConsoleExecution(
+      context
+    );
 
     const result =
       executeDevConsoleSource(
@@ -601,56 +449,419 @@ function executeDevConsole() {
       "function"
     ) {
 
-      result
-        .then(value => {
-
-          restoreConsole();
-
-          updateResult(
-            buildSuccessText(
-              value
-            )
-          );
-
-        })
-        .catch(error => {
-
-          restoreConsole();
-
-          updateResult(
-            buildErrorText(
-              error
-            )
-          );
-
-        });
+      executeDevConsoleAsync(
+        context,
+        result
+      );
 
       return;
 
     }
 
-    restoreConsole();
-
-    updateResult(
-      buildSuccessText(
-        result
-      )
+    executeDevConsoleSync(
+      context,
+      result
     );
 
   } catch (error) {
 
-    restoreConsole();
-
-    updateResult(
-      buildErrorText(
-        error
-      )
+    handleDevConsoleError(
+      context,
+      error
     );
 
   }
 
 }
 
+/* ===============================
+   Create Dev Console Context
+=============================== */
+
+function createDevConsoleExecutionContext(
+  resultBox
+) {
+
+  return {
+
+    logs: [],
+
+    startedAt:
+      performance.now(),
+
+    resultBox,
+
+    originalConsole: {
+
+      log:
+        console.log,
+
+      warn:
+        console.warn,
+
+      error:
+        console.error
+
+    }
+
+  };
+
+}
+
+/* ===============================
+   Finish Dev Console Execution
+=============================== */
+
+function finishDevConsoleExecution(
+  context
+) {
+
+  console.log =
+    context.originalConsole.log;
+
+  console.warn =
+    context.originalConsole.warn;
+
+  console.error =
+    context.originalConsole.error;
+
+  devConsoleExecuting =
+    false;
+
+}
+
+/* ===============================
+   Build Dev Console Success Text
+=============================== */
+
+function buildDevConsoleSuccessText(
+  context,
+  result
+) {
+
+  const lines = [];
+
+  if (context.logs.length) {
+
+    lines.push(
+      "=== Console ==="
+    );
+
+    lines.push(
+      context.logs.join("\n")
+    );
+
+  }
+
+  if (
+    result !== undefined ||
+    !context.logs.length
+  ) {
+
+    if (lines.length) {
+      lines.push("");
+    }
+
+    lines.push(
+      "=== Result ==="
+    );
+
+    lines.push(
+      formatDevConsoleValue(
+        result
+      )
+    );
+
+  }
+
+  lines.push("");
+
+  lines.push(
+    "Execution: " +
+    (
+      performance.now() -
+      context.startedAt
+    ).toFixed(2) +
+    " ms"
+  );
+
+  return lines.join("\n");
+
+}
+
+/* ===============================
+   Build Dev Console Error Text
+=============================== */
+
+function buildDevConsoleErrorText(
+  context,
+  error
+) {
+
+  const lines = [];
+
+  if (context.logs.length) {
+
+    lines.push(
+      "=== Console ==="
+    );
+
+    lines.push(
+      context.logs.join("\n")
+    );
+
+    lines.push("");
+
+  }
+
+  lines.push(
+    "=== Error ==="
+  );
+
+  lines.push(
+    formatDevConsoleError(
+      error
+    )
+  );
+
+  lines.push("");
+
+  lines.push(
+    "Execution: " +
+    (
+      performance.now() -
+      context.startedAt
+    ).toFixed(2) +
+    " ms"
+  );
+
+  return lines.join("\n");
+
+}
+
+/* ===============================
+   Execute Dev Console Sync
+=============================== */
+
+function executeDevConsoleSync(
+  context,
+  result
+) {
+
+  handleDevConsoleSuccess(
+    context,
+    result
+  );
+
+}
+
+/* ===============================
+   Execute Dev Console Async
+=============================== */
+
+function executeDevConsoleAsync(
+  context,
+  promise
+) {
+
+  promise
+
+    .then(result => {
+
+      handleDevConsoleSuccess(
+        context,
+        result
+      );
+
+    })
+
+    .catch(error => {
+
+      handleDevConsoleError(
+        context,
+        error
+      );
+
+    });
+
+}
+
+/* ===============================
+   Complete Dev Console Execution
+=============================== */
+
+function completeDevConsoleExecution(
+  context,
+  text
+) {
+
+  finishDevConsoleExecution(
+    context
+  );
+
+  devConsoleResult =
+    text;
+
+  if (
+    context.resultBox
+  ) {
+
+    context.resultBox.value =
+      text;
+
+  }
+
+}
+
+/* ===============================
+   Hook Dev Console Execution
+=============================== */
+
+function hookDevConsoleExecution(
+  context
+) {
+
+  function capture(
+    type,
+    args
+  ) {
+
+    context.logs.push(
+      "[" + type + "] " +
+      args
+        .map(formatDevConsoleValue)
+        .join(" ")
+    );
+
+  }
+
+  console.log =
+    function(...args) {
+
+      capture(
+        "log",
+        args
+      );
+
+      context.originalConsole.log.apply(
+        console,
+        args
+      );
+
+    };
+
+  console.warn =
+    function(...args) {
+
+      capture(
+        "warn",
+        args
+      );
+
+      context.originalConsole.warn.apply(
+        console,
+        args
+      );
+
+    };
+
+  console.error =
+    function(...args) {
+
+      capture(
+        "error",
+        args
+      );
+
+      context.originalConsole.error.apply(
+        console,
+        args
+      );
+
+    };
+
+}
+
+/* ===============================
+   Handle Dev Console Success
+=============================== */
+
+function handleDevConsoleSuccess(
+  context,
+  result
+) {
+
+  try {
+
+    const text =
+      buildDevConsoleSuccessText(
+        context,
+        result
+      );
+
+    completeDevConsoleExecution(
+      context,
+      text
+    );
+
+  } catch (error) {
+
+    handleDevConsoleError(
+      context,
+      error
+    );
+
+  }
+
+}
+
+/* ===============================
+   Handle Dev Console Error
+=============================== */
+
+function handleDevConsoleError(
+  context,
+  error
+) {
+
+  let text = "";
+
+  try {
+
+    text =
+      buildDevConsoleErrorText(
+        context,
+        error
+      );
+
+  } catch (formatError) {
+
+    text = [
+      "=== Error ===",
+      String(
+        error &&
+        error.message
+          ? error.message
+          : error
+      ),
+      "",
+      "=== Format Error ===",
+      String(
+        formatError &&
+        formatError.message
+          ? formatError.message
+          : formatError
+      )
+    ].join("\n");
+
+  }
+
+  completeDevConsoleExecution(
+    context,
+    text
+  );
+
+}
 
 function formatDevConsoleValue(
   value
@@ -971,12 +1182,6 @@ async function pasteAndRunDevConsole() {
   executeDevConsole();
 
 }
-
-
-
-
-
-
 
 /* ===============================
    Set Dev Console Input
