@@ -330,7 +330,9 @@ function executeDevConsole() {
     typeof saveDevConsoleHistory ===
     "function"
   ) {
-    saveDevConsoleHistory(code);
+    saveDevConsoleHistory(
+      code
+    );
   }
 
   const logs = [];
@@ -374,116 +376,114 @@ function executeDevConsole() {
 
   }
 
-  function updateResultBox() {
+  function updateResult(
+    text
+  ) {
+
+    devConsoleResult =
+      text;
 
     if (resultBox) {
       resultBox.value =
-        devConsoleResult;
+        text;
     }
 
   }
 
-  function buildSuccessOutput(
+  function buildSuccessText(
     result
   ) {
 
-    const elapsed =
-      performance.now() -
-      startedAt;
-
-    const output = [];
+    const lines = [];
 
     if (logs.length) {
 
-      output.push(
+      lines.push(
         "=== Console ==="
       );
 
-      output.push(
+      lines.push(
         logs.join("\n")
       );
 
     }
 
-    const hasResult =
-      result !== undefined;
-
     if (
-      hasResult ||
+      result !== undefined ||
       !logs.length
     ) {
 
-      if (output.length) {
-        output.push("");
+      if (lines.length) {
+        lines.push("");
       }
 
-      output.push(
+      lines.push(
         "=== Result ==="
       );
 
-      output.push(
-        formatDevConsoleValue(result)
+      lines.push(
+        formatDevConsoleValue(
+          result
+        )
       );
 
     }
 
-    output.push("");
-    output.push(
+    lines.push("");
+    lines.push(
       "Execution: " +
-      elapsed.toFixed(2) +
+      (
+        performance.now() -
+        startedAt
+      ).toFixed(2) +
       " ms"
     );
 
-    devConsoleResult =
-      output.join("\n");
-
-    updateResultBox();
+    return lines.join("\n");
 
   }
 
-  function buildErrorOutput(
+  function buildErrorText(
     error
   ) {
 
-    const elapsed =
-      performance.now() -
-      startedAt;
-
-    const output = [];
+    const lines = [];
 
     if (logs.length) {
 
-      output.push(
+      lines.push(
         "=== Console ==="
       );
 
-      output.push(
+      lines.push(
         logs.join("\n")
       );
 
-      output.push("");
+      lines.push("");
 
     }
 
-    output.push(
+    lines.push(
       "=== Error ==="
     );
 
-    output.push(
-      formatDevConsoleError(error)
+    lines.push(
+      formatDevConsoleError(
+        error
+      )
     );
 
-    output.push("");
-    output.push(
+    lines.push("");
+    lines.push(
       "Execution: " +
-      elapsed.toFixed(2) +
+      (
+        performance.now() -
+        startedAt
+      ).toFixed(2) +
       " ms"
     );
 
-    devConsoleResult =
-      output.join("\n");
-
-    updateResultBox();
+    return lines.join("\n");
 
   }
 
@@ -535,7 +535,7 @@ function executeDevConsole() {
       };
 
     const result =
-      executeDevConsoleCode(
+      executeDevConsoleSource(
         code
       );
 
@@ -550,8 +550,10 @@ function executeDevConsole() {
 
           restoreConsole();
 
-          buildSuccessOutput(
-            value
+          updateResult(
+            buildSuccessText(
+              value
+            )
           );
 
         })
@@ -559,8 +561,10 @@ function executeDevConsole() {
 
           restoreConsole();
 
-          buildErrorOutput(
-            error
+          updateResult(
+            buildErrorText(
+              error
+            )
           );
 
         });
@@ -571,16 +575,20 @@ function executeDevConsole() {
 
     restoreConsole();
 
-    buildSuccessOutput(
-      result
+    updateResult(
+      buildSuccessText(
+        result
+      )
     );
 
   } catch (error) {
 
     restoreConsole();
 
-    buildErrorOutput(
-      error
+    updateResult(
+      buildErrorText(
+        error
+      )
     );
 
   }
@@ -651,31 +659,17 @@ function formatDevConsoleValue(
   }
 
   if (
-    typeof value === "number" ||
-    typeof value === "boolean" ||
-    typeof value === "bigint"
-  ) {
-    return String(value);
-  }
-
-  if (
-    typeof value === "symbol"
-  ) {
-    return value.toString();
-  }
-
-  if (
     typeof value === "function"
   ) {
 
-    return [
-      "[Function]",
-      value.name
-        ? "Name: " + value.name
-        : "Anonymous",
-      "",
-      String(value)
-    ].join("\n");
+    return (
+      "[Function " +
+      (
+        value.name ||
+        "anonymous"
+      ) +
+      "]"
+    );
 
   }
 
@@ -693,11 +687,7 @@ function formatDevConsoleValue(
 
     } catch (error) {
 
-      try {
-        return String(value);
-      } catch (stringError) {
-        return "[Unserializable Object]";
-      }
+      return String(value);
 
     }
 
@@ -959,5 +949,253 @@ async function pasteAndRunDevConsole() {
   }
 
   executeDevConsole();
+
+}
+
+
+
+
+
+
+
+/* ===============================
+   Set Dev Console Input
+=============================== */
+
+function setDevConsoleInput(
+  code,
+  options = {}
+) {
+
+  const source =
+    String(code || "");
+
+  const input =
+    get("devConsoleInput");
+
+  localStorage.setItem(
+    "devConsoleLastInput",
+    source
+  );
+
+  if (!input) {
+
+    if (
+      options.reopen === true &&
+      typeof showMobileConsole ===
+      "function"
+    ) {
+      showMobileConsole();
+    }
+
+    return false;
+  }
+
+  input.value =
+    source;
+
+  input.focus();
+
+  const position =
+    source.length;
+
+  input.selectionStart =
+    position;
+
+  input.selectionEnd =
+    position;
+
+  if (
+    typeof updateDevConsoleSuggestions ===
+    "function"
+  ) {
+    updateDevConsoleSuggestions();
+  }
+
+  return true;
+
+}
+
+/* ===============================
+   Load And Execute Console Code
+=============================== */
+
+function runDevConsoleCode(
+  code
+) {
+
+  const source =
+    String(code || "")
+      .trim();
+
+  if (!source) {
+    return false;
+  }
+
+  const loaded =
+    setDevConsoleInput(
+      source
+    );
+
+  if (!loaded) {
+    return false;
+  }
+
+  executeDevConsole();
+
+  return true;
+
+}
+
+/* ===============================
+   Execute Dev Console Source
+=============================== */
+
+function executeDevConsoleSource(
+  code
+) {
+
+  const source =
+    String(code || "")
+      .trim();
+
+  if (!source) {
+    return undefined;
+  }
+
+  try {
+
+    return Function(
+      `"use strict";
+return (
+${source}
+);`
+    )();
+
+  } catch (expressionError) {
+
+    if (
+      expressionError instanceof
+      SyntaxError
+    ) {
+
+      return Function(
+        `"use strict";
+${source}
+`
+      )();
+
+    }
+
+    throw expressionError;
+
+  }
+
+}
+
+function formatDevConsoleError(
+  error
+) {
+
+  if (!error) {
+    return "Unknown Error";
+  }
+
+  if (
+    typeof error === "string"
+  ) {
+    return error;
+  }
+
+  const name =
+    error.name ||
+    "Error";
+
+  const message =
+    error.message ||
+    String(error);
+
+  const lines = [
+    name + ": " + message
+  ];
+
+  if (error.stack) {
+
+    const stackLines =
+      String(error.stack)
+        .split(/\r?\n/);
+
+    if (stackLines.length > 1) {
+
+      lines.push("");
+      lines.push(
+        stackLines
+          .slice(1)
+          .join("\n")
+      );
+
+    }
+
+  }
+
+  return lines.join("\n");
+
+}
+
+function createDevConsoleJsonReplacer() {
+
+  const visited =
+    new WeakSet();
+
+  return function(
+    key,
+    value
+  ) {
+
+    if (
+      typeof value === "bigint"
+    ) {
+      return value.toString() + "n";
+    }
+
+    if (
+      typeof value === "function"
+    ) {
+
+      return (
+        "[Function " +
+        (
+          value.name ||
+          "anonymous"
+        ) +
+        "]"
+      );
+
+    }
+
+    if (
+      typeof value === "undefined"
+    ) {
+      return "[undefined]";
+    }
+
+    if (
+      value &&
+      typeof value === "object"
+    ) {
+
+      if (
+        visited.has(value)
+      ) {
+        return "[Circular]";
+      }
+
+      visited.add(value);
+
+    }
+
+    return value;
+
+  };
 
 }
