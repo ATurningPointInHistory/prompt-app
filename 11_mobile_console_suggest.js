@@ -82,35 +82,15 @@ function loadDevConsoleHistory(
     return;
   }
 
-  localStorage.setItem(
-    "devConsoleLastInput",
-    code
-  );
-
   showMobileConsole();
 
-  setTimeout(() => {
+  waitDevConsoleReady(() => {
 
-    const input =
-      get("devConsoleInput");
+    setDevConsoleInput(
+      code
+    );
 
-    if (!input) {
-      return;
-    }
-
-    input.value =
-      code;
-
-    input.focus();
-
-    if (
-      typeof updateDevConsoleSuggestions ===
-      "function"
-    ) {
-      updateDevConsoleSuggestions();
-    }
-
-  }, 50);
+  });
 
 }
 
@@ -294,6 +274,41 @@ function deleteDevConsoleFavorite(
   );
 
   showDevConsoleFavorites();
+
+}
+
+/* ===============================
+   Wait Dev Console Ready
+=============================== */
+
+function waitDevConsoleReady(
+  callback,
+  retry = 0
+) {
+
+  const input =
+    get("devConsoleInput");
+
+  if (input) {
+
+    callback(input);
+
+    return;
+
+  }
+
+  if (retry >= 10) {
+    return;
+  }
+
+  requestAnimationFrame(() => {
+
+    waitDevConsoleReady(
+      callback,
+      retry + 1
+    );
+
+  });
 
 }
 
