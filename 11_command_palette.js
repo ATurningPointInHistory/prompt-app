@@ -2042,6 +2042,106 @@ function createCommandPaletteStableId(
 }
 
 /* ===============================
+   Validate Command Palette
+=============================== */
+
+function validateCommandPalette() {
+
+  const checks = {
+
+    registry:
+      Array.isArray(
+        commandPaletteRegistry
+      ) &&
+      commandPaletteRegistry.length > 0,
+
+    uniqueRegistryIds:
+      new Set(
+        commandPaletteRegistry
+          .map(item =>
+            item.id
+          )
+      ).size ===
+      commandPaletteRegistry.length,
+
+    search:
+      searchCommandPalette(
+        "console"
+      ).length > 0,
+
+    executor:
+      typeof executeCommandPaletteCommand ===
+      "function",
+
+    recent:
+      Array.isArray(
+        commandPaletteRecent
+      ),
+
+    favorites:
+      Array.isArray(
+        commandPaletteFavorites
+      ),
+
+    resultViewer:
+      typeof buildCommandPaletteResultHtml ===
+      "function",
+
+    stableId:
+      createCommandPaletteStableId(
+        "test",
+        "sample"
+      ) ===
+      createCommandPaletteStableId(
+        "test",
+        "sample"
+      )
+
+  };
+
+  const failed =
+    Object.entries(checks)
+      .filter(entry =>
+        entry[1] !== true
+      )
+      .map(entry =>
+        entry[0]
+      );
+
+  return {
+    id:
+      "IDE-030",
+
+    title:
+      "Command Palette",
+
+    valid:
+      failed.length === 0,
+
+    passed:
+      Object.keys(checks).length -
+      failed.length,
+
+    total:
+      Object.keys(checks).length,
+
+    failed,
+
+    checks,
+
+    registered:
+      commandPaletteRegistry.length,
+
+    searchResultCount:
+      searchCommandPalette(
+        "console"
+      ).length
+
+  };
+
+}
+
+/* ===============================
    Public API
 =============================== */
 
@@ -2086,6 +2186,9 @@ window.showCommandPaletteFavorites =
 
 window.handleCommandPaletteKeydown =
   handleCommandPaletteKeydown;
+
+window.validateCommandPalette =
+  validateCommandPalette;
 
 initCommandPalette();
 
