@@ -242,3 +242,187 @@ function getFunctionHelp(
   };
 
 }
+
+/* ===============================
+   Build Function Help Card HTML
+=============================== */
+
+function buildFunctionHelpCardHtml(
+  info
+) {
+
+  if (!info) {
+
+    return `
+<div class="small">
+関数情報が見つかりません。
+</div>
+`;
+
+  }
+
+  const name =
+    info.name ||
+    "unknown";
+
+  const file =
+    info.file ||
+    info.fileName ||
+    "unknown";
+
+  const parameters =
+    Array.isArray(info.parameters)
+      ? info.parameters
+      : [];
+
+  const called =
+    Array.isArray(info.called)
+      ? info.called
+      : [];
+
+  const calledBy =
+    Array.isArray(info.calledBy)
+      ? info.calledBy
+      : [];
+
+  const keywords =
+    Array.isArray(info.keywords)
+      ? info.keywords
+      : [];
+
+  return `
+<div class="function-help-card">
+
+<h3>
+${escapeHtml(name)}()
+</h3>
+
+<div class="small">
+定義ファイル
+</div>
+
+<div>
+${escapeHtml(file)}
+${info.line
+  ? " : line " + escapeHtml(info.line)
+  : ""}
+</div>
+
+<hr>
+
+<div class="small">
+概要
+</div>
+
+<div>
+${escapeHtml(
+  info.aiComment ||
+  info.summary ||
+  "説明なし"
+)}
+</div>
+
+<hr>
+
+<div class="small">
+引数
+</div>
+
+<pre class="code-preview">${
+  parameters.length
+    ? escapeHtml(
+        parameters.join("\n")
+      )
+    : "なし"
+}</pre>
+
+<div class="small">
+戻り値
+</div>
+
+<div>
+${escapeHtml(
+  info.returnValue ||
+  "unknown"
+)}
+</div>
+
+<hr>
+
+<div class="small">
+呼び出し先
+</div>
+
+<pre class="code-preview">${
+  called.length
+    ? escapeHtml(
+        called.join("\n")
+      )
+    : "なし"
+}</pre>
+
+<div class="small">
+呼び出し元
+</div>
+
+<pre class="code-preview">${
+  calledBy.length
+    ? escapeHtml(
+        calledBy.join("\n")
+      )
+    : "なし"
+}</pre>
+
+<hr>
+
+<div class="small">
+分類
+</div>
+
+<div>
+Section:
+${escapeHtml(
+  info.section ||
+  "General"
+)}
+</div>
+
+<div>
+Role:
+${escapeHtml(
+  info.role ||
+  "unknown"
+)}
+</div>
+
+<div>
+Risk:
+${escapeHtml(
+  info.risk ||
+  "unknown"
+)}
+</div>
+
+<div>
+Keywords:
+${escapeHtml(
+  keywords.join(", ") ||
+  "なし"
+)}
+</div>
+
+<hr>
+
+<div class="small">
+Source Code
+</div>
+
+<pre class="code-preview">${escapeHtml(
+  info.code ||
+  "コードなし"
+)}</pre>
+
+</div>
+`;
+
+}
