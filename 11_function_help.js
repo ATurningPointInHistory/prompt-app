@@ -1,6 +1,7 @@
 /* ===============================
    11_function_help.js
    Search Function Help
+   IDE-020
 =============================== */
 
 function searchFunctionHelp(
