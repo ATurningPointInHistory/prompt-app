@@ -1,4 +1,4 @@
 /* ===============================
-   FILE:11_error_inspector.js
+   FILE: 11_error_inspector.js
    IDE-050
 =============================== */
