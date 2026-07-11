@@ -895,10 +895,6 @@ function addHistoryToCommandPalette(
    Calculate Search Score
 =============================== */
 
-/* ===============================
-   Calculate Search Score
-=============================== */
-
 function calculateCommandPaletteScore(
   command,
   query
