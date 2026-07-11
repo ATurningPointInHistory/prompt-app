@@ -483,3 +483,85 @@ function showFunctionHelp(
   return true;
 
 }
+
+/* ===============================
+   Show Function Help Search
+=============================== */
+
+function showFunctionHelpSearch() {
+
+  openFloatPanel(
+
+    "Function Help",
+
+    `
+<div class="small">
+
+検索
+
+</div>
+
+<input
+  id="functionHelpKeyword"
+  type="text"
+  placeholder="関数名・ファイル名・キーワード"
+  style="width:100%;"
+>
+
+<div
+  class="float-panel-actions"
+  style="margin-top:8px;">
+
+<button
+onclick="searchFunctionHelpPanel()">
+
+🔍 Search
+
+</button>
+
+</div>
+
+<div
+id="functionHelpResult"
+style="margin-top:10px;">
+
+検索してください
+
+</div>
+`
+
+  );
+
+}
+
+/* ===============================
+   Search Function Help Panel
+=============================== */
+
+function searchFunctionHelpPanel() {
+
+  const keyword =
+    get(
+      "functionHelpKeyword"
+    )?.value || "";
+
+  const list =
+    searchFunctionHelp(
+      keyword
+    );
+
+  const result =
+    get(
+      "functionHelpResult"
+    );
+
+  if (!result) {
+    return;
+  }
+
+  result.innerHTML =
+    buildFunctionHelpListHtml(
+      list
+    );
+
+}
