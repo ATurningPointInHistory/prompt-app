@@ -1,5 +1,5 @@
 /* ===============================
-   11_command_palette.js
+   FILE:11_command_palette.js
    Show Command Palette
    IDE-030
 =============================== */
