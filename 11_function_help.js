@@ -565,3 +565,77 @@ function searchFunctionHelpPanel() {
     );
 
 }
+
+/* ===============================
+   Build Function Help List HTML
+=============================== */
+
+function buildFunctionHelpListHtml(
+  list
+) {
+
+  if (
+    !Array.isArray(list) ||
+    !list.length
+  ) {
+
+    return `
+<div class="small">
+
+検索結果はありません
+
+</div>
+`;
+
+  }
+
+  return list
+
+    .map(info => {
+
+      const name =
+        info.name ||
+        "unknown";
+
+      const file =
+        info.file ||
+        info.fileName ||
+        "";
+
+      const summary =
+        info.summary ||
+        "";
+
+      return `
+
+<div
+class="function-help-item"
+onclick="
+showFunctionHelp(
+'${escapeHtml(name)}'
+);
+">
+
+<b>
+${escapeHtml(name)}()
+</b>
+
+<div class="small">
+${escapeHtml(file)}
+</div>
+
+<div class="small">
+${escapeHtml(summary)}
+</div>
+
+</div>
+
+<hr>
+
+`;
+
+    })
+
+    .join("");
+
+}
