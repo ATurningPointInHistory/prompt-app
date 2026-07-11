@@ -426,3 +426,60 @@ Source Code
 `;
 
 }
+
+/* ===============================
+   Show Function Help
+=============================== */
+
+function showFunctionHelp(
+  functionName
+) {
+
+  const name =
+    String(functionName || "")
+      .trim();
+
+  if (!name) {
+
+    const input =
+      prompt(
+        "関数名を入力してください",
+        ""
+      );
+
+    if (!input) {
+      return false;
+    }
+
+    return showFunctionHelp(
+      input
+    );
+
+  }
+
+  const info =
+    getFunctionHelp(
+      name
+    );
+
+  if (!info) {
+
+    alert(
+      "関数が見つかりません\n\n" +
+      name
+    );
+
+    return false;
+
+  }
+
+  openFloatPanel(
+    "Function Help",
+    buildFunctionHelpCardHtml(
+      info
+    )
+  );
+
+  return true;
+
+}
