@@ -49,3 +49,48 @@ style="margin-top:10px;">
   );
 
 }
+
+/* ===============================
+   Search Command Palette
+=============================== */
+
+function searchCommandPalette(
+  keyword
+) {
+
+  const query =
+    String(keyword || "")
+      .trim();
+
+  if (!query) {
+    return [];
+  }
+
+  return searchFunctionHelp(
+    query
+  ).map(info => ({
+
+    type:
+      "function",
+
+    name:
+      info.name,
+
+    title:
+      info.name + "()",
+
+    summary:
+      info.summary || "",
+
+    file:
+      info.file ||
+      info.fileName ||
+
+      "",
+
+    data:
+      info
+
+  }));
+
+}
