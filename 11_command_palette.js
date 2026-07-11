@@ -31,6 +31,8 @@ function initCommandPalette() {
   commandPaletteRegistry =
     [];
 
+  cleanupCommandPaletteStoredState();
+
   registerDefaultCommandPaletteCommands();
 
 }
@@ -651,8 +653,13 @@ function addQuickCommandsToCommandPalette(
       const command = {
 
         id:
-          "quick." +
-          index,
+          createCommandPaletteStableId(
+            "quick",
+            [
+              item.label || "",
+              item.code || ""
+            ].join("\n")
+          ),
 
         type:
           "quick",
@@ -740,8 +747,13 @@ function addFavoritesToCommandPalette(
       const command = {
 
         id:
-          "favorite.console." +
-          index,
+          createCommandPaletteStableId(
+            "favorite.console",
+            [
+              item.name || "",
+              item.code || ""
+            ].join("\n")
+          ),
 
         type:
           "favorite",
@@ -829,8 +841,10 @@ function addHistoryToCommandPalette(
       const command = {
 
         id:
-          "history.console." +
-          index,
+          createCommandPaletteStableId(
+            "history.console",
+            code
+          ),
 
         type:
           "history",
@@ -904,10 +918,12 @@ function buildCommandPaletteHistoryTitle(
       .trim();
 
   if (!source) {
+
     return (
       "Console History " +
       (index + 1)
     );
+
   }
 
   const lines =
@@ -919,39 +935,125 @@ function buildCommandPaletteHistoryTitle(
       .filter(Boolean);
 
   const meaningful =
-    lines.find(line =>
-      !/^[({[\];,]+$/.test(
-        line
-      )
-    );
+    lines.find(line => {
+
+      if (
+        /^[({[\];,]+$/.test(
+          line
+        )
+      ) {
+        return false;
+      }
+
+      if (
+        /^\(?\s*\)?\s*=>\s*\{$/.test(
+          line
+        )
+      ) {
+        return false;
+      }
+
+      if (
+        /^\(\s*\(\s*\)\s*=>\s*\{$/.test(
+          line
+        )
+      ) {
+        return false;
+      }
+
+      return true;
+
+    });
 
   const title =
     meaningful ||
-    lines[0] ||
     "";
 
   const cleaned =
     title
       .replace(
-        /^\(\s*/,
+        /^[({[]+\s*/,
         ""
       )
       .replace(
-        /^[{[]\s*/,
+        /[;,]+$/,
         ""
       )
       .trim();
 
   if (!cleaned) {
+
     return (
       "Console History " +
       (index + 1)
     );
+
   }
 
   return cleaned.slice(
     0,
     60
+  );
+
+}
+
+/* ===============================
+   Cleanup Stored Command State
+=============================== */
+
+function cleanupCommandPaletteStoredState() {
+
+  commandPaletteRecent =
+    Array.isArray(
+      commandPaletteRecent
+    )
+      ? commandPaletteRecent
+          .filter(item =>
+            item &&
+            item.id &&
+            !/^quick\.\d+$/.test(
+              item.id
+            ) &&
+            !/^favorite\.console\.\d+$/.test(
+              item.id
+            ) &&
+            !/^history\.console\.\d+$/.test(
+              item.id
+            )
+          )
+      : [];
+
+  commandPaletteFavorites =
+    Array.isArray(
+      commandPaletteFavorites
+    )
+      ? commandPaletteFavorites
+          .filter(id =>
+            id &&
+            !/^quick\.\d+$/.test(
+              id
+            ) &&
+            !/^favorite\.console\.\d+$/.test(
+              id
+            ) &&
+            !/^history\.console\.\d+$/.test(
+              id
+            )
+          )
+      : [];
+
+  localStorage.setItem(
+    "commandPaletteRecent",
+    JSON.stringify(
+      commandPaletteRecent
+    )
+  );
+
+  localStorage.setItem(
+    "commandPaletteFavorites",
+    JSON.stringify(
+      commandPaletteFavorites
+    )
   );
 
 }
@@ -1535,9 +1637,17 @@ function executeCommandPaletteCommand(
         .catch(error => {
 
           showCommandPaletteExecutionResult(
-            formatDevConsoleError(
-              error
-            ),
+            typeof formatDevConsoleError ===
+            "function"
+              ? formatDevConsoleError(
+                  error
+                )
+              : String(
+                  error &&
+                  error.message
+                    ? error.message
+                    : error
+                ),
             true
           );
 
@@ -1889,6 +1999,45 @@ function handleCommandPaletteKeydown(
       0
     );
   }
+
+}
+
+/* ===============================
+   Create Stable Command ID
+=============================== */
+
+function createCommandPaletteStableId(
+  type,
+  value
+) {
+
+  const source =
+    String(value || "");
+
+  let hash =
+    2166136261;
+
+  for (
+    let i = 0;
+    i < source.length;
+    i++
+  ) {
+
+    hash ^=
+      source.charCodeAt(i);
+
+    hash =
+      Math.imul(
+        hash,
+        16777619
+      );
+
+  }
+
+  return [
+    String(type || "command"),
+    (hash >>> 0).toString(36)
+  ].join(".");
 
 }
 
