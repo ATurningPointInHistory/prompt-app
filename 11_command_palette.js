@@ -613,16 +613,14 @@ function searchCommandPalette(
     query
   );
 
-  return deduplicateCommandPaletteResults(
-    results
-  )
-    .sort(
-      compareCommandPaletteResults
+  return limitCommandPaletteResultsByType(
+    deduplicateCommandPaletteResults(
+      results
     )
-    .slice(
-      0,
-      100
-    );
+      .sort(
+        compareCommandPaletteResults
+      )
+  );
 
 }
 
@@ -838,9 +836,10 @@ function addHistoryToCommandPalette(
           "history",
 
         title:
-          String(code)
-            .split(/\r?\n/)[0]
-            .slice(0, 50),
+          buildCommandPaletteHistoryTitle(
+            code,
+            index
+          ),
 
         summary:
           code,
@@ -892,6 +891,72 @@ function addHistoryToCommandPalette(
 }
 
 /* ===============================
+   Build History Title
+=============================== */
+
+function buildCommandPaletteHistoryTitle(
+  code,
+  index
+) {
+
+  const source =
+    String(code || "")
+      .trim();
+
+  if (!source) {
+    return (
+      "Console History " +
+      (index + 1)
+    );
+  }
+
+  const lines =
+    source
+      .split(/\r?\n/)
+      .map(line =>
+        line.trim()
+      )
+      .filter(Boolean);
+
+  const meaningful =
+    lines.find(line =>
+      !/^[({[\];,]+$/.test(
+        line
+      )
+    );
+
+  const title =
+    meaningful ||
+    lines[0] ||
+    "";
+
+  const cleaned =
+    title
+      .replace(
+        /^\(\s*/,
+        ""
+      )
+      .replace(
+        /^[{[]\s*/,
+        ""
+      )
+      .trim();
+
+  if (!cleaned) {
+    return (
+      "Console History " +
+      (index + 1)
+    );
+  }
+
+  return cleaned.slice(
+    0,
+    60
+  );
+
+}
+
+/* ===============================
    Calculate Search Score
 =============================== */
 
@@ -914,8 +979,8 @@ function calculateCommandPaletteScore(
     project: 1200,
     diagnostic: 1200,
     quick: 1000,
-    favorite: 800,
-    history: 400,
+    favorite: 700,
+    history: 100,
     function: 0,
     command: 600
   };
@@ -1123,6 +1188,74 @@ function compareCommandPaletteResults(
     .localeCompare(
       String(b.title || "")
     );
+
+}
+
+/* ===============================
+   Limit Results By Type
+=============================== */
+
+function limitCommandPaletteResultsByType(
+  list
+) {
+
+  if (!Array.isArray(list)) {
+    return [];
+  }
+
+  const limits = {
+    ide: 10,
+    project: 10,
+    diagnostic: 10,
+    quick: 10,
+    favorite: 5,
+    history: 5,
+    function: 25,
+    command: 10
+  };
+
+  const counts = {};
+
+  const output = [];
+
+  list.forEach(item => {
+
+    if (!item) {
+      return;
+    }
+
+    const type =
+      item.type ||
+      "command";
+
+    const limit =
+      Number(
+        limits[type] || 10
+      );
+
+    counts[type] =
+      Number(
+        counts[type] || 0
+      );
+
+    if (
+      counts[type] >= limit
+    ) {
+      return;
+    }
+
+    counts[type] += 1;
+
+    output.push(
+      item
+    );
+
+  });
+
+  return output.slice(
+    0,
+    50
+  );
 
 }
 
