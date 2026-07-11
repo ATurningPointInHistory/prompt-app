@@ -136,6 +136,10 @@ function buildDevConsoleToolbarHtml() {
     ⭐ 保存
   </button>
 
+  <button onclick="showFunctionHelpSearch()">
+    📖 Function Help
+  </button>
+
   <button onclick="showDevConsoleFavorites()">
     📂 Favorite
   </button>
