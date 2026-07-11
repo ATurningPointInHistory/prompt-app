@@ -1,6 +1,7 @@
 /* ===============================
    11_command_palette.js
    Show Command Palette
+   IDE-030
 =============================== */
 
 function showCommandPalette() {
