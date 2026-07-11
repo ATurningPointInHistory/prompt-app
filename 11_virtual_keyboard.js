@@ -34,27 +34,42 @@ function insertVirtualKeyboardText(
     return;
   }
 
+  const source =
+    String(text || "");
+
   const start =
-    input.selectionStart || 0;
+    Number.isFinite(
+      input.selectionStart
+    )
+      ? input.selectionStart
+      : 0;
 
   const end =
-    input.selectionEnd || start;
+    Number.isFinite(
+      input.selectionEnd
+    )
+      ? input.selectionEnd
+      : start;
 
   input.value =
     input.value.slice(0, start) +
-    text +
+    source +
     input.value.slice(end);
 
-  const pos =
-    start + text.length;
+  const position =
+    start + source.length;
 
   input.focus();
 
   input.selectionStart =
-    pos;
+    position;
 
   input.selectionEnd =
-    pos;
+    position;
+
+  notifyVirtualKeyboardInput(
+    input
+  );
 
 }
 
@@ -68,10 +83,18 @@ function virtualKeyboardBackspace() {
   }
 
   const start =
-    input.selectionStart || 0;
+    Number.isFinite(
+      input.selectionStart
+    )
+      ? input.selectionStart
+      : 0;
 
   const end =
-    input.selectionEnd || start;
+    Number.isFinite(
+      input.selectionEnd
+    )
+      ? input.selectionEnd
+      : start;
 
   if (start !== end) {
 
@@ -79,11 +102,17 @@ function virtualKeyboardBackspace() {
       input.value.slice(0, start) +
       input.value.slice(end);
 
+    input.focus();
+
     input.selectionStart =
       start;
 
     input.selectionEnd =
       start;
+
+    notifyVirtualKeyboardInput(
+      input
+    );
 
     return;
 
@@ -97,13 +126,20 @@ function virtualKeyboardBackspace() {
     input.value.slice(0, start - 1) +
     input.value.slice(start);
 
+  const position =
+    start - 1;
+
   input.focus();
 
   input.selectionStart =
-    start - 1;
+    position;
 
   input.selectionEnd =
-    start - 1;
+    position;
+
+  notifyVirtualKeyboardInput(
+    input
+  );
 
 }
 
@@ -117,10 +153,18 @@ function virtualKeyboardDelete() {
   }
 
   const start =
-    input.selectionStart || 0;
+    Number.isFinite(
+      input.selectionStart
+    )
+      ? input.selectionStart
+      : 0;
 
   const end =
-    input.selectionEnd || start;
+    Number.isFinite(
+      input.selectionEnd
+    )
+      ? input.selectionEnd
+      : start;
 
   if (start !== end) {
 
@@ -128,14 +172,27 @@ function virtualKeyboardDelete() {
       input.value.slice(0, start) +
       input.value.slice(end);
 
+    input.focus();
+
     input.selectionStart =
       start;
 
     input.selectionEnd =
       start;
 
+    notifyVirtualKeyboardInput(
+      input
+    );
+
     return;
 
+  }
+
+  if (
+    start >=
+    input.value.length
+  ) {
+    return;
   }
 
   input.value =
@@ -149,6 +206,10 @@ function virtualKeyboardDelete() {
 
   input.selectionEnd =
     start;
+
+  notifyVirtualKeyboardInput(
+    input
+  );
 
 }
 
@@ -187,28 +248,79 @@ function buildVirtualKeyboardHtml() {
   return `
 <div class="virtual-keyboard">
 
-  <button onclick="insertVirtualKeyboardText('(')">(</button>
-  <button onclick="insertVirtualKeyboardText(')')">)</button>
-  <button onclick="insertVirtualKeyboardText('{')">{</button>
-  <button onclick="insertVirtualKeyboardText('}')">}</button>
-  <button onclick="insertVirtualKeyboardText('[')">[</button>
-  <button onclick="insertVirtualKeyboardText(']')">]</button>
+  <button type="button"
+  onclick="insertVirtualKeyboardText('(')">(</button>
 
-  <button onclick="insertVirtualKeyboardText('=>')">=&gt;</button>
-  <button onclick="insertVirtualKeyboardText('&&')">&amp;&amp;</button>
-  <button onclick="insertVirtualKeyboardText('||')">||</button>
+  <button type="button"
+  onclick="insertVirtualKeyboardText(')')">)</button>
 
-  <button onclick="insertVirtualKeyboardText(';')">;</button>
-  <button onclick="insertVirtualKeyboardText('.')">.</button>
-  <button onclick="insertVirtualKeyboardText(',')">,</button>
+  <button type="button"
+  onclick="insertVirtualKeyboardText('{')">{</button>
 
-  <button onclick="moveVirtualKeyboardCursor(-1)">◀</button>
-  <button onclick="moveVirtualKeyboardCursor(1)">▶</button>
-  <button onclick="virtualKeyboardBackspace()">⌫</button>
-  <button onclick="virtualKeyboardDelete()">Del</button>
+  <button type="button"
+  onclick="insertVirtualKeyboardText('}')">}</button>
+
+  <button type="button"
+  onclick="insertVirtualKeyboardText('[')">[</button>
+
+  <button type="button"
+  onclick="insertVirtualKeyboardText(']')">]</button>
+
+  <button type="button"
+  onclick="insertVirtualKeyboardText('=>')">=&gt;</button>
+
+  <button type="button"
+  onclick="insertVirtualKeyboardText('&&')">&amp;&amp;</button>
+
+  <button type="button"
+  onclick="insertVirtualKeyboardText('||')">||</button>
+
+  <button type="button"
+  onclick="insertVirtualKeyboardText(';')">;</button>
+
+  <button type="button"
+  onclick="insertVirtualKeyboardText('.')">.</button>
+
+  <button type="button"
+  onclick="insertVirtualKeyboardText(',')">,</button>
+
+  <button type="button"
+  onclick="moveVirtualKeyboardCursor(-1)">◀</button>
+
+  <button type="button"
+  onclick="moveVirtualKeyboardCursor(1)">▶</button>
+
+  <button type="button"
+  onclick="virtualKeyboardBackspace()">⌫</button>
+
+  <button type="button"
+  onclick="virtualKeyboardDelete()">Del</button>
 
 </div>
 `;
+
+}
+
+/* ===============================
+   Notify Virtual Keyboard Input
+=============================== */
+
+function notifyVirtualKeyboardInput(
+  input
+) {
+
+  if (!input) {
+    return;
+  }
+
+  input.dispatchEvent(
+    new Event(
+      "input",
+      {
+        bubbles: true
+      }
+    )
+  );
 
 }
 
@@ -232,6 +344,9 @@ window.virtualKeyboardDelete =
 
 window.moveVirtualKeyboardCursor =
   moveVirtualKeyboardCursor;
+
+window.notifyVirtualKeyboardInput =
+  notifyVirtualKeyboardInput;
 
 console.log(
   "11_virtual_keyboard loaded"
