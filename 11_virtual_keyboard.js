@@ -1,6 +1,6 @@
 /* ===============================
    FILE: 11_virtual_keyboard.js
-   Virtual Keyboard
+   IDE-080
 =============================== */
 
 let virtualKeyboardTarget =
