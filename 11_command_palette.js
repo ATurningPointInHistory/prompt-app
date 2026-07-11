@@ -895,6 +895,10 @@ function addHistoryToCommandPalette(
    Calculate Search Score
 =============================== */
 
+/* ===============================
+   Calculate Search Score
+=============================== */
+
 function calculateCommandPaletteScore(
   command,
   query
@@ -909,9 +913,28 @@ function calculateCommandPaletteScore(
       .trim()
       .toLowerCase();
 
+  const typeBoostMap = {
+    ide: 1400,
+    project: 1200,
+    diagnostic: 1200,
+    quick: 1000,
+    favorite: 800,
+    history: 400,
+    function: 0,
+    command: 600
+  };
+
+  const typeBoost =
+    Number(
+      typeBoostMap[
+        command.type
+      ] || 0
+    );
+
   if (!word) {
 
     return (
+      typeBoost +
       getCommandPaletteRecentScore(
         command.id
       ) +
@@ -952,58 +975,81 @@ function calculateCommandPaletteScore(
   let score = -1;
 
   if (title === word) {
+
     score = 5000;
-  } else if (
-    id === word
-  ) {
+
+  } else if (id === word) {
+
     score = 4800;
+
   } else if (
     title.startsWith(word)
   ) {
+
     score = 4000;
+
   } else if (
     id.startsWith(word)
   ) {
+
     score = 3800;
+
   } else if (
     title.includes(word)
   ) {
+
     score = 3000;
+
   } else if (
     id.includes(word)
   ) {
+
     score = 2800;
+
   } else if (
     keywords.some(value =>
       value === word
     )
   ) {
+
     score = 2500;
+
   } else if (
     keywords.some(value =>
       value.startsWith(word)
     )
   ) {
+
     score = 2200;
+
   } else if (
     keywords.some(value =>
       value.includes(word)
     )
   ) {
+
     score = 1800;
+
   } else if (
     category.includes(word)
   ) {
+
     score = 1400;
+
   } else if (
     summary.includes(word)
   ) {
+
     score = 1000;
+
   }
 
   if (score < 0) {
     return -1;
   }
+
+  score +=
+    typeBoost;
 
   score +=
     getCommandPaletteRecentScore(
