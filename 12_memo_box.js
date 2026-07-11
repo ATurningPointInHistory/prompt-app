@@ -1,5 +1,5 @@
 /* ===============================
-   12_memo_box.js
+   FILE: 12_memo_box.js
 =============================== */
 
 let memoBoxActiveIndex =
