@@ -172,40 +172,6 @@ function getFunctionHelp(
     return null;
   }
 
-  if (
-    database[name]
-  ) {
-
-    const info =
-      database[name];
-
-    return {
-      ...info,
-
-      name:
-        getFunctionName(info) !==
-        "unknown"
-          ? getFunctionName(info)
-          : name,
-
-      file:
-        getFunctionFileName(
-          info
-        ),
-
-      called:
-        getFunctionCalledList(
-          info
-        ),
-
-      calledBy:
-        getFunctionCalledByList(
-          info
-        )
-    };
-
-  }
-
   const normalized =
     name.toLowerCase();
 
@@ -240,14 +206,17 @@ function getFunctionHelp(
   const info =
     entry[1] || {};
 
+  const resolvedName =
+    getFunctionName(info) !==
+    "unknown"
+      ? getFunctionName(info)
+      : key;
+
   return {
     ...info,
 
     name:
-      getFunctionName(info) !==
-      "unknown"
-        ? getFunctionName(info)
-        : key,
+      resolvedName,
 
     file:
       getFunctionFileName(
@@ -255,14 +224,21 @@ function getFunctionHelp(
       ),
 
     called:
-      getFunctionCalledList(
-        info
+      filterSelfFunctionCalls(
+        resolvedName,
+        getFunctionCalledList(
+          info
+        )
       ),
 
     calledBy:
-      getFunctionCalledByList(
-        info
+      filterSelfFunctionCalls(
+        resolvedName,
+        getFunctionCalledByList(
+          info
+        )
       )
+
   };
 
 }
