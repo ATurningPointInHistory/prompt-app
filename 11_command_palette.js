@@ -48,11 +48,3 @@ style="margin-top:10px;">
   );
 
 }
-
-executeCommandPaletteSearch()
-
-searchCommandPalette()
-
-buildCommandPaletteListHtml()
-
-executeCommandPaletteItem()
