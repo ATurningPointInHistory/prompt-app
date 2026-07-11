@@ -1,5 +1,5 @@
 /* ===============================
-   12_knowledge_migration.js
+   FILE: 12_knowledge_migration.js
    AI Prompt OS v7.0
    Knowledge Migration Engine v2
 =============================== */
