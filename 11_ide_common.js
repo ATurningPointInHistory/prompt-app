@@ -1,1 +1,2 @@
-1
+11_ide_common.js
+    IDE共通部品
