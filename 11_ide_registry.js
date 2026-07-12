@@ -541,3 +541,57 @@ function registerDefaultIdeComponents() {
   return components.length;
 
 }
+
+/* ===============================
+   Initialize IDE Registry
+=============================== */
+
+function initIdeRegistry() {
+
+  clearIdeRegistry();
+
+  registerDefaultIdeComponents();
+
+  return validateIdeRegistry();
+
+}
+
+/* ===============================
+   Public API
+=============================== */
+
+window.registerIdeComponent =
+  registerIdeComponent;
+
+window.unregisterIdeComponent =
+  unregisterIdeComponent;
+
+window.getIdeRegistry =
+  getIdeRegistry;
+
+window.getIdeComponent =
+  getIdeComponent;
+
+window.hasIdeComponent =
+  hasIdeComponent;
+
+window.getIdeComponentCount =
+  getIdeComponentCount;
+
+window.clearIdeRegistry =
+  clearIdeRegistry;
+
+window.registerDefaultIdeComponents =
+  registerDefaultIdeComponents;
+
+window.validateIdeRegistry =
+  validateIdeRegistry;
+
+window.initIdeRegistry =
+  initIdeRegistry;
+
+initIdeRegistry();
+
+console.log(
+  "11_ide_registry loaded"
+);
