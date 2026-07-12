@@ -814,6 +814,15 @@ function getIdeComponentStatus(
     return null;
   }
 
+  const runtimeReady =
+    component.launcher
+      ? typeof window[
+          component.launcher
+        ] === "function"
+      : Boolean(
+          component.ready
+        );
+
   return {
 
     id:
@@ -826,7 +835,7 @@ function getIdeComponentStatus(
       component.status,
 
     ready:
-      component.ready,
+      runtimeReady,
 
     progress:
       component.progress,
@@ -945,8 +954,20 @@ function refreshIdeRegistry() {
       component.ready =
         typeof window[
           component.launcher
-        ] ===
-        "function";
+        ] === "function";
+
+      return;
+
+    }
+
+    if (
+      component.validator
+    ) {
+
+      component.ready =
+        typeof window[
+          component.validator
+        ] === "function";
 
     }
 
