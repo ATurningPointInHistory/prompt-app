@@ -76,6 +76,11 @@ function registerIdeComponent(
         component.validator || ""
       ),
 
+    probe:
+      String(
+        component.probe || ""
+      ),
+
     category:
       String(
         component.category ||
@@ -471,6 +476,7 @@ function registerDefaultIdeComponents() {
       category: "IDE"
     },
     {
+    {
       id: "IDE-070",
       title: "Autocomplete",
       version: "1.0",
@@ -482,6 +488,8 @@ function registerDefaultIdeComponents() {
       health: 90,
       launcher: "",
       validator: "",
+      probe:
+        "updateDevConsoleSuggestions",
       category: "IDE"
     },
     {
@@ -496,6 +504,8 @@ function registerDefaultIdeComponents() {
       health: 100,
       launcher: "",
       validator: "",
+      probe:
+        "buildVirtualKeyboardHtml",
       category: "IDE"
     },
     {
@@ -559,15 +569,6 @@ function getIdeComponentStatus(
     return null;
   }
 
-  const runtimeReady =
-    component.launcher
-      ? typeof window[
-          component.launcher
-        ] === "function"
-      : Boolean(
-          component.ready
-        );
-
   return {
 
     id:
@@ -580,7 +581,9 @@ function getIdeComponentStatus(
       component.status,
 
     ready:
-      runtimeReady,
+      resolveIdeComponentReady(
+        component
+      ),
 
     progress:
       component.progress,
@@ -692,29 +695,10 @@ function refreshIdeRegistry() {
       return;
     }
 
-    if (
-      component.launcher
-    ) {
-
-      component.ready =
-        typeof window[
-          component.launcher
-        ] === "function";
-
-      return;
-
-    }
-
-    if (
-      component.validator
-    ) {
-
-      component.ready =
-        typeof window[
-          component.validator
-        ] === "function";
-
-    }
+    component.ready =
+      resolveIdeComponentReady(
+        component
+      );
 
   });
 
@@ -933,7 +917,59 @@ function registerIdeRegistryCommand() {
 
 }
 
+/* ===============================
+   Resolve IDE Component Ready
+=============================== */
 
+function resolveIdeComponentReady(
+  component
+) {
+
+  if (!component) {
+    return false;
+  }
+
+  if (
+    component.launcher
+  ) {
+
+    return (
+      typeof window[
+        component.launcher
+      ] === "function"
+    );
+
+  }
+
+  if (
+    component.probe
+  ) {
+
+    return (
+      typeof window[
+        component.probe
+      ] === "function"
+    );
+
+  }
+
+  if (
+    component.validator
+  ) {
+
+    return (
+      typeof window[
+        component.validator
+      ] === "function"
+    );
+
+  }
+
+  return Boolean(
+    component.ready
+  );
+
+}
 
 /* ===============================
    Public API
@@ -986,6 +1022,9 @@ window.refreshIdeRegistryView =
 
 window.registerIdeRegistryCommand =
   registerIdeRegistryCommand;
+
+window.resolveIdeComponentReady =
+  resolveIdeComponentReady;
 
 initIdeRegistry();
 
