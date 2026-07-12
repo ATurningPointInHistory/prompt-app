@@ -732,9 +732,208 @@ function initIdeRegistry() {
 
   registerDefaultIdeComponents();
 
+  registerIdeRegistryCommand();
+
   return validateIdeRegistry();
 
 }
+
+/* ===============================
+   Build IDE Registry Item HTML
+=============================== */
+
+function buildIdeRegistryItemHtml(
+  component
+) {
+
+  if (!component) {
+    return "";
+  }
+
+  const status =
+    getIdeComponentStatus(
+      component.id
+    );
+
+  return `
+<div class="function-help-item">
+
+<b>
+${escapeHtml(component.id)}
+</b>
+
+<div>
+${escapeHtml(component.title)}
+</div>
+
+<div class="small">
+
+Status :
+${escapeHtml(status.status)}
+
+<br>
+
+Ready :
+${status.ready ? "✅" : "❌"}
+
+<br>
+
+Progress :
+${status.progress}%
+
+<br>
+
+Health :
+${status.health}%
+
+</div>
+
+</div>
+
+<hr>
+`;
+
+}
+
+/* ===============================
+   Build IDE Registry HTML
+=============================== */
+
+function buildIdeRegistryHtml() {
+
+  const list =
+    getIdeRegistry();
+
+  return `
+
+<div class="small">
+
+IDE Components
+
+</div>
+
+<div
+class="float-panel-actions">
+
+<button
+onclick="
+refreshIdeRegistryView()
+">
+
+🔄 Refresh
+
+</button>
+
+</div>
+
+<hr>
+
+<div
+id="ideRegistryList">
+
+${list
+  .map(
+    buildIdeRegistryItemHtml
+  )
+  .join("")}
+
+</div>
+
+`;
+
+}
+
+/* ===============================
+   Show IDE Registry
+=============================== */
+
+function showIdeRegistry() {
+
+  openFloatPanel(
+    "IDE Registry",
+    buildIdeRegistryHtml()
+  );
+
+  return true;
+
+}
+
+/* ===============================
+   Refresh IDE Registry View
+=============================== */
+
+function refreshIdeRegistryView() {
+
+  refreshIdeRegistry();
+
+  const box =
+    get(
+      "ideRegistryList"
+    );
+
+  if (!box) {
+    return;
+  }
+
+  box.innerHTML =
+    getIdeRegistry()
+      .map(
+        buildIdeRegistryItemHtml
+      )
+      .join("");
+
+}
+
+/* ===============================
+   Register IDE Registry Command
+=============================== */
+
+function registerIdeRegistryCommand() {
+
+  if (
+    typeof registerCommandPaletteCommand !==
+    "function"
+  ) {
+    return false;
+  }
+
+  return registerCommandPaletteCommand({
+
+    id:
+      "ide.registry",
+
+    type:
+      "ide",
+
+    title:
+      "Open IDE Registry",
+
+    summary:
+      "IDE Registryを表示します。",
+
+    category:
+      "IDE",
+
+    keywords: [
+      "registry",
+      "ide",
+      "status"
+    ],
+
+    icon:
+      "📋",
+
+    action() {
+
+      return showIdeRegistry();
+
+    }
+
+  });
+
+}
+
+
 
 /* ===============================
    Public API
@@ -778,6 +977,15 @@ window.updateIdeComponentStatus =
 
 window.refreshIdeRegistry =
   refreshIdeRegistry;
+
+window.showIdeRegistry =
+  showIdeRegistry;
+
+window.refreshIdeRegistryView =
+  refreshIdeRegistryView;
+
+window.registerIdeRegistryCommand =
+  registerIdeRegistryCommand;
 
 initIdeRegistry();
 
