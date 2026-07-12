@@ -798,6 +798,165 @@ function initIdeLauncher() {
 }
 
 /* ===============================
+   Get IDE Component Status
+=============================== */
+
+function getIdeComponentStatus(
+  id
+) {
+
+  const component =
+    getIdeComponent(
+      id
+    );
+
+  if (!component) {
+    return null;
+  }
+
+  return {
+
+    id:
+      component.id,
+
+    title:
+      component.title,
+
+    status:
+      component.status,
+
+    ready:
+      component.ready,
+
+    progress:
+      component.progress,
+
+    health:
+      component.health
+
+  };
+
+}
+
+/* ===============================
+   Update IDE Component Status
+=============================== */
+
+function updateIdeComponentStatus(
+  id,
+  data = {}
+) {
+
+  const componentId =
+    String(id || "")
+      .trim();
+
+  if (
+    !componentId ||
+    !ideRegistry[
+      componentId
+    ]
+  ) {
+    return false;
+  }
+
+  const component =
+    ideRegistry[
+      componentId
+    ];
+
+  if (
+    data.status !==
+    undefined
+  ) {
+    component.status =
+      String(
+        data.status
+      );
+  }
+
+  if (
+    data.ready !==
+    undefined
+  ) {
+    component.ready =
+      Boolean(
+        data.ready
+      );
+  }
+
+  if (
+    data.progress !==
+    undefined
+  ) {
+    component.progress =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          Number(
+            data.progress
+          ) || 0
+        )
+      );
+  }
+
+  if (
+    data.health !==
+    undefined
+  ) {
+    component.health =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          Number(
+            data.health
+          ) || 0
+        )
+      );
+  }
+
+  return true;
+
+}
+
+/* ===============================
+   Refresh IDE Registry
+=============================== */
+
+function refreshIdeRegistry() {
+
+  Object.keys(
+    ideRegistry
+  ).forEach(id => {
+
+    const component =
+      ideRegistry[id];
+
+    if (!component) {
+      return;
+    }
+
+    if (
+      component.launcher
+    ) {
+
+      component.ready =
+        typeof window[
+          component.launcher
+        ] ===
+        "function";
+
+    }
+
+  });
+
+  return getIdeRegistry();
+
+}
+
+/* ===============================
    Public API
 =============================== */
 
@@ -839,6 +998,15 @@ window.validateIdeLauncher =
 
 window.initIdeLauncher =
   initIdeLauncher;
+
+window.getIdeComponentStatus =
+  getIdeComponentStatus;
+
+window.updateIdeComponentStatus =
+  updateIdeComponentStatus;
+
+window.refreshIdeRegistry =
+  refreshIdeRegistry;
 
 initIdeLauncher();
 
