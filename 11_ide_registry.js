@@ -117,3 +117,103 @@ function unregisterIdeComponent(
 
 }
 
+/* ===============================
+   Get IDE Registry
+=============================== */
+
+function getIdeRegistry() {
+
+  return Object.values(
+    ideRegistry
+  )
+    .map(component => ({
+      ...component
+    }))
+    .sort((a, b) =>
+      String(a.id || "")
+        .localeCompare(
+          String(b.id || "")
+        )
+    );
+
+}
+
+/* ===============================
+   Get IDE Component
+=============================== */
+
+function getIdeComponent(
+  id
+) {
+
+  const componentId =
+    String(id || "")
+      .trim();
+
+  if (!componentId) {
+    return null;
+  }
+
+  const component =
+    ideRegistry[
+      componentId
+    ];
+
+  if (!component) {
+    return null;
+  }
+
+  return {
+    ...component
+  };
+
+}
+
+/* ===============================
+   Check IDE Component
+=============================== */
+
+function hasIdeComponent(
+  id
+) {
+
+  const componentId =
+    String(id || "")
+      .trim();
+
+  if (!componentId) {
+    return false;
+  }
+
+  return Boolean(
+    ideRegistry[
+      componentId
+    ]
+  );
+
+}
+
+/* ===============================
+   Get IDE Component Count
+=============================== */
+
+function getIdeComponentCount() {
+
+  return Object.keys(
+    ideRegistry
+  ).length;
+
+}
+
+/* ===============================
+   Clear IDE Registry
+=============================== */
+
+function clearIdeRegistry() {
+
+  ideRegistry =
+    Object.create(null);
+
+  return true;
+
+}
