@@ -476,7 +476,6 @@ function registerDefaultIdeComponents() {
       category: "IDE"
     },
     {
-    {
       id: "IDE-070",
       title: "Autocomplete",
       version: "1.0",
