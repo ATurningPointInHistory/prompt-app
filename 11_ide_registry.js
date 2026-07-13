@@ -467,25 +467,37 @@ function registerDefaultIdeComponents() {
     {
       id: "IDE-040",
       title: "Project Search",
-    
       summary:
         "プロジェクト全体を横断検索します。",
-    
       icon:
         "🔍",
-    
       version: "1.0",
-      status: "Planned",
+      status:
+        typeof showProjectSearch ===
+        "function"
+          ? "Working"
+          : "Planned",
       ready:
         typeof showProjectSearch ===
         "function",
-      progress: 0,
-      health: 0,
+      progress:
+        typeof showProjectSearch ===
+        "function"
+          ? 80
+          : 0,
+      health:
+        typeof validateProjectSearch ===
+        "function"
+          ? 90
+          : 0,
       launcher:
         "showProjectSearch",
-      validator: "",
-      probe: "",
-      category: "IDE"
+      validator:
+        "validateProjectSearch",
+      probe:
+        "searchProject",
+      category:
+        "IDE"
     },
     {
       id: "IDE-050",
