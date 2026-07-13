@@ -971,6 +971,72 @@ function resolveIdeComponentReady(
 }
 
 /* ===============================
+   Get IDE Launcher Items
+=============================== */
+
+function getIdeLauncherItems() {
+
+  return getIdeRegistry()
+
+    .filter(component =>
+      component.launcher
+    )
+
+    .sort((a, b) =>
+      String(a.id)
+        .localeCompare(
+          String(b.id)
+        )
+    );
+
+}
+
+/* ===============================
+   Build IDE Launcher Item
+=============================== */
+
+function buildIdeLauncherItemHtml(
+  component
+) {
+
+  const status =
+    getIdeComponentStatus(
+      component.id
+    );
+
+  return `
+
+<button
+class="tool-button"
+onclick="${escapeHtml(
+  component.launcher
+)}()">
+
+${escapeHtml(
+  component.id
+)}
+
+<br>
+
+${escapeHtml(
+  component.title
+)}
+
+<br>
+
+${status.ready
+  ? "🟢"
+  : "⚪"}
+
+${status.progress}%
+
+</button>
+
+`;
+
+}
+
+/* ===============================
    Public API
 =============================== */
 
@@ -1024,6 +1090,12 @@ window.registerIdeRegistryCommand =
 
 window.resolveIdeComponentReady =
   resolveIdeComponentReady;
+
+window.getIdeLauncherItems =
+  getIdeLauncherItems;
+
+window.buildIdeLauncherItemHtml =
+  buildIdeLauncherItemHtml;
 
 initIdeRegistry();
 
