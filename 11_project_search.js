@@ -1475,3 +1475,13 @@ window.registerProjectSearchCommand =
 window.validateProjectSearch =
   validateProjectSearch;
 
+/* ===============================
+   Initialize
+=============================== */
+
+initProjectSearch();
+
+console.log(
+  "11_project_search loaded"
+);
+
