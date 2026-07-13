@@ -701,6 +701,12 @@ window.validateIdeLauncher =
 window.initIdeLauncher =
   initIdeLauncher;
 
+window.getIdeLauncherItems =
+  getIdeLauncherItems;
+
+window.buildIdeLauncherItemHtml =
+  buildIdeLauncherItemHtml;
+
 initIdeLauncher();
 
 console.log(
