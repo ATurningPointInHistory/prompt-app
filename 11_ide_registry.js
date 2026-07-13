@@ -40,6 +40,16 @@ function registerIdeComponent(
         component.title || ""
       ),
 
+    summary:
+      String(
+        component.summary || ""
+      ),
+
+    icon:
+      String(
+        component.icon || "🧩"
+      ),
+
     version:
       String(
         component.version || "1.0"
@@ -1024,12 +1034,6 @@ window.registerIdeRegistryCommand =
 
 window.resolveIdeComponentReady =
   resolveIdeComponentReady;
-
-window.getIdeLauncherItems =
-  getIdeLauncherItems;
-
-window.buildIdeLauncherItemHtml =
-  buildIdeLauncherItemHtml;
 
 initIdeRegistry();
 
