@@ -397,6 +397,13 @@ function registerDefaultIdeComponents() {
     {
       id: "IDE-010",
       title: "Mobile Console",
+    
+      summary:
+        "JavaScript実行・ログ確認・デバッグを行います。",
+    
+      icon:
+        "🖥",
+    
       version: "1.0",
       status: "Official",
       ready:
@@ -407,11 +414,19 @@ function registerDefaultIdeComponents() {
       launcher:
         "showMobileConsole",
       validator: "",
+      probe: "",
       category: "IDE"
     },
     {
       id: "IDE-020",
       title: "Function Help",
+    
+      summary:
+        "関数情報・呼び出し関係・ソースコードを検索します。",
+    
+      icon:
+        "📖",
+    
       version: "1.0",
       status: "Official",
       ready:
@@ -422,11 +437,19 @@ function registerDefaultIdeComponents() {
       launcher:
         "showFunctionHelpSearch",
       validator: "",
+      probe: "",
       category: "IDE"
     },
     {
       id: "IDE-030",
       title: "Command Palette",
+    
+      summary:
+        "IDEコマンド・関数・履歴・Favoriteを検索して実行します。",
+    
+      icon:
+        "⌨",
+    
       version: "1.0",
       status: "Official",
       ready:
@@ -438,11 +461,19 @@ function registerDefaultIdeComponents() {
         "showCommandPalette",
       validator:
         "validateCommandPalette",
+      probe: "",
       category: "IDE"
     },
     {
       id: "IDE-040",
       title: "Project Search",
+    
+      summary:
+        "プロジェクト全体を横断検索します。",
+    
+      icon:
+        "🔍",
+    
       version: "1.0",
       status: "Planned",
       ready:
@@ -453,11 +484,19 @@ function registerDefaultIdeComponents() {
       launcher:
         "showProjectSearch",
       validator: "",
+      probe: "",
       category: "IDE"
     },
     {
       id: "IDE-050",
       title: "Error Inspector",
+    
+      summary:
+        "エラー・例外・診断情報を確認します。",
+    
+      icon:
+        "⚠",
+    
       version: "1.0",
       status: "Planned",
       ready:
@@ -468,11 +507,19 @@ function registerDefaultIdeComponents() {
       launcher:
         "showErrorInspector",
       validator: "",
+      probe: "",
       category: "IDE"
     },
     {
       id: "IDE-060",
       title: "Quick Command",
+    
+      summary:
+        "登録済みQuick Commandを管理します。",
+    
+      icon:
+        "⚡",
+    
       version: "1.0",
       status: "Working",
       ready:
@@ -483,11 +530,19 @@ function registerDefaultIdeComponents() {
       launcher:
         "showDevConsoleQuickEditor",
       validator: "",
+      probe: "",
       category: "IDE"
     },
     {
       id: "IDE-070",
       title: "Autocomplete",
+    
+      summary:
+        "Console入力を補助する候補生成機能です。",
+    
+      icon:
+        "✍",
+    
       version: "1.0",
       status: "Working",
       ready:
@@ -504,6 +559,13 @@ function registerDefaultIdeComponents() {
     {
       id: "IDE-080",
       title: "Virtual Keyboard",
+    
+      summary:
+        "モバイル向けの開発用仮想キーボードです。",
+    
+      icon:
+        "⌨",
+    
       version: "1.0",
       status: "Official",
       ready:
@@ -520,6 +582,13 @@ function registerDefaultIdeComponents() {
     {
       id: "IDE-090",
       title: "Dashboard Integration",
+    
+      summary:
+        "Development Progress・Health・Repository状態を表示します。",
+    
+      icon:
+        "📊",
+    
       version: "1.0",
       status: "Working",
       ready:
@@ -530,11 +599,19 @@ function registerDefaultIdeComponents() {
       launcher:
         "showDevelopmentDashboard",
       validator: "",
+      probe: "",
       category: "IDE"
     },
     {
       id: "IDE-100",
       title: "AI Development Assistant",
+    
+      summary:
+        "Repository・Analyzer・IDEを利用してAI開発支援を行います。",
+    
+      icon:
+        "🤖",
+    
       version: "1.0",
       status: "Planned",
       ready:
@@ -545,6 +622,7 @@ function registerDefaultIdeComponents() {
       launcher:
         "showAiDevelopmentAssistant",
       validator: "",
+      probe: "",
       category: "IDE"
     }
   ];
