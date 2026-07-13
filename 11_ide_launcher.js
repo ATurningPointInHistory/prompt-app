@@ -10,198 +10,27 @@
 
 function getIdeLauncherItems() {
 
-  return [
-    {
-      id:
-        "IDE-010",
+  if (
+    typeof getIdeRegistry !==
+    "function"
+  ) {
+    return [];
+  }
 
-      title:
-        "Mobile Console",
+  if (
+    typeof refreshIdeRegistry ===
+    "function"
+  ) {
+    refreshIdeRegistry();
+  }
 
-      summary:
-        "JavaScript実行・ログ確認・デバッグを行います。",
-
-      icon:
-        "🖥",
-
-      functionName:
-        "showMobileConsole",
-
-      status:
-        "Official"
-    },
-    {
-      id:
-        "IDE-020",
-
-      title:
-        "Function Help",
-
-      summary:
-        "関数情報・呼び出し関係・ソースコードを検索します。",
-
-      icon:
-        "📖",
-
-      functionName:
-        "showFunctionHelpSearch",
-
-      status:
-        "Official"
-    },
-    {
-      id:
-        "IDE-030",
-
-      title:
-        "Command Palette",
-
-      summary:
-        "IDEコマンド・関数・履歴・Favoriteを検索して実行します。",
-
-      icon:
-        "⌨",
-
-      functionName:
-        "showCommandPalette",
-
-      status:
-        "Official"
-    },
-    {
-      id:
-        "IDE-040",
-
-      title:
-        "Project Search",
-
-      summary:
-        "プロジェクト全体を横断検索します。",
-
-      icon:
-        "🔍",
-
-      functionName:
-        "showProjectSearch",
-
-      status:
-        "Planned"
-    },
-    {
-      id:
-        "IDE-050",
-
-      title:
-        "Error Inspector",
-
-      summary:
-        "エラー・例外・診断情報を確認します。",
-
-      icon:
-        "⚠",
-
-      functionName:
-        "showErrorInspector",
-
-      status:
-        "Planned"
-    },
-    {
-      id:
-        "IDE-060",
-
-      title:
-        "Quick Command",
-
-      summary:
-        "登録済みQuick Commandを管理します。",
-
-      icon:
-        "⚡",
-
-      functionName:
-        "showDevConsoleQuickEditor",
-
-      status:
-        "Working"
-    },
-    {
-      id:
-        "IDE-070",
-
-      title:
-        "Autocomplete",
-
-      summary:
-        "Console入力を補助する候補生成機能です。",
-
-      icon:
-        "✍",
-
-      functionName:
-        "",
-
-      status:
-        "Working"
-    },
-    {
-      id:
-        "IDE-080",
-
-      title:
-        "Virtual Keyboard",
-
-      summary:
-        "モバイル向けの開発用仮想キーボードです。",
-
-      icon:
-        "⌨",
-
-      functionName:
-        "",
-
-      status:
-        "Official"
-    },
-    {
-      id:
-        "IDE-090",
-
-      title:
-        "Dashboard",
-
-      summary:
-        "Development Progress・Health・Repository状態を表示します。",
-
-      icon:
-        "📊",
-
-      functionName:
-        "showDevelopmentDashboard",
-
-      status:
-        "Planned"
-    },
-    {
-      id:
-        "IDE-100",
-
-      title:
-        "AI Development Assistant",
-
-      summary:
-        "Repository・Analyzer・IDEを利用してAI開発支援を行います。",
-
-      icon:
-        "🤖",
-
-      functionName:
-        "showAiDevelopmentAssistant",
-
-      status:
-        "Planned"
-    }
-  ];
+  return getIdeRegistry()
+    .sort((a, b) =>
+      String(a.id || "")
+        .localeCompare(
+          String(b.id || "")
+        )
+    );
 
 }
 
@@ -240,19 +69,44 @@ function isIdeLauncherItemReady(
     return false;
   }
 
-  const functionName =
-    String(
-      item.functionName || ""
-    ).trim();
-
-  if (!functionName) {
-    return false;
+  if (
+    typeof resolveIdeComponentReady ===
+    "function"
+  ) {
+    return resolveIdeComponentReady(
+      item
+    );
   }
 
-  return (
+  if (
+    item.launcher &&
     typeof window[
-      functionName
+      item.launcher
     ] === "function"
+  ) {
+    return true;
+  }
+
+  if (
+    item.probe &&
+    typeof window[
+      item.probe
+    ] === "function"
+  ) {
+    return true;
+  }
+
+  if (
+    item.validator &&
+    typeof window[
+      item.validator
+    ] === "function"
+  ) {
+    return true;
+  }
+
+  return Boolean(
+    item.ready
   );
 
 }
@@ -278,12 +132,16 @@ function getIdeLauncherRuntimeStatus(
   }
 
   if (
-    item.status === "Official"
+    item.status === "Official" &&
+    !item.launcher
   ) {
     return "Embedded";
   }
 
-  return item.status || "Planned";
+  return (
+    item.status ||
+    "Planned"
+  );
 
 }
 
@@ -519,25 +377,28 @@ function openIdeLauncherItem(
 
   }
 
-  const functionName =
+  const launcher =
     String(
-      item.functionName || ""
+      item.launcher || ""
     ).trim();
 
   if (
-    functionName &&
+    launcher &&
     typeof window[
-      functionName
+      launcher
     ] === "function"
   ) {
 
     try {
 
-      window[
-        functionName
-      ]();
+      const result =
+        window[
+          launcher
+        ]();
 
-      return true;
+      return result === undefined
+        ? true
+        : result;
 
     } catch (error) {
 
