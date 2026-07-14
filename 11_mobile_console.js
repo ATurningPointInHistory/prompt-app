@@ -784,6 +784,284 @@ function hookDevConsoleExecution(
 }
 
 /* ===============================
+   Report Dev Console Error
+   To Error Inspector
+=============================== */
+
+function reportDevConsoleErrorToInspector(
+  error,
+  source = "console"
+) {
+
+  if (
+    typeof addErrorInspectorRecord !==
+    "function"
+  ) {
+    return null;
+  }
+
+  const errorObject =
+    error &&
+    typeof error === "object"
+      ? error
+      : null;
+
+  return addErrorInspectorRecord({
+
+    source:
+      source,
+
+    type:
+      errorObject &&
+      errorObject.name
+        ? String(
+            errorObject.name
+          )
+        : "Error",
+
+    message:
+      errorObject &&
+      errorObject.message
+        ? String(
+            errorObject.message
+          )
+        : String(
+            error ||
+            "Unknown Error"
+          ),
+
+    file:
+      getDevConsoleErrorFile(
+        errorObject
+      ),
+
+    line:
+      getDevConsoleErrorLine(
+        errorObject
+      ),
+
+    column:
+      getDevConsoleErrorColumn(
+        errorObject
+      ),
+
+    functionName:
+      getDevConsoleErrorFunctionName(
+        errorObject
+      ),
+
+    stack:
+      errorObject &&
+      errorObject.stack
+        ? String(
+            errorObject.stack
+          )
+        : ""
+
+  });
+
+}
+
+/* ===============================
+   Get Dev Console Error File
+=============================== */
+
+function getDevConsoleErrorFile(
+  error
+) {
+
+  if (!error) {
+    return "";
+  }
+
+  if (error.fileName) {
+    return String(
+      error.fileName
+    );
+  }
+
+  const location =
+    parseDevConsoleErrorLocation(
+      error.stack
+    );
+
+  return location.file;
+}
+
+/* ===============================
+   Get Dev Console Error Line
+=============================== */
+
+function getDevConsoleErrorLine(
+  error
+) {
+
+  if (!error) {
+    return 0;
+  }
+
+  if (error.lineNumber) {
+
+    return Number(
+      error.lineNumber
+    ) || 0;
+
+  }
+
+  const location =
+    parseDevConsoleErrorLocation(
+      error.stack
+    );
+
+  return location.line;
+}
+
+/* ===============================
+   Get Dev Console Error Column
+=============================== */
+
+function getDevConsoleErrorColumn(
+  error
+) {
+
+  if (!error) {
+    return 0;
+  }
+
+  if (error.columnNumber) {
+
+    return Number(
+      error.columnNumber
+    ) || 0;
+
+  }
+
+  const location =
+    parseDevConsoleErrorLocation(
+      error.stack
+    );
+
+  return location.column;
+}
+
+/* ===============================
+   Get Error Function Name
+=============================== */
+
+function getDevConsoleErrorFunctionName(
+  error
+) {
+
+  if (
+    !error ||
+    !error.stack
+  ) {
+    return "";
+  }
+
+  const lines =
+    String(error.stack)
+      .split(/\r?\n/)
+      .slice(1);
+
+  for (
+    const line of lines
+  ) {
+
+    const match =
+      line.match(
+        /^\s*at\s+([^\s(]+)/
+      );
+
+    if (match) {
+
+      const name =
+        String(
+          match[1] || ""
+        );
+
+      if (
+        name !== "eval" &&
+        name !== "anonymous"
+      ) {
+        return name;
+      }
+
+    }
+
+  }
+
+  return "";
+}
+
+/* ===============================
+   Parse Error Location
+=============================== */
+
+function parseDevConsoleErrorLocation(
+  stack
+) {
+
+  const empty = {
+
+    file:
+      "",
+
+    line:
+      0,
+
+    column:
+      0
+
+  };
+
+  if (!stack) {
+    return empty;
+  }
+
+  const lines =
+    String(stack)
+      .split(/\r?\n/);
+
+  for (
+    const line of lines
+  ) {
+
+    const match =
+      line.match(
+        /((?:https?:\/\/|file:\/\/\/)[^)\s]+|[^()\s]+\.js):(\d+):(\d+)/
+      );
+
+    if (!match) {
+      continue;
+    }
+
+    return {
+
+      file:
+        String(
+          match[1] || ""
+        ),
+
+      line:
+        Number(
+          match[2] || 0
+        ),
+
+      column:
+        Number(
+          match[3] || 0
+        )
+
+    };
+
+  }
+
+  return empty;
+
+}
+
+/* ===============================
    Handle Dev Console Success
 =============================== */
 
@@ -827,6 +1105,11 @@ function handleDevConsoleError(
 
   let text = "";
 
+  reportDevConsoleErrorToInspector(
+    error,
+    "console"
+  );
+
   try {
 
     text =
@@ -836,6 +1119,11 @@ function handleDevConsoleError(
       );
 
   } catch (formatError) {
+
+    reportDevConsoleErrorToInspector(
+      formatError,
+      "console-format"
+    );
 
     text = [
       "=== Error ===",
@@ -1420,3 +1708,9 @@ ${source}
   )();
 
 }
+
+window.reportDevConsoleErrorToInspector =
+  reportDevConsoleErrorToInspector;
+
+window.parseDevConsoleErrorLocation =
+  parseDevConsoleErrorLocation;
