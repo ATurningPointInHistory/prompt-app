@@ -612,6 +612,12 @@ function showErrorInspector() {
 </button>
 
 <button
+  onclick="runErrorInspection()"
+>
+🔍 Scan
+</button>
+
+<button
   onclick="clearErrorHistory()"
 >
 🗑 Clear
@@ -655,11 +661,27 @@ function renderErrorInspector() {
 
   container.innerHTML = `
 
+<div>
+  <b>Runtime Errors</b>
+</div>
+
 ${buildErrorInspectorSummaryHtml()}
 
 <hr>
 
 ${buildErrorInspectorRecordsHtml()}
+
+<hr>
+
+<div>
+  <b>Static Inspection</b>
+</div>
+
+${buildErrorInspectorScanSummaryHtml()}
+
+<hr>
+
+${buildErrorInspectorScanResultsHtml()}
 
 `;
 
@@ -963,6 +985,734 @@ function validateErrorInspector() {
 }
 
 /* ===============================
+   Error Inspector Scan State
+=============================== */
+
+let errorInspectorScanResult = {
+
+  duplicateFunctions: [],
+
+  missingFunctions: [],
+
+  invalidRecords: [],
+
+  scannedFunctions: 0,
+
+  scannedAt: 0
+
+};
+
+/* ===============================
+   Get Inspector Function Database
+=============================== */
+
+function getErrorInspectorFunctionDatabase() {
+
+  if (
+    typeof getProjectFunctionDatabase !==
+    "function"
+  ) {
+    return {};
+  }
+
+  const database =
+    getProjectFunctionDatabase();
+
+  if (
+    !database ||
+    typeof database !==
+    "object"
+  ) {
+    return {};
+  }
+
+  return database;
+
+}
+
+/* ===============================
+   Normalize Inspector Array
+=============================== */
+
+function normalizeErrorInspectorArray(
+  value
+) {
+
+  if (Array.isArray(value)) {
+
+    return value
+      .filter(item =>
+        item !== undefined &&
+        item !== null &&
+        item !== ""
+      )
+      .map(item =>
+        String(item)
+      );
+
+  }
+
+  if (
+    value === undefined ||
+    value === null ||
+    value === ""
+  ) {
+    return [];
+  }
+
+  return [
+    String(value)
+  ];
+
+}
+
+/* ===============================
+   Resolve Inspector Function Name
+=============================== */
+
+function getErrorInspectorFunctionName(
+  key,
+  info
+) {
+
+  if (
+    typeof getFunctionName ===
+    "function"
+  ) {
+
+    const name =
+      getFunctionName(
+        info || {}
+      );
+
+    if (
+      name &&
+      name !== "unknown"
+    ) {
+      return String(name);
+    }
+
+  }
+
+  return String(
+    info?.name ||
+    info?.functionName ||
+    key ||
+    ""
+  );
+
+}
+
+/* ===============================
+   Resolve Inspector File Name
+=============================== */
+
+function getErrorInspectorFunctionFile(
+  info
+) {
+
+  if (
+    typeof getFunctionFileName ===
+    "function"
+  ) {
+
+    const file =
+      getFunctionFileName(
+        info || {}
+      );
+
+    if (
+      file &&
+      file !== "unknown"
+    ) {
+      return String(file);
+    }
+
+  }
+
+  return String(
+    info?.file ||
+    info?.fileName ||
+    info?.path ||
+    ""
+  );
+
+}
+
+/* ===============================
+   Resolve Inspector Called List
+=============================== */
+
+function getErrorInspectorCalledList(
+  info
+) {
+
+  if (
+    typeof getFunctionCalledList ===
+    "function"
+  ) {
+
+    return normalizeErrorInspectorArray(
+      getFunctionCalledList(
+        info || {}
+      )
+    );
+
+  }
+
+  return normalizeErrorInspectorArray(
+    info?.called ||
+    info?.calls ||
+    info?.dependencies
+  );
+
+}
+
+/* ===============================
+   Build Inspector Function Records
+=============================== */
+
+function buildErrorInspectorFunctionRecords() {
+
+  const database =
+    getErrorInspectorFunctionDatabase();
+
+  return Object.entries(
+    database
+  ).map(entry => {
+
+    const key =
+      entry[0];
+
+    const info =
+      entry[1];
+
+    if (
+      !info ||
+      typeof info !==
+      "object"
+    ) {
+
+      return {
+
+        key,
+
+        name:
+          String(key || ""),
+
+        file:
+          "",
+
+        called:
+          [],
+
+        valid:
+          false
+
+      };
+
+    }
+
+    return {
+
+      key,
+
+      name:
+        getErrorInspectorFunctionName(
+          key,
+          info
+        ),
+
+      file:
+        getErrorInspectorFunctionFile(
+          info
+        ),
+
+      called:
+        getErrorInspectorCalledList(
+          info
+        ),
+
+      valid:
+        true
+
+    };
+
+  });
+
+}
+
+/* ===============================
+   Scan Duplicate Functions
+=============================== */
+
+function scanErrorInspectorDuplicateFunctions(
+  records
+) {
+
+  const source =
+    Array.isArray(records)
+      ? records
+      : [];
+
+  const map =
+    Object.create(null);
+
+  source.forEach(record => {
+
+    const name =
+      String(
+        record?.name || ""
+      ).trim();
+
+    if (!name) {
+      return;
+    }
+
+    if (!map[name]) {
+      map[name] = [];
+    }
+
+    map[name].push({
+
+      key:
+        record.key,
+
+      file:
+        record.file
+
+    });
+
+  });
+
+  return Object.entries(map)
+    .filter(entry =>
+      entry[1].length > 1
+    )
+    .map(entry => ({
+
+      name:
+        entry[0],
+
+      count:
+        entry[1].length,
+
+      definitions:
+        entry[1]
+
+    }));
+
+}
+
+/* ===============================
+   Scan Missing Function Calls
+=============================== */
+
+function scanErrorInspectorMissingFunctions(
+  records
+) {
+
+  const source =
+    Array.isArray(records)
+      ? records
+      : [];
+
+  const definedNames =
+    new Set(
+      source
+        .map(record =>
+          String(
+            record?.name || ""
+          ).trim()
+        )
+        .filter(Boolean)
+    );
+
+  const ignoreNames =
+    new Set([
+
+      "alert",
+      "confirm",
+      "prompt",
+
+      "setTimeout",
+      "clearTimeout",
+
+      "setInterval",
+      "clearInterval",
+
+      "fetch",
+
+      "parseInt",
+      "parseFloat",
+
+      "isNaN",
+
+      "JSON",
+      "Date",
+      "Math",
+
+      "String",
+      "Number",
+      "Boolean",
+
+      "Object",
+      "Array",
+      "Set",
+      "Map",
+
+      "console"
+
+    ]);
+
+  const missingMap =
+    Object.create(null);
+
+  source.forEach(record => {
+
+    normalizeErrorInspectorArray(
+      record.called
+    ).forEach(calledName => {
+
+      const name =
+        String(
+          calledName || ""
+        ).trim();
+
+      if (
+        !name ||
+        definedNames.has(name) ||
+        ignoreNames.has(name)
+      ) {
+        return;
+      }
+
+      if (!missingMap[name]) {
+
+        missingMap[name] = {
+
+          name,
+
+          callers: []
+
+        };
+
+      }
+
+      missingMap[name]
+        .callers
+        .push({
+
+          name:
+            record.name,
+
+          file:
+            record.file
+
+        });
+
+    });
+
+  });
+
+  return Object.values(
+    missingMap
+  ).map(item => ({
+
+    ...item,
+
+    callers:
+      item.callers.filter(
+        (
+          caller,
+          index,
+          list
+        ) =>
+          index ===
+          list.findIndex(compare =>
+            compare.name ===
+              caller.name &&
+            compare.file ===
+              caller.file
+          )
+      )
+
+  }));
+
+}
+
+/* ===============================
+   Scan Invalid Function Records
+=============================== */
+
+function scanErrorInspectorInvalidRecords(
+  records
+) {
+
+  const source =
+    Array.isArray(records)
+      ? records
+      : [];
+
+  return source
+    .filter(record =>
+      !record.valid ||
+      !record.name
+    )
+    .map(record => ({
+
+      key:
+        String(
+          record?.key || ""
+        ),
+
+      name:
+        String(
+          record?.name || ""
+        ),
+
+      file:
+        String(
+          record?.file || ""
+        )
+
+    }));
+
+}
+
+/* ===============================
+   Run Error Inspection
+=============================== */
+
+function runErrorInspection() {
+
+  const records =
+    buildErrorInspectorFunctionRecords();
+
+  const duplicateFunctions =
+    scanErrorInspectorDuplicateFunctions(
+      records
+    );
+
+  const missingFunctions =
+    scanErrorInspectorMissingFunctions(
+      records
+    );
+
+  const invalidRecords =
+    scanErrorInspectorInvalidRecords(
+      records
+    );
+
+  errorInspectorScanResult = {
+
+    duplicateFunctions,
+
+    missingFunctions,
+
+    invalidRecords,
+
+    scannedFunctions:
+      records.length,
+
+    scannedAt:
+      Date.now()
+
+  };
+
+  renderErrorInspector();
+
+  return {
+    ...errorInspectorScanResult
+  };
+
+}
+
+/* ===============================
+   Get Error Inspection Result
+=============================== */
+
+function getErrorInspectionResult() {
+
+  return {
+
+    duplicateFunctions:
+      errorInspectorScanResult
+        .duplicateFunctions
+        .slice(),
+
+    missingFunctions:
+      errorInspectorScanResult
+        .missingFunctions
+        .slice(),
+
+    invalidRecords:
+      errorInspectorScanResult
+        .invalidRecords
+        .slice(),
+
+    scannedFunctions:
+      errorInspectorScanResult
+        .scannedFunctions,
+
+    scannedAt:
+      errorInspectorScanResult
+        .scannedAt
+
+  };
+
+}
+
+/* ===============================
+   Build Static Scan Summary
+=============================== */
+
+function buildErrorInspectorScanSummaryHtml() {
+
+  const result =
+    getErrorInspectionResult();
+
+  if (!result.scannedAt) {
+
+    return `
+<div class="small">
+静的診断はまだ実行されていません。
+</div>
+`;
+
+  }
+
+  return `
+<div class="small">
+
+Scanned:
+<b>${result.scannedFunctions}</b>
+
+<br>
+
+Duplicate:
+<b>${result.duplicateFunctions.length}</b>
+
+<br>
+
+Missing:
+<b>${result.missingFunctions.length}</b>
+
+<br>
+
+Invalid:
+<b>${result.invalidRecords.length}</b>
+
+</div>
+`;
+
+}
+
+/* ===============================
+   Build Static Scan Results
+=============================== */
+
+function buildErrorInspectorScanResultsHtml() {
+
+  const result =
+    getErrorInspectionResult();
+
+  const sections = [];
+
+  if (
+    result.duplicateFunctions.length
+  ) {
+
+    sections.push(`
+
+<div>
+  <b>Duplicate Functions</b>
+</div>
+
+${result.duplicateFunctions
+  .map(item => `
+<div class="small">
+⚠ ${escapeHtml(item.name)}
+× ${item.count}
+</div>
+`)
+  .join("")}
+
+`);
+
+  }
+
+  if (
+    result.missingFunctions.length
+  ) {
+
+    sections.push(`
+
+<div>
+  <b>Missing Functions</b>
+</div>
+
+${result.missingFunctions
+  .map(item => `
+<div class="small">
+⚠ ${escapeHtml(item.name)}
+<br>
+Called by:
+${escapeHtml(
+  item.callers
+    .map(caller =>
+      caller.name
+    )
+    .join(", ")
+)}
+</div>
+`)
+  .join("<hr>")}
+
+`);
+
+  }
+
+  if (
+    result.invalidRecords.length
+  ) {
+
+    sections.push(`
+
+<div>
+  <b>Invalid Records</b>
+</div>
+
+${result.invalidRecords
+  .map(item => `
+<div class="small">
+⚠ ${escapeHtml(
+  item.key ||
+  "unknown"
+)}
+</div>
+`)
+  .join("")}
+
+`);
+
+  }
+
+  if (!sections.length) {
+
+    return `
+<div class="small">
+静的診断上の問題はありません。
+</div>
+`;
+
+  }
+
+  return sections.join("<hr>");
+
+}
+
+/* ===============================
    Window Export
 =============================== */
 
@@ -998,3 +1748,15 @@ window.createErrorInspectorTestError =
 
 window.validateErrorInspector =
   validateErrorInspector;
+
+window.runErrorInspection =
+  runErrorInspection;
+
+window.getErrorInspectionResult =
+  getErrorInspectionResult;
+
+window.scanErrorInspectorDuplicateFunctions =
+  scanErrorInspectorDuplicateFunctions;
+
+window.scanErrorInspectorMissingFunctions =
+  scanErrorInspectorMissingFunctions;
