@@ -502,25 +502,40 @@ function registerDefaultIdeComponents() {
     {
       id: "IDE-050",
       title: "Error Inspector",
-    
       summary:
-        "エラー・例外・診断情報を確認します。",
-    
+        "実行時エラー・未処理Promise・診断情報を確認します。",
       icon:
         "⚠",
-    
-      version: "1.0",
-      status: "Planned",
+      version:
+        "1.0",
+      status:
+        typeof showErrorInspector ===
+        "function"
+          ? "Working"
+          : "Planned",
       ready:
         typeof showErrorInspector ===
         "function",
-      progress: 0,
-      health: 0,
+      progress:
+        typeof getErrorInspectorStatus ===
+        "function"
+          ? getErrorInspectorStatus()
+              .progress
+          : 0,
+      health:
+        typeof getErrorInspectorStatus ===
+        "function"
+          ? getErrorInspectorStatus()
+              .health
+          : 0,
       launcher:
         "showErrorInspector",
-      validator: "",
-      probe: "",
-      category: "IDE"
+      validator:
+        "validateErrorInspector",
+      probe:
+        "getErrorInspectorStatus",
+      category:
+        "IDE"
     },
     {
       id: "IDE-060",
