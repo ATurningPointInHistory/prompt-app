@@ -367,10 +367,6 @@ function checkFunctionExistsPrompt() {
    Execute Dev Console
 =============================== */
 
-/* ===============================
-   Execute Dev Console
-=============================== */
-
 function executeDevConsole() {
 
   const input =
@@ -1277,10 +1273,6 @@ function runDevConsoleCode(
 
 }
 
-/* ===============================
-   Execute Dev Console Source
-=============================== */
-
 function executeDevConsoleSource(
   code
 ) {
@@ -1293,32 +1285,138 @@ function executeDevConsoleSource(
     return undefined;
   }
 
+  const expressionSource =
+    normalizeDevConsoleExpressionSource(
+      source
+    );
+
   try {
 
-    return Function(
-      `"use strict";
-return (
-${source}
-);`
-    )();
+    return executeDevConsoleExpression(
+      expressionSource
+    );
 
   } catch (expressionError) {
 
     if (
-      expressionError instanceof
-      SyntaxError
+      !(
+        expressionError instanceof
+        SyntaxError
+      )
     ) {
-
-      return Function(
-        `"use strict";
-${source}
-`
-      )();
-
+      throw expressionError;
     }
 
-    throw expressionError;
+    return executeDevConsoleStatements(
+      source
+    );
 
   }
+
+}
+
+/* ===============================
+   Normalize Dev Console Expression
+=============================== */
+
+function normalizeDevConsoleExpressionSource(
+  source
+) {
+
+  const text =
+    String(source || "")
+      .trim();
+
+  if (!text) {
+    return text;
+  }
+
+  if (
+    text.endsWith(";") &&
+    isSingleDevConsoleExpression(
+      text
+    )
+  ) {
+
+    return text
+      .slice(0, -1)
+      .trim();
+
+  }
+
+  return text;
+
+}
+
+/* ===============================
+   Check Single Dev Console Expression
+=============================== */
+
+function isSingleDevConsoleExpression(
+  source
+) {
+
+  const text =
+    String(source || "")
+      .trim();
+
+  if (!text) {
+    return false;
+  }
+
+  const withoutLastSemicolon =
+    text.endsWith(";")
+      ? text.slice(0, -1).trim()
+      : text;
+
+  try {
+
+    Function(
+      `"use strict";
+return (
+${withoutLastSemicolon}
+);`
+    );
+
+    return true;
+
+  } catch (error) {
+
+    return false;
+
+  }
+
+}
+
+/* ===============================
+   Execute Dev Console Expression
+=============================== */
+
+function executeDevConsoleExpression(
+  source
+) {
+
+  return Function(
+    `"use strict";
+return (
+${source}
+);`
+  )();
+
+}
+
+/* ===============================
+   Execute Dev Console Statements
+=============================== */
+
+function executeDevConsoleStatements(
+  source
+) {
+
+  return Function(
+    `"use strict";
+${source}
+`
+  )();
 
 }
