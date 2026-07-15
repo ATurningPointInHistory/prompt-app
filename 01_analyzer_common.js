@@ -10,48 +10,264 @@
 function getIgnoredFunctionCalls() {
 
   return new Set([
+
+    /* ===============================
+       Browser Global
+    =============================== */
+
     "alert",
     "confirm",
     "prompt",
-    "trim",
-    "filter",
-    "map",
-    "forEach",
-    "find",
-    "findIndex",
-    "slice",
-    "split",
-    "join",
-    "includes",
-    "indexOf",
-    "match",
-    "matchAll",
-    "replace",
-    "toLowerCase",
-    "toUpperCase",
-    "toISOString",
+
+    "setTimeout",
+    "setInterval",
+    "clearTimeout",
+    "clearInterval",
+
+    "requestAnimationFrame",
+    "cancelAnimationFrame",
+
+    "fetch",
+
+    "parseInt",
+    "parseFloat",
+    "isNaN",
+    "isFinite",
+
+    "encodeURI",
+    "decodeURI",
+    "encodeURIComponent",
+    "decodeURIComponent",
+
+    /* ===============================
+       DOM
+    =============================== */
+
+    "createElement",
+    "createTextNode",
+    "createDocumentFragment",
+
+    "appendChild",
+    "removeChild",
+    "replaceChild",
+    "insertBefore",
+
+    "append",
+    "prepend",
+    "before",
+    "after",
+    "remove",
+    "replaceWith",
+
     "querySelector",
     "querySelectorAll",
+
+    "getElementById",
+    "getElementsByClassName",
+    "getElementsByTagName",
+
+    "closest",
+    "matches",
+    "contains",
+
+    "setAttribute",
+    "getAttribute",
+    "removeAttribute",
+    "hasAttribute",
+
+    "addEventListener",
+    "removeEventListener",
+    "dispatchEvent",
+
+    "focus",
+    "blur",
+    "click",
+    "select",
+
+    "scroll",
+    "scrollTo",
+    "scrollBy",
+    "scrollIntoView",
+
+    "execCommand",
+
+    /* ===============================
+       Storage
+    =============================== */
+
     "setItem",
     "getItem",
     "removeItem",
+    "clear",
+
+    /* ===============================
+       Array
+    =============================== */
+
+    "push",
+    "pop",
+    "shift",
+    "unshift",
+
+    "slice",
+    "splice",
+
+    "map",
+    "filter",
+    "forEach",
+    "find",
+    "findIndex",
+    "some",
+    "every",
+    "reduce",
+    "reduceRight",
+
+    "includes",
+    "indexOf",
+    "lastIndexOf",
+
+    "sort",
+    "reverse",
+    "concat",
+    "flat",
+    "flatMap",
+
+    "join",
+
+    /* ===============================
+       String
+    =============================== */
+
+    "trim",
+    "trimStart",
+    "trimEnd",
+
+    "split",
+    "replace",
+    "replaceAll",
+
+    "match",
+    "matchAll",
+    "search",
+
+    "includes",
+    "indexOf",
+    "lastIndexOf",
+
+    "startsWith",
+    "endsWith",
+
+    "substring",
+    "substr",
+
+    "toLowerCase",
+    "toUpperCase",
+
+    "charAt",
+    "charCodeAt",
+
+    /* ===============================
+       Object
+    =============================== */
+
+    "keys",
+    "values",
+    "entries",
+
+    "assign",
+    "create",
+
+    "hasOwn",
+    "hasOwnProperty",
+
+    "getPrototypeOf",
+    "setPrototypeOf",
+
+    /* ===============================
+       JSON
+    =============================== */
+
     "stringify",
     "parse",
+
+    /* ===============================
+       Number / Math
+    =============================== */
+
     "min",
     "max",
+    "round",
+    "floor",
+    "ceil",
+    "abs",
+    "random",
+
+    /* ===============================
+       Date
+    =============================== */
+
+    "now",
+    "toISOString",
+    "toLocaleString",
+    "toLocaleDateString",
+    "toLocaleTimeString",
+
+    /* ===============================
+       Promise
+    =============================== */
+
+    "resolve",
+    "reject",
+    "then",
+    "catch",
+    "finally",
+    "all",
+    "allSettled",
+    "race",
+    "any",
+
+    /* ===============================
+       Set / Map
+    =============================== */
+
+    "get",
+    "set",
+    "add",
+    "has",
+    "delete",
+    "clear",
+
+    /* ===============================
+       Console
+    =============================== */
+
     "log",
     "warn",
     "error",
-    "get",
-    "add",
-    "has",
-    "push",
-    "if",
-    "return",
-    "for",
-    "while",
-    "switch",
-    "catch",
+    "info",
+    "debug",
+    "table",
+    "group",
+    "groupEnd",
+
+    /* ===============================
+       RegExp
+    =============================== */
+
+    "test",
+    "exec",
+
+    /* ===============================
+       File / URL
+    =============================== */
+
+    "createObjectURL",
+    "revokeObjectURL",
+
+    /* ===============================
+       Constructors
+    =============================== */
+
     "String",
     "Number",
     "Boolean",
@@ -61,26 +277,43 @@ function getIgnoredFunctionCalls() {
     "RegExp",
     "Map",
     "Set",
+    "WeakMap",
+    "WeakSet",
     "Promise",
     "Function",
     "Date",
     "Math",
     "Reflect",
-    "setTimeout",
-    "setInterval",
-    "clearTimeout",
-    "clearInterval",
-    "isArray",
-    "test",
-    "resolve",
-    "reject",
-    "b",
-    "keys",
-    "values",
-    "entries",
-    "now",
-    "startsWith",
-    "endsWith"
+    "URL",
+    "Blob",
+    "FileReader",
+    "FormData",
+
+    /* ===============================
+       Analyzer Noise
+    =============================== */
+
+    "if",
+    "return",
+    "for",
+    "while",
+    "switch",
+    "catch",
+
+    "fn",
+    "callback",
+    "cb",
+    "handler",
+    "action",
+    "task",
+    "runner",
+    "executor",
+    "predicate",
+    "mapper",
+    "listener",
+
+    "b"
+
   ]);
 
 }
