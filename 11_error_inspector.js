@@ -2115,3 +2115,9 @@ window.scanErrorInspectorDuplicateFunctions =
 
 window.scanErrorInspectorMissingFunctions =
   scanErrorInspectorMissingFunctions;
+
+window.getErrorInspectorOptionalHooks =
+  getErrorInspectorOptionalHooks;
+
+window.extractErrorInspectorLocalCallables =
+  extractErrorInspectorLocalCallables;
