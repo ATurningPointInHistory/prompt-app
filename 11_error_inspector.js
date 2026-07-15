@@ -1548,7 +1548,10 @@ function scanErrorInspectorMissingFunctions(
         !name ||
         definedNames.has(name) ||
         ignoreNames.has(name) ||
-        parameters.has(name)
+        parameters.has(name) ||
+        isErrorInspectorRuntimeDefined(
+          name
+        )
       ) {
         return;
       }
@@ -1877,6 +1880,39 @@ ${result.invalidRecords
   }
 
   return sections.join("<hr>");
+
+}
+
+/* ===============================
+   Runtime Function Defined
+=============================== */
+
+function isErrorInspectorRuntimeDefined(
+  name
+) {
+
+  const functionName =
+    String(
+      name || ""
+    ).trim();
+
+  if (!functionName) {
+    return false;
+  }
+
+  try {
+
+    return (
+      functionName in window &&
+      window[functionName] !==
+        undefined
+    );
+
+  } catch (error) {
+
+    return false;
+
+  }
 
 }
 
