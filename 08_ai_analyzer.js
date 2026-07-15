@@ -318,55 +318,671 @@ function detectMissingCriticalFunctionsInText(text) {
 
 }
 
-function extractCalledFunctions(code) {
+/* ===============================
+   Analyzer Character Helpers
+=============================== */
+
+function isAnalyzerLineCommentStart(
+  current,
+  next
+) {
+
+  return (
+    current === "/" &&
+    next === "/"
+  );
+
+}
+
+function isAnalyzerBlockCommentStart(
+  current,
+  next
+) {
+
+  return (
+    current === "/" &&
+    next === "*"
+  );
+
+}
+
+function isAnalyzerBlockCommentEnd(
+  current,
+  next
+) {
+
+  return (
+    current === "*" &&
+    next === "/"
+  );
+
+}
+
+function getAnalyzerStringState(
+  character
+) {
+
+  if (
+    character === "'"
+  ) {
+    return "single-string";
+  }
+
+  if (
+    character === "\""
+  ) {
+    return "double-string";
+  }
+
+  if (
+    character === "`"
+  ) {
+    return "template-string";
+  }
+
+  return "";
+
+}
+
+function getAnalyzerStringEndCharacter(
+  state
+) {
+
+  if (
+    state === "single-string"
+  ) {
+    return "'";
+  }
+
+  if (
+    state === "double-string"
+  ) {
+    return "\"";
+  }
+
+  if (
+    state === "template-string"
+  ) {
+    return "`";
+  }
+
+  return "";
+
+}
+
+function getAnalyzerMaskedCharacter(
+  character
+) {
+
+  return (
+    character === "\n"
+      ? "\n"
+      : " "
+  );
+
+}
+
+/* ===============================
+   Consume Analyzer Code Character
+=============================== */
+
+function consumeAnalyzerCodeCharacter(
+  source,
+  index
+) {
+
+  const current =
+    source[index];
+
+  const next =
+    source[index + 1] ||
+    "";
+
+  if (
+    isAnalyzerLineCommentStart(
+      current,
+      next
+    )
+  ) {
+
+    return {
+
+      text:
+        "  ",
+
+      nextIndex:
+        index + 2,
+
+      nextState:
+        "line-comment"
+
+    };
+
+  }
+
+  if (
+    isAnalyzerBlockCommentStart(
+      current,
+      next
+    )
+  ) {
+
+    return {
+
+      text:
+        "  ",
+
+      nextIndex:
+        index + 2,
+
+      nextState:
+        "block-comment"
+
+    };
+
+  }
+
+  const stringState =
+    getAnalyzerStringState(
+      current
+    );
+
+  if (stringState) {
+
+    return {
+
+      text:
+        " ",
+
+      nextIndex:
+        index + 1,
+
+      nextState:
+        stringState
+
+    };
+
+  }
+
+  return {
+
+    text:
+      current,
+
+    nextIndex:
+      index + 1,
+
+    nextState:
+      "code"
+
+  };
+
+}
+
+/* ===============================
+   Consume Analyzer Line Comment
+=============================== */
+
+function consumeAnalyzerLineComment(
+  source,
+  index
+) {
+
+  const current =
+    source[index];
+
+  if (
+    current === "\n"
+  ) {
+
+    return {
+
+      text:
+        "\n",
+
+      nextIndex:
+        index + 1,
+
+      nextState:
+        "code"
+
+    };
+
+  }
+
+  return {
+
+    text:
+      " ",
+
+    nextIndex:
+      index + 1,
+
+    nextState:
+      "line-comment"
+
+  };
+
+}
+
+/* ===============================
+   Consume Analyzer Block Comment
+=============================== */
+
+function consumeAnalyzerBlockComment(
+  source,
+  index
+) {
+
+  const current =
+    source[index];
+
+  const next =
+    source[index + 1] ||
+    "";
+
+  if (
+    isAnalyzerBlockCommentEnd(
+      current,
+      next
+    )
+  ) {
+
+    return {
+
+      text:
+        "  ",
+
+      nextIndex:
+        index + 2,
+
+      nextState:
+        "code"
+
+    };
+
+  }
+
+  return {
+
+    text:
+      getAnalyzerMaskedCharacter(
+        current
+      ),
+
+    nextIndex:
+      index + 1,
+
+    nextState:
+      "block-comment"
+
+  };
+
+}
+
+/* ===============================
+   Consume Analyzer String
+=============================== */
+
+function consumeAnalyzerString(
+  source,
+  index,
+  state
+) {
+
+  const current =
+    source[index];
+
+  if (
+    current === "\\"
+  ) {
+
+    const next =
+      source[index + 1] ||
+      "";
+
+    return {
+
+      text:
+        " " +
+        getAnalyzerMaskedCharacter(
+          next
+        ),
+
+      nextIndex:
+        index + 2,
+
+      nextState:
+        state
+
+    };
+
+  }
+
+  const endCharacter =
+    getAnalyzerStringEndCharacter(
+      state
+    );
+
+  if (
+    current ===
+    endCharacter
+  ) {
+
+    return {
+
+      text:
+        " ",
+
+      nextIndex:
+        index + 1,
+
+      nextState:
+        "code"
+
+    };
+
+  }
+
+  return {
+
+    text:
+      getAnalyzerMaskedCharacter(
+        current
+      ),
+
+    nextIndex:
+      index + 1,
+
+    nextState:
+      state
+
+  };
+
+}
+
+/* ===============================
+   Consume Analyzer Character
+=============================== */
+
+function consumeAnalyzerCharacter(
+  source,
+  index,
+  state
+) {
+
+  if (
+    state === "code"
+  ) {
+
+    return consumeAnalyzerCodeCharacter(
+      source,
+      index
+    );
+
+  }
+
+  if (
+    state ===
+    "line-comment"
+  ) {
+
+    return consumeAnalyzerLineComment(
+      source,
+      index
+    );
+
+  }
+
+  if (
+    state ===
+    "block-comment"
+  ) {
+
+    return consumeAnalyzerBlockComment(
+      source,
+      index
+    );
+
+  }
+
+  return consumeAnalyzerString(
+    source,
+    index,
+    state
+  );
+
+}
+
+/* ===============================
+   Strip Analyzer Non-Code Text
+=============================== */
+
+function stripAnalyzerNonCodeText(
+  code
+) {
+
+  const source =
+    String(
+      code || ""
+    );
+
+  let result = "";
+
+  let index = 0;
+
+  let state =
+    "code";
+
+  while (
+    index <
+    source.length
+  ) {
+
+    const consumed =
+      consumeAnalyzerCharacter(
+        source,
+        index,
+        state
+      );
+
+    result +=
+      consumed.text;
+
+    index =
+      consumed.nextIndex;
+
+    state =
+      consumed.nextState;
+
+  }
+
+  return result;
+
+}
+
+/* ===============================
+   Analyzer Call Helpers
+=============================== */
+
+function isAnalyzerMemberCall(
+  source,
+  nameIndex
+) {
+
+  if (
+    nameIndex <= 0
+  ) {
+    return false;
+  }
+
+  const before =
+    source.slice(
+      0,
+      nameIndex
+    );
+
+  return (
+    /\.\s*$/.test(
+      before
+    ) ||
+    /\?\.\s*$/.test(
+      before
+    )
+  );
+
+}
+
+function isAnalyzerFunctionDeclaration(
+  source,
+  nameIndex
+) {
+
+  const before =
+    source.slice(
+      Math.max(
+        0,
+        nameIndex - 40
+      ),
+      nameIndex
+    );
+
+  return (
+    /\bfunction\s*$/.test(
+      before
+    )
+  );
+
+}
+
+function isAnalyzerControlCall(
+  name
+) {
+
+  return new Set([
+    "if",
+    "for",
+    "while",
+    "switch",
+    "catch",
+    "with"
+  ]).has(
+    name
+  );
+
+}
+
+function shouldIgnoreAnalyzerCall(
+  source,
+  match,
+  ignore
+) {
+
+  const name =
+    String(
+      match?.[1] || ""
+    );
+
+  const nameIndex =
+    Number(
+      match?.index || 0
+    );
+
+  if (!name) {
+    return true;
+  }
+
+  if (
+    isAnalyzerMemberCall(
+      source,
+      nameIndex
+    )
+  ) {
+    return true;
+  }
+
+  if (
+    isAnalyzerFunctionDeclaration(
+      source,
+      nameIndex
+    )
+  ) {
+    return true;
+  }
+
+  if (
+    isAnalyzerControlCall(
+      name
+    )
+  ) {
+    return true;
+  }
+
+  if (
+    ignore.has(name)
+  ) {
+    return true;
+  }
+
+  return false;
+
+}
+
+/* ===============================
+   Extract Called Functions
+=============================== */
+
+function extractCalledFunctions(
+  code
+) {
+
+  const source =
+    stripAnalyzerNonCodeText(
+      code
+    );
 
   const ignore =
-    typeof getIgnoredFunctionCalls === "function"
+    typeof getIgnoredFunctionCalls ===
+    "function"
       ? getIgnoredFunctionCalls()
       : new Set();
 
-  const keepPrefixes = [
-    "repair",
-    "search",
-    "macro",
-    "health",
-    "diagnose",
-    "ai",
-    "backup",
-    "todo",
-    "memo"
-  ];
+  const calls =
+    new Set();
+
+  const pattern =
+    /\b([a-zA-Z_$][\w$]*)\s*\(/g;
+
+  let match;
+
+  while (
+    (
+      match =
+        pattern.exec(source)
+    )
+  ) {
+
+    if (
+      shouldIgnoreAnalyzerCall(
+        source,
+        match,
+        ignore
+      )
+    ) {
+      continue;
+    }
+
+    calls.add(
+      String(
+        match[1]
+      )
+    );
+
+  }
 
   return [
-    ...new Set(
-      [...String(code || "").matchAll(
-        /\b([a-zA-Z_$][\w$]*)\s*\(/g
-      )]
-      .map(x => x[1])
-      .filter(name => {
-
-        if (!name) {
-          return false;
-        }
-
-        const lower =
-          String(name)
-            .toLowerCase();
-
-        const shouldKeep =
-          keepPrefixes.some(prefix =>
-            lower.includes(prefix)
-          );
-
-        if (shouldKeep) {
-          return true;
-        }
-
-        return !ignore.has(name);
-
-      })
-    )
-  ];
+    ...calls
+  ].sort();
 
 }
 
@@ -493,3 +1109,9 @@ function detectBestModuleFromCalls(
   return best;
 
 }
+
+window.stripAnalyzerNonCodeText =
+  stripAnalyzerNonCodeText;
+
+window.extractCalledFunctions =
+  extractCalledFunctions;
