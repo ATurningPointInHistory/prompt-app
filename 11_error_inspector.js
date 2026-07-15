@@ -1917,6 +1917,36 @@ function isErrorInspectorRuntimeDefined(
 }
 
 /* ===============================
+   Analyzer Noise Name
+=============================== */
+
+function isErrorInspectorNoiseName(
+  name
+) {
+
+  const value =
+    String(
+      name || ""
+    ).trim();
+
+  if (!value) {
+    return true;
+  }
+
+  if (
+    value.length === 1
+  ) {
+    return true;
+  }
+
+  return new Set([
+    "function",
+    "at"
+  ]).has(value);
+
+}
+
+/* ===============================
    Window Export
 =============================== */
 
