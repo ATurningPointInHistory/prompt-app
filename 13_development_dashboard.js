@@ -731,7 +731,7 @@ function showDevelopmentDashboardReport() {
 function getDevelopmentDashboardStatus() {
 
   const dashboard =
-    buildDevelopmentDashboard();
+    buildDevelopmentDashboardStatus();
 
   return {
     id: "DevelopmentDashboard",
