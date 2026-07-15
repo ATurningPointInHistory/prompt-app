@@ -312,7 +312,13 @@ function getIgnoredFunctionCalls() {
     "mapper",
     "listener",
 
-    "b"
+    "b",
+
+    "structuredClone",
+    "getComputedStyle",
+    "DOMParser",
+    "Error",
+    "Event"
 
   ]);
 
