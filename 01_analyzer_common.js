@@ -320,6 +320,27 @@ window.buildAnalyzerCalledBy =
 window.buildAnalyzerDependencies =
   buildAnalyzerDependencies;
 
+window.getProjectFunctionDatabase =
+  getProjectFunctionDatabase;
+
+window.getFunctionCalledList =
+  getFunctionCalledList;
+
+window.hasProjectFunctionDatabase =
+  hasProjectFunctionDatabase;
+
+window.getFunctionCalledByList =
+  getFunctionCalledByList;
+
+window.getFunctionFileName =
+  getFunctionFileName;
+
+window.getFunctionName =
+  getFunctionName;
+
+window.filterSelfFunctionCalls =
+  filterSelfFunctionCalls;
+
 console.log(
   "01_analyzer_common loaded"
 );
