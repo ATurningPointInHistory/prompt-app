@@ -802,6 +802,468 @@ function stripAnalyzerNonCodeText(
 }
 
 /* ===============================
+   Read Template Expression
+=============================== */
+
+function readAnalyzerTemplateExpression(
+  source,
+  startIndex
+) {
+
+  let index =
+    startIndex;
+
+  let depth =
+    1;
+
+  let state =
+    "code";
+
+  let result =
+    "";
+
+  while (
+    index <
+    source.length
+  ) {
+
+    const current =
+      source[index];
+
+    const next =
+      source[index + 1] ||
+      "";
+
+    if (
+      state === "code"
+    ) {
+
+      if (
+        current === "'" ||
+        current === "\"" ||
+        current === "`"
+      ) {
+
+        state =
+          current === "'"
+            ? "single-string"
+            : (
+                current === "\""
+                  ? "double-string"
+                  : "template-string"
+              );
+
+        result +=
+          current;
+
+        index++;
+
+        continue;
+
+      }
+
+      if (
+        current === "/" &&
+        next === "/"
+      ) {
+
+        state =
+          "line-comment";
+
+        result +=
+          "  ";
+
+        index += 2;
+
+        continue;
+
+      }
+
+      if (
+        current === "/" &&
+        next === "*"
+      ) {
+
+        state =
+          "block-comment";
+
+        result +=
+          "  ";
+
+        index += 2;
+
+        continue;
+
+      }
+
+      if (
+        current === "{"
+      ) {
+
+        depth++;
+
+        result +=
+          current;
+
+        index++;
+
+        continue;
+
+      }
+
+      if (
+        current === "}"
+      ) {
+
+        depth--;
+
+        if (
+          depth === 0
+        ) {
+
+          return {
+
+            code:
+              result,
+
+            nextIndex:
+              index + 1
+
+          };
+
+        }
+
+        result +=
+          current;
+
+        index++;
+
+        continue;
+
+      }
+
+      result +=
+        current;
+
+      index++;
+
+      continue;
+
+    }
+
+    if (
+      state ===
+      "line-comment"
+    ) {
+
+      if (
+        current === "\n"
+      ) {
+
+        state =
+          "code";
+
+        result +=
+          "\n";
+
+      } else {
+
+        result +=
+          " ";
+
+      }
+
+      index++;
+
+      continue;
+
+    }
+
+    if (
+      state ===
+      "block-comment"
+    ) {
+
+      if (
+        current === "*" &&
+        next === "/"
+      ) {
+
+        state =
+          "code";
+
+        result +=
+          "  ";
+
+        index += 2;
+
+        continue;
+
+      }
+
+      result +=
+        getAnalyzerMaskedCharacter(
+          current
+        );
+
+      index++;
+
+      continue;
+
+    }
+
+    const endCharacter =
+      getAnalyzerStringEndCharacter(
+        state
+      );
+
+    if (
+      current === "\\"
+    ) {
+
+      result +=
+        " ";
+
+      if (
+        index + 1 <
+        source.length
+      ) {
+
+        result +=
+          getAnalyzerMaskedCharacter(
+            source[index + 1]
+          );
+
+      }
+
+      index += 2;
+
+      continue;
+
+    }
+
+    if (
+      current ===
+      endCharacter
+    ) {
+
+      result +=
+        current;
+
+      state =
+        "code";
+
+      index++;
+
+      continue;
+
+    }
+
+    result +=
+      getAnalyzerMaskedCharacter(
+        current
+      );
+
+    index++;
+
+  }
+
+  return {
+
+    code:
+      result,
+
+    nextIndex:
+      source.length
+
+  };
+
+}
+
+/* ===============================
+   Extract Template Expression Code
+=============================== */
+
+function extractAnalyzerTemplateExpressionCode(
+  code
+) {
+
+  const source =
+    String(
+      code || ""
+    );
+
+  const expressions =
+    [];
+
+  let index = 0;
+
+  let state =
+    "code";
+
+  while (
+    index <
+    source.length
+  ) {
+
+    const current =
+      source[index];
+
+    const next =
+      source[index + 1] ||
+      "";
+
+    if (
+      state === "code"
+    ) {
+
+      if (
+        current === "'"
+      ) {
+
+        state =
+          "single-string";
+
+        index++;
+
+        continue;
+
+      }
+
+      if (
+        current === "\""
+      ) {
+
+        state =
+          "double-string";
+
+        index++;
+
+        continue;
+
+      }
+
+      if (
+        current === "`"
+      ) {
+
+        state =
+          "template-string";
+
+        index++;
+
+        continue;
+
+      }
+
+      index++;
+
+      continue;
+
+    }
+
+    if (
+      state ===
+        "single-string" ||
+      state ===
+        "double-string"
+    ) {
+
+      const endCharacter =
+        getAnalyzerStringEndCharacter(
+          state
+        );
+
+      if (
+        current === "\\"
+      ) {
+
+        index += 2;
+
+        continue;
+
+      }
+
+      if (
+        current ===
+        endCharacter
+      ) {
+
+        state =
+          "code";
+
+      }
+
+      index++;
+
+      continue;
+
+    }
+
+    if (
+      state ===
+      "template-string"
+    ) {
+
+      if (
+        current === "\\"
+      ) {
+
+        index += 2;
+
+        continue;
+
+      }
+
+      if (
+        current === "`"
+      ) {
+
+        state =
+          "code";
+
+        index++;
+
+        continue;
+
+      }
+
+      if (
+        current === "$" &&
+        next === "{"
+      ) {
+
+        const expression =
+          readAnalyzerTemplateExpression(
+            source,
+            index + 2
+          );
+
+        expressions.push(
+          expression.code
+        );
+
+        index =
+          expression.nextIndex;
+
+        continue;
+
+      }
+
+      index++;
+
+      continue;
+
+    }
+
+  }
+
+  return expressions
+    .join("\n");
+
+}
+
+/* ===============================
    Analyzer Call Helpers
 =============================== */
 
@@ -851,6 +1313,127 @@ function isAnalyzerFunctionDeclaration(
     /\bfunction\s*$/.test(
       before
     )
+  );
+
+}
+
+/* ===============================
+   Find Analyzer Closing Parenthesis
+=============================== */
+
+function findAnalyzerClosingParenthesis(
+  source,
+  openIndex
+) {
+
+  let depth = 0;
+
+  for (
+    let index = openIndex;
+    index < source.length;
+    index++
+  ) {
+
+    const character =
+      source[index];
+
+    if (
+      character === "("
+    ) {
+
+      depth++;
+
+      continue;
+
+    }
+
+    if (
+      character === ")"
+    ) {
+
+      depth--;
+
+      if (
+        depth === 0
+      ) {
+        return index;
+      }
+
+    }
+
+  }
+
+  return -1;
+
+}
+
+/* ===============================
+   Analyzer Method Definition
+=============================== */
+
+function isAnalyzerMethodDefinition(
+  source,
+  match
+) {
+
+  if (
+    !match ||
+    typeof match.index !==
+      "number"
+  ) {
+    return false;
+  }
+
+  const matchedText =
+    String(
+      match[0] || ""
+    );
+
+  const relativeOpenIndex =
+    matchedText.lastIndexOf(
+      "("
+    );
+
+  if (
+    relativeOpenIndex < 0
+  ) {
+    return false;
+  }
+
+  const openIndex =
+    match.index +
+    relativeOpenIndex;
+
+  const closeIndex =
+    findAnalyzerClosingParenthesis(
+      source,
+      openIndex
+    );
+
+  if (
+    closeIndex < 0
+  ) {
+    return false;
+  }
+
+  let nextIndex =
+    closeIndex + 1;
+
+  while (
+    nextIndex <
+      source.length &&
+    /\s/.test(
+      source[nextIndex]
+    )
+  ) {
+
+    nextIndex++;
+
+  }
+
+  return (
+    source[nextIndex] ===
+    "{"
   );
 
 }
@@ -911,6 +1494,15 @@ function shouldIgnoreAnalyzerCall(
   }
 
   if (
+    isAnalyzerMethodDefinition(
+      source,
+      match
+    )
+  ) {
+    return true;
+  }
+
+  if (
     isAnalyzerControlCall(
       name
     )
@@ -936,10 +1528,22 @@ function extractCalledFunctions(
   code
 ) {
 
-  const source =
+  const normalCode =
     stripAnalyzerNonCodeText(
       code
     );
+
+  const templateCode =
+    extractAnalyzerTemplateExpressionCode(
+      code
+    );
+
+  const source = [
+    normalCode,
+    stripAnalyzerNonCodeText(
+      templateCode
+    )
+  ].join("\n");
 
   const ignore =
     typeof getIgnoredFunctionCalls ===
@@ -1115,3 +1719,6 @@ window.stripAnalyzerNonCodeText =
 
 window.extractCalledFunctions =
   extractCalledFunctions;
+
+window.extractAnalyzerTemplateExpressionCode =
+  extractAnalyzerTemplateExpressionCode;
