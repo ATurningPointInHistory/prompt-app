@@ -1551,6 +1551,9 @@ function scanErrorInspectorMissingFunctions(
         parameters.has(name) ||
         isErrorInspectorRuntimeDefined(
           name
+        ) ||
+        isErrorInspectorNoiseName(
+          name
         )
       ) {
         return;
