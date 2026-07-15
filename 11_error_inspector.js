@@ -1382,6 +1382,104 @@ function scanErrorInspectorDuplicateFunctions(
 }
 
 /* ===============================
+   Build Defined Function Names
+=============================== */
+
+function buildErrorInspectorDefinedFunctionNames(
+  records
+) {
+
+  const names =
+    new Set();
+
+  const source =
+    Array.isArray(records)
+      ? records
+      : [];
+
+  source.forEach(record => {
+
+    const recordName =
+      String(
+        record?.name || ""
+      ).trim();
+
+    const recordKey =
+      String(
+        record?.key || ""
+      ).trim();
+
+    if (recordName) {
+      names.add(recordName);
+    }
+
+    if (recordKey) {
+      names.add(recordKey);
+    }
+
+  });
+
+  const databaseSources = [
+
+    window.projectDatabase
+      ?.functions,
+
+    window.projectFunctionDatabase,
+
+    window.functionDatabase,
+
+    window.projectAnalyzerDatabase
+      ?.functions
+
+  ];
+
+  databaseSources.forEach(
+    database => {
+
+      if (
+        !database ||
+        typeof database !==
+          "object"
+      ) {
+        return;
+      }
+
+      Object.entries(database)
+        .forEach(entry => {
+
+          const key =
+            String(
+              entry[0] || ""
+            ).trim();
+
+          const info =
+            entry[1];
+
+          const name =
+            String(
+              info?.name ||
+              info?.functionName ||
+              ""
+            ).trim();
+
+          if (key) {
+            names.add(key);
+          }
+
+          if (name) {
+            names.add(name);
+          }
+
+        });
+
+    }
+  );
+
+  return names;
+
+}
+
+/* ===============================
    Scan Missing Function Calls
 =============================== */
 
@@ -1395,14 +1493,8 @@ function scanErrorInspectorMissingFunctions(
       : [];
 
   const definedNames =
-    new Set(
+    buildErrorInspectorDefinedFunctionNames(
       source
-        .map(record =>
-          String(
-            record?.name || ""
-          ).trim()
-        )
-        .filter(Boolean)
     );
 
   const ignoreNames =
