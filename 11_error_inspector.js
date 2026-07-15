@@ -1212,6 +1212,9 @@ function buildErrorInspectorFunctionRecords() {
         parameters:
           [],
 
+        localCallables:
+          [],
+
         valid:
           false
 
@@ -1287,6 +1290,11 @@ function buildErrorInspectorFunctionRecords() {
             .filter(Boolean)
         : [];
 
+    const localCallables =
+      extractErrorInspectorLocalCallables(
+        info
+      );
+
     return {
 
       key,
@@ -1309,6 +1317,8 @@ function buildErrorInspectorFunctionRecords() {
           : [],
 
       parameters,
+
+      localCallables,
 
       valid:
         Boolean(name)
@@ -1503,6 +1513,9 @@ function scanErrorInspectorMissingFunctions(
       ? getIgnoredFunctionCalls()
       : new Set();
 
+  const optionalHooks =
+    getErrorInspectorOptionalHooks();
+
   const missingMap =
     Object.create(null);
 
@@ -1519,6 +1532,15 @@ function scanErrorInspectorMissingFunctions(
           record?.parameters
         )
           ? record.parameters
+          : []
+      );
+
+    const localCallables =
+      new Set(
+        Array.isArray(
+          record?.localCallables
+        )
+          ? record.localCallables
           : []
       );
 
@@ -1548,7 +1570,9 @@ function scanErrorInspectorMissingFunctions(
         !name ||
         definedNames.has(name) ||
         ignoreNames.has(name) ||
+        optionalHooks.has(name) ||
         parameters.has(name) ||
+        localCallables.has(name) ||
         isErrorInspectorRuntimeDefined(
           name
         ) ||
@@ -1946,6 +1970,100 @@ function isErrorInspectorNoiseName(
     "function",
     "at"
   ]).has(value);
+
+}
+
+/* ===============================
+   Optional Function Hooks
+=============================== */
+
+function getErrorInspectorOptionalHooks() {
+
+  return new Set([
+
+    "updateRepairQuickPanelVisibility",
+
+    "renderMemoBoxList",
+
+    "saveMemoBoxList",
+
+    "getDevelopmentDashboardModules"
+
+  ]);
+
+}
+
+/* ===============================
+   Extract Local Callable Names
+=============================== */
+
+function extractErrorInspectorLocalCallables(
+  info
+) {
+
+  const code =
+    String(
+      info?.code ||
+      info?.block ||
+      info?.text ||
+      info?.source ||
+      ""
+    );
+
+  if (!code) {
+    return [];
+  }
+
+  const names =
+    new Set();
+
+  /*
+    const normalize = value => ...
+    let handler = (...) => ...
+    var callback = function (...) ...
+  */
+
+  const variablePattern =
+    /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/g;
+
+  let match;
+
+  while (
+    (
+      match =
+        variablePattern.exec(code)
+    )
+  ) {
+
+    if (match[1]) {
+      names.add(match[1]);
+    }
+
+  }
+
+  /*
+    function localFunction() {}
+  */
+
+  const functionPattern =
+    /\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g;
+
+  while (
+    (
+      match =
+        functionPattern.exec(code)
+    )
+  ) {
+
+    if (match[1]) {
+      names.add(match[1]);
+    }
+
+  }
+
+  return [
+    ...names
+  ];
 
 }
 
