@@ -1175,10 +1175,13 @@ function getErrorInspectorCalledList(
 function buildErrorInspectorFunctionRecords() {
 
   const database =
-    getErrorInspectorFunctionDatabase();
+    typeof getProjectFunctionDatabase ===
+    "function"
+      ? getProjectFunctionDatabase()
+      : {};
 
   return Object.entries(
-    database
+    database || {}
   ).map(entry => {
 
     const key =
@@ -1206,6 +1209,9 @@ function buildErrorInspectorFunctionRecords() {
         called:
           [],
 
+        parameters:
+          [],
+
         valid:
           false
 
@@ -1213,28 +1219,99 @@ function buildErrorInspectorFunctionRecords() {
 
     }
 
+    const name =
+      typeof getFunctionName ===
+      "function"
+        ? getFunctionName(info)
+        : (
+            info.name ||
+            info.functionName ||
+            key
+          );
+
+    const file =
+      typeof getFunctionFileName ===
+      "function"
+        ? getFunctionFileName(info)
+        : (
+            info.file ||
+            info.fileName ||
+            ""
+          );
+
+    const called =
+      typeof getFunctionCalledList ===
+      "function"
+        ? getFunctionCalledList(info)
+        : (
+            info.called ||
+            info.calledFunctions ||
+            []
+          );
+
+    const parameters =
+      Array.isArray(
+        info.parameters
+      )
+        ? info.parameters
+            .map(parameter => {
+
+              if (
+                parameter &&
+                typeof parameter ===
+                "object"
+              ) {
+
+                return String(
+                  parameter.name ||
+                  parameter.parameter ||
+                  ""
+                ).trim();
+
+              }
+
+              return String(
+                parameter || ""
+              )
+                .replace(
+                  /=.*$/,
+                  ""
+                )
+                .replace(
+                  /^\.\.\./,
+                  ""
+                )
+                .trim();
+
+            })
+            .filter(Boolean)
+        : [];
+
     return {
 
       key,
 
       name:
-        getErrorInspectorFunctionName(
-          key,
-          info
+        String(
+          name ||
+          key ||
+          ""
         ),
 
       file:
-        getErrorInspectorFunctionFile(
-          info
+        String(
+          file || ""
         ),
 
       called:
-        getErrorInspectorCalledList(
-          info
-        ),
+        Array.isArray(called)
+          ? called.slice()
+          : [],
+
+      parameters,
 
       valid:
-        true
+        Boolean(name)
 
     };
 
@@ -1329,50 +1406,46 @@ function scanErrorInspectorMissingFunctions(
     );
 
   const ignoreNames =
-    new Set([
-
-      "alert",
-      "confirm",
-      "prompt",
-
-      "setTimeout",
-      "clearTimeout",
-
-      "setInterval",
-      "clearInterval",
-
-      "fetch",
-
-      "parseInt",
-      "parseFloat",
-
-      "isNaN",
-
-      "JSON",
-      "Date",
-      "Math",
-
-      "String",
-      "Number",
-      "Boolean",
-
-      "Object",
-      "Array",
-      "Set",
-      "Map",
-
-      "console"
-
-    ]);
+    typeof getIgnoredFunctionCalls ===
+    "function"
+      ? getIgnoredFunctionCalls()
+      : new Set();
 
   const missingMap =
     Object.create(null);
 
   source.forEach(record => {
 
-    normalizeErrorInspectorArray(
-      record.called
-    ).forEach(calledName => {
+    const functionName =
+      String(
+        record?.name || ""
+      ).trim();
+
+    const parameters =
+      new Set(
+        Array.isArray(
+          record?.parameters
+        )
+          ? record.parameters
+          : []
+      );
+
+    const calls =
+      typeof filterSelfFunctionCalls ===
+      "function"
+        ? filterSelfFunctionCalls(
+            functionName,
+            record?.called || []
+          )
+        : (
+            Array.isArray(
+              record?.called
+            )
+              ? record.called
+              : []
+          );
+
+    calls.forEach(calledName => {
 
       const name =
         String(
@@ -1382,7 +1455,8 @@ function scanErrorInspectorMissingFunctions(
       if (
         !name ||
         definedNames.has(name) ||
-        ignoreNames.has(name)
+        ignoreNames.has(name) ||
+        parameters.has(name)
       ) {
         return;
       }
@@ -1404,10 +1478,12 @@ function scanErrorInspectorMissingFunctions(
         .push({
 
           name:
-            record.name,
+            functionName,
 
           file:
-            record.file
+            String(
+              record?.file || ""
+            )
 
         });
 
