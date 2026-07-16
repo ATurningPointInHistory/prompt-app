@@ -365,6 +365,22 @@ function showAutocomplete() {
 
 }
 
+/* ===============================
+   Compatibility API
+=============================== */
+
+function showAutocomplete() {
+
+  return refreshAutocompleteSuggestions();
+
+}
+
+function hideAutocomplete() {
+
+  return clearAutocompleteSuggestions();
+
+}
+
 window.initAutocomplete = initAutocomplete;
 window.getAutocompleteSettings = getAutocompleteSettings;
 window.updateAutocompleteSettings = updateAutocompleteSettings;
@@ -381,5 +397,9 @@ window.getAutocompleteStatus = getAutocompleteStatus;
 window.registerAutocompleteToCommandPalette = registerAutocompleteToCommandPalette;
 window.showAutocomplete =
   showAutocomplete;
+window.showAutocomplete =
+  showAutocomplete;
+window.hideAutocomplete =
+  hideAutocomplete;
 
 initAutocomplete();
