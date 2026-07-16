@@ -1133,6 +1133,224 @@ function collectDevelopmentDashboardMetrics() {
 }
 
 /* ===============================
+   IDE-090 Calculate Health
+=============================== */
+
+function calculateDevelopmentDashboardHealth(
+  metrics
+) {
+
+  const source =
+    metrics &&
+    typeof metrics ===
+    "object"
+      ? metrics
+      : collectDevelopmentDashboardMetrics();
+
+  const modules =
+    Array.isArray(
+      source.modules
+    )
+      ? source.modules
+      : [];
+
+  const availableModules =
+    modules.filter(
+      module =>
+        module &&
+        module.status !==
+        "Unavailable"
+    );
+
+  const healthValues =
+    availableModules
+      .map(
+        module =>
+          Number(
+            module.health
+          )
+      )
+      .filter(
+        value =>
+          Number.isFinite(
+            value
+          )
+      );
+
+  const progressValues =
+    availableModules
+      .map(
+        module =>
+          Number(
+            module.progress
+          )
+      )
+      .filter(
+        value =>
+          Number.isFinite(
+            value
+          )
+      );
+
+  const health =
+    healthValues.length > 0
+      ? Math.round(
+          healthValues.reduce(
+            (
+              total,
+              value
+            ) =>
+              total +
+              value,
+            0
+          ) /
+          healthValues.length
+        )
+      : 0;
+
+  const progress =
+    progressValues.length > 0
+      ? Math.round(
+          progressValues.reduce(
+            (
+              total,
+              value
+            ) =>
+              total +
+              value,
+            0
+          ) /
+          progressValues.length
+        )
+      : 0;
+
+  const ready =
+    availableModules.filter(
+      module =>
+        module.ready ===
+        true
+    ).length;
+
+  const unavailable =
+    modules.length -
+    availableModules.length;
+
+  let status =
+    "Unknown";
+
+  if (
+    availableModules.length ===
+    0
+  ) {
+
+    status =
+      "Unavailable";
+
+  } else if (
+    health >= 90
+  ) {
+
+    status =
+      "Healthy";
+
+  } else if (
+    health >= 70
+  ) {
+
+    status =
+      "Warning";
+
+  } else {
+
+    status =
+      "Critical";
+
+  }
+
+  const warnings = [];
+
+  if (
+    unavailable > 0
+  ) {
+
+    warnings.push(
+      unavailable +
+      " dashboard module(s) are unavailable."
+    );
+
+  }
+
+  if (
+    ready <
+    availableModules.length
+  ) {
+
+    warnings.push(
+      (
+        availableModules.length -
+        ready
+      ) +
+      " dashboard module(s) are not ready."
+    );
+
+  }
+
+  if (
+    health < 90
+  ) {
+
+    warnings.push(
+      "Overall dashboard health is below 90."
+    );
+
+  }
+
+  return {
+    id:
+      "IDE-090-HEALTH",
+
+    title:
+      "Development Dashboard Health",
+
+    health,
+
+    progress,
+
+    status,
+
+    ready:
+      availableModules.length >
+      0 &&
+      ready ===
+      availableModules.length &&
+      unavailable ===
+      0,
+
+    modules: {
+      total:
+        modules.length,
+
+      available:
+        availableModules.length,
+
+      unavailable,
+
+      ready,
+
+      notReady:
+        availableModules.length -
+        ready
+    },
+
+    warnings,
+
+    calculatedAt:
+      new Date().toISOString()
+  };
+
+}
+
+/* ===============================
    Simple Status APIs
    Temporary self-check versions
 =============================== */
