@@ -3692,3 +3692,238 @@ function getDevelopmentIDEStatus() {
   };
 
 }
+
+/* ===============================
+   IDE-095 Validate Development IDE
+=============================== */
+
+function validateDevelopmentIDE() {
+
+  const validators = [
+    {
+      id: "IDE-030",
+      title: "Command Palette",
+      fn: "validateCommandPalette"
+    },
+    {
+      id: "IDE-040",
+      title: "Project Search",
+      fn: "validateProjectSearch"
+    },
+    {
+      id: "IDE-050",
+      title: "Error Inspector",
+      fn: "validateErrorInspector"
+    },
+    {
+      id: "IDE-060",
+      title: "Quick Command",
+      fn: "validateQuickCommand"
+    },
+    {
+      id: "IDE-070",
+      title: "Autocomplete",
+      fn: "validateAutocomplete"
+    },
+    {
+      id: "IDE-080",
+      title: "Virtual Keyboard",
+      fn: "validateVirtualKeyboard"
+    },
+    {
+      id: "IDE-090",
+      title: "Dashboard Integration",
+      fn: "validateDevelopmentDashboard"
+    }
+  ];
+
+  const modules = [];
+  const failed = [];
+  const errors = [];
+
+  let total = 0;
+  let passed = 0;
+
+  validators.forEach(item => {
+
+    total++;
+
+    try {
+
+      const fn =
+        window[item.fn];
+
+      if (
+        typeof fn !==
+        "function"
+      ) {
+
+        failed.push(
+          item.id
+        );
+
+        modules.push({
+
+          id:
+            item.id,
+
+          title:
+            item.title,
+
+          valid:
+            false,
+
+          message:
+            "Validator not found."
+
+        });
+
+        return;
+
+      }
+
+      const result =
+        fn();
+
+      const valid =
+        result &&
+        result.valid ===
+        true;
+
+      if (valid) {
+
+        passed++;
+
+      } else {
+
+        failed.push(
+          item.id
+        );
+
+      }
+
+      modules.push({
+
+        id:
+          item.id,
+
+        title:
+          item.title,
+
+        valid,
+
+        health:
+          result.health ??
+          100,
+
+        progress:
+          result.progress ??
+          100,
+
+        passed:
+          result.passed ??
+          0,
+
+        total:
+          result.total ??
+          0
+
+      });
+
+    } catch (error) {
+
+      failed.push(
+        item.id
+      );
+
+      errors.push({
+
+        id:
+          item.id,
+
+        message:
+          error.message
+
+      });
+
+    }
+
+  });
+
+  const health =
+    modules.length > 0
+      ? Math.round(
+          modules.reduce(
+            (
+              sum,
+              module
+            ) =>
+              sum +
+              (
+                Number(
+                  module.health
+                ) || 0
+              ),
+            0
+          ) /
+          modules.length
+        )
+      : 0;
+
+  const progress =
+    modules.length > 0
+      ? Math.round(
+          modules.reduce(
+            (
+              sum,
+              module
+            ) =>
+              sum +
+              (
+                Number(
+                  module.progress
+                ) || 0
+              ),
+            0
+          ) /
+          modules.length
+        )
+      : 0;
+
+  return {
+
+    id:
+      "IDE-095",
+
+    title:
+      "Development IDE Validation",
+
+    valid:
+      failed.length ===
+      0,
+
+    passed,
+
+    total,
+
+    failed,
+
+    errors,
+
+    health,
+
+    progress,
+
+    releaseReady:
+      failed.length ===
+      0,
+
+    modules,
+
+    validatedAt:
+      new Date()
+        .toISOString()
+
+  };
+
+}
