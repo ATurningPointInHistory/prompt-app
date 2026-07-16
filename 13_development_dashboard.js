@@ -1958,6 +1958,104 @@ function renderDevelopmentDashboard(
 }
 
 /* ===============================
+   IDE-090 Refresh Dashboard
+=============================== */
+
+function refreshDevelopmentDashboard(
+  target
+) {
+
+  const dashboard =
+    buildDevelopmentDashboard();
+
+  let element = null;
+
+  if (
+    typeof target ===
+    "string"
+  ) {
+
+    element =
+      document.getElementById(
+        target
+      );
+
+  } else if (
+    target &&
+    typeof target ===
+    "object" &&
+    "innerHTML" in target
+  ) {
+
+    element =
+      target;
+
+  }
+
+  if (!element) {
+
+    element =
+      document.getElementById(
+        "developmentDashboardOutput"
+      ) ||
+      document.getElementById(
+        "developmentDashboard"
+      );
+
+  }
+
+  const html =
+    renderDevelopmentDashboard(
+      dashboard,
+      element
+    );
+
+  return {
+    id:
+      "IDE-090-REFRESH",
+
+    title:
+      "Development Dashboard Refresh",
+
+    refreshed:
+      true,
+
+    rendered:
+      Boolean(element),
+
+    targetId:
+      element &&
+      element.id
+        ? element.id
+        : "",
+
+    health:
+      dashboard.overview
+        ? dashboard.overview.health
+        : 0,
+
+    progress:
+      dashboard.overview
+        ? dashboard.overview.progress
+        : 0,
+
+    modules:
+      dashboard.overview
+        ? dashboard.overview.totalModules
+        : 0,
+
+    htmlLength:
+      html.length,
+
+    dashboard,
+
+    refreshedAt:
+      new Date().toISOString()
+  };
+
+}
+
+/* ===============================
    Simple Status APIs
    Temporary self-check versions
 =============================== */
