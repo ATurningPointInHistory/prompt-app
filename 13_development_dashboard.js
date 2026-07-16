@@ -1529,6 +1529,435 @@ function buildDevelopmentDashboard() {
 }
 
 /* ===============================
+   IDE-090 Render Dashboard
+=============================== */
+
+function renderDevelopmentDashboard(
+  dashboard,
+  target
+) {
+
+  const data =
+    dashboard &&
+    typeof dashboard ===
+    "object"
+      ? dashboard
+      : buildDevelopmentDashboard();
+
+  const escape =
+    typeof escapeHtml ===
+    "function"
+      ? escapeHtml
+      : function(value) {
+
+          return String(
+            value ?? ""
+          )
+            .replace(
+              /&/g,
+              "&amp;"
+            )
+            .replace(
+              /</g,
+              "&lt;"
+            )
+            .replace(
+              />/g,
+              "&gt;"
+            )
+            .replace(
+              /"/g,
+              "&quot;"
+            )
+            .replace(
+              /'/g,
+              "&#039;"
+            );
+
+        };
+
+  const overview =
+    data.overview &&
+    typeof data.overview ===
+    "object"
+      ? data.overview
+      : {};
+
+  const modules =
+    Array.isArray(
+      data.modules
+    )
+      ? data.modules
+      : [];
+
+  const alerts =
+    Array.isArray(
+      data.alerts
+    )
+      ? data.alerts
+      : [];
+
+  const recommendations =
+    Array.isArray(
+      data.recommendations
+    )
+      ? data.recommendations
+      : [];
+
+  function buildBar(
+    value
+  ) {
+
+    const normalized =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          Number(value) || 0
+        )
+      );
+
+    const filled =
+      Math.round(
+        normalized / 10
+      );
+
+    return (
+      "█".repeat(
+        filled
+      ) +
+      "□".repeat(
+        10 - filled
+      )
+    );
+
+  }
+
+  let html = "";
+
+  html += `
+<div
+  class="development-dashboard"
+  data-dashboard-id="${escape(
+    data.id || "IDE-090"
+  )}"
+>
+
+  <div>
+    <b>
+      ${escape(
+        data.title ||
+        "Dashboard Integration"
+      )}
+    </b>
+  </div>
+
+  <div
+    class="small"
+    style="margin-top:4px;"
+  >
+    Version:
+    ${escape(
+      data.version || ""
+    )}
+    /
+    Status:
+    ${escape(
+      data.status || "Unknown"
+    )}
+  </div>
+
+  <hr>
+
+  <div>
+    <b>Overall Health</b>
+  </div>
+
+  <div
+    style="
+      font-family:monospace;
+      margin-top:4px;
+    "
+  >
+    ${buildBar(
+      overview.health
+    )}
+    ${escape(
+      overview.health ?? 0
+    )}%
+  </div>
+
+  <div
+    style="margin-top:10px;"
+  >
+    <b>Development Progress</b>
+  </div>
+
+  <div
+    style="
+      font-family:monospace;
+      margin-top:4px;
+    "
+  >
+    ${buildBar(
+      overview.progress
+    )}
+    ${escape(
+      overview.progress ?? 0
+    )}%
+  </div>
+
+  <hr>
+
+  <div>
+    <b>IDE Summary</b>
+  </div>
+
+  <div
+    style="margin-top:6px;"
+  >
+    Total:
+    ${escape(
+      overview.totalModules ?? 0
+    )}
+  </div>
+
+  <div>
+    Ready:
+    ${escape(
+      overview.readyModules ?? 0
+    )}
+  </div>
+
+  <div>
+    Attention:
+    ${escape(
+      overview.attentionModules ?? 0
+    )}
+  </div>
+
+  <div>
+    Unavailable:
+    ${escape(
+      overview.unavailableModules ?? 0
+    )}
+  </div>
+
+  <hr>
+
+  <div>
+    <b>IDE Modules</b>
+  </div>
+`;
+
+  modules.forEach(
+    module => {
+
+      const icon =
+        module.ready === true
+          ? "✓"
+          : (
+              module.status ===
+              "Unavailable"
+                ? "?"
+                : "!"
+            );
+
+      html += `
+  <div
+    style="
+      border:1px solid #555;
+      border-radius:6px;
+      padding:8px;
+      margin-top:8px;
+    "
+  >
+
+    <div>
+      <b>
+        ${icon}
+        ${escape(
+          module.id || ""
+        )}
+        ${escape(
+          module.title || ""
+        )}
+      </b>
+    </div>
+
+    <div
+      class="small"
+      style="margin-top:4px;"
+    >
+      Status:
+      ${escape(
+        module.status || "Unknown"
+      )}
+    </div>
+
+    <div
+      class="small"
+    >
+      Health:
+      ${escape(
+        module.health ?? 0
+      )}%
+      /
+      Progress:
+      ${escape(
+        module.progress ?? 0
+      )}%
+    </div>
+
+    <div
+      class="small"
+    >
+      Source:
+      ${escape(
+        module.source || ""
+      )}
+    </div>
+
+  </div>
+`;
+
+    }
+  );
+
+  html += `
+  <hr>
+
+  <div>
+    <b>Alerts</b>
+  </div>
+`;
+
+  if (
+    alerts.length === 0
+  ) {
+
+    html += `
+  <div
+    style="margin-top:6px;"
+  >
+    No alerts.
+  </div>
+`;
+
+  } else {
+
+    alerts.forEach(
+      alert => {
+
+        html += `
+  <div
+    style="margin-top:6px;"
+  >
+    [
+    ${escape(
+      alert.level || "Warning"
+    )}
+    ]
+    ${escape(
+      alert.source || "IDE-090"
+    )}
+    :
+    ${escape(
+      alert.message || ""
+    )}
+  </div>
+`;
+
+      }
+    );
+
+  }
+
+  html += `
+  <hr>
+
+  <div>
+    <b>Recommendations</b>
+  </div>
+`;
+
+  recommendations.forEach(
+    recommendation => {
+
+      html += `
+  <div
+    style="margin-top:6px;"
+  >
+    ・${escape(
+      recommendation
+    )}
+  </div>
+`;
+
+    }
+  );
+
+  html += `
+  <hr>
+
+  <div
+    class="small"
+  >
+    Read Only:
+    ${data.readOnly === true
+      ? "Yes"
+      : "No"
+    }
+  </div>
+
+  <div
+    class="small"
+  >
+    Generated:
+    ${escape(
+      data.generatedAt || ""
+    )}
+  </div>
+
+</div>
+`;
+
+  let element = null;
+
+  if (
+    typeof target ===
+    "string"
+  ) {
+
+    element =
+      document.getElementById(
+        target
+      );
+
+  } else if (
+    target &&
+    typeof target ===
+    "object" &&
+    "innerHTML" in target
+  ) {
+
+    element =
+      target;
+
+  }
+
+  if (element) {
+
+    element.innerHTML =
+      html;
+
+  }
+
+  return html;
+
+}
+
+/* ===============================
    Simple Status APIs
    Temporary self-check versions
 =============================== */
