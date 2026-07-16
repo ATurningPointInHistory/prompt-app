@@ -784,6 +784,355 @@ function getDevelopmentDashboardStatus() {
 }
 
 /* ===============================
+   IDE-090 Collect Metrics
+=============================== */
+
+function collectDevelopmentDashboardMetrics() {
+
+  const definitions = [
+    {
+      id: "IDE-010",
+      title: "Mobile Console",
+      statusApi: "getMobileConsoleStatus",
+      validator: ""
+    },
+    {
+      id: "IDE-020",
+      title: "Function Help",
+      statusApi: "getFunctionHelpStatus",
+      validator: ""
+    },
+    {
+      id: "IDE-030",
+      title: "Command Palette",
+      statusApi: "getCommandPaletteStatus",
+      validator: "validateCommandPalette"
+    },
+    {
+      id: "IDE-040",
+      title: "Project Search",
+      statusApi: "getProjectSearchStatus",
+      validator: "validateProjectSearch"
+    },
+    {
+      id: "IDE-050",
+      title: "Error Inspector",
+      statusApi: "getErrorInspectorStatus",
+      validator: "validateErrorInspector"
+    },
+    {
+      id: "IDE-060",
+      title: "Quick Command",
+      statusApi: "getQuickCommandStatus",
+      validator: "validateQuickCommand"
+    },
+    {
+      id: "IDE-070",
+      title: "Autocomplete",
+      statusApi: "getAutocompleteStatus",
+      validator: "validateAutocomplete"
+    },
+    {
+      id: "IDE-080",
+      title: "Virtual Keyboard",
+      statusApi: "getVirtualKeyboardStatus",
+      validator: "validateVirtualKeyboard"
+    }
+  ];
+
+  const modules = [];
+  const warnings = [];
+  const errors = [];
+
+  definitions.forEach(definition => {
+
+    let status = null;
+    let source = "Unavailable";
+
+    try {
+
+      const statusFunction =
+        window[
+          definition.statusApi
+        ];
+
+      if (
+        typeof statusFunction ===
+        "function"
+      ) {
+
+        status =
+          statusFunction();
+
+        source =
+          definition.statusApi;
+
+      }
+
+      if (
+        !status &&
+        definition.validator
+      ) {
+
+        const validatorFunction =
+          window[
+            definition.validator
+          ];
+
+        if (
+          typeof validatorFunction ===
+          "function"
+        ) {
+
+          const validation =
+            validatorFunction();
+
+          if (
+            validation &&
+            typeof validation ===
+            "object"
+          ) {
+
+            const total =
+              Number(
+                validation.total
+              ) || 0;
+
+            const passed =
+              Number(
+                validation.passed
+              ) || 0;
+
+            const rate =
+              total > 0
+                ? Math.round(
+                    passed /
+                    total *
+                    100
+                  )
+                : (
+                    validation.valid
+                      ? 100
+                      : 0
+                  );
+
+            status = {
+              id:
+                definition.id,
+
+              title:
+                definition.title,
+
+              version:
+                "1.0",
+
+              status:
+                validation.valid
+                  ? "Ready"
+                  : "Error",
+
+              ready:
+                validation.valid ===
+                true,
+
+              progress:
+                rate,
+
+              health:
+                rate,
+
+              validation
+            };
+
+            source =
+              definition.validator;
+
+          }
+
+        }
+
+      }
+
+      if (
+        !status &&
+        typeof getIdeComponentStatus ===
+        "function"
+      ) {
+
+        status =
+          getIdeComponentStatus(
+            definition.id
+          );
+
+        if (status) {
+          source =
+            "getIdeComponentStatus";
+        }
+
+      }
+
+    } catch (error) {
+
+      errors.push({
+        id:
+          definition.id,
+
+        title:
+          definition.title,
+
+        message:
+          error &&
+          error.message
+            ? error.message
+            : String(error)
+      });
+
+    }
+
+    if (!status) {
+
+      warnings.push({
+        id:
+          definition.id,
+
+        title:
+          definition.title,
+
+        message:
+          "Status information is unavailable."
+      });
+
+      status = {
+        id:
+          definition.id,
+
+        title:
+          definition.title,
+
+        version:
+          "",
+
+        status:
+          "Unavailable",
+
+        ready:
+          false,
+
+        progress:
+          0,
+
+        health:
+          0
+      };
+
+    }
+
+    modules.push({
+      id:
+        status.id ||
+        definition.id,
+
+      title:
+        status.title ||
+        status.name ||
+        definition.title,
+
+      version:
+        status.version ||
+        "",
+
+      status:
+        status.status ||
+        (
+          status.ready
+            ? "Ready"
+            : "Unavailable"
+        ),
+
+      ready:
+        status.ready ===
+        true,
+
+      progress:
+        Math.max(
+          0,
+          Math.min(
+            100,
+            Number(
+              status.progress
+            ) || 0
+          )
+        ),
+
+      health:
+        Math.max(
+          0,
+          Math.min(
+            100,
+            Number(
+              status.health
+            ) || 0
+          )
+        ),
+
+      source
+    });
+
+  });
+
+  const ready =
+    modules.filter(
+      module =>
+        module.ready
+    ).length;
+
+  const available =
+    modules.filter(
+      module =>
+        module.status !==
+        "Unavailable"
+    ).length;
+
+  return {
+    id:
+      "IDE-090-METRICS",
+
+    title:
+      "Development Dashboard Metrics",
+
+    modules,
+
+    summary: {
+      total:
+        modules.length,
+
+      available,
+
+      unavailable:
+        modules.length -
+        available,
+
+      ready,
+
+      notReady:
+        modules.length -
+        ready
+    },
+
+    warnings,
+
+    errors,
+
+    readOnly:
+      true,
+
+    collectedAt:
+      new Date().toISOString()
+  };
+
+}
+
+/* ===============================
    Simple Status APIs
    Temporary self-check versions
 =============================== */
