@@ -718,19 +718,25 @@ function showDevelopmentDashboard() {
   "
 >
 
-  <button
-    type="button"
-    onclick="showDevelopmentDashboard()"
-  >
-    🔄 Refresh
-  </button>
+    <button
+      type="button"
+      onclick="
+        refreshDevelopmentDashboard(
+          'developmentDashboardOutput'
+        );
+      "
+    >
+      🔄 Refresh
+    </button>
 
-  <button
-    type="button"
-    onclick="validateDevelopmentDashboard()"
-  >
-    ✅ Validate
-  </button>
+    <button
+      type="button"
+      onclick="
+        showDevelopmentDashboardValidation();
+      "
+    >
+      ✅ Validate
+    </button>
 
 </div>
 
