@@ -2395,7 +2395,20 @@ function renderDevelopmentDashboard(
   if (element) {
 
     element.innerHTML =
-      html;
+      `
+  <div
+    style="
+      margin-bottom:8px;
+      font-size:12px;
+      opacity:0.8;
+    "
+  >
+  Updated :
+  ${new Date().toLocaleTimeString()}
+  </div>
+
+  ${html}
+  `;
 
   }
 
