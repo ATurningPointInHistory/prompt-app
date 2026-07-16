@@ -2089,26 +2089,6 @@ function extractErrorInspectorLocalCallables(
 }
 
 /* ===============================
-   Optional Function Hooks
-=============================== */
-
-function getErrorInspectorOptionalHooks() {
-
-  return new Set([
-
-    "updateRepairQuickPanelVisibility",
-
-    "renderMemoBoxList",
-
-    "saveMemoBoxList",
-
-    "getDevelopmentDashboardModules"
-
-  ]);
-
-}
-
-/* ===============================
    Build Error Inspector Health
 =============================== */
 
