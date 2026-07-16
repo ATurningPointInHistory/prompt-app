@@ -1351,6 +1351,184 @@ function calculateDevelopmentDashboardHealth(
 }
 
 /* ===============================
+   IDE-090 Build Dashboard
+=============================== */
+
+function buildDevelopmentDashboard() {
+
+  const metrics =
+    collectDevelopmentDashboardMetrics();
+
+  const health =
+    calculateDevelopmentDashboardHealth(
+      metrics
+    );
+
+  const modules =
+    Array.isArray(
+      metrics.modules
+    )
+      ? metrics.modules
+      : [];
+
+  const readyModules =
+    modules.filter(
+      module =>
+        module.ready === true
+    );
+
+  const unavailableModules =
+    modules.filter(
+      module =>
+        module.status ===
+        "Unavailable"
+    );
+
+  const attentionModules =
+    modules.filter(
+      module =>
+        module.status !==
+        "Unavailable" &&
+        (
+          module.ready !== true ||
+          Number(
+            module.health
+          ) < 90
+        )
+    );
+
+  const alerts = [];
+
+  unavailableModules.forEach(
+    module => {
+
+      alerts.push({
+        level:
+          "Warning",
+
+        source:
+          module.id,
+
+        message:
+          module.title +
+          " status is unavailable."
+      });
+
+    }
+  );
+
+  attentionModules.forEach(
+    module => {
+
+      alerts.push({
+        level:
+          Number(
+            module.health
+          ) < 70
+            ? "Critical"
+            : "Warning",
+
+        source:
+          module.id,
+
+        message:
+          module.title +
+          " requires attention."
+      });
+
+    }
+  );
+
+  if (
+    Array.isArray(
+      metrics.errors
+    )
+  ) {
+
+    metrics.errors.forEach(
+      error => {
+
+        alerts.push({
+          level:
+            "Error",
+
+          source:
+            error.id ||
+            "IDE-090",
+
+          message:
+            error.message ||
+            "Dashboard metric collection failed."
+        });
+
+      }
+    );
+
+  }
+
+  return {
+    id:
+      "IDE-090",
+
+    title:
+      "Dashboard Integration",
+
+    version:
+      "1.0",
+
+    status:
+      health.status,
+
+    ready:
+      health.ready,
+
+    readOnly:
+      true,
+
+    overview: {
+      health:
+        health.health,
+
+      progress:
+        health.progress,
+
+      totalModules:
+        modules.length,
+
+      readyModules:
+        readyModules.length,
+
+      attentionModules:
+        attentionModules.length,
+
+      unavailableModules:
+        unavailableModules.length
+    },
+
+    modules,
+
+    health,
+
+    alerts,
+
+    recommendations:
+      alerts.length === 0
+        ? [
+            "All Development IDE modules are healthy.",
+            "Continue with IDE-095 Development IDE Validation."
+          ]
+        : [
+            "Review modules requiring attention.",
+            "Resolve unavailable status APIs before release validation."
+          ],
+
+    generatedAt:
+      new Date().toISOString()
+  };
+
+}
+
+/* ===============================
    Simple Status APIs
    Temporary self-check versions
 =============================== */
