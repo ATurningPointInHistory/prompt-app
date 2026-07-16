@@ -707,68 +707,40 @@ function showDevelopmentDashboard() {
 
     openFloatPanel(
       "IDE-090 Dashboard Integration",
-
       `
-<div
-  style="
-    margin-bottom:10px;
-    display:flex;
-    gap:6px;
-    flex-wrap:wrap;
-  "
->
+<div style="margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap;">
+  <button
+    type="button"
+    onclick="refreshDevelopmentDashboard('developmentDashboardOutput');"
+  >
+    🔄 Refresh
+  </button>
 
-    <button
-      type="button"
-      onclick="
-        refreshDevelopmentDashboard(
-          'developmentDashboardOutput'
-        );
-      "
-    >
-      🔄 Refresh
-    </button>
-
-    <button
-      type="button"
-      onclick="
-        showDevelopmentDashboardValidation();
-      "
-    >
-      ✅ Validate
-    </button>
-
+  <button
+    type="button"
+    onclick="showDevelopmentDashboardValidation();"
+  >
+    ✅ Validate
+  </button>
 </div>
 
-<div
-  id="developmentDashboardOutput"
->
+<div id="developmentDashboardOutput">
   ${html}
 </div>
 `
     );
 
     return {
-      id:
-        "IDE-090-SHOW",
-
-      shown:
-        true,
-
-      method:
-        "openFloatPanel",
-
+      id: "IDE-090-SHOW",
+      shown: true,
+      method: "openFloatPanel",
       health:
         dashboard.overview.health,
-
       progress:
         dashboard.overview.progress,
-
       modules:
         dashboard.overview.totalModules,
-
-      htmlLength:
-        html.length
+      htmlLength: html.length
     };
 
   }
@@ -782,66 +754,40 @@ function showDevelopmentDashboard() {
     );
 
   if (target) {
-
-    target.innerHTML =
-      html;
+    target.innerHTML = html;
 
     return {
-      id:
-        "IDE-090-SHOW",
-
-      shown:
-        true,
-
-      method:
-        "existingElement",
-
-      targetId:
-        target.id,
-
+      id: "IDE-090-SHOW",
+      shown: true,
+      method: "existingElement",
+      targetId: target.id,
       health:
         dashboard.overview.health,
-
       progress:
         dashboard.overview.progress,
-
       modules:
         dashboard.overview.totalModules,
-
-      htmlLength:
-        html.length
+      htmlLength: html.length
     };
-
   }
 
-  console.log(
-    dashboard
-  );
+  console.log(dashboard);
 
   return {
-    id:
-      "IDE-090-SHOW",
-
-    shown:
-      false,
-
-    method:
-      "console",
-
+    id: "IDE-090-SHOW",
+    shown: false,
+    method: "console",
     health:
       dashboard.overview.health,
-
     progress:
       dashboard.overview.progress,
-
     modules:
       dashboard.overview.totalModules,
-
-    htmlLength:
-      html.length
+    htmlLength: html.length
   };
 
 }
+
 
 /* ===============================
    IDE-090 Show Validation
@@ -1180,28 +1126,66 @@ function showDevelopmentDashboardReport() {
 
 function getDevelopmentDashboardStatus() {
 
+  let dashboard = null;
+
+  try {
+    if (
+      typeof buildDevelopmentDashboard ===
+      "function"
+    ) {
+      dashboard =
+        buildDevelopmentDashboard();
+    }
+  } catch (error) {
+    dashboard = null;
+  }
+
+  const ready =
+    Boolean(
+      dashboard &&
+      dashboard.ready === true
+    );
+
   return {
     id: "IDE-090",
     title: "Dashboard Integration",
     name: "Dashboard Integration",
-
     version: "1.0",
-
-    status: "In Progress",
-    ready: false,
-
-    progress: 10,
-    health: 100,
-
-    implemented: 1,
+    status:
+      ready ? "Ready" : "In Progress",
+    ready,
+    progress:
+      dashboard && dashboard.overview
+        ? dashboard.overview.progress
+        : 10,
+    health:
+      dashboard && dashboard.overview
+        ? dashboard.overview.health
+        : 100,
+    implemented:
+      ready ? 10 : 9,
     total: 10,
-
-    warnings: [],
-    errors: [],
-
+    warnings:
+      dashboard &&
+      Array.isArray(dashboard.alerts)
+        ? dashboard.alerts.filter(
+            alert =>
+              alert.level === "Warning"
+          )
+        : [],
+    errors:
+      dashboard &&
+      Array.isArray(dashboard.alerts)
+        ? dashboard.alerts.filter(
+            alert =>
+              alert.level === "Error" ||
+              alert.level === "Critical"
+          )
+        : [],
     nextTask:
-      "collectDevelopmentDashboardMetrics",
-
+      ready
+        ? "validateDevelopmentIDE"
+        : "Resolve dashboard alerts.",
     dependsOn: [
       "IDE-001",
       "DASHBOARD-001",
@@ -1209,7 +1193,6 @@ function getDevelopmentDashboardStatus() {
       "DATABASE-001",
       "OBSERVABILITY-001"
     ],
-
     provides: [
       "Development Dashboard",
       "Project Status",
@@ -1217,12 +1200,11 @@ function getDevelopmentDashboardStatus() {
       "Architecture Health",
       "Development Metrics"
     ],
-
     readOnly: true,
-
     message:
-      "IDE-090 Dashboard Integration implementation is in progress.",
-
+      ready
+        ? "IDE-090 Dashboard Integration is ready."
+        : "IDE-090 Dashboard Integration implementation is in progress.",
     updatedAt:
       new Date().toISOString()
   };
@@ -3612,6 +3594,1498 @@ function buildKnowledgeMigrationReport() {
   });
 
   return lines.join("\n");
+
+}
+
+/* ===============================
+   IDE-090 Collect Metrics
+=============================== */
+
+function collectDevelopmentDashboardMetrics() {
+
+  const definitions = [
+    {
+      id: "IDE-010",
+      title: "Mobile Console",
+      statusApi: "getMobileConsoleStatus",
+      validator: ""
+    },
+    {
+      id: "IDE-020",
+      title: "Function Help",
+      statusApi: "getFunctionHelpStatus",
+      validator: ""
+    },
+    {
+      id: "IDE-030",
+      title: "Command Palette",
+      statusApi: "getCommandPaletteStatus",
+      validator: "validateCommandPalette"
+    },
+    {
+      id: "IDE-040",
+      title: "Project Search",
+      statusApi: "getProjectSearchStatus",
+      validator: "validateProjectSearch"
+    },
+    {
+      id: "IDE-050",
+      title: "Error Inspector",
+      statusApi: "getErrorInspectorStatus",
+      validator: "validateErrorInspector"
+    },
+    {
+      id: "IDE-060",
+      title: "Quick Command",
+      statusApi: "getQuickCommandStatus",
+      validator: "validateQuickCommand"
+    },
+    {
+      id: "IDE-070",
+      title: "Autocomplete",
+      statusApi: "getAutocompleteStatus",
+      validator: "validateAutocomplete"
+    },
+    {
+      id: "IDE-080",
+      title: "Virtual Keyboard",
+      statusApi: "getVirtualKeyboardStatus",
+      validator: "validateVirtualKeyboard"
+    }
+  ];
+
+  const modules = [];
+  const warnings = [];
+  const errors = [];
+
+  definitions.forEach(definition => {
+
+    let status = null;
+    let source = "Unavailable";
+
+    try {
+
+      const statusFunction =
+        window[definition.statusApi];
+
+      if (
+        typeof statusFunction ===
+        "function"
+      ) {
+
+        status =
+          statusFunction();
+
+        source =
+          definition.statusApi;
+
+      }
+
+      if (
+        !status &&
+        definition.validator
+      ) {
+
+        const validatorFunction =
+          window[definition.validator];
+
+        if (
+          typeof validatorFunction ===
+          "function"
+        ) {
+
+          const validation =
+            validatorFunction();
+
+          if (
+            validation &&
+            typeof validation ===
+            "object"
+          ) {
+
+            const total =
+              Number(validation.total) || 0;
+
+            const passed =
+              Number(validation.passed) || 0;
+
+            const rate =
+              total > 0
+                ? Math.round(
+                    passed / total * 100
+                  )
+                : (
+                    validation.valid
+                      ? 100
+                      : 0
+                  );
+
+            status = {
+              id: definition.id,
+              title: definition.title,
+              version: "1.0",
+              status:
+                validation.valid
+                  ? "Ready"
+                  : "Error",
+              ready:
+                validation.valid === true,
+              progress: rate,
+              health: rate,
+              validation
+            };
+
+            source =
+              definition.validator;
+
+          }
+
+        }
+
+      }
+
+      if (
+        !status &&
+        typeof getIdeComponentStatus ===
+        "function"
+      ) {
+
+        status =
+          getIdeComponentStatus(
+            definition.id
+          );
+
+        if (status) {
+          source =
+            "getIdeComponentStatus";
+        }
+
+      }
+
+    } catch (error) {
+
+      errors.push({
+        id: definition.id,
+        title: definition.title,
+        message:
+          error && error.message
+            ? error.message
+            : String(error)
+      });
+
+    }
+
+    if (!status) {
+
+      warnings.push({
+        id: definition.id,
+        title: definition.title,
+        message:
+          "Status information is unavailable."
+      });
+
+      status = {
+        id: definition.id,
+        title: definition.title,
+        version: "",
+        status: "Unavailable",
+        ready: false,
+        progress: 0,
+        health: 0
+      };
+
+    }
+
+    modules.push({
+      id:
+        status.id ||
+        definition.id,
+      title:
+        status.title ||
+        status.name ||
+        definition.title,
+      version:
+        status.version || "",
+      status:
+        status.status ||
+        (
+          status.ready
+            ? "Ready"
+            : "Unavailable"
+        ),
+      ready:
+        status.ready === true,
+      progress:
+        Math.max(
+          0,
+          Math.min(
+            100,
+            Number(status.progress) || 0
+          )
+        ),
+      health:
+        Math.max(
+          0,
+          Math.min(
+            100,
+            Number(status.health) || 0
+          )
+        ),
+      source
+    });
+
+  });
+
+  const ready =
+    modules.filter(
+      module => module.ready
+    ).length;
+
+  const available =
+    modules.filter(
+      module =>
+        module.status !==
+        "Unavailable"
+    ).length;
+
+  return {
+    id: "IDE-090-METRICS",
+    title:
+      "Development Dashboard Metrics",
+    modules,
+    summary: {
+      total: modules.length,
+      available,
+      unavailable:
+        modules.length - available,
+      ready,
+      notReady:
+        modules.length - ready
+    },
+    warnings,
+    errors,
+    readOnly: true,
+    collectedAt:
+      new Date().toISOString()
+  };
+
+}
+
+/* ===============================
+   IDE-090 Calculate Health
+=============================== */
+
+function calculateDevelopmentDashboardHealth(
+  metrics
+) {
+
+  const source =
+    metrics &&
+    typeof metrics === "object"
+      ? metrics
+      : collectDevelopmentDashboardMetrics();
+
+  const modules =
+    Array.isArray(source.modules)
+      ? source.modules
+      : [];
+
+  const availableModules =
+    modules.filter(
+      module =>
+        module &&
+        module.status !==
+        "Unavailable"
+    );
+
+  const healthValues =
+    availableModules
+      .map(module => Number(module.health))
+      .filter(value => Number.isFinite(value));
+
+  const progressValues =
+    availableModules
+      .map(module => Number(module.progress))
+      .filter(value => Number.isFinite(value));
+
+  const health =
+    healthValues.length > 0
+      ? Math.round(
+          healthValues.reduce(
+            (total, value) => total + value,
+            0
+          ) / healthValues.length
+        )
+      : 0;
+
+  const progress =
+    progressValues.length > 0
+      ? Math.round(
+          progressValues.reduce(
+            (total, value) => total + value,
+            0
+          ) / progressValues.length
+        )
+      : 0;
+
+  const ready =
+    availableModules.filter(
+      module => module.ready === true
+    ).length;
+
+  const unavailable =
+    modules.length -
+    availableModules.length;
+
+  let status = "Unknown";
+
+  if (availableModules.length === 0) {
+    status = "Unavailable";
+  } else if (health >= 90) {
+    status = "Healthy";
+  } else if (health >= 70) {
+    status = "Warning";
+  } else {
+    status = "Critical";
+  }
+
+  const warnings = [];
+
+  if (unavailable > 0) {
+    warnings.push(
+      unavailable +
+      " dashboard module(s) are unavailable."
+    );
+  }
+
+  if (ready < availableModules.length) {
+    warnings.push(
+      (
+        availableModules.length - ready
+      ) +
+      " dashboard module(s) are not ready."
+    );
+  }
+
+  if (health < 90) {
+    warnings.push(
+      "Overall dashboard health is below 90."
+    );
+  }
+
+  return {
+    id: "IDE-090-HEALTH",
+    title:
+      "Development Dashboard Health",
+    health,
+    progress,
+    status,
+    ready:
+      availableModules.length > 0 &&
+      ready === availableModules.length &&
+      unavailable === 0,
+    modules: {
+      total: modules.length,
+      available:
+        availableModules.length,
+      unavailable,
+      ready,
+      notReady:
+        availableModules.length - ready
+    },
+    warnings,
+    calculatedAt:
+      new Date().toISOString()
+  };
+
+}
+
+/* ===============================
+   IDE-090 Build Dashboard
+=============================== */
+
+function buildDevelopmentDashboard() {
+
+  const metrics =
+    collectDevelopmentDashboardMetrics();
+
+  const health =
+    calculateDevelopmentDashboardHealth(
+      metrics
+    );
+
+  const modules =
+    Array.isArray(metrics.modules)
+      ? metrics.modules
+      : [];
+
+  const readyModules =
+    modules.filter(
+      module => module.ready === true
+    );
+
+  const unavailableModules =
+    modules.filter(
+      module =>
+        module.status ===
+        "Unavailable"
+    );
+
+  const attentionModules =
+    modules.filter(
+      module =>
+        module.status !==
+        "Unavailable" &&
+        (
+          module.ready !== true ||
+          Number(module.health) < 90
+        )
+    );
+
+  const alerts = [];
+
+  unavailableModules.forEach(module => {
+    alerts.push({
+      level: "Warning",
+      source: module.id,
+      message:
+        module.title +
+        " status is unavailable."
+    });
+  });
+
+  attentionModules.forEach(module => {
+    alerts.push({
+      level:
+        Number(module.health) < 70
+          ? "Critical"
+          : "Warning",
+      source: module.id,
+      message:
+        module.title +
+        " requires attention."
+    });
+  });
+
+  if (Array.isArray(metrics.errors)) {
+    metrics.errors.forEach(error => {
+      alerts.push({
+        level: "Error",
+        source:
+          error.id || "IDE-090",
+        message:
+          error.message ||
+          "Dashboard metric collection failed."
+      });
+    });
+  }
+
+  return {
+    id: "IDE-090",
+    title: "Dashboard Integration",
+    version: "1.0",
+    status: health.status,
+    ready: health.ready,
+    readOnly: true,
+    overview: {
+      health: health.health,
+      progress: health.progress,
+      totalModules: modules.length,
+      readyModules:
+        readyModules.length,
+      attentionModules:
+        attentionModules.length,
+      unavailableModules:
+        unavailableModules.length
+    },
+    modules,
+    health,
+    alerts,
+    recommendations:
+      alerts.length === 0
+        ? [
+            "All Development IDE modules are healthy.",
+            "Continue with IDE-095 Development IDE Validation."
+          ]
+        : [
+            "Review modules requiring attention.",
+            "Resolve unavailable status APIs before release validation."
+          ],
+    generatedAt:
+      new Date().toISOString()
+  };
+
+}
+
+/* ===============================
+   IDE-090 Render Dashboard
+=============================== */
+
+function renderDevelopmentDashboard(
+  dashboard,
+  target
+) {
+
+  const data =
+    dashboard &&
+    typeof dashboard === "object"
+      ? dashboard
+      : buildDevelopmentDashboard();
+
+  const escape =
+    typeof escapeHtml === "function"
+      ? escapeHtml
+      : function(value) {
+          return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        };
+
+  const overview =
+    data.overview &&
+    typeof data.overview === "object"
+      ? data.overview
+      : {};
+
+  const modules =
+    Array.isArray(data.modules)
+      ? data.modules
+      : [];
+
+  const alerts =
+    Array.isArray(data.alerts)
+      ? data.alerts
+      : [];
+
+  const recommendations =
+    Array.isArray(data.recommendations)
+      ? data.recommendations
+      : [];
+
+  function buildBar(value) {
+    const normalized =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          Number(value) || 0
+        )
+      );
+
+    const filled =
+      Math.round(normalized / 10);
+
+    return (
+      "█".repeat(filled) +
+      "□".repeat(10 - filled)
+    );
+  }
+
+  let html = "";
+
+  html += `
+<div
+  class="development-dashboard"
+  data-dashboard-id="${escape(data.id || "IDE-090")}"
+>
+  <div><b>${escape(data.title || "Dashboard Integration")}</b></div>
+  <div class="small" style="margin-top:4px;">
+    Version: ${escape(data.version || "")} /
+    Status: ${escape(data.status || "Unknown")}
+  </div>
+  <hr>
+  <div><b>Overall Health</b></div>
+  <div style="font-family:monospace;margin-top:4px;">
+    ${buildBar(overview.health)} ${escape(overview.health ?? 0)}%
+  </div>
+  <div style="margin-top:10px;"><b>Development Progress</b></div>
+  <div style="font-family:monospace;margin-top:4px;">
+    ${buildBar(overview.progress)} ${escape(overview.progress ?? 0)}%
+  </div>
+  <hr>
+  <div><b>IDE Summary</b></div>
+  <div style="margin-top:6px;">Total: ${escape(overview.totalModules ?? 0)}</div>
+  <div>Ready: ${escape(overview.readyModules ?? 0)}</div>
+  <div>Attention: ${escape(overview.attentionModules ?? 0)}</div>
+  <div>Unavailable: ${escape(overview.unavailableModules ?? 0)}</div>
+  <hr>
+  <div><b>IDE Modules</b></div>
+`;
+
+  modules.forEach(module => {
+    const icon =
+      module.ready === true
+        ? "✓"
+        : (
+            module.status === "Unavailable"
+              ? "?"
+              : "!"
+          );
+
+    html += `
+  <div style="border:1px solid #555;border-radius:6px;padding:8px;margin-top:8px;">
+    <div><b>${icon} ${escape(module.id || "")} ${escape(module.title || "")}</b></div>
+    <div class="small" style="margin-top:4px;">Status: ${escape(module.status || "Unknown")}</div>
+    <div class="small">Health: ${escape(module.health ?? 0)}% / Progress: ${escape(module.progress ?? 0)}%</div>
+    <div class="small">Source: ${escape(module.source || "")}</div>
+  </div>
+`;
+  });
+
+  html += `
+  <hr>
+  <div><b>Alerts</b></div>
+`;
+
+  if (alerts.length === 0) {
+    html += `<div style="margin-top:6px;">No alerts.</div>`;
+  } else {
+    alerts.forEach(alert => {
+      html += `
+  <div style="margin-top:6px;">
+    [${escape(alert.level || "Warning")}] ${escape(alert.source || "IDE-090")}: ${escape(alert.message || "")}
+  </div>
+`;
+    });
+  }
+
+  html += `
+  <hr>
+  <div><b>Recommendations</b></div>
+`;
+
+  recommendations.forEach(recommendation => {
+    html += `<div style="margin-top:6px;">・${escape(recommendation)}</div>`;
+  });
+
+  html += `
+  <hr>
+  <div class="small">Read Only: ${data.readOnly === true ? "Yes" : "No"}</div>
+  <div class="small">Generated: ${escape(data.generatedAt || "")}</div>
+</div>
+`;
+
+  let element = null;
+
+  if (typeof target === "string") {
+    element =
+      document.getElementById(target);
+  } else if (
+    target &&
+    typeof target === "object" &&
+    "innerHTML" in target
+  ) {
+    element = target;
+  }
+
+  if (element) {
+    element.innerHTML = html;
+  }
+
+  return html;
+
+}
+
+/* ===============================
+   IDE-090 Refresh Dashboard
+=============================== */
+
+function refreshDevelopmentDashboard(
+  target
+) {
+
+  const dashboard =
+    buildDevelopmentDashboard();
+
+  let element = null;
+
+  if (typeof target === "string") {
+    element =
+      document.getElementById(target);
+  } else if (
+    target &&
+    typeof target === "object" &&
+    "innerHTML" in target
+  ) {
+    element = target;
+  }
+
+  if (!element) {
+    element =
+      document.getElementById(
+        "developmentDashboardOutput"
+      ) ||
+      document.getElementById(
+        "developmentDashboard"
+      );
+  }
+
+  const html =
+    renderDevelopmentDashboard(
+      dashboard
+    );
+
+  if (element) {
+    element.innerHTML = `
+<div style="margin-bottom:8px;font-size:12px;opacity:0.8;">
+  Updated: ${new Date().toLocaleString()}
+</div>
+${html}
+`;
+  }
+
+  return {
+    id: "IDE-090-REFRESH",
+    title:
+      "Development Dashboard Refresh",
+    refreshed: true,
+    rendered: Boolean(element),
+    targetId:
+      element && element.id
+        ? element.id
+        : "",
+    health:
+      dashboard.overview
+        ? dashboard.overview.health
+        : 0,
+    progress:
+      dashboard.overview
+        ? dashboard.overview.progress
+        : 0,
+    modules:
+      dashboard.overview
+        ? dashboard.overview.totalModules
+        : 0,
+    htmlLength: html.length,
+    dashboard,
+    refreshedAt:
+      new Date().toISOString()
+  };
+
+}
+
+/* ===============================
+   IDE-090 Validate Dashboard
+=============================== */
+
+function validateDevelopmentDashboard() {
+
+  const checks = {
+    status:
+      typeof getDevelopmentDashboardStatus ===
+      "function",
+    metrics:
+      typeof collectDevelopmentDashboardMetrics ===
+      "function",
+    health:
+      typeof calculateDevelopmentDashboardHealth ===
+      "function",
+    builder:
+      typeof buildDevelopmentDashboard ===
+      "function",
+    renderer:
+      typeof renderDevelopmentDashboard ===
+      "function",
+    refresh:
+      typeof refreshDevelopmentDashboard ===
+      "function",
+    readOnly: false,
+    modules: false,
+    alerts: false,
+    output: false
+  };
+
+  const failed = [];
+  const errors = [];
+
+  let dashboard = null;
+  let metrics = null;
+  let health = null;
+  let html = "";
+
+  try {
+    metrics =
+      collectDevelopmentDashboardMetrics();
+
+    checks.modules =
+      Array.isArray(metrics.modules) &&
+      metrics.modules.length > 0;
+  } catch (error) {
+    errors.push(
+      "Metrics: " +
+      (
+        error && error.message
+          ? error.message
+          : String(error)
+      )
+    );
+  }
+
+  try {
+    health =
+      calculateDevelopmentDashboardHealth(
+        metrics
+      );
+
+    checks.health =
+      Boolean(
+        health &&
+        Number.isFinite(
+          Number(health.health)
+        ) &&
+        Number.isFinite(
+          Number(health.progress)
+        )
+      );
+  } catch (error) {
+    errors.push(
+      "Health: " +
+      (
+        error && error.message
+          ? error.message
+          : String(error)
+      )
+    );
+  }
+
+  try {
+    dashboard =
+      buildDevelopmentDashboard();
+
+    checks.readOnly =
+      dashboard &&
+      dashboard.readOnly === true;
+
+    checks.alerts =
+      dashboard &&
+      Array.isArray(dashboard.alerts);
+  } catch (error) {
+    errors.push(
+      "Builder: " +
+      (
+        error && error.message
+          ? error.message
+          : String(error)
+      )
+    );
+  }
+
+  try {
+    html =
+      renderDevelopmentDashboard(
+        dashboard
+      );
+
+    checks.output =
+      typeof html === "string" &&
+      html.includes(
+        "development-dashboard"
+      ) &&
+      html.includes("IDE-090");
+  } catch (error) {
+    errors.push(
+      "Renderer: " +
+      (
+        error && error.message
+          ? error.message
+          : String(error)
+      )
+    );
+  }
+
+  Object.keys(checks).forEach(key => {
+    if (checks[key] !== true) {
+      failed.push(key);
+    }
+  });
+
+  const passed =
+    Object.values(checks)
+      .filter(value => value === true)
+      .length;
+
+  const total =
+    Object.keys(checks).length;
+
+  const result = {
+    id: "IDE-090",
+    title: "Dashboard Integration",
+    valid:
+      failed.length === 0 &&
+      errors.length === 0,
+    passed,
+    total,
+    failed,
+    checks,
+    errors,
+    modules:
+      metrics && metrics.summary
+        ? metrics.summary.total
+        : 0,
+    health:
+      health ? health.health : 0,
+    progress:
+      health ? health.progress : 0,
+    htmlLength: html.length
+  };
+
+  console.log(result);
+
+  return result;
+
+}
+
+/* ===============================
+   IDE-090 Show Validation
+=============================== */
+
+function showDevelopmentDashboardValidation() {
+
+  const validation =
+    validateDevelopmentDashboard();
+
+  const escape =
+    typeof escapeHtml === "function"
+      ? escapeHtml
+      : function(value) {
+          return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        };
+
+  const checks =
+    validation.checks &&
+    typeof validation.checks === "object"
+      ? validation.checks
+      : {};
+
+  const failed =
+    Array.isArray(validation.failed)
+      ? validation.failed
+      : [];
+
+  const errors =
+    Array.isArray(validation.errors)
+      ? validation.errors
+      : [];
+
+  let html = `
+<div class="development-dashboard-validation">
+  <div><b>${escape(validation.title || "Dashboard Integration")} Validation</b></div>
+  <div style="margin-top:8px;">Result: <b>${validation.valid ? "Passed" : "Failed"}</b></div>
+  <div style="margin-top:4px;">Checks: ${escape(validation.passed ?? 0)} / ${escape(validation.total ?? 0)}</div>
+  <div>Health: ${escape(validation.health ?? 0)}%</div>
+  <div>Progress: ${escape(validation.progress ?? 0)}%</div>
+  <div>Modules: ${escape(validation.modules ?? 0)}</div>
+  <hr>
+  <div><b>Validation Checks</b></div>
+`;
+
+  Object.keys(checks).forEach(key => {
+    const passed = checks[key] === true;
+    html += `<div style="margin-top:6px;">${passed ? "✓" : "✕"} ${escape(key)}</div>`;
+  });
+
+  html += `<hr><div><b>Failed Checks</b></div>`;
+
+  if (failed.length === 0) {
+    html += `<div style="margin-top:6px;">None</div>`;
+  } else {
+    failed.forEach(item => {
+      html += `<div style="margin-top:6px;">・${escape(item)}</div>`;
+    });
+  }
+
+  html += `<hr><div><b>Errors</b></div>`;
+
+  if (errors.length === 0) {
+    html += `<div style="margin-top:6px;">None</div>`;
+  } else {
+    errors.forEach(error => {
+      html += `<div style="margin-top:6px;">・${escape(error)}</div>`;
+    });
+  }
+
+  html += `</div>`;
+
+  if (
+    typeof openFloatPanel ===
+    "function"
+  ) {
+    openFloatPanel(
+      "IDE-090 Validation",
+      html
+    );
+
+    return {
+      id: "IDE-090-VALIDATION-SHOW",
+      shown: true,
+      method: "openFloatPanel",
+      valid: validation.valid,
+      passed: validation.passed,
+      total: validation.total,
+      failed: failed.length,
+      errors: errors.length,
+      htmlLength: html.length
+    };
+  }
+
+  console.log(validation);
+
+  return {
+    id: "IDE-090-VALIDATION-SHOW",
+    shown: false,
+    method: "console",
+    valid: validation.valid,
+    passed: validation.passed,
+    total: validation.total,
+    failed: failed.length,
+    errors: errors.length,
+    htmlLength: html.length
+  };
+
+}
+
+/* ===============================
+   IDE-095 Development IDE Status
+=============================== */
+
+function getDevelopmentIDEStatus() {
+
+  let validation = null;
+
+  try {
+    if (
+      typeof validateDevelopmentIDE ===
+      "function"
+    ) {
+      validation =
+        validateDevelopmentIDE(false);
+    }
+  } catch (error) {
+    validation = null;
+  }
+
+  const ready =
+    Boolean(
+      validation &&
+      validation.releaseReady === true
+    );
+
+  return {
+    id: "IDE-095",
+    title:
+      "Development IDE Validation",
+    name:
+      "Development IDE Validation",
+    version: "1.0",
+    status:
+      ready ? "Ready" : "In Progress",
+    ready,
+    progress:
+      validation
+        ? validation.validationProgress
+        : 10,
+    health:
+      validation
+        ? validation.health
+        : 100,
+    implemented:
+      validation
+        ? validation.passed
+        : 1,
+    total:
+      validation
+        ? validation.total
+        : 4,
+    validated:
+      validation
+        ? validation.passed
+        : 0,
+    releaseReady: ready,
+    nextTask:
+      ready
+        ? "getDevelopmentIDERelease"
+        : "validateDevelopmentIDE",
+    dependsOn: [
+      "IDE-010",
+      "IDE-020",
+      "IDE-030",
+      "IDE-040",
+      "IDE-050",
+      "IDE-060",
+      "IDE-070",
+      "IDE-080",
+      "IDE-090"
+    ],
+    provides: [
+      "Development IDE Validation",
+      "Release Readiness",
+      "IDE Health"
+    ],
+    readOnly: true,
+    message:
+      ready
+        ? "Development IDE validation passed."
+        : "IDE-095 Development IDE Validation implementation is in progress.",
+    updatedAt:
+      new Date().toISOString()
+  };
+
+}
+
+/* ===============================
+   IDE-095 Validate Development IDE
+=============================== */
+
+function validateDevelopmentIDE(
+  writeLog
+) {
+
+  const definitions = [
+    {
+      id: "IDE-010",
+      title: "Mobile Console",
+      statusApi: "getMobileConsoleStatus"
+    },
+    {
+      id: "IDE-020",
+      title: "Function Help",
+      statusApi: "getFunctionHelpStatus"
+    },
+    {
+      id: "IDE-030",
+      title: "Command Palette",
+      validator: "validateCommandPalette"
+    },
+    {
+      id: "IDE-040",
+      title: "Project Search",
+      validator: "validateProjectSearch"
+    },
+    {
+      id: "IDE-050",
+      title: "Error Inspector",
+      validator: "validateErrorInspector"
+    },
+    {
+      id: "IDE-060",
+      title: "Quick Command",
+      validator: "validateQuickCommand"
+    },
+    {
+      id: "IDE-070",
+      title: "Autocomplete",
+      validator: "validateAutocomplete"
+    },
+    {
+      id: "IDE-080",
+      title: "Virtual Keyboard",
+      validator: "validateVirtualKeyboard"
+    },
+    {
+      id: "IDE-090",
+      title: "Dashboard Integration",
+      validator: "validateDevelopmentDashboard"
+    }
+  ];
+
+  const modules = [];
+  const failed = [];
+  const errors = [];
+
+  definitions.forEach(definition => {
+
+    let result = null;
+    let source = "";
+
+    try {
+
+      if (definition.validator) {
+        const validator =
+          window[definition.validator];
+
+        if (typeof validator === "function") {
+          result = validator();
+          source = definition.validator;
+        }
+      }
+
+      if (
+        !result &&
+        definition.statusApi
+      ) {
+        const statusApi =
+          window[definition.statusApi];
+
+        if (typeof statusApi === "function") {
+          result = statusApi();
+          source = definition.statusApi;
+        }
+      }
+
+      if (
+        !result &&
+        typeof getIdeComponentStatus ===
+        "function"
+      ) {
+        result =
+          getIdeComponentStatus(
+            definition.id
+          );
+
+        if (result) {
+          source =
+            "getIdeComponentStatus";
+        }
+      }
+
+      if (!result) {
+        failed.push(definition.id);
+
+        modules.push({
+          id: definition.id,
+          title: definition.title,
+          valid: false,
+          ready: false,
+          health: 0,
+          developmentProgress: 0,
+          source: "Unavailable",
+          message:
+            "Validation or status information is unavailable."
+        });
+
+        return;
+      }
+
+      const valid =
+        definition.validator
+          ? result.valid === true
+          : result.ready === true;
+
+      if (!valid) {
+        failed.push(definition.id);
+      }
+
+      const health =
+        Number.isFinite(
+          Number(result.health)
+        )
+          ? Number(result.health)
+          : (
+              valid ? 100 : 0
+            );
+
+      const developmentProgress =
+        Number.isFinite(
+          Number(result.progress)
+        )
+          ? Number(result.progress)
+          : (
+              valid ? 100 : 0
+            );
+
+      modules.push({
+        id:
+          result.id || definition.id,
+        title:
+          result.title ||
+          result.name ||
+          definition.title,
+        valid,
+        ready:
+          result.ready === true || valid,
+        health:
+          Math.max(
+            0,
+            Math.min(100, health)
+          ),
+        developmentProgress:
+          Math.max(
+            0,
+            Math.min(
+              100,
+              developmentProgress
+            )
+          ),
+        passed:
+          Number(result.passed) || 0,
+        total:
+          Number(result.total) || 0,
+        source
+      });
+
+    } catch (error) {
+
+      failed.push(definition.id);
+
+      errors.push({
+        id: definition.id,
+        title: definition.title,
+        message:
+          error && error.message
+            ? error.message
+            : String(error)
+      });
+
+      modules.push({
+        id: definition.id,
+        title: definition.title,
+        valid: false,
+        ready: false,
+        health: 0,
+        developmentProgress: 0,
+        source:
+          definition.validator ||
+          definition.statusApi ||
+          "Unknown",
+        message:
+          error && error.message
+            ? error.message
+            : String(error)
+      });
+
+    }
+
+  });
+
+  const passed =
+    modules.filter(
+      module => module.valid === true
+    ).length;
+
+  const total = definitions.length;
+
+  const health =
+    modules.length > 0
+      ? Math.round(
+          modules.reduce(
+            (sum, module) =>
+              sum +
+              (Number(module.health) || 0),
+            0
+          ) / modules.length
+        )
+      : 0;
+
+  const developmentProgress =
+    modules.length > 0
+      ? Math.round(
+          modules.reduce(
+            (sum, module) =>
+              sum +
+              (
+                Number(
+                  module.developmentProgress
+                ) || 0
+              ),
+            0
+          ) / modules.length
+        )
+      : 0;
+
+  const validationProgress =
+    total > 0
+      ? Math.round(
+          passed / total * 100
+        )
+      : 0;
+
+  const releaseReady =
+    failed.length === 0 &&
+    errors.length === 0 &&
+    passed === total;
+
+  const result = {
+    id: "IDE-095",
+    title:
+      "Development IDE Validation",
+    valid: releaseReady,
+    passed,
+    total,
+    failed,
+    errors,
+    health,
+    validationProgress,
+    developmentProgress,
+    releaseReady,
+    modules,
+    validatedAt:
+      new Date().toISOString()
+  };
+
+  if (writeLog !== false) {
+    console.log(result);
+  }
+
+  return result;
+
+}
+
+/* ===============================
+   Development IDE v1.0 Release
+=============================== */
+
+function getDevelopmentIDERelease() {
+
+  const validation =
+    validateDevelopmentIDE(false);
+
+  const releaseReady =
+    validation.releaseReady === true;
+
+  return {
+    id: "IDE-099",
+    title: "Development IDE Release",
+    name: "Development IDE v1.0",
+    version: "1.0.0",
+    status:
+      releaseReady
+        ? "Official"
+        : "Blocked",
+    ready: releaseReady,
+    releaseReady,
+    validationPassed:
+      validation.valid === true,
+    health: validation.health,
+    validationProgress:
+      validation.validationProgress,
+    developmentProgress:
+      validation.developmentProgress,
+    validatedModules:
+      validation.passed,
+    totalModules:
+      validation.total,
+    failed:
+      validation.failed.slice(),
+    errors:
+      validation.errors.slice(),
+    modules:
+      validation.modules.map(
+        module => module.id
+      ),
+    milestone:
+      "Development IDE v1.0",
+    nextTask:
+      releaseReady
+        ? "IDE-100 AI Development Assistant"
+        : "Resolve failed IDE validation checks.",
+    message:
+      releaseReady
+        ? "Development IDE v1.0 is release ready."
+        : "Development IDE v1.0 release is blocked.",
+    releasedAt:
+      releaseReady
+        ? new Date().toISOString()
+        : "",
+    readOnly: true
+  };
 
 }
 
