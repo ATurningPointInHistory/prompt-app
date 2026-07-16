@@ -376,31 +376,35 @@ function clearErrorHistory() {
 
 function buildErrorInspectorSummaryHtml() {
 
-  const records =
-    getErrorInspectorRecords();
-
-  const runtimeCount =
-    records.filter(record =>
-      record.source ===
-      "runtime"
-    ).length;
-
-  const promiseCount =
-    records.filter(record =>
-      record.source ===
-      "promise"
-    ).length;
+  const info =
+    buildErrorInspectorHealth();
 
   return `
 <div class="small">
-Total:
-<b>${records.length}</b>
-　
-Runtime:
-<b>${runtimeCount}</b>
-　
-Promise:
-<b>${promiseCount}</b>
+
+Health :
+<b>${info.health}%</b>
+
+<br>
+
+Runtime :
+<b>${info.runtime}</b>
+
+<br>
+
+Duplicate :
+<b>${info.duplicate}</b>
+
+<br>
+
+Missing :
+<b>${info.missing}</b>
+
+<br>
+
+Invalid :
+<b>${info.invalid}</b>
+
 </div>
 `;
 
@@ -2101,6 +2105,57 @@ function getErrorInspectorOptionalHooks() {
     "getDevelopmentDashboardModules"
 
   ]);
+
+}
+
+/* ===============================
+   Build Error Inspector Health
+=============================== */
+
+function buildErrorInspectorHealth() {
+
+  const result =
+    getErrorInspectionResult();
+
+  const runtime =
+    getErrorInspectorRecords()
+      .length;
+
+  const duplicate =
+    result.duplicateFunctions
+      .length;
+
+  const missing =
+    result.missingFunctions
+      .length;
+
+  const invalid =
+    result.invalidRecords
+      .length;
+
+  const health =
+    Math.max(
+      0,
+      100 -
+      runtime * 5 -
+      duplicate * 10 -
+      missing * 5 -
+      invalid * 5
+    );
+
+  return {
+
+    health,
+
+    runtime,
+
+    duplicate,
+
+    missing,
+
+    invalid
+
+  };
 
 }
 
