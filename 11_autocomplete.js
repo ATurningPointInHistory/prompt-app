@@ -365,16 +365,6 @@ function showAutocomplete() {
 
 }
 
-/* ===============================
-   Compatibility API
-=============================== */
-
-function showAutocomplete() {
-
-  return refreshAutocompleteSuggestions();
-
-}
-
 function hideAutocomplete() {
 
   return clearAutocompleteSuggestions();
