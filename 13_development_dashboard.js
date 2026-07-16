@@ -686,25 +686,154 @@ function buildDevelopmentDashboardHtml() {
 
 }
 
+/* ===============================
+   IDE-090 Show Dashboard
+=============================== */
+
 function showDevelopmentDashboard() {
+
+  const dashboard =
+    buildDevelopmentDashboard();
+
+  const html =
+    renderDevelopmentDashboard(
+      dashboard
+    );
+
+  if (
+    typeof openFloatPanel ===
+    "function"
+  ) {
+
+    openFloatPanel(
+      "IDE-090 Dashboard Integration",
+
+      `
+<div
+  style="
+    margin-bottom:10px;
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+  "
+>
+
+  <button
+    type="button"
+    onclick="showDevelopmentDashboard()"
+  >
+    🔄 Refresh
+  </button>
+
+  <button
+    type="button"
+    onclick="validateDevelopmentDashboard()"
+  >
+    ✅ Validate
+  </button>
+
+</div>
+
+<div
+  id="developmentDashboardOutput"
+>
+  ${html}
+</div>
+`
+    );
+
+    return {
+      id:
+        "IDE-090-SHOW",
+
+      shown:
+        true,
+
+      method:
+        "openFloatPanel",
+
+      health:
+        dashboard.overview.health,
+
+      progress:
+        dashboard.overview.progress,
+
+      modules:
+        dashboard.overview.totalModules,
+
+      htmlLength:
+        html.length
+    };
+
+  }
 
   const target =
     document.getElementById(
       "developmentDashboard"
+    ) ||
+    document.getElementById(
+      "developmentDashboardOutput"
     );
 
-  if (!target) {
+  if (target) {
 
-    console.log(
-      buildDashboardReport()
-    );
+    target.innerHTML =
+      html;
 
-    return;
+    return {
+      id:
+        "IDE-090-SHOW",
+
+      shown:
+        true,
+
+      method:
+        "existingElement",
+
+      targetId:
+        target.id,
+
+      health:
+        dashboard.overview.health,
+
+      progress:
+        dashboard.overview.progress,
+
+      modules:
+        dashboard.overview.totalModules,
+
+      htmlLength:
+        html.length
+    };
 
   }
 
-  target.innerHTML =
-    buildDevelopmentDashboardHtml();
+  console.log(
+    dashboard
+  );
+
+  return {
+    id:
+      "IDE-090-SHOW",
+
+    shown:
+      false,
+
+    method:
+      "console",
+
+    health:
+      dashboard.overview.health,
+
+    progress:
+      dashboard.overview.progress,
+
+    modules:
+      dashboard.overview.totalModules,
+
+    htmlLength:
+      html.length
+  };
 
 }
 
