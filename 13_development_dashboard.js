@@ -837,6 +837,317 @@ function showDevelopmentDashboard() {
 
 }
 
+/* ===============================
+   IDE-090 Show Validation
+=============================== */
+
+function showDevelopmentDashboardValidation() {
+
+  const validation =
+    validateDevelopmentDashboard();
+
+  const escape =
+    typeof escapeHtml ===
+    "function"
+      ? escapeHtml
+      : function(value) {
+
+          return String(
+            value ?? ""
+          )
+            .replace(
+              /&/g,
+              "&amp;"
+            )
+            .replace(
+              /</g,
+              "&lt;"
+            )
+            .replace(
+              />/g,
+              "&gt;"
+            )
+            .replace(
+              /"/g,
+              "&quot;"
+            )
+            .replace(
+              /'/g,
+              "&#039;"
+            );
+
+        };
+
+  const checks =
+    validation.checks &&
+    typeof validation.checks ===
+    "object"
+      ? validation.checks
+      : {};
+
+  const failed =
+    Array.isArray(
+      validation.failed
+    )
+      ? validation.failed
+      : [];
+
+  const errors =
+    Array.isArray(
+      validation.errors
+    )
+      ? validation.errors
+      : [];
+
+  let html = "";
+
+  html += `
+<div
+  class="development-dashboard-validation"
+>
+
+  <div>
+    <b>
+      ${escape(
+        validation.title ||
+        "Dashboard Integration"
+      )}
+      Validation
+    </b>
+  </div>
+
+  <div
+    style="margin-top:8px;"
+  >
+    Result:
+    <b>
+      ${validation.valid
+        ? "Passed"
+        : "Failed"
+      }
+    </b>
+  </div>
+
+  <div
+    style="margin-top:4px;"
+  >
+    Checks:
+    ${escape(
+      validation.passed ?? 0
+    )}
+    /
+    ${escape(
+      validation.total ?? 0
+    )}
+  </div>
+
+  <div>
+    Health:
+    ${escape(
+      validation.health ?? 0
+    )}%
+  </div>
+
+  <div>
+    Progress:
+    ${escape(
+      validation.progress ?? 0
+    )}%
+  </div>
+
+  <div>
+    Modules:
+    ${escape(
+      validation.modules ?? 0
+    )}
+  </div>
+
+  <hr>
+
+  <div>
+    <b>Validation Checks</b>
+  </div>
+`;
+
+  Object.keys(
+    checks
+  ).forEach(
+    key => {
+
+      const passed =
+        checks[key] === true;
+
+      html += `
+  <div
+    style="margin-top:6px;"
+  >
+    ${passed
+      ? "✓"
+      : "✕"
+    }
+    ${escape(key)}
+  </div>
+`;
+
+    }
+  );
+
+  html += `
+  <hr>
+
+  <div>
+    <b>Failed Checks</b>
+  </div>
+`;
+
+  if (
+    failed.length === 0
+  ) {
+
+    html += `
+  <div
+    style="margin-top:6px;"
+  >
+    None
+  </div>
+`;
+
+  } else {
+
+    failed.forEach(
+      item => {
+
+        html += `
+  <div
+    style="margin-top:6px;"
+  >
+    ・${escape(item)}
+  </div>
+`;
+
+      }
+    );
+
+  }
+
+  html += `
+  <hr>
+
+  <div>
+    <b>Errors</b>
+  </div>
+`;
+
+  if (
+    errors.length === 0
+  ) {
+
+    html += `
+  <div
+    style="margin-top:6px;"
+  >
+    None
+  </div>
+`;
+
+  } else {
+
+    errors.forEach(
+      error => {
+
+        html += `
+  <div
+    style="margin-top:6px;"
+  >
+    ・${escape(error)}
+  </div>
+`;
+
+      }
+    );
+
+  }
+
+  html += `
+</div>
+`;
+
+  if (
+    typeof openFloatPanel ===
+    "function"
+  ) {
+
+    openFloatPanel(
+      "IDE-090 Validation",
+      html
+    );
+
+    return {
+      id:
+        "IDE-090-VALIDATION-SHOW",
+
+      shown:
+        true,
+
+      method:
+        "openFloatPanel",
+
+      valid:
+        validation.valid,
+
+      passed:
+        validation.passed,
+
+      total:
+        validation.total,
+
+      failed:
+        failed.length,
+
+      errors:
+        errors.length,
+
+      htmlLength:
+        html.length
+    };
+
+  }
+
+  console.log(
+    validation
+  );
+
+  return {
+    id:
+      "IDE-090-VALIDATION-SHOW",
+
+    shown:
+      false,
+
+    method:
+      "console",
+
+    valid:
+      validation.valid,
+
+    passed:
+      validation.passed,
+
+    total:
+      validation.total,
+
+    failed:
+      failed.length,
+
+    errors:
+      errors.length,
+
+    htmlLength:
+      html.length
+  };
+
+}
+
 function showDevelopmentDashboardReport() {
 
   const report =
