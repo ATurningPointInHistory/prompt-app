@@ -728,38 +728,57 @@ function showDevelopmentDashboardReport() {
 
 }
 
+/* ===============================
+   IDE-090 Dashboard Status
+=============================== */
+
 function getDevelopmentDashboardStatus() {
 
-  const dashboard =
-    buildDevelopmentDashboardStatus();
-
   return {
-    id: "DevelopmentDashboard",
-    name: "Development Dashboard",
-    version: dashboard.version,
+    id: "IDE-090",
+    title: "Dashboard Integration",
+    name: "Dashboard Integration",
 
-    status: "Ready",
-    ready: true,
+    version: "1.0",
 
-    health: dashboard.progress,
+    status: "In Progress",
+    ready: false,
 
-    implemented: dashboard.ok,
-    total: dashboard.total,
+    progress: 10,
+    health: 100,
+
+    implemented: 1,
+    total: 10,
 
     warnings: [],
     errors: [],
 
     nextTask:
-      dashboard.missing > 0
-        ? "Implement missing dashboard checks."
-        : "Completed",
+      "collectDevelopmentDashboardMetrics",
 
-    dependsOn: [],
+    dependsOn: [
+      "IDE-001",
+      "DASHBOARD-001",
+      "REPOSITORY-001",
+      "DATABASE-001",
+      "OBSERVABILITY-001"
+    ],
+
+    provides: [
+      "Development Dashboard",
+      "Project Status",
+      "Repository Status",
+      "Architecture Health",
+      "Development Metrics"
+    ],
+
+    readOnly: true,
 
     message:
-      "Development Dashboard self-check is available.",
+      "IDE-090 Dashboard Integration implementation is in progress.",
 
-    updatedAt: Date.now()
+    updatedAt:
+      new Date().toISOString()
   };
 
 }
