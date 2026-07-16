@@ -2056,6 +2056,264 @@ function refreshDevelopmentDashboard(
 }
 
 /* ===============================
+   IDE-090 Validate Dashboard
+=============================== */
+
+function validateDevelopmentDashboard() {
+
+  const checks = {
+    status:
+      typeof getDevelopmentDashboardStatus ===
+      "function",
+
+    metrics:
+      typeof collectDevelopmentDashboardMetrics ===
+      "function",
+
+    health:
+      typeof calculateDevelopmentDashboardHealth ===
+      "function",
+
+    builder:
+      typeof buildDevelopmentDashboard ===
+      "function",
+
+    renderer:
+      typeof renderDevelopmentDashboard ===
+      "function",
+
+    refresh:
+      typeof refreshDevelopmentDashboard ===
+      "function",
+
+    readOnly:
+      false,
+
+    modules:
+      false,
+
+    alerts:
+      false,
+
+    output:
+      false
+  };
+
+  const failed = [];
+  const errors = [];
+
+  let dashboard = null;
+  let metrics = null;
+  let health = null;
+  let html = "";
+
+  try {
+
+    metrics =
+      collectDevelopmentDashboardMetrics();
+
+    checks.modules =
+      Array.isArray(
+        metrics.modules
+      ) &&
+      metrics.modules.length >
+      0;
+
+  } catch (error) {
+
+    errors.push(
+      "Metrics: " +
+      (
+        error &&
+        error.message
+          ? error.message
+          : String(error)
+      )
+    );
+
+  }
+
+  try {
+
+    health =
+      calculateDevelopmentDashboardHealth(
+        metrics
+      );
+
+    checks.health =
+      Boolean(
+        health &&
+        Number.isFinite(
+          Number(
+            health.health
+          )
+        ) &&
+        Number.isFinite(
+          Number(
+            health.progress
+          )
+        )
+      );
+
+  } catch (error) {
+
+    errors.push(
+      "Health: " +
+      (
+        error &&
+        error.message
+          ? error.message
+          : String(error)
+      )
+    );
+
+  }
+
+  try {
+
+    dashboard =
+      buildDevelopmentDashboard();
+
+    checks.readOnly =
+      dashboard &&
+      dashboard.readOnly ===
+      true;
+
+    checks.alerts =
+      dashboard &&
+      Array.isArray(
+        dashboard.alerts
+      );
+
+  } catch (error) {
+
+    errors.push(
+      "Builder: " +
+      (
+        error &&
+        error.message
+          ? error.message
+          : String(error)
+      )
+    );
+
+  }
+
+  try {
+
+    html =
+      renderDevelopmentDashboard(
+        dashboard
+      );
+
+    checks.output =
+      typeof html ===
+      "string" &&
+      html.includes(
+        "development-dashboard"
+      ) &&
+      html.includes(
+        "IDE-090"
+      );
+
+  } catch (error) {
+
+    errors.push(
+      "Renderer: " +
+      (
+        error &&
+        error.message
+          ? error.message
+          : String(error)
+      )
+    );
+
+  }
+
+  Object.keys(
+    checks
+  ).forEach(
+    key => {
+
+      if (
+        checks[key] !==
+        true
+      ) {
+
+        failed.push(
+          key
+        );
+
+      }
+
+    }
+  );
+
+  const passed =
+    Object.values(
+      checks
+    ).filter(
+      value =>
+        value === true
+    ).length;
+
+  const total =
+    Object.keys(
+      checks
+    ).length;
+
+  const result = {
+    id:
+      "IDE-090",
+
+    title:
+      "Dashboard Integration",
+
+    valid:
+      failed.length ===
+      0 &&
+      errors.length ===
+      0,
+
+    passed,
+
+    total,
+
+    failed,
+
+    checks,
+
+    errors,
+
+    modules:
+      metrics &&
+      metrics.summary
+        ? metrics.summary.total
+        : 0,
+
+    health:
+      health
+        ? health.health
+        : 0,
+
+    progress:
+      health
+        ? health.progress
+        : 0,
+
+    htmlLength:
+      html.length
+  };
+
+  console.log(
+    result
+  );
+
+  return result;
+
+}
+
+/* ===============================
    Simple Status APIs
    Temporary self-check versions
 =============================== */
