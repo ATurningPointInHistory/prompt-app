@@ -2005,8 +2005,13 @@ function extractErrorInspectorLocalCallables(
     String(
       info?.code ||
       info?.block ||
+      info?.body ||
+      info?.functionCode ||
+      info?.sourceCode ||
+      info?.rawCode ||
       info?.text ||
       info?.source ||
+      info?.content ||
       ""
     );
 
@@ -2036,7 +2041,13 @@ function extractErrorInspectorLocalCallables(
   ) {
 
     if (match[1]) {
-      names.add(match[1]);
+
+      names.add(
+        String(
+          match[1]
+        )
+      );
+
     }
 
   }
@@ -2056,7 +2067,13 @@ function extractErrorInspectorLocalCallables(
   ) {
 
     if (match[1]) {
-      names.add(match[1]);
+
+      names.add(
+        String(
+          match[1]
+        )
+      );
+
     }
 
   }
@@ -2064,6 +2081,26 @@ function extractErrorInspectorLocalCallables(
   return [
     ...names
   ];
+
+}
+
+/* ===============================
+   Optional Function Hooks
+=============================== */
+
+function getErrorInspectorOptionalHooks() {
+
+  return new Set([
+
+    "updateRepairQuickPanelVisibility",
+
+    "renderMemoBoxList",
+
+    "saveMemoBoxList",
+
+    "getDevelopmentDashboardModules"
+
+  ]);
 
 }
 
