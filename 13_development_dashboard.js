@@ -3694,43 +3694,55 @@ function getDevelopmentIDEStatus() {
    IDE-095 Validate Development IDE
 =============================== */
 
-function validateDevelopmentIDE() {
+function validateDevelopmentIDE(
+  writeLog
+) {
 
-  const validators = [
+  const definitions = [
+    {
+      id: "IDE-010",
+      title: "Mobile Console",
+      statusApi: "getMobileConsoleStatus"
+    },
+    {
+      id: "IDE-020",
+      title: "Function Help",
+      statusApi: "getFunctionHelpStatus"
+    },
     {
       id: "IDE-030",
       title: "Command Palette",
-      fn: "validateCommandPalette"
+      validator: "validateCommandPalette"
     },
     {
       id: "IDE-040",
       title: "Project Search",
-      fn: "validateProjectSearch"
+      validator: "validateProjectSearch"
     },
     {
       id: "IDE-050",
       title: "Error Inspector",
-      fn: "validateErrorInspector"
+      validator: "validateErrorInspector"
     },
     {
       id: "IDE-060",
       title: "Quick Command",
-      fn: "validateQuickCommand"
+      validator: "validateQuickCommand"
     },
     {
       id: "IDE-070",
       title: "Autocomplete",
-      fn: "validateAutocomplete"
+      validator: "validateAutocomplete"
     },
     {
       id: "IDE-080",
       title: "Virtual Keyboard",
-      fn: "validateVirtualKeyboard"
+      validator: "validateVirtualKeyboard"
     },
     {
       id: "IDE-090",
       title: "Dashboard Integration",
-      fn: "validateDevelopmentDashboard"
+      validator: "validateDevelopmentDashboard"
     }
   ];
 
@@ -3738,189 +3750,231 @@ function validateDevelopmentIDE() {
   const failed = [];
   const errors = [];
 
-  let total = 0;
-  let passed = 0;
+  definitions.forEach(definition => {
 
-  validators.forEach(item => {
-
-    total++;
+    let result = null;
+    let source = "";
 
     try {
 
-      const fn =
-        window[item.fn];
+      if (definition.validator) {
+        const validator =
+          window[definition.validator];
+
+        if (typeof validator === "function") {
+          result = validator();
+          source = definition.validator;
+        }
+      }
 
       if (
-        typeof fn !==
+        !result &&
+        definition.statusApi
+      ) {
+        const statusApi =
+          window[definition.statusApi];
+
+        if (typeof statusApi === "function") {
+          result = statusApi();
+          source = definition.statusApi;
+        }
+      }
+
+      if (
+        !result &&
+        typeof getIdeComponentStatus ===
         "function"
       ) {
+        result =
+          getIdeComponentStatus(
+            definition.id
+          );
 
-        failed.push(
-          item.id
-        );
+        if (result) {
+          source =
+            "getIdeComponentStatus";
+        }
+      }
+
+      if (!result) {
+        failed.push(definition.id);
 
         modules.push({
-
-          id:
-            item.id,
-
-          title:
-            item.title,
-
-          valid:
-            false,
-
+          id: definition.id,
+          title: definition.title,
+          valid: false,
+          ready: false,
+          health: 0,
+          developmentProgress: 0,
+          source: "Unavailable",
           message:
-            "Validator not found."
-
+            "Validation or status information is unavailable."
         });
 
         return;
-
       }
-
-      const result =
-        fn();
 
       const valid =
-        result &&
-        result.valid ===
-        true;
+        definition.validator
+          ? result.valid === true
+          : result.ready === true;
 
-      if (valid) {
-
-        passed++;
-
-      } else {
-
-        failed.push(
-          item.id
-        );
-
+      if (!valid) {
+        failed.push(definition.id);
       }
 
+      const health =
+        Number.isFinite(
+          Number(result.health)
+        )
+          ? Number(result.health)
+          : (
+              valid ? 100 : 0
+            );
+
+      const developmentProgress =
+        Number.isFinite(
+          Number(result.progress)
+        )
+          ? Number(result.progress)
+          : (
+              valid ? 100 : 0
+            );
+
       modules.push({
-
         id:
-          item.id,
-
+          result.id || definition.id,
         title:
-          item.title,
-
+          result.title ||
+          result.name ||
+          definition.title,
         valid,
-
+        ready:
+          result.ready === true || valid,
         health:
-          result.health ??
-          100,
-
-        progress:
-          result.progress ??
-          100,
-
+          Math.max(
+            0,
+            Math.min(100, health)
+          ),
+        developmentProgress:
+          Math.max(
+            0,
+            Math.min(
+              100,
+              developmentProgress
+            )
+          ),
         passed:
-          result.passed ??
-          0,
-
+          Number(result.passed) || 0,
         total:
-          result.total ??
-          0
-
+          Number(result.total) || 0,
+        source
       });
 
     } catch (error) {
 
-      failed.push(
-        item.id
-      );
+      failed.push(definition.id);
 
       errors.push({
-
-        id:
-          item.id,
-
+        id: definition.id,
+        title: definition.title,
         message:
-          error.message
+          error && error.message
+            ? error.message
+            : String(error)
+      });
 
+      modules.push({
+        id: definition.id,
+        title: definition.title,
+        valid: false,
+        ready: false,
+        health: 0,
+        developmentProgress: 0,
+        source:
+          definition.validator ||
+          definition.statusApi ||
+          "Unknown",
+        message:
+          error && error.message
+            ? error.message
+            : String(error)
       });
 
     }
 
   });
 
+  const passed =
+    modules.filter(
+      module => module.valid === true
+    ).length;
+
+  const total = definitions.length;
+
   const health =
     modules.length > 0
       ? Math.round(
           modules.reduce(
-            (
-              sum,
-              module
-            ) =>
+            (sum, module) =>
               sum +
-              (
-                Number(
-                  module.health
-                ) || 0
-              ),
+              (Number(module.health) || 0),
             0
-          ) /
-          modules.length
+          ) / modules.length
         )
       : 0;
 
-  const progress =
+  const developmentProgress =
     modules.length > 0
       ? Math.round(
           modules.reduce(
-            (
-              sum,
-              module
-            ) =>
+            (sum, module) =>
               sum +
               (
                 Number(
-                  module.progress
+                  module.developmentProgress
                 ) || 0
               ),
             0
-          ) /
-          modules.length
+          ) / modules.length
         )
       : 0;
 
-  return {
+  const validationProgress =
+    total > 0
+      ? Math.round(
+          passed / total * 100
+        )
+      : 0;
 
-    id:
-      "IDE-095",
+  const releaseReady =
+    failed.length === 0 &&
+    errors.length === 0 &&
+    passed === total;
 
+  const result = {
+    id: "IDE-095",
     title:
       "Development IDE Validation",
-
-    valid:
-      failed.length ===
-      0,
-
+    valid: releaseReady,
     passed,
-
     total,
-
     failed,
-
     errors,
-
     health,
-
-    progress,
-
-    releaseReady:
-      failed.length ===
-      0,
-
+    validationProgress,
+    developmentProgress,
+    releaseReady,
     modules,
-
     validatedAt:
-      new Date()
-        .toISOString()
-
+      new Date().toISOString()
   };
 
+  if (writeLog !== false) {
+    console.log(result);
+  }
+
+  return result;
+
 }
+
