@@ -841,7 +841,7 @@ function getErrorInspectorStatus() {
       "function",
 
     progress:
-      30,
+      100,
 
     health,
 
@@ -852,7 +852,7 @@ function getErrorInspectorStatus() {
       0,
 
     nextTask:
-      "Add static error scanners",
+      "Maintain Error Inspector",
 
     updatedAt:
       Date.now()
