@@ -3744,7 +3744,7 @@ function validateDevelopmentIDE(
       id: "IDE-090",
       title: "Dashboard Integration",
       validator: "validateDevelopmentDashboard"
-    }
+    },
     {
       id: "IDE-100",
       title: "AI Development Assistant",
