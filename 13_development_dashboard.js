@@ -3744,6 +3744,11 @@ function validateDevelopmentIDE(
       title: "Dashboard Integration",
       validator: "validateDevelopmentDashboard"
     }
+    {
+      id: "IDE-100",
+      title: "AI Development Assistant",
+      validator: "validateAiDevelopmentAssistant"
+    }
   ];
 
   const modules = [];
