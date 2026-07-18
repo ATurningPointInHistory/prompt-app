@@ -4206,9 +4206,16 @@ function checkDevelopmentIDEReleasePerformance() {
     }
   );
 
-  console.table(
-    results
-  );
+  results.forEach(item => {
+
+  console.log(
+      item.name +
+      " : " +
+      item.elapsed +
+      " ms"
+    );
+
+  });
 
   return results;
 
