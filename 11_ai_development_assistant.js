@@ -783,3 +783,73 @@ function checkAiDevelopmentAssistantPerformance() {
   return results;
 
 }
+
+/* ===============================
+   IDE-100 Analysis Performance
+=============================== */
+
+function checkAiDevelopmentProjectAnalysisPerformance() {
+
+  const results = [];
+
+  let context = null;
+  let recommendations = [];
+  let explanations = [];
+  let plan = null;
+
+  function measure(
+    name,
+    callback
+  ) {
+
+    const startedAt =
+      performance.now();
+
+    let error = "";
+
+    try {
+
+      callback();
+
+    } catch (caughtError) {
+
+      error =
+        caughtError &&
+        caughtError.message
+          ? caughtError.message
+          : String(caughtError);
+
+    }
+
+    const elapsed =
+      performance.now() -
+      startedAt;
+
+    const record = {
+      name,
+      elapsed:
+        Number(elapsed.toFixed(2)),
+      error
+    };
+
+    results.push(
+      record
+    );
+
+    console.log(
+      record.name +
+      " : " +
+      record.elapsed +
+      " ms" +
+      (
+        record.error
+          ? " / Error: " +
+            record.error
+          : ""
+      )
+    );
+
+  }
+
+  measure(
+    "collectAiDevelopmentContext
