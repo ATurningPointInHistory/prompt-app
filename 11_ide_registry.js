@@ -640,16 +640,18 @@ function registerDefaultIdeComponents() {
         "🤖",
     
       version: "1.0",
-      status: "Planned",
+      status: "Official",
       ready:
         typeof showAiDevelopmentAssistant ===
         "function",
-      progress: 0,
-      health: 0,
+      progress: 100,
+      health: 100,
       launcher:
         "showAiDevelopmentAssistant",
-      validator: "",
-      probe: "",
+      validator:
+        "validateAiDevelopmentAssistant",
+      probe:
+        "getAiDevelopmentAssistantStatus",
       category: "IDE"
     }
   ];
