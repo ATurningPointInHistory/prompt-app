@@ -3979,3 +3979,137 @@ function validateDevelopmentIDE(
 
 }
 
+function validateDevelopmentIDERelease() {
+
+  const base =
+    validateDevelopmentIDE(false);
+
+  let assistant = null;
+  let assistantError = null;
+
+  try {
+
+    if (
+      typeof validateAiDevelopmentAssistant ===
+      "function"
+    ) {
+      assistant =
+        validateAiDevelopmentAssistant(false);
+    }
+
+  } catch (error) {
+
+    assistantError =
+      error && error.message
+        ? error.message
+        : String(error);
+
+  }
+
+  const assistantValid =
+    assistant &&
+    assistant.valid === true;
+
+  const releaseReady =
+    base.releaseReady === true &&
+    assistantValid &&
+    !assistantError;
+
+  const modules =
+    base.modules.slice();
+
+  modules.push({
+    id: "IDE-100",
+    title: "AI Development Assistant",
+    valid: assistantValid,
+    ready: assistantValid,
+    health:
+      assistant
+        ? Number(assistant.health) || 0
+        : 0,
+    developmentProgress:
+      assistant
+        ? Number(assistant.progress) || 0
+        : 0,
+    passed:
+      assistant
+        ? Number(assistant.passed) || 0
+        : 0,
+    total:
+      assistant
+        ? Number(assistant.total) || 0
+        : 0,
+    source:
+      "validateAiDevelopmentAssistant"
+  });
+
+  const failed =
+    base.failed.slice();
+
+  if (!assistantValid) {
+    failed.push("IDE-100");
+  }
+
+  const errors =
+    base.errors.slice();
+
+  if (assistantError) {
+    errors.push({
+      id: "IDE-100",
+      title: "AI Development Assistant",
+      message: assistantError
+    });
+  }
+
+  return {
+    id: "IDE-099",
+    title: "Development IDE Release Validation",
+    valid: releaseReady,
+    passed:
+      base.passed +
+      (assistantValid ? 1 : 0),
+    total:
+      base.total + 1,
+    failed,
+    errors,
+    health:
+      releaseReady
+        ? 100
+        : Math.round(
+            modules.reduce(
+              (sum, module) =>
+                sum +
+                (Number(module.health) || 0),
+              0
+            ) / modules.length
+          ),
+    validationProgress:
+      Math.round(
+        (
+          base.passed +
+          (assistantValid ? 1 : 0)
+        ) /
+        (base.total + 1) *
+        100
+      ),
+    developmentProgress:
+      Math.round(
+        modules.reduce(
+          (sum, module) =>
+            sum +
+            (
+              Number(
+                module.developmentProgress
+              ) || 0
+            ),
+          0
+        ) / modules.length
+      ),
+    releaseReady,
+    modules,
+    validatedAt:
+      new Date().toISOString(),
+    readOnly: true
+  };
+
+}
