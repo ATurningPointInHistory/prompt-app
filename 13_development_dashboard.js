@@ -4113,3 +4113,103 @@ function validateDevelopmentIDERelease() {
   };
 
 }
+
+/* ===============================
+   IDE Release Performance Check
+=============================== */
+
+function checkDevelopmentIDEReleasePerformance() {
+
+  const results = [];
+
+  function measure(
+    name,
+    callback
+  ) {
+
+    const startedAt =
+      performance.now();
+
+    let result = null;
+    let error = "";
+
+    try {
+
+      result =
+        callback();
+
+    } catch (caughtError) {
+
+      error =
+        caughtError &&
+        caughtError.message
+          ? caughtError.message
+          : String(caughtError);
+
+    }
+
+    const elapsed =
+      performance.now() -
+      startedAt;
+
+    results.push({
+      name,
+      elapsed:
+        Number(elapsed.toFixed(2)),
+      valid:
+        result &&
+        result.valid !== undefined
+          ? result.valid
+          : null,
+      releaseReady:
+        result &&
+        result.releaseReady !== undefined
+          ? result.releaseReady
+          : null,
+      error
+    });
+
+    return result;
+
+  }
+
+  measure(
+    "validateDevelopmentIDE",
+    function() {
+
+      return validateDevelopmentIDE(
+        false
+      );
+
+    }
+  );
+
+  measure(
+    "validateAiDevelopmentAssistant",
+    function() {
+
+      return validateAiDevelopmentAssistant(
+        false
+      );
+
+    }
+  );
+
+  measure(
+    "validateDevelopmentIDERelease",
+    function() {
+
+      return validateDevelopmentIDERelease(
+        false
+      );
+
+    }
+  );
+
+  console.table(
+    results
+  );
+
+  return results;
+
+}
