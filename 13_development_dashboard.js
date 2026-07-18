@@ -3558,7 +3558,7 @@ function showDevelopmentDashboardValidation() {
 function getDevelopmentIDERelease() {
 
   const validation =
-    validateDevelopmentIDE(false);
+    validateDevelopmentIDERelease(false);
 
   const releaseReady =
     validation.releaseReady === true;
