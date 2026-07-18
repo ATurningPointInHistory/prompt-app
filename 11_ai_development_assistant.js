@@ -852,4 +852,61 @@ function checkAiDevelopmentProjectAnalysisPerformance() {
   }
 
   measure(
-    "collectAiDevelopmentContext
+    "collectAiDevelopmentContext",
+    function() {
+
+      context =
+        collectAiDevelopmentContext({
+          issue:
+            "IDE-100 performance check",
+          focus:
+            "overview"
+        });
+
+    }
+  );
+
+  if (context) {
+
+    measure(
+      "buildAiDevelopmentRecommendations",
+      function() {
+
+        recommendations =
+          buildAiDevelopmentRecommendations(
+            context
+          );
+
+      }
+    );
+
+    measure(
+      "explainAiDevelopmentRecommendation",
+      function() {
+
+        explanations =
+          recommendations.map(
+            explainAiDevelopmentRecommendation
+          );
+
+      }
+    );
+
+    measure(
+      "buildAiDevelopmentPlan",
+      function() {
+
+        plan =
+          buildAiDevelopmentPlan(
+            context,
+            recommendations
+          );
+
+      }
+    );
+
+  }
+
+  return results;
+
+}
