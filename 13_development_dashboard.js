@@ -3597,11 +3597,12 @@ function getDevelopmentIDERelease() {
       "Development IDE v1.0",
     nextTask:
       releaseReady
-        ? "IDE-100 AI Development Assistant"
+        ? "Development IDE v1.0 Complete"
         : "Resolve failed IDE validation checks.",
+
     message:
       releaseReady
-        ? "Development IDE v1.0 is release ready."
+        ? "Development IDE v1.0 is complete and release ready."
         : "Development IDE v1.0 release is blocked.",
     releasedAt:
       releaseReady
