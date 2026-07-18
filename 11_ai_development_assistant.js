@@ -673,3 +673,113 @@ if (document.readyState === "loading") {
 } else {
   initAiDevelopmentAssistant();
 }
+
+/* ===============================
+   IDE-100 Performance Check
+=============================== */
+
+function checkAiDevelopmentAssistantPerformance() {
+
+  const results = [];
+  let analysis = null;
+  let prompt = "";
+  let html = "";
+
+  function measure(
+    name,
+    callback
+  ) {
+
+    const startedAt =
+      performance.now();
+
+    let error = "";
+
+    try {
+
+      callback();
+
+    } catch (caughtError) {
+
+      error =
+        caughtError &&
+        caughtError.message
+          ? caughtError.message
+          : String(caughtError);
+
+    }
+
+    const elapsed =
+      performance.now() -
+      startedAt;
+
+    const record = {
+      name,
+      elapsed:
+        Number(elapsed.toFixed(2)),
+      error
+    };
+
+    results.push(
+      record
+    );
+
+    console.log(
+      record.name +
+      " : " +
+      record.elapsed +
+      " ms" +
+      (
+        record.error
+          ? " / Error: " +
+            record.error
+          : ""
+      )
+    );
+
+  }
+
+  measure(
+    "analyzeAiDevelopmentProject",
+    function() {
+
+      analysis =
+        analyzeAiDevelopmentProject({
+          issue:
+            "IDE-100 performance check"
+        });
+
+    }
+  );
+
+  if (analysis) {
+
+    measure(
+      "buildAiDevelopmentPrompt",
+      function() {
+
+        prompt =
+          buildAiDevelopmentPrompt({
+            analysis
+          });
+
+      }
+    );
+
+    measure(
+      "renderAiDevelopmentAssistant",
+      function() {
+
+        html =
+          renderAiDevelopmentAssistant(
+            analysis
+          );
+
+      }
+    );
+
+  }
+
+  return results;
+
+}
