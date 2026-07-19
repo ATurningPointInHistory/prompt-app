@@ -236,34 +236,120 @@ function reviewAiDevelopmentContext(context) {
 }
 
 function collectAiDevelopmentContext(options = {}) {
-  const issue = String(options.issue || "").trim();
-  const focus = String(options.focus || "overview");
-  const validation = getAiDevelopmentAssistantSafeResult(
-    "validateDevelopmentIDE",
-    null,
-    [false]
-  );
-  const dashboard = getAiDevelopmentAssistantSafeResult(
-    "getDevelopmentDashboardStatus",
-    null
-  );
-  const release = getAiDevelopmentAssistantSafeResult(
-    "getDevelopmentIDERelease",
-    null
-  );
-  const errorInspector = getAiDevelopmentAssistantSafeResult(
-    "getErrorInspectorStatus",
-    null
-  );
-  const repository = analyzeAiDevelopmentRepository(issue);
-  const knowledge = retrieveAiDevelopmentKnowledge(issue);
-  const architecture = analyzeAiDevelopmentArchitecture(issue);
+
+  const issue =
+    String(
+      options.issue || ""
+    ).trim();
+
+  const focus =
+    String(
+      options.focus || "overview"
+    );
+
+  const validation =
+    getAiDevelopmentAssistantSafeResult(
+      "validateDevelopmentIDE",
+      null,
+      [false]
+    );
+
+  const dashboard =
+    getAiDevelopmentAssistantSafeResult(
+      "getDevelopmentDashboardStatus",
+      null
+    );
+
+  /*
+   * getDevelopmentIDERelease() は呼ばない。
+   *
+   * Release検証
+   *   ↓
+   * IDE-100検証
+   *   ↓
+   * Context収集
+   *   ↓
+   * Release取得
+   *
+   * の循環を防止する。
+   */
+
+  const releaseReady =
+    Boolean(
+      validation &&
+      validation.releaseReady === true
+    );
+
+  const release = {
+    id: "IDE-099",
+    title:
+      "Development IDE Release",
+    name:
+      "Development IDE v1.0",
+    version:
+      "1.0.0",
+    status:
+      releaseReady
+        ? "Official"
+        : "Blocked",
+    ready:
+      releaseReady,
+    releaseReady,
+    validationPassed:
+      Boolean(
+        validation &&
+        validation.valid === true
+      ),
+    health:
+      validation &&
+      typeof validation.health ===
+        "number"
+        ? validation.health
+        : 0,
+    validationProgress:
+      validation &&
+      typeof validation.validationProgress ===
+        "number"
+        ? validation.validationProgress
+        : 0,
+    developmentProgress:
+      validation &&
+      typeof validation.developmentProgress ===
+        "number"
+        ? validation.developmentProgress
+        : 0,
+    readOnly: true,
+    snapshot: true
+  };
+
+  const errorInspector =
+    getAiDevelopmentAssistantSafeResult(
+      "getErrorInspectorStatus",
+      null
+    );
+
+  const repository =
+    analyzeAiDevelopmentRepository(
+      issue
+    );
+
+  const knowledge =
+    retrieveAiDevelopmentKnowledge(
+      issue
+    );
+
+  const architecture =
+    analyzeAiDevelopmentArchitecture(
+      issue
+    );
 
   const context = {
-    id: "IDE-100-CONTEXT",
+    id:
+      "IDE-100-CONTEXT",
     issue,
     focus,
-    project: repository.project,
+    project:
+      repository.project,
     repository,
     knowledge,
     architecture,
@@ -271,12 +357,18 @@ function collectAiDevelopmentContext(options = {}) {
     dashboard,
     release,
     errorInspector,
-    collectedAt: new Date().toISOString(),
+    collectedAt:
+      new Date().toISOString(),
     readOnly: true
   };
 
-  context.review = reviewAiDevelopmentContext(context);
+  context.review =
+    reviewAiDevelopmentContext(
+      context
+    );
+
   return context;
+
 }
 
 function buildAiDevelopmentRecommendations(context) {
