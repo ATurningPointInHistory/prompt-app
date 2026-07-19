@@ -566,6 +566,10 @@ function showMemoBox() {
 Export
 </button>
 
+<button onclick="exportSelectedMemoBoxes()">
+選択Export
+</button>
+
 <button onclick="importMemoBoxes()">
 Import
 </button>
@@ -1936,6 +1940,74 @@ function getMemoMetadataCreated(metadata) {
     metadata.createdAt ||
     metadata.created ||
     ""
+  );
+
+}
+
+function sanitizeMemoExportFileName(
+  name
+) {
+
+  return String(name || "")
+    .trim()
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .replace(/\s+/g, "_");
+
+}
+
+function getSelectedMemoBoxes() {
+
+  return [...memoBoxSelected]
+    .sort((a, b) => a - b)
+    .map(index =>
+      memoBoxList[index]
+    )
+    .filter(Boolean);
+
+}
+
+function exportSelectedMemoBoxes() {
+
+  saveMemoBoxCurrent();
+
+  const selected =
+    getSelectedMemoBoxes();
+
+  if (!selected.length) {
+    alert(
+      "エクスポートするメモを選択してください"
+    );
+    return;
+  }
+
+  const defaultName =
+    "memo_boxes_selected";
+
+  const inputName =
+    prompt(
+      "エクスポート名を入力してください",
+      defaultName
+    );
+
+  if (inputName === null) {
+    return;
+  }
+
+  const safeName =
+    sanitizeMemoExportFileName(
+      inputName
+    );
+
+  if (!safeName) {
+    alert(
+      "ファイル名を入力してください"
+    );
+    return;
+  }
+
+  downloadJsonFile(
+    selected,
+    safeName + ".json"
   );
 
 }
