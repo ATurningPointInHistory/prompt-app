@@ -2,7 +2,7 @@
    FILE: 16_search_engine.js
    Search Engine
    ENGINE-010
-   Version: 1.0.0
+   Version: 1.0.1
 =============================== */
 
 var SEARCH_ENGINE_ID = "ENGINE-010";
