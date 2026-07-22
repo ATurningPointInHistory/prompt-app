@@ -6,7 +6,7 @@
 =============================== */
 
 var SEARCH_ENGINE_ID = "ENGINE-010";
-var SEARCH_ENGINE_VERSION = "1.0.0";
+var SEARCH_ENGINE_VERSION = "1.0.1";
 var SEARCH_ENGINE_TITLE = "Search Engine";
 var SEARCH_ENGINE_DEFAULT_LIMIT = 20;
 var SEARCH_ENGINE_MAX_LIMIT = 200;
