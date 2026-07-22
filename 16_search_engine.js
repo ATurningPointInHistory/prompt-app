@@ -167,7 +167,7 @@ function normalizeSearchRecord(record, options = {}) {
     record.title || record.name || record.label || id
   ).trim();
   const body = String(
-    record.body || record.text || record.content || record.summary || ""
+    record.body || record.text || record.content || ""
   );
   const summary = String(record.summary || "").trim();
   const type = String(
@@ -752,13 +752,12 @@ function sortSearchResults(results, sort = "score") {
 function assembleSearchResult(item, plan, rank) {
   const record = item.record;
 
-  return {
+  const result = {
     rank,
     id: record.id,
     sourceId: record.sourceId,
     title: record.title,
     summary: record.summary,
-    body: plan.includeBody ? record.body : undefined,
     type: record.type,
     tags: [...record.tags],
     keywords: [...record.keywords],
@@ -767,6 +766,12 @@ function assembleSearchResult(item, plan, rank) {
     metadata: cloneSearchValue(record.metadata),
     provenance: [...record.provenance]
   };
+
+  if (plan.includeBody === true) {
+    result.body = record.body;
+  }
+
+  return result;
 }
 
 function validateSearchResultSet(result) {
@@ -868,7 +873,7 @@ async function executeSearch(request = {}, context = null) {
       diagnostics: [],
       warnings,
       errors,
-      context,
+      context: cloneSearchValue(context),
       startedAt,
       completedAt: createSearchTimestamp(),
       durationMs: Date.now() - startedAtMs
@@ -887,13 +892,13 @@ async function executeSearch(request = {}, context = null) {
       engineId: SEARCH_ENGINE_ID,
       version: SEARCH_ENGINE_VERSION,
       status: "error",
-      query: plan.query,
-      plan,
+      query: cloneSearchValue(plan.query),
+      plan: cloneSearchValue(plan),
       results: [],
       total: 0,
       returned: 0,
       diagnostics: [],
-      warnings,
+      warnings: cloneSearchValue(warnings),
       errors: [
         createSearchResultError(
           "SEARCH_RETRIEVAL_ERROR",
@@ -901,7 +906,7 @@ async function executeSearch(request = {}, context = null) {
           { stack: error.stack }
         )
       ],
-      context,
+      context: cloneSearchValue(context),
       startedAt,
       completedAt: createSearchTimestamp(),
       durationMs: Date.now() - startedAtMs
@@ -950,15 +955,15 @@ async function executeSearch(request = {}, context = null) {
     engineId: SEARCH_ENGINE_ID,
     version: SEARCH_ENGINE_VERSION,
     status,
-    query: plan.query,
-    plan,
+    query: cloneSearchValue(plan.query),
+    plan: cloneSearchValue(plan),
     results,
     total: sorted.length,
     returned: results.length,
-    diagnostics: retrieval.diagnostics,
-    warnings,
-    errors,
-    context,
+    diagnostics: cloneSearchValue(retrieval.diagnostics),
+    warnings: cloneSearchValue(warnings),
+    errors: cloneSearchValue(errors),
+    context: cloneSearchValue(context),
     startedAt,
     completedAt: createSearchTimestamp(),
     durationMs: Date.now() - startedAtMs
