@@ -2,12 +2,12 @@
    FILE: 15_reasoning_engine.js
    Reasoning Engine
    ENGINE-050
-   Version: 1.0.0
+   Version: 1.1.0
 =============================== */
 
 var REASONING_ENGINE_ID = "ENGINE-050";
 var REASONING_ENGINE_TITLE = "Reasoning Engine";
-var REASONING_ENGINE_VERSION = "1.0.0";
+var REASONING_ENGINE_VERSION = "1.1.0";
 var REASONING_HISTORY_LIMIT = 300;
 var REASONING_CANDIDATE_LIMIT = 200;
 var REASONING_EVIDENCE_LIMIT = 1000;
@@ -466,8 +466,24 @@ function listReasoningSessions() {
   return Array.from(reasoningSessions.values()).map(cloneReasoningValue);
 }
 
+function normalizeWorkflowReasoningInput(input, options) {
+  input = normalizeReasoningObject(input);
+  options = normalizeReasoningObject(options);
+  var workflow = normalizeReasoningObject(input.workflow);
+  var workflowContext = normalizeReasoningObject(input.context || options.workflowContext);
+  var normalized = Object.assign({}, input);
+  delete normalized.workflow;
+  if (!normalized.goal && workflow.goal) normalized.goal = workflow.goal;
+  if (!normalized.summary && workflow.summary) normalized.summary = workflow.summary;
+  if (!normalized.constraints && workflow.constraints) normalized.constraints = workflow.constraints;
+  if (!normalized.evidence && workflow.evidence) normalized.evidence = workflow.evidence;
+  if (!normalized.assumptions && workflow.assumptions) normalized.assumptions = workflow.assumptions;
+  normalized.workflowContext = workflowContext;
+  return normalized;
+}
+
 function executeReasoning(input, options) {
-  input = input || {};
+  input = normalizeWorkflowReasoningInput(input, options);
   options = options || {};
   var started = performance && typeof performance.now === "function" ? performance.now() : Date.now();
   var session = {
