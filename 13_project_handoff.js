@@ -14,6 +14,11 @@ function buildAiHandoffReport() {
   lines.push("AI HANDOFF REPORT");
   lines.push("");
 
+  if (typeof buildProjectGovernanceReport === "function") {
+    lines.push(buildProjectGovernanceReport());
+    lines.push("");
+  }
+
   /* ===============================
      Project
   ============================== */
@@ -281,6 +286,15 @@ function buildAiReportManagerHtml() {
 
   return `
 <div class="ai-report-manager">
+
+<label>
+<input
+type="checkbox"
+id="aiReportGovernance"
+data-package="repair,analysis,architecture,database,ai,debug,full"
+checked>
+Project Governance / AI Startup Contract
+</label><br>
 
 <label>
 <input
@@ -583,6 +597,16 @@ function showAiReportManager() {
 function generateSelectedAiReport() {
 
   const lines = [];
+
+  if (
+    get("aiReportGovernance")?.checked &&
+    typeof buildProjectGovernanceReport === "function"
+  ) {
+    lines.push(
+      buildProjectGovernanceReport()
+    );
+    lines.push("");
+  }
 
   if (
     get("aiReportSummary")?.checked
