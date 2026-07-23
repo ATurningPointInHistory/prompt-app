@@ -2,12 +2,12 @@
    FILE: 16_workflow_engine.js
    Workflow Engine
    ENGINE-060
-   Version: 1.0.0
+   Version: 1.1.0
 =============================== */
 
 var WORKFLOW_ENGINE_ID = "ENGINE-060";
 var WORKFLOW_ENGINE_TITLE = "Workflow Engine";
-var WORKFLOW_ENGINE_VERSION = "1.0.0";
+var WORKFLOW_ENGINE_VERSION = "1.1.0";
 var WORKFLOW_DEFINITION_LIMIT = 200;
 var WORKFLOW_INSTANCE_LIMIT = 500;
 var WORKFLOW_HISTORY_LIMIT = 500;
@@ -45,8 +45,17 @@ var workflowMetrics = typeof workflowMetrics !== "undefined" && workflowMetrics
       executedStepCount: 0,
       retryCount: 0,
       errorCount: 0,
+      reasoningExecutions: 0,
+      reasoningFailures: 0,
+      totalReasoningTime: 0,
+      lastReasoningAt: null,
       lastExecutionAt: null
     };
+
+["reasoningExecutions", "reasoningFailures", "totalReasoningTime"].forEach(function(key) {
+  if (typeof workflowMetrics[key] !== "number") workflowMetrics[key] = 0;
+});
+if (!("lastReasoningAt" in workflowMetrics)) workflowMetrics.lastReasoningAt = null;
 
 function createWorkflowTimestamp() { return new Date().toISOString(); }
 function cloneWorkflowValue(value) {
@@ -178,6 +187,8 @@ function createWorkflowInstance(workflowId, input, options) {
     contextId: options.contextId || null,
     input: cloneWorkflowValue(input),
     variables: normalizeWorkflowObject(options.variables),
+    context: normalizeWorkflowObject(options.context),
+    engineExecutions: [],
     stepStates: {},
     stepResults: {},
     result: null,
@@ -273,14 +284,65 @@ function delayWorkflow(ms) { return new Promise(function(resolve) { setTimeout(r
 async function invokeWorkflowEngine(step, input, instance) {
   if (typeof executeEngine !== "function") throw new Error("WF-004 Engine Platform executeEngine() is unavailable");
   var context = typeof createEngineContext === "function"
-    ? createEngineContext({ source: WORKFLOW_ENGINE_ID, metadata: { workflowId: instance.workflowId, instanceId: instance.instanceId, stepId: step.id } })
+    ? createEngineContext({
+        source: WORKFLOW_ENGINE_ID,
+        metadata: {
+          workflowId: instance.workflowId,
+          instanceId: instance.instanceId,
+          stepId: step.id,
+          action: step.action
+        }
+      })
     : undefined;
+  var started = Date.now();
   var execution = await executeEngine(step.engine, input, { context: context });
+  var durationMs = Date.now() - started;
+  var record = {
+    engineId: step.engine,
+    stepId: step.id,
+    action: step.action,
+    ok: Boolean(execution && execution.ok === true),
+    durationMs: durationMs,
+    executedAt: createWorkflowTimestamp()
+  };
+  instance.engineExecutions.push(record);
+
+  if (step.engine === "ENGINE-050") {
+    workflowMetrics.reasoningExecutions += 1;
+    workflowMetrics.totalReasoningTime += durationMs;
+    workflowMetrics.lastReasoningAt = record.executedAt;
+  }
+
   if (!execution || execution.ok !== true) {
-    var message = execution && execution.errors && execution.errors[0] ? execution.errors[0].message : "Engine execution failed";
+    if (step.engine === "ENGINE-050") workflowMetrics.reasoningFailures += 1;
+    var message = execution && execution.errors && execution.errors[0]
+      ? execution.errors[0].message
+      : "Engine execution failed";
     throw new Error(message);
   }
-  return execution.output;
+
+  var output = execution.output;
+  if (step.engine === "ENGINE-050") {
+    instance.context.reasoning = mapReasoningResultToWorkflowContext(output, step, record);
+  }
+  return output;
+}
+
+function mapReasoningResultToWorkflowContext(output, step, executionRecord) {
+  var result = normalizeWorkflowObject(output);
+  return {
+    engineId: "ENGINE-050",
+    stepId: step && step.id ? step.id : null,
+    decision: cloneWorkflowValue(result.decision || null),
+    confidence: Number(result.confidence) || 0,
+    trace: cloneWorkflowValue(result.trace || null),
+    report: cloneWorkflowValue(result.report || null),
+    validation: cloneWorkflowValue(result.validation || null),
+    sessionId: result.sessionId || null,
+    resultId: result.id || null,
+    executionTime: Number(result.executionTime) || (executionRecord ? executionRecord.durationMs : 0),
+    completedAt: result.completedAt || createWorkflowTimestamp()
+  };
 }
 
 async function executeWorkflowStep(instanceId, stepId) {
@@ -465,11 +527,12 @@ function getWorkflowMetrics() {
   var metrics = cloneWorkflowValue(workflowMetrics);
   metrics.averageExecutionTime = metrics.completedWorkflowCount + metrics.failedWorkflowCount ? Math.round(metrics.totalExecutionTime / (metrics.completedWorkflowCount + metrics.failedWorkflowCount)) : 0;
   metrics.averageStepTime = metrics.executedStepCount ? Math.round(metrics.totalStepTime / metrics.executedStepCount) : 0;
+  metrics.averageReasoningTime = metrics.reasoningExecutions ? Math.round(metrics.totalReasoningTime / metrics.reasoningExecutions) : 0;
   return metrics;
 }
 function getWorkflowStatistics() { return getWorkflowMetrics(); }
 function resetWorkflowStatistics() {
-  Object.keys(workflowMetrics).forEach(function(key) { workflowMetrics[key] = key === "lastExecutionAt" ? null : 0; });
+  Object.keys(workflowMetrics).forEach(function(key) { workflowMetrics[key] = ["lastExecutionAt", "lastReasoningAt"].includes(key) ? null : 0; });
   return getWorkflowMetrics();
 }
 function getWorkflowStatus(instanceId) {
@@ -558,6 +621,73 @@ function validateWorkflowEngine() {
   var total = 20;
   var passed = Object.keys(checks).filter(function(key) { return checks[key]; }).length;
   return { id: WORKFLOW_ENGINE_ID, title: WORKFLOW_ENGINE_TITLE, version: WORKFLOW_ENGINE_VERSION, valid: failed.length === 0 && passed === total, passed: passed, total: total, failed: failed, checks: checks, status: getWorkflowEngineStatus() };
+}
+
+async function validateWorkflowReasoningIntegration() {
+  var checks = {};
+  var failed = [];
+  var errors = [];
+  var definitionId = "WF-REASONING-INTEGRATION-TEST";
+  var instanceId = null;
+  function remember(name, value) {
+    checks[name] = Boolean(value);
+    if (!checks[name]) failed.push(name);
+  }
+  try {
+    remember("reasoningAvailable", typeof getEngine === "function" && Boolean(getEngine("ENGINE-050")));
+    var registration = registerWorkflowDefinition({
+      id: definitionId,
+      name: "Workflow Reasoning Integration Test",
+      version: "1.0.0",
+      steps: [{
+        id: "REASON",
+        engine: "ENGINE-050",
+        action: "execute",
+        input: {
+          goal: "Select the safest integration approach",
+          candidates: [
+            { id: "CANDIDATE-A", title: "Function-level integration", score: 0.9 },
+            { id: "CANDIDATE-B", title: "Full-file replacement", score: 0.4 }
+          ],
+          constraints: [{ id: "SAFE", required: true }]
+        }
+      }]
+    }, { replace: true });
+    remember("definitionRegistration", registration.registered === true);
+    var created = createWorkflowInstance(definitionId, {}, { context: {} });
+    instanceId = created.instanceId;
+    remember("instanceCreation", Boolean(instanceId));
+    var completed = await executeWorkflow(instanceId);
+    remember("workflowCompleted", completed && completed.state === "Completed");
+    var reasoning = completed && completed.context ? completed.context.reasoning : null;
+    remember("contextStored", Boolean(reasoning));
+    remember("decision", Boolean(reasoning && reasoning.decision));
+    remember("confidence", Boolean(reasoning && typeof reasoning.confidence === "number"));
+    remember("trace", Boolean(reasoning && reasoning.trace));
+    remember("report", Boolean(reasoning && reasoning.report));
+    remember("engineHistory", Boolean(completed && Array.isArray(completed.engineExecutions) && completed.engineExecutions.length));
+    remember("metrics", getWorkflowMetrics().reasoningExecutions > 0);
+  } catch (error) {
+    errors.push(String(error && error.message ? error.message : error));
+  } finally {
+    removeWorkflowDefinition(definitionId);
+    if (instanceId) workflowInstances.delete(instanceId);
+  }
+  var total = 11;
+  var passed = Object.keys(checks).filter(function(key) { return checks[key] === true; }).length;
+  return {
+    id: "ENGINE-050-060-INTEGRATION",
+    title: "Workflow Reasoning Integration Validation",
+    version: "1.0.0",
+    valid: failed.length === 0 && errors.length === 0 && passed === total,
+    passed: passed,
+    total: total,
+    failed: failed,
+    errors: errors,
+    checks: checks,
+    workflowStatus: getWorkflowEngineStatus(),
+    reasoningStatus: typeof getReasoningEngineStatus === "function" ? getReasoningEngineStatus() : null
+  };
 }
 
 initializeScheduler();
