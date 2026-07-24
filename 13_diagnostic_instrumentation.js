@@ -42,6 +42,16 @@
     activeSessionId: null,
     sessions: [],
     sequence: 0,
+
+    statistics: {
+      created: 0,
+      started: 0,
+      completed: 0,
+      cancelled: 0,
+      failed: 0,
+      removed: 0
+    },
+
     lastError: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -209,10 +219,13 @@
   function createDiagnosticSession(options) {
     try {
       const session = buildSession(options);
+  
       state.sessions.push(session);
+      state.statistics.created += 1;
+  
       trimSessionHistory();
       clearLastError();
-
+  
       return clone(session);
     } catch (error) {
       setLastError(error, "createDiagnosticSession");
@@ -271,7 +284,9 @@
       session.endedAt = null;
       session.durationMs = null;
       session.error = null;
+
       state.activeSessionId = session.id;
+      state.statistics.started += 1;
 
       addDiagnosticSessionEvent(session.id, "SESSION_STARTED", null);
       clearLastError();
@@ -321,6 +336,14 @@
             : String(errorValue),
           at: endedAt
         };
+
+    if (status === SESSION_STATUS.COMPLETED) {
+      state.statistics.completed += 1;
+    } else if (status === SESSION_STATUS.CANCELLED) {
+      state.statistics.cancelled += 1;
+    } else if (status === SESSION_STATUS.FAILED) {
+      state.statistics.failed += 1;
+    }
 
     if (state.activeSessionId === session.id) {
       state.activeSessionId = null;
@@ -452,6 +475,8 @@
     }
 
     state.sessions.splice(index, 1);
+    state.statistics.removed += 1;
+
     touchState();
 
     return {
@@ -488,6 +513,7 @@
   function resetDiagnosticInstrumentationState(options) {
     const input = normalizeObject(options);
     const force = input.force === true;
+    const preserveStatistics = input.preserveStatistics === true;
 
     if (state.activeSessionId && !force) {
       return {
@@ -503,12 +529,25 @@
     state.sequence = 0;
     state.lastError = null;
     state.enabled = true;
+
+    if (!preserveStatistics) {
+      state.statistics = {
+        created: 0,
+        started: 0,
+        completed: 0,
+        cancelled: 0,
+        failed: 0,
+        removed: 0
+      };
+    }
+
     state.createdAt = nowIso();
     touchState();
 
     return {
       id: "IDE-110-RESET",
       reset: true,
+      statisticsPreserved: preserveStatistics,
       state: getDiagnosticInstrumentationState()
     };
   }
@@ -520,6 +559,7 @@
       activeSessionId: state.activeSessionId,
       sessions: state.sessions,
       sequence: state.sequence,
+      statistics: state.statistics,
       lastError: state.lastError,
       createdAt: state.createdAt,
       updatedAt: state.updatedAt
@@ -595,12 +635,17 @@
       enabled: state.enabled,
       activeSessionId: state.activeSessionId,
       sessionCount: state.sessions.length,
+
       counts: counts,
+      statistics: clone(state.statistics),
+
       warnings: warnings,
       errors: errors,
+
       nextTask: ready
         ? "Implement Probe Manager and Performance Monitor."
         : "Complete IDE-110 public APIs.",
+
       dependsOn: [
         "IDE-050",
         "IDE-090",
@@ -608,12 +653,14 @@
         "OBSERVABILITY-001",
         "LOGGING-001"
       ],
+
       provides: [
         "Diagnostic Session Management",
         "Diagnostic State Management",
         "Diagnostic Public API",
         "Diagnostic Status API"
       ],
+
       readOnly: false,
       updatedAt: state.updatedAt
     };
@@ -633,7 +680,10 @@
     const snapshot = getDiagnosticInstrumentationState();
 
     try {
-      resetDiagnosticInstrumentationState({ force: true });
+      resetDiagnosticInstrumentationState({
+        force: true,
+        preserveStatistics: false
+      });
 
       const created = createDiagnosticSession({
         title: "IDE-110 Validation",
@@ -641,48 +691,108 @@
         targetId: "validateDiagnosticInstrumentation"
       });
 
-      check("Session creation", Boolean(created && created.id), created.id);
+      check(
+        "Session creation",
+        Boolean(created && created.id),
+        created ? created.id : "Session not created"
+      );
 
       const started = startDiagnosticSession(created.id);
-      check("Session start", started.started === true, started.reason);
+
+      check(
+        "Session start",
+        started.started === true,
+        started.reason
+      );
 
       const active = getActiveDiagnosticSession();
+
       check(
         "Active session state",
-        Boolean(active && active.id === created.id && active.status === SESSION_STATUS.ACTIVE),
+        Boolean(
+          active &&
+          active.id === created.id &&
+          active.status === SESSION_STATUS.ACTIVE
+        ),
         active ? active.status : "No active session"
       );
 
-      const completed = completeDiagnosticSession(created.id, { ok: true });
-      check("Session completion", completed.completed === true, completed.reason);
+      const completed = completeDiagnosticSession(
+        created.id,
+        { ok: true }
+      );
+
+      check(
+        "Session completion",
+        completed.completed === true,
+        completed.reason
+      );
 
       const finished = getDiagnosticSession(created.id);
+
       check(
         "Completed session state",
-        Boolean(finished && finished.status === SESSION_STATUS.COMPLETED),
+        Boolean(
+          finished &&
+          finished.status === SESSION_STATUS.COMPLETED
+        ),
         finished ? finished.status : "Session missing"
       );
 
       const list = listDiagnosticSessions();
-      check("Session listing", list.length === 1, "count=" + list.length);
+
+      check(
+        "Session listing",
+        list.length === 1,
+        "count=" + list.length
+      );
 
       const status = getDiagnosticInstrumentationStatus();
+
       check(
         "Status API",
-        Boolean(status && status.id === COMPONENT_ID && status.ready === true),
-        status.status
+        Boolean(
+          status &&
+          status.id === COMPONENT_ID &&
+          status.ready === true &&
+          status.health === 100 &&
+          status.progress === 100 &&
+          status.enabled === true &&
+          status.statistics &&
+          status.statistics.created === 1 &&
+          status.statistics.started === 1 &&
+          status.statistics.completed === 1 &&
+          status.statistics.cancelled === 0 &&
+          status.statistics.failed === 0
+        ),
+        status
+          ? status.status +
+            " / created=" + status.statistics.created +
+            " / started=" + status.statistics.started +
+            " / completed=" + status.statistics.completed
+          : "Status unavailable"
       );
 
       const removed = removeDiagnosticSession(created.id);
-      check("Session removal", removed.removed === true, removed.reason);
+
+      check(
+        "Session removal",
+        removed.removed === true,
+        removed.reason
+      );
     } catch (error) {
-      check("Unexpected exception", false, error.message || String(error));
+      check(
+        "Unexpected exception",
+        false,
+        error.message || String(error)
+      );
     } finally {
       state.initialized = snapshot.initialized;
       state.enabled = snapshot.enabled;
       state.activeSessionId = snapshot.activeSessionId;
       state.sessions = snapshot.sessions;
       state.sequence = snapshot.sequence;
+      state.statistics = snapshot.statistics;
       state.lastError = snapshot.lastError;
       state.createdAt = snapshot.createdAt;
       state.updatedAt = snapshot.updatedAt;
@@ -691,6 +801,7 @@
     const passed = checks.filter(function filterCheck(item) {
       return item.passed;
     }).length;
+
     const total = checks.length;
     const valid = total > 0 && passed === total;
 
@@ -699,8 +810,8 @@
       valid: valid,
       passed: passed,
       total: total,
-      health: total > 0 ? Math.round((passed / total) * 100) : 0,
-      progress: total > 0 ? Math.round((passed / total) * 100) : 0,
+      health: valid ? 100 : Math.round((passed / total) * 100),
+      progress: valid ? 100 : Math.round((passed / total) * 100),
       checks: checks,
       validatedAt: nowIso()
     };
