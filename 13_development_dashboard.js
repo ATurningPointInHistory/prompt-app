@@ -2559,230 +2559,233 @@ function buildKnowledgeMigrationReport() {
 
 function collectDevelopmentDashboardMetrics() {
 
-  const definitions =
+  const dashboardDefinitions =
     getDevelopmentDashboardModuleRegistry();
+
+  const statusCollection =
+    typeof collectDevelopmentStatuses === "function"
+      ? collectDevelopmentStatuses()
+      : {
+          statuses: [],
+          errors: [],
+          summary: {
+            total: 0,
+            available: 0,
+            ready: 0,
+            errors: 0
+          }
+        };
+
+  const collectedStatuses =
+    Array.isArray(statusCollection.statuses)
+      ? statusCollection.statuses
+      : [];
+
+  const collectedStatusMap =
+    new Map();
+
+  collectedStatuses.forEach(
+    function mapCollectedStatus(status) {
+
+      if (
+        status &&
+        typeof status === "object" &&
+        status.id
+      ) {
+
+        collectedStatusMap.set(
+          status.id,
+          status
+        );
+
+      }
+
+    }
+  );
 
   const modules = [];
   const warnings = [];
   const errors = [];
 
-  definitions.forEach(function collectDefinition(definition) {
+  dashboardDefinitions.forEach(
+    function collectDashboardDefinition(
+      definition
+    ) {
 
-    let status = null;
-    let source = "Unavailable";
+      const status =
+        collectedStatusMap.get(
+          definition.id
+        );
 
-    try {
+      if (!status) {
 
-      const statusFunction =
-        window[definition.statusApi];
+        warnings.push({
+          id: definition.id,
+          title: definition.title,
+          message:
+            "Status Registry registration or status result was not found."
+        });
 
-      if (
-        typeof statusFunction ===
-        "function"
-      ) {
+        modules.push({
+          id: definition.id,
+          title: definition.title,
+          version: "",
+          status: "Unavailable",
+          ready: false,
+          progress: 0,
+          health: 0,
+          source:
+            "Development Status Registry"
+        });
 
-        status =
-          statusFunction();
+        return;
 
-        source =
-          definition.statusApi;
+      }
+
+      if (status.error) {
+
+        errors.push({
+          id: definition.id,
+          title: definition.title,
+          message: status.error,
+          source:
+            status.source ||
+            "Unavailable"
+        });
 
       }
 
       if (
-        !status &&
-        definition.validator
+        status.available !== true ||
+        status.status === "Unavailable"
       ) {
 
-        const validatorFunction =
-          window[definition.validator];
-
-        if (
-          typeof validatorFunction ===
-          "function"
-        ) {
-
-          const validation =
-            validatorFunction();
-
-          if (
-            validation &&
-            typeof validation ===
-            "object"
-          ) {
-
-            const total =
-              Number(validation.total) || 0;
-
-            const passed =
-              Number(validation.passed) || 0;
-
-            const rate =
-              total > 0
-                ? Math.round(
-                    passed / total * 100
-                  )
-                : (
-                    validation.valid
-                      ? 100
-                      : 0
-                  );
-
-            status = {
-              id: definition.id,
-              title: definition.title,
-              version: "1.0",
-              status:
-                validation.valid
-                  ? "Ready"
-                  : "Error",
-              ready:
-                validation.valid === true,
-              progress: rate,
-              health: rate,
-              validation: validation
-            };
-
-            source =
-              definition.validator;
-
-          }
-
-        }
+        warnings.push({
+          id: definition.id,
+          title: definition.title,
+          message:
+            status.error ||
+            "Status information is unavailable."
+        });
 
       }
 
-      if (
-        !status &&
-        typeof getIdeComponentStatus ===
-        "function"
-      ) {
+      modules.push({
+        id:
+          status.id ||
+          definition.id,
 
-        status =
-          getIdeComponentStatus(
-            definition.id
-          );
+        title:
+          status.title ||
+          status.name ||
+          definition.title,
 
-        if (status) {
-          source =
-            "getIdeComponentStatus";
-        }
+        version:
+          status.version || "",
 
-      }
+        status:
+          status.status ||
+          (
+            status.ready === true
+              ? "Ready"
+              : "Unavailable"
+          ),
 
-    } catch (error) {
+        ready:
+          status.ready === true,
 
-      errors.push({
-        id: definition.id,
-        title: definition.title,
-        message:
-          error && error.message
-            ? error.message
-            : String(error)
+        progress:
+          Math.max(
+            0,
+            Math.min(
+              100,
+              Number(
+                status.progress
+              ) || 0
+            )
+          ),
+
+        health:
+          Math.max(
+            0,
+            Math.min(
+              100,
+              Number(
+                status.health
+              ) || 0
+            )
+          ),
+
+        source:
+          status.source ||
+          "Development Status Registry"
       });
 
     }
-
-    if (!status) {
-
-      warnings.push({
-        id: definition.id,
-        title: definition.title,
-        message:
-          "Status information is unavailable."
-      });
-
-      status = {
-        id: definition.id,
-        title: definition.title,
-        version: "",
-        status: "Unavailable",
-        ready: false,
-        progress: 0,
-        health: 0
-      };
-
-    }
-
-    modules.push({
-      id:
-        status.id ||
-        definition.id,
-
-      title:
-        status.title ||
-        status.name ||
-        definition.title,
-
-      version:
-        status.version || "",
-
-      status:
-        status.status ||
-        (
-          status.ready
-            ? "Ready"
-            : "Unavailable"
-        ),
-
-      ready:
-        status.ready === true,
-
-      progress:
-        Math.max(
-          0,
-          Math.min(
-            100,
-            Number(status.progress) || 0
-          )
-        ),
-
-      health:
-        Math.max(
-          0,
-          Math.min(
-            100,
-            Number(status.health) || 0
-          )
-        ),
-
-      source: source
-    });
-
-  });
+  );
 
   const ready =
     modules.filter(
       function filterReady(module) {
-        return module.ready;
+        return module.ready === true;
       }
     ).length;
 
   const available =
     modules.filter(
       function filterAvailable(module) {
-        return module.status !== "Unavailable";
+        return (
+          module.status !==
+          "Unavailable"
+        );
       }
     ).length;
 
   return {
     id: "IDE-090-METRICS",
-    title: "Development Dashboard Metrics",
+    title:
+      "Development Dashboard Metrics",
 
     modules: modules,
 
     summary: {
-      total: modules.length,
-      available: available,
+      total:
+        modules.length,
+
+      available:
+        available,
+
       unavailable:
-        modules.length - available,
-      ready: ready,
+        modules.length -
+        available,
+
+      ready:
+        ready,
+
       notReady:
-        modules.length - ready
+        modules.length -
+        ready
     },
 
     warnings: warnings,
     errors: errors,
+
+    registry: {
+      source:
+        "Development Status Registry",
+
+      statusRegistryAvailable:
+        typeof collectDevelopmentStatuses ===
+        "function",
+
+      registeredStatuses:
+        collectedStatuses.length,
+
+      collectedAt:
+        statusCollection.collectedAt ||
+        ""
+    },
+
     readOnly: true,
 
     collectedAt:
@@ -2790,6 +2793,7 @@ function collectDevelopmentDashboardMetrics() {
   };
 
 }
+
 /* ===============================
    IDE-090 Calculate Health
 =============================== */
