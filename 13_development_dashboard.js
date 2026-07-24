@@ -8,6 +8,63 @@
    Dashboard Registry
 =============================== */
 
+const DEVELOPMENT_DASHBOARD_MODULE_REGISTRY = [
+  {
+    id: "IDE-010",
+    title: "Mobile Console",
+    statusApi: "getMobileConsoleStatus",
+    validator: ""
+  },
+  {
+    id: "IDE-020",
+    title: "Function Help",
+    statusApi: "getFunctionHelpStatus",
+    validator: ""
+  },
+  {
+    id: "IDE-030",
+    title: "Command Palette",
+    statusApi: "getCommandPaletteStatus",
+    validator: "validateCommandPalette"
+  },
+  {
+    id: "IDE-040",
+    title: "Project Search",
+    statusApi: "getProjectSearchStatus",
+    validator: "validateProjectSearch"
+  },
+  {
+    id: "IDE-050",
+    title: "Error Inspector",
+    statusApi: "getErrorInspectorStatus",
+    validator: "validateErrorInspector"
+  },
+  {
+    id: "IDE-060",
+    title: "Quick Command",
+    statusApi: "getQuickCommandStatus",
+    validator: "validateQuickCommand"
+  },
+  {
+    id: "IDE-070",
+    title: "Autocomplete",
+    statusApi: "getAutocompleteStatus",
+    validator: "validateAutocomplete"
+  },
+  {
+    id: "IDE-080",
+    title: "Virtual Keyboard",
+    statusApi: "getVirtualKeyboardStatus",
+    validator: "validateVirtualKeyboard"
+  },
+  {
+    id: "IDE-110",
+    title: "Diagnostic Instrumentation",
+    statusApi: "getDiagnosticInstrumentationStatus",
+    validator: "validateDiagnosticInstrumentation"
+  }
+];
+
 const DEVELOPMENT_DASHBOARD_MODULES = [
   {
     id: "Migration",
@@ -2502,68 +2559,14 @@ function buildKnowledgeMigrationReport() {
 
 function collectDevelopmentDashboardMetrics() {
 
-  const definitions = [
-    {
-      id: "IDE-010",
-      title: "Mobile Console",
-      statusApi: "getMobileConsoleStatus",
-      validator: ""
-    },
-    {
-      id: "IDE-020",
-      title: "Function Help",
-      statusApi: "getFunctionHelpStatus",
-      validator: ""
-    },
-    {
-      id: "IDE-030",
-      title: "Command Palette",
-      statusApi: "getCommandPaletteStatus",
-      validator: "validateCommandPalette"
-    },
-    {
-      id: "IDE-040",
-      title: "Project Search",
-      statusApi: "getProjectSearchStatus",
-      validator: "validateProjectSearch"
-    },
-    {
-      id: "IDE-050",
-      title: "Error Inspector",
-      statusApi: "getErrorInspectorStatus",
-      validator: "validateErrorInspector"
-    },
-    {
-      id: "IDE-060",
-      title: "Quick Command",
-      statusApi: "getQuickCommandStatus",
-      validator: "validateQuickCommand"
-    },
-    {
-      id: "IDE-070",
-      title: "Autocomplete",
-      statusApi: "getAutocompleteStatus",
-      validator: "validateAutocomplete"
-    },
-    {
-      id: "IDE-080",
-      title: "Virtual Keyboard",
-      statusApi: "getVirtualKeyboardStatus",
-      validator: "validateVirtualKeyboard"
-    },
-    {
-      id: "IDE-110",
-      title: "Diagnostic Instrumentation",
-      statusApi: "getDiagnosticInstrumentationStatus",
-      validator: "validateDiagnosticInstrumentation"
-    }
-  ];
+  const definitions =
+    getDevelopmentDashboardModuleRegistry();
 
   const modules = [];
   const warnings = [];
   const errors = [];
 
-  definitions.forEach(definition => {
+  definitions.forEach(function collectDefinition(definition) {
 
     let status = null;
     let source = "Unavailable";
@@ -2637,7 +2640,7 @@ function collectDevelopmentDashboardMetrics() {
                 validation.valid === true,
               progress: rate,
               health: rate,
-              validation
+              validation: validation
             };
 
             source =
@@ -2705,12 +2708,15 @@ function collectDevelopmentDashboardMetrics() {
       id:
         status.id ||
         definition.id,
+
       title:
         status.title ||
         status.name ||
         definition.title,
+
       version:
         status.version || "",
+
       status:
         status.status ||
         (
@@ -2718,8 +2724,10 @@ function collectDevelopmentDashboardMetrics() {
             ? "Ready"
             : "Unavailable"
         ),
+
       ready:
         status.ready === true,
+
       progress:
         Math.max(
           0,
@@ -2728,6 +2736,7 @@ function collectDevelopmentDashboardMetrics() {
             Number(status.progress) || 0
           )
         ),
+
       health:
         Math.max(
           0,
@@ -2736,40 +2745,46 @@ function collectDevelopmentDashboardMetrics() {
             Number(status.health) || 0
           )
         ),
-      source
+
+      source: source
     });
 
   });
 
   const ready =
     modules.filter(
-      module => module.ready
+      function filterReady(module) {
+        return module.ready;
+      }
     ).length;
 
   const available =
     modules.filter(
-      module =>
-        module.status !==
-        "Unavailable"
+      function filterAvailable(module) {
+        return module.status !== "Unavailable";
+      }
     ).length;
 
   return {
     id: "IDE-090-METRICS",
-    title:
-      "Development Dashboard Metrics",
-    modules,
+    title: "Development Dashboard Metrics",
+
+    modules: modules,
+
     summary: {
       total: modules.length,
-      available,
+      available: available,
       unavailable:
         modules.length - available,
-      ready,
+      ready: ready,
       notReady:
         modules.length - ready
     },
-    warnings,
-    errors,
+
+    warnings: warnings,
+    errors: errors,
     readOnly: true,
+
     collectedAt:
       new Date().toISOString()
   };
@@ -4224,4 +4239,200 @@ function checkDevelopmentIDEReleasePerformance() {
 
   return results;
 
+}
+
+function getDevelopmentDashboardModuleRegistry() {
+  return DEVELOPMENT_DASHBOARD_MODULE_REGISTRY.map(
+    function cloneDefinition(definition) {
+      return {
+        id: definition.id,
+        title: definition.title,
+        statusApi: definition.statusApi,
+        validator: definition.validator
+      };
+    }
+  );
+}
+
+function registerDevelopmentDashboardModule(definition) {
+  if (!definition || typeof definition !== "object") {
+    return {
+      id: "IDE-090-REGISTRY-REGISTER",
+      registered: false,
+      reason: "definition must be an object."
+    };
+  }
+
+  const id =
+    typeof definition.id === "string"
+      ? definition.id.trim()
+      : "";
+
+  const title =
+    typeof definition.title === "string"
+      ? definition.title.trim()
+      : "";
+
+  const statusApi =
+    typeof definition.statusApi === "string"
+      ? definition.statusApi.trim()
+      : "";
+
+  const validator =
+    typeof definition.validator === "string"
+      ? definition.validator.trim()
+      : "";
+
+  if (!id) {
+    return {
+      id: "IDE-090-REGISTRY-REGISTER",
+      registered: false,
+      reason: "definition.id is required."
+    };
+  }
+
+  if (!title) {
+    return {
+      id: "IDE-090-REGISTRY-REGISTER",
+      registered: false,
+      reason: "definition.title is required."
+    };
+  }
+
+  if (!statusApi && !validator) {
+    return {
+      id: "IDE-090-REGISTRY-REGISTER",
+      registered: false,
+      reason: "statusApi or validator is required."
+    };
+  }
+
+  const existingIndex =
+    DEVELOPMENT_DASHBOARD_MODULE_REGISTRY.findIndex(
+      function findDefinition(item) {
+        return item.id === id;
+      }
+    );
+
+  const normalizedDefinition = {
+    id: id,
+    title: title,
+    statusApi: statusApi,
+    validator: validator
+  };
+
+  if (existingIndex >= 0) {
+    DEVELOPMENT_DASHBOARD_MODULE_REGISTRY[
+      existingIndex
+    ] = normalizedDefinition;
+
+    return {
+      id: "IDE-090-REGISTRY-REGISTER",
+      registered: true,
+      updated: true,
+      definition: {
+        ...normalizedDefinition
+      }
+    };
+  }
+
+  DEVELOPMENT_DASHBOARD_MODULE_REGISTRY.push(
+    normalizedDefinition
+  );
+
+  return {
+    id: "IDE-090-REGISTRY-REGISTER",
+    registered: true,
+    updated: false,
+    definition: {
+      ...normalizedDefinition
+    }
+  };
+}
+
+function validateDevelopmentDashboardModuleRegistry() {
+  const definitions =
+    getDevelopmentDashboardModuleRegistry();
+
+  const checks = [];
+  const ids = new Set();
+
+  function check(name, passed, detail) {
+    checks.push({
+      name: name,
+      passed: passed === true,
+      detail: detail || ""
+    });
+  }
+
+  check(
+    "Registry exists",
+    Array.isArray(definitions),
+    "count=" + definitions.length
+  );
+
+  check(
+    "Registry is not empty",
+    definitions.length > 0,
+    "count=" + definitions.length
+  );
+
+  definitions.forEach(function validateDefinition(definition) {
+    const duplicate =
+      ids.has(definition.id);
+
+    check(
+      "Unique ID: " + definition.id,
+      !duplicate,
+      duplicate ? "Duplicate ID" : ""
+    );
+
+    ids.add(definition.id);
+
+    check(
+      "Title: " + definition.id,
+      Boolean(definition.title),
+      definition.title
+    );
+
+    check(
+      "API definition: " + definition.id,
+      Boolean(
+        definition.statusApi ||
+        definition.validator
+      ),
+      definition.statusApi ||
+        definition.validator ||
+        "No API"
+    );
+  });
+
+  const passed =
+    checks.filter(
+      function filterCheck(item) {
+        return item.passed;
+      }
+    ).length;
+
+  const total = checks.length;
+  const valid =
+    total > 0 &&
+    passed === total;
+
+  return {
+    id: "IDE-090-REGISTRY-VALIDATION",
+    valid: valid,
+    passed: passed,
+    total: total,
+    registryCount: definitions.length,
+    health:
+      valid
+        ? 100
+        : Math.round(
+            passed / total * 100
+          ),
+    checks: checks,
+    validatedAt:
+      new Date().toISOString()
+  };
 }
