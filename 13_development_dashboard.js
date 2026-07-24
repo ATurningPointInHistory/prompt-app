@@ -2550,6 +2550,12 @@ function collectDevelopmentDashboardMetrics() {
       title: "Virtual Keyboard",
       statusApi: "getVirtualKeyboardStatus",
       validator: "validateVirtualKeyboard"
+    },
+    {
+      id: "IDE-110",
+      title: "Diagnostic Instrumentation",
+      statusApi: "getDiagnosticInstrumentationStatus",
+      validator: "validateDiagnosticInstrumentation"
     }
   ];
 
@@ -2769,7 +2775,6 @@ function collectDevelopmentDashboardMetrics() {
   };
 
 }
-
 /* ===============================
    IDE-090 Calculate Health
 =============================== */
