@@ -569,6 +569,18 @@ function showMemoBox() {
 ☐Clear
 </button>
 
+<button onclick="lockSelectedMemoBoxes()">
+🔒選択ロック
+</button>
+
+<button onclick="unlockSelectedMemoBoxes()">
+🔓選択ロック解除
+</button>
+
+<span class="small-muted">
+選択: ${memoBoxSelected.size}件
+</span>
+
 <button onclick="deleteSelectedMemoBoxes()">
 🗑選択削除
 </button>
@@ -1402,6 +1414,78 @@ function clearMemoSelection() {
   memoBoxSelected.clear();
 
   showMemoBox();
+
+}
+
+function lockSelectedMemoBoxes() {
+
+  if (!memoBoxSelected.size) {
+    alert("選択されていません");
+    return;
+  }
+
+  let changed = 0;
+  let skipped = 0;
+
+  [...memoBoxSelected].forEach(index => {
+    const memo = memoBoxList[index];
+    if (!memo) return;
+
+    if (memo.migrationLocked === true) {
+      skipped++;
+      return;
+    }
+
+    if (memo.locked !== true) {
+      memo.locked = true;
+      memo.updatedAt = new Date().toISOString();
+      changed++;
+    }
+  });
+
+  saveMemoBoxes();
+  showMemoBox();
+
+  alert(
+    `選択ロック完了: ${changed}件` +
+    (skipped ? `\nMigration Lock除外: ${skipped}件` : "")
+  );
+
+}
+
+function unlockSelectedMemoBoxes() {
+
+  if (!memoBoxSelected.size) {
+    alert("選択されていません");
+    return;
+  }
+
+  let changed = 0;
+  let skipped = 0;
+
+  [...memoBoxSelected].forEach(index => {
+    const memo = memoBoxList[index];
+    if (!memo) return;
+
+    if (memo.migrationLocked === true) {
+      skipped++;
+      return;
+    }
+
+    if (memo.locked === true) {
+      memo.locked = false;
+      memo.updatedAt = new Date().toISOString();
+      changed++;
+    }
+  });
+
+  saveMemoBoxes();
+  showMemoBox();
+
+  alert(
+    `選択ロック解除完了: ${changed}件` +
+    (skipped ? `\nMigration Lock除外: ${skipped}件` : "")
+  );
 
 }
 
@@ -2336,6 +2420,12 @@ window.selectAllMemoBoxes = selectAllMemoBoxes;
 
 window.clearMemoSelection = 
 clearMemoSelection;
+
+window.lockSelectedMemoBoxes =
+lockSelectedMemoBoxes;
+
+window.unlockSelectedMemoBoxes =
+unlockSelectedMemoBoxes;
 
 window.deleteSelectedMemoBoxes = deleteSelectedMemoBoxes;
 
