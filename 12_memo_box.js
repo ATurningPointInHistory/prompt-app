@@ -17,6 +17,9 @@ let memoBoxTypeFilter =
 let memoBoxSeriesFilter =
   "";
 
+let memoBoxModeFilter =
+  "";
+
 let memoBoxSelected =
   new Set();
 
@@ -39,6 +42,13 @@ let memoBoxList =
    Type
    メモ・Knowledge Objectの種類
 =============================== */
+
+const MEMO_BOX_MODES = [
+  "knowledge",
+  "simple",
+  "document",
+  "relation"
+];
 
 const MEMO_BOX_TYPES = [
   "Idea",             // アイデア・検討案
@@ -457,6 +467,7 @@ function showMemoBox() {
 
     <div class="memo-card-meta">
 
+      <span>${escapeHtml(item.memoMode || inferMemoMode(item))}</span>
       <span>${escapeHtml(item.knowledgeType || item.type || "-")}</span>
       <span>${escapeHtml(item.status || "-")}</span>
       <span>${escapeHtml(item.series || "-")}</span>
@@ -570,8 +581,12 @@ Export
 選択Export
 </button>
 
-<button onclick="importMemoBoxes()">
-Import
+<button onclick="importMemoBoxes('merge')">
+追加Import
+</button>
+
+<button onclick="importMemoBoxes('replace')">
+全置換Import
 </button>
 
 </div>
@@ -584,6 +599,28 @@ Filter / Search
 </summary>
 
 <div class="memo-filter">
+
+
+<select
+id="memoFilterMode"
+onchange="
+memoBoxModeFilter=this.value;
+showMemoBox();
+">
+
+<option value="">
+Mode: All
+</option>
+
+${MEMO_BOX_MODES.map(v => `
+<option
+value="${v}"
+${memoBoxModeFilter === v ? "selected" : ""}>
+Mode: ${v}
+</option>
+`).join("")}
+
+</select>
 
 <select
 id="memoFilterType"
@@ -675,7 +712,8 @@ ${memoCards || `
 <input
 id="memoBoxImportFile"
 type="file"
-accept=".json"
+accept=".json,.md,.markdown,.txt,.html,.htm,.csv,.tsv"
+multiple
 style="display:none"
 onchange="loadMemoBoxesFile(event)">
 `
@@ -756,11 +794,26 @@ value="${isNew ? "" : index}">
 📋本文
 </button>
 
+<button onclick="readMemoMetadataFromBody()">
+🔄本文からMetadata読取
+</button>
+
 <button onclick="selectMemoTitle()">
 🔤題名
 </button>
 
 </div>
+
+
+<select id="memoBoxMode" ${lockedDisabledAttr}>
+${MEMO_BOX_MODES.map(v => `
+<option
+value="${v}"
+${v === (current.memoMode || inferMemoMode(current)) ? "selected" : ""}>
+${v}
+</option>
+`).join("")}
+</select>
 
 <input
 id="memoBoxBoxTitle"
@@ -1034,10 +1087,6 @@ async function pasteMemoText() {
 
       textarea.value = text;
 
-      applyDocumentHeaderToMemoEditor(
-        text
-      );
-
       setMemoEditorValue(
         "memoBoxBoxTitle",
         extractBoxHeaderTitle(text)
@@ -1141,6 +1190,29 @@ function extractMemoTitle(
 
 }
 
+function readMemoMetadataFromBody() {
+
+  const text =
+    get("memoBoxText")?.value || "";
+
+  if (!text.trim()) {
+    alert("本文が空です");
+    return;
+  }
+
+  applyDocumentHeaderToMemoEditor(text);
+
+  if (
+    !window.memoBoxParsedMetadata ||
+    !Object.keys(window.memoBoxParsedMetadata).length
+  ) {
+    alert("Metadataを検出できませんでした");
+    return;
+  }
+
+  alert("本文からMetadata候補を読み取りました。内容を確認して保存してください。");
+}
+
 function saveMemoEditor() {
 
   normalizeMemoBoxes();
@@ -1166,12 +1238,16 @@ function saveMemoEditor() {
     get("memoBoxText")?.value || "";
 
   const metadata =
-    typeof parseDocumentHeader ===
-  "function"
-      ? parseDocumentHeader(text)
-      : {};
+    window.memoBoxParsedMetadata || {};
 
   const memo = {
+
+    memoMode:
+      get("memoBoxMode")?.value ||
+      inferMemoMode({
+        type: get("memoBoxType")?.value,
+        knowledgeType: get("memoBoxType")?.value
+      }),
 
     boxTitle:
       get("memoBoxBoxTitle")?.value ||
@@ -1418,11 +1494,17 @@ function exportMemoBoxes() {
 
 }
 
-function importMemoBoxes() {
+function importMemoBoxes(mode = "merge") {
+
+  window.memoBoxImportMode =
+    mode === "replace"
+      ? "replace"
+      : "merge";
 
   if (
+    window.memoBoxImportMode === "replace" &&
     !confirm(
-      "現在のメモを上書きします。続行しますか？"
+      "現在のメモを全置換します。バックアップ済みですか？"
     )
   ) {
     return;
@@ -1436,71 +1518,241 @@ function importMemoBoxes() {
   }
 
   input.value = "";
-
   input.click();
 
 }
 
-function loadMemoBoxesFile(
-  event
-) {
+function readMemoImportFile(file) {
 
-  const file =
-    event.target.files?.[0];
+  return new Promise((resolve, reject) => {
 
-  if (!file) {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      try {
+        resolve({
+          file,
+          text: String(reader.result || "")
+        });
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    reader.onerror = () => reject(reader.error || new Error("read failed"));
+    reader.readAsText(file);
+
+  });
+
+}
+
+function normalizeImportedMemoItem(item, source = {}) {
+
+  const raw =
+    item && typeof item === "object"
+      ? item
+      : {};
+
+  const text =
+    String(raw.text ?? raw.content ?? raw.body ?? "");
+
+  return {
+    ...raw,
+    memoMode:
+      raw.memoMode ||
+      inferMemoMode(raw),
+    name:
+      raw.name ||
+      raw.title ||
+      source.fileName ||
+      "メモ",
+    text,
+    sourceFileName:
+      raw.sourceFileName ||
+      source.fileName ||
+      "",
+    sourceFormat:
+      raw.sourceFormat ||
+      source.format ||
+      "",
+    importedAt:
+      raw.importedAt ||
+      new Date().toISOString()
+  };
+
+}
+
+function parseMemoImportText(file, text) {
+
+  const fileName = file.name || "imported";
+  const extension =
+    fileName.includes(".")
+      ? fileName.split(".").pop().toLowerCase()
+      : "";
+
+  if (extension === "json") {
+
+    const parsed = JSON.parse(text);
+
+    let items = [];
+
+    if (Array.isArray(parsed)) {
+      items = parsed;
+    } else if (Array.isArray(parsed.memos)) {
+      items = parsed.memos;
+    } else if (Array.isArray(parsed.memoBoxList)) {
+      items = parsed.memoBoxList;
+    } else if (parsed && typeof parsed === "object") {
+      items = [parsed];
+    }
+
+    return items.map(item =>
+      normalizeImportedMemoItem(item, {
+        fileName,
+        format: "json"
+      })
+    );
+
+  }
+
+  const metadata =
+    typeof parseDocumentHeader === "function"
+      ? parseDocumentHeader(text)
+      : {};
+
+  return [normalizeImportedMemoItem({
+    memoMode: "document",
+    id: metadata.id || "",
+    name:
+      getMemoMetadataTitle(metadata) ||
+      fileName,
+    summary: metadata.summary || "",
+    text,
+    knowledgeType:
+      metadata.knowledgeType ||
+      (extension === "md" || extension === "markdown"
+        ? "Specification"
+        : "Report"),
+    category: metadata.category || "Imported Document",
+    type:
+      metadata.knowledgeType ||
+      (extension === "md" || extension === "markdown"
+        ? "Specification"
+        : "Report"),
+    status: metadata.status || "Inbox",
+    series: metadata.series || "",
+    version: metadata.version || "",
+    keywords: metadata.keywords || [],
+    relationships: metadata.relationships || []
+  }, {
+    fileName,
+    format: extension || "text"
+  })];
+
+}
+
+async function loadMemoBoxesFile(event) {
+
+  const files =
+    Array.from(event.target.files || []);
+
+  if (!files.length) {
     return;
   }
 
-  readJsonFile(
+  const imported = [];
+  const failures = [];
 
-    file,
+  for (const file of files) {
 
-    data => {
+    try {
+      const result =
+        await readMemoImportFile(file);
 
-      if (!Array.isArray(data)) {
-        alert("Memo JSON形式が不正です");
-        return;
-      }
-
-      memoBoxList =
-        data.map(item => ({
-          ...item,
-          name:
-            item.name || "メモ",
-          text:
-            item.text || ""
-        }));
-
-      normalizeMemoBoxes();
-
-      if (!memoBoxList.length) {
-        memoBoxList = [
-          {
-            name: "メモ1",
-            text: ""
-          }
-        ];
-      }
-
-      memoBoxActiveIndex = 0;
-
-      saveMemoBoxes();
-
-      showMemoBox();
-
-      alert("Memo Import完了");
-
-    },
-
-    () => {
-      alert("Memo JSON読込失敗");
+      imported.push(
+        ...parseMemoImportText(
+          file,
+          result.text
+        )
+      );
+    } catch (error) {
+      failures.push({
+        fileName: file.name,
+        message: error?.message || String(error)
+      });
     }
 
+  }
+
+  if (!imported.length) {
+    alert("Importできるファイルがありませんでした");
+    event.target.value = "";
+    return;
+  }
+
+  const mode =
+    window.memoBoxImportMode || "merge";
+
+  if (mode === "replace") {
+    memoBoxList = imported;
+  } else {
+    memoBoxList = [
+      ...memoBoxList,
+      ...imported
+    ];
+  }
+
+  normalizeMemoBoxes();
+  memoBoxActiveIndex = 0;
+  saveMemoBoxes();
+  showMemoBox();
+
+  const failureText = failures.length
+    ? `\n失敗: ${failures.length}件`
+    : "";
+
+  alert(
+    `Memo Import完了: ${imported.length}件${failureText}`
   );
 
-  event.target.value =
-    "";
+  if (failures.length) {
+    console.warn("Memo import failures", failures);
+  }
+
+  event.target.value = "";
+
+}
+
+function inferMemoMode(item = {}) {
+
+  if (item.memoMode) {
+    return item.memoMode;
+  }
+
+  const type =
+    String(item.knowledgeType || item.type || "").toLowerCase();
+
+  const sourceFormat =
+    String(item.sourceFormat || "").toLowerCase();
+
+  if (sourceFormat && sourceFormat !== "json") {
+    return "document";
+  }
+
+  if (
+    [
+      "specification",
+      "architecture",
+      "design",
+      "core",
+      "rule",
+      "implementation"
+    ].includes(type)
+  ) {
+    return "knowledge";
+  }
+
+  return "simple";
 
 }
 
@@ -1512,6 +1764,9 @@ function normalizeMemoBoxes() {
       /* ==========================
          Basic
       ========================== */
+
+      memoMode:
+        inferMemoMode(item),
 
       boxTitle:
         item.boxTitle || "",
@@ -1607,7 +1862,16 @@ function normalizeMemoBoxes() {
         item.createdAt || "",
 
       updatedAt:
-        item.updatedAt || ""
+        item.updatedAt || "",
+
+      sourceFileName:
+        item.sourceFileName || "",
+
+      sourceFormat:
+        item.sourceFormat || "",
+
+      importedAt:
+        item.importedAt || ""
 
     }));
 
@@ -1621,6 +1885,13 @@ function filterMemoBoxes() {
       .toLowerCase();
 
   return memoBoxList.filter(item => {
+
+    if (
+      memoBoxModeFilter &&
+      item.memoMode !== memoBoxModeFilter
+    ) {
+      return false;
+    }
 
     if (
       memoBoxStatusFilter &&
@@ -1649,6 +1920,7 @@ function filterMemoBoxes() {
 
     const text =
     [
+      item.memoMode,
       item.id,
       item.name,
       item.summary,
@@ -2033,6 +2305,8 @@ window.importMemoBoxes =
 window.loadMemoBoxesFile =
   loadMemoBoxesFile;
 
+window.inferMemoMode = inferMemoMode;
+
 window.showMemoBox =
   showMemoBox;
 
@@ -2050,6 +2324,9 @@ window.openMemoEditor = openMemoEditor;
 window.saveMemoEditor = saveMemoEditor;
 
 window.pasteMemoText = pasteMemoText;
+
+window.readMemoMetadataFromBody =
+  readMemoMetadataFromBody;
 
 window.selectMemoTitle = selectMemoTitle;
 
