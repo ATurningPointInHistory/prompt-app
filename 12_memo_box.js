@@ -1116,27 +1116,7 @@ async function pasteMemoText() {
       );
 
     }
-
-    const input =
-      get("memoBoxName");
-
-    if (
-      input &&
-      !input.value
-    ) {
-
-      input.value =
-        extractMemoTitle(
-          text
-        );
-
-      input.focus();
-
-      input.select();
-
-    }
-
-  } catch (error) {
+} catch (error) {
 
     alert(
       "クリップボードを読み取れません。"
@@ -1672,11 +1652,19 @@ function normalizeImportedMemoItem(item, source = {}) {
     memoMode:
       raw.memoMode ||
       inferMemoMode(raw),
-    name:
-      raw.name ||
-      raw.title ||
-      source.fileName ||
-      "メモ",
+    name: (() => {
+      const explicitName =
+        String(raw.name || raw.title || "").trim();
+
+      if (
+        explicitName &&
+        !isSuspiciousMemoTitle(explicitName)
+      ) {
+        return explicitName;
+      }
+
+      return source.fileName || "メモ";
+    })(),
     text,
     sourceFileName:
       raw.sourceFileName ||
@@ -1726,35 +1714,20 @@ function parseMemoImportText(file, text) {
 
   }
 
-  const metadata =
-    typeof parseDocumentHeader === "function"
-      ? parseDocumentHeader(text)
-      : {};
-
   return [normalizeImportedMemoItem({
     memoMode: "document",
-    id: metadata.id || "",
-    name:
-      getMemoMetadataTitle(metadata) ||
-      fileName,
-    summary: metadata.summary || "",
+    id: "",
+    name: fileName,
+    summary: "",
     text,
-    knowledgeType:
-      metadata.knowledgeType ||
-      (extension === "md" || extension === "markdown"
-        ? "Specification"
-        : "Report"),
-    category: metadata.category || "Imported Document",
-    type:
-      metadata.knowledgeType ||
-      (extension === "md" || extension === "markdown"
-        ? "Specification"
-        : "Report"),
-    status: metadata.status || "Inbox",
-    series: metadata.series || "",
-    version: metadata.version || "",
-    keywords: metadata.keywords || [],
-    relationships: metadata.relationships || []
+    knowledgeType: "Document",
+    category: "Imported Document",
+    type: "Document",
+    status: "Inbox",
+    series: "",
+    version: "",
+    keywords: [],
+    relationships: []
   }, {
     fileName,
     format: extension || "text"
@@ -2232,12 +2205,11 @@ function repairSuspiciousMemoTitles() {
     ) {
 
       const next =
-        extractMemoTitle(
-          item.text || ""
-        );
+        getSafeMemoTitleCandidate(item);
 
       if (
         next &&
+        next !== "メモ" &&
         !isSuspiciousMemoTitle(next)
       ) {
         item.name = next;
@@ -2309,6 +2281,48 @@ function isSuspiciousMemoTitle(value) {
 
 }
 
+function getSafeMemoTitleCandidate(item) {
+
+  const sourceFileName =
+    String(item?.sourceFileName || "").trim();
+
+  if (sourceFileName) {
+    return sourceFileName.replace(/\.[^.]+$/, "") || sourceFileName;
+  }
+
+  const ignoredPatterns = [
+    /^={3,}$/,
+    /^-{3,}$/,
+    /^(Metadata|Body|Purpose|Scope|Definitions|Background|Architecture|Workflow|Design|Specification|Rules|Implementation Notes|Examples|Validation|Migration|Compatibility|Limitations|Future|References|Related Documents|Completion Criteria|Revision History)\s*[:：]?$/i,
+    /^(ID|Title|Summary|Series|KnowledgeType|Category|Status|Priority|Stability|DecisionLevel|Version|Owner|Authority|Created|Updated|Tags|Keywords|Relationships|DependsOn|Provides|Input|Output|Workflow|Rules|Compatibility|Supersedes|SupersededBy|MergedFrom|MergedInto|DecisionRecord)\s*[:：]/i
+  ];
+
+  const lines =
+    String(item?.text || "")
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(Boolean);
+
+  for (const line of lines) {
+
+    if (ignoredPatterns.some(pattern => pattern.test(line))) {
+      continue;
+    }
+
+    if (isSuspiciousMemoTitle(line)) {
+      continue;
+    }
+
+    if (line.length > 100) {
+      continue;
+    }
+
+    return line;
+  }
+
+  return "メモ";
+}
+
 function getMemoDisplayName(item) {
 
   const name =
@@ -2321,17 +2335,7 @@ function getMemoDisplayName(item) {
     return name;
   }
 
-  const fallback =
-    extractMemoTitle(
-      item?.text || ""
-    );
-
-  return (
-    fallback &&
-    !isSuspiciousMemoTitle(fallback)
-  )
-    ? fallback
-    : "メモ";
+  return getSafeMemoTitleCandidate(item);
 }
 
 function sanitizeMemoParsedMetadata(metadata) {
@@ -3116,9 +3120,25 @@ function showMemoBox() {
       <span>${escapeHtml(item.status || "-")}</span>
       <span>${escapeHtml(item.category || item.type || "-")}</span>
       ${item.version ? `<span>v${escapeHtml(item.version)}</span>` : ""}
+      ${Array.isArray(item.relationships) && item.relationships.length
+        ? `<span>🔗${item.relationships.length}</span>`
+        : ""}
     </div>
     ${item.summary ? `<div class="small-muted">${escapeHtml(item.summary)}</div>` : ""}
     ${item.updatedAt ? `<div class="small-muted">更新: ${escapeHtml(item.updatedAt)}</div>` : ""}
+    ${Array.isArray(item.relationships) && item.relationships.length
+      ? `
+      <div class="memo-card-links">
+        ${item.relationships.map(targetId => `
+          <button
+            class="memo-link-btn"
+            onclick="event.stopPropagation();openMemoById('${escapeJs(String(targetId))}')">
+            🔗${escapeHtml(String(targetId))}
+          </button>
+        `).join("")}
+      </div>
+      `
+      : ""}
   </div>
   <div class="memo-card-actions">
     <button onclick="openMemoEditor(${index})">${isMemoLocked(item) ? "🔏表示" : "🖋編集"}</button>
@@ -3190,3 +3210,5 @@ window.undoLastMemoImport = undoLastMemoImport;
 window.showLastMemoImportResult = showLastMemoImportResult;
 window.loadMemoBoxesFile = loadMemoBoxesFile;
 window.showMemoBox = showMemoBox;
+
+window.openMemoById = openMemoById;
