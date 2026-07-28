@@ -3212,3 +3212,760 @@ window.loadMemoBoxesFile = loadMemoBoxesFile;
 window.showMemoBox = showMemoBox;
 
 window.openMemoById = openMemoById;
+
+
+
+/* ============================================================
+   Memo Box v1.9 LTS RC Extension
+   Health / Repair / Dashboard / Recent / Working / Folder / ZIP
+============================================================ */
+
+const MEMO_BOX_LTS_VERSION = "1.9.0-rc1";
+const MEMO_BOX_RECENT_KEY = "AI_PROMPT_OS_MEMO_RECENT_V1";
+const MEMO_BOX_BACKUP_KEY = "AI_PROMPT_OS_MEMO_AUTO_BACKUP_V1";
+const MEMO_BOX_RECENT_LIMIT = 8;
+
+let memoBoxDashboardVisible = true;
+
+function getMemoRecentIds() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(MEMO_BOX_RECENT_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function rememberMemoOpened(item) {
+  if (!item) return;
+  const key = String(item.id || item.name || "").trim();
+  if (!key) return;
+  const list = getMemoRecentIds().filter(v => v !== key);
+  list.unshift(key);
+  localStorage.setItem(
+    MEMO_BOX_RECENT_KEY,
+    JSON.stringify(list.slice(0, MEMO_BOX_RECENT_LIMIT))
+  );
+}
+
+function getRecentMemoItems() {
+  const keys = getMemoRecentIds();
+  return keys
+    .map(key => memoBoxList.find(item =>
+      String(item.id || "") === key ||
+      String(item.name || "") === key
+    ))
+    .filter(Boolean);
+}
+
+function createMemoAutoBackup(reason = "manual") {
+  try {
+    const payload = {
+      version: MEMO_BOX_LTS_VERSION,
+      reason,
+      createdAt: new Date().toISOString(),
+      activeIndex: memoBoxActiveIndex,
+      memos: JSON.parse(JSON.stringify(memoBoxList))
+    };
+    localStorage.setItem(MEMO_BOX_BACKUP_KEY, JSON.stringify(payload));
+    return true;
+  } catch (error) {
+    console.warn("Memo auto backup failed", error);
+    return false;
+  }
+}
+
+function restoreMemoAutoBackup() {
+  let payload;
+  try {
+    payload = JSON.parse(localStorage.getItem(MEMO_BOX_BACKUP_KEY) || "null");
+  } catch (_) {
+    payload = null;
+  }
+  if (!payload || !Array.isArray(payload.memos)) {
+    alert("復元できるAuto Backupがありません。");
+    return;
+  }
+  if (!confirm(`${payload.createdAt || ""} のBackupへ戻しますか？`)) return;
+  memoBoxList = JSON.parse(JSON.stringify(payload.memos));
+  memoBoxActiveIndex = Number.isInteger(payload.activeIndex) ? payload.activeIndex : 0;
+  memoBoxSelected.clear();
+  normalizeMemoBoxes();
+  saveMemoBoxes();
+  showMemoBox();
+}
+
+function countCodeSignals(value) {
+  const text = String(value || "");
+  const patterns = [
+    /\bfunction\b/g, /\bconst\b/g, /\blet\b/g, /\bvar\b/g,
+    /onclick\s*=/g, /<\/?[a-z][^>]*>/gi, /=>/g, /\{[\s\S]*\}/g
+  ];
+  return patterns.reduce((total, pattern) => {
+    const matches = text.match(pattern);
+    return total + (matches ? matches.length : 0);
+  }, 0);
+}
+
+function inspectMemoHealth(item) {
+  const issues = [];
+  const mode = item.memoMode || inferMemoMode(item);
+  const title = String(item.name || "").trim();
+  const summary = String(item.summary || "").trim();
+  const status = String(item.status || "").trim();
+
+  if (!title) {
+    issues.push({ code: "TITLE_MISSING", severity: "warning", label: "題名が未設定" });
+  } else if (isSuspiciousMemoTitle(title)) {
+    issues.push({ code: "TITLE_SUSPICIOUS", severity: "error", label: "題名がMetadataまたは長文を誤認識" });
+  }
+
+  if (summary.length > 500) {
+    issues.push({ code: "SUMMARY_TOO_LONG", severity: "warning", label: `Summaryが長すぎる (${summary.length}文字)` });
+  }
+  if (summary && countCodeSignals(summary) >= 4) {
+    issues.push({ code: "SUMMARY_CODE", severity: "warning", label: "Summaryへコード断片が混入" });
+  }
+
+  if (!status) {
+    issues.push({ code: "STATUS_MISSING", severity: "warning", label: "Statusが未設定" });
+  }
+
+  if (mode === "knowledge") {
+    if (!String(item.id || "").trim()) {
+      issues.push({ code: "KNOWLEDGE_ID_MISSING", severity: "warning", label: "Knowledge IDが未設定" });
+    }
+    if (!String(item.version || "").trim()) {
+      issues.push({ code: "KNOWLEDGE_VERSION_MISSING", severity: "info", label: "Versionが未設定" });
+    }
+  }
+
+  if (mode !== "knowledge") {
+    const hasKnowledgeFields = Boolean(
+      String(item.boxTitle || "").trim() ||
+      String(item.decisionLevel || "").trim() ||
+      String(item.stability || "").trim()
+    );
+    if (hasKnowledgeFields) {
+      issues.push({ code: "NON_KNOWLEDGE_METADATA", severity: "info", label: "Simple/DocumentにKnowledge Metadataが残存" });
+    }
+  }
+
+  if (Array.isArray(item.relationships)) {
+    const missingTargets = item.relationships.filter(target =>
+      !memoBoxList.some(memo => String(memo.id || "") === String(target))
+    );
+    if (missingTargets.length) {
+      issues.push({
+        code: "RELATIONSHIP_TARGET_MISSING",
+        severity: "warning",
+        label: `Relationship参照先なし (${missingTargets.length}件)`
+      });
+    }
+  }
+
+  const deduction = issues.reduce((score, issue) => {
+    if (issue.severity === "error") return score + 30;
+    if (issue.severity === "warning") return score + 12;
+    return score + 4;
+  }, 0);
+
+  return {
+    score: Math.max(0, 100 - deduction),
+    issues,
+    status:
+      issues.some(v => v.severity === "error") ? "error" :
+      issues.some(v => v.severity === "warning") ? "warning" : "healthy"
+  };
+}
+
+function buildSafeSummary(item) {
+  const text = String(item.text || "");
+  const purposeMatch = text.match(
+    /(?:^|\n)\s*(?:\d+\.\s*)?Purpose\s*[:：]?\s*(?:\n[-=]+\n|\n)([\s\S]*?)(?=\n={5,}|\n-{5,}|\n[A-Z][A-Za-z ]+\s*[:：]?\n|\Z)/i
+  );
+  const source = purposeMatch ? purposeMatch[1] : text;
+  const lines = source
+    .split(/\r?\n/)
+    .map(v => v.trim())
+    .filter(v => v)
+    .filter(v => !/^[=\-]{3,}$/.test(v))
+    .filter(v => !/^(ID|Title|Summary|Series|KnowledgeType|Category|Status|Priority|Version|Relationships|DependsOn|Provides|Input|Output)\s*[:：]/i.test(v))
+    .filter(v => countCodeSignals(v) === 0);
+
+  let summary = "";
+  for (const line of lines) {
+    if ((summary + " " + line).length > 180) break;
+    summary += (summary ? " " : "") + line;
+    if (summary.length >= 80) break;
+  }
+  return summary || getSafeMemoTitleCandidate(item);
+}
+
+function buildMemoRepairPlan(item, index) {
+  const health = inspectMemoHealth(item);
+  const changes = [];
+
+  health.issues.forEach(issue => {
+    if (issue.code === "TITLE_MISSING" || issue.code === "TITLE_SUSPICIOUS") {
+      const next = getSafeMemoTitleCandidate(item);
+      if (next && next !== "メモ" && next !== item.name) {
+        changes.push({ field: "name", from: item.name || "", to: next, reason: issue.label });
+      }
+    }
+    if (issue.code === "SUMMARY_TOO_LONG" || issue.code === "SUMMARY_CODE") {
+      const next = buildSafeSummary(item);
+      if (next && next !== item.summary) {
+        changes.push({ field: "summary", from: item.summary || "", to: next, reason: issue.label });
+      }
+    }
+    if (issue.code === "STATUS_MISSING") {
+      changes.push({ field: "status", from: item.status || "", to: "Inbox", reason: issue.label });
+    }
+  });
+
+  return { index, id: item.id || "", name: item.name || "", changes, health };
+}
+
+function getMemoRepairPlans(scope = "all") {
+  const indexes = scope === "selected" && memoBoxSelected.size
+    ? [...memoBoxSelected]
+    : memoBoxList.map((_, index) => index);
+
+  return indexes
+    .map(index => buildMemoRepairPlan(memoBoxList[index], index))
+    .filter(plan => plan.changes.length);
+}
+
+function showMemoHealthReport() {
+  normalizeMemoBoxes();
+  const results = memoBoxList.map((item, index) => ({
+    index,
+    item,
+    health: inspectMemoHealth(item)
+  }));
+  const healthy = results.filter(v => v.health.status === "healthy").length;
+  const warnings = results.filter(v => v.health.status === "warning").length;
+  const errors = results.filter(v => v.health.status === "error").length;
+  const average = results.length
+    ? Math.round(results.reduce((s, v) => s + v.health.score, 0) / results.length)
+    : 100;
+
+  const details = results
+    .filter(v => v.health.issues.length)
+    .slice(0, 100)
+    .map(v => `
+      <div class="memo-health-item">
+        <b>${escapeHtml(v.item.id || v.item.name || `Memo ${v.index + 1}`)}</b>
+        <span>${v.health.status === "error" ? "🔴" : "🟡"} ${v.health.score}</span>
+        <ul>${v.health.issues.map(i => `<li>${escapeHtml(i.label)}</li>`).join("")}</ul>
+        <button onclick="selectMemoBox(${v.index})">開く</button>
+      </div>
+    `).join("");
+
+  openFloatPanel("Memo Health", `
+    <div><b>Health ${average}%</b></div>
+    <div>🟢 Healthy ${healthy}　🟡 Warning ${warnings}　🔴 Error ${errors}</div>
+    <hr>
+    <button onclick="showMemoRepairPreview('all')">全件 Repair Preview</button>
+    <button onclick="showMemoRepairPreview('selected')">選択 Repair Preview</button>
+    <div>${details || "問題はありません。"}</div>
+  `);
+}
+
+function showMemoRepairPreview(scope = "all") {
+  const plans = getMemoRepairPlans(scope);
+  if (!plans.length) {
+    alert("修復候補はありません。");
+    return;
+  }
+
+  const preview = plans.slice(0, 100).map(plan => `
+    <div class="memo-repair-plan">
+      <b>${escapeHtml(plan.id || plan.name || `Memo ${plan.index + 1}`)}</b>
+      ${plan.changes.map(change => `
+        <div>
+          ${escapeHtml(change.field)}:
+          <del>${escapeHtml(String(change.from).slice(0, 120))}</del>
+          →
+          <ins>${escapeHtml(String(change.to).slice(0, 180))}</ins>
+        </div>
+      `).join("")}
+    </div>
+  `).join("");
+
+  window.memoPendingRepairPlans = plans;
+  openFloatPanel("Repair Preview", `
+    <div>${plans.length}件を修復予定です。本文は変更しません。</div>
+    <button onclick="applyMemoRepairPlans()">修復実行</button>
+    <button onclick="window.memoPendingRepairPlans=[];showMemoBox()">キャンセル</button>
+    <hr>
+    ${preview}
+  `);
+}
+
+function applyMemoRepairPlans() {
+  const plans = Array.isArray(window.memoPendingRepairPlans)
+    ? window.memoPendingRepairPlans
+    : [];
+  if (!plans.length) {
+    alert("修復対象がありません。");
+    return;
+  }
+  if (!confirm(`${plans.length}件を修復しますか？`)) return;
+
+  createMemoAutoBackup("before-repair");
+  let changed = 0;
+  plans.forEach(plan => {
+    const item = memoBoxList[plan.index];
+    if (!item || isMemoLocked(item)) return;
+    plan.changes.forEach(change => {
+      item[change.field] = change.to;
+      changed++;
+    });
+    item.updatedAt = new Date().toISOString();
+  });
+
+  window.memoPendingRepairPlans = [];
+  saveMemoBoxes();
+  alert(`${changed}項目を修復しました。`);
+  showMemoBox();
+}
+
+function toggleMemoWorking(index) {
+  const item = memoBoxList[index];
+  if (!item || isMemoLocked(item)) return;
+  item.working = !item.working;
+  item.updatedAt = new Date().toISOString();
+  saveMemoBoxes();
+  showMemoBox();
+}
+
+function getMemoStatistics() {
+  const stats = {
+    total: memoBoxList.length,
+    knowledge: 0, simple: 0, document: 0, relation: 0,
+    archive: 0, favorite: 0, working: 0,
+    healthy: 0, warning: 0, error: 0,
+    repairCandidates: 0
+  };
+
+  memoBoxList.forEach((item, index) => {
+    const mode = item.memoMode || inferMemoMode(item);
+    if (stats[mode] !== undefined) stats[mode]++;
+    if (item.archivedAt || item.status === "Archived") stats.archive++;
+    if (item.pinned) stats.favorite++;
+    if (item.working) stats.working++;
+    const health = inspectMemoHealth(item);
+    stats[health.status]++;
+    if (buildMemoRepairPlan(item, index).changes.length) stats.repairCandidates++;
+  });
+  return stats;
+}
+
+function buildMemoDashboardHtml() {
+  const s = getMemoStatistics();
+  const recent = getRecentMemoItems();
+  return `
+  <div class="memo-dashboard">
+    <div class="memo-dashboard-grid">
+      <button onclick="setMemoTab('knowledge')">Knowledge<br><b>${s.knowledge}</b></button>
+      <button onclick="setMemoTab('simple')">Simple<br><b>${s.simple}</b></button>
+      <button onclick="setMemoTab('document')">Document<br><b>${s.document}</b></button>
+      <button onclick="setMemoTab('relation')">Relation<br><b>${s.relation}</b></button>
+      <button onclick="setMemoTab('archive')">Archive<br><b>${s.archive}</b></button>
+      <button onclick="memoBoxActiveTab='all';memoBoxSearch='';showMemoBox()">All<br><b>${s.total}</b></button>
+    </div>
+    <div class="memo-dashboard-row">
+      <button onclick="showMemoHealthReport()">Health<br>🟢${s.healthy} 🟡${s.warning} 🔴${s.error}</button>
+      <button onclick="showMemoRepairPreview('all')">Repair候補<br><b>${s.repairCandidates}</b></button>
+      <button onclick="memoBoxActiveTab='all';memoBoxSearch='';memoBoxStatusFilter='';window.memoWorkingOnly=true;showMemoBox()">Working<br><b>${s.working}</b></button>
+      <button onclick="memoBoxActiveTab='all';window.memoFavoriteOnly=true;showMemoBox()">Favorite<br><b>${s.favorite}</b></button>
+    </div>
+    <details>
+      <summary>最近開いたメモ</summary>
+      <div>
+        ${recent.length ? recent.map(item => `
+          <button onclick="openMemoById('${escapeJs(String(item.id || item.name || ""))}')">
+            ${escapeHtml(item.id || item.name || "メモ")}
+          </button>
+        `).join("") : '<span class="small-muted">履歴なし</span>'}
+      </div>
+    </details>
+  </div>`;
+}
+
+function selectMemoFolderImport() {
+  let input = get("memoBoxFolderImport");
+  if (!input) {
+    input = document.createElement("input");
+    input.id = "memoBoxFolderImport";
+    input.type = "file";
+    input.multiple = true;
+    input.setAttribute("webkitdirectory", "");
+    input.style.display = "none";
+    input.onchange = loadMemoFolderFiles;
+    document.body.appendChild(input);
+  }
+  input.value = "";
+  input.click();
+}
+
+async function loadMemoFolderFiles(event) {
+  const files = [...(event.target.files || [])];
+  if (!files.length) return;
+  createMemoAutoBackup("before-folder-import");
+
+  const imported = [];
+  const failures = [];
+  for (const file of files) {
+    try {
+      const result = await readMemoImportFile(file);
+      const memos = parseMemoImportText(file, result.text);
+      memos.forEach(memo => {
+        memo.sourceRelativePath = file.webkitRelativePath || file.name;
+        memo.sourceFolderPath = (file.webkitRelativePath || "").split("/").slice(0, -1).join("/");
+      });
+      imported.push(...memos);
+    } catch (error) {
+      failures.push(`${file.name}: ${error?.message || error}`);
+    }
+  }
+
+  await commitExternalMemoImport(imported, failures, "Folder");
+  event.target.value = "";
+}
+
+async function decompressZipDeflate(data) {
+  if (typeof DecompressionStream !== "function") {
+    throw new Error("このブラウザはZIP展開に必要なDecompressionStreamへ未対応です。");
+  }
+  const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+function findZipEndOfCentralDirectory(bytes) {
+  for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 65557); i--) {
+    if (bytes[i] === 0x50 && bytes[i+1] === 0x4b && bytes[i+2] === 0x05 && bytes[i+3] === 0x06) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+async function readZipEntries(file) {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const eocd = findZipEndOfCentralDirectory(bytes);
+  if (eocd < 0) throw new Error("ZIP中央ディレクトリが見つかりません。");
+
+  const entryCount = view.getUint16(eocd + 10, true);
+  const centralOffset = view.getUint32(eocd + 16, true);
+  let offset = centralOffset;
+  const decoder = new TextDecoder("utf-8");
+  const results = [];
+
+  for (let i = 0; i < entryCount; i++) {
+    if (view.getUint32(offset, true) !== 0x02014b50) throw new Error("ZIP Entryが不正です。");
+    const method = view.getUint16(offset + 10, true);
+    const compressedSize = view.getUint32(offset + 20, true);
+    const fileNameLength = view.getUint16(offset + 28, true);
+    const extraLength = view.getUint16(offset + 30, true);
+    const commentLength = view.getUint16(offset + 32, true);
+    const localOffset = view.getUint32(offset + 42, true);
+    const fileName = decoder.decode(bytes.slice(offset + 46, offset + 46 + fileNameLength));
+
+    offset += 46 + fileNameLength + extraLength + commentLength;
+    if (fileName.endsWith("/")) continue;
+
+    if (view.getUint32(localOffset, true) !== 0x04034b50) throw new Error("ZIP Local Headerが不正です。");
+    const localNameLength = view.getUint16(localOffset + 26, true);
+    const localExtraLength = view.getUint16(localOffset + 28, true);
+    const dataOffset = localOffset + 30 + localNameLength + localExtraLength;
+    const compressed = bytes.slice(dataOffset, dataOffset + compressedSize);
+
+    let data;
+    if (method === 0) data = compressed;
+    else if (method === 8) data = await decompressZipDeflate(compressed);
+    else continue;
+
+    results.push({ fileName, data });
+  }
+  return results;
+}
+
+function selectMemoZipImport() {
+  let input = get("memoBoxZipImport");
+  if (!input) {
+    input = document.createElement("input");
+    input.id = "memoBoxZipImport";
+    input.type = "file";
+    input.accept = ".zip";
+    input.style.display = "none";
+    input.onchange = loadMemoZipFile;
+    document.body.appendChild(input);
+  }
+  input.value = "";
+  input.click();
+}
+
+async function loadMemoZipFile(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  createMemoAutoBackup("before-zip-import");
+
+  const imported = [];
+  const failures = [];
+  try {
+    const entries = await readZipEntries(file);
+    for (const entry of entries) {
+      const extension = entry.fileName.split(".").pop().toLowerCase();
+      if (!["json","md","markdown","txt","html","htm","csv","tsv"].includes(extension)) continue;
+      try {
+        const text = new TextDecoder("utf-8").decode(entry.data);
+        const pseudoFile = { name: entry.fileName };
+        const memos = parseMemoImportText(pseudoFile, text);
+        memos.forEach(memo => {
+          memo.sourceRelativePath = entry.fileName;
+          memo.sourcePackageName = file.name;
+        });
+        imported.push(...memos);
+      } catch (error) {
+        failures.push(`${entry.fileName}: ${error?.message || error}`);
+      }
+    }
+  } catch (error) {
+    failures.push(`${file.name}: ${error?.message || error}`);
+  }
+
+  await commitExternalMemoImport(imported, failures, "ZIP");
+  event.target.value = "";
+}
+
+async function commitExternalMemoImport(imported, failures = [], sourceLabel = "Import") {
+  if (!imported.length) {
+    alert(`${sourceLabel}でImport可能なデータがありません。\n失敗 ${failures.length}件`);
+    return;
+  }
+
+  const analysis = analyzeMemoImport(imported);
+  const c = analysis.counts;
+  const message =
+`${sourceLabel} Preview
+合計 ${imported.length}
+Knowledge ${c.knowledge || 0}
+Simple ${c.simple || 0}
+Document ${c.document || 0}
+Relation ${c.relation || 0}
+重複候補 ${c.duplicates || 0}
+失敗 ${failures.length}
+
+追加Importしますか？`;
+
+  if (!confirm(message)) return;
+  const strategy = chooseDuplicateStrategy(c.duplicates || 0);
+  if (strategy === null) return;
+
+  createImportSnapshot();
+  const report = { success: 0, overwritten: 0, versioned: 0, skipped: 0, warnings: [], failures: failures.map(message => ({ message })) };
+
+  analysis.analyzed.forEach(entry => {
+    const memo = normalizeImportedMemoItem(entry.memo, {});
+    const existingIndex = memoBoxList.findIndex(current => getMemoDuplicateKey(current) === entry.key);
+    if (existingIndex < 0 || strategy === "new") {
+      memoBoxList.push(memo); report.success++; return;
+    }
+    if (strategy === "skip") { report.skipped++; return; }
+    if (strategy === "overwrite") {
+      if (isMemoLocked(memoBoxList[existingIndex])) {
+        report.warnings.push(`${memo.id || memo.name}: ロック中`);
+        report.skipped++;
+      } else {
+        memoBoxList[existingIndex] = { ...memoBoxList[existingIndex], ...memo, updatedAt: new Date().toISOString() };
+        report.overwritten++;
+      }
+      return;
+    }
+    if (strategy === "version") {
+      memo.version = `${memo.version || "1.0"}.1`;
+      memo.status = "Draft";
+      memoBoxList.push(memo);
+      report.versioned++;
+    }
+  });
+
+  normalizeMemoBoxes();
+  saveMemoBoxes();
+  memoBoxLastImportReport = report;
+  showMemoBox();
+  showLastMemoImportResult();
+}
+
+/* existing function wrappers */
+const memoBoxOriginalSelectMemoBoxV19 =
+  typeof selectMemoBox === "function" ? selectMemoBox : null;
+
+if (memoBoxOriginalSelectMemoBoxV19) {
+  selectMemoBox = function(index) {
+    const result = memoBoxOriginalSelectMemoBoxV19(index);
+    rememberMemoOpened(memoBoxList[index]);
+    return result;
+  };
+}
+
+const memoBoxOriginalOpenMemoByIdV19 =
+  typeof openMemoById === "function" ? openMemoById : null;
+
+if (memoBoxOriginalOpenMemoByIdV19) {
+  openMemoById = function(id) {
+    const result = memoBoxOriginalOpenMemoByIdV19(id);
+    const item = memoBoxList.find(memo =>
+      String(memo.id || "") === String(id) ||
+      String(memo.name || "") === String(id)
+    );
+    rememberMemoOpened(item);
+    return result;
+  };
+}
+
+const memoBoxOriginalLoadMemoBoxesFileV19 =
+  typeof loadMemoBoxesFile === "function" ? loadMemoBoxesFile : null;
+
+if (memoBoxOriginalLoadMemoBoxesFileV19) {
+  loadMemoBoxesFile = async function(event) {
+    createMemoAutoBackup("before-import");
+    return await memoBoxOriginalLoadMemoBoxesFileV19(event);
+  };
+}
+
+function getVisibleMemoBoxesV19() {
+  let list = getVisibleMemoBoxes();
+  if (window.memoWorkingOnly) {
+    list = list.filter(item => item.working);
+  }
+  if (window.memoFavoriteOnly) {
+    list = list.filter(item => item.pinned);
+  }
+  return list;
+}
+
+function clearMemoQuickViewFilters() {
+  window.memoWorkingOnly = false;
+  window.memoFavoriteOnly = false;
+  memoBoxActiveTab = "all";
+  showMemoBox();
+}
+
+function showMemoBoxV19() {
+  normalizeMemoBoxes();
+  const filtered = getVisibleMemoBoxesV19();
+  const memoCards = filtered.map(item => {
+    const index = memoBoxList.indexOf(item);
+    const health = inspectMemoHealth(item);
+    const healthIcon = health.status === "error" ? "🔴" : health.status === "warning" ? "🟡" : "🟢";
+    return `
+<div class="memo-card ${index === memoBoxActiveIndex ? "active" : ""}">
+  <div class="memo-card-select">
+    <input type="checkbox" ${memoBoxSelected.has(index) ? "checked" : ""}
+      onclick="event.stopPropagation()"
+      onchange="toggleMemoSelection(${index},this.checked);showMemoBox()">
+    <button class="memo-lock-btn" onclick="event.stopPropagation();toggleMemoLock(${index})">
+      ${isMemoLocked(item) ? "🔏" : "🖋"}
+    </button>
+    <button onclick="event.stopPropagation();toggleMemoPin(${index})">
+      ${item.pinned ? "⭐" : "☆"}
+    </button>
+    <button onclick="event.stopPropagation();toggleMemoWorking(${index})">
+      ${item.working ? "🛠" : "⚪"}
+    </button>
+  </div>
+  <div class="memo-card-body" onclick="selectMemoBox(${index})">
+    <div class="memo-card-title">
+      ${item.boxTitle ? `<div class="small-muted">${escapeHtml(item.boxTitle)}</div>` : ""}
+      ${item.id ? `<div class="small-muted">${escapeHtml(item.id)}</div>` : ""}
+      ${item.pinned ? "⭐ " : ""}${item.working ? "🛠 " : ""}${isMemoLocked(item) ? "🔏 " : ""}${escapeHtml(getMemoDisplayName(item))}
+    </div>
+    <div class="memo-card-meta">
+      <span>${escapeHtml(item.memoMode || inferMemoMode(item))}</span>
+      <span>${escapeHtml(item.status || "-")}</span>
+      <span>${healthIcon}${health.score}</span>
+      ${item.version ? `<span>v${escapeHtml(item.version)}</span>` : ""}
+      ${Array.isArray(item.relationships) && item.relationships.length ? `<span>🔗${item.relationships.length}</span>` : ""}
+    </div>
+    ${item.summary ? `<div class="small-muted">${escapeHtml(item.summary)}</div>` : ""}
+    ${item.updatedAt ? `<div class="small-muted">更新: ${escapeHtml(item.updatedAt)}</div>` : ""}
+    ${Array.isArray(item.relationships) && item.relationships.length
+      ? `<div class="memo-card-links">${item.relationships.map(targetId => `
+          <button class="memo-link-btn"
+            onclick="event.stopPropagation();openMemoById('${escapeJs(String(targetId))}')">
+            🔗${escapeHtml(String(targetId))}
+          </button>`).join("")}</div>`
+      : ""}
+  </div>
+  <div class="memo-card-actions">
+    <button onclick="openMemoEditor(${index})">${isMemoLocked(item) ? "🔏表示" : "🖋編集"}</button>
+    <button onclick="event.stopPropagation();copyMemoBoxByIndex(${index})">📋</button>
+  </div>
+</div>`;
+  }).join("");
+
+  const tab = (key, label) =>
+    `<button ${memoBoxActiveTab === key ? 'style="font-weight:bold"' : ""} onclick="window.memoWorkingOnly=false;window.memoFavoriteOnly=false;setMemoTab('${key}')">${label}</button>`;
+
+  openFloatPanel(`MEMO BOX v${MEMO_BOX_LTS_VERSION}`, `
+<style>
+.memo-dashboard-grid,.memo-dashboard-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}
+.memo-dashboard button{min-height:44px}
+.memo-health-item,.memo-repair-plan{border:1px solid #777;padding:8px;margin:6px 0;border-radius:6px}
+.memo-repair-plan del{opacity:.65}.memo-repair-plan ins{text-decoration:none;font-weight:bold}
+</style>
+${memoBoxDashboardVisible ? buildMemoDashboardHtml() : ""}
+<div class="memo-actions">
+<button onclick="memoBoxDashboardVisible=!memoBoxDashboardVisible;showMemoBox()">Dashboard</button>
+<button onclick="openMemoEditor()">＋新規</button>
+<button onclick="runMemoBatchAction()">一括操作 (${memoBoxSelected.size})</button>
+<button onclick="showMemoHealthReport()">Health</button>
+<button onclick="showMemoRepairPreview('all')">Repair</button>
+<button onclick="importMemoBoxes('merge')">複数Import</button>
+<button onclick="selectMemoFolderImport()">Folder</button>
+<button onclick="selectMemoZipImport()">ZIP</button>
+<button onclick="undoLastMemoImport()">↶Undo</button>
+<button onclick="restoreMemoAutoBackup()">Backup復元</button>
+</div>
+<div class="memo-actions">
+${tab("all", "All")}${tab("knowledge", "Knowledge")}${tab("simple", "Simple")}${tab("document", "Document")}${tab("relation", "Relation")}${tab("archive", "Archive")}
+<button onclick="clearMemoQuickViewFilters()">絞込解除</button>
+</div>
+<details open><summary>検索 / ソート</summary>
+<input id="memoSearch" class="input" placeholder="Title / 本文 / ID / Keywords / Summary / Relationship"
+ value="${escapeHtml(memoBoxSearch)}" oninput="memoBoxSearch=this.value;showMemoBox()">
+<select onchange="setMemoSort(this.value)">
+<option value="updated-desc" ${memoBoxSortKey === "updated-desc" ? "selected" : ""}>更新日 新しい順</option>
+<option value="updated-asc" ${memoBoxSortKey === "updated-asc" ? "selected" : ""}>更新日 古い順</option>
+<option value="created-desc" ${memoBoxSortKey === "created-desc" ? "selected" : ""}>作成日 新しい順</option>
+<option value="name-asc" ${memoBoxSortKey === "name-asc" ? "selected" : ""}>名前</option>
+<option value="status-asc" ${memoBoxSortKey === "status-asc" ? "selected" : ""}>Status</option>
+<option value="version-desc" ${memoBoxSortKey === "version-desc" ? "selected" : ""}>Version</option>
+</select>
+</details>
+<div class="small-muted">表示 ${filtered.length} / 全 ${memoBoxList.length}件　選択 ${memoBoxSelected.size}件</div>
+<div class="memo-list">${memoCards || '<div class="small-muted">該当メモなし</div>'}</div>
+<input id="memoBoxImportFile" type="file" accept=".json,.md,.markdown,.txt,.html,.htm,.csv,.tsv" multiple style="display:none" onchange="loadMemoBoxesFile(event)">
+`);
+}
+
+showMemoBox = showMemoBoxV19;
+
+window.showMemoBox = showMemoBoxV19;
+window.showMemoHealthReport = showMemoHealthReport;
+window.showMemoRepairPreview = showMemoRepairPreview;
+window.applyMemoRepairPlans = applyMemoRepairPlans;
+window.toggleMemoWorking = toggleMemoWorking;
+window.selectMemoFolderImport = selectMemoFolderImport;
+window.selectMemoZipImport = selectMemoZipImport;
+window.restoreMemoAutoBackup = restoreMemoAutoBackup;
+window.clearMemoQuickViewFilters = clearMemoQuickViewFilters;
+window.openMemoById = openMemoById;
+window.loadMemoBoxesFile = loadMemoBoxesFile;
+
+console.log("Memo Box v1.9 LTS RC loaded");
