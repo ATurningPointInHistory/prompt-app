@@ -74,6 +74,12 @@ const DEVELOPMENT_DASHBOARD_MODULE_REGISTRY = [
     title: "Advanced Search Strategy",
     statusApi: "getSearchPipelineStatus",
     validator: "validateSearchStrategyPlatform"
+  },
+  {
+    id: "IDE-125",
+    title: "Search Strategy Validation",
+    statusApi: "getSearchValidationStatus",
+    validator: "validateSearchStrategyValidationPlatform"
   }
 ];
 
