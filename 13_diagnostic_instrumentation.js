@@ -643,7 +643,7 @@
       errors: errors,
 
       nextTask: ready
-        ? "Run IDE-115 Diagnostic Validation."
+        ? "Implement Probe Manager and Performance Monitor."
         : "Complete IDE-110 public APIs.",
 
       dependsOn: [
