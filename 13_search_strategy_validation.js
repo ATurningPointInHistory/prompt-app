@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_search_strategy_validation.js
    IDE-125 Search Strategy Validation
-   Version: 1.0.0
+   Version: 1.0.1
    Status: Implementation
    Design Freeze: 2026-07-25
    ============================================================ */
@@ -9,7 +9,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-125";
-  const VERSION = "1.0.0";
+  const VERSION = "1.0.1";
   const validationRegistry = new Map();
   const datasetRegistry = new Map();
   const validationHistory = [];
@@ -175,6 +175,47 @@
     return { name:"Traceability Gate", passed:traceable || session.results.length===0, metrics:{cases:session.results.length,traceableCases:session.results.filter(r=>r.execution&&r.execution.id&&Array.isArray(r.execution.trace)).length}, severity:traceable ? "Info" : "Error" };
   }
 
+  function validateDatasetReadiness(session) {
+    const cases=asArray(session && session.dataset && session.dataset.cases);
+    const ready=cases.length>0;
+    return {
+      name:"Dataset Gate",
+      passed:ready,
+      blocked:!ready,
+      metrics:{
+        datasetId:String(session && session.dataset && session.dataset.id || "unknown"),
+        datasetVersion:String(session && session.dataset && session.dataset.version || "unknown"),
+        caseCount:cases.length,
+        minimumRequired:1
+      },
+      severity:ready ? "Info" : "Blocked",
+      reason:ready ? "" : "Validation dataset contains no executable test cases."
+    };
+  }
+
+  function buildBlockedResult(session,datasetGate,clock) {
+    const decision={status:"Blocked",severity:"Blocked",releaseAllowed:false,reason:datasetGate.reason};
+    const gates=[datasetGate];
+    const evidence=buildEvidencePackage(session,gates,decision);
+    const end=typeof performance!=="undefined"?performance.now():Date.now();
+    session.completedAt=nowIso();
+    session.durationMs=Number((end-clock).toFixed(3));
+    session.status="Blocked";
+    const result={
+      id:session.id,componentId:COMPONENT_ID,version:VERSION,status:"Blocked",severity:"Blocked",releaseAllowed:false,
+      passed:0,failed:0,warnings:0,blocked:1,total:1,health:0,progress:100,gates,
+      metricResults:gates.map(g=>({name:g.name,metrics:g.metrics})),
+      performanceResults:{runs:0,medianMs:null,p95Ms:null,maxMs:null,budgetState:"Not Measured"},
+      consistencyResults:{checked:0,differences:[],state:"Not Measured"},
+      fallbackResults:{cases:0,recovered:0,successRate:null,loopDetected:[],state:"Not Measured"},
+      evidenceReferences:clone(session.evidenceReferences),evidencePackage:evidence,investigationRequest:null,
+      blockingReasons:[datasetGate.reason],durationMs:session.durationMs,startedAt:session.startedAt,completedAt:session.completedAt,
+      datasetVersion:session.dataset.version,repositoryVersion:session.repositoryVersion,baselineVersion:session.baselineVersion
+    };
+    lastValidation=result; validationHistory.push(result); if (validationHistory.length>100) validationHistory.shift();
+    return clone(result);
+  }
+
   function buildEvidencePackage(session,gates,decision) {
     const id=`${COMPONENT_ID}-EVIDENCE-${Date.now().toString(36).toUpperCase()}`;
     const item={ id, validationSummary:{sessionId:session.id,decision,severity:decision.severity}, executionContext:{validationType:session.validationType,scope:session.scope,executionMode:session.executionMode,datasetId:session.dataset.id,datasetVersion:session.dataset.version,repositoryVersion:session.repositoryVersion,strategyVersion:session.strategyVersion,baselineVersion:session.baselineVersion,deviceProfile:session.deviceProfile,cacheCondition:session.cacheCondition}, metricResults:gates.map(g=>({name:g.name,passed:g.passed,metrics:clone(g.metrics)})), gateDecisions:clone(gates), failureEvidence:session.results.filter(r=>!r.passed||r.error).slice(0,session.policy.evidence.maxResults), reproductionData:{dataset:clone(session.dataset),request:{scope:session.scope,executionMode:session.executionMode}}, createdAt:nowIso() };
@@ -198,6 +239,8 @@
 
   async function runSearchValidation(request = {}) {
     const clock=typeof performance!=="undefined"?performance.now():Date.now(); const session=createValidationSession(request); session.status="Running"; session.startedAt=nowIso();
+    const datasetGate=validateDatasetReadiness(session);
+    if (!datasetGate.passed) return buildBlockedResult(session,datasetGate,clock);
     const cases=asArray(session.dataset.cases); for (const testCase of cases) session.results.push(await executeCase(testCase,session));
     const gates=[]; gates.push(await validateSearchStrategies(session)); gates.push(await validateSearchPipeline(session)); gates.push(validateSearchResults(session)); gates.push(validateSearchRanking(session)); gates.push(validateSearchPerformance(session)); gates.push(await validateSearchConsistency(session)); gates.push(validateFallback(session)); gates.push(validateTraceability(session));
     const decision=determineOverallDecision(gates); const evidence=buildEvidencePackage(session,gates,decision); const investigation=createInvestigationRequest(session,gates,decision);
@@ -208,7 +251,7 @@
 
   function getSearchValidationStatus() {
     const ready=typeof global.executeSearchPipeline==="function" && typeof global.getSearchStrategies==="function";
-    return { id:COMPONENT_ID,title:"Search Strategy Validation",name:"Search Quality Assurance Platform",version:VERSION,status:ready?"Ready":"Blocked",ready,health:ready?100:0,progress:100,registeredValidations:validationRegistry.size,registeredDatasets:datasetRegistry.size,historyCount:validationHistory.length,evidenceCount:evidenceRegistry.size,investigationRequestCount:investigationRequests.length,lastValidation:lastValidation?{id:lastValidation.id,status:lastValidation.status,health:lastValidation.health,completedAt:lastValidation.completedAt}:null,dependsOn:["IDE-110","IDE-115","IDE-120","Relationship Platform","Information Platform","Repository","Registry"],provides:["Search Strategy Validation","Search Quality Validation","Search Performance Validation","Search Consistency Validation","Fallback Validation","Validation Evidence","Release Gate","Investigation Handoff"],nextTask:"Run validateSearchStrategyValidationPlatform(), then calibrate Performance Baseline v1.0.",updatedAt:nowIso() };
+    return { id:COMPONENT_ID,title:"Search Strategy Validation",name:"Search Quality Assurance Platform",version:VERSION,status:ready?"Ready":"Blocked",ready,health:ready?100:0,progress:100,registeredValidations:validationRegistry.size,registeredDatasets:datasetRegistry.size,historyCount:validationHistory.length,evidenceCount:evidenceRegistry.size,investigationRequestCount:investigationRequests.length,lastValidation:lastValidation?{id:lastValidation.id,status:lastValidation.status,health:lastValidation.health,completedAt:lastValidation.completedAt}:null,dependsOn:["IDE-110","IDE-115","IDE-120","Relationship Platform","Information Platform","Repository","Registry"],provides:["Search Strategy Validation","Search Quality Validation","Search Performance Validation","Search Consistency Validation","Fallback Validation","Validation Evidence","Release Gate","Investigation Handoff"],nextTask:"Register at least one executable validation case, run runSearchValidation(), then calibrate Performance Baseline v1.0.",updatedAt:nowIso() };
   }
   function getSearchValidationHistory() { return clone(validationHistory); }
   function getValidationEvidence(id) { return clone(evidenceRegistry.get(String(id))||null); }
@@ -227,6 +270,7 @@
     check("Versioned dataset",getValidationDataset("IDE-125-SELFTEST").version==="1.0.0");
     check("Hybrid dataset registry",getValidationDatasets().some(d=>d.id==="IDE-125-SELFTEST"));
     const session=createValidationSession({datasetId:"IDE-125-SELFTEST"}); check("Validation session",session.id.startsWith("IDE-125-SESSION-"));
+    check("Empty dataset blocks execution",validateDatasetReadiness(session).blocked===true,"Empty datasets must be Blocked, not Failed or Passed");
     check("Strategy validation API",typeof validateSearchStrategies==="function");
     check("Pipeline validation API",typeof validateSearchPipeline==="function");
     check("Result validation API",typeof validateSearchResults==="function");
@@ -266,7 +310,7 @@
   registerValidationDataset({ id:"fallback-core",name:"Fallback Dataset",type:"Fallback",version:"1.0.0",cases:[] },{replace:true});
   registerValidationDataset({ id:"performance-core",name:"Performance Dataset",type:"Performance",version:"1.0.0",cases:[] },{replace:true});
 
-  const api={ createValidationSession,registerSearchValidation,getSearchValidation,getSearchValidations,setSearchValidationEnabled,registerValidationDataset,getValidationDataset,getValidationDatasets,validateSearchStrategies,validateSearchPipeline,validateSearchRanking,validateFallback,validateSearchPerformance,validateSearchConsistency,runSearchValidation,getSearchValidationStatus,getSearchValidationHistory,getValidationEvidence,getInvestigationRequests,validateSearchStrategyValidationPlatform };
+  const api={ createValidationSession,validateDatasetReadiness,registerSearchValidation,getSearchValidation,getSearchValidations,setSearchValidationEnabled,registerValidationDataset,getValidationDataset,getValidationDatasets,validateSearchStrategies,validateSearchPipeline,validateSearchRanking,validateFallback,validateSearchPerformance,validateSearchConsistency,runSearchValidation,getSearchValidationStatus,getSearchValidationHistory,getValidationEvidence,getInvestigationRequests,validateSearchStrategyValidationPlatform };
   Object.keys(api).forEach(name=>{ global[name]=api[name]; });
   global.IDE125SearchStrategyValidation={id:COMPONENT_ID,version:VERSION,...api};
 })(typeof window!=="undefined"?window:globalThis);
