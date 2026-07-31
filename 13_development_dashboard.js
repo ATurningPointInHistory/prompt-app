@@ -68,6 +68,12 @@ const DEVELOPMENT_DASHBOARD_MODULE_REGISTRY = [
     title: "Diagnostic Validation Platform",
     statusApi: "getDiagnosticValidationStatus",
     validator: "validateDiagnosticValidationPlatform"
+  },
+  {
+    id: "IDE-120",
+    title: "Advanced Search Strategy",
+    statusApi: "getSearchPipelineStatus",
+    validator: "validateSearchStrategyPlatform"
   }
 ];
 
