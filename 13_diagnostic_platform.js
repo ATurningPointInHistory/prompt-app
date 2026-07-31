@@ -2,13 +2,13 @@
    IDE-110 Diagnostic Platform Extension
    File: 13_diagnostic_platform.js
    Version: 1.1.0
-   Strategy: additive extension; existing instrumentation remains intact.
+   Strategy: standalone platform extension loaded after instrumentation.
 ============================================================ */
 (function initializeDiagnosticPlatform(global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-110";
-  const VERSION = "1.1.0";
+  const VERSION = "1.1.1";
   const MAX_RECORDS = 500;
 
   const state = {
