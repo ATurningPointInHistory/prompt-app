@@ -15,8 +15,14 @@ async function saveProjectPackage() {
       return;
     }
 
-    const zip =
-      new JSZip();
+    if (
+      typeof saveCurrentSearchEditorFile ===
+      "function"
+    ) {
+      saveCurrentSearchEditorFile();
+    }
+
+    const zip = new JSZip();
 
     const timestamp =
       new Date()
@@ -27,82 +33,123 @@ async function saveProjectPackage() {
       "<!DOCTYPE html>\n" +
       document.documentElement.outerHTML;
 
-    zip.file(
+    const references =
+      getProjectPackageReferences(html);
+
+    const requestedFiles = [
       "index.html",
-      html
-    );
+      ...references.local.map(item => item.path)
+    ];
 
-    const files =
-      typeof getExternalScriptSrcList === "function"
-        ? getExternalScriptSrcList(html)
-            .filter(src =>
-              !/^https?:\/\//i.test(src)
-            )
-            .map(src =>
-              src
-                .replace(/^\.\//, "")
-                .split("?")[0]
-            )
-        : [];
+    const savedFiles = ["index.html"];
+    const missingFiles = [];
 
-    for (const file of files) {
+    zip.file("index.html", html);
+
+    for (const item of references.local) {
 
       try {
 
-        const res =
-          await fetch(file);
+        const res = await fetch(item.fetchPath);
 
         if (!res.ok) {
+          missingFiles.push({
+            path: item.path,
+            status: res.status,
+            reason: "HTTP error"
+          });
           continue;
         }
 
-        const text =
-          await res.text();
+        const data = await res.arrayBuffer();
 
-        zip.file(
-          file,
-          text
-        );
+        zip.file(item.path, data);
+        savedFiles.push(item.path);
 
       } catch (e) {
+        missingFiles.push({
+          path: item.path,
+          status: 0,
+          reason: e && e.message
+            ? e.message
+            : "Fetch failed"
+        });
+
         console.warn(
           "package file skip:",
-          file,
+          item.path,
           e
         );
       }
     }
 
+    if (missingFiles.length) {
+      alert(
+        "プロジェクト保存を中止しました\n\n" +
+        "必須ファイルを取得できません。\n" +
+        missingFiles
+          .map(item => "- " + item.path)
+          .join("\n")
+      );
+
+      return {
+        ok: false,
+        complete: false,
+        requestedFiles,
+        savedFiles,
+        missingFiles
+      };
+    }
+
+    const projectInfo = {
+      project: "AIプロンプト生成Pro",
+      version:
+        getProjectPackageVersion(),
+      savedAt:
+        new Date().toISOString(),
+      complete: true,
+      requestedFiles,
+      savedFiles: [
+        ...savedFiles,
+        "project_info.json"
+      ],
+      missingFiles: [],
+      externalFiles:
+        references.external,
+      fileCount:
+        savedFiles.length + 1
+    };
+
     zip.file(
       "project_info.json",
-      JSON.stringify(
-        {
-          project:
-            "AIプロンプト生成Pro",
-
-          version:
-            get("versionLabel")
-              ?.innerText ||
-            "unknown",
-
-          savedAt:
-            new Date()
-              .toISOString(),
-
-          files,
-
-          fileCount:
-            files.length
-        },
-        null,
-        2
-      )
+      JSON.stringify(projectInfo, null, 2)
     );
 
-    const blob =
-      await zip.generateAsync({
-        type: "blob"
-      });
+    const blob = await zip.generateAsync({
+      type: "blob"
+    });
+
+    const verification =
+      await verifyProjectPackageBlob(
+        blob,
+        projectInfo.savedFiles
+      );
+
+    if (!verification.complete) {
+      alert(
+        "プロジェクト保存を中止しました\n\n" +
+        "ZIP生成後の整合性検証に失敗しました。\n" +
+        verification.missingFiles
+          .map(file => "- " + file)
+          .join("\n")
+      );
+
+      return {
+        ok: false,
+        complete: false,
+        verification
+      };
+    }
 
     const a =
       document.createElement("a");
@@ -122,8 +169,19 @@ async function saveProjectPackage() {
     }, 1000);
 
     alert(
-      "プロジェクト保存完了"
+      "プロジェクト保存完了\n\n" +
+      "Files : " +
+      projectInfo.fileCount + "\n" +
+      "Missing : 0\n" +
+      "Complete : true"
     );
+
+    return {
+      ok: true,
+      complete: true,
+      fileName: a.download,
+      projectInfo
+    };
 
   } catch (e) {
 
@@ -132,6 +190,110 @@ async function saveProjectPackage() {
       e.message
     );
   }
+}
+
+function getProjectPackageReferences(html) {
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(
+    String(html || ""),
+    "text/html"
+  );
+
+  const values = [];
+
+  doc.querySelectorAll("script[src]")
+    .forEach(el => values.push(
+      el.getAttribute("src")
+    ));
+
+  doc.querySelectorAll(
+    'link[rel="stylesheet"][href], link[rel~="icon"][href]'
+  ).forEach(el => values.push(
+    el.getAttribute("href")
+  ));
+
+  doc.querySelectorAll("img[src], source[src]")
+    .forEach(el => values.push(
+      el.getAttribute("src")
+    ));
+
+  const localMap = new Map();
+  const external = [];
+
+  values.filter(Boolean).forEach(value => {
+    const ref = String(value).trim();
+
+    if (
+      /^(?:https?:)?\/\//i.test(ref)
+    ) {
+      if (!external.includes(ref)) {
+        external.push(ref);
+      }
+      return;
+    }
+
+    if (/^(?:data:|blob:|#)/i.test(ref)) {
+      return;
+    }
+
+    const path = cleanProjectPackagePath(ref);
+
+    if (
+      !path ||
+      path === "index.html" ||
+      path.includes("../")
+    ) {
+      return;
+    }
+
+    if (!localMap.has(path)) {
+      localMap.set(path, {
+        path,
+        fetchPath: ref
+      });
+    }
+  });
+
+  return {
+    local: [...localMap.values()],
+    external
+  };
+}
+
+function getProjectPackageVersion() {
+  return (
+    window.APP_VERSION ||
+    window.PROJECT_INFO?.version ||
+    get("versionLabel")?.innerText ||
+    "unknown"
+  );
+}
+
+async function verifyProjectPackageBlob(
+  blob,
+  expectedFiles
+) {
+  const generatedZip =
+    await JSZip.loadAsync(blob);
+
+  const actualFiles = Object.keys(
+    generatedZip.files
+  ).filter(path =>
+    !generatedZip.files[path].dir
+  );
+
+  const missingFiles =
+    expectedFiles.filter(path =>
+      !actualFiles.includes(path)
+    );
+
+  return {
+    complete: missingFiles.length === 0,
+    expectedFiles: [...expectedFiles],
+    actualFiles,
+    missingFiles
+  };
 }
 
 function analyzeProjectJsDependency() {
@@ -454,116 +616,7 @@ function getProjectPackageFileCandidates() {
 }
 
 async function executeSaveProjectPackage() {
-
-  try {
-
-    if (typeof JSZip === "undefined") {
-      alert("JSZip が読み込まれていません");
-      return;
-    }
-
-    if (
-      typeof getProjectPackageFileText !==
-      "function"
-    ) {
-      alert(
-        "getProjectPackageFileText が見つかりません\n\n" +
-        "01_project_config.js の読み込み順を確認してください"
-      );
-      return;
-    }
-
-    saveCurrentSearchEditorFile();
-
-    const zip =
-      new JSZip();
-
-    const selectedPaths =
-      getSelectedProjectPackageFiles();
-
-    let missing = 0;
-
-    for (const file of projectPackageFiles) {
-
-      if (
-        !selectedPaths.includes(
-          file.path
-        )
-      ) {
-        continue;
-      }
-
-      try {
-
-        const zipPath =
-          getProjectPackageZipPath(
-            file
-          );
-
-        const result =
-          await getProjectPackageFileText(
-            file
-          );
-
-        if (
-          !result ||
-          !result.ok
-        ) {
-
-          missing++;
-
-          continue;
-
-        }
-
-        zip.file(
-          zipPath,
-          result.text
-        );
-
-      } catch (e) {
-
-        missing++;
-
-        console.warn(
-          "Package file failed:",
-          file.path,
-          e
-        );
-
-      }
-
-    }
-
-    const blob =
-      await zip.generateAsync({
-        type: "blob"
-      });
-
-    const fileName =
-      getProjectPackageZipName();
-
-    downloadProjectPackageBlob(
-      blob,
-      fileName
-    );
-
-    alert(
-      `Project Package 保存完了\n\n` +
-      `Selected : ${selectedPaths.length}\n` +
-      `Missing : ${missing}\n` +
-      `Size : ${Math.round(blob.size / 1024)}KB`
-    );
-
-  } catch (e) {
-
-    alert(
-      "Project Package 保存に失敗しました\n\n" +
-      e.message
-    );
-
-  }
-
+  return saveProjectPackage();
 }
 
 function getProjectPackageZipName() {
