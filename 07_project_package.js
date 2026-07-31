@@ -15,6 +15,16 @@ async function saveProjectPackage() {
       return;
     }
 
+    const zipFileName =
+      getProjectPackageZipName();
+
+    if (!zipFileName) {
+      return {
+        ok: false,
+        canceled: true
+      };
+    }
+
     if (
       typeof saveCurrentSearchEditorFile ===
       "function"
@@ -23,11 +33,6 @@ async function saveProjectPackage() {
     }
 
     const zip = new JSZip();
-
-    const timestamp =
-      new Date()
-        .toISOString()
-        .replace(/[:.]/g, "-");
 
     const html =
       "<!DOCTYPE html>\n" +
@@ -157,8 +162,7 @@ async function saveProjectPackage() {
     a.href =
       URL.createObjectURL(blob);
 
-    a.download =
-      `AIPro_Project_${timestamp}.zip`;
+    a.download = zipFileName;
 
     a.click();
 
@@ -629,22 +633,37 @@ function getProjectPackageZipName() {
       ? input.value.trim()
       : "";
 
+  const timestamp =
+    new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-");
+
+  const defaultName =
+    `AIPro_Project_${timestamp}`;
+
   if (!name) {
 
-    const timestamp =
-      new Date()
-        .toISOString()
-        .replace(/[:.]/g, "-");
+    const enteredName = prompt(
+      "保存するZIPファイル名を入力してください",
+      defaultName
+    );
 
-    name =
-      `AIPro_Project_${timestamp}`;
+    if (enteredName === null) {
+      return null;
+    }
 
+    name = enteredName.trim();
+
+  }
+
+  if (!name) {
+    name = defaultName;
   }
 
   name =
     name.replace(/[\\/:*?"<>|]/g, "_");
 
-  if (!name.endsWith(".zip")) {
+  if (!/\.zip$/i.test(name)) {
     name += ".zip";
   }
 
