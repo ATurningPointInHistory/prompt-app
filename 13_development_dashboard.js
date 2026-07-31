@@ -60,8 +60,8 @@ const DEVELOPMENT_DASHBOARD_MODULE_REGISTRY = [
   {
     id: "IDE-110",
     title: "Diagnostic Instrumentation",
-    statusApi: "getDiagnosticInstrumentationStatus",
-    validator: "validateDiagnosticInstrumentation"
+    statusApi: "getDiagnosticPlatformStatus",
+    validator: "validateDiagnosticPlatform"
   }
 ];
 
