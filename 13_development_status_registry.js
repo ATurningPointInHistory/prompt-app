@@ -16,7 +16,7 @@ const DEVELOPMENT_STATUS_BUILT_IN_DEFINITIONS = [
   { id: "IDE-060", statusApi: "getQuickCommandStatus", validator: "validateQuickCommand" },
   { id: "IDE-070", statusApi: "getAutocompleteStatus", validator: "validateAutocomplete" },
   { id: "IDE-080", statusApi: "getVirtualKeyboardStatus", validator: "validateVirtualKeyboard" },
-  { id: "IDE-110", statusApi: "getDiagnosticInstrumentationStatus", validator: "validateDiagnosticInstrumentation" }
+  { id: "IDE-110", statusApi: "getDiagnosticPlatformStatus", validator: "validateDiagnosticPlatform" }
 ];
 
 const DEVELOPMENT_STATUS_REGISTRY = [];
