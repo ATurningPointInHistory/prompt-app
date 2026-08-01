@@ -80,6 +80,12 @@ const DEVELOPMENT_DASHBOARD_MODULE_REGISTRY = [
     title: "Search Strategy Validation",
     statusApi: "getSearchValidationStatus",
     validator: "validateSearchStrategyValidationPlatform"
+  },
+  {
+    id: "IDE-130",
+    title: "Investigation Workflow",
+    statusApi: "getInvestigationWorkflowStatus",
+    validator: "validateInvestigationWorkflow"
   }
 ];
 
