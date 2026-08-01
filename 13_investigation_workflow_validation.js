@@ -1,15 +1,15 @@
 /* ============================================================
    FILE: 13_investigation_workflow_validation.js
    IDE-135 Investigation Workflow Validation
-   Version: 1.0.0
-   Status: Implementation
+   Version: 1.0.1
+   Status: Ready
    Design Freeze: 2026-07-26
    ============================================================ */
 (function (global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-135";
-  const VERSION = "1.0.0";
+  const VERSION = "1.0.1";
   const TARGET_COMPONENT = "IDE-130";
   const MAX_HISTORY = 100;
 
@@ -153,6 +153,7 @@
       expectedGateDecisions: clone(source.expectedGateDecisions || {}),
       expectedRestoreResult: text(source.expectedRestoreResult, "Not Applicable"),
       expectedClosureResult: text(source.expectedClosureResult, "Not Applicable"),
+      expectedReopenDecision: text(source.expectedReopenDecision, "Not Applicable"),
       covers: normalizeCoverage(source.covers),
       relatedRequirements: unique(source.relatedRequirements),
       relatedDecisions: unique(source.relatedDecisions),
@@ -278,7 +279,8 @@
         risk: item.risk,
         critical: item.critical,
         expectedRestoreResult: item.expectedRestoreResult,
-        expectedClosureResult: item.expectedClosureResult
+        expectedClosureResult: item.expectedClosureResult,
+      expectedReopenDecision: item.expectedReopenDecision
       };
     });
     session.executionQueue = session.plan.map(function queue(item) {
@@ -314,7 +316,8 @@
       errors: unique(source.errors),
       expectedStateSequence: clone(scenario.expectedStateSequence),
       expectedRestoreResult: scenario.expectedRestoreResult,
-      expectedClosureResult: scenario.expectedClosureResult
+      expectedClosureResult: scenario.expectedClosureResult,
+      expectedReopenDecision: scenario.expectedReopenDecision
     };
   }
 
@@ -781,7 +784,7 @@
     };
   }
 
-  function executeEvidenceGateRejection() {
+  function executeEvidenceGateRejection(context) {
     const request = global.createInvestigationRequest(baseRequest({ problemStatement: "Evidence gate rejection" }));
     const created = global.createInvestigationSession(request.id);
     const sessionId = created.session.id;
@@ -789,15 +792,19 @@
     global.transitionInvestigationState(sessionId, "Searching", "Start search state", COMPONENT_ID);
     global.transitionInvestigationState(sessionId, "Investigating", "No evidence test", COMPONENT_ID);
     const attempt = global.transitionInvestigationState(sessionId, "Analyzing", "Evidence missing", COMPONENT_ID);
-    const passed = attempt.transitioned === false && String(attempt.reason || "").toLowerCase().includes("evidence");
+    const rejectionPassed = attempt.transitioned === false && String(attempt.reason || "").toLowerCase().includes("evidence");
     global.transitionInvestigationState(sessionId, "Failed", "Validation scenario completed", COMPONENT_ID);
+    const actualStateSequence = transitionSequence(sessionId);
+    const expectedStateSequence = context && context.scenario ? asArray(context.scenario.expectedStateSequence) : [];
+    const stateSequencePassed = expectedStateSequence.length === actualStateSequence.length && expectedStateSequence.every(function same(item, index) { return item === actualStateSequence[index]; });
+    const passed = rejectionPassed && stateSequencePassed;
     return {
       passed: passed,
       detail: attempt.reason || "Evidence gate evaluated.",
-      actualStateSequence: transitionSequence(sessionId),
+      actualStateSequence: actualStateSequence,
       investigationSessionIds: [sessionId],
       evidenceResults: [{ evidenceRequired: true, transitionRejected: !attempt.transitioned }],
-      policyResults: [{ policy: "Evidence Required", passed: passed }],
+      policyResults: [{ policy: "Evidence Required", passed: rejectionPassed }, { policy: "Expected State Sequence", passed: stateSequencePassed }],
       safetyResult: { status: passed ? "Passed" : "Failed" }
     };
   }
@@ -924,7 +931,7 @@
     };
   }
 
-  function executeClosedSessionReopenRejection() {
+  function executeClosedSessionReopenRejection(context) {
     const request = global.createInvestigationRequest(baseRequest({ problemStatement: "Closed session reopen rejection" }));
     const created = global.createInvestigationSession(request.id);
     const sessionId = created.session.id;
@@ -938,14 +945,20 @@
     global.closeInvestigation(sessionId, { handoff: { responsibleWorkflow: COMPONENT_ID } });
     const reopen = global.transitionInvestigationState(sessionId, "Searching", "Invalid reopen", COMPONENT_ID);
     const finalSession = global.getInvestigationSession(sessionId);
-    const passed = finalSession.state === "Completed" && reopen.transitioned === false;
+    const reopenDecision = reopen.transitioned === false ? "Rejected" : "Allowed";
+    const expectedClosureStatus = context && context.scenario ? context.scenario.expectedClosureResult : "Closed as Inconclusive";
+    const expectedReopenDecision = context && context.scenario ? context.scenario.expectedReopenDecision : "Rejected";
+    const closureStatusPassed = finalSession.closureStatus === expectedClosureStatus;
+    const reopenDecisionPassed = reopenDecision === expectedReopenDecision;
+    const passed = finalSession.state === "Completed" && closureStatusPassed && reopenDecisionPassed;
     return {
       passed: passed,
       detail: reopen.reason || "Closed-session transition evaluated.",
       actualStateSequence: transitionSequence(sessionId),
       investigationSessionIds: [sessionId],
       evidenceReferences: [evidence.evidence.id],
-      closureResult: { status: finalSession.closureStatus, reopenRejected: !reopen.transitioned },
+      closureResult: { status: finalSession.closureStatus, reopenDecision: reopenDecision, reopenRejected: !reopen.transitioned },
+      policyResults: [{ policy: "Closure Status", passed: closureStatusPassed }, { policy: "Reopen Decision", passed: reopenDecisionPassed }],
       transitionResults: [{ from: "Completed", to: "Searching", expected: false, actual: reopen.transitioned, passed: !reopen.transitioned }]
     };
   }
@@ -1007,7 +1020,7 @@
     },
     {
       id: "IDE135-SCN-003", title: "Missing evidence gate rejection", category: "Evidence", priority: 30, risk: "High", critical: true,
-      expectedStateSequence: ["Scoped", "Searching", "Investigating"], expectedRestoreResult: "Not Applicable", expectedClosureResult: "Open",
+      expectedStateSequence: ["Scoped", "Searching", "Investigating", "Failed"], expectedRestoreResult: "Not Applicable", expectedClosureResult: "Open",
       covers: scenarioCovers({ Requirement: ["IDE-130-004"], State: ["Investigating"], Transition: ["Investigating->Analyzing Rejected"], Policy: ["Evidence Required"], Evidence: ["Missing Evidence Rejection"], Safety: ["Evidence Gate"] }),
       relatedDecisions: ["IDE-135-001", "IDE-135-005", "IDE-135-006"], execute: executeEvidenceGateRejection
     },
@@ -1037,7 +1050,7 @@
     },
     {
       id: "IDE135-SCN-008", title: "Closed workflow cannot reopen", category: "Closure", priority: 80, risk: "High", critical: true,
-      expectedRestoreResult: "Not Required", expectedClosureResult: "Reopen Rejected",
+      expectedRestoreResult: "Not Required", expectedClosureResult: "Closed as Inconclusive", expectedReopenDecision: "Rejected",
       covers: scenarioCovers({ Requirement: ["IDE-130-001", "IDE-130-010"], State: ["Completed"], Transition: ["Completed->Searching Rejected"], Policy: ["Closure Reopen Policy"], Evidence: ["Closure Evidence"], Safety: ["Closed State Protection"], Closure: ["Reopen Rejected"] }),
       relatedDecisions: ["IDE-135-001", "IDE-135-010"], execute: executeClosedSessionReopenRejection
     },
@@ -1143,15 +1156,53 @@
     };
   }
 
+  function buildInvestigationValidationLifecycle(validation, lastResult) {
+    const selfValid = Boolean(validation && validation.valid);
+    const hasResult = Boolean(lastResult);
+    const releaseAllowed = Boolean(hasResult && lastResult.releaseAllowed && lastResult.implementationReady);
+    if (!selfValid) {
+      return {
+        status: "Attention",
+        lifecycleStatus: "Implementation",
+        releaseStatus: "Blocked",
+        nextTask: "Resolve IDE-135 self-validation failures before running full validation."
+      };
+    }
+    if (!hasResult) {
+      return {
+        status: "Ready",
+        lifecycleStatus: "Implementation",
+        releaseStatus: "Not Run",
+        nextTask: "Run runInvestigationWorkflowValidation() and confirm all critical gates pass."
+      };
+    }
+    if (releaseAllowed) {
+      return {
+        status: "Ready",
+        lifecycleStatus: "Completed",
+        releaseStatus: "Official",
+        nextTask: "Begin IDE-140 Development Analytics implementation."
+      };
+    }
+    const failedGates = asArray(lastResult.gates).filter(function failed(item) { return !item.passed; }).map(function name(item) { return item.name; });
+    return {
+      status: "Attention",
+      lifecycleStatus: "Validation Failed",
+      releaseStatus: "Blocked",
+      nextTask: "Resolve failed IDE-135 gates" + (failedGates.length ? ": " + failedGates.join(", ") : "") + ", then rerun full validation."
+    };
+  }
+
   function getInvestigationWorkflowValidationStatus() {
     const validation = validateInvestigationWorkflowValidation();
+    const lifecycle = buildInvestigationValidationLifecycle(validation, state.lastResult);
     return {
       id: COMPONENT_ID,
       title: "Investigation Workflow Validation",
       name: "Investigation Workflow Validation",
       version: VERSION,
-      status: validation.valid ? "Ready" : "Attention",
-      lifecycleStatus: "Implementation",
+      status: lifecycle.status,
+      lifecycleStatus: lifecycle.lifecycleStatus,
       ready: validation.valid,
       health: state.lastResult ? state.lastResult.health : validation.health,
       progress: 100,
@@ -1165,11 +1216,12 @@
       reportCount: state.reports.size,
       evidencePackageCount: state.evidencePackages.size,
       handoffCount: state.handoffs.size,
+      releaseStatus: lifecycle.releaseStatus,
       releaseAllowed: Boolean(state.lastResult && state.lastResult.releaseAllowed),
       lastValidation: clone(state.lastResult),
       dependsOn: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "IDE-130", "Relationship Platform"],
       provides: ["Scenario Registry", "Risk-based Multi-layer Coverage", "Dependency-aware Validation Pipeline", "Evidence-linked Validation Result", "Gate-based Release Decision", "Layered Safety and Restore Gate", "Analytics-ready Validation Package", "Validation Handoff"],
-      nextTask: state.lastResult && state.lastResult.releaseAllowed ? "Complete IDE-135 and begin IDE-140 Development Analytics implementation." : "Run runInvestigationWorkflowValidation() and confirm all critical gates pass.",
+      nextTask: lifecycle.nextTask,
       lastError: clone(state.lastError),
       updatedAt: nowIso()
     };
