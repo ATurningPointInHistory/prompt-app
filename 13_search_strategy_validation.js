@@ -2,7 +2,7 @@
    FILE: 13_search_strategy_validation.js
    IDE-125 Search Strategy Validation
    Version: 1.0.2
-   Status: Implementation
+   Status: Completed
    Design Freeze: 2026-07-25
    ============================================================ */
 (function (global) {
@@ -638,7 +638,7 @@
       const failedGates = asArray(validation.gates).filter(gate => !gate.passed).map(gate => gate.name).join(", ");
       return `Resolve failed validation gates${failedGates ? `: ${failedGates}` : ""}, then rerun golden-core validation.`;
     }
-    return "Calibrate Performance Baseline v1.0 and freeze golden-core as the regression baseline.";
+    return "IDE-120 and IDE-125 are formally completed. Start IDE-130 Investigation Workflow.";
   }
 
   function getSearchValidationStatus() {
@@ -662,6 +662,10 @@
       name: "Search Quality Assurance Platform",
       version: VERSION,
       status: platformReady ? "Ready" : "Blocked",
+      lifecycleStatus: "Completed",
+      officialStatus: "Official",
+      performanceBaselineVersion: "1.0.0",
+      regressionBaselineVersion: "golden-core-v1.0.0",
       platformStatus: platformReady ? "Ready" : "Blocked",
       ready: platformReady,
       health: platformReady ? 100 : 0,
