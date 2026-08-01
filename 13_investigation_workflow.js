@@ -2,7 +2,7 @@
    FILE: 13_investigation_workflow.js
    IDE-130 Investigation Workflow
    Version: 1.0.0
-   Status: Implementation
+   Status: Completed
    Design Freeze: 2026-07-26
    ============================================================ */
 (function (global) {
@@ -1087,7 +1087,7 @@
       name: "Investigation Workflow",
       version: VERSION,
       status: validation.valid ? "Ready" : "Attention",
-      lifecycleStatus: "Implementation",
+      lifecycleStatus: "Completed",
       ready: validation.valid,
       health: validation.health,
       progress: 100,
@@ -1104,7 +1104,8 @@
       states: clone(WORKFLOW_STATES),
       dependsOn: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "Search Regression Baseline", "Relationship Platform"],
       provides: ["Investigation Request Intake", "Policy-driven State Workflow", "Progressive Scope", "Strategy Router", "Evidence Registry", "Hypothesis Graph", "Transactional Instrumentation", "Performance Investigation", "Structured Report", "Restore Gate", "Handoff Gate"],
-      nextTask: "Run IDE-130 integration scenarios, then implement IDE-135 Investigation Workflow Validation.",
+      releaseStatus: "Official",
+      nextTask: "Run IDE-135 full validation and confirm all release gates.",
       lastError: clone(state.lastError),
       updatedAt: nowIso()
     };
