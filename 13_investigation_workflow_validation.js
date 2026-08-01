@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_investigation_workflow_validation.js
    IDE-135 Investigation Workflow Validation
-   Version: 1.0.1
+   Version: 1.1.0
    Status: Ready
    Design Freeze: 2026-07-26
    ============================================================ */
@@ -9,7 +9,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-135";
-  const VERSION = "1.0.1";
+  const VERSION = "1.1.0";
   const TARGET_COMPONENT = "IDE-130";
   const MAX_HISTORY = 100;
 
@@ -700,8 +700,38 @@
       repositoryVersion: session.repositoryVersion,
       datasetVersion: session.datasetVersion
     };
+    let persistence = null;
+    if (typeof global.saveValidationResult === "function") {
+      try {
+        persistence = global.saveValidationResult(output, {
+          sourceComponent: COMPONENT_ID,
+          sourceType: "Full Investigation Workflow Validation",
+          official: output.releaseAllowed === true && output.implementationReady === true
+        });
+      } catch (error) {
+        persistence = {
+          saved: false,
+          persisted: false,
+          reason: error && error.message ? error.message : String(error)
+        };
+        session.warnings.push("Validation Result Repository persistence failed.");
+      }
+    } else {
+      persistence = {
+        saved: false,
+        persisted: false,
+        pending: true,
+        reason: "Validation Result Repository API is unavailable."
+      };
+    }
+    output.persistence = clone(persistence);
     state.lastResult = clone(output);
-    recordEvent("Validation Completed", session.id, { status: output.status, releaseAllowed: output.releaseAllowed, health: output.health });
+    recordEvent("Validation Completed", session.id, {
+      status: output.status,
+      releaseAllowed: output.releaseAllowed,
+      health: output.health,
+      persisted: Boolean(persistence && persistence.persisted)
+    });
     return output;
   }
 
@@ -1107,11 +1137,15 @@
       check("IDE-110 dependency", typeof global.getDiagnosticPlatformStatus === "function");
       check("IDE-120 dependency", typeof global.getSearchPipelineStatus === "function");
       check("IDE-125 dependency", typeof global.getSearchValidationStatus === "function");
+      check("Validation Result Repository dependency", typeof global.getValidationResultRepositoryStatus === "function" && global.getValidationResultRepositoryStatus().ready === true);
+      check("Validation persistence API", typeof global.saveValidationResult === "function" && typeof persistInvestigationWorkflowValidationResult === "function");
+      check("Persisted result restore API", typeof restoreInvestigationWorkflowValidationResult === "function" && typeof getInvestigationWorkflowValidationPersistenceStatus === "function");
       const publicApis = [
         "registerInvestigationValidationScenario", "getInvestigationValidationScenarios", "createInvestigationValidationSession",
         "buildInvestigationValidationPlan", "runInvestigationValidationScenario", "runInvestigationWorkflowValidation",
         "calculateInvestigationValidationCoverage", "evaluateInvestigationValidationGates", "buildInvestigationValidationReport",
-        "buildInvestigationValidationEvidencePackage", "buildInvestigationValidationHandoff", "getInvestigationWorkflowValidationStatus"
+        "buildInvestigationValidationEvidencePackage", "buildInvestigationValidationHandoff", "getInvestigationWorkflowValidationStatus",
+        "persistInvestigationWorkflowValidationResult", "restoreInvestigationWorkflowValidationResult", "publishInvestigationWorkflowValidationResult"
       ];
       check("Public API", publicApis.every(function exists(name) { return typeof global[name] === "function"; }));
       check("Read-only responsibility", typeof global.applyInvestigationValidationFix !== "function");
@@ -1135,6 +1169,94 @@
       progress: 100,
       checks: checks,
       validatedAt: nowIso()
+    };
+  }
+
+  function persistInvestigationWorkflowValidationResult(options) {
+    const settings = options && typeof options === "object" ? options : {};
+    const result = settings.result || state.lastResult;
+    if (!result) return { saved: false, persisted: false, reason: "IDE-135 validation result is not available." };
+    if (typeof global.saveValidationResult !== "function") {
+      return { saved: false, persisted: false, pending: true, reason: "Validation Result Repository API is unavailable." };
+    }
+    const saved = global.saveValidationResult(result, {
+      sourceComponent: COMPONENT_ID,
+      sourceType: "Full Investigation Workflow Validation",
+      official: result.releaseAllowed === true && result.implementationReady === true,
+      persist: settings.persist !== false
+    });
+    if (saved && saved.saved) {
+      state.lastResult = clone(Object.assign({}, result, { persistence: clone(saved) }));
+      touch();
+    }
+    return saved;
+  }
+
+  function restoreInvestigationWorkflowValidationResult(options) {
+    const settings = options && typeof options === "object" ? options : {};
+    if (typeof global.getLatestValidationResult !== "function") {
+      return { restored: false, pending: true, reason: "Validation Result Repository API is unavailable." };
+    }
+    const record = global.getLatestValidationResult({
+      sourceComponent: COMPONENT_ID,
+      official: settings.officialOnly === true
+    });
+    if (!record || !record.payload) {
+      return { restored: false, reason: "Persisted IDE-135 validation result was not found." };
+    }
+    state.lastResult = clone(Object.assign({}, record.payload, {
+      persistence: {
+        saved: true,
+        persisted: true,
+        restored: true,
+        recordId: record.recordId,
+        storageKey: typeof global.getValidationResultRepositoryStatus === "function"
+          ? global.getValidationResultRepositoryStatus().storage.storageKey
+          : ""
+      }
+    }));
+    touch();
+    return {
+      restored: true,
+      recordId: record.recordId,
+      validationId: record.id,
+      official: record.official === true,
+      result: clone(state.lastResult)
+    };
+  }
+
+  function publishInvestigationWorkflowValidationResult(options) {
+    const settings = options && typeof options === "object" ? options : {};
+    if (typeof global.publishValidationResultToRepository !== "function") {
+      return { published: false, pending: true, reason: "MemoBox Repository publication adapter is unavailable." };
+    }
+    const result = settings.result || state.lastResult;
+    if (!result) return { published: false, reason: "IDE-135 validation result is not available." };
+    return global.publishValidationResultToRepository(result, settings);
+  }
+
+  function getInvestigationWorkflowValidationPersistenceStatus() {
+    const repository = typeof global.getValidationResultRepositoryStatus === "function"
+      ? global.getValidationResultRepositoryStatus()
+      : null;
+    const latest = typeof global.getLatestValidationResult === "function"
+      ? global.getLatestValidationResult({ sourceComponent: COMPONENT_ID })
+      : null;
+    return {
+      componentId: COMPONENT_ID,
+      version: VERSION,
+      available: Boolean(repository && repository.ready),
+      adapter: repository && repository.storage ? repository.storage.adapter : "Unavailable",
+      storageKey: repository && repository.storage ? repository.storage.storageKey : "",
+      persistedRecordCount: typeof global.getValidationResults === "function"
+        ? global.getValidationResults({ sourceComponent: COMPONENT_ID }).length
+        : 0,
+      latestRecordId: latest ? latest.recordId : null,
+      latestValidationId: latest ? latest.id : null,
+      latestOfficial: Boolean(latest && latest.official),
+      autoPersist: true,
+      repositoryPublication: "Manual",
+      updatedAt: nowIso()
     };
   }
 
@@ -1211,11 +1333,12 @@
       registeredScenarios: state.scenarios.size,
       coverageLayers: COVERAGE_LAYERS.length,
       validationGates: VALIDATION_GATES.length,
-      sessionCount: state.sessions.size,
-      resultCount: state.results.size,
-      reportCount: state.reports.size,
-      evidencePackageCount: state.evidencePackages.size,
-      handoffCount: state.handoffs.size,
+      sessionCount: state.sessions.size || (state.lastResult ? 1 : 0),
+      resultCount: state.results.size || asArray(state.lastResult && state.lastResult.scenarioResults).length,
+      reportCount: state.reports.size || (state.lastResult && state.lastResult.report && state.lastResult.report.id ? 1 : 0),
+      evidencePackageCount: state.evidencePackages.size || (state.lastResult && state.lastResult.evidencePackage && state.lastResult.evidencePackage.id ? 1 : 0),
+      handoffCount: state.handoffs.size || (state.lastResult && state.lastResult.handoff && state.lastResult.handoff.id ? 1 : 0),
+      persistence: getInvestigationWorkflowValidationPersistenceStatus(),
       releaseStatus: lifecycle.releaseStatus,
       releaseAllowed: Boolean(state.lastResult && state.lastResult.releaseAllowed),
       lastValidation: clone(state.lastResult),
@@ -1251,6 +1374,10 @@
     addInvestigationValidationRelationship: addRelationship,
     getInvestigationValidationRelationships: getInvestigationValidationRelationships,
     getInvestigationWorkflowValidationState: getInvestigationWorkflowValidationState,
+    persistInvestigationWorkflowValidationResult: persistInvestigationWorkflowValidationResult,
+    restoreInvestigationWorkflowValidationResult: restoreInvestigationWorkflowValidationResult,
+    publishInvestigationWorkflowValidationResult: publishInvestigationWorkflowValidationResult,
+    getInvestigationWorkflowValidationPersistenceStatus: getInvestigationWorkflowValidationPersistenceStatus,
     validateInvestigationWorkflowValidation: validateInvestigationWorkflowValidation,
     getInvestigationWorkflowValidationStatus: getInvestigationWorkflowValidationStatus
   };
@@ -1264,6 +1391,12 @@
     states: SESSION_STATES,
     ...api
   });
+
+  try {
+    restoreInvestigationWorkflowValidationResult({ officialOnly: false });
+  } catch (_) {
+    /* Persistence hydration is best-effort and must not block module startup. */
+  }
 
   if (typeof global.registerDevelopmentStatus === "function") {
     global.registerDevelopmentStatus({ id: COMPONENT_ID, statusApi: "getInvestigationWorkflowValidationStatus", validator: "validateInvestigationWorkflowValidation" }, { source: "runtime", persist: false });
