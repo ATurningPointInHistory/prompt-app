@@ -107,9 +107,12 @@ async function saveProjectPackage() {
     }
 
     const projectInfo = {
+      manifestSchemaVersion: 1,
+      manifestType: "Project Package Build Manifest",
       project: "AIプロンプト生成Pro",
       version:
         getProjectPackageVersion(),
+      entryFile: "index.html",
       savedAt:
         new Date().toISOString(),
       complete: true,
@@ -121,6 +124,10 @@ async function saveProjectPackage() {
       missingFiles: [],
       externalFiles:
         references.external,
+      localFileCount:
+        savedFiles.length + 1,
+      externalFileCount:
+        references.external.length,
       fileCount:
         savedFiles.length + 1
     };
