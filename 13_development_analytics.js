@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_development_analytics.js
    IDE-140 Development Analytics
-   Version: 1.2.0
+   Version: 1.2.1
    Status: Completed / Phase 2B
    Design Freeze: 2026-07-26
 
@@ -24,7 +24,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-140";
-  const VERSION = "1.2.0";
+  const VERSION = "1.2.1";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE140_DEVELOPMENT_ANALYTICS_V1";
   const MAX_HISTORY = 100;
 
