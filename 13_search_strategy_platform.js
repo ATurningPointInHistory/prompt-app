@@ -2,7 +2,7 @@
    FILE: 13_search_strategy_platform.js
    IDE-120 Advanced Search Strategy
    Version: 1.1.1
-   Status: Implementation
+   Status: Completed
    ============================================================ */
 (function (global) {
   "use strict";
@@ -675,6 +675,8 @@
       name: "Search Strategy Platform",
       version: VERSION,
       status: validation.valid ? "Ready" : "Attention",
+      lifecycleStatus: "Completed",
+      releaseStatus: "Official",
       ready: validation.valid,
       health: validation.health,
       progress: validation.progress,
@@ -692,7 +694,7 @@
       } : null,
       dependsOn: ["IDE-040", "IDE-090", "IDE-100", "IDE-110", "Search Engine", "Repository", "Architecture Database", "Knowledge Database"],
       provides: ["Strategy Registry", "Pipeline Engine", "Score Engine", "Merge Engine", "Fallback Engine", "Search Diagnostics"],
-      nextTask: "Run IDE-125 golden-core validation and calibrate the search quality baseline.",
+      nextTask: "Use the frozen golden-core regression baseline in IDE-130 Investigation Workflow.",
       updatedAt: nowIso()
     };
   }
