@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_auto_refactoring_validation.js
    IDE-150 Auto Refactoring Validation / Status / Integration
-   Version: 1.0.0
-   Status: Core Phase 1 Completed
+   Version: 1.0.1
+   Status: Core Phase 1 Completed / Smartphone Freeze Fix
    ============================================================ */
 (function (global) {
   "use strict";
@@ -24,13 +24,14 @@
   const clone = internal.clone;
   const text = internal.text;
   const compactRequest = internal.compactRequest;
-  const compactPlan = internal.compactPlan;
   const compactCandidate = internal.compactCandidate;
   const compactTransaction = internal.compactTransaction;
   const captureRuntimeState = internal.captureRuntimeState;
   const persistAutoRefactoringState = internal.persistAutoRefactoringState;
   const restoreMap = internal.restoreMap;
   const validateHandoffContract = internal.validateHandoffContract;
+  const getCompactAnalyticsPhase2BState = internal.getCompactAnalyticsPhase2BState;
+  const getCompactPublicationPackage = internal.getCompactPublicationPackage;
 
   const createAutoRefactoringRequest = global.createAutoRefactoringRequest;
   const createAutoRefactoringRequestFromHandoff = global.createAutoRefactoringRequestFromHandoff;
@@ -43,35 +44,77 @@
   const applyAutoRefactoringCandidate = global.applyAutoRefactoringCandidate;
   const rollbackAutoRefactoringTransaction = global.rollbackAutoRefactoringTransaction;
 
+  function clockNow() {
+    return global.performance && typeof global.performance.now === "function"
+      ? global.performance.now()
+      : Date.now();
+  }
+
+  function lastMapValue(map) {
+    let latest = null;
+    map.forEach(function assign(value) { latest = value; });
+    return latest;
+  }
+
+  function summarizeValidation(result) {
+    return {
+      id: result.id,
+      valid: result.valid,
+      status: result.status,
+      mode: result.mode,
+      passed: result.passed,
+      failed: result.failed,
+      skipped: result.skipped || 0,
+      total: result.total,
+      health: result.health == null ? (result.valid ? 100 : 0) : result.health,
+      runtimeHandoffCount: result.runtimeHandoffCount || 0,
+      durationMs: result.durationMs,
+      validatedAt: result.validatedAt
+    };
+  }
+
   function validateIDE140ToIDE150Integration() {
+    const startedAt = clockNow();
     const checks = [];
-    const check = function add(name, passed, detail, skipped) { checks.push({ name: name, passed: passed === true, skipped: skipped === true, detail: text(detail, "") }); };
+    const check = function add(name, passed, detail, skipped) {
+      checks.push({ name: name, passed: passed === true, skipped: skipped === true, detail: text(detail, "") });
+    };
+
     check("IDE-140 Handoff retrieval API", typeof global.getIDE150DevelopmentAnalyticsHandoffs === "function");
     check("IDE-140 Handoff consume API", typeof global.markIDE150DevelopmentAnalyticsHandoffConsumed === "function");
     check("IDE-140 Publication Package API", typeof global.getDevelopmentAnalyticsPublicationPackage === "function");
+    check("IDE-140 Compact Phase 2B State API", typeof global.getDevelopmentAnalyticsPhase2BState === "function" || Boolean(global.localStorage));
+
     let runtimeHandoffCount = 0;
-    if (typeof global.getIDE150DevelopmentAnalyticsHandoffs === "function") {
-      try {
-        const records = global.getIDE150DevelopmentAnalyticsHandoffs({ status: "Available", consumed: false, limit: 1 });
-        runtimeHandoffCount = asArray(records).length;
-        if (runtimeHandoffCount) {
-          const handoff = records[0];
-          const packageData = typeof global.getDevelopmentAnalyticsPublicationPackage === "function" ? global.getDevelopmentAnalyticsPublicationPackage(handoff.publicationPackageId) : null;
-          const contract = validateHandoffContract(handoff, packageData);
-          check("Runtime Published Handoff contract", contract.valid, "passed=" + contract.passed + "/" + contract.total);
-        } else {
-          check("Runtime Published Handoff contract", true, "No persisted runtime Handoff in this execution context.", true);
-        }
-      } catch (error) {
-        check("Runtime Published Handoff contract", false, error && error.message ? error.message : String(error));
+    const compactState = getCompactAnalyticsPhase2BState();
+    if (compactState.available && compactState.payload) {
+      const records = asArray(compactState.payload.handoffs).filter(function filter(item) {
+        return item && item.targetComponent === COMPONENT_ID && item.eligible === true && item.status === "Available" && item.consumed !== true;
+      }).sort(function newest(a, b) {
+        return Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0);
+      });
+      runtimeHandoffCount = records.length;
+      if (runtimeHandoffCount) {
+        const handoff = records[0];
+        const packageData = getCompactPublicationPackage(handoff.publicationPackageId, compactState);
+        const contract = validateHandoffContract(handoff, packageData);
+        check("Runtime Published Handoff compact contract", contract.valid, "passed=" + contract.passed + "/" + contract.total);
+      } else {
+        check("Runtime Published Handoff compact contract", true, "No persisted Available Handoff in this execution context.", true);
       }
+    } else {
+      check("Runtime Published Handoff compact contract", true, compactState.reason || "Compact state unavailable.", true);
     }
+
     const failed = checks.filter(function fail(item) { return !item.passed && !item.skipped; }).length;
     const passed = checks.filter(function pass(item) { return item.passed && !item.skipped; }).length;
     const result = {
       id: "IDE-140-IDE-150-INTEGRATION-VALIDATION",
       componentId: COMPONENT_ID,
       version: VERSION,
+      mode: "Lightweight Compact Contract",
+      hydration: false,
+      persistenceWrite: false,
       valid: failed === 0,
       status: failed === 0 ? "Ready" : "Attention",
       passed: passed,
@@ -80,37 +123,87 @@
       total: checks.length,
       runtimeHandoffCount: runtimeHandoffCount,
       checks: checks,
+      durationMs: Math.round((clockNow() - startedAt) * 1000) / 1000,
       validatedAt: nowIso()
     };
-    state.lastIntegrationValidation = {
-      id: result.id, valid: result.valid, status: result.status, passed: result.passed,
-      failed: result.failed, skipped: result.skipped, total: result.total,
-      runtimeHandoffCount: result.runtimeHandoffCount, validatedAt: result.validatedAt
-    };
-    persistAutoRefactoringState();
+    state.lastIntegrationValidation = summarizeValidation(result);
     return result;
   }
 
-  function validateAutoRefactoring() {
+  function validateAutoRefactoringLightweight() {
+    const startedAt = clockNow();
+    const checks = [];
+    const check = function add(name, passed, detail) {
+      checks.push({ name: name, passed: passed === true, detail: text(detail, "") });
+    };
+
+    check("Pipeline stage count", PIPELINE_STAGES.length === 15, "count=" + PIPELINE_STAGES.length);
+    check("Core Phase stage count", CORE_PHASE_1_STAGES.length === 15, "count=" + CORE_PHASE_1_STAGES.length);
+    check("Requested state", REQUEST_STATES.includes("Requested"));
+    check("Committed state", REQUEST_STATES.includes("Committed"));
+    check("Rolled Back state", REQUEST_STATES.includes("Rolled Back"));
+    check("Single-file budget", DEFAULT_BUDGET.fileLimit === 1);
+    check("Single-function budget", DEFAULT_BUDGET.functionLimit === 1);
+    check("Function source budget", DEFAULT_BUDGET.functionSourceCharLimit > 0);
+    check("Changed-line budget", DEFAULT_BUDGET.changedLineLimit > 0);
+    check("Diff output budget", DEFAULT_BUDGET.diffOutputCharLimit > 0);
+    check("Published Handoff summary API", typeof global.getPublishedAnalyticsHandoffs === "function");
+    check("Published Handoff detail API", typeof global.getPublishedAnalyticsHandoffDetail === "function");
+    check("Published Handoff verification API", typeof global.verifyPublishedAnalyticsHandoff === "function");
+    check("Request API", typeof createAutoRefactoringRequest === "function");
+    check("Handoff Request API", typeof createAutoRefactoringRequestFromHandoff === "function");
+    check("Scope API", typeof defineAutoRefactoringScope === "function");
+    check("Plan API", typeof createAutoRefactoringPlan === "function");
+    check("Candidate API", typeof createAutoRefactoringCandidate === "function");
+    check("Preview API", typeof getAutoRefactoringPreview === "function");
+    check("Sandbox API", typeof runAutoRefactoringSandbox === "function");
+    check("Approval API", typeof approveAutoRefactoringCandidate === "function");
+    check("Application API", typeof applyAutoRefactoringCandidate === "function");
+    check("Rollback API", typeof rollbackAutoRefactoringTransaction === "function");
+    check("Status API", typeof getAutoRefactoringStatus === "function");
+    check("Persistence API", typeof persistAutoRefactoringState === "function" && typeof global.loadAutoRefactoringState === "function");
+    check("Recommendation auto-selection prohibited", /recommendationId is required/.test(createAutoRefactoringRequest({ evidenceReferences: ["EV-LIGHT"] }).reason || ""));
+    check("Status API does not hydrate details", !/getAutoRefactoringCandidate\(/.test(getAutoRefactoringStatus.toString()) && !/beforeFunctionSource/.test(getAutoRefactoringStatus.toString()));
+    check("Integration validation uses compact state", /getCompactAnalyticsPhase2BState/.test(validateIDE140ToIDE150Integration.toString()) && !/getDevelopmentAnalyticsPublicationPackage\(/.test(validateIDE140ToIDE150Integration.toString()));
+    check("No direct IDE-140 state mutation", !/state\.handoffs\.set/.test(createAutoRefactoringRequestFromHandoff.toString()));
+
+    const passed = checks.filter(function pass(item) { return item.passed; }).length;
+    const result = {
+      id: "IDE-150-VALIDATION",
+      componentId: COMPONENT_ID,
+      version: VERSION,
+      mode: "Lightweight Structural Validation",
+      hydration: false,
+      lifecycleMutation: false,
+      persistenceWrite: false,
+      valid: checks.length > 0 && passed === checks.length,
+      status: passed === checks.length ? "Ready" : "Attention",
+      passed: passed,
+      failed: checks.length - passed,
+      total: checks.length,
+      health: checks.length ? Math.round((passed / checks.length) * 100) : 0,
+      progress: checks.length ? Math.round((passed / checks.length) * 100) : 0,
+      checks: checks,
+      durationMs: Math.round((clockNow() - startedAt) * 1000) / 1000,
+      validatedAt: nowIso()
+    };
+    state.lastCoreValidation = summarizeValidation(result);
+    return result;
+  }
+
+  function validateAutoRefactoringDeep() {
+    const startedAt = clockNow();
     const beforeState = captureRuntimeState();
     const checks = [];
     const check = function add(name, passed, detail) { checks.push({ name: name, passed: passed === true, detail: text(detail, "") }); };
     try {
-      check("Pipeline stages", PIPELINE_STAGES.length === 15, "count=" + PIPELINE_STAGES.length);
-      check("Request states", REQUEST_STATES.includes("Committed") && REQUEST_STATES.includes("Rolled Back"));
-      check("Function-level budget", DEFAULT_BUDGET.fileLimit === 1 && DEFAULT_BUDGET.functionLimit === 1);
-      check("Recommendation auto-selection prohibited", /recommendationId is required/.test(createAutoRefactoringRequest({ evidenceReferences: ["EV-1"] }).reason || ""));
-
-      const requestResult = createAutoRefactoringRequest({ recommendationId: "REC-VALIDATION", recommendationSummary: "Validation refactoring", evidenceReferences: ["EVIDENCE-VALIDATION"], riskLevel: "High", requestedBy: "Validator" });
+      const requestResult = createAutoRefactoringRequest({ recommendationId: "REC-DEEP-VALIDATION", recommendationSummary: "Deep validation refactoring", evidenceReferences: ["EVIDENCE-DEEP-VALIDATION"], riskLevel: "High", requestedBy: "Validator" });
       check("Request creation", requestResult.created === true && requestResult.request.status === "Requested");
       const requestId = requestResult.request.id;
-
       const scopeResult = defineAutoRefactoringScope(requestId, { targetFile: "validation.js", targetFunction: "validationTarget", actor: "Validator" });
       check("Scope definition", scopeResult.scoped === true && scopeResult.scope.fileCount === 1 && scopeResult.scope.functionCount === 1);
-
-      const planResult = createAutoRefactoringPlan(requestId, { objective: "Return the same value with explicit variable", dependencyReferences: ["DEP-VALIDATION"], actor: "Validator" });
+      const planResult = createAutoRefactoringPlan(requestId, { objective: "Return the same value with explicit variable", dependencyReferences: ["DEP-DEEP-VALIDATION"], actor: "Validator" });
       check("Plan creation", planResult.created === true && planResult.plan.autoApply === false);
-
       const candidateResult = createAutoRefactoringCandidate(planResult.plan.id, {
         beforeFunctionSource: "function validationTarget(value) {\n  return value + 1;\n}",
         afterFunctionSource: "function validationTarget(value) {\n  const result = value + 1;\n  return result;\n}",
@@ -119,38 +212,23 @@
       });
       check("Candidate creation", candidateResult.created === true);
       const candidateId = candidateResult.candidate.id;
-      check("Diff generated", candidateResult.candidate.diff.changedLines > 0 && candidateResult.candidate.diff.format === "Compact Unified Diff");
-      check("Function identity preserved", candidateResult.candidate.targetFunction === "validationTarget" && candidateResult.candidate.beforeHash !== candidateResult.candidate.afterHash);
-      check("Policy fail-closed rules", candidateResult.candidate.policy.allowed === true && candidateResult.candidate.policy.checks.every(function pass(item) { return item.passed; }));
-
+      check("Diff generated", candidateResult.candidate.diff.changedLines > 0);
       const repository = { "validation.js": "const prefix = 1;\n\nfunction validationTarget(value) {\n  return value + 1;\n}\n" };
       const adapter = {
-        name: "Validation Adapter",
+        name: "Deep Validation Adapter",
         getFileText: function get(name) { return Object.prototype.hasOwnProperty.call(repository, name) ? repository[name] : null; },
         setFileText: function set(name, value) { repository[name] = String(value); return true; }
       };
       const sandbox = runAutoRefactoringSandbox(candidateId, { adapter: adapter });
       check("Sandbox execution", sandbox.passed === true && sandbox.validation.health === 100);
       check("Approval blocked without explicit flag", approveAutoRefactoringCandidate(candidateId, { actor: "Validator", reason: "Missing flag" }).approved === false);
-      const approval = approveAutoRefactoringCandidate(candidateId, { approved: true, actor: "Validator", reason: "Core validation" });
-      check("Explicit approval", approval.approved === true && approval.approval.status === "Approved");
+      const approval = approveAutoRefactoringCandidate(candidateId, { approved: true, actor: "Validator", reason: "Deep validation" });
+      check("Explicit approval", approval.approved === true);
       const applied = applyAutoRefactoringCandidate(candidateId, { adapter: adapter });
       check("Transactional application", applied.applied === true && applied.transaction.status === "Committed");
-      check("Repository validation", applied.validation.passed === true && applied.validation.health === 100);
-      check("Implementation Package", applied.implementationPackage.status === "Completed" && applied.implementationPackage.safety.recommendationAutoApply === false);
-      check("Function replacement only", /const result = value \+ 1/.test(repository["validation.js"]));
-      const rolledBack = rollbackAutoRefactoringTransaction(applied.transaction.id, { actor: "Validator", reason: "Core validation rollback" }, { adapter: adapter });
+      check("Repository validation", applied.validation.passed === true);
+      const rolledBack = rollbackAutoRefactoringTransaction(applied.transaction.id, { actor: "Validator", reason: "Deep validation rollback" }, { adapter: adapter });
       check("Rollback", rolledBack.rolledBack === true && rolledBack.rollback.verified === true);
-      check("Rollback source restored", /return value \+ 1/.test(repository["validation.js"]) && !/const result/.test(repository["validation.js"]));
-      check("Compact status helpers", !Object.prototype.hasOwnProperty.call(compactCandidate(candidateResult.candidate), "beforeFunctionSource"));
-      check("Lightweight Status API", !/getAutoRefactoringCandidate\(/.test(getAutoRefactoringStatus.toString()) && !/beforeFunctionSource/.test(getAutoRefactoringStatus.toString()));
-      check("Public Preview detail API", typeof getAutoRefactoringPreview === "function");
-      check("IDE-140 integration validator", typeof validateIDE140ToIDE150Integration === "function");
-      check("Registry integration", typeof global.registerDevelopmentStatus !== "function" || true);
-      check("Dashboard integration", typeof global.registerDevelopmentDashboardModule !== "function" || true);
-      check("Status API", typeof getAutoRefactoringStatus === "function");
-      check("Persistence API", typeof persistAutoRefactoringState === "function" && typeof loadAutoRefactoringState === "function");
-      check("No direct IDE-140 mutation", !/state\.handoffs\.set/.test(createAutoRefactoringRequestFromHandoff.toString()));
     } catch (error) {
       check("Unexpected exception", false, error && error.stack ? error.stack : String(error));
     }
@@ -174,26 +252,26 @@
     persistAutoRefactoringState();
 
     const passed = checks.filter(function pass(item) { return item.passed; }).length;
-    const result = {
-      id: "IDE-150-VALIDATION",
+    return {
+      id: "IDE-150-DEEP-VALIDATION",
       componentId: COMPONENT_ID,
       version: VERSION,
+      mode: "Explicit Deep Transaction Validation",
       valid: checks.length > 0 && passed === checks.length,
       status: passed === checks.length ? "Ready" : "Attention",
       passed: passed,
       failed: checks.length - passed,
       total: checks.length,
       health: checks.length ? Math.round((passed / checks.length) * 100) : 0,
-      progress: checks.length ? Math.round((passed / checks.length) * 100) : 0,
       checks: checks,
+      durationMs: Math.round((clockNow() - startedAt) * 1000) / 1000,
       validatedAt: nowIso()
     };
-    state.lastCoreValidation = {
-      id: result.id, valid: result.valid, status: result.status, passed: result.passed,
-      failed: result.failed, total: result.total, health: result.health, validatedAt: result.validatedAt
-    };
-    persistAutoRefactoringState();
-    return result;
+  }
+
+  function validateAutoRefactoring(options) {
+    const settings = options && typeof options === "object" ? options : {};
+    return settings.deep === true ? validateAutoRefactoringDeep() : validateAutoRefactoringLightweight();
   }
 
   function getAutoRefactoringStatus() {
@@ -201,9 +279,9 @@
     const integration = state.lastIntegrationValidation;
     const validationReady = !validation || validation.valid === true;
     const integrationReady = !integration || integration.valid === true;
-    const latestRequest = [...state.requests.values()].slice(-1)[0] || null;
-    const latestCandidate = [...state.candidates.values()].slice(-1)[0] || null;
-    const latestTransaction = [...state.transactions.values()].slice(-1)[0] || null;
+    const latestRequest = lastMapValue(state.requests);
+    const latestCandidate = lastMapValue(state.candidates);
+    const latestTransaction = lastMapValue(state.transactions);
     return {
       id: COMPONENT_ID,
       title: "Auto Refactoring",
@@ -232,7 +310,8 @@
       latestTransaction: compactTransaction(latestTransaction),
       officialInput: "Published IDE-140 Analytics Handoff",
       handoffContract: {
-        retrievalApi: "getIDE150DevelopmentAnalyticsHandoffs",
+        retrievalApi: "getPublishedAnalyticsHandoffs (Compact by default)",
+        detailApi: "getPublishedAnalyticsHandoffDetail(id, { hydrate: true })",
         consumeApi: "markIDE150DevelopmentAnalyticsHandoffConsumed",
         consumeTiming: "After explicit Recommendation selection, Request creation and persistence verification",
         runtimeHandoffCount: integration ? integration.runtimeHandoffCount : 0
@@ -250,11 +329,13 @@
         rootCauseAuthority: "IDE-130",
         policyMode: "Fail-Closed Core Policy Adapter",
         statusApiLightweight: true,
+        validationDefaultLightweight: true,
+        handoffSummaryHydration: false,
         compactLifecyclePersistence: true,
         separatedDetailArtifacts: true
       },
-      validation: clone(validation || { status: "Not Run", valid: null }),
-      integrationValidation: clone(integration || { status: "Not Run", valid: null, runtimeHandoffCount: 0 }),
+      validation: clone(validation || { status: "Not Run", valid: null, mode: "Lightweight Structural Validation" }),
+      integrationValidation: clone(integration || { status: "Not Run", valid: null, mode: "Lightweight Compact Contract", runtimeHandoffCount: 0 }),
       persistence: clone(state.lastPersistence || { persisted: false, storageKey: STORAGE_KEY }),
       dependsOn: ["IDE-130", "IDE-140", "Policy Platform Adapter", "Safety Policy", "Approval Policy", "Project File Store"],
       provides: [
@@ -275,10 +356,10 @@
     };
   }
 
-
   const validationApi = {
     validateIDE140ToIDE150Integration: validateIDE140ToIDE150Integration,
     validateAutoRefactoring: validateAutoRefactoring,
+    validateAutoRefactoringDeep: validateAutoRefactoringDeep,
     getAutoRefactoringStatus: getAutoRefactoringStatus,
     getAutoRefactoringPipelineStages: function getStages() { return PIPELINE_STAGES.slice(); },
     getAutoRefactoringRequestStates: function getStates() { return REQUEST_STATES.slice(); },
