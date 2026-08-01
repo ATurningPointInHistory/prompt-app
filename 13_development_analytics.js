@@ -1,11 +1,11 @@
 /* ============================================================
    FILE: 13_development_analytics.js
    IDE-140 Development Analytics
-   Version: 1.0.0
-   Status: Implementation / Core Phase 1
+   Version: 1.1.0
+   Status: Implementation / Phase 2A
    Design Freeze: 2026-07-26
 
-   Core Phase 1 scope:
+   Core and Phase 2A integration scope:
    - Official Validation Result intake
    - Canonical Analytics normalization
    - Governed Metric Registry
@@ -15,16 +15,16 @@
    - localStorage persistence
 
    Out of current phase:
-   - Full multi-source IDE-110..135 adapters
-   - Advanced time-series and pattern models
-   - Root Cause graph analytics
-   - Publication Gate and IDE-150 official handoff
+   - Full multi-source IDE-110..130 direct adapters
+   - Publication Gate
+   - IDE-150 official handoff
+   - Analytics Closure
    ============================================================ */
 (function initializeDevelopmentAnalytics(global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-140";
-  const VERSION = "1.0.0";
+  const VERSION = "1.1.0";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE140_DEVELOPMENT_ANALYTICS_V1";
   const MAX_HISTORY = 100;
 
@@ -578,13 +578,24 @@
       request.updatedAt = session.completedAt;
       state.requests.set(request.id, request);
       recordEvent("Analytics Snapshot Generated", { sessionId: session.id, snapshotId: snapshot.id, sourceCount: resolved.records.length });
+      let phase2A = null;
+      if (!(input && input.autoPhase2A === false) && typeof global.runDevelopmentAnalyticsPhase2A === "function") {
+        phase2A = global.runDevelopmentAnalyticsPhase2A({
+          baseSnapshotId: snapshot.id,
+          scope: clone(request.scope),
+          sourceRecordIds: clone(session.sourceRecordIds),
+          persist: true
+        });
+      }
       const persistence = persistDevelopmentAnalyticsState();
+      const phase2ACompleted = Boolean(phase2A && phase2A.status === "Completed");
       return {
         id: session.id,
         componentId: COMPONENT_ID,
         version: VERSION,
         status: "Completed",
-        corePhase: "Phase 1",
+        corePhase: phase2ACompleted ? "Phase 2A" : "Core Phase 1",
+        implementationPhase: phase2ACompleted ? "Phase 2A" : "Core Phase 1",
         sourceRecordCount: resolved.records.length,
         metricResultCount: latestMetrics.length,
         findingCount: 1,
@@ -592,13 +603,15 @@
         publicationStatus: snapshot.publicationStatus,
         handoffEligible: false,
         snapshot: clone(snapshot),
+        phase2A: clone(phase2A),
         persistence: persistence,
         completedAt: session.completedAt
       };
     } catch (error) {
       setError(error, "runDevelopmentAnalytics");
+      const failureReason = state.lastError ? state.lastError.message : (error && error.message ? error.message : String(error));
       session.state = "Failed";
-      session.errors.push(state.lastError.message);
+      session.errors.push(failureReason);
       session.completedAt = nowIso();
       persistDevelopmentAnalyticsState();
       return {
@@ -607,15 +620,23 @@
         version: VERSION,
         status: "Failed",
         corePhase: "Phase 1",
-        reason: state.lastError.message,
+        implementationPhase: "Core Phase 1",
+        reason: failureReason,
         completedAt: session.completedAt
       };
     }
   }
 
   function getDevelopmentAnalyticsSnapshot(id) {
-    if (!id) return clone(state.lastSnapshot);
-    return clone(state.snapshots.get(String(id)) || null);
+    const snapshot = !id
+      ? clone(state.lastSnapshot)
+      : clone(state.snapshots.get(String(id)) || null);
+    if (!snapshot) return null;
+    if (typeof global.getDevelopmentAnalyticsPhase2AResultBySnapshot === "function") {
+      const phase2A = global.getDevelopmentAnalyticsPhase2AResultBySnapshot(snapshot.id);
+      if (phase2A) snapshot.phase2A = phase2A;
+    }
+    return snapshot;
   }
 
   function getDevelopmentAnalyticsSnapshots(options) {
@@ -657,6 +678,11 @@
       check("Evidence reference only", true);
       check("Publication remains gated", true);
       check("IDE-150 handoff blocked before publication", true);
+      check("Phase 2A extension", typeof global.runDevelopmentAnalyticsPhase2A === "function");
+      check("Phase 2A validation", typeof global.validateDevelopmentAnalyticsPhase2A === "function");
+      check("Phase 2A status", typeof global.getDevelopmentAnalyticsPhase2AStatus === "function");
+      check("Core normalization API", typeof normalizeValidationAnalyticsRecord === "function");
+      check("Core metric calculation API", typeof calculateValidationAnalyticsMetrics === "function");
       check("Public API", typeof runDevelopmentAnalytics === "function" && typeof getDevelopmentAnalyticsStatus === "function");
     } catch (error) {
       check("Unexpected exception", false, error && error.message ? error.message : String(error));
@@ -685,9 +711,14 @@
       : [];
     const hasSource = officialRecords.length > 0;
     const hasSnapshot = Boolean(state.lastSnapshot);
+    const phase2AStatus = typeof global.getDevelopmentAnalyticsPhase2AStatus === "function"
+      ? global.getDevelopmentAnalyticsPhase2AStatus()
+      : null;
+    const phase2ACompleted = Boolean(phase2AStatus && phase2AStatus.resultCount > 0 && phase2AStatus.lastResult && phase2AStatus.lastResult.status === "Completed");
     let nextTask = "Run IDE-135 full validation to create an Official Result.";
     if (hasSource && !hasSnapshot) nextTask = "Run runDevelopmentAnalytics() to generate the first Analytics Snapshot.";
-    if (hasSnapshot) nextTask = "Implement IDE-140 Phase 2: multi-version trend, pattern and root-cause analytics.";
+    if (hasSnapshot && !phase2ACompleted) nextTask = "Run runDevelopmentAnalyticsPhase2A() to generate Trend, Pattern, Root Cause and Quality Analytics.";
+    if (phase2ACompleted) nextTask = "Implement IDE-140 Phase 2B: Publication Gate, IDE-150 handoff and Analytics Closure.";
     return {
       id: COMPONENT_ID,
       title: "Development Analytics",
@@ -695,7 +726,7 @@
       version: VERSION,
       status: validation.valid ? "Ready" : "Attention",
       lifecycleStatus: "Implementation",
-      implementationPhase: "Core Phase 1",
+      implementationPhase: phase2ACompleted ? "Phase 2A" : "Core Phase 1",
       ready: validation.valid,
       health: validation.health,
       progress: Math.round((IMPLEMENTED_STAGES.length / PIPELINE_STAGES.length) * 100),
@@ -708,7 +739,10 @@
       snapshotCount: state.snapshots.size,
       findingCount: state.findings.size,
       recommendationCount: state.recommendations.size,
-      lastSnapshot: clone(state.lastSnapshot),
+      phase2A: clone(phase2AStatus),
+      phase2ACompleted: phase2ACompleted,
+      phase2AProgress: phase2ACompleted ? 100 : 0,
+      lastSnapshot: getDevelopmentAnalyticsSnapshot(),
       publicationStatus: state.lastSnapshot ? state.lastSnapshot.publicationStatus : "Not Generated",
       releaseStatus: "Not Released",
       persistence: {
@@ -724,7 +758,12 @@
         "Validation Quality Metrics",
         "Initial Version Comparison",
         "Analytics Snapshot",
-        "Recommendation Candidate"
+        "Recommendation Candidate",
+        "Version-aware Trend Analysis",
+        "Pattern Analysis",
+        "IDE-130 Confirmed Root Cause Analytics",
+        "Quality Graph",
+        "Multi-layer Reliability Report"
       ],
       nextTask: nextTask,
       lastError: clone(state.lastError),
@@ -748,6 +787,10 @@
     getDevelopmentAnalyticsState: getDevelopmentAnalyticsState,
     persistDevelopmentAnalyticsState: persistDevelopmentAnalyticsState,
     loadDevelopmentAnalyticsState: loadDevelopmentAnalyticsState,
+    resolveOfficialValidationRecords: resolveOfficialValidationRecords,
+    normalizeValidationAnalyticsRecord: normalizeValidationAnalyticsRecord,
+    calculateValidationAnalyticsMetrics: calculateValidationAnalyticsMetrics,
+    buildVersionComparison: buildVersionComparison,
     validateDevelopmentAnalytics: validateDevelopmentAnalytics,
     getDevelopmentAnalyticsStatus: getDevelopmentAnalyticsStatus
   };
@@ -770,7 +813,7 @@
     global.registerIdeComponent({
       id: COMPONENT_ID,
       title: "Development Analytics",
-      summary: "Official Result intake, canonical analytics model and governed metric calculation.",
+      summary: "Official Result intake, governed metrics, version-aware trend, pattern, Root Cause and quality analytics.",
       icon: "📊",
       version: VERSION,
       status: "Implementation",
