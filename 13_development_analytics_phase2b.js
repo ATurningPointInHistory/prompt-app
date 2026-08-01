@@ -2,8 +2,8 @@
    FILE: 13_development_analytics_phase2b.js
    IDE-140 Development Analytics
    Phase 2B: Publication Gate / IDE-150 Handoff / Analytics Closure
-   Version: 1.0.2
-   Overall IDE-140 Version: 1.2.1
+   Version: 1.0.3
+   Overall IDE-140 Version: 1.2.2
    Status: Completed / Phase 2B
    Design Freeze: 2026-07-26
 
@@ -25,8 +25,8 @@
 
   const COMPONENT_ID = "IDE-140";
   const EXTENSION_ID = "IDE-140-PHASE-2B";
-  const VERSION = "1.0.2";
-  const OVERALL_VERSION = "1.2.1";
+  const VERSION = "1.0.3";
+  const OVERALL_VERSION = "1.2.2";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2B_V1";
   const MAX_RECORDS = 20;
   const STORAGE_SCHEMA_VERSION = 2;
@@ -1194,8 +1194,8 @@
     function check(name, passed, detail) { checks.push({ name: name, passed: passed === true, detail: text(detail, "") }); }
     try {
       check("Extension identity", EXTENSION_ID === "IDE-140-PHASE-2B");
-      check("Extension version", VERSION === "1.0.2");
-      check("Overall version", OVERALL_VERSION === "1.2.1");
+      check("Extension version", VERSION === "1.0.3");
+      check("Overall version", OVERALL_VERSION === "1.2.2");
       check("State persistence", state.loaded === true && typeof persistDevelopmentAnalyticsPhase2BState === "function");
       check("Compact Storage schema", STORAGE_SCHEMA_VERSION === 2 && typeof compactCandidate === "function" && typeof compactPublicationPackage === "function");
       check("Compact record limit", MAX_RECORDS === 20, "max=" + MAX_RECORDS);
@@ -1242,6 +1242,8 @@
       check("Storage clear API", typeof clearDevelopmentAnalyticsPhase2BStorage === "function");
       check("Public status API", typeof getDevelopmentAnalyticsPhase2BStatus === "function");
       check("Status packageCount compatibility alias", /packageCount:\s*state\.packages\.size/.test(getDevelopmentAnalyticsPhase2BStatus.toString()));
+      check("Status avoids full Analytics hydration", !/getDevelopmentAnalyticsSnapshot\(/.test(getDevelopmentAnalyticsPhase2BStatus.toString()) && !/getDevelopmentAnalyticsPhase2AResultBySnapshot\(/.test(getDevelopmentAnalyticsPhase2BStatus.toString()));
+      check("Status compacts Publication state before return", /compactPublicationPackage\(state\.lastPackage\)/.test(getDevelopmentAnalyticsPhase2BStatus.toString()) && /compactCandidate\(state\.lastCandidate\)/.test(getDevelopmentAnalyticsPhase2BStatus.toString()));
     } catch (error) {
       check("Unexpected exception", false, error && error.message ? error.message : String(error));
     }
@@ -1266,15 +1268,12 @@
 
   function getDevelopmentAnalyticsPhase2BStatus() {
     const validation = validateDevelopmentAnalyticsPhase2B();
-    const snapshot = typeof global.getDevelopmentAnalyticsSnapshot === "function" ? global.getDevelopmentAnalyticsSnapshot() : null;
-    const phase2A = snapshot && typeof global.getDevelopmentAnalyticsPhase2AResultBySnapshot === "function"
-      ? global.getDevelopmentAnalyticsPhase2AResultBySnapshot(snapshot.id)
-      : null;
-    const published = clone(state.lastPackage);
-    const candidate = clone(state.lastCandidate);
+    // Status must stay lightweight. Do not hydrate or clone the full Core Snapshot,
+    // Phase 2A result, Publication Package, or Handoff just to render status.
+    const published = state.lastPackage ? compactPublicationPackage(state.lastPackage) : null;
+    const candidate = state.lastCandidate ? compactCandidate(state.lastCandidate) : null;
     const candidatePersisted = Boolean(candidate && state.persistedCandidateIds.has(String(candidate.id)));
-    let nextTask = "Generate an IDE-140 Analytics Snapshot and Phase 2A result.";
-    if (snapshot && phase2A && !candidate && !published) nextTask = "Run runDevelopmentAnalyticsPhase2B() to prepare Publication Gate review.";
+    let nextTask = "Run runDevelopmentAnalyticsPhase2B() to prepare Publication Gate review.";
     if (candidate && candidate.status === "Awaiting Approval" && !published && candidatePersisted) nextTask = "Approve the Publication Candidate with explicit Project Owner approval.";
     if (candidate && !candidatePersisted && !published) nextTask = "Resolve Phase 2B persistence before Publication approval.";
     if (candidate && candidate.status === "Blocked" && !published) nextTask = "Resolve blocked Publication Gates and rerun Phase 2B.";
@@ -1298,9 +1297,9 @@
       publicationPackageCount: state.packages.size,
       handoffCount: state.handoffs.size,
       closureCount: state.closures.size,
-      lastCandidate: candidate ? compactCandidate(candidate) : null,
-      lastPublicationPackage: published ? compactPublicationPackage(published) : null,
-      lastClosure: clone(state.lastClosure),
+      lastCandidate: candidate,
+      lastPublicationPackage: published,
+      lastClosure: state.lastClosure ? compactClosure(state.lastClosure) : null,
       publicationStatus: published ? published.publicationStatus : candidate ? candidate.publicationStatus : "Not Generated",
       releaseStatus: published ? published.releaseStatus : "Not Released",
       approvalStatus: published ? published.approvalStatus : candidate ? candidate.approvalStatus : "Not Requested",
