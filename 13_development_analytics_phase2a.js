@@ -2,8 +2,8 @@
    FILE: 13_development_analytics_phase2a.js
    IDE-140 Development Analytics
    Phase 2A: Trend / Pattern / Root Cause / Quality Analytics
-   Version: 1.0.0
-   Overall IDE-140 Version: 1.2.1
+   Version: 1.0.1
+   Overall IDE-140 Version: 1.2.2
    Status: Implementation / Phase 2A
    Design Freeze: 2026-07-26
 
@@ -26,8 +26,8 @@
 
   const COMPONENT_ID = "IDE-140";
   const EXTENSION_ID = "IDE-140-PHASE-2A";
-  const VERSION = "1.0.0";
-  const OVERALL_VERSION = "1.2.1";
+  const VERSION = "1.0.1";
+  const OVERALL_VERSION = "1.2.2";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2A_V1";
   const MAX_RESULTS = 20;
 
@@ -1115,7 +1115,8 @@
     function check(name, passed, detail) { checks.push({ name: name, passed: passed === true, detail: text(detail, "") }); }
     try {
       check("Extension identity", EXTENSION_ID === "IDE-140-PHASE-2A");
-      check("Overall version", OVERALL_VERSION === "1.2.1");
+      check("Extension version", VERSION === "1.0.1");
+      check("Overall version", OVERALL_VERSION === "1.2.2");
       check("State persistence", state.loaded === true && typeof persistDevelopmentAnalyticsPhase2AState === "function");
       check("Official Result Repository dependency", typeof global.getValidationResults === "function");
       check("Core normalizer dependency", typeof global.normalizeValidationAnalyticsRecord === "function");
@@ -1142,6 +1143,8 @@
       check("Publication remains Draft", true);
       check("IDE-150 handoff remains blocked", true);
       check("Phase 2B Closure remains open", true);
+      check("Lightweight Result summary", typeof summarizeDevelopmentAnalyticsPhase2AResult === "function");
+      check("Status avoids full Phase 2A clone", !/clone\(state\.lastResult\)/.test(getDevelopmentAnalyticsPhase2AStatus.toString()) && /summarizeDevelopmentAnalyticsPhase2AResult\(state\.lastResult\)/.test(getDevelopmentAnalyticsPhase2AStatus.toString()));
       check("Public run API", typeof runDevelopmentAnalyticsPhase2A === "function");
       check("Public status API", typeof getDevelopmentAnalyticsPhase2AStatus === "function");
     } catch (error) {
@@ -1166,12 +1169,37 @@
     };
   }
 
+  function summarizeDevelopmentAnalyticsPhase2AResult(item) {
+    const result = item || null;
+    if (!result) return null;
+    return {
+      id: result.id,
+      componentId: result.componentId,
+      extensionId: result.extensionId,
+      version: result.version,
+      overallVersion: result.overallVersion,
+      implementationPhase: result.implementationPhase,
+      status: result.status,
+      baseSnapshotId: result.baseSnapshotId,
+      sourceRecordCount: finite(result.sourceRecordCount, asArray(result.sourceRecords).length),
+      trendCount: asArray(result.trendResults).length,
+      patternCount: asArray(result.patternResults).length,
+      findingCount: asArray(result.findings).length,
+      recommendationCount: asArray(result.recommendationCandidates).length,
+      rootCauseStatus: result.rootCauseAnalytics && result.rootCauseAnalytics.status || "Not Available",
+      publicationStatus: result.publicationStatus || "Draft",
+      handoffEligible: result.handoffEligible === true,
+      generatedAt: result.generatedAt,
+      completedAt: result.completedAt
+    };
+  }
+
   function getDevelopmentAnalyticsPhase2AStatus() {
     const validation = validateDevelopmentAnalyticsPhase2A();
     const officialRecords = typeof global.getValidationResults === "function"
       ? global.getValidationResults({ official: true, limit: MAX_RESULTS })
       : [];
-    const last = clone(state.lastResult);
+    const last = summarizeDevelopmentAnalyticsPhase2AResult(state.lastResult);
     let nextTask = "Run IDE-135 full validation to create Official Results.";
     if (officialRecords.length && !last) nextTask = "Run runDevelopmentAnalytics() or runDevelopmentAnalyticsPhase2A() to generate Phase 2A analytics.";
     if (last && last.status === "Completed") nextTask = "Implement IDE-140 Phase 2B: Publication Gate, IDE-150 handoff and Analytics Closure.";
