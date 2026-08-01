@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring.js
    IDE-150 Auto Refactoring
-   Version: 1.0.0
+   Version: 1.0.1
    Status: Core Phase 1 Completed
    Design Freeze: 2026-07-26
    ============================================================ */
@@ -9,9 +9,10 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-150";
-  const VERSION = "1.0.0";
+  const VERSION = "1.0.1";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CORE_V1";
   const STORAGE_SCHEMA_VERSION = 1;
+  const IDE140_PHASE2B_STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2B_V1";
   const ARTIFACT_PREFIX = "AI_PROMPT_OS_IDE150_ARTIFACT_V1:";
   const MAX_RECORDS = 30;
   const MAX_HISTORY = 200;
@@ -545,9 +546,50 @@
     };
   }
 
+  function getCompactAnalyticsPhase2BState() {
+    try {
+      if (typeof global.getDevelopmentAnalyticsPhase2BState === "function") {
+        const payload = global.getDevelopmentAnalyticsPhase2BState();
+        if (payload && payload.compact === true && Array.isArray(payload.handoffs)) {
+          return { available: true, source: "Runtime Compact State API", payload: payload };
+        }
+      }
+      if (global.localStorage) {
+        const raw = global.localStorage.getItem(IDE140_PHASE2B_STORAGE_KEY);
+        if (raw) {
+          const payload = JSON.parse(raw);
+          if (payload && payload.compact === true && Array.isArray(payload.handoffs)) {
+            return { available: true, source: "Compact Persistence", payload: payload };
+          }
+        }
+      }
+      return { available: false, reason: "IDE-140 Compact Phase 2B state is unavailable.", payload: null };
+    } catch (error) {
+      return {
+        available: false,
+        reason: error && error.message ? error.message : String(error),
+        payload: null
+      };
+    }
+  }
+
+  function getCompactPublicationPackage(publicationPackageId, compactStateResult) {
+    const source = compactStateResult && compactStateResult.payload
+      ? compactStateResult
+      : getCompactAnalyticsPhase2BState();
+    if (!source.available || !source.payload) return null;
+    const target = String(publicationPackageId || "");
+    return asArray(source.payload.packages).find(function find(item) {
+      return item && String(item.id || "") === target;
+    }) || null;
+  }
+
   function validateHandoffContract(handoff, publicationPackage) {
     const checks = [];
     const check = function add(name, passed, detail) { checks.push({ name: name, passed: passed === true, detail: text(detail, "") }); };
+    const recommendationCount = handoff
+      ? Math.max(asArray(handoff.recommendations).length, asArray(handoff.recommendationIds).length)
+      : 0;
     check("Handoff object", Boolean(handoff && typeof handoff === "object"));
     check("Source component", handoff && handoff.sourceComponent === "IDE-140", handoff && handoff.sourceComponent);
     check("Target component", handoff && handoff.targetComponent === COMPONENT_ID, handoff && handoff.targetComponent);
@@ -556,8 +598,8 @@
     check("Not consumed", handoff && handoff.consumed !== true);
     check("Publication package reference", Boolean(handoff && handoff.publicationPackageId));
     check("Snapshot traceability", Boolean(handoff && handoff.sourceSnapshotId && handoff.sourceHash));
-    check("Recommendation exists", Boolean(handoff && asArray(handoff.recommendations).length));
-    check("No auto apply contract", Boolean(handoff && asArray(handoff.prohibitedActions).some(function match(item) { return /auto-apply/i.test(String(item)); })));
+    check("Recommendation exists", recommendationCount > 0, "count=" + recommendationCount);
+    check("No auto apply contract", Boolean(handoff && asArray(handoff.prohibitedActions).some(function match(item) { return /auto[- ]?apply/i.test(String(item)); })));
     if (publicationPackage) {
       check("Published package", publicationPackage.publicationStatus === "Published", publicationPackage.publicationStatus);
       check("Official release", publicationPackage.releaseStatus === "Official", publicationPackage.releaseStatus);
@@ -579,52 +621,104 @@
     };
   }
 
+  function summarizeCompactHandoff(item) {
+    return {
+      id: item.id,
+      publicationPackageId: item.publicationPackageId,
+      sourceSnapshotId: item.sourceSnapshotId,
+      sourceHash: item.sourceHash,
+      sourceComponent: item.sourceComponent,
+      targetComponent: item.targetComponent,
+      status: item.status,
+      eligible: item.eligible === true,
+      consumed: item.consumed === true,
+      recommendationCount: Math.max(asArray(item.recommendations).length, asArray(item.recommendationIds).length),
+      findingCount: Math.max(asArray(item.findings).length, asArray(item.findingIds).length),
+      metricCount: Math.max(asArray(item.metricResults).length, asArray(item.metricIds).length),
+      trendCount: Math.max(asArray(item.trendResults).length, asArray(item.trendIds).length),
+      evidenceReferenceCount: Math.max(finite(item.evidenceReferenceCount, 0), asArray(item.evidenceReferences).length),
+      createdAt: item.createdAt
+    };
+  }
+
   function getPublishedAnalyticsHandoffs(options) {
     const settings = options && typeof options === "object" ? options : {};
-    if (typeof global.getIDE150DevelopmentAnalyticsHandoffs !== "function") {
-      return { available: false, reason: "IDE-140 Handoff API is unavailable.", handoffs: [] };
-    }
-    const records = global.getIDE150DevelopmentAnalyticsHandoffs({
-      status: settings.includeConsumed ? undefined : "Available",
-      consumed: settings.includeConsumed ? undefined : false,
-      limit: Math.max(1, Math.min(20, finite(settings.limit, 10)))
-    });
-    const summaries = asArray(records).map(function summarize(item) {
+    const limit = Math.max(1, Math.min(20, finite(settings.limit, 10)));
+
+    if (settings.hydrate === true || settings.details === true) {
+      if (typeof global.getIDE150DevelopmentAnalyticsHandoffs !== "function") {
+        return { available: false, reason: "IDE-140 Handoff API is unavailable.", count: 0, handoffs: [] };
+      }
+      const hydrated = global.getIDE150DevelopmentAnalyticsHandoffs({
+        status: settings.includeConsumed ? undefined : "Available",
+        consumed: settings.includeConsumed ? undefined : false,
+        limit: limit
+      });
       return {
-        id: item.id,
-        publicationPackageId: item.publicationPackageId,
-        sourceSnapshotId: item.sourceSnapshotId,
-        sourceHash: item.sourceHash,
-        sourceComponent: item.sourceComponent,
-        targetComponent: item.targetComponent,
-        status: item.status,
-        eligible: item.eligible === true,
-        consumed: item.consumed === true,
-        recommendationCount: asArray(item.recommendations).length,
-        findingCount: asArray(item.findings).length,
-        evidenceReferenceCount: asArray(item.evidenceReferences).length,
-        createdAt: item.createdAt
+        available: true,
+        mode: "Hydrated Detail",
+        hydration: true,
+        count: asArray(hydrated).length,
+        handoffs: clone(hydrated)
       };
-    });
-    return { available: true, count: summaries.length, handoffs: settings.details === true ? clone(records) : summaries };
+    }
+
+    const compactState = getCompactAnalyticsPhase2BState();
+    if (!compactState.available || !compactState.payload) {
+      return { available: false, reason: compactState.reason, count: 0, handoffs: [] };
+    }
+    const records = asArray(compactState.payload.handoffs).filter(function filter(item) {
+      if (!item || item.targetComponent !== COMPONENT_ID || item.eligible !== true) return false;
+      if (!settings.includeConsumed && (item.status !== "Available" || item.consumed === true)) return false;
+      return true;
+    }).sort(function newest(a, b) {
+      return Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0);
+    }).slice(0, limit);
+
+    return {
+      available: true,
+      mode: "Compact Summary",
+      hydration: false,
+      source: compactState.source,
+      count: records.length,
+      handoffs: settings.compactDetails === true
+        ? records.map(function compact(item) { return clone(item); })
+        : records.map(summarizeCompactHandoff)
+    };
   }
 
-  function getPublishedAnalyticsHandoffDetail(handoffId) {
-    if (typeof global.getIDE150DevelopmentAnalyticsHandoffs !== "function") return null;
-    const records = global.getIDE150DevelopmentAnalyticsHandoffs({ limit: 20 });
-    return clone(asArray(records).find(function find(item) { return item.id === String(handoffId || ""); }) || null);
+  function getPublishedAnalyticsHandoffDetail(handoffId, options) {
+    const settings = options && typeof options === "object" ? options : {};
+    const id = String(handoffId || "");
+    if (!id) return null;
+
+    const shouldHydrate = settings.compact !== true && settings.hydrate !== false;
+    if (shouldHydrate) {
+      if (typeof global.getIDE150DevelopmentAnalyticsHandoffs !== "function") return null;
+      const records = global.getIDE150DevelopmentAnalyticsHandoffs({ limit: Math.max(1, Math.min(20, finite(settings.limit, 20))) });
+      return clone(asArray(records).find(function find(item) { return item.id === id; }) || null);
+    }
+
+    const compactState = getCompactAnalyticsPhase2BState();
+    if (!compactState.available || !compactState.payload) return null;
+    return clone(asArray(compactState.payload.handoffs).find(function find(item) { return item && item.id === id; }) || null);
   }
 
-  function verifyPublishedAnalyticsHandoff(handoffId) {
-    const handoff = getPublishedAnalyticsHandoffDetail(handoffId);
+  function verifyPublishedAnalyticsHandoff(handoffId, options) {
+    const settings = options && typeof options === "object" ? options : {};
+    const compactState = getCompactAnalyticsPhase2BState();
+    const shouldHydrate = settings.compact !== true && settings.hydrate !== false;
+    const handoff = getPublishedAnalyticsHandoffDetail(handoffId, { hydrate: shouldHydrate, limit: settings.limit });
     if (!handoff) return { valid: false, reason: "Published Analytics Handoff not found.", handoffId: String(handoffId || "") };
-    let publicationPackage = null;
-    if (typeof global.getDevelopmentAnalyticsPublicationPackage === "function") {
+    let publicationPackage = getCompactPublicationPackage(handoff.publicationPackageId, compactState);
+    if (settings.hydratePackage === true && typeof global.getDevelopmentAnalyticsPublicationPackage === "function") {
       publicationPackage = global.getDevelopmentAnalyticsPublicationPackage(handoff.publicationPackageId);
     }
     const validation = validateHandoffContract(handoff, publicationPackage);
     return {
       valid: validation.valid,
+      mode: shouldHydrate ? "Hydrated Detail" : "Compact Contract",
+      hydration: shouldHydrate,
       handoff: clone(handoff),
       publicationPackage: publicationPackage ? {
         id: publicationPackage.id,
@@ -689,7 +783,7 @@
 
   function createAutoRefactoringRequestFromHandoff(input) {
     const settings = input && typeof input === "object" ? input : {};
-    const verified = verifyPublishedAnalyticsHandoff(settings.handoffId);
+    const verified = verifyPublishedAnalyticsHandoff(settings.handoffId, { hydrate: true });
     if (!verified.valid) return { created: false, reason: "Published Analytics Handoff validation failed.", verification: verified };
     const recommendations = asArray(verified.handoff.recommendations);
     const recommendationId = text(settings.recommendationId, "");
@@ -938,7 +1032,9 @@
     restoreMap: restoreMap,
     findFunctionBlock: findFunctionBlock,
     countFunctionDefinitions: countFunctionDefinitions,
-    validateHandoffContract: validateHandoffContract
+    validateHandoffContract: validateHandoffContract,
+    getCompactAnalyticsPhase2BState: getCompactAnalyticsPhase2BState,
+    getCompactPublicationPackage: getCompactPublicationPackage
   };
 
   global.IDE150AutoRefactoring = Object.assign({
