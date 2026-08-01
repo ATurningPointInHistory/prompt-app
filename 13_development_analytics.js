@@ -1,11 +1,11 @@
 /* ============================================================
    FILE: 13_development_analytics.js
    IDE-140 Development Analytics
-   Version: 1.1.0
-   Status: Implementation / Phase 2A
+   Version: 1.2.0
+   Status: Completed / Phase 2B
    Design Freeze: 2026-07-26
 
-   Core and Phase 2A integration scope:
+   Core / Phase 2A / Phase 2B integration scope:
    - Official Validation Result intake
    - Canonical Analytics normalization
    - Governed Metric Registry
@@ -13,18 +13,18 @@
    - Version-aware initial comparison
    - Analytics Snapshot / Finding / Recommendation Candidate
    - localStorage persistence
-
-   Out of current phase:
-   - Full multi-source IDE-110..130 direct adapters
-   - Publication Gate
-   - IDE-150 official handoff
+   - Gate-based Publication with explicit approval
+   - Published-only IDE-150 handoff
    - Analytics Closure
+
+   Deferred extension:
+   - Full multi-source IDE-110..130 direct adapters
    ============================================================ */
 (function initializeDevelopmentAnalytics(global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-140";
-  const VERSION = "1.1.0";
+  const VERSION = "1.2.0";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE140_DEVELOPMENT_ANALYTICS_V1";
   const MAX_HISTORY = 100;
 
@@ -52,7 +52,10 @@
     "Version Comparison",
     "Analytics Processing",
     "Dashboard Generation",
-    "Recommendation Generation"
+    "Recommendation Generation",
+    "Publication",
+    "Handoff",
+    "Closure"
   ]);
 
   const DEFAULT_METRICS = Object.freeze([
@@ -587,23 +590,35 @@
           persist: true
         });
       }
-      const persistence = persistDevelopmentAnalyticsState();
       const phase2ACompleted = Boolean(phase2A && phase2A.status === "Completed");
+      let phase2B = null;
+      if (phase2ACompleted && !(input && input.autoPhase2B === false) && typeof global.runDevelopmentAnalyticsPhase2B === "function") {
+        phase2B = global.runDevelopmentAnalyticsPhase2B({
+          baseSnapshotId: snapshot.id,
+          approval: input && (input.publicationApproval || input.approval) || null,
+          persist: true
+        });
+      }
+      const persistence = persistDevelopmentAnalyticsState();
+      const phase2BPublished = Boolean(phase2B && phase2B.publicationStatus === "Published" && phase2B.releaseStatus === "Official");
       return {
         id: session.id,
         componentId: COMPONENT_ID,
         version: VERSION,
         status: "Completed",
-        corePhase: phase2ACompleted ? "Phase 2A" : "Core Phase 1",
-        implementationPhase: phase2ACompleted ? "Phase 2A" : "Core Phase 1",
+        corePhase: phase2ACompleted ? "Phase 2B" : "Core Phase 1",
+        implementationPhase: phase2ACompleted ? "Phase 2B" : "Core Phase 1",
         sourceRecordCount: resolved.records.length,
         metricResultCount: latestMetrics.length,
         findingCount: 1,
         recommendationCount: 1,
-        publicationStatus: snapshot.publicationStatus,
-        handoffEligible: false,
+        publicationStatus: phase2B ? phase2B.publicationStatus : snapshot.publicationStatus,
+        releaseStatus: phase2BPublished ? "Official" : "Not Released",
+        handoffEligible: phase2BPublished,
+        closureStatus: phase2BPublished ? "Completed" : "Open",
         snapshot: clone(snapshot),
         phase2A: clone(phase2A),
+        phase2B: clone(phase2B),
         persistence: persistence,
         completedAt: session.completedAt
       };
@@ -636,6 +651,10 @@
       const phase2A = global.getDevelopmentAnalyticsPhase2AResultBySnapshot(snapshot.id);
       if (phase2A) snapshot.phase2A = phase2A;
     }
+    if (typeof global.getDevelopmentAnalyticsPublicationPackageBySnapshot === "function") {
+      const phase2B = global.getDevelopmentAnalyticsPublicationPackageBySnapshot(snapshot.id);
+      if (phase2B) snapshot.phase2B = phase2B;
+    }
     return snapshot;
   }
 
@@ -656,7 +675,7 @@
     function check(name, passed, detail) { checks.push({ name: name, passed: passed === true, detail: text(detail, "") }); }
     try {
       check("Pipeline model", PIPELINE_STAGES.length === 12, "count=" + PIPELINE_STAGES.length);
-      check("Implemented stages", IMPLEMENTED_STAGES.length === 9, "count=" + IMPLEMENTED_STAGES.length);
+      check("Implemented stages", IMPLEMENTED_STAGES.length === 12, "count=" + IMPLEMENTED_STAGES.length);
       check("State persistence", state.loaded === true && typeof persistDevelopmentAnalyticsState === "function");
       check("Validation Result Repository dependency", typeof global.getValidationResults === "function");
       check("Official Result intake", typeof resolveOfficialValidationRecords === "function");
@@ -681,6 +700,11 @@
       check("Phase 2A extension", typeof global.runDevelopmentAnalyticsPhase2A === "function");
       check("Phase 2A validation", typeof global.validateDevelopmentAnalyticsPhase2A === "function");
       check("Phase 2A status", typeof global.getDevelopmentAnalyticsPhase2AStatus === "function");
+      check("Phase 2B extension", typeof global.runDevelopmentAnalyticsPhase2B === "function");
+      check("Phase 2B validation", typeof global.validateDevelopmentAnalyticsPhase2B === "function");
+      check("Phase 2B status", typeof global.getDevelopmentAnalyticsPhase2BStatus === "function");
+      check("Publication approval API", typeof global.approveDevelopmentAnalyticsPublication === "function");
+      check("Published-only IDE-150 Handoff API", typeof global.getIDE150DevelopmentAnalyticsHandoffs === "function");
       check("Core normalization API", typeof normalizeValidationAnalyticsRecord === "function");
       check("Core metric calculation API", typeof calculateValidationAnalyticsMetrics === "function");
       check("Public API", typeof runDevelopmentAnalytics === "function" && typeof getDevelopmentAnalyticsStatus === "function");
@@ -715,18 +739,25 @@
       ? global.getDevelopmentAnalyticsPhase2AStatus()
       : null;
     const phase2ACompleted = Boolean(phase2AStatus && phase2AStatus.resultCount > 0 && phase2AStatus.lastResult && phase2AStatus.lastResult.status === "Completed");
+    const phase2BStatus = typeof global.getDevelopmentAnalyticsPhase2BStatus === "function"
+      ? global.getDevelopmentAnalyticsPhase2BStatus()
+      : null;
+    const phase2BImplemented = Boolean(phase2BStatus && phase2BStatus.ready === true);
+    const phase2BPublished = Boolean(phase2BStatus && phase2BStatus.publicationStatus === "Published" && phase2BStatus.releaseStatus === "Official");
     let nextTask = "Run IDE-135 full validation to create an Official Result.";
     if (hasSource && !hasSnapshot) nextTask = "Run runDevelopmentAnalytics() to generate the first Analytics Snapshot.";
     if (hasSnapshot && !phase2ACompleted) nextTask = "Run runDevelopmentAnalyticsPhase2A() to generate Trend, Pattern, Root Cause and Quality Analytics.";
-    if (phase2ACompleted) nextTask = "Implement IDE-140 Phase 2B: Publication Gate, IDE-150 handoff and Analytics Closure.";
+    if (phase2ACompleted && !phase2BStatus) nextTask = "Load IDE-140 Phase 2B and prepare Publication Gate review.";
+    if (phase2BStatus) nextTask = phase2BStatus.nextTask;
+    if (phase2BPublished) nextTask = "Begin IDE-150 Auto Refactoring implementation using the Published Analytics Handoff.";
     return {
       id: COMPONENT_ID,
       title: "Development Analytics",
       name: "Development Analytics",
       version: VERSION,
       status: validation.valid ? "Ready" : "Attention",
-      lifecycleStatus: "Implementation",
-      implementationPhase: phase2ACompleted ? "Phase 2A" : "Core Phase 1",
+      lifecycleStatus: phase2BImplemented ? "Completed" : "Implementation",
+      implementationPhase: phase2BImplemented ? "Phase 2B" : phase2ACompleted ? "Phase 2A" : "Core Phase 1",
       ready: validation.valid,
       health: validation.health,
       progress: Math.round((IMPLEMENTED_STAGES.length / PIPELINE_STAGES.length) * 100),
@@ -742,9 +773,16 @@
       phase2A: clone(phase2AStatus),
       phase2ACompleted: phase2ACompleted,
       phase2AProgress: phase2ACompleted ? 100 : 0,
+      phase2B: clone(phase2BStatus),
+      phase2BImplemented: phase2BImplemented,
+      phase2BProgress: phase2BImplemented ? 100 : 0,
       lastSnapshot: getDevelopmentAnalyticsSnapshot(),
-      publicationStatus: state.lastSnapshot ? state.lastSnapshot.publicationStatus : "Not Generated",
-      releaseStatus: "Not Released",
+      publicationStatus: phase2BStatus ? phase2BStatus.publicationStatus : state.lastSnapshot ? state.lastSnapshot.publicationStatus : "Not Generated",
+      releaseStatus: phase2BStatus ? phase2BStatus.releaseStatus : "Not Released",
+      approvalStatus: phase2BStatus ? phase2BStatus.approvalStatus : "Not Requested",
+      handoffEligible: Boolean(phase2BStatus && phase2BStatus.handoffEligible),
+      handoffStatus: phase2BStatus ? phase2BStatus.handoffStatus : "Not Available",
+      closureStatus: phase2BStatus ? phase2BStatus.closureStatus : "Open",
       persistence: {
         adapter: "localStorage",
         storageKey: STORAGE_KEY,
@@ -756,14 +794,13 @@
         "Canonical Analytics Model",
         "Governed Metric Registry",
         "Validation Quality Metrics",
-        "Initial Version Comparison",
-        "Analytics Snapshot",
-        "Recommendation Candidate",
-        "Version-aware Trend Analysis",
-        "Pattern Analysis",
+        "Version-aware Trend and Pattern Analytics",
         "IDE-130 Confirmed Root Cause Analytics",
-        "Quality Graph",
-        "Multi-layer Reliability Report"
+        "Quality Graph and Reliability Report",
+        "Gate-based Publication",
+        "Published Analytics Package",
+        "Published-only IDE-150 Handoff",
+        "Analytics Closure"
       ],
       nextTask: nextTask,
       lastError: clone(state.lastError),
@@ -813,12 +850,12 @@
     global.registerIdeComponent({
       id: COMPONENT_ID,
       title: "Development Analytics",
-      summary: "Official Result intake, governed metrics, version-aware trend, pattern, Root Cause and quality analytics.",
+      summary: "Official Result intake, governed analytics, gate-based publication, IDE-150 handoff and closure.",
       icon: "📊",
       version: VERSION,
-      status: "Implementation",
+      status: "Completed",
       ready: true,
-      progress: Math.round((IMPLEMENTED_STAGES.length / PIPELINE_STAGES.length) * 100),
+      progress: 100,
       health: 100,
       validator: "validateDevelopmentAnalytics",
       probe: "getDevelopmentAnalyticsStatus",
