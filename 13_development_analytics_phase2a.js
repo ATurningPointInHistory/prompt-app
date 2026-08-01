@@ -3,7 +3,7 @@
    IDE-140 Development Analytics
    Phase 2A: Trend / Pattern / Root Cause / Quality Analytics
    Version: 1.0.0
-   Overall IDE-140 Version: 1.1.0
+   Overall IDE-140 Version: 1.2.0
    Status: Implementation / Phase 2A
    Design Freeze: 2026-07-26
 
@@ -27,7 +27,7 @@
   const COMPONENT_ID = "IDE-140";
   const EXTENSION_ID = "IDE-140-PHASE-2A";
   const VERSION = "1.0.0";
-  const OVERALL_VERSION = "1.1.0";
+  const OVERALL_VERSION = "1.2.0";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2A_V1";
   const MAX_RESULTS = 20;
 
@@ -1115,7 +1115,7 @@
     function check(name, passed, detail) { checks.push({ name: name, passed: passed === true, detail: text(detail, "") }); }
     try {
       check("Extension identity", EXTENSION_ID === "IDE-140-PHASE-2A");
-      check("Overall version", OVERALL_VERSION === "1.1.0");
+      check("Overall version", OVERALL_VERSION === "1.2.0");
       check("State persistence", state.loaded === true && typeof persistDevelopmentAnalyticsPhase2AState === "function");
       check("Official Result Repository dependency", typeof global.getValidationResults === "function");
       check("Core normalizer dependency", typeof global.normalizeValidationAnalyticsRecord === "function");
