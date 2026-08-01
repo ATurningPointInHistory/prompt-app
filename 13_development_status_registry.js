@@ -16,7 +16,11 @@ const DEVELOPMENT_STATUS_BUILT_IN_DEFINITIONS = [
   { id: "IDE-060", statusApi: "getQuickCommandStatus", validator: "validateQuickCommand" },
   { id: "IDE-070", statusApi: "getAutocompleteStatus", validator: "validateAutocomplete" },
   { id: "IDE-080", statusApi: "getVirtualKeyboardStatus", validator: "validateVirtualKeyboard" },
-  { id: "IDE-110", statusApi: "getDiagnosticPlatformStatus", validator: "validateDiagnosticPlatform" }
+  { id: "IDE-110", statusApi: "getDiagnosticPlatformStatus", validator: "validateDiagnosticPlatform" },
+  { id: "IDE-115", statusApi: "getDiagnosticValidationStatus", validator: "validateDiagnosticValidationPlatform" },
+  { id: "IDE-120", statusApi: "getSearchPipelineStatus", validator: "validateSearchStrategyPlatform" },
+  { id: "IDE-125", statusApi: "getSearchValidationStatus", validator: "validateSearchStrategyValidationPlatform" },
+  { id: "IDE-130", statusApi: "getInvestigationWorkflowStatus", validator: "validateInvestigationWorkflow" }
 ];
 
 const DEVELOPMENT_STATUS_REGISTRY = [];
