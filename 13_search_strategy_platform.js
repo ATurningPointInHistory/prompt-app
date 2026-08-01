@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_search_strategy_platform.js
    IDE-120 Advanced Search Strategy
-   Version: 1.1.0
+   Version: 1.1.1
    Status: Implementation
    ============================================================ */
 (function (global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-120";
-  const VERSION = "1.1.0";
+  const VERSION = "1.1.1";
   const DEFAULT_SEARCH_POLICY = Object.freeze({
     limit: 10,
     candidateLimit: 200,
@@ -328,9 +328,143 @@
     return execution;
   }
 
+  function extractKnowledgeIdentity(value) {
+    const text = String(value == null ? "" : value).trim();
+    if (!text) return "";
+    if (typeof global.extractKnowledgeIdFromTitle === "function") {
+      const resolved = String(global.extractKnowledgeIdFromTitle(text) || "").trim();
+      if (resolved) return resolved;
+    }
+    const match = text.match(/[A-Z][A-Z0-9_]*-\d+/);
+    return match ? String(match[0]).trim() : "";
+  }
+
+  function normalizeKnowledgeRecord(object = {}, index = 0) {
+    const rawId = object.id || object.koId || object.objectId || object.knowledgeId || "";
+    const title = String(object.title || object.name || object.boxTitle || "").trim();
+    const id = String(rawId || extractKnowledgeIdentity(title)).trim();
+    if (!id) return null;
+    const relationships = unique(object.relationships);
+    const keywords = unique(object.keywords || object.tags);
+    return {
+      ...object,
+      id,
+      objectId: id,
+      knowledgeId: id,
+      koId: id,
+      type: "knowledge",
+      name: title || id,
+      title: title || id,
+      file: String(object.file || "MemoBox"),
+      summary: String(object.summary || ""),
+      series: String(object.series || ""),
+      category: String(object.category || ""),
+      knowledgeType: String(object.knowledgeType || object.type || ""),
+      status: String(object.status || ""),
+      version: String(object.version || ""),
+      relationships,
+      keywords,
+      repositoryIndex: finiteNumber(object.index, index),
+      data: { ...object, id }
+    };
+  }
+
+  function getKnowledgeRepositoryRecords() {
+    let objects = [];
+    try {
+      if (typeof global.buildKnowledgeRepository === "function") {
+        const database = global.buildKnowledgeRepository();
+        objects = asArray(database && database.objects);
+      }
+    } catch (error) {
+      diagnostics.push({ strategyId: "knowledge-repository", severity: "warning", message: String(error && error.message || error) });
+    }
+
+    if (!objects.length && typeof global.getMemoBoxList === "function") {
+      try { objects = asArray(global.getMemoBoxList()); } catch (_) { objects = []; }
+    }
+
+    const normalized = objects
+      .map((object, index) => normalizeKnowledgeRecord(object, index))
+      .filter(Boolean);
+
+    const byId = new Map();
+    normalized.forEach(item => {
+      const key = normalizeText(item.id);
+      if (!key) return;
+      const current = byId.get(key);
+      if (!current) {
+        byId.set(key, item);
+        return;
+      }
+      const currentScore = Number(Boolean(current.summary)) + Number(asArray(current.relationships).length > 0) + Number(Boolean(current.version));
+      const incomingScore = Number(Boolean(item.summary)) + Number(asArray(item.relationships).length > 0) + Number(Boolean(item.version));
+      if (incomingScore > currentScore) byId.set(key, item);
+    });
+    return [...byId.values()];
+  }
+
+  function getKnowledgeSearchValues(record = {}) {
+    return [
+      record.id,
+      record.name,
+      record.title,
+      record.summary,
+      record.series,
+      record.category,
+      record.knowledgeType,
+      record.status,
+      record.version,
+      ...asArray(record.keywords),
+      ...asArray(record.relationships)
+    ].map(normalizeText).filter(Boolean);
+  }
+
+  function calculateKnowledgeSearchScore(record, query) {
+    const q = normalizeText(query);
+    if (!q) return 0;
+    const id = normalizeText(record.id);
+    const title = normalizeText(record.title || record.name);
+    const relationships = asArray(record.relationships).map(normalizeText);
+    const metadata = [record.summary, record.series, record.category, record.knowledgeType, record.status, record.version, ...asArray(record.keywords)].map(normalizeText);
+
+    if (id === q) return 1000;
+    if (title === q) return 950;
+    if (id.startsWith(q)) return 875;
+    if (title.startsWith(q)) return 825;
+    if (id.includes(q)) return 775;
+    if (title.includes(q)) return 700;
+    if (relationships.some(value => value === q)) return 675;
+    if (relationships.some(value => value.includes(q))) return 600;
+    if (metadata.some(value => value.includes(q))) return 525;
+    if (getKnowledgeSearchValues(record).some(value => value.includes(q))) return 450;
+    return -1;
+  }
+
+  function knowledgeSearchAdapter(query, options = {}) {
+    const q = normalizeText(query);
+    const candidateLimit = Math.max(1, finiteNumber(options.candidateLimit, DEFAULT_SEARCH_POLICY.candidateLimit));
+    return getKnowledgeRepositoryRecords()
+      .map(record => {
+        const rawScore = calculateKnowledgeSearchScore(record, q);
+        const matchScore = clamp(rawScore / 1000);
+        return {
+          ...record,
+          rawScore,
+          score: rawScore,
+          matchScore,
+          confidence: clamp(0.55 + (matchScore * 0.42))
+        };
+      })
+      .filter(record => !q || record.rawScore >= 0)
+      .sort((a, b) => b.rawScore - a.rawScore || String(a.id).localeCompare(String(b.id)))
+      .slice(0, candidateLimit);
+  }
+
   function projectSearchAdapter(query, options = {}) {
     if (typeof global.searchProject !== "function") return [];
     const candidateLimit = Math.max(1, finiteNumber(options.candidateLimit, DEFAULT_SEARCH_POLICY.candidateLimit));
+    const q = normalizeText(query);
     return asArray(global.searchProject(query, { ...options, limit: candidateLimit })).map(item => {
       const rawScore = finiteNumber(item && item.score, 0);
       const matchScore = clamp(rawScore / 1000);
@@ -341,12 +475,12 @@
         matchScore,
         confidence: clamp(0.50 + (matchScore * 0.45))
       };
-    });
+    }).filter(item => !q || Number(item.rawScore) > 0);
   }
 
   function getIdentityFields(item = {}) {
     const data = item.data && typeof item.data === "object" ? item.data : {};
-    const id = String(item.id || "");
+    const id = String(item.id || "").trim();
     return unique([
       item.objectId, item.knowledgeId, item.koId, item.key,
       data.id, data.key, data.koId, data.objectId,
@@ -365,9 +499,9 @@
     const preferred = [item.objectId, item.knowledgeId, item.koId, data.id, data.key, data.koId, item.key]
       .find(value => normalizeText(value) === normalizedQuery);
     const label = [item.name, item.title].find(value => normalizeText(value) === normalizedQuery);
-    const strippedId = String(item.id || "").replace(/^[a-z]+:/i, "");
-    const id = String(preferred || label || (normalizeText(strippedId) === normalizedQuery ? strippedId : item.id));
-    return { ...item, id, exactMatch: true, matchScore: 1, confidence: 1, reason: `Exact Match matched '${query}'` };
+    const strippedId = String(item.id || "").trim().replace(/^[a-z]+:/i, "");
+    const id = String(preferred || (normalizeText(strippedId) === normalizedQuery ? strippedId : label || item.id)).trim();
+    return { ...item, id, objectId: id, exactMatch: true, matchScore: 1, confidence: 1, reason: `Exact Match matched '${query}'` };
   }
 
   function exactProjectSearch(query, options = {}) {
@@ -381,12 +515,39 @@
     return selected.map(item => markExactResult(item, query));
   }
 
+  function exactKnowledgeSearch(query, options = {}) {
+    const normalizedQuery = normalizeText(query);
+    if (!normalizedQuery) return [];
+    const candidates = knowledgeSearchAdapter(query, options);
+    const identityMatches = candidates.filter(item => getIdentityFields(item).includes(normalizedQuery));
+    const selected = identityMatches.length
+      ? identityMatches
+      : candidates.filter(item => getLabelFields(item).includes(normalizedQuery));
+    return selected.map(item => markExactResult(item, query));
+  }
+
+  function exactUnifiedSearch(query, options = {}) {
+    return [...exactKnowledgeSearch(query, options), ...exactProjectSearch(query, options)];
+  }
+
   function prefixProjectSearch(query, options = {}) {
     const normalizedQuery = normalizeText(query);
     if (!normalizedQuery) return [];
     return projectSearchAdapter(query, options)
       .filter(item => [...getIdentityFields(item), ...getLabelFields(item)].some(value => value.startsWith(normalizedQuery)))
       .map(item => ({ ...item, matchScore: Math.max(item.matchScore, 0.75) }));
+  }
+
+  function prefixKnowledgeSearch(query, options = {}) {
+    const normalizedQuery = normalizeText(query);
+    if (!normalizedQuery) return [];
+    return knowledgeSearchAdapter(query, options)
+      .filter(item => [...getIdentityFields(item), ...getLabelFields(item)].some(value => value.startsWith(normalizedQuery)))
+      .map(item => ({ ...item, matchScore: Math.max(item.matchScore, 0.75) }));
+  }
+
+  function prefixUnifiedSearch(query, options = {}) {
+    return [...prefixKnowledgeSearch(query, options), ...prefixProjectSearch(query, options)];
   }
 
   function containsProjectSearch(query, options = {}) {
@@ -398,16 +559,46 @@
     }));
   }
 
+  function containsKnowledgeSearch(query, options = {}) {
+    const factor = clamp(finiteNumber(options.containsMatchFactor, DEFAULT_SEARCH_POLICY.containsMatchFactor));
+    return knowledgeSearchAdapter(query, options).map(item => ({
+      ...item,
+      matchScore: clamp(Number(item.matchScore || 0) * factor),
+      confidence: clamp(Number(item.confidence || 0) * 0.95)
+    }));
+  }
+
+  function containsUnifiedSearch(query, options = {}) {
+    return [...containsKnowledgeSearch(query, options), ...containsProjectSearch(query, options)];
+  }
+
+  function relationshipKnowledgeSearch(query, options = {}) {
+    const q = normalizeText(query);
+    if (!q) return [];
+    return knowledgeSearchAdapter(query, options)
+      .filter(item => asArray(item.relationships).map(normalizeText).some(value => value.includes(q)))
+      .map(item => ({ ...item, matchScore: Math.max(Number(item.matchScore || 0), 0.60), confidence: Math.max(Number(item.confidence || 0), 0.75) }));
+  }
+
+  function decisionKnowledgeSearch(query, options = {}) {
+    const q = normalizeText(query);
+    return knowledgeSearchAdapter(query, options)
+      .filter(item => {
+        const decisionText = [item.knowledgeType, item.category, item.series, item.title].map(normalizeText).join(" ");
+        return !q || calculateKnowledgeSearchScore(item, q) >= 0 || decisionText.includes("decision");
+      });
+  }
+
   function registerStandardStrategies() {
     const definitions = [
-      { id: "exact-match", name: "Exact Match", priority: 10, weight: 2.0, stopOnResult: true, execute: exactProjectSearch },
-      { id: "prefix-match", name: "Prefix Match", priority: 20, weight: 1.05, execute: prefixProjectSearch },
-      { id: "contains-match", name: "Contains Match", priority: 30, weight: 0.55, execute: containsProjectSearch },
+      { id: "exact-match", name: "Exact Match", priority: 10, weight: 2.0, stopOnResult: true, execute: exactUnifiedSearch },
+      { id: "prefix-match", name: "Prefix Match", priority: 20, weight: 1.05, execute: prefixUnifiedSearch },
+      { id: "contains-match", name: "Contains Match", priority: 30, weight: 0.55, execute: containsUnifiedSearch },
       { id: "regex-search", name: "Regex Search", priority: 40, weight: 0.75, execute: (q, o) => { let regex; try { regex = new RegExp(String(q), o.regexFlags || "i"); } catch (_) { return []; } return projectSearchAdapter("", o).filter(item => regex.test(JSON.stringify(item))).map(item => ({ ...item, matchScore: Math.max(item.matchScore, 0.65), confidence: Math.max(item.confidence, 0.75) })); } },
-      { id: "metadata-search", name: "Metadata Search", priority: 50, weight: 0.90, execute: projectSearchAdapter },
-      { id: "relationship-search", name: "Relationship Search", priority: 60, weight: 0.90, execute: projectSearchAdapter },
-      { id: "knowledge-search", name: "Knowledge Search", priority: 70, weight: 0.95, execute: projectSearchAdapter },
-      { id: "decision-search", name: "Decision Search", priority: 80, weight: 0.90, execute: projectSearchAdapter },
+      { id: "metadata-search", name: "Metadata Search", priority: 50, weight: 0.90, execute: knowledgeSearchAdapter },
+      { id: "relationship-search", name: "Relationship Search", priority: 60, weight: 0.90, execute: relationshipKnowledgeSearch },
+      { id: "knowledge-search", name: "Knowledge Search", priority: 70, weight: 0.95, execute: knowledgeSearchAdapter },
+      { id: "decision-search", name: "Decision Search", priority: 80, weight: 0.90, execute: decisionKnowledgeSearch },
       { id: "function-search", name: "Function Search", priority: 90, weight: 0.90, execute: (q, o) => projectSearchAdapter(q, { ...o, type: "function" }) },
       { id: "call-graph-search", name: "Call Graph Search", priority: 100, weight: 0.85, execute: projectSearchAdapter },
       { id: "file-search", name: "File Search", priority: 110, weight: 0.85, execute: (q, o) => projectSearchAdapter(q, { ...o, type: "file" }) },
@@ -518,6 +709,8 @@
     executeSearchPipeline,
     executeCompoundSearch,
     fallbackSearch,
+    searchKnowledgeRepository: knowledgeSearchAdapter,
+    getKnowledgeRepositoryRecords,
     mergeSearchResults,
     calculateSearchScore,
     scoreSearchResults,
