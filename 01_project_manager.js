@@ -1,4 +1,3 @@
-
 /* ===============================
    FILE: 01_project_manager.js
    共通関数
@@ -1514,4 +1513,3 @@ window.changeRepairAnalyzeSourceMode =
 
 window.buildRepairAnalyzeSourceToolHtml =
   buildRepairAnalyzeSourceToolHtml;
-
