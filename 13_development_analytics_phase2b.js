@@ -2,7 +2,7 @@
    FILE: 13_development_analytics_phase2b.js
    IDE-140 Development Analytics
    Phase 2B: Publication Gate / IDE-150 Handoff / Analytics Closure
-   Version: 1.0.1
+   Version: 1.0.2
    Overall IDE-140 Version: 1.2.1
    Status: Completed / Phase 2B
    Design Freeze: 2026-07-26
@@ -25,7 +25,7 @@
 
   const COMPONENT_ID = "IDE-140";
   const EXTENSION_ID = "IDE-140-PHASE-2B";
-  const VERSION = "1.0.1";
+  const VERSION = "1.0.2";
   const OVERALL_VERSION = "1.2.1";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2B_V1";
   const MAX_RECORDS = 20;
@@ -1194,7 +1194,7 @@
     function check(name, passed, detail) { checks.push({ name: name, passed: passed === true, detail: text(detail, "") }); }
     try {
       check("Extension identity", EXTENSION_ID === "IDE-140-PHASE-2B");
-      check("Extension version", VERSION === "1.0.1");
+      check("Extension version", VERSION === "1.0.2");
       check("Overall version", OVERALL_VERSION === "1.2.1");
       check("State persistence", state.loaded === true && typeof persistDevelopmentAnalyticsPhase2BState === "function");
       check("Compact Storage schema", STORAGE_SCHEMA_VERSION === 2 && typeof compactCandidate === "function" && typeof compactPublicationPackage === "function");
@@ -1241,6 +1241,7 @@
       check("Closure query API", typeof getDevelopmentAnalyticsClosures === "function");
       check("Storage clear API", typeof clearDevelopmentAnalyticsPhase2BStorage === "function");
       check("Public status API", typeof getDevelopmentAnalyticsPhase2BStatus === "function");
+      check("Status packageCount compatibility alias", /packageCount:\s*state\.packages\.size/.test(getDevelopmentAnalyticsPhase2BStatus.toString()));
     } catch (error) {
       check("Unexpected exception", false, error && error.message ? error.message : String(error));
     }
@@ -1293,6 +1294,7 @@
       progress: 100,
       completionGateCount: COMPLETION_GATES.length,
       candidateCount: state.candidates.size,
+      packageCount: state.packages.size,
       publicationPackageCount: state.packages.size,
       handoffCount: state.handoffs.size,
       closureCount: state.closures.size,
