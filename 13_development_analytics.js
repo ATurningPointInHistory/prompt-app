@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_development_analytics.js
    IDE-140 Development Analytics
-   Version: 1.2.1
+   Version: 1.2.2
    Status: Completed / Phase 2B
    Design Freeze: 2026-07-26
 
@@ -24,7 +24,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-140";
-  const VERSION = "1.2.1";
+  const VERSION = "1.2.2";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE140_DEVELOPMENT_ANALYTICS_V1";
   const MAX_HISTORY = 100;
 
@@ -642,6 +642,32 @@
     }
   }
 
+  function summarizeDevelopmentAnalyticsSnapshot(item) {
+    const snapshot = item || null;
+    if (!snapshot) return null;
+    return {
+      id: snapshot.id,
+      componentId: snapshot.componentId,
+      version: snapshot.version,
+      snapshotVersion: snapshot.snapshotVersion,
+      status: snapshot.status,
+      publicationStatus: snapshot.publicationStatus,
+      requestId: snapshot.requestId,
+      sessionId: snapshot.sessionId,
+      scope: clone(snapshot.scope || {}),
+      sourceRecordCount: asArray(snapshot.sourceRecords).length,
+      metricResultCount: asArray(snapshot.metricResults).length,
+      findingCount: asArray(snapshot.findings).length,
+      recommendationCount: asArray(snapshot.recommendationCandidates).length,
+      generatedAt: snapshot.generatedAt
+    };
+  }
+
+  function getDevelopmentAnalyticsSnapshotSummary(id) {
+    const snapshot = !id ? state.lastSnapshot : state.snapshots.get(String(id)) || null;
+    return summarizeDevelopmentAnalyticsSnapshot(snapshot);
+  }
+
   function getDevelopmentAnalyticsSnapshot(id) {
     const snapshot = !id
       ? clone(state.lastSnapshot)
@@ -707,6 +733,8 @@
       check("Published-only IDE-150 Handoff API", typeof global.getIDE150DevelopmentAnalyticsHandoffs === "function");
       check("Core normalization API", typeof normalizeValidationAnalyticsRecord === "function");
       check("Core metric calculation API", typeof calculateValidationAnalyticsMetrics === "function");
+      check("Lightweight Snapshot summary API", typeof getDevelopmentAnalyticsSnapshotSummary === "function");
+      check("Status avoids full Snapshot hydration", !/getDevelopmentAnalyticsSnapshot\(\)/.test(getDevelopmentAnalyticsStatus.toString()) && /getDevelopmentAnalyticsSnapshotSummary\(\)/.test(getDevelopmentAnalyticsStatus.toString()));
       check("Public API", typeof runDevelopmentAnalytics === "function" && typeof getDevelopmentAnalyticsStatus === "function");
     } catch (error) {
       check("Unexpected exception", false, error && error.message ? error.message : String(error));
@@ -776,7 +804,7 @@
       phase2B: clone(phase2BStatus),
       phase2BImplemented: phase2BImplemented,
       phase2BProgress: phase2BImplemented ? 100 : 0,
-      lastSnapshot: getDevelopmentAnalyticsSnapshot(),
+      lastSnapshot: getDevelopmentAnalyticsSnapshotSummary(),
       publicationStatus: phase2BStatus ? phase2BStatus.publicationStatus : state.lastSnapshot ? state.lastSnapshot.publicationStatus : "Not Generated",
       releaseStatus: phase2BStatus ? phase2BStatus.releaseStatus : "Not Released",
       approvalStatus: phase2BStatus ? phase2BStatus.approvalStatus : "Not Requested",
@@ -820,6 +848,7 @@
     createDevelopmentAnalyticsRequest: createDevelopmentAnalyticsRequest,
     runDevelopmentAnalytics: runDevelopmentAnalytics,
     getDevelopmentAnalyticsSnapshot: getDevelopmentAnalyticsSnapshot,
+    getDevelopmentAnalyticsSnapshotSummary: getDevelopmentAnalyticsSnapshotSummary,
     getDevelopmentAnalyticsSnapshots: getDevelopmentAnalyticsSnapshots,
     getDevelopmentAnalyticsState: getDevelopmentAnalyticsState,
     persistDevelopmentAnalyticsState: persistDevelopmentAnalyticsState,
