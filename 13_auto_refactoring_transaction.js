@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_transaction.js
    IDE-150 Auto Refactoring Transaction Extension
-   Version: 1.0.0
+   Version: 1.0.1
    Status: Core Phase 1 Completed
    ============================================================ */
 (function (global) {
