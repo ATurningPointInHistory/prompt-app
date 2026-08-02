@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_investigation_workflow_validation.js
    IDE-135 Investigation Workflow Validation
-   Version: 1.1.0
+   Version: 1.2.0
    Status: Ready
    Design Freeze: 2026-07-26
    ============================================================ */
@@ -9,7 +9,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-135";
-  const VERSION = "1.1.0";
+  const VERSION = "1.2.0";
   const TARGET_COMPONENT = "IDE-130";
   const MAX_HISTORY = 100;
 
@@ -17,6 +17,41 @@
     "Requirement", "State", "Transition", "Policy", "Evidence",
     "Restore", "Safety", "Integration", "Performance", "Closure"
   ]);
+
+
+  const REQUIRED_COVERAGE_TARGETS = Object.freeze({
+    Requirement: ["IDE-130-001", "IDE-130-002", "IDE-130-003", "IDE-130-004", "IDE-130-005", "IDE-130-006", "IDE-130-007", "IDE-130-008", "IDE-130-009", "IDE-130-010"],
+    State: ["Requested", "Scoped", "Searching", "Investigating", "Instrumenting", "Measuring", "Analyzing", "Reporting", "Restoring", "Verifying", "Completed", "Paused", "Blocked", "Inconclusive", "Safety Stopped", "Restore Required", "Manual Recovery Required", "Failed"],
+    Transition: ["Normal Path", "Invalid Transition Rejected", "User Cancelled Restore Path", "Runtime Error Restore Path", "Budget Exhausted Restore Path", "Concurrent Change Protection", "Restore Failure Escalation", "Closure Reopen Rejected"],
+    Policy: ["Permission Gate", "Evidence Gate", "Budget Gate", "Scope Gate", "Restore Gate", "Safety Gate", "Closure Gate"],
+    Evidence: ["Evidence Registry", "Evidence Reference Integrity", "Supporting Evidence", "Contradicting Evidence", "Evidence Reference Break Detection"],
+    Restore: ["Instrumentation Removal", "Runtime Wrapper Restore", "Residual Scan", "Concurrent Change Preservation", "Restore Failure Detection"],
+    Safety: ["Unauthorized Change Rejection", "Hard Limit", "Runtime Error Handling", "Safety Stop", "Manual Recovery"],
+    Integration: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "IDE-130", "Relationship Platform", "Validation Result Repository"],
+    Performance: ["Search Duration", "Instrumentation Measurement", "Validation Duration", "Budget Limit"],
+    Closure: ["Completed", "Closed as Inconclusive", "Closed as Not Reproduced", "Safety Stopped", "Manual Recovery Required", "Reopen Rejected"]
+  });
+
+  const STANDARD_COVERAGE_BY_SCENARIO = Object.freeze({
+    "IDE135-SCN-001": { Transition: ["Normal Path"], Policy: ["Scope Gate", "Closure Gate"], Evidence: ["Evidence Registry", "Supporting Evidence"], Performance: ["Search Duration"], Closure: ["Completed"] },
+    "IDE135-SCN-002": { Transition: ["Invalid Transition Rejected"], Policy: ["Safety Gate"] },
+    "IDE135-SCN-003": { State: ["Failed"], Policy: ["Evidence Gate"], Evidence: ["Evidence Reference Integrity"] },
+    "IDE135-SCN-004": { Policy: ["Permission Gate"], Safety: ["Unauthorized Change Rejection"] },
+    "IDE135-SCN-005": { Transition: ["Budget Exhausted Restore Path"], Policy: ["Budget Gate"], Safety: ["Hard Limit"], Performance: ["Budget Limit"] },
+    "IDE135-SCN-006": { State: ["Inconclusive"], Policy: ["Closure Gate"], Closure: ["Closed as Inconclusive"] },
+    "IDE135-SCN-007": { Policy: ["Restore Gate"], Evidence: ["Evidence Registry"], Restore: ["Instrumentation Removal", "Runtime Wrapper Restore", "Residual Scan"], Performance: ["Instrumentation Measurement"] },
+    "IDE135-SCN-008": { Transition: ["Closure Reopen Rejected"], Policy: ["Closure Gate"], Closure: ["Reopen Rejected"] },
+    "IDE135-SCN-009": { Evidence: ["Evidence Reference Integrity", "Supporting Evidence", "Contradicting Evidence"], Integration: ["Relationship Platform"] },
+    "IDE135-SCN-010": { Integration: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "IDE-130", "Validation Result Repository"], Performance: ["Validation Duration"] },
+    "IDE135-SCN-011": { State: ["Paused", "Blocked"], Policy: ["Scope Gate"] },
+    "IDE135-SCN-012": { State: ["Failed", "Restoring"], Transition: ["User Cancelled Restore Path"], Restore: ["Instrumentation Removal", "Runtime Wrapper Restore"] },
+    "IDE135-SCN-013": { State: ["Failed", "Restoring"], Transition: ["Runtime Error Restore Path"], Restore: ["Instrumentation Removal", "Runtime Wrapper Restore"], Safety: ["Runtime Error Handling"] },
+    "IDE135-SCN-014": { Transition: ["Concurrent Change Protection"], Restore: ["Concurrent Change Preservation"], Policy: ["Safety Gate"] },
+    "IDE135-SCN-015": { State: ["Restore Required", "Manual Recovery Required"], Transition: ["Restore Failure Escalation"], Restore: ["Restore Failure Detection"], Safety: ["Manual Recovery"], Closure: ["Manual Recovery Required"] },
+    "IDE135-SCN-016": { Policy: ["Evidence Gate"], Evidence: ["Evidence Reference Break Detection"] },
+    "IDE135-SCN-017": { Closure: ["Closed as Not Reproduced"] },
+    "IDE135-SCN-018": { State: ["Safety Stopped", "Manual Recovery Required"], Safety: ["Safety Stop", "Manual Recovery"], Closure: ["Safety Stopped", "Manual Recovery Required"] }
+  });
 
   const VALIDATION_GATES = Object.freeze([
     "Requirement Gate", "State Gate", "Transition Gate", "Policy Gate",
@@ -384,39 +419,9 @@
   }
 
   function calculateInvestigationValidationCoverage(sessionId) {
-    const session = requireValidationSession(sessionId);
-    const results = getSessionInvestigationValidationResults(session.id);
-    const plannedScenarios = session.plan.map(function map(item) { return state.scenarios.get(item.scenarioId); }).filter(Boolean);
-    const coverage = COVERAGE_LAYERS.map(function calculate(layer) {
-      const targetSet = new Set();
-      const coveredSet = new Set();
-      plannedScenarios.forEach(function target(scenario) {
-        asArray(scenario.covers[layer]).forEach(function add(id) { targetSet.add(String(id)); });
-      });
-      results.filter(function passed(item) { return item.passed; }).forEach(function cover(result) {
-        asArray(result.covers[layer]).forEach(function add(id) { coveredSet.add(String(id)); });
-      });
-      const missing = [...targetSet].filter(function missingTarget(id) { return !coveredSet.has(id); });
-      const rate = targetSet.size ? coveredSet.size / targetSet.size : 1;
-      const critical = ["Requirement", "State", "Transition", "Policy", "Evidence", "Restore", "Safety", "Closure"].includes(layer);
-      const requiredThreshold = critical ? session.policy.criticalCoverageRequired : session.policy.nonCriticalCoverageRequired;
-      return {
-        id: nextId("IDE-135-COVERAGE"),
-        layer: layer,
-        targetCount: targetSet.size,
-        coveredCount: coveredSet.size,
-        missingCount: missing.length,
-        coverageRate: Number(rate.toFixed(4)),
-        requiredThreshold: requiredThreshold,
-        critical: critical,
-        missingItems: missing,
-        status: rate >= requiredThreshold ? "Complete" : rate > 0 ? "Partial" : "Missing"
-      };
-    });
-    session.coverageResults = coverage;
-    session.updatedAt = nowIso();
-    recordEvent("Coverage Calculated", session.id, { layers: coverage.length });
-    return clone(coverage);
+    const session = requireValidationSession(sessionId); const results = getSessionInvestigationValidationResults(session.id);
+    const coverage = COVERAGE_LAYERS.map(function (layer) { const targetSet = new Set(asArray(REQUIRED_COVERAGE_TARGETS[layer]).map(String)); const coveredSet = new Set(); results.filter(item => item.passed).forEach(function (result) { asArray(result.covers[layer]).forEach(id => coveredSet.add(String(id))); const standardized = STANDARD_COVERAGE_BY_SCENARIO[result.scenarioId] || {}; asArray(standardized[layer]).forEach(id => coveredSet.add(String(id))); }); const missing = [...targetSet].filter(id => !coveredSet.has(id)); const rate = targetSet.size ? (targetSet.size - missing.length) / targetSet.size : 1; const critical = ["Requirement", "State", "Transition", "Policy", "Evidence", "Restore", "Safety", "Closure"].includes(layer); const requiredThreshold = critical ? session.policy.criticalCoverageRequired : session.policy.nonCriticalCoverageRequired; return { id: nextId("IDE-135-COVERAGE"), layer, targetCount: targetSet.size, coveredCount: targetSet.size - missing.length, extraCoveredCount: [...coveredSet].filter(id => !targetSet.has(id)).length, missingCount: missing.length, coverageRate: Number(rate.toFixed(4)), requiredThreshold, critical, missingItems: missing, status: rate >= requiredThreshold ? "Complete" : rate > 0 ? "Partial" : "Missing", source: "Design Freeze Requirement Registry" }; });
+    session.coverageResults = coverage; session.updatedAt = nowIso(); recordEvent("Coverage Calculated", session.id, { layers: coverage.length, source: "Design Freeze Requirement Registry" }); return clone(coverage);
   }
 
   function findScenarioResultById(results, scenarioId) {
@@ -1010,29 +1015,144 @@
     };
   }
 
+  function createStateScenarioSession(title, options) {
+    const settings = options && typeof options === "object" ? options : {};
+    const request = global.createInvestigationRequest(baseRequest({
+      problemStatement: title,
+      initialScope: settings.initialScope || { component: TARGET_COMPONENT, readOnly: settings.readOnly !== false },
+      permission: settings.permission || { readOnly: true, instrumentation: false }
+    }));
+    const created = global.createInvestigationSession(request.id);
+    return { request: request, sessionId: created.session.id };
+  }
+
+  function executePausedBlockedResume() {
+    const fixture = createStateScenarioSession("Paused and blocked resume validation");
+    const sessionId = fixture.sessionId;
+    const paused = global.transitionInvestigationState(sessionId, "Paused", "Validation pause", COMPONENT_ID);
+    const resumed = global.transitionInvestigationState(sessionId, "Scoped", "Resume from pause", COMPONENT_ID, { force: true });
+    const blocked = global.transitionInvestigationState(sessionId, "Blocked", "Permission dependency blocked", COMPONENT_ID);
+    const unblocked = global.transitionInvestigationState(sessionId, "Scoped", "Dependency resolved", COMPONENT_ID);
+    const passed = paused.transitioned && resumed.transitioned && blocked.transitioned && unblocked.transitioned;
+    return { passed: passed, detail: passed ? "Paused and Blocked states resumed through explicit transitions." : "Pause/Block resume failed.", actualStateSequence: transitionSequence(sessionId), investigationSessionIds: [sessionId], transitionResults: [paused, resumed, blocked, unblocked], policyResults: [{ policy: "Resume requires explicit reason", passed: passed }] };
+  }
+
+  function executeUserCancelledRestorePath() {
+    const fixture = createStateScenarioSession("User cancelled restore path", { readOnly: false, initialScope: { component: TARGET_COMPONENT, function: "temporaryUserCancelTarget", readOnly: false }, permission: { readOnly: true, instrumentation: true } });
+    const sessionId = fixture.sessionId;
+    const targetId = "__ide135UserCancelTarget";
+    const original = function originalUserCancelTarget(value) { return value; };
+    global[targetId] = original;
+    const added = global.addInstrumentation({ targetId: targetId, targetType: "Function", type: "TRACE", sessionId: sessionId });
+    const cancelled = global.transitionInvestigationState(sessionId, "Failed", "User Cancelled", COMPONENT_ID, { force: true });
+    const restoring = global.transitionInvestigationState(sessionId, "Restoring", "Restore after cancellation", COMPONENT_ID, { force: true });
+    const removed = added.added ? global.removeInstrumentation(added.instrumentation.id) : { removed: false };
+    const restored = global[targetId] === original;
+    delete global[targetId];
+    const passed = added.added && cancelled.transitioned && restoring.transitioned && removed.removed && restored;
+    return { passed: passed, detail: passed ? "User cancellation restored the runtime wrapper." : "Cancellation restore failed.", actualStateSequence: transitionSequence(sessionId), investigationSessionIds: [sessionId], transitionResults: [cancelled, restoring], restoreResult: { status: restored ? "Verified" : "Restore Required", instrumentationRemoved: removed.removed }, safetyResult: { status: passed ? "Passed" : "Failed" } };
+  }
+
+  function executeRuntimeErrorRestorePath() {
+    const fixture = createStateScenarioSession("Runtime error restore path", { readOnly: false, initialScope: { component: TARGET_COMPONENT, function: "temporaryRuntimeErrorTarget", readOnly: false }, permission: { readOnly: true, instrumentation: true } });
+    const sessionId = fixture.sessionId;
+    const targetId = "__ide135RuntimeErrorTarget";
+    const original = function originalRuntimeErrorTarget() { throw new Error("IDE-135 expected runtime error"); };
+    global[targetId] = original;
+    const added = global.addInstrumentation({ targetId: targetId, targetType: "Function", type: "TRACE", sessionId: sessionId });
+    let caught = false;
+    try { global[targetId](); } catch (_) { caught = true; }
+    const failed = global.transitionInvestigationState(sessionId, "Failed", "Runtime Error", COMPONENT_ID, { force: true });
+    const restoring = global.transitionInvestigationState(sessionId, "Restoring", "Restore after runtime error", COMPONENT_ID, { force: true });
+    const removed = added.added ? global.removeInstrumentation(added.instrumentation.id) : { removed: false };
+    const restored = global[targetId] === original;
+    delete global[targetId];
+    const passed = added.added && caught && failed.transitioned && restoring.transitioned && removed.removed && restored;
+    return { passed: passed, detail: passed ? "Runtime error was captured and runtime state restored." : "Runtime error restore failed.", actualStateSequence: transitionSequence(sessionId), investigationSessionIds: [sessionId], transitionResults: [failed, restoring], restoreResult: { status: restored ? "Verified" : "Restore Required" }, safetyResult: { status: passed ? "Passed" : "Failed", runtimeErrorCaught: caught } };
+  }
+
+  function executeConcurrentChangeProtection() {
+    const targetId = "__ide135ConcurrentChangeTarget";
+    const original = function originalConcurrentChangeTarget() { return "original"; };
+    const concurrent = function concurrentChangeTarget() { return "concurrent"; };
+    global[targetId] = original;
+    const added = global.addInstrumentation({ targetId: targetId, targetType: "Function", type: "TRACE" });
+    global[targetId] = concurrent;
+    const removed = added.added ? global.removeInstrumentation(added.instrumentation.id) : { removed: false };
+    const concurrentPreserved = global[targetId] === concurrent;
+    global[targetId] = original;
+    delete global[targetId];
+    const passed = added.added && removed.conflict === true && removed.removed === false && concurrentPreserved;
+    return { passed: passed, detail: passed ? "Concurrent change was preserved and automatic restore was blocked." : "Concurrent change protection failed.", transitionResults: [{ transition: "Concurrent Change Protection", passed: passed }], restoreResult: { status: "Conflict Detected", concurrentChangePreserved: concurrentPreserved }, safetyResult: { status: passed ? "Passed" : "Failed" } };
+  }
+
+  function executeRestoreFailureEscalation() {
+    const fixture = createStateScenarioSession("Restore failure escalation", { readOnly: false, initialScope: { component: TARGET_COMPONENT, function: "temporaryRestoreFailureTarget", readOnly: false }, permission: { readOnly: true, instrumentation: true } });
+    const sessionId = fixture.sessionId;
+    const targetId = "__ide135RestoreFailureTarget";
+    const original = function originalRestoreFailureTarget() { return "original"; };
+    global[targetId] = original;
+    const added = global.addInstrumentation({ targetId: targetId, targetType: "Function", type: "TRACE", sessionId: sessionId });
+    global[targetId] = function userConcurrentReplacement() { return "changed"; };
+    const removed = added.added ? global.removeInstrumentation(added.instrumentation.id) : { removed: false };
+    const restoreRequired = global.transitionInvestigationState(sessionId, "Restore Required", "Conflict detected during restore", COMPONENT_ID, { force: true });
+    const manualRecovery = global.transitionInvestigationState(sessionId, "Manual Recovery Required", "Automatic restore prohibited", COMPONENT_ID);
+    global[targetId] = original;
+    delete global[targetId];
+    const passed = added.added && removed.conflict === true && restoreRequired.transitioned && manualRecovery.transitioned;
+    return { passed: passed, detail: passed ? "Restore conflict escalated to Manual Recovery Required." : "Restore escalation failed.", actualStateSequence: transitionSequence(sessionId), investigationSessionIds: [sessionId], transitionResults: [restoreRequired, manualRecovery], restoreResult: { status: "Manual Recovery Required", conflictDetected: removed.conflict === true }, safetyResult: { status: passed ? "Passed" : "Failed" }, closureResult: { status: "Manual Recovery Required" } };
+  }
+
+  function executeEvidenceReferenceBreakDetection() {
+    const fixture = createStateScenarioSession("Evidence reference break detection");
+    const sessionId = fixture.sessionId;
+    global.defineInvestigationScope(sessionId, fixture.request.initialScope, "Initial scope", []);
+    const evidence = global.addInvestigationEvidence(sessionId, { type: "Observation", source: COMPONENT_ID, data: { traceability: true } });
+    global.transitionInvestigationState(sessionId, "Investigating", "Evidence available", COMPONENT_ID);
+    global.transitionInvestigationState(sessionId, "Analyzing", "Check evidence integrity", COMPONENT_ID);
+    const missingId = "IDE-130-EVIDENCE-MISSING-EXPECTED";
+    global.setInvestigationConclusion(sessionId, { status: "Inconclusive", evidenceReferences: [evidence.evidence.id, missingId], decisionReason: "Intentional broken reference validation." });
+    global.transitionInvestigationState(sessionId, "Reporting", "Build report for integrity check", COMPONENT_ID);
+    global.buildInvestigationReport(sessionId, { executiveSummary: "Evidence reference break test" });
+    const integrity = global.verifyInvestigationIntegrity(sessionId);
+    const passed = integrity.verified === false && asArray(integrity.missingEvidence).includes(missingId);
+    return { passed: passed, detail: passed ? "Broken evidence reference was detected before closure." : "Broken evidence reference was not detected.", investigationSessionIds: [sessionId], evidenceReferences: [evidence.evidence.id, missingId], evidenceResults: [{ evidenceId: missingId, traceable: false, detected: passed }], policyResults: [{ policy: "Evidence Gate", passed: passed }], safetyResult: { status: passed ? "Passed" : "Failed" } };
+  }
+
+  function executeNotReproducedClosure() {
+    const fixture = createStateScenarioSession("Issue not reproduced closure");
+    const sessionId = fixture.sessionId;
+    global.defineInvestigationScope(sessionId, fixture.request.initialScope, "Initial scope", []);
+    const evidence = global.addInvestigationEvidence(sessionId, { type: "Reproduction Result", source: COMPONENT_ID, data: { reproduced: false } });
+    global.transitionInvestigationState(sessionId, "Investigating", "Reproduction evidence available", COMPONENT_ID);
+    global.transitionInvestigationState(sessionId, "Analyzing", "Analyze reproduction result", COMPONENT_ID);
+    global.setInvestigationConclusion(sessionId, { status: "Issue Not Reproduced", evidenceReferences: [evidence.evidence.id], decisionReason: "Issue was not reproduced under fixed conditions." });
+    global.transitionInvestigationState(sessionId, "Reporting", "Prepare not reproduced report", COMPONENT_ID);
+    global.buildInvestigationReport(sessionId, { executiveSummary: "Issue not reproduced" });
+    const closed = global.closeInvestigation(sessionId, { handoff: { responsibleWorkflow: "Additional Investigation" } });
+    const finalSession = global.getInvestigationSession(sessionId);
+    const passed = closed.closed && finalSession.closureStatus === "Closed as Not Reproduced";
+    return { passed: passed, detail: passed ? "Not Reproduced was preserved as a formal closure state." : "Not Reproduced closure failed.", actualStateSequence: transitionSequence(sessionId), investigationSessionIds: [sessionId], evidenceReferences: [evidence.evidence.id], closureResult: { status: finalSession.closureStatus } };
+  }
+
+  function executeSafetyStopManualRecovery() {
+    const fixture = createStateScenarioSession("Safety stop manual recovery", { readOnly: false, initialScope: { component: TARGET_COMPONENT, function: "safetyTarget", readOnly: false }, permission: { readOnly: true, instrumentation: true } });
+    const sessionId = fixture.sessionId;
+    global.defineInvestigationScope(sessionId, fixture.request.initialScope, "Initial scope", []);
+    const evidence = global.addInvestigationEvidence(sessionId, { type: "Safety Observation", source: COMPONENT_ID, data: { criticalSafetyViolation: true } });
+    global.transitionInvestigationState(sessionId, "Investigating", "Safety evidence registered", COMPONENT_ID);
+    const instrumenting = global.transitionInvestigationState(sessionId, "Instrumenting", "Prepare controlled instrumentation", COMPONENT_ID);
+    const stopped = global.transitionInvestigationState(sessionId, "Safety Stopped", "Critical safety violation", COMPONENT_ID);
+    const manual = global.transitionInvestigationState(sessionId, "Manual Recovery Required", "Automatic continuation prohibited", COMPONENT_ID);
+    const passed = instrumenting.transitioned && stopped.transitioned && manual.transitioned;
+    return { passed: passed, detail: passed ? "Critical safety violation stopped execution and required manual recovery." : "Safety stop escalation failed.", actualStateSequence: transitionSequence(sessionId), investigationSessionIds: [sessionId], evidenceReferences: [evidence.evidence.id], transitionResults: [instrumenting, stopped, manual], safetyResult: { status: passed ? "Safety Stopped" : "Failed" }, closureResult: { status: "Manual Recovery Required" } };
+  }
+
   function executeDependencyContract() {
-    const dependencies = [
-      ["IDE-110", "getDiagnosticPlatformStatus"],
-      ["IDE-115", "getDiagnosticValidationStatus"],
-      ["IDE-120", "getSearchPipelineStatus"],
-      ["IDE-125", "getSearchValidationStatus"],
-      ["IDE-130", "getInvestigationWorkflowStatus"]
-    ];
-    const results = dependencies.map(function inspect(item) {
-      const fn = global[item[1]];
-      let status = null;
-      try { status = typeof fn === "function" ? fn() : null; } catch (_) { status = null; }
-      return { component: item[0], statusApi: item[1], available: typeof fn === "function", ready: Boolean(status && (status.ready === true || status.status === "Ready" || status.status === "Passed")), health: status && status.health };
-    });
-    const passed = results.every(function valid(item) { return item.available && item.ready; });
-    return {
-      passed: passed,
-      detail: passed ? "All required component contracts are ready." : "One or more dependency contracts are unavailable.",
-      integrationResults: results,
-      evidenceReferences: ["IDE-130-DEPENDENCY-CONTRACT"],
-      evidenceResults: results,
-      safetyResult: { status: passed ? "Passed" : "Failed" }
-    };
+    const definitions = [{ component: "IDE-110", api: "getDiagnosticPlatformStatus" }, { component: "IDE-115", api: "getDiagnosticValidationStatus" }, { component: "IDE-120", api: "getSearchPipelineStatus" }, { component: "IDE-125", api: "getSearchValidationStatus" }, { component: "IDE-130", api: "getInvestigationWorkflowStatus" }];
+    const results = definitions.map(function (definition) { const fn = global[definition.api]; let status = null; try { status = typeof fn === "function" ? fn() : null; } catch (_) { status = null; } const platformReady = Boolean(status && status.ready === true); const releaseAllowed = Boolean(status && (status.releaseAllowed === true || status.releaseStatus === "Official" || status.officialStatus === "Official")); return { component: definition.component, statusApi: definition.api, available: typeof fn === "function", platformReady, releaseAllowed, passed: typeof fn === "function" && platformReady && releaseAllowed, health: status && status.health, lifecycleStatus: status && status.lifecycleStatus }; });
+    const repository = typeof global.getValidationResultRepositoryStatus === "function" ? global.getValidationResultRepositoryStatus() : null; results.push({ component: "Validation Result Repository", statusApi: "getValidationResultRepositoryStatus", available: Boolean(repository), platformReady: Boolean(repository && repository.ready), releaseAllowed: true, passed: Boolean(repository && repository.ready), health: repository && repository.health });
+    const passed = results.every(item => item.passed); return { passed, detail: passed ? "All required component contracts are platform-ready and officially validated." : "One or more dependency contracts are not Official or not ready.", integrationResults: results, evidenceReferences: ["IDE-130-DEPENDENCY-CONTRACT"], evidenceResults: results, safetyResult: { status: passed ? "Passed" : "Failed" } };
   }
 
   const builtInScenarios = [
@@ -1093,8 +1213,56 @@
     {
       id: "IDE135-SCN-010", title: "Required dependency contracts", category: "Integration", priority: 100, risk: "High", critical: true,
       expectedRestoreResult: "Not Applicable", expectedClosureResult: "Not Applicable",
-      covers: scenarioCovers({ Requirement: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "IDE-130"], Evidence: ["Dependency Status Evidence"], Safety: ["Dependency Readiness"], Integration: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "IDE-130"] }),
+      covers: scenarioCovers({ Requirement: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "IDE-130"], Evidence: ["Dependency Status Evidence"], Safety: ["Dependency Readiness"], Integration: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "IDE-130", "Validation Result Repository"] }),
       relatedDecisions: ["IDE-135-004", "IDE-135-009"], execute: executeDependencyContract
+    },
+    {
+      id: "IDE135-SCN-011", title: "Paused and blocked resume", category: "State", priority: 110, risk: "Medium", critical: true,
+      expectedRestoreResult: "Not Applicable", expectedClosureResult: "Open",
+      covers: scenarioCovers({ Requirement: ["IDE-130-001", "IDE-130-002"], State: ["Paused", "Blocked"], Policy: ["Scope Gate"] }),
+      relatedDecisions: ["IDE-135-001", "IDE-135-002"], execute: executePausedBlockedResume
+    },
+    {
+      id: "IDE135-SCN-012", title: "User cancelled restore path", category: "Restore", priority: 120, risk: "Critical", critical: true,
+      expectedRestoreResult: "Verified", expectedClosureResult: "Open",
+      covers: scenarioCovers({ Requirement: ["IDE-130-005", "IDE-130-008", "IDE-130-009"], State: ["Failed", "Restoring"], Transition: ["User Cancelled Restore Path"], Restore: ["Instrumentation Removal", "Runtime Wrapper Restore"] }),
+      relatedDecisions: ["IDE-135-004", "IDE-135-008"], execute: executeUserCancelledRestorePath
+    },
+    {
+      id: "IDE135-SCN-013", title: "Runtime error restore path", category: "Failure", priority: 130, risk: "Critical", critical: true,
+      expectedRestoreResult: "Verified", expectedClosureResult: "Open",
+      covers: scenarioCovers({ Requirement: ["IDE-130-005", "IDE-130-008", "IDE-130-009"], State: ["Failed", "Restoring"], Transition: ["Runtime Error Restore Path"], Restore: ["Instrumentation Removal", "Runtime Wrapper Restore"], Safety: ["Runtime Error Handling"] }),
+      relatedDecisions: ["IDE-135-004", "IDE-135-008"], execute: executeRuntimeErrorRestorePath
+    },
+    {
+      id: "IDE135-SCN-014", title: "Concurrent change protection", category: "Concurrency", priority: 140, risk: "Critical", critical: true,
+      expectedRestoreResult: "Conflict Detected", expectedClosureResult: "Open",
+      covers: scenarioCovers({ Requirement: ["IDE-130-005", "IDE-130-008"], Transition: ["Concurrent Change Protection"], Restore: ["Concurrent Change Preservation"], Safety: ["Concurrent Change Protection"] }),
+      relatedDecisions: ["IDE-135-004", "IDE-135-008"], execute: executeConcurrentChangeProtection
+    },
+    {
+      id: "IDE135-SCN-015", title: "Restore failure escalation", category: "Recovery", priority: 150, risk: "Critical", critical: true,
+      expectedRestoreResult: "Manual Recovery Required", expectedClosureResult: "Manual Recovery Required",
+      covers: scenarioCovers({ Requirement: ["IDE-130-008", "IDE-130-010"], State: ["Restore Required", "Manual Recovery Required"], Transition: ["Restore Failure Escalation"], Restore: ["Restore Failure Detection"], Safety: ["Manual Recovery"], Closure: ["Manual Recovery Required"] }),
+      relatedDecisions: ["IDE-135-008", "IDE-135-010"], execute: executeRestoreFailureEscalation
+    },
+    {
+      id: "IDE135-SCN-016", title: "Evidence reference break detection", category: "Evidence", priority: 160, risk: "Critical", critical: true,
+      expectedRestoreResult: "Not Required", expectedClosureResult: "Blocked",
+      covers: scenarioCovers({ Requirement: ["IDE-130-004", "IDE-130-007", "IDE-130-010"], Policy: ["Evidence Gate"], Evidence: ["Evidence Reference Break Detection"] }),
+      relatedDecisions: ["IDE-135-005", "IDE-135-007"], execute: executeEvidenceReferenceBreakDetection
+    },
+    {
+      id: "IDE135-SCN-017", title: "Issue not reproduced closure", category: "Closure", priority: 170, risk: "Medium", critical: true,
+      expectedRestoreResult: "Not Required", expectedClosureResult: "Closed as Not Reproduced",
+      covers: scenarioCovers({ Requirement: ["IDE-130-007", "IDE-130-010"], Closure: ["Closed as Not Reproduced"] }),
+      relatedDecisions: ["IDE-135-007", "IDE-135-010"], execute: executeNotReproducedClosure
+    },
+    {
+      id: "IDE135-SCN-018", title: "Safety stopped and manual recovery", category: "Safety", priority: 180, risk: "Critical", critical: true,
+      expectedRestoreResult: "Manual Recovery Required", expectedClosureResult: "Manual Recovery Required",
+      covers: scenarioCovers({ Requirement: ["IDE-130-005", "IDE-130-008", "IDE-130-009", "IDE-130-010"], State: ["Safety Stopped", "Manual Recovery Required"], Safety: ["Safety Stop", "Manual Recovery"], Closure: ["Safety Stopped", "Manual Recovery Required"] }),
+      relatedDecisions: ["IDE-135-008", "IDE-135-010"], execute: executeSafetyStopManualRecovery
     }
   ];
 
@@ -1108,9 +1276,10 @@
     try {
       check("Coverage layers", COVERAGE_LAYERS.length === 10, "count=" + COVERAGE_LAYERS.length);
       check("Validation gates", VALIDATION_GATES.length === 10, "count=" + VALIDATION_GATES.length);
+      check("Design Freeze requirement registry", Object.keys(REQUIRED_COVERAGE_TARGETS).length === 10 && REQUIRED_COVERAGE_TARGETS.Requirement.length === 10);
       check("Validation states", SESSION_STATES.length >= 15, "count=" + SESSION_STATES.length);
       check("Default policy", DEFAULT_POLICY.criticalCoverageRequired === 1 && DEFAULT_POLICY.requireRestoreVerified === true);
-      check("Scenario registry", state.scenarios.size === 10, "registered=" + state.scenarios.size);
+      check("Scenario registry", state.scenarios.size >= 18, "registered=" + state.scenarios.size);
       check("Normal scenario", Boolean(state.scenarios.get("IDE135-SCN-001")));
       check("State scenario", Boolean(state.scenarios.get("IDE135-SCN-002")));
       check("Evidence scenario", Boolean(state.scenarios.get("IDE135-SCN-003")));
@@ -1133,7 +1302,7 @@
       check("Structured report", typeof buildInvestigationValidationReport === "function");
       check("Evidence package", typeof buildInvestigationValidationEvidencePackage === "function");
       check("Traceable handoff", typeof buildInvestigationValidationHandoff === "function");
-      check("IDE-130 dependency", typeof global.validateInvestigationWorkflow === "function" && global.validateInvestigationWorkflow().valid === true);
+      check("IDE-130 dependency", typeof global.getInvestigationWorkflowStatus === "function" && global.getInvestigationWorkflowStatus().ready === true);
       check("IDE-110 dependency", typeof global.getDiagnosticPlatformStatus === "function");
       check("IDE-120 dependency", typeof global.getSearchPipelineStatus === "function");
       check("IDE-125 dependency", typeof global.getSearchValidationStatus === "function");
@@ -1239,18 +1408,17 @@
     const repository = typeof global.getValidationResultRepositoryStatus === "function"
       ? global.getValidationResultRepositoryStatus()
       : null;
-    const latest = typeof global.getLatestValidationResult === "function"
-      ? global.getLatestValidationResult({ sourceComponent: COMPONENT_ID })
+    const summary = typeof global.getValidationResultRepositorySummary === "function"
+      ? global.getValidationResultRepositorySummary({ sourceComponent: COMPONENT_ID })
       : null;
+    const latest = summary && summary.latest ? summary.latest : null;
     return {
       componentId: COMPONENT_ID,
       version: VERSION,
       available: Boolean(repository && repository.ready),
       adapter: repository && repository.storage ? repository.storage.adapter : "Unavailable",
       storageKey: repository && repository.storage ? repository.storage.storageKey : "",
-      persistedRecordCount: typeof global.getValidationResults === "function"
-        ? global.getValidationResults({ sourceComponent: COMPONENT_ID }).length
-        : 0,
+      persistedRecordCount: summary ? summary.count : 0,
       latestRecordId: latest ? latest.recordId : null,
       latestValidationId: latest ? latest.id : null,
       latestOfficial: Boolean(latest && latest.official),
@@ -1316,38 +1484,9 @@
   }
 
   function getInvestigationWorkflowValidationStatus() {
-    const validation = validateInvestigationWorkflowValidation();
-    const lifecycle = buildInvestigationValidationLifecycle(validation, state.lastResult);
-    return {
-      id: COMPONENT_ID,
-      title: "Investigation Workflow Validation",
-      name: "Investigation Workflow Validation",
-      version: VERSION,
-      status: lifecycle.status,
-      lifecycleStatus: lifecycle.lifecycleStatus,
-      ready: validation.valid,
-      health: state.lastResult ? state.lastResult.health : validation.health,
-      progress: 100,
-      implemented: validation.passed,
-      total: validation.total,
-      registeredScenarios: state.scenarios.size,
-      coverageLayers: COVERAGE_LAYERS.length,
-      validationGates: VALIDATION_GATES.length,
-      sessionCount: state.sessions.size || (state.lastResult ? 1 : 0),
-      resultCount: state.results.size || asArray(state.lastResult && state.lastResult.scenarioResults).length,
-      reportCount: state.reports.size || (state.lastResult && state.lastResult.report && state.lastResult.report.id ? 1 : 0),
-      evidencePackageCount: state.evidencePackages.size || (state.lastResult && state.lastResult.evidencePackage && state.lastResult.evidencePackage.id ? 1 : 0),
-      handoffCount: state.handoffs.size || (state.lastResult && state.lastResult.handoff && state.lastResult.handoff.id ? 1 : 0),
-      persistence: getInvestigationWorkflowValidationPersistenceStatus(),
-      releaseStatus: lifecycle.releaseStatus,
-      releaseAllowed: Boolean(state.lastResult && state.lastResult.releaseAllowed),
-      lastValidation: clone(state.lastResult),
-      dependsOn: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "IDE-130", "Relationship Platform"],
-      provides: ["Scenario Registry", "Risk-based Multi-layer Coverage", "Dependency-aware Validation Pipeline", "Evidence-linked Validation Result", "Gate-based Release Decision", "Layered Safety and Restore Gate", "Analytics-ready Validation Package", "Validation Handoff"],
-      nextTask: lifecycle.nextTask,
-      lastError: clone(state.lastError),
-      updatedAt: nowIso()
-    };
+    const requiredApis = ["registerInvestigationValidationScenario", "getInvestigationValidationScenarios", "createInvestigationValidationSession", "buildInvestigationValidationPlan", "runInvestigationValidationScenario", "runInvestigationWorkflowValidation", "calculateInvestigationValidationCoverage", "evaluateInvestigationValidationGates", "getInvestigationWorkflowValidationStatus"];
+    const implemented = requiredApis.filter(name => typeof global[name] === "function").length; const platformReady = implemented === requiredApis.length && state.scenarios.size >= 18; const lifecycle = buildInvestigationValidationLifecycle({ valid: platformReady, health: platformReady ? 100 : 0 }, state.lastResult); const last = state.lastResult;
+    return { id: COMPONENT_ID, title: "Investigation Workflow Validation", name: "Investigation Workflow Validation", version: VERSION, status: lifecycle.status, lifecycleStatus: lifecycle.lifecycleStatus, ready: platformReady, health: last ? last.health : (platformReady ? 90 : 0), progress: last && last.releaseAllowed ? 100 : platformReady ? 90 : 0, implemented, total: requiredApis.length, registeredScenarios: state.scenarios.size, requiredCoverageTargetCount: Object.values(REQUIRED_COVERAGE_TARGETS).reduce((sum, values) => sum + values.length, 0), coverageSource: "Design Freeze Requirement Registry", coverageLayers: COVERAGE_LAYERS.length, validationGates: VALIDATION_GATES.length, sessionCount: state.sessions.size || (last ? 1 : 0), resultCount: state.results.size || asArray(last && last.scenarioResults).length, reportCount: state.reports.size || (last && last.report && last.report.id ? 1 : 0), evidencePackageCount: state.evidencePackages.size || (last && last.evidencePackage && last.evidencePackage.id ? 1 : 0), handoffCount: state.handoffs.size || (last && last.handoff && last.handoff.id ? 1 : 0), persistence: getInvestigationWorkflowValidationPersistenceStatus(), releaseStatus: lifecycle.releaseStatus, releaseAllowed: Boolean(last && last.releaseAllowed), lastValidation: last ? { id: last.id, status: last.status, releaseAllowed: last.releaseAllowed, implementationReady: last.implementationReady, passed: last.passed, failed: last.failed, total: last.total, health: last.health, failedGates: asArray(last.gates).filter(gate => !gate.passed).map(gate => gate.name), completedAt: last.completedAt } : null, statusApiMode: "Lightweight / no self-validation execution", dependsOn: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "IDE-130", "Relationship Platform"], provides: ["Scenario Registry", "Design Freeze Requirement Coverage", "Dependency-aware Validation Pipeline", "Evidence-linked Validation Result", "Gate-based Release Decision", "Layered Safety and Restore Gate", "Analytics-ready Validation Package", "Validation Handoff"], nextTask: lifecycle.nextTask, lastError: clone(state.lastError), updatedAt: state.updatedAt };
   }
 
   const api = {
