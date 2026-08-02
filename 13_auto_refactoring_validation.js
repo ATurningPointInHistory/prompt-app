@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_validation.js
    IDE-150 Auto Refactoring Validation / Status / Integration
-   Version: 1.2.2
+   Version: 1.2.3
    Status: Isolated Deep Transaction Validation
    ============================================================ */
 (function (global) {
