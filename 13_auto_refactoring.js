@@ -1,17 +1,17 @@
 /* ============================================================
    FILE: 13_auto_refactoring.js
    IDE-150 Auto Refactoring
-   Version: 1.0.1
-   Status: Core Phase 1 Completed
+   Version: 1.1.0
+   Status: Core Phase 2 Completed
    Design Freeze: 2026-07-26
    ============================================================ */
 (function (global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-150";
-  const VERSION = "1.0.1";
+  const VERSION = "1.1.0";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CORE_V1";
-  const STORAGE_SCHEMA_VERSION = 1;
+  const STORAGE_SCHEMA_VERSION = 2;
   const IDE140_PHASE2B_STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2B_V1";
   const ARTIFACT_PREFIX = "AI_PROMPT_OS_IDE150_ARTIFACT_V1:";
   const MAX_RECORDS = 30;
@@ -38,6 +38,11 @@
   ]);
 
   const CORE_PHASE_1_STAGES = Object.freeze(PIPELINE_STAGES.slice());
+  const CORE_PHASE_2_CAPABILITIES = Object.freeze([
+    "Governed Patch Generation",
+    "Full Dependency Analysis",
+    "External Policy Platform Adapter"
+  ]);
 
   const REQUEST_STATES = Object.freeze([
     "Requested",
@@ -76,6 +81,9 @@
     rollbacks: new Map(),
     reports: new Map(),
     packages: new Map(),
+    dependencyAnalyses: new Map(),
+    patches: new Map(),
+    policyDecisions: new Map(),
     history: [],
     sequence: 0,
     loaded: false,
@@ -155,6 +163,7 @@
       id: item.id,
       requestId: item.requestId,
       status: item.status,
+      passed: item.passed === true,
       targetFile: item.targetFile,
       targetFunction: item.targetFunction,
       operation: item.operation,
@@ -201,6 +210,64 @@
     };
   }
 
+  function compactDependencyAnalysis(item) {
+    if (!item) return null;
+    return {
+      id: item.id,
+      planId: item.planId,
+      requestId: item.requestId,
+      status: item.status,
+      passed: item.passed === true,
+      targetFile: item.targetFile,
+      targetFunction: item.targetFunction,
+      riskLevel: item.riskLevel,
+      inboundReferenceCount: finite(item.summary && item.summary.inboundReferenceCount, 0),
+      outboundBeforeCount: finite(item.summary && item.summary.outboundBeforeCount, 0),
+      outboundAfterCount: finite(item.summary && item.summary.outboundAfterCount, 0),
+      impactedFileCount: finite(item.summary && item.summary.impactedFileCount, 0),
+      analyzedAt: item.analyzedAt,
+      artifactKey: text(item.artifactKey, "")
+    };
+  }
+
+  function compactPatch(item) {
+    if (!item) return null;
+    return {
+      id: item.id,
+      candidateId: item.candidateId,
+      planId: item.planId,
+      requestId: item.requestId,
+      status: item.status,
+      format: item.format,
+      targetFile: item.targetFile,
+      targetFunction: item.targetFunction,
+      beforeFunctionHash: item.preconditions && item.preconditions.beforeFunctionHash,
+      afterFunctionHash: item.postconditions && item.postconditions.afterFunctionHash,
+      dependencyAnalysisId: item.dependencyAnalysisId,
+      policyDecisionId: item.policyDecisionId,
+      verifiedAt: item.verifiedAt || "",
+      createdAt: item.createdAt,
+      artifactKey: text(item.artifactKey, "")
+    };
+  }
+
+  function compactPolicyDecision(item) {
+    if (!item) return null;
+    return {
+      id: item.id,
+      adapterId: item.adapterId,
+      adapterVersion: item.adapterVersion,
+      requestId: item.requestId,
+      planId: item.planId,
+      candidateId: item.candidateId,
+      allowed: item.allowed === true,
+      status: item.status,
+      riskLevel: item.riskLevel,
+      evaluatedAt: item.evaluatedAt,
+      artifactKey: text(item.artifactKey, "")
+    };
+  }
+
   function getArtifactKey(type, id) {
     return ARTIFACT_PREFIX + String(type || "RECORD").toUpperCase() + ":" + String(id || "");
   }
@@ -208,8 +275,14 @@
   function buildPersistenceRecords() {
     const candidateValues = [...state.candidates.values()].slice(-MAX_RECORDS);
     const transactionValues = [...state.transactions.values()].slice(-MAX_ROLLBACK_SNAPSHOTS);
+    const dependencyValues = [...state.dependencyAnalyses.values()].slice(-MAX_RECORDS);
+    const patchValues = [...state.patches.values()].slice(-MAX_RECORDS);
+    const policyValues = [...state.policyDecisions.values()].slice(-MAX_RECORDS);
     const candidateArtifactIds = new Set(candidateValues.slice(-MAX_ARTIFACTS).map(function id(item) { return item.id; }));
     const transactionArtifactIds = new Set(transactionValues.slice(-MAX_ARTIFACTS).map(function id(item) { return item.id; }));
+    const dependencyArtifactIds = new Set(dependencyValues.slice(-MAX_ARTIFACTS).map(function id(item) { return item.id; }));
+    const patchArtifactIds = new Set(patchValues.slice(-MAX_ARTIFACTS).map(function id(item) { return item.id; }));
+    const policyArtifactIds = new Set(policyValues.slice(-MAX_ARTIFACTS).map(function id(item) { return item.id; }));
     const candidates = candidateValues.map(function compact(item) {
       item.artifactKey = candidateArtifactIds.has(item.id) ? getArtifactKey("CANDIDATE", item.id) : "";
       return compactCandidate(item);
@@ -218,10 +291,25 @@
       item.artifactKey = transactionArtifactIds.has(item.id) ? getArtifactKey("TRANSACTION", item.id) : "";
       return compactTransaction(item);
     });
+    const dependencyAnalyses = dependencyValues.map(function compact(item) {
+      item.artifactKey = dependencyArtifactIds.has(item.id) ? getArtifactKey("DEPENDENCY", item.id) : "";
+      return compactDependencyAnalysis(item);
+    });
+    const patches = patchValues.map(function compact(item) {
+      item.artifactKey = patchArtifactIds.has(item.id) ? getArtifactKey("PATCH", item.id) : "";
+      return compactPatch(item);
+    });
+    const policyDecisions = policyValues.map(function compact(item) {
+      item.artifactKey = policyArtifactIds.has(item.id) ? getArtifactKey("POLICY", item.id) : "";
+      return compactPolicyDecision(item);
+    });
     return {
       candidates: candidates,
       transactions: transactions,
-      artifactIndex: candidates.concat(transactions).map(function key(item) { return item.artifactKey; }).filter(Boolean)
+      dependencyAnalyses: dependencyAnalyses,
+      patches: patches,
+      policyDecisions: policyDecisions,
+      artifactIndex: candidates.concat(transactions, dependencyAnalyses, patches, policyDecisions).map(function key(item) { return item.artifactKey; }).filter(Boolean)
     };
   }
 
@@ -241,6 +329,9 @@
       rollbacks: [...state.rollbacks.values()].slice(-MAX_ROLLBACK_SNAPSHOTS),
       reports: [...state.reports.values()].slice(-MAX_RECORDS),
       packages: [...state.packages.values()].slice(-MAX_RECORDS),
+      dependencyAnalyses: persistenceRecords.dependencyAnalyses,
+      patches: persistenceRecords.patches,
+      policyDecisions: persistenceRecords.policyDecisions,
       history: state.history.slice(-MAX_HISTORY),
       artifactIndex: persistenceRecords.artifactIndex,
       lastCoreValidation: clone(state.lastCoreValidation),
@@ -262,6 +353,9 @@
     const previousKeys = asArray(previousPayload && previousPayload.artifactIndex);
     let candidateArtifactCount = 0;
     let transactionArtifactCount = 0;
+    let dependencyArtifactCount = 0;
+    let patchArtifactCount = 0;
+    let policyArtifactCount = 0;
     let estimatedBytes = 0;
     const failed = [];
 
@@ -291,6 +385,45 @@
       }
     });
 
+    [...state.dependencyAnalyses.values()].forEach(function saveDependency(item) {
+      if (!item || !item.artifactKey || !keepKeys.has(item.artifactKey)) return;
+      if (!Array.isArray(item.inboundReferences) || !Array.isArray(item.checks)) return;
+      try {
+        const raw = JSON.stringify(item);
+        global.localStorage.setItem(item.artifactKey, raw);
+        dependencyArtifactCount += 1;
+        estimatedBytes += raw.length * 2;
+      } catch (error) {
+        failed.push({ key: item.artifactKey, error: error && error.message ? error.message : String(error) });
+      }
+    });
+
+    [...state.patches.values()].forEach(function savePatch(item) {
+      if (!item || !item.artifactKey || !keepKeys.has(item.artifactKey)) return;
+      if (!item.replacement || typeof item.replacement.source !== "string") return;
+      try {
+        const raw = JSON.stringify(item);
+        global.localStorage.setItem(item.artifactKey, raw);
+        patchArtifactCount += 1;
+        estimatedBytes += raw.length * 2;
+      } catch (error) {
+        failed.push({ key: item.artifactKey, error: error && error.message ? error.message : String(error) });
+      }
+    });
+
+    [...state.policyDecisions.values()].forEach(function savePolicy(item) {
+      if (!item || !item.artifactKey || !keepKeys.has(item.artifactKey)) return;
+      if (!item.rawDecision && !Array.isArray(item.rules)) return;
+      try {
+        const raw = JSON.stringify(item);
+        global.localStorage.setItem(item.artifactKey, raw);
+        policyArtifactCount += 1;
+        estimatedBytes += raw.length * 2;
+      } catch (error) {
+        failed.push({ key: item.artifactKey, error: error && error.message ? error.message : String(error) });
+      }
+    });
+
     previousKeys.forEach(function removeStale(key) {
       if (!keepKeys.has(key)) {
         try { global.localStorage.removeItem(key); } catch (_) {}
@@ -301,6 +434,9 @@
       persisted: failed.length === 0,
       candidateArtifactCount: candidateArtifactCount,
       transactionArtifactCount: transactionArtifactCount,
+      dependencyArtifactCount: dependencyArtifactCount,
+      patchArtifactCount: patchArtifactCount,
+      policyArtifactCount: policyArtifactCount,
       artifactKeyCount: keepKeys.size,
       estimatedBytes: estimatedBytes,
       failed: failed
@@ -335,13 +471,37 @@
     return current;
   }
 
+
+  function hydrateArtifactRecord(map, id, fullCheck) {
+    const key = String(id || "");
+    const current = map.get(key) || null;
+    if (!current) return null;
+    if (typeof fullCheck === "function" && fullCheck(current)) return current;
+    const artifact = readArtifact(current.artifactKey);
+    if (artifact && artifact.id === key) { map.set(key, artifact); return artifact; }
+    return current;
+  }
+
+  function getDependencyAnalysisRecord(id) {
+    return hydrateArtifactRecord(state.dependencyAnalyses, id, function full(item) { return Array.isArray(item.inboundReferences) && Array.isArray(item.checks); });
+  }
+
+  function getPatchRecord(id) {
+    return hydrateArtifactRecord(state.patches, id, function full(item) { return Boolean(item.replacement && typeof item.replacement.source === "string"); });
+  }
+
+  function getPolicyDecisionRecord(id) {
+    return hydrateArtifactRecord(state.policyDecisions, id, function full(item) { return Boolean(item.rawDecision || Array.isArray(item.rules)); });
+  }
+
   function captureRuntimeState() {
     return {
       requests: [...state.requests.values()].map(clone), plans: [...state.plans.values()].map(clone),
       candidates: [...state.candidates.values()].map(clone), validations: [...state.validations.values()].map(clone),
       approvals: [...state.approvals.values()].map(clone), transactions: [...state.transactions.values()].map(clone),
       rollbacks: [...state.rollbacks.values()].map(clone), reports: [...state.reports.values()].map(clone),
-      packages: [...state.packages.values()].map(clone), history: state.history.map(clone), sequence: state.sequence,
+      packages: [...state.packages.values()].map(clone), dependencyAnalyses: [...state.dependencyAnalyses.values()].map(clone),
+      patches: [...state.patches.values()].map(clone), policyDecisions: [...state.policyDecisions.values()].map(clone), history: state.history.map(clone), sequence: state.sequence,
       lastPersistence: clone(state.lastPersistence), lastCoreValidation: clone(state.lastCoreValidation),
       lastIntegrationValidation: clone(state.lastIntegrationValidation), lastError: clone(state.lastError), updatedAt: state.updatedAt
     };
@@ -370,6 +530,9 @@
         artifactKeyCount: artifacts.artifactKeyCount,
         candidateArtifactCount: artifacts.candidateArtifactCount,
         transactionArtifactCount: artifacts.transactionArtifactCount,
+        dependencyArtifactCount: artifacts.dependencyArtifactCount,
+        patchArtifactCount: artifacts.patchArtifactCount,
+        policyArtifactCount: artifacts.policyArtifactCount,
         persistedAt: nowIso()
       };
       return clone(state.lastPersistence);
@@ -406,6 +569,9 @@
       restoreMap(state.rollbacks, payload.rollbacks);
       restoreMap(state.reports, payload.reports);
       restoreMap(state.packages, payload.packages);
+      restoreMap(state.dependencyAnalyses, payload.dependencyAnalyses);
+      restoreMap(state.patches, payload.patches);
+      restoreMap(state.policyDecisions, payload.policyDecisions);
       state.history = asArray(payload.history).slice(-MAX_HISTORY);
       state.lastCoreValidation = clone(payload.lastCoreValidation || null);
       state.lastIntegrationValidation = clone(payload.lastIntegrationValidation || null);
@@ -426,7 +592,7 @@
       asArray(previous && previous.artifactIndex).forEach(function remove(key) { try { global.localStorage.removeItem(key); } catch (_) {} });
       global.localStorage.removeItem(STORAGE_KEY);
     }
-    [state.requests, state.plans, state.candidates, state.validations, state.approvals, state.transactions, state.rollbacks, state.reports, state.packages].forEach(function clear(map) { map.clear(); });
+    [state.requests, state.plans, state.candidates, state.validations, state.approvals, state.transactions, state.rollbacks, state.reports, state.packages, state.dependencyAnalyses, state.patches, state.policyDecisions].forEach(function clear(map) { map.clear(); });
     state.history = [];
     state.sequence = 0;
     state.lastCoreValidation = null;
@@ -1009,6 +1175,7 @@
     MAX_ROLLBACK_SNAPSHOTS: MAX_ROLLBACK_SNAPSHOTS,
     PIPELINE_STAGES: PIPELINE_STAGES,
     CORE_PHASE_1_STAGES: CORE_PHASE_1_STAGES,
+    CORE_PHASE_2_CAPABILITIES: CORE_PHASE_2_CAPABILITIES,
     REQUEST_STATES: REQUEST_STATES,
     DEFAULT_BUDGET: DEFAULT_BUDGET,
     state: state,
@@ -1017,6 +1184,7 @@
     clone: clone,
     text: text,
     finite: finite,
+    unique: unique,
     nextId: nextId,
     trimMap: trimMap,
     hashText: hashText,
@@ -1025,13 +1193,22 @@
     compactPlan: compactPlan,
     compactCandidate: compactCandidate,
     compactTransaction: compactTransaction,
+    compactDependencyAnalysis: compactDependencyAnalysis,
+    compactPatch: compactPatch,
+    compactPolicyDecision: compactPolicyDecision,
     getCandidateRecord: getCandidateRecord,
     getTransactionRecord: getTransactionRecord,
+    getDependencyAnalysisRecord: getDependencyAnalysisRecord,
+    getPatchRecord: getPatchRecord,
+    getPolicyDecisionRecord: getPolicyDecisionRecord,
     captureRuntimeState: captureRuntimeState,
     persistAutoRefactoringState: persistAutoRefactoringState,
     restoreMap: restoreMap,
     findFunctionBlock: findFunctionBlock,
     countFunctionDefinitions: countFunctionDefinitions,
+    normalizeFunctionSource: normalizeFunctionSource,
+    buildCompactLineDiff: buildCompactLineDiff,
+    normalizeRiskLevel: normalizeRiskLevel,
     validateHandoffContract: validateHandoffContract,
     getCompactAnalyticsPhase2BState: getCompactAnalyticsPhase2BState,
     getCompactPublicationPackage: getCompactPublicationPackage
@@ -1042,6 +1219,7 @@
     version: VERSION,
     storageKey: STORAGE_KEY,
     pipelineStages: PIPELINE_STAGES,
-    corePhase1Stages: CORE_PHASE_1_STAGES
+    corePhase1Stages: CORE_PHASE_1_STAGES,
+    corePhase2Capabilities: CORE_PHASE_2_CAPABILITIES
   }, coreApi);
 })(typeof window !== "undefined" ? window : globalThis);
