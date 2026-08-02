@@ -26,8 +26,8 @@
 
   const COMPONENT_ID = "IDE-140";
   const EXTENSION_ID = "IDE-140-PHASE-2A";
-  const VERSION = "1.0.1";
-  const OVERALL_VERSION = "1.2.2";
+  const VERSION = "1.0.2";
+  const OVERALL_VERSION = "1.2.3";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2A_V1";
   const MAX_RESULTS = 20;
 
@@ -1115,8 +1115,8 @@
     function check(name, passed, detail) { checks.push({ name: name, passed: passed === true, detail: text(detail, "") }); }
     try {
       check("Extension identity", EXTENSION_ID === "IDE-140-PHASE-2A");
-      check("Extension version", VERSION === "1.0.1");
-      check("Overall version", OVERALL_VERSION === "1.2.2");
+      check("Extension version", VERSION === "1.0.2");
+      check("Overall version", OVERALL_VERSION === "1.2.3");
       check("State persistence", state.loaded === true && typeof persistDevelopmentAnalyticsPhase2AState === "function");
       check("Official Result Repository dependency", typeof global.getValidationResults === "function");
       check("Core normalizer dependency", typeof global.normalizeValidationAnalyticsRecord === "function");
@@ -1131,18 +1131,65 @@
       check("Version-aware Metric Series", typeof buildMetricSeries === "function");
       check("Trend Classification", typeof classifyTrend === "function");
       check("Pattern Analysis", typeof buildPatternAnalysis === "function");
+      const rootCauseProbeRecord = {
+        recordId: "IDE-140-PHASE2A-PROBE-RECORD",
+        sourceComponent: "IDE-135",
+        targetComponent: "IDE-130",
+        repositoryVersion: "probe-repository",
+        payload: {
+          id: "IDE-140-PHASE2A-PROBE-RESULT",
+          conclusion: {
+            rootCause: "Confirmed upstream probe cause",
+            status: "Confirmed",
+            evidenceReferences: ["IDE-140-PHASE2A-PROBE-EVIDENCE"]
+          }
+        }
+      };
+      const rootCauseProbe = collectConfirmedRootCauses(rootCauseProbeRecord);
+      const reliabilityProbe = buildReliabilityReport(
+        [{ official: true }],
+        [{ reliability: 1 }],
+        [{ reliability: 1 }],
+        { evidenceCompleteness: 1 },
+        { confirmedRootCauseCount: 0, clusters: [] }
+      );
+      const patternProbe = [{
+        patternType: "Probe Pattern",
+        status: "Observed",
+        classification: "Stable",
+        affectedComponents: ["IDE-130"],
+        supportingMetricIds: ["IDE-140-PROBE-METRIC"],
+        evidenceReferences: ["IDE-140-PHASE2A-PROBE-EVIDENCE"],
+        confidence: 0.9,
+        reliability: 0.9,
+        fact: "Probe fact",
+        inference: "Probe inference"
+      }];
+      const rootCauseAnalyticsProbe = {
+        status: "Available",
+        confirmedRootCauseCount: 1,
+        clusters: [{ affectedComponents: ["IDE-130"], evidenceReferences: ["IDE-140-PHASE2A-PROBE-EVIDENCE"] }],
+        reason: "IDE-130-confirmed Root Cause data is available."
+      };
+      const findingsProbe = buildAdvancedFindings([], patternProbe, rootCauseAnalyticsProbe, { issues: [], status: "High" }, Object.assign({}, reliabilityProbe, { rootCauseReliability: 1 }));
+      const recommendationProbe = buildAdvancedRecommendations(findingsProbe, [], rootCauseAnalyticsProbe, Object.assign({}, reliabilityProbe, { analysisReliability: 1, recommendationReliability: 1 }));
+      const correlationProbe = buildCorrelationAnalysis([
+        { metricId: "IDE-140-PROBE-A", points: [{ value: 1 }, { value: 2 }, { value: 3 }] },
+        { metricId: "IDE-140-PROBE-B", points: [{ value: 2 }, { value: 4 }, { value: 6 }] }
+      ]);
+      const phase2ASource = runDevelopmentAnalyticsPhase2A.toString();
       check("Root Cause extraction is Confirmed-only", /confirmed/i.test(collectConfirmedRootCauses.toString()));
-      check("Root Cause authority remains IDE-130", true);
+      check("Root Cause authority remains IDE-130", rootCauseProbe.length === 1 && rootCauseProbe[0].targetComponent === "IDE-130" && rootCauseProbe[0].statement === "Confirmed upstream probe cause");
       check("Quality Graph", typeof buildRootCauseAnalytics === "function");
       check("Quality Analytics", typeof buildQualityAnalytics === "function");
-      check("Reliability and Confidence separated", true);
-      check("Fact and Inference separated", true);
-      check("Correlation does not establish causation", true);
+      check("Reliability and Confidence separated", reliabilityProbe.confidenceSeparated === true && Object.prototype.hasOwnProperty.call(reliabilityProbe, "analysisReliability") && !Object.prototype.hasOwnProperty.call(reliabilityProbe, "confidence"));
+      check("Fact and Inference separated", findingsProbe.length > 0 && findingsProbe.every(function verify(item) { return typeof item.fact === "string" && typeof item.inference === "string" && item.fact !== item.inference; }));
+      check("Correlation does not establish causation", correlationProbe.length > 0 && correlationProbe.every(function verify(item) { return item.causalConclusion === false; }));
       check("Recommendation Candidate", typeof buildAdvancedRecommendations === "function");
-      check("Recommendation autoApply disabled", true);
-      check("Publication remains Draft", true);
-      check("IDE-150 handoff remains blocked", true);
-      check("Phase 2B Closure remains open", true);
+      check("Recommendation autoApply disabled", recommendationProbe.length > 0 && recommendationProbe.every(function verify(item) { return item.autoApply === false && item.ide150Eligible === false; }));
+      check("Publication remains Draft", /publicationStatus:\s*["']Draft["']/.test(phase2ASource));
+      check("IDE-150 handoff remains blocked", /handoffEligible:\s*false/.test(phase2ASource));
+      check("Phase 2B Closure remains open", /closureStatus:\s*["']Open["']/.test(phase2ASource));
       check("Lightweight Result summary", typeof summarizeDevelopmentAnalyticsPhase2AResult === "function");
       check("Status avoids full Phase 2A clone", !/clone\(state\.lastResult\)/.test(getDevelopmentAnalyticsPhase2AStatus.toString()) && /summarizeDevelopmentAnalyticsPhase2AResult\(state\.lastResult\)/.test(getDevelopmentAnalyticsPhase2AStatus.toString()));
       check("Public run API", typeof runDevelopmentAnalyticsPhase2A === "function");
