@@ -1,14 +1,14 @@
 /* ============================================================
    IDE-110 Diagnostic Platform Extension
    File: 13_diagnostic_platform.js
-   Version: 1.2.0
+   Version: 1.2.1
    Strategy: standalone platform extension loaded after instrumentation.
 ============================================================ */
 (function initializeDiagnosticPlatform(global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-110";
-  const VERSION = "1.2.0";
+  const VERSION = "1.2.1";
   const MAX_RECORDS = 500;
   const runtimeBindings = new Map();
 
@@ -269,16 +269,20 @@
     const base = typeof global.getDiagnosticInstrumentationStatus === "function" ? global.getDiagnosticInstrumentationStatus() : null;
     const platformReady = Boolean(base && base.ready && implemented === required.length);
     const validation = state.lastValidation;
-    const releaseAllowed = Boolean(validation && validation.valid);
+    const releaseEvidence = typeof global.getDevelopmentReleaseEvidence === "function"
+      ? global.getDevelopmentReleaseEvidence(COMPONENT_ID, { componentVersion: VERSION })
+      : null;
+    const releaseAllowed = Boolean((validation && validation.valid) || (releaseEvidence && releaseEvidence.releaseAllowed));
     return {
       id: COMPONENT_ID, title: "Diagnostic Platform", name: "Diagnostic Platform", version: VERSION,
       status: platformReady ? "Ready" : "In Progress", lifecycleStatus: releaseAllowed ? "Completed" : "Implementation",
       officialStatus: releaseAllowed ? "Official" : "Not Validated", ready: platformReady, releaseAllowed: releaseAllowed,
-      health: validation ? validation.health : (platformReady ? 90 : 70), progress: Math.round((implemented / required.length) * 100),
+      health: validation ? validation.health : (releaseEvidence ? releaseEvidence.health : (platformReady ? 90 : 70)), progress: Math.round((implemented / required.length) * 100),
       implemented: implemented, total: required.length,
       instrumentationCapabilities: { runtimeWrapper: true, logicalAdapter: true, projectFileRestore: typeof global.updateProjectFile === "function", sourcePatchGeneration: false },
       baseInstrumentation: base,
-      lastValidation: validation ? clone({ valid: validation.valid, passed: validation.passed, failed: validation.failed, total: validation.total, health: validation.health, validatedAt: validation.validatedAt }) : null,
+      lastValidation: validation ? clone({ valid: validation.valid, passed: validation.passed, failed: validation.failed, total: validation.total, health: validation.health, validatedAt: validation.validatedAt, source: "Runtime" }) : (releaseEvidence ? clone({ valid: true, failed: 0, health: releaseEvidence.health, validatedAt: releaseEvidence.completedAt, source: releaseEvidence.source }) : null),
+      releaseEvidence: releaseEvidence,
       counts: { instrumentationTypes: Object.keys(state.instrumentationTypes).length, probeTypes: Object.keys(state.probeTypes).length, instrumentations: state.instrumentations.length, activeRuntimeBindings: runtimeBindings.size, investigations: state.investigations.length, performanceRecords: state.performanceRecords.length, backups: state.sourceBackups.length, reports: state.reports.length },
       warnings: [], errors: state.lastError ? [clone(state.lastError)] : [],
       nextTask: releaseAllowed ? "Run IDE-115 Diagnostic Validation release check." : "Run validateDiagnosticPlatform() once and confirm runtime instrumentation restore.",
@@ -316,7 +320,11 @@
     }
     const passed = checks.filter(function (x) { return x.passed; }).length;
     const result = { id: "IDE-110-PLATFORM-VALIDATION", valid: passed === checks.length, passed: passed, failed: checks.length - passed, total: checks.length, health: checks.length ? Math.round((passed / checks.length) * 100) : 0, checks: checks, validatedAt: nowIso() };
-    state.lastValidation = clone(result); touch(); return result;
+    state.lastValidation = clone(result);
+    if (result.valid && typeof global.saveDevelopmentReleaseEvidence === "function") {
+      global.saveDevelopmentReleaseEvidence(COMPONENT_ID, result, { componentVersion: VERSION, releaseAllowed: true });
+    }
+    touch(); return result;
   }
 
   registerInstrumentationType({ id: "TRACE", title: "Execution Trace" });
