@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_policy_standard.js
    IDE-150 Standard Policy Adapter / Governed Dry Run
-   Version: 1.1.0
+   Version: 1.1.1
    Status: Completed
 
    Responsibilities:
@@ -19,10 +19,10 @@
   const COMPONENT_ID = internal.COMPONENT_ID;
   const VERSION = internal.VERSION;
   const ADAPTER_ID = "AI-PROMPT-OS-STANDARD-REFACTORING-POLICY";
-  const ADAPTER_VERSION = "1.1.0";
-  const POLICY_VERSION = "IDE-150-STANDARD-POLICY-v1.1.0";
+  const ADAPTER_VERSION = "1.1.1";
+  const POLICY_VERSION = "IDE-150-STANDARD-POLICY-v1.1.1";
   const DRY_RUN_STORAGE_KEY = "AI_PROMPT_OS_IDE150_STANDARD_DRY_RUN_V1";
-  const PRACTICAL_DRY_RUN_VERSION = "1.0.0";
+  const PRACTICAL_DRY_RUN_VERSION = "1.0.1";
   const nowIso = internal.nowIso;
   const clone = internal.clone;
   const text = internal.text;
@@ -462,6 +462,74 @@
     };
   }
 
+  async function ensureDryRunSources(options) {
+    const settings = options && typeof options === "object" ? options : {};
+    const existing = phase2.resolveProjectSources(settings);
+    if (existing.length) {
+      return { ready: true, loadedNow: false, sourceCount: existing.length, sources: existing, reason: "" };
+    }
+    if (typeof global.ensureCurrentProjectAnalyzeSources !== "function") {
+      return { ready: false, loadedNow: false, sourceCount: 0, sources: [], reason: "Current Project source loader is unavailable." };
+    }
+    const loaded = await global.ensureCurrentProjectAnalyzeSources({ silent: true });
+    const sources = Array.isArray(loaded && loaded.sources) ? loaded.sources : [];
+    return {
+      ready: sources.length > 0,
+      loadedNow: Boolean(loaded && loaded.loadedNow),
+      sourceCount: sources.length,
+      sources: sources,
+      failedFileCount: finite(loaded && loaded.failedFileCount, 0),
+      failedFiles: clone(loaded && loaded.failedFiles || []),
+      reason: text(loaded && loaded.reason, sources.length ? "" : "Project sources are unavailable after lazy loading.")
+    };
+  }
+
+  async function prepareAutoRefactoringDryRunTemplateAsync(options) {
+    const settings = options && typeof options === "object" ? options : {};
+    const sourceState = await ensureDryRunSources(settings);
+    if (!sourceState.ready) {
+      return {
+        prepared: false,
+        status: "Blocked",
+        reason: sourceState.reason,
+        sourceLoad: sourceState
+      };
+    }
+    const result = prepareAutoRefactoringDryRunTemplate(Object.assign({}, settings, { sources: sourceState.sources }));
+    result.sourceLoad = {
+      ready: true,
+      loadedNow: sourceState.loadedNow,
+      sourceCount: sourceState.sourceCount,
+      failedFileCount: sourceState.failedFileCount || 0,
+      failedFiles: sourceState.failedFiles || []
+    };
+    return result;
+  }
+
+  async function runPracticalAutoRefactoringDryRunAsync(options) {
+    const settings = options && typeof options === "object" ? options : {};
+    const sourceState = await ensureDryRunSources(settings);
+    if (!sourceState.ready) {
+      return {
+        completed: false,
+        status: "Blocked",
+        reason: sourceState.reason,
+        sourceLoad: sourceState,
+        repositoryMutation: false,
+        repositoryWriteCount: 0
+      };
+    }
+    const result = runPracticalAutoRefactoringDryRun(Object.assign({}, settings, { sources: sourceState.sources }));
+    result.sourceLoad = {
+      ready: true,
+      loadedNow: sourceState.loadedNow,
+      sourceCount: sourceState.sourceCount,
+      failedFileCount: sourceState.failedFileCount || 0,
+      failedFiles: sourceState.failedFiles || []
+    };
+    return result;
+  }
+
   function prepareAutoRefactoringDryRunTemplate(options) {
     const resolved = resolveDryRunTarget(options);
     if (!resolved.resolved) return { prepared: false, reason: resolved.reason, target: resolved.target || null };
@@ -630,7 +698,10 @@
       practicalDryRun: {
         version: PRACTICAL_DRY_RUN_VERSION,
         templateApi: "prepareAutoRefactoringDryRunTemplate",
+        asyncTemplateApi: "prepareAutoRefactoringDryRunTemplateAsync",
         executionApi: "runPracticalAutoRefactoringDryRun",
+        asyncExecutionApi: "runPracticalAutoRefactoringDryRunAsync",
+        lazySourceLoading: true,
         manualAfterRequired: true,
         repositoryWriteProhibited: true
       },
@@ -646,8 +717,10 @@
     getStandardAutoRefactoringPolicyStatus: getStandardAutoRefactoringPolicyStatus,
     evaluateStandardAutoRefactoringPolicy: evaluateStandardAutoRefactoringPolicy,
     prepareAutoRefactoringDryRunTemplate: prepareAutoRefactoringDryRunTemplate,
+    prepareAutoRefactoringDryRunTemplateAsync: prepareAutoRefactoringDryRunTemplateAsync,
     runStandardAutoRefactoringDryRun: runStandardAutoRefactoringDryRun,
     runPracticalAutoRefactoringDryRun: runPracticalAutoRefactoringDryRun,
+    runPracticalAutoRefactoringDryRunAsync: runPracticalAutoRefactoringDryRunAsync,
     getAutoRefactoringPhase2Status: getAutoRefactoringPhase2RuntimeStatus
   };
 
