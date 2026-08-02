@@ -3,8 +3,7 @@
    検索履歴
 =============================== */
 
-let repairSearchHistory =
-  window.repairSearchHistory || [];
+/* repairSearchHistory is owned by 00_core.js. */
 
 function saveSearchHistory(
   file,
@@ -35,6 +34,9 @@ function saveSearchHistory(
       repairSearchHistory
     )
   );
+
+  window.repairSearchHistory =
+    repairSearchHistory;
 
 }
 
@@ -101,6 +103,11 @@ function loadSearchHistory() {
     repairSearchHistory = [];
 
   }
+
+  window.repairSearchHistory =
+    repairSearchHistory;
+
+  return repairSearchHistory;
 
 }
 
