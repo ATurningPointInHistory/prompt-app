@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_controlled_application.js
    IDE-150 Controlled Application Trial
-   Version: 1.0.0
+   Version: 1.0.1
    Status: Controlled Application Trial
    ============================================================ */
 (function (global) {
@@ -12,7 +12,7 @@
 
   const COMPONENT_ID = internal.COMPONENT_ID;
   const VERSION = internal.VERSION;
-  const CONTROLLED_VERSION = "1.0.0";
+  const CONTROLLED_VERSION = "1.0.1";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CONTROLLED_APPLICATION_V1";
   const MAX_SESSIONS = 20;
   const nowIso = internal.nowIso;
@@ -674,71 +674,305 @@
   }
 
   function openControlledAutoRefactoringApprovalPanel(sessionId) {
-    if (!global.document || typeof global.document.createElement !== "function") return { opened: false, reason: "Document UI is unavailable." };
+    if (!global.document || typeof global.document.createElement !== "function") {
+      return { opened: false, reason: "Document UI is unavailable." };
+    }
     const session = getSession(sessionId);
     if (!session) return { opened: false, reason: "Controlled Application Session not found." };
+
     closeControlledPanel();
+
+    const STATUS_JA = {
+      "Awaiting Explicit Approval": "明示承認待ち",
+      "Approved": "承認済み",
+      "Executing Trial": "トライアル実行中",
+      "Trial Completed and Rolled Back": "トライアル完了・ロールバック確認済み",
+      "Manual Review Required": "手動確認が必要",
+      "Passed": "合格",
+      "Allowed": "許可",
+      "Verified": "確認済み",
+      "Low": "低",
+      "Medium": "中",
+      "High": "高",
+      "Critical": "重大",
+      "Unknown": "不明"
+    };
+
+    const REASON_JA = {
+      "Controlled Application Session not found.": "制御適用セッションが見つかりません。",
+      "Session is not awaiting Approval.": "このセッションは承認待ち状態ではありません。",
+      "Approval actor and reason are required.": "承認者と承認理由を入力してください。",
+      "Approval confirmation text does not match the required challenge.": "承認用確認文字列が一致しません。",
+      "Runtime Project mutation acknowledgement is required.": "実行時プロジェクトが一時変更されることへの確認が必要です。",
+      "Automatic Rollback acknowledgement is required.": "自動ロールバックへの確認が必要です。",
+      "Explicit Controlled Application Approval is required.": "明示的な制御適用承認が必要です。",
+      "Explicit execute:true is required.": "明示的な実行指定が必要です。",
+      "Persistent Commit is prohibited in Controlled Application Trial. Automatic Rollback is mandatory.": "このトライアルでは永続コミットは禁止されています。自動ロールバックが必須です。",
+      "Execution actor must match the explicit Approval actor.": "実行者は承認者と一致する必要があります。",
+      "Execution confirmation text does not match the required challenge.": "実行用確認文字列が一致しません。",
+      "Current Project Runtime File Store Adapter is unavailable.": "現在のプロジェクト実行時ファイルストアを利用できません。",
+      "Target Project source is unavailable.": "対象プロジェクトのソースを取得できません。"
+    };
+
+    function ja(value, fallback) {
+      const key = text(value, "");
+      return STATUS_JA[key] || key || fallback || "";
+    }
+
+    function jaReason(value) {
+      const key = text(value, "");
+      return REASON_JA[key] || key;
+    }
+
+    function buttonStyle(button, emphasized) {
+      button.style.cssText = [
+        "padding:10px 14px",
+        "border-radius:8px",
+        "border:1px solid #4b5563",
+        emphasized ? "background:#1d4ed8" : "background:#1f2937",
+        "color:#fff",
+        "font-weight:700",
+        "cursor:pointer"
+      ].join(";");
+    }
+
+    function setDisabled(button, disabled) {
+      button.disabled = disabled === true;
+      button.style.opacity = button.disabled ? ".5" : "1";
+      button.style.cursor = button.disabled ? "not-allowed" : "pointer";
+    }
+
+    function copyTextValue(value, button, successLabel) {
+      const source = String(value || "");
+      function done(ok) {
+        const original = button.dataset.originalLabel || button.textContent;
+        button.dataset.originalLabel = original;
+        button.textContent = ok ? successLabel : "コピー失敗";
+        global.setTimeout(function restoreLabel() { button.textContent = original; }, 1400);
+      }
+      if (global.navigator && global.navigator.clipboard && typeof global.navigator.clipboard.writeText === "function") {
+        global.navigator.clipboard.writeText(source).then(function success() { done(true); }).catch(function fallbackCopy() {
+          try {
+            const area = global.document.createElement("textarea");
+            area.value = source;
+            area.style.position = "fixed";
+            area.style.opacity = "0";
+            global.document.body.appendChild(area);
+            area.focus();
+            area.select();
+            const copied = global.document.execCommand("copy");
+            area.remove();
+            done(copied === true);
+          } catch (_) { done(false); }
+        });
+        return;
+      }
+      try {
+        const area = global.document.createElement("textarea");
+        area.value = source;
+        area.style.position = "fixed";
+        area.style.opacity = "0";
+        global.document.body.appendChild(area);
+        area.focus();
+        area.select();
+        const copied = global.document.execCommand("copy");
+        area.remove();
+        done(copied === true);
+      } catch (_) { done(false); }
+    }
+
+    function resultSummary(result, type) {
+      if (type === "approval") {
+        if (result && result.approved === true) {
+          return [
+            "承認が完了しました。",
+            "次に実行用確認文字列を入力し、［一時適用・検証・ロールバック］を押してください。",
+            "状態: " + ja(result.session && result.session.status, "承認済み")
+          ].join("\n");
+        }
+        return "承認できませんでした。\n理由: " + jaReason(result && result.reason);
+      }
+      if (result && result.executed === true) {
+        return [
+          "トライアルが正常に完了しました。",
+          "一時適用: 完了",
+          "適用後検証: " + (result.postValidation && result.postValidation.passed ? "合格" : "不合格"),
+          "ロールバック: " + (result.rollback && result.rollback.verified ? "確認済み" : "未確認"),
+          "元ソース復元: " + (result.repository && result.repository.sourceRestored ? "はい" : "いいえ"),
+          "永続コミット: なし",
+          "書込み回数: " + finite(result.repository && result.repository.writeCount, 0)
+        ].join("\n");
+      }
+      return "トライアルを完了できませんでした。\n理由: " + jaReason(result && result.reason);
+    }
+
     const overlay = global.document.createElement("div");
     overlay.id = "ide150ControlledApplicationPanel";
+    overlay.lang = "ja";
     overlay.style.cssText = "position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;box-sizing:border-box;";
+
     const panel = global.document.createElement("div");
-    panel.style.cssText = "width:min(760px,100%);background:#111827;color:#f9fafb;border:1px solid #374151;border-radius:14px;padding:16px;box-sizing:border-box;font-family:system-ui,sans-serif;";
+    panel.style.cssText = "width:min(760px,100%);background:#111827;color:#f9fafb;border:1px solid #374151;border-radius:14px;padding:16px;box-sizing:border-box;font-family:system-ui,-apple-system,'Noto Sans JP',sans-serif;";
+
     const title = global.document.createElement("h2");
-    title.textContent = "IDE-150 Controlled Application Trial";
-    title.style.margin = "0 0 12px";
+    title.textContent = "IDE-150 制御適用トライアル";
+    title.style.margin = "0 0 4px";
     panel.appendChild(title);
+
+    const subtitle = global.document.createElement("div");
+    subtitle.textContent = "一時適用・検証・必須ロールバック";
+    subtitle.style.cssText = "color:#93c5fd;margin:0 0 12px;font-weight:700;";
+    panel.appendChild(subtitle);
+
     const summary = global.document.createElement("pre");
     summary.textContent = [
-      "Target: " + session.target.file + " :: " + session.target.function,
-      "Risk: " + text(session.dependencySummary && session.dependencySummary.riskLevel, "Unknown"),
-      "Changed Lines: " + finite(session.diffSummary && session.diffSummary.changedLines, 0),
-      "Policy: " + text(session.policySummary && session.policySummary.status, "Unknown"),
-      "Sandbox: " + (session.sandboxSummary && session.sandboxSummary.passed ? "Passed" : "Not Passed"),
-      "Mode: Temporary Runtime Application + Mandatory Rollback",
-      "Persistent Commit: Prohibited",
-      "Approval Challenge: " + session.challenge,
-      "Execution Challenge: " + session.executionChallenge
+      "対象: " + session.target.file + " :: " + session.target.function,
+      "リスク: " + ja(session.dependencySummary && session.dependencySummary.riskLevel, "不明"),
+      "変更行数: " + finite(session.diffSummary && session.diffSummary.changedLines, 0),
+      "ポリシー判定: " + ja(session.policySummary && session.policySummary.status, "不明"),
+      "サンドボックス: " + (session.sandboxSummary && session.sandboxSummary.passed ? "合格" : "未合格"),
+      "実行方式: 実行時プロジェクトへの一時適用 + 必須ロールバック",
+      "永続コミット: 禁止",
+      "現在の状態: " + ja(session.status, session.status)
     ].join("\n");
-    summary.style.cssText = "white-space:pre-wrap;background:#0b1220;padding:12px;border-radius:10px;";
+    summary.style.cssText = "white-space:pre-wrap;background:#0b1220;padding:12px;border-radius:10px;line-height:1.5;";
     panel.appendChild(summary);
+
+    const notice = global.document.createElement("div");
+    notice.textContent = "安全確認用の英字Challenge文字列は内部契約のため翻訳しません。表示された文字列を完全一致で入力してください。";
+    notice.style.cssText = "margin:10px 0;padding:10px 12px;border-left:4px solid #f59e0b;background:#1f2937;border-radius:6px;line-height:1.5;";
+    panel.appendChild(notice);
+
+    function challengeBox(labelText, value, copyLabel) {
+      const wrap = global.document.createElement("div");
+      wrap.style.cssText = "margin:10px 0;padding:10px;background:#0b1220;border-radius:10px;";
+      const label = global.document.createElement("div");
+      label.textContent = labelText;
+      label.style.cssText = "font-weight:700;margin-bottom:6px;";
+      const code = global.document.createElement("code");
+      code.textContent = value;
+      code.style.cssText = "display:block;white-space:pre-wrap;overflow-wrap:anywhere;padding:8px;background:#030712;border-radius:6px;user-select:text;";
+      const copyButton = global.document.createElement("button");
+      copyButton.textContent = copyLabel;
+      buttonStyle(copyButton, false);
+      copyButton.style.marginTop = "8px";
+      copyButton.onclick = function copyChallenge() { copyTextValue(value, copyButton, "コピーしました"); };
+      wrap.appendChild(label);
+      wrap.appendChild(code);
+      wrap.appendChild(copyButton);
+      panel.appendChild(wrap);
+    }
+
+    challengeBox("承認用確認文字列", session.challenge, "承認用文字列をコピー");
+    challengeBox("実行用確認文字列（承認後に入力）", session.executionChallenge, "実行用文字列をコピー");
+
+    const diffHeading = global.document.createElement("h3");
+    diffHeading.textContent = "変更差分";
+    diffHeading.style.margin = "16px 0 8px";
+    panel.appendChild(diffHeading);
+
     const diff = global.document.createElement("pre");
-    diff.textContent = text(session.diffSummary && session.diffSummary.text, "No diff available.");
+    diff.textContent = text(session.diffSummary && session.diffSummary.text, "差分を取得できませんでした。");
     diff.style.cssText = "white-space:pre-wrap;max-height:240px;overflow:auto;background:#030712;padding:12px;border-radius:10px;";
     panel.appendChild(diff);
 
-    function field(labelText, value) {
+    function field(labelText, value, placeholder) {
       const wrap = global.document.createElement("label");
-      wrap.style.cssText = "display:block;margin:10px 0;";
+      wrap.style.cssText = "display:block;margin:12px 0;";
       const label = global.document.createElement("div");
       label.textContent = labelText;
-      label.style.marginBottom = "4px";
+      label.style.cssText = "margin-bottom:6px;font-weight:700;";
       const input = global.document.createElement("input");
       input.value = value || "";
-      input.style.cssText = "width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #4b5563;background:#111827;color:#fff;";
+      input.placeholder = placeholder || "";
+      input.autocomplete = "off";
+      input.spellcheck = false;
+      input.style.cssText = "width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:1px solid #4b5563;background:#111827;color:#fff;font-size:16px;";
       wrap.appendChild(label);
       wrap.appendChild(input);
       panel.appendChild(wrap);
       return input;
     }
 
-    const actor = field("Approval actor", "Project Owner");
-    const reason = field("Approval reason", "Controlled application trial with mandatory rollback");
-    const confirmation = field("Type the exact Approval challenge", "");
-    const execution = field("Type the exact Execution challenge", "");
-    const mutationAck = global.document.createElement("input"); mutationAck.type = "checkbox";
-    const rollbackAck = global.document.createElement("input"); rollbackAck.type = "checkbox";
+    const actor = field("承認者", "Project Owner", "承認者を入力");
+    const reason = field("承認理由", "必須ロールバック付き制御適用トライアル", "承認理由を入力");
+    const confirmation = field("承認用確認文字列を入力", "", "APPROVE ...");
+    const execution = field("実行用確認文字列を入力（承認後）", "", "EXECUTE-AND-ROLLBACK ...");
+
+    const mutationAck = global.document.createElement("input");
+    mutationAck.type = "checkbox";
+    mutationAck.style.cssText = "width:22px;height:22px;flex:0 0 auto;margin-top:2px;";
+    const rollbackAck = global.document.createElement("input");
+    rollbackAck.type = "checkbox";
+    rollbackAck.style.cssText = mutationAck.style.cssText;
+
     const ackWrap = global.document.createElement("div");
-    ackWrap.style.margin = "12px 0";
-    const m = global.document.createElement("label"); m.appendChild(mutationAck); m.appendChild(global.document.createTextNode(" I understand the Runtime Project source is temporarily modified."));
-    const r = global.document.createElement("label"); r.style.display = "block"; r.appendChild(rollbackAck); r.appendChild(global.document.createTextNode(" I understand automatic Rollback is mandatory."));
-    ackWrap.appendChild(m); ackWrap.appendChild(r); panel.appendChild(ackWrap);
-    const output = global.document.createElement("pre"); output.style.cssText = "white-space:pre-wrap;background:#0b1220;padding:10px;border-radius:8px;"; panel.appendChild(output);
-    const buttons = global.document.createElement("div"); buttons.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;";
-    const approveButton = global.document.createElement("button"); approveButton.textContent = "Approve Trial";
-    const executeButton = global.document.createElement("button"); executeButton.textContent = "Apply, Validate & Roll Back"; executeButton.disabled = session.status !== "Approved";
-    const closeButton = global.document.createElement("button"); closeButton.textContent = "Close";
-    [approveButton, executeButton, closeButton].forEach(function style(button) { button.style.cssText = "padding:10px 14px;border-radius:8px;border:1px solid #4b5563;background:#1f2937;color:#fff;"; buttons.appendChild(button); });
+    ackWrap.style.margin = "14px 0";
+    function ackLabel(input, labelText) {
+      const label = global.document.createElement("label");
+      label.style.cssText = "display:flex;gap:8px;align-items:flex-start;margin:10px 0;line-height:1.45;font-weight:700;";
+      label.appendChild(input);
+      label.appendChild(global.document.createTextNode(labelText));
+      return label;
+    }
+    ackWrap.appendChild(ackLabel(mutationAck, "実行時プロジェクトのソースが一時的に変更されることを理解しました。"));
+    ackWrap.appendChild(ackLabel(rollbackAck, "検証後に自動ロールバックが必ず実行されることを理解しました。"));
+    panel.appendChild(ackWrap);
+
+    const resultHeading = global.document.createElement("h3");
+    resultHeading.textContent = "実行結果";
+    resultHeading.style.margin = "16px 0 8px";
+    panel.appendChild(resultHeading);
+
+    const output = global.document.createElement("pre");
+    output.textContent = session.status === "Trial Completed and Rolled Back"
+      ? "トライアル完了・ロールバック確認済みです。"
+      : "まだ実行されていません。";
+    output.style.cssText = "white-space:pre-wrap;background:#0b1220;padding:12px;border-radius:8px;line-height:1.5;";
+    panel.appendChild(output);
+
+    const rawDetails = global.document.createElement("details");
+    rawDetails.style.marginTop = "10px";
+    const rawSummary = global.document.createElement("summary");
+    rawSummary.textContent = "詳細JSONを表示";
+    rawSummary.style.cssText = "cursor:pointer;font-weight:700;";
+    const rawOutput = global.document.createElement("pre");
+    rawOutput.textContent = "";
+    rawOutput.style.cssText = "white-space:pre-wrap;max-height:360px;overflow:auto;background:#030712;padding:10px;border-radius:8px;";
+    rawDetails.appendChild(rawSummary);
+    rawDetails.appendChild(rawOutput);
+    panel.appendChild(rawDetails);
+
+    const buttons = global.document.createElement("div");
+    buttons.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;";
+    const approveButton = global.document.createElement("button");
+    approveButton.textContent = "トライアルを承認";
+    const executeButton = global.document.createElement("button");
+    executeButton.textContent = "一時適用・検証・ロールバック";
+    const closeButton = global.document.createElement("button");
+    closeButton.textContent = "閉じる";
+    buttonStyle(approveButton, false);
+    buttonStyle(executeButton, true);
+    buttonStyle(closeButton, false);
+    buttons.appendChild(approveButton);
+    buttons.appendChild(executeButton);
+    buttons.appendChild(closeButton);
     panel.appendChild(buttons);
+
+    function lockCompletedUi() {
+      approveButton.textContent = "承認済み";
+      executeButton.textContent = "完了・ロールバック確認済み";
+      setDisabled(approveButton, true);
+      setDisabled(executeButton, true);
+      [actor, reason, confirmation, execution].forEach(function lock(input) { input.readOnly = true; });
+      mutationAck.disabled = true;
+      rollbackAck.disabled = true;
+    }
+
+    setDisabled(approveButton, session.status !== "Awaiting Explicit Approval");
+    setDisabled(executeButton, session.status !== "Approved");
+    if (session.status === "Trial Completed and Rolled Back") lockCompletedUi();
+
     approveButton.onclick = function approveClick() {
       const result = approveControlledAutoRefactoringApplication(session.id, {
         actor: actor.value,
@@ -747,22 +981,39 @@
         acknowledgeRuntimeMutation: mutationAck.checked,
         acknowledgeAutomaticRollback: rollbackAck.checked
       });
-      output.textContent = JSON.stringify(result, null, 2);
-      executeButton.disabled = result.approved !== true;
+      output.textContent = resultSummary(result, "approval");
+      rawOutput.textContent = JSON.stringify(result, null, 2);
+      if (result.approved === true) {
+        setDisabled(approveButton, true);
+        approveButton.textContent = "承認済み";
+        setDisabled(executeButton, false);
+        execution.focus();
+      }
     };
+
     executeButton.onclick = function executeClick() {
+      setDisabled(executeButton, true);
+      executeButton.textContent = "実行中…";
       const result = executeControlledAutoRefactoringApplication(session.id, {
         execute: true,
         actor: actor.value,
         confirmationText: execution.value,
-        rollbackReason: "Mandatory rollback from Controlled Application UI"
+        rollbackReason: "制御適用UIからの必須ロールバック"
       });
-      output.textContent = JSON.stringify(result, null, 2);
+      output.textContent = resultSummary(result, "execution");
+      rawOutput.textContent = JSON.stringify(result, null, 2);
+      if (result.executed === true) {
+        lockCompletedUi();
+      } else {
+        executeButton.textContent = "一時適用・検証・ロールバック";
+        setDisabled(executeButton, false);
+      }
     };
+
     closeButton.onclick = closeControlledPanel;
     overlay.appendChild(panel);
     global.document.body.appendChild(overlay);
-    return { opened: true, session: compactSession(session) };
+    return { opened: true, session: compactSession(session), locale: "ja-JP" };
   }
 
   loadSessions();
