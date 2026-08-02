@@ -1,15 +1,16 @@
 /* ============================================================
    IDE-110 Diagnostic Platform Extension
    File: 13_diagnostic_platform.js
-   Version: 1.1.0
+   Version: 1.2.0
    Strategy: standalone platform extension loaded after instrumentation.
 ============================================================ */
 (function initializeDiagnosticPlatform(global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-110";
-  const VERSION = "1.1.1";
+  const VERSION = "1.2.0";
   const MAX_RECORDS = 500;
+  const runtimeBindings = new Map();
 
   const state = {
     initialized: true,
@@ -22,6 +23,7 @@
     reports: [],
     sequence: 0,
     lastError: null,
+    lastValidation: null,
     updatedAt: new Date().toISOString()
   };
 
@@ -71,14 +73,19 @@
   function previewInstrumentation(options) {
     const input = object(options);
     const type = text(input.type, "TRACE");
+    const targetId = text(input.targetId || input.target || input.functionName, "");
+    const runtimeTarget = Boolean(targetId && typeof global[targetId] === "function");
     return {
       id: "IDE-110-INSTRUMENTATION-PREVIEW",
-      valid: Boolean(input.targetId || input.target),
+      valid: Boolean(targetId),
       type: type,
       targetType: text(input.targetType, "Function"),
-      targetId: text(input.targetId || input.target, ""),
-      changes: [{ action: "ADD_PROBE", type: type, reversible: true }],
+      targetId: targetId,
+      applicationMode: runtimeTarget ? "Runtime Wrapper" : "Logical Adapter",
+      runtimeTargetAvailable: runtimeTarget,
+      changes: [{ action: runtimeTarget ? "WRAP_RUNTIME_FUNCTION" : "REGISTER_LOGICAL_PROBE", type: type, reversible: true }],
       sourceChanged: false,
+      runtimeChanged: runtimeTarget,
       previewedAt: nowIso()
     };
   }
@@ -89,18 +96,36 @@
       if (!preview.valid) return { added: false, reason: "targetId is required.", preview: preview };
       const input = object(options);
       const item = {
-        id: nextId("INST"),
-        sessionId: text(input.sessionId, ""),
-        investigationId: text(input.investigationId, ""),
-        type: preview.type,
-        targetType: preview.targetType,
-        targetId: preview.targetId,
-        config: object(input.config),
-        status: "Applied",
-        appliedAt: nowIso(),
-        removedAt: null,
-        verified: false
+        id: nextId("INST"), sessionId: text(input.sessionId, ""), investigationId: text(input.investigationId, ""),
+        type: preview.type, targetType: preview.targetType, targetId: preview.targetId, config: object(input.config),
+        status: "Applied", applicationMode: preview.applicationMode, sourceMutated: false, runtimeMutated: false,
+        callCount: 0, appliedAt: nowIso(), removedAt: null, verified: false
       };
+      if (preview.runtimeTargetAvailable) {
+        const original = global[item.targetId];
+        const wrapper = function diagnosticRuntimeWrapper() {
+          const started = typeof performance !== "undefined" && typeof performance.now === "function" ? performance.now() : Date.now();
+          item.callCount += 1;
+          const finish = function (outcome) {
+            const ended = typeof performance !== "undefined" && typeof performance.now === "function" ? performance.now() : Date.now();
+            recordPerformance({ targetId: item.targetId, durationMs: Math.max(0, ended - started), metadata: { instrumentationId: item.id, outcome: outcome } });
+          };
+          try {
+            const result = original.apply(this, arguments);
+            if (result && typeof result.then === "function") {
+              return result.then(function (value) { finish("Resolved"); return value; }, function (error) { finish("Rejected"); throw error; });
+            }
+            finish("Returned");
+            return result;
+          } catch (error) {
+            finish("Thrown");
+            throw error;
+          }
+        };
+        runtimeBindings.set(item.id, { targetId: item.targetId, original: original, wrapper: wrapper });
+        global[item.targetId] = wrapper;
+        item.runtimeMutated = true;
+      }
       state.instrumentations.push(item); trim(state.instrumentations); touch();
       if (item.sessionId && typeof global.addDiagnosticSessionEvent === "function") global.addDiagnosticSessionEvent(item.sessionId, "INSTRUMENTATION_ADDED", item);
       return { added: true, instrumentation: clone(item) };
@@ -111,6 +136,15 @@
     const item = state.instrumentations.find(function (x) { return x.id === instrumentationId; });
     if (!item) return { removed: false, reason: "Instrumentation not found." };
     if (item.status === "Removed") return { removed: true, alreadyRemoved: true, instrumentation: clone(item) };
+    const binding = runtimeBindings.get(item.id);
+    if (binding) {
+      if (global[binding.targetId] !== binding.wrapper) {
+        item.status = "Conflict Detected"; item.removedAt = nowIso(); touch();
+        return { removed: false, conflict: true, reason: "Runtime target changed after instrumentation; automatic restore was blocked.", instrumentation: clone(item) };
+      }
+      global[binding.targetId] = binding.original;
+      runtimeBindings.delete(item.id);
+    }
     item.status = "Removed"; item.removedAt = nowIso(); touch();
     return { removed: true, instrumentation: clone(item) };
   }
@@ -118,7 +152,12 @@
   function verifyInstrumentation(instrumentationId) {
     const item = state.instrumentations.find(function (x) { return x.id === instrumentationId; });
     if (!item) return { verified: false, reason: "Instrumentation not found." };
-    item.verified = item.status === "Applied" || item.status === "Removed"; item.verifiedAt = nowIso(); touch();
+    const binding = runtimeBindings.get(item.id);
+    if (item.status === "Applied" && item.runtimeMutated) item.verified = Boolean(binding && global[item.targetId] === binding.wrapper);
+    else if (item.status === "Applied") item.verified = item.applicationMode === "Logical Adapter";
+    else if (item.status === "Removed") item.verified = !binding;
+    else item.verified = false;
+    item.verifiedAt = nowIso(); touch();
     return { verified: item.verified, instrumentation: clone(item) };
   }
 
@@ -189,15 +228,23 @@
   function restoreSource(backupId) {
     const backup = state.sourceBackups.find(function (x) { return x.id === backupId; });
     if (!backup) return { restored: false, reason: "Backup not found." };
-    backup.restoredAt = nowIso(); touch();
-    return { restored: true, targetId: backup.targetId, content: backup.content, backup: clone(backup) };
+    const returnOnly = Boolean(backup.metadata && backup.metadata.returnOnly === true);
+    let repositoryWritten = false;
+    if (!returnOnly && typeof global.updateProjectFile === "function") repositoryWritten = global.updateProjectFile(backup.targetId, backup.content) === true;
+    backup.restoredAt = nowIso(); backup.repositoryWritten = repositoryWritten; touch();
+    return { restored: returnOnly || repositoryWritten, logicalRestore: returnOnly || !repositoryWritten, repositoryWritten: repositoryWritten, targetId: backup.targetId, content: backup.content, backup: clone(backup) };
   }
 
   function verifyRestore(backupId, currentContent) {
     const backup = state.sourceBackups.find(function (x) { return x.id === backupId; });
     if (!backup) return { verified: false, reason: "Backup not found." };
-    const verified = String(currentContent == null ? "" : currentContent) === backup.content;
-    return { verified: verified, backupId: backupId, targetId: backup.targetId, checkedAt: nowIso() };
+    let actual = currentContent;
+    if (actual === undefined && typeof global.getProjectFile === "function") {
+      const file = global.getProjectFile(backup.targetId);
+      actual = file && (file.code || file.text || file.content);
+    }
+    const verified = String(actual == null ? "" : actual) === backup.content;
+    return { verified: verified, backupId: backupId, targetId: backup.targetId, repositoryVerified: actual !== undefined, checkedAt: nowIso() };
   }
 
   function buildDiagnosticReport(options) {
@@ -220,46 +267,56 @@
     const required = ["registerInstrumentationType","registerProbeType","previewInstrumentation","addInstrumentation","removeInstrumentation","verifyInstrumentation","createInvestigation","addInvestigationEvidence","recordPerformance","getPerformanceRanking","backupSource","restoreSource","verifyRestore","buildDiagnosticReport","getDiagnosticPlatformStatus","validateDiagnosticPlatform"];
     const implemented = required.filter(function (name) { return typeof global[name] === "function"; }).length;
     const base = typeof global.getDiagnosticInstrumentationStatus === "function" ? global.getDiagnosticInstrumentationStatus() : null;
-    const ready = Boolean(base && base.ready && implemented === required.length);
+    const platformReady = Boolean(base && base.ready && implemented === required.length);
+    const validation = state.lastValidation;
+    const releaseAllowed = Boolean(validation && validation.valid);
     return {
       id: COMPONENT_ID, title: "Diagnostic Platform", name: "Diagnostic Platform", version: VERSION,
-      status: ready ? "Ready" : "In Progress", ready: ready, progress: Math.round((implemented / required.length) * 100),
-      health: state.lastError ? 80 : (ready ? 100 : 90), implemented: implemented, total: required.length,
-      baseInstrumentation: base, counts: {
-        instrumentationTypes: Object.keys(state.instrumentationTypes).length, probeTypes: Object.keys(state.probeTypes).length,
-        instrumentations: state.instrumentations.length, investigations: state.investigations.length,
-        performanceRecords: state.performanceRecords.length, backups: state.sourceBackups.length, reports: state.reports.length
-      },
-      warnings: [], errors: state.lastError ? [clone(state.lastError)] : [], nextTask: ready ? "Run IDE-115 Diagnostic Validation." : "Complete IDE-110 Diagnostic Platform APIs.",
-      provides: ["Instrumentation Registry","Probe Registry","Performance Monitoring","Investigation Management","Restore Management","Diagnostic Reporting"],
-      updatedAt: state.updatedAt
+      status: platformReady ? "Ready" : "In Progress", lifecycleStatus: releaseAllowed ? "Completed" : "Implementation",
+      officialStatus: releaseAllowed ? "Official" : "Not Validated", ready: platformReady, releaseAllowed: releaseAllowed,
+      health: validation ? validation.health : (platformReady ? 90 : 70), progress: Math.round((implemented / required.length) * 100),
+      implemented: implemented, total: required.length,
+      instrumentationCapabilities: { runtimeWrapper: true, logicalAdapter: true, projectFileRestore: typeof global.updateProjectFile === "function", sourcePatchGeneration: false },
+      baseInstrumentation: base,
+      lastValidation: validation ? clone({ valid: validation.valid, passed: validation.passed, failed: validation.failed, total: validation.total, health: validation.health, validatedAt: validation.validatedAt }) : null,
+      counts: { instrumentationTypes: Object.keys(state.instrumentationTypes).length, probeTypes: Object.keys(state.probeTypes).length, instrumentations: state.instrumentations.length, activeRuntimeBindings: runtimeBindings.size, investigations: state.investigations.length, performanceRecords: state.performanceRecords.length, backups: state.sourceBackups.length, reports: state.reports.length },
+      warnings: [], errors: state.lastError ? [clone(state.lastError)] : [],
+      nextTask: releaseAllowed ? "Run IDE-115 Diagnostic Validation release check." : "Run validateDiagnosticPlatform() once and confirm runtime instrumentation restore.",
+      provides: ["Instrumentation Registry","Runtime Function Wrapper","Logical Probe Adapter","Performance Monitoring","Investigation Management","Project File Restore Adapter","Diagnostic Reporting"], updatedAt: state.updatedAt
     };
   }
 
   function validateDiagnosticPlatform() {
     const checks = []; function check(name, passed, detail) { checks.push({ name: name, passed: passed === true, detail: detail || "" }); }
-    const snapshot = clone(state);
+    const snapshot = clone(state); const testName = "__IDE110_RUNTIME_TEST__"; const previousTest = global[testName];
+    global[testName] = function (value) { return value + 1; };
     try {
       check("Base instrumentation", typeof global.validateDiagnosticInstrumentation === "function" && global.validateDiagnosticInstrumentation().valid === true);
       check("Instrumentation type registry", registerInstrumentationType({ id: "TRACE", title: "Trace" }).registered === true);
       check("Probe type registry", registerProbeType({ id: "ELAPSED", metric: "durationMs" }).registered === true);
-      const preview = previewInstrumentation({ type: "TRACE", targetId: "sampleFunction" }); check("Instrumentation preview", preview.valid === true && preview.sourceChanged === false);
-      const added = addInstrumentation({ type: "TRACE", targetId: "sampleFunction" }); check("Instrumentation apply", added.added === true);
+      const preview = previewInstrumentation({ type: "TRACE", targetId: testName }); check("Runtime instrumentation preview", preview.valid && preview.applicationMode === "Runtime Wrapper");
+      const original = global[testName]; const added = addInstrumentation({ type: "TRACE", targetId: testName });
+      check("Runtime instrumentation apply", added.added && added.instrumentation.runtimeMutated && global[testName] !== original);
+      check("Instrumented function execution", global[testName](1) === 2);
       check("Instrumentation verification", verifyInstrumentation(added.instrumentation.id).verified === true);
-      check("Instrumentation removal", removeInstrumentation(added.instrumentation.id).removed === true);
+      check("Runtime instrumentation removal", removeInstrumentation(added.instrumentation.id).removed === true && global[testName] === original);
       const investigation = createInvestigation({ title: "Validation", problem: "test" }); check("Investigation creation", Boolean(investigation.id));
       check("Evidence recording", addInvestigationEvidence(investigation.id, { type: "Observation", data: "ok" }).added === true);
-      check("Performance recording", recordPerformance({ targetId: "sampleFunction", durationMs: 12.5 }).recorded === true);
-      check("Performance ranking", getPerformanceRanking({ limit: 5 }).length === 1);
-      const backup = backupSource({ targetId: "sample.js", content: "function sample(){}" }); check("Source backup", backup.backedUp === true);
-      const restored = restoreSource(backup.backup.id); check("Source restore", restored.restored === true);
+      check("Performance recording", recordPerformance({ targetId: testName, durationMs: 12.5 }).recorded === true);
+      check("Performance ranking", getPerformanceRanking({ limit: 5 }).length >= 1);
+      const backup = backupSource({ targetId: "sample.js", content: "function sample(){}", metadata: { returnOnly: true } }); check("Source backup", backup.backedUp === true);
+      const restored = restoreSource(backup.backup.id); check("Logical source restore", restored.restored && restored.logicalRestore);
       check("Restore verification", verifyRestore(backup.backup.id, restored.content).verified === true);
       check("Diagnostic report", Boolean(buildDiagnosticReport({ title: "Validation Report" }).id));
-      const status = getDiagnosticPlatformStatus(); check("Platform Status API", status.ready === true && status.health === 100, status.status + " / " + status.implemented + "/" + status.total);
+      check("Status API is lightweight", !/const\s+validation\s*=\s*validateDiagnosticPlatform\s*\(/.test(getDiagnosticPlatformStatus.toString()));
     } catch (error) { check("Unexpected exception", false, error.message || String(error)); }
-    finally { Object.keys(state).forEach(function (key) { delete state[key]; }); Object.keys(snapshot).forEach(function (key) { state[key] = snapshot[key]; }); }
+    finally {
+      if (previousTest === undefined) delete global[testName]; else global[testName] = previousTest;
+      runtimeBindings.clear(); Object.keys(state).forEach(function (key) { delete state[key]; }); Object.keys(snapshot).forEach(function (key) { state[key] = snapshot[key]; });
+    }
     const passed = checks.filter(function (x) { return x.passed; }).length;
-    return { id: "IDE-110-PLATFORM-VALIDATION", valid: passed === checks.length, passed: passed, total: checks.length, health: checks.length ? Math.round((passed / checks.length) * 100) : 0, checks: checks, validatedAt: nowIso() };
+    const result = { id: "IDE-110-PLATFORM-VALIDATION", valid: passed === checks.length, passed: passed, failed: checks.length - passed, total: checks.length, health: checks.length ? Math.round((passed / checks.length) * 100) : 0, checks: checks, validatedAt: nowIso() };
+    state.lastValidation = clone(result); touch(); return result;
   }
 
   registerInstrumentationType({ id: "TRACE", title: "Execution Trace" });
