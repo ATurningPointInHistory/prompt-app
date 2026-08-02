@@ -1085,7 +1085,17 @@ function openRepairTarget(
    Load Current Project Search Files
 =============================== */
 
-async function loadCurrentProjectSearchFiles() {
+async function loadCurrentProjectSearchFiles(
+  options = {}
+) {
+
+  const settings =
+    options && typeof options === "object"
+      ? options
+      : {};
+
+  const silent =
+    settings.silent === true;
 
   try {
 
@@ -1106,8 +1116,10 @@ async function loadCurrentProjectSearchFiles() {
 
     let loaded = 1;
     let failed = 0;
+    let skippedExternal = 0;
 
     const failedFiles = [];
+    const skippedExternalFiles = [];
 
     /* ---------------------------
        JavaScript
@@ -1126,6 +1138,12 @@ async function loadCurrentProjectSearchFiles() {
         script.getAttribute("src");
 
       if (!src) {
+        continue;
+      }
+
+      if (/^(?:https?:)?\/\//i.test(src)) {
+        skippedExternal++;
+        skippedExternalFiles.push(src);
         continue;
       }
 
@@ -1169,6 +1187,12 @@ async function loadCurrentProjectSearchFiles() {
         );
 
       if (!href) {
+        continue;
+      }
+
+      if (/^(?:https?:)?\/\//i.test(href)) {
+        skippedExternal++;
+        skippedExternalFiles.push(href);
         continue;
       }
 
@@ -1217,31 +1241,160 @@ async function loadCurrentProjectSearchFiles() {
       );
     }
 
-    if (
-      typeof buildCurrentProjectLoadReport ===
-      "function"
-    ) {
-      alert(
-        buildCurrentProjectLoadReport(
-          loaded,
-          failed,
-          failedFiles
-        )
-      );
-    } else {
-      alert(
-        `現在プロジェクト ${loaded}件読込 / 失敗 ${failed}件`
-      );
+    if (!silent) {
+      if (
+        typeof buildCurrentProjectLoadReport ===
+        "function"
+      ) {
+        alert(
+          buildCurrentProjectLoadReport(
+            loaded,
+            failed,
+            failedFiles
+          )
+        );
+      } else {
+        alert(
+          `現在プロジェクト ${loaded}件読込 / 失敗 ${failed}件`
+        );
+      }
     }
+
+    const sources =
+      getAnalyzeSourcesFromCurrentProject();
+
+    return {
+      loaded: true,
+      status:
+        sources.length
+          ? "Ready"
+          : "Unavailable",
+      loadedFileCount: loaded,
+      failedFileCount: failed,
+      failedFiles,
+      skippedExternalFileCount: skippedExternal,
+      skippedExternalFiles,
+      sourceCount: sources.length,
+      sources
+    };
 
   } catch (e) {
 
-    alert(
-      "現在プロジェクト読込に失敗しました\n\n" +
-      e.message
-    );
+    if (!silent) {
+      alert(
+        "現在プロジェクト読込に失敗しました\n\n" +
+        e.message
+      );
+    }
+
+    return {
+      loaded: false,
+      status: "Failed",
+      loadedFileCount: 0,
+      failedFileCount: 0,
+      failedFiles: [],
+      skippedExternalFileCount: 0,
+      skippedExternalFiles: [],
+      sourceCount: 0,
+      sources: [],
+      error:
+        e && e.message
+          ? e.message
+          : String(e)
+    };
 
   }
+
+}
+
+/* ===============================
+   Ensure Current Project Analyze Sources
+   Current Projectが未読込の場合のみ遅延読込する
+=============================== */
+
+async function ensureCurrentProjectAnalyzeSources(
+  options = {}
+) {
+
+  const settings =
+    options && typeof options === "object"
+      ? options
+      : {};
+
+  const existing =
+    getAnalyzeSourcesFromCurrentProject();
+
+  if (existing.length) {
+    return {
+      ready: true,
+      status: "Ready",
+      loadedNow: false,
+      sourceCount: existing.length,
+      sources: existing,
+      failedFileCount: 0,
+      failedFiles: [],
+      skippedExternalFileCount: 0,
+      skippedExternalFiles: [],
+      reason: ""
+    };
+  }
+
+  const loadResult =
+    await loadCurrentProjectSearchFiles({
+      silent:
+        settings.silent !== false
+    });
+
+  const sources =
+    getAnalyzeSourcesFromCurrentProject();
+
+  return {
+    ready: sources.length > 0,
+    status:
+      sources.length
+        ? "Ready"
+        : "Unavailable",
+    loadedNow: true,
+    sourceCount: sources.length,
+    sources,
+    loadedFileCount:
+      Number(
+        loadResult &&
+        loadResult.loadedFileCount
+      ) || 0,
+    failedFileCount:
+      Number(
+        loadResult &&
+        loadResult.failedFileCount
+      ) || 0,
+    failedFiles:
+      Array.isArray(
+        loadResult &&
+        loadResult.failedFiles
+      )
+        ? loadResult.failedFiles
+        : [],
+    skippedExternalFileCount:
+      Number(
+        loadResult &&
+        loadResult.skippedExternalFileCount
+      ) || 0,
+    skippedExternalFiles:
+      Array.isArray(
+        loadResult &&
+        loadResult.skippedExternalFiles
+      )
+        ? loadResult.skippedExternalFiles
+        : [],
+    reason:
+      sources.length
+        ? ""
+        : (
+            loadResult &&
+            loadResult.error
+          ) ||
+          "現在プロジェクトのソースを読込めませんでした。"
+  };
 
 }
 /* ===============================
@@ -1492,6 +1645,9 @@ window.openRepairTarget =
 
 window.loadCurrentProjectSearchFiles =
   loadCurrentProjectSearchFiles;
+
+window.ensureCurrentProjectAnalyzeSources =
+  ensureCurrentProjectAnalyzeSources;
 
 window.loadCurrentProjectFileByFetch =
   loadCurrentProjectFileByFetch;
