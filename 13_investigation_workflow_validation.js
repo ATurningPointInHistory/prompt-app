@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_investigation_workflow_validation.js
    IDE-135 Investigation Workflow Validation
-   Version: 1.2.0
+   Version: 1.2.3
    Status: Ready
    Design Freeze: 2026-07-26
    ============================================================ */
@@ -9,7 +9,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-135";
-  const VERSION = "1.2.0";
+  const VERSION = "1.2.3";
   const TARGET_COMPONENT = "IDE-130";
   const MAX_HISTORY = 100;
 
@@ -1235,7 +1235,9 @@
             ),
           health: status && status.health,
           lifecycleStatus:
-            status && status.lifecycleStatus
+            status && status.lifecycleStatus,
+          releaseEvidenceSource:
+            status && status.releaseEvidence && status.releaseEvidence.source || (releaseAllowed ? "Runtime" : "")
         };
       });
 
