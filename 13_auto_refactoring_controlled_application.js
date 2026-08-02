@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_auto_refactoring_controlled_application.js
    IDE-150 Controlled Application Trial
-   Version: 1.0.5
-   Status: Function-Level Rollback Snapshot Compatible
+   Version: 1.0.6
+   Status: Compact Controlled Session Persistence
    ============================================================ */
 (function (global) {
   "use strict";
@@ -12,9 +12,11 @@
 
   const COMPONENT_ID = internal.COMPONENT_ID;
   const VERSION = internal.VERSION;
-  const CONTROLLED_VERSION = "1.0.5";
+  const CONTROLLED_VERSION = "1.0.6";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CONTROLLED_APPLICATION_V1";
+  const STORAGE_SCHEMA_VERSION = 2;
   const MAX_SESSIONS = 20;
+  const MAX_PERSISTED_SESSIONS = 6;
   const nowIso = internal.nowIso;
   const clone = internal.clone;
   const text = internal.text;
@@ -83,25 +85,157 @@
     };
   }
 
+  function isQuotaError(error) {
+    if (!error) return false;
+    return Boolean(
+      error.name === "QuotaExceededError" ||
+      error.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+      error.code === 22 ||
+      error.code === 1014 ||
+      /quota|storage.*full|exceeded/i.test(String(error.message || ""))
+    );
+  }
+
+  function persistentSessionSummary(item) {
+    if (!item) return null;
+    return {
+      id: item.id,
+      componentId: COMPONENT_ID,
+      version: VERSION,
+      controlledVersion: CONTROLLED_VERSION,
+      status: item.status,
+      target: clone(item.target),
+      candidateId: item.candidateId || "",
+      patchId: item.patchId || "",
+      approvalId: item.approvalId || "",
+      approvalActor: item.approvalActor || "",
+      transactionId: item.transactionId || "",
+      rollbackId: item.rollbackId || "",
+      beforeHash: item.beforeHash || "",
+      afterHash: item.afterHash || "",
+      approvalStatus: item.approvalStatus || "",
+      executionStatus: item.executionStatus || "",
+      rollbackStatus: item.rollbackStatus || "",
+      postValidationStatus: item.postValidationStatus || "",
+      trialRollbackRequired: true,
+      persistentCommitAllowed: false,
+      temporaryWriteExpected: item.status === "Approved" || item.status === "Executing Trial",
+      finalRepositoryMutation: false,
+      writeCount: finite(item.writeCount, 0),
+      sourceRestored: item.sourceRestored === true,
+      diffSummary: {
+        changedLines: finite(item.diffSummary && item.diffSummary.changedLines, 0),
+        addedLines: finite(item.diffSummary && item.diffSummary.addedLines, 0),
+        removedLines: finite(item.diffSummary && item.diffSummary.removedLines, 0),
+        truncated: Boolean(item.diffSummary && item.diffSummary.truncated)
+      },
+      dependencySummary: clone(item.dependencySummary || {}),
+      policySummary: clone(item.policySummary || {}),
+      sandboxSummary: {
+        passed: Boolean(item.sandboxSummary && item.sandboxSummary.passed),
+        health: finite(item.sandboxSummary && item.sandboxSummary.health, 0),
+        passedChecks: finite(item.sandboxSummary && item.sandboxSummary.passedChecks, 0),
+        failedChecks: finite(item.sandboxSummary && item.sandboxSummary.failedChecks, 0)
+      },
+      preparedAt: item.preparedAt || "",
+      approvedAt: item.approvedAt || "",
+      executedAt: item.executedAt || "",
+      completedAt: item.completedAt || "",
+      lastError: item.lastError || "",
+      resumableAfterReload: false
+    };
+  }
+
+  function buildPersistencePayload(limit) {
+    const count = Math.max(1, Math.min(MAX_PERSISTED_SESSIONS, finite(limit, MAX_PERSISTED_SESSIONS)));
+    return {
+      schemaVersion: STORAGE_SCHEMA_VERSION,
+      componentId: COMPONENT_ID,
+      version: VERSION,
+      controlledVersion: CONTROLLED_VERSION,
+      mode: "Compact Session Summary",
+      sessions: [...sessions.values()].slice(-count).map(persistentSessionSummary),
+      updatedAt: nowIso()
+    };
+  }
+
+  function verifyPersistedSessionPayload(payload) {
+    if (!payload || payload.schemaVersion !== STORAGE_SCHEMA_VERSION || !Array.isArray(payload.sessions)) return false;
+    const current = [...sessions.values()];
+    const latest = current.length ? current[current.length - 1] : null;
+    if (!latest) return true;
+    const stored = payload.sessions.find(function find(item) { return item && item.id === latest.id; });
+    return Boolean(
+      stored &&
+      stored.status === latest.status &&
+      stored.transactionId === (latest.transactionId || "") &&
+      stored.rollbackId === (latest.rollbackId || "") &&
+      stored.sourceRestored === (latest.sourceRestored === true)
+    );
+  }
+
   function persistSessions() {
     const storage = getStorage();
     if (!storage || typeof storage.setItem !== "function") {
       return { persisted: false, reason: "Storage is unavailable." };
     }
-    try {
-      const payload = {
-        schemaVersion: 1,
-        componentId: COMPONENT_ID,
-        version: VERSION,
-        controlledVersion: CONTROLLED_VERSION,
-        sessions: [...sessions.values()].slice(-MAX_SESSIONS).map(compactSession),
-        updatedAt: nowIso()
-      };
-      storage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      return { persisted: true, storageKey: STORAGE_KEY, sessionCount: payload.sessions.length };
-    } catch (error) {
-      return { persisted: false, reason: error && error.message ? error.message : String(error) };
+
+    const attempts = [
+      { limit: MAX_PERSISTED_SESSIONS, removeExisting: false, clearConsoleCache: false },
+      { limit: 3, removeExisting: true, clearConsoleCache: true },
+      { limit: 1, removeExisting: true, clearConsoleCache: true }
+    ];
+    let lastError = "";
+    const reclaimedKeys = [];
+
+    for (let index = 0; index < attempts.length; index += 1) {
+      const attempt = attempts[index];
+      const payload = buildPersistencePayload(attempt.limit);
+      const raw = JSON.stringify(payload);
+      try {
+        if (attempt.removeExisting) {
+          try { storage.removeItem(STORAGE_KEY); reclaimedKeys.push(STORAGE_KEY); } catch (_) {}
+        }
+        if (attempt.clearConsoleCache) {
+          ["devConsoleLastInput", "devConsoleHistory"].forEach(function clearCache(key) {
+            try {
+              if (storage.getItem(key) !== null) {
+                storage.removeItem(key);
+                reclaimedKeys.push(key);
+              }
+            } catch (_) {}
+          });
+        }
+        storage.setItem(STORAGE_KEY, raw);
+        const stored = safeParse(storage.getItem(STORAGE_KEY), null);
+        if (!verifyPersistedSessionPayload(stored)) throw new Error("Controlled Session compact read-back verification failed.");
+        return {
+          persisted: true,
+          verified: true,
+          storageKey: STORAGE_KEY,
+          schemaVersion: STORAGE_SCHEMA_VERSION,
+          mode: "Compact Session Summary",
+          sessionCount: payload.sessions.length,
+          estimatedBytes: raw.length * 2,
+          reclaimedKeys: Array.from(new Set(reclaimedKeys)),
+          updatedAt: payload.updatedAt
+        };
+      } catch (error) {
+        lastError = error && error.message ? error.message : String(error);
+        if (!isQuotaError(error) && index === 0) break;
+      }
     }
+
+    return {
+      persisted: false,
+      verified: false,
+      storageKey: STORAGE_KEY,
+      schemaVersion: STORAGE_SCHEMA_VERSION,
+      mode: "Compact Session Summary",
+      reclaimedKeys: Array.from(new Set(reclaimedKeys)),
+      quotaError: /quota|storage.*full|exceeded/i.test(lastError),
+      reason: lastError || "Controlled Session persistence failed."
+    };
   }
 
   function loadSessions() {
@@ -111,12 +245,29 @@
     if (!storage || typeof storage.getItem !== "function") return { loaded: false, reason: "Storage is unavailable." };
     try {
       const payload = safeParse(storage.getItem(STORAGE_KEY), null);
-      if (!payload || payload.schemaVersion !== 1) return { loaded: true, sessionCount: 0 };
+      if (!payload || !Array.isArray(payload.sessions)) return { loaded: true, sessionCount: 0 };
+      if (payload.schemaVersion !== 1 && payload.schemaVersion !== STORAGE_SCHEMA_VERSION) return { loaded: true, sessionCount: 0 };
       (Array.isArray(payload.sessions) ? payload.sessions : []).forEach(function restore(item) {
-        if (item && item.id) sessions.set(String(item.id), Object.assign({}, item));
+        if (!item || !item.id) return;
+        const restored = Object.assign({}, item);
+        if (
+          restored.status === "Awaiting Explicit Approval" ||
+          restored.status === "Approved" ||
+          restored.status === "Executing Trial"
+        ) {
+          restored.status = "Expired - New Trial Required";
+          restored.executionStatus = "Not Resumable After Reload";
+          restored.lastError = "Safety contract requires a new Trial after page reload.";
+        }
+        sessions.set(String(restored.id), restored);
       });
       trimSessions();
-      return { loaded: true, sessionCount: sessions.size };
+      return {
+        loaded: true,
+        sessionCount: sessions.size,
+        schemaVersion: payload.schemaVersion,
+        mode: payload.mode || (payload.schemaVersion === 1 ? "Legacy Full Session" : "Compact Session Summary")
+      };
     } catch (error) {
       return { loaded: false, reason: error && error.message ? error.message : String(error) };
     }
@@ -546,6 +697,9 @@
       },
       validation: clone(lastValidation || { status: "Not Run", valid: null }),
       storageKey: STORAGE_KEY,
+      storageSchemaVersion: STORAGE_SCHEMA_VERSION,
+      persistenceMode: "Compact Session Summary",
+      persistedSessionLimit: MAX_PERSISTED_SESSIONS,
       updatedAt: nowIso()
     };
   }
@@ -705,6 +859,17 @@
       check("Rollback Snapshot retention limit", rollbackSnapshotKeyCount <= 10, "count=" + rollbackSnapshotKeyCount);
       const compact = getControlledAutoRefactoringApplicationSession(prepared.session.id);
       check("Compact Session status", compact && compact.sourceRestored === true && compact.persistentCommitAllowed === false);
+      let controlledPayload = null;
+      try {
+        const controlledStorage = getStorage();
+        controlledPayload = controlledStorage ? safeParse(controlledStorage.getItem(STORAGE_KEY), null) : null;
+      } catch (_) {}
+      const persistedSummary = controlledPayload && Array.isArray(controlledPayload.sessions)
+        ? controlledPayload.sessions.find(function find(item) { return item && item.id === prepared.session.id; })
+        : null;
+      check("Controlled Session compact schema", Boolean(controlledPayload && controlledPayload.schemaVersion === STORAGE_SCHEMA_VERSION && controlledPayload.mode === "Compact Session Summary"));
+      check("Controlled Session compact read-back", Boolean(persistedSummary && persistedSummary.status === "Trial Completed and Rolled Back" && persistedSummary.sourceRestored === true));
+      check("Controlled Session excludes duplicate detail", Boolean(persistedSummary && !Object.prototype.hasOwnProperty.call(persistedSummary, "challenge") && !(persistedSummary.diffSummary && Object.prototype.hasOwnProperty.call(persistedSummary.diffSummary, "text"))));
 
       const concurrentPrepared = prepareControlledAutoRefactoringApplication({
         sources: sources,
