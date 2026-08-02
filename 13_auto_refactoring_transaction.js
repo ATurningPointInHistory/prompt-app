@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_auto_refactoring_transaction.js
    IDE-150 Auto Refactoring Transaction Extension
-   Version: 1.2.0
-   Status: Controlled Application Trial Completed
+   Version: 1.2.2
+   Status: Rollback Snapshot Persistence Hardened
    ============================================================ */
 (function (global) {
   "use strict";
@@ -33,6 +33,138 @@
   const persistAutoRefactoringState = internal.persistAutoRefactoringState;
   const findFunctionBlock = internal.findFunctionBlock;
   const countFunctionDefinitions = internal.countFunctionDefinitions;
+  const ROLLBACK_SNAPSHOT_PREFIX = "AI_PROMPT_OS_IDE150_ROLLBACK_SNAPSHOT_V1:";
+  const ROLLBACK_SNAPSHOT_LIMIT = Math.max(3, Number(MAX_ROLLBACK_SNAPSHOTS) || 10);
+
+  function listRollbackSnapshotRecords() {
+    const records = [];
+    if (!global.localStorage) return records;
+    try {
+      for (let index = 0; index < global.localStorage.length; index += 1) {
+        const key = global.localStorage.key(index);
+        if (!key || key.indexOf(ROLLBACK_SNAPSHOT_PREFIX) !== 0) continue;
+        let payload = null;
+        try {
+          const raw = global.localStorage.getItem(key);
+          payload = raw ? JSON.parse(raw) : null;
+        } catch (_) {}
+        records.push({
+          key: key,
+          transactionId: text(payload && payload.transactionId, ""),
+          capturedAt: text(payload && payload.capturedAt, ""),
+          verifiedAt: text(payload && payload.verifiedAt, "")
+        });
+      }
+    } catch (_) {}
+    records.sort(function order(left, right) {
+      return String(left.capturedAt || left.verifiedAt || "").localeCompare(String(right.capturedAt || right.verifiedAt || ""));
+    });
+    return records;
+  }
+
+  function pruneRollbackSnapshots(protectedKey) {
+    const records = listRollbackSnapshotRecords().filter(function keep(item) { return item.key !== protectedKey; });
+    const removeCount = Math.max(0, records.length - (ROLLBACK_SNAPSHOT_LIMIT - 1));
+    const removed = [];
+    for (let index = 0; index < removeCount; index += 1) {
+      try {
+        global.localStorage.removeItem(records[index].key);
+        removed.push(records[index].key);
+      } catch (_) {}
+    }
+    return removed;
+  }
+
+  function persistRollbackSnapshot(transaction) {
+    if (!global.localStorage) return { persisted: false, reason: "localStorage is unavailable." };
+    if (!transaction || !transaction.rollbackSnapshot || typeof transaction.rollbackSnapshot.source !== "string") {
+      return { persisted: false, reason: "Rollback Snapshot source is unavailable." };
+    }
+    const storageKey = ROLLBACK_SNAPSHOT_PREFIX + transaction.id;
+    const payload = {
+      schemaVersion: 1,
+      componentId: COMPONENT_ID,
+      version: VERSION,
+      transactionId: transaction.id,
+      candidateId: transaction.candidateId,
+      targetFile: transaction.targetFile,
+      source: transaction.rollbackSnapshot.source,
+      sourceHash: transaction.rollbackSnapshot.sourceHash || hashText(transaction.rollbackSnapshot.source),
+      capturedAt: transaction.rollbackSnapshot.capturedAt || nowIso(),
+      verifiedAt: nowIso()
+    };
+    const raw = JSON.stringify(payload);
+    let lastError = "";
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        if (attempt > 0) pruneRollbackSnapshots(storageKey);
+        global.localStorage.setItem(storageKey, raw);
+        const storedRaw = global.localStorage.getItem(storageKey);
+        const stored = storedRaw ? JSON.parse(storedRaw) : null;
+        const verified = Boolean(
+          stored &&
+          stored.transactionId === transaction.id &&
+          stored.targetFile === transaction.targetFile &&
+          typeof stored.source === "string" &&
+          hashText(stored.source) === payload.sourceHash
+        );
+        if (!verified) throw new Error("Rollback Snapshot read-back verification failed.");
+        transaction.rollbackSnapshot.storageKey = storageKey;
+        transaction.rollbackSnapshot.persisted = true;
+        transaction.rollbackSnapshot.verifiedAt = stored.verifiedAt || payload.verifiedAt;
+        pruneRollbackSnapshots(storageKey);
+        return {
+          persisted: true,
+          verified: true,
+          storageKey: storageKey,
+          sourceHash: payload.sourceHash,
+          estimatedBytes: raw.length * 2,
+          verifiedAt: transaction.rollbackSnapshot.verifiedAt
+        };
+      } catch (error) {
+        lastError = error && error.message ? error.message : String(error);
+      }
+    }
+    return { persisted: false, verified: false, storageKey: storageKey, reason: lastError || "Rollback Snapshot persistence failed." };
+  }
+
+  function removeRollbackSnapshot(storageKey) {
+    if (!global.localStorage || !storageKey) return false;
+    try {
+      global.localStorage.removeItem(storageKey);
+      return global.localStorage.getItem(storageKey) === null;
+    } catch (_) { return false; }
+  }
+
+  function verifyPersistedTransaction(transaction) {
+    if (!transaction || !global.localStorage) return { verified: false, reason: "Transaction persistence cannot be verified." };
+    try {
+      const coreRaw = global.localStorage.getItem(internal.STORAGE_KEY);
+      const core = coreRaw ? JSON.parse(coreRaw) : null;
+      const compact = core && Array.isArray(core.transactions)
+        ? core.transactions.find(function find(item) { return item && item.id === transaction.id; })
+        : null;
+      if (!compact || !compact.artifactKey) return { verified: false, reason: "Compact Transaction record is unavailable." };
+      const artifactRaw = global.localStorage.getItem(compact.artifactKey);
+      const artifact = artifactRaw ? JSON.parse(artifactRaw) : null;
+      if (!artifact || artifact.id !== transaction.id) return { verified: false, reason: "Transaction Artifact read-back failed." };
+      const snapshotKey = text(artifact.rollbackSnapshot && artifact.rollbackSnapshot.storageKey, "");
+      if (!snapshotKey || snapshotKey !== text(transaction.rollbackSnapshot && transaction.rollbackSnapshot.storageKey, "")) {
+        return { verified: false, reason: "Transaction Artifact does not reference the persisted Rollback Snapshot." };
+      }
+      const snapshotRaw = global.localStorage.getItem(snapshotKey);
+      const snapshot = snapshotRaw ? JSON.parse(snapshotRaw) : null;
+      if (!snapshot || snapshot.transactionId !== transaction.id || typeof snapshot.source !== "string") {
+        return { verified: false, reason: "Rollback Snapshot read-back failed." };
+      }
+      if (hashText(snapshot.source) !== transaction.rollbackSnapshot.sourceHash) {
+        return { verified: false, reason: "Rollback Snapshot Hash verification failed." };
+      }
+      return { verified: true, artifactKey: compact.artifactKey, snapshotKey: snapshotKey };
+    } catch (error) {
+      return { verified: false, reason: error && error.message ? error.message : String(error) };
+    }
+  }
 
   function resolveRepositoryAdapter(options) {
     const settings = options && typeof options === "object" ? options : {};
@@ -321,13 +453,36 @@
     const request = state.requests.get(candidate.requestId);
     if (request) { request.status = "Applying"; request.updatedAt = nowIso(); state.requests.set(request.id, request); }
     recordEvent("Transaction Started", { requestId: candidate.requestId, candidateId: candidate.id, transactionId: transaction.id });
-    const snapshotPersistence = persistAutoRefactoringState();
-    if (!snapshotPersistence.persisted || snapshotPersistence.transactionArtifactCount < 1) {
+
+    const rollbackSnapshotPersistence = persistRollbackSnapshot(transaction);
+    if (!rollbackSnapshotPersistence.persisted || rollbackSnapshotPersistence.verified !== true) {
       state.transactions.delete(transaction.id);
       if (request) { request.status = "Approved"; request.updatedAt = nowIso(); state.requests.set(request.id, request); }
-      recordEvent("Transaction Blocked", { requestId: candidate.requestId, candidateId: candidate.id, reason: "Rollback Snapshot persistence failed." });
+      recordEvent("Transaction Blocked", { requestId: candidate.requestId, candidateId: candidate.id, reason: "Dedicated Rollback Snapshot persistence failed." });
       persistAutoRefactoringState();
-      return { applied: false, reason: "Rollback Snapshot must be persisted before Repository modification.", persistence: snapshotPersistence };
+      return {
+        applied: false,
+        reason: "Rollback Snapshot must be persisted and verified before Repository modification.",
+        rollbackSnapshotPersistence: rollbackSnapshotPersistence
+      };
+    }
+
+    state.transactions.set(transaction.id, transaction);
+    const snapshotPersistence = persistAutoRefactoringState();
+    const persistenceVerification = snapshotPersistence.persisted ? verifyPersistedTransaction(transaction) : { verified: false, reason: "Core Transaction State persistence failed." };
+    if (!snapshotPersistence.persisted || persistenceVerification.verified !== true) {
+      state.transactions.delete(transaction.id);
+      removeRollbackSnapshot(rollbackSnapshotPersistence.storageKey);
+      if (request) { request.status = "Approved"; request.updatedAt = nowIso(); state.requests.set(request.id, request); }
+      recordEvent("Transaction Blocked", { requestId: candidate.requestId, candidateId: candidate.id, reason: "Rollback Snapshot or Transaction persistence verification failed." });
+      persistAutoRefactoringState();
+      return {
+        applied: false,
+        reason: "Rollback Snapshot and Transaction State must be persisted before Repository modification.",
+        persistence: snapshotPersistence,
+        rollbackSnapshotPersistence: rollbackSnapshotPersistence,
+        persistenceVerification: persistenceVerification
+      };
     }
 
     let writeSucceeded = false;
