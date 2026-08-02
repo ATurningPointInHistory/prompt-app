@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_controlled_application.js
    IDE-150 Controlled Application Trial
-   Version: 1.0.2
+   Version: 1.0.3
    Status: Controlled Application Trial
    ============================================================ */
 (function (global) {
@@ -12,7 +12,7 @@
 
   const COMPONENT_ID = internal.COMPONENT_ID;
   const VERSION = internal.VERSION;
-  const CONTROLLED_VERSION = "1.0.2";
+  const CONTROLLED_VERSION = "1.0.3";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CONTROLLED_APPLICATION_V1";
   const MAX_SESSIONS = 20;
   const nowIso = internal.nowIso;
@@ -296,6 +296,45 @@
       },
       persistence: persistence
     };
+  }
+
+  async function prepareControlledAutoRefactoringApplicationAsync(options) {
+    const settings = options && typeof options === "object" ? options : {};
+    let sources = resolveSources(settings);
+    let sourceLoad = {
+      ready: sources.length > 0,
+      loadedNow: false,
+      sourceCount: sources.length,
+      failedFileCount: 0,
+      failedFiles: [],
+      reason: ""
+    };
+
+    if (!sources.length && typeof global.ensureCurrentProjectAnalyzeSources === "function") {
+      const loaded = await global.ensureCurrentProjectAnalyzeSources({ silent: true });
+      sources = Array.isArray(loaded && loaded.sources) ? loaded.sources : [];
+      sourceLoad = {
+        ready: sources.length > 0,
+        loadedNow: Boolean(loaded && loaded.loadedNow),
+        sourceCount: sources.length,
+        failedFileCount: finite(loaded && loaded.failedFileCount, 0),
+        failedFiles: clone(loaded && loaded.failedFiles || []),
+        reason: text(loaded && loaded.reason, sources.length ? "" : "現在プロジェクトのソースを読込めませんでした。")
+      };
+    }
+
+    if (!sources.length) {
+      return {
+        prepared: false,
+        status: "Blocked",
+        reason: sourceLoad.reason || "Project sources are unavailable. Controlled Application is fail-closed.",
+        sourceLoad: sourceLoad
+      };
+    }
+
+    const result = prepareControlledAutoRefactoringApplication(Object.assign({}, settings, { sources: sources }));
+    result.sourceLoad = sourceLoad;
+    return result;
   }
 
   function approveControlledAutoRefactoringApplication(sessionId, input) {
@@ -1067,6 +1106,7 @@
 
   const api = {
     prepareControlledAutoRefactoringApplication: prepareControlledAutoRefactoringApplication,
+    prepareControlledAutoRefactoringApplicationAsync: prepareControlledAutoRefactoringApplicationAsync,
     approveControlledAutoRefactoringApplication: approveControlledAutoRefactoringApplication,
     executeControlledAutoRefactoringApplication: executeControlledAutoRefactoringApplication,
     getControlledAutoRefactoringApplicationSession: getControlledAutoRefactoringApplicationSession,
