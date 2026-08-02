@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_search_strategy_validation.js
    IDE-125 Search Strategy Validation
-   Version: 1.0.4
+   Version: 1.0.5
    Status: Completed
    Design Freeze: 2026-07-25
    ============================================================ */
@@ -9,7 +9,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-125";
-  const VERSION = "1.0.4";
+  const VERSION = "1.0.5";
   const validationRegistry = new Map();
   const datasetRegistry = new Map();
   const validationHistory = [];
@@ -411,6 +411,9 @@
       baselineVersion: session.baselineVersion
     };
     lastValidation = result;
+    if (result.releaseAllowed === true && typeof global.saveDevelopmentReleaseEvidence === "function") {
+      global.saveDevelopmentReleaseEvidence(COMPONENT_ID, result, { componentVersion: VERSION, releaseAllowed: true, datasetVersion: result.datasetVersion, repositoryVersion: result.repositoryVersion });
+    }
     validationHistory.push(result);
     if (validationHistory.length > 100) validationHistory.shift();
     return clone(result);
@@ -620,6 +623,9 @@
     };
 
     lastValidation = result;
+    if (result.releaseAllowed === true && typeof global.saveDevelopmentReleaseEvidence === "function") {
+      global.saveDevelopmentReleaseEvidence(COMPONENT_ID, result, { componentVersion: VERSION, releaseAllowed: true, datasetVersion: result.datasetVersion, repositoryVersion: result.repositoryVersion });
+    }
     validationHistory.push(result);
     if (validationHistory.length > 100) validationHistory.shift();
     return clone(result);
@@ -648,17 +654,21 @@
   function getSearchValidationStatus() {
     const platformReady = typeof global.executeSearchPipeline === "function" && typeof global.getSearchStrategies === "function"; const goldenCore = datasetRegistry.get("golden-core") || null;
     const requestCounts = investigationRequests.reduce(function (counts, request) { const status = String(request.status || "Open").toLowerCase(); counts.total += 1; if (status === "open") counts.open += 1; else if (status === "resolved") counts.resolved += 1; else if (status === "invalidated") counts.invalidated += 1; else counts.other += 1; return counts; }, { total: 0, open: 0, resolved: 0, invalidated: 0, other: 0 });
-    const qualityGate = lastValidation && asArray(lastValidation.gates).find(gate => gate.name === "Quality Gate"); const bridgeStatus = typeof global.getGoldenCoreSyncStatus === "function" ? global.getGoldenCoreSyncStatus() : null; const releaseAllowed = Boolean(lastValidation && lastValidation.releaseAllowed === true);
+    const qualityGate = lastValidation && asArray(lastValidation.gates).find(gate => gate.name === "Quality Gate"); const bridgeStatus = typeof global.getGoldenCoreSyncStatus === "function" ? global.getGoldenCoreSyncStatus() : null;
+    const releaseEvidence = typeof global.getDevelopmentReleaseEvidence === "function"
+      ? global.getDevelopmentReleaseEvidence(COMPONENT_ID, { componentVersion: VERSION })
+      : null;
+    const releaseAllowed = Boolean((lastValidation && lastValidation.releaseAllowed === true) || (releaseEvidence && releaseEvidence.releaseAllowed));
     const baseline = typeof global.getPerformanceBaseline === "function" ? global.getPerformanceBaseline() : null; const baselineCalibrated = Boolean(baseline && baseline.calibration && baseline.calibration.status === "Calibrated");
     return { id: COMPONENT_ID, title: "Search Strategy Validation", name: "Search Quality Assurance Platform", version: VERSION,
       status: platformReady ? "Ready" : "Blocked", lifecycleStatus: releaseAllowed ? (baselineCalibrated ? "Completed" : "Completed with Calibration Pending") : "Implementation", officialStatus: releaseAllowed ? (baselineCalibrated ? "Official" : "Conditional Official") : "Not Official", platformStatus: platformReady ? "Ready" : "Blocked",
-      ready: platformReady, releaseAllowed, health: lastValidation ? lastValidation.health : (platformReady ? 90 : 0), platformHealth: platformReady ? 100 : 0, progress: releaseAllowed ? 100 : platformReady ? 90 : 0,
-      releaseStatus: lastValidation ? lastValidation.status : "Not Run", validationHealth: lastValidation ? lastValidation.health : null, performanceBaselineVersion: baseline ? baseline.version : "Not Available", performanceBaselineStatus: baselineCalibrated ? "Calibrated" : "Provisional Policy Baseline", performanceCalibrationRequired: !baselineCalibrated, designFreezeCompliance: baselineCalibrated ? "Complete" : "Partial - Performance Calibration Pending", regressionBaselineVersion: "golden-core-v1.0.0",
+      ready: platformReady, releaseAllowed, health: lastValidation ? lastValidation.health : (releaseEvidence ? releaseEvidence.health : (platformReady ? 90 : 0)), platformHealth: platformReady ? 100 : 0, progress: releaseAllowed ? 100 : platformReady ? 90 : 0,
+      releaseStatus: lastValidation ? lastValidation.status : (releaseEvidence ? "Passed (Persisted)" : "Not Run"), validationHealth: lastValidation ? lastValidation.health : (releaseEvidence ? releaseEvidence.health : null), performanceBaselineVersion: baseline ? baseline.version : "Not Available", performanceBaselineStatus: baselineCalibrated ? "Calibrated" : "Provisional Policy Baseline", performanceCalibrationRequired: !baselineCalibrated, designFreezeCompliance: baselineCalibrated ? "Complete" : "Partial - Performance Calibration Pending", regressionBaselineVersion: "golden-core-v1.0.0",
       registeredValidations: validationRegistry.size, registeredDatasets: datasetRegistry.size, executableDatasetCount: [...datasetRegistry.values()].filter(dataset => asArray(dataset.cases).length > 0).length, goldenCoreCaseCount: goldenCore ? asArray(goldenCore.cases).length : 0,
       goldenCore: goldenCore ? { id: goldenCore.id, version: goldenCore.version, caseCount: asArray(goldenCore.cases).length, source: goldenCore.profile && goldenCore.profile.source || "", syncedAt: goldenCore.profile && goldenCore.profile.syncedAt || null, updatedAt: goldenCore.updatedAt } : null,
       goldenCoreSync: bridgeStatus, historyCount: validationHistory.length, evidenceCount: evidenceRegistry.size, investigationRequestCount: requestCounts.total, openInvestigationRequestCount: requestCounts.open, investigationRequests: requestCounts,
-      lastValidation: lastValidation ? { id: lastValidation.id, datasetId: lastValidation.datasetId, datasetVersion: lastValidation.datasetVersion, status: lastValidation.status, severity: lastValidation.severity, releaseAllowed: lastValidation.releaseAllowed, health: lastValidation.health, failedGates: asArray(lastValidation.gates).filter(gate => !gate.passed).map(gate => gate.name), quality: qualityGate ? clone(qualityGate.metrics) : null, completedAt: lastValidation.completedAt } : null,
-      dependsOn: ["IDE-110", "IDE-115", "IDE-120", "Relationship Platform", "Information Platform", "Repository", "Registry"], provides: ["Search Strategy Validation", "Search Quality Validation", "Search Performance Validation", "Search Consistency Validation", "Fallback Validation", "Validation Evidence", "Release Gate", "Investigation Handoff"], nextTask: buildNextTask(platformReady, goldenCore, lastValidation), updatedAt: nowIso() };
+      lastValidation: lastValidation ? { id: lastValidation.id, datasetId: lastValidation.datasetId, datasetVersion: lastValidation.datasetVersion, status: lastValidation.status, severity: lastValidation.severity, releaseAllowed: lastValidation.releaseAllowed, health: lastValidation.health, failedGates: asArray(lastValidation.gates).filter(gate => !gate.passed).map(gate => gate.name), quality: qualityGate ? clone(qualityGate.metrics) : null, completedAt: lastValidation.completedAt, source: "Runtime" } : (releaseEvidence ? { id: releaseEvidence.validationId, status: releaseEvidence.status, releaseAllowed: true, health: releaseEvidence.health, failedGates: [], completedAt: releaseEvidence.completedAt, source: releaseEvidence.source } : null), releaseEvidence: releaseEvidence,
+      dependsOn: ["IDE-110", "IDE-115", "IDE-120", "Relationship Platform", "Information Platform", "Repository", "Registry"], provides: ["Search Strategy Validation", "Search Quality Validation", "Search Performance Validation", "Search Consistency Validation", "Fallback Validation", "Validation Evidence", "Release Gate", "Investigation Handoff"], nextTask: buildNextTask(platformReady, goldenCore, lastValidation || (releaseEvidence ? { releaseAllowed: true, status: "Passed", gates: [] } : null)), updatedAt: nowIso() };
   }
 
   function getSearchValidationHistory() { return clone(validationHistory); }
