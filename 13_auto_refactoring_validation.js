@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_validation.js
    IDE-150 Auto Refactoring Validation / Status / Integration
-   Version: 1.1.1
+   Version: 1.1.2
    Status: Core Phase 1 Completed / Smartphone Freeze Fix
    ============================================================ */
 (function (global) {
@@ -178,6 +178,9 @@
     const standardPolicyStatus = typeof global.getStandardAutoRefactoringPolicyStatus === "function" ? global.getStandardAutoRefactoringPolicyStatus() : null;
     check("Standard Policy Adapter installed", Boolean(standardPolicyStatus && standardPolicyStatus.installed === true && standardPolicyStatus.active === true));
     check("Governed Dry Run API", typeof global.runStandardAutoRefactoringDryRun === "function");
+    check("Practical Dry Run Template API", typeof global.prepareAutoRefactoringDryRunTemplate === "function");
+    check("Practical Dry Run Execution API", typeof global.runPracticalAutoRefactoringDryRun === "function");
+    check("Dry Run success reason contract", /reason:\s*""/.test(global.runStandardAutoRefactoringDryRun.toString()));
     const runtimePhase2Status = typeof global.getAutoRefactoringPhase2Status === "function" ? global.getAutoRefactoringPhase2Status() : null;
     check("Core Phase 2 runtime ready", Boolean(runtimePhase2Status && runtimePhase2Status.runtimeReady === true && runtimePhase2Status.externalPolicyStatus === "Standard Policy Connected"));
 
@@ -339,6 +342,47 @@
       check("Dry Run repository remains unchanged", governedDryRun.repositoryMutation === false && governedDryRun.repositoryWriteCount === 0 && governedDryRun.sourceUnchanged === true);
       check("Dry Run Patch and Sandbox", governedDryRun.patch && governedDryRun.patch.verified === true && governedDryRun.sandbox && governedDryRun.sandbox.passed === true);
       check("Dry Run remains unapproved and unapplied", governedDryRun.approvalRequested === false && governedDryRun.applicationAttempted === false && governedDryRun.patch.autoApply === false);
+      check("Dry Run success reason is empty", governedDryRun.reason === "");
+
+      const practicalTemplate = global.prepareAutoRefactoringDryRunTemplate({
+        sources: [
+          { fileName: "13_auto_refactoring_phase2.js", code: actualPhase2Source },
+          { fileName: "dry-run-consumer.js", code: "function anotherDryRunCaller(item) { return sourceName(item); }" }
+        ],
+        targetFile: "13_auto_refactoring_phase2.js",
+        targetFunction: "sourceName"
+      });
+      check("Practical Dry Run template", practicalTemplate.prepared === true && practicalTemplate.requiresManualChange === true && practicalTemplate.beforeFunctionSource.includes("function sourceName"));
+      const practicalAfter = [
+        "function sourceName(item) {",
+        "  const resolvedName = text(item && (item.fileName || item.name || item.path), \"unknown\");",
+        "  return resolvedName.replace(/^\\.\\//, \"\");",
+        "}"
+      ].join("\n");
+      const practicalDryRun = global.runPracticalAutoRefactoringDryRun({
+        sources: [
+          { fileName: "13_auto_refactoring_phase2.js", code: actualPhase2Source },
+          { fileName: "dry-run-consumer.js", code: "function anotherDryRunCaller(item) { return sourceName(item); }" }
+        ],
+        targetFile: "13_auto_refactoring_phase2.js",
+        targetFunction: "sourceName",
+        beforeFunctionSource: practicalTemplate.beforeFunctionSource,
+        afterFunctionSource: practicalAfter,
+        actor: "Validator"
+      });
+      check("Practical manual Before/After Dry Run", practicalDryRun.completed === true && practicalDryRun.reason === "" && practicalDryRun.mode === "Manual Before/After Read-only Dry Run");
+      check("Practical Dry Run exposes source and diff", Boolean(practicalDryRun.candidateInput && practicalDryRun.candidateInput.beforeFunctionSource && practicalDryRun.candidateInput.afterFunctionSource && practicalDryRun.diff && practicalDryRun.diff.changedLines > 0));
+      check("Practical Dry Run exposes dependency impact", Boolean(practicalDryRun.dependencyImpact && practicalDryRun.dependencyImpact.passed === true && practicalDryRun.dependencyImpact.inboundReferences.length === 2));
+      check("Practical Dry Run exposes policy rules", Boolean(practicalDryRun.policyEvaluation && practicalDryRun.policyEvaluation.allowed === true && practicalDryRun.policyEvaluation.passedRules === 21));
+      check("Practical Dry Run remains read-only", practicalDryRun.repository && practicalDryRun.repository.mutation === false && practicalDryRun.repository.writeCount === 0 && practicalDryRun.repository.sourceUnchanged === true);
+      const practicalMismatch = global.runPracticalAutoRefactoringDryRun({
+        sources: [{ fileName: "13_auto_refactoring_phase2.js", code: actualPhase2Source }],
+        targetFile: "13_auto_refactoring_phase2.js",
+        targetFunction: "sourceName",
+        beforeFunctionSource: "function sourceName(item) { return 'stale'; }",
+        afterFunctionSource: practicalAfter
+      });
+      check("Practical Dry Run concurrent-change guard", practicalMismatch.completed === false && practicalMismatch.status === "Concurrent Change Detected" && practicalMismatch.repositoryWriteCount === 0);
     } catch (error) {
       check("Unexpected exception", false, error && error.stack ? error.stack : String(error));
     }
@@ -402,11 +446,11 @@
       version: VERSION,
       status: validationReady && integrationReady ? "Ready" : "Attention",
       lifecycleStatus: "Implementation",
-      implementationPhase: "Core Phase 2 + Standard Policy Dry Run",
+      implementationPhase: "Core Phase 2 + Practical Governed Dry Run",
       phaseStatus: validationReady ? "Completed" : "Attention",
       ready: validationReady && integrationReady,
       health: Math.min(validation ? validation.health : 100, integrationReady ? 100 : 0),
-      progress: 80,
+      progress: 82,
       implementedStages: CORE_PHASE_1_STAGES.length,
       totalStages: PIPELINE_STAGES.length,
       requestCount: state.requests.size,
