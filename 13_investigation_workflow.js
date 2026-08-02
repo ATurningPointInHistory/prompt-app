@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_investigation_workflow.js
    IDE-130 Investigation Workflow
-   Version: 1.0.1
+   Version: 1.0.2
    Status: Completed
    Design Freeze: 2026-07-26
    ============================================================ */
@@ -9,7 +9,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-130";
-  const VERSION = "1.0.1";
+  const VERSION = "1.0.2";
   const MAX_HISTORY = 500;
 
   const WORKFLOW_STATES = Object.freeze([
@@ -233,12 +233,23 @@
     if (!request || typeof request !== "object") request = createInvestigationRequest(settings.request || {});
     if (!state.requests.has(request.id)) state.requests.set(request.id, clone(request));
 
+    const validationOwned = Boolean(
+      request.executionContext && request.executionContext.validationOwned === true
+    );
     const activeCount = [...state.sessions.values()].filter(function active(item) {
-      return !TERMINAL_STATES.includes(item.state);
+      if (TERMINAL_STATES.includes(item.state)) return false;
+      return Boolean(item.validationOwned) === validationOwned;
     }).length;
     const budget = normalizeBudget(settings.budget || request.budget);
     if (activeCount >= budget.concurrentSessionLimit) {
-      return { created: false, reason: "Concurrent session limit reached.", activeCount: activeCount };
+      return {
+        created: false,
+        reason: validationOwned
+          ? "Concurrent validation session limit reached."
+          : "Concurrent session limit reached.",
+        activeCount: activeCount,
+        validationOwned: validationOwned
+      };
     }
 
     const id = nextId("IDE-130-SESSION");
@@ -248,6 +259,10 @@
       version: VERSION,
       requestId: request.id,
       sourceRequestId: request.sourceRequestId || "",
+      validationOwned: validationOwned,
+      validationOwner: validationOwned
+        ? text(request.executionContext.validationComponent, "Validation")
+        : "",
       state: "Requested",
       previousState: null,
       currentScope: clone(request.initialScope || {}),
@@ -1003,14 +1018,34 @@
       check("State transition model", TRANSITIONS.Requested.includes("Scoped") && TRANSITIONS.Verifying.includes("Completed"));
       check("Default safety budget", DEFAULT_BUDGET.retryLimit === 3 && DEFAULT_BUDGET.concurrentSessionLimit === 3);
 
-      const request = createInvestigationRequest({ problemStatement: "Validation problem", initialScope: { component: "IDE-130", readOnly: true }, repositoryVersion: "validation", datasetVersion: "validation" });
+      const request = createInvestigationRequest({
+        problemStatement: "Validation problem",
+        source: "IDE-130 Self Validation",
+        initialScope: { component: "IDE-130", readOnly: true },
+        repositoryVersion: "validation",
+        datasetVersion: "validation",
+        executionContext: {
+          validationOwned: true,
+          validationComponent: "IDE-130"
+        },
+        budget: {
+          concurrentSessionLimit: 50
+        }
+      });
       ids.requestId = request.id;
       check("Request intake", Boolean(request.id) && request.status === "Accepted");
 
       const created = createInvestigationSession(request.id);
-      const session = created.session;
-      ids.sessionId = session.id;
-      check("Session creation", created.created === true && session.state === "Requested");
+      const session = created && created.session;
+      ids.sessionId = session && session.id || "";
+      check(
+        "Session creation",
+        Boolean(created && created.created === true && session && session.state === "Requested"),
+        created && created.reason || ""
+      );
+      if (!session) {
+        throw new Error(created && created.reason || "Validation session creation failed.");
+      }
 
       const scoped = defineInvestigationScope(session.id, { component: "IDE-130", function: "validateInvestigationWorkflow", readOnly: true }, "Initial validation scope", []);
       check("Scope definition", scoped.updated === true && scoped.session.state === "Scoped");
@@ -1074,6 +1109,8 @@
       id: "IDE-130-VALIDATION",
       componentId: COMPONENT_ID,
       version: VERSION,
+      runtimeSignature: "IDE-130-FULL-VALIDATION-24-v1.0.2",
+      expectedCheckCount: 24,
       valid: passed === checks.length,
       status: passed === checks.length ? "Ready" : "Attention",
       passed: passed,
@@ -1090,12 +1127,23 @@
   function getInvestigationWorkflowStatus() {
     const requiredApis = ["createInvestigationRequest", "createInvestigationSession", "defineInvestigationScope", "runInvestigationSearch", "addInvestigationEvidence", "createInvestigationHypothesis", "createInstrumentationTransaction", "restoreInvestigationSession", "buildInvestigationReport", "buildInvestigationHandoff", "closeInvestigation", "getInvestigationWorkflowStatus"];
     const implemented = requiredApis.filter(name => typeof global[name] === "function").length; const platformReady = implemented === requiredApis.length; const validation = state.lastValidation;
-    const sessions = [...state.sessions.values()]; const active = sessions.filter(item => !TERMINAL_STATES.includes(item.state));
+    const sessions = [...state.sessions.values()];
+    const active = sessions.filter(item => !TERMINAL_STATES.includes(item.state));
+    const activeRuntime = active.filter(item => item.validationOwned !== true);
+    const activeValidation = active.filter(item => item.validationOwned === true);
+    const validationSessions = sessions.filter(item => item.validationOwned === true);
     return { id: COMPONENT_ID, title: "Investigation Workflow", name: "Investigation Workflow", version: VERSION,
-      status: platformReady ? "Ready" : "Attention", lifecycleStatus: validation && validation.valid ? "Completed" : "Implementation", ready: platformReady, releaseAllowed: Boolean(validation && validation.valid), health: validation ? validation.health : (platformReady ? 90 : 70), progress: Math.round((implemented / requiredApis.length) * 100), implemented, total: requiredApis.length,
-      requestCount: state.requests.size, sessionCount: state.sessions.size, activeSessionCount: active.length, evidenceCount: state.evidence.size, hypothesisCount: state.hypotheses.size, reportCount: state.reports.size, handoffCount: state.handoffs.size, relationshipCount: state.relationships.length, states: clone(WORKFLOW_STATES),
-      lastValidation: validation ? clone({ valid: validation.valid, passed: validation.passed, failed: validation.failed, total: validation.total, health: validation.health, validatedAt: validation.validatedAt }) : null, statusApiMode: "Lightweight / no self-validation execution",
-      dependsOn: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "Search Regression Baseline", "Relationship Platform"], provides: ["Investigation Request Intake", "Policy-driven State Workflow", "Progressive Scope", "Strategy Router", "Evidence Registry", "Hypothesis Graph", "Transactional Instrumentation", "Performance Investigation", "Structured Report", "Restore Gate", "Handoff Gate"], releaseStatus: validation && validation.valid ? "Official" : "Not Validated", nextTask: validation && validation.valid ? "Run IDE-135 full validation and confirm all release gates." : "Run validateInvestigationWorkflow() once before IDE-135 full validation.", lastError: clone(state.lastError), updatedAt: state.updatedAt };
+      status: platformReady ? "Ready" : "Attention", lifecycleStatus: validation && validation.valid && validation.total === 24 ? "Completed" : "Implementation", ready: platformReady, releaseAllowed: Boolean(validation && validation.valid && validation.total === 24), health: validation ? validation.health : (platformReady ? 90 : 70), progress: Math.round((implemented / requiredApis.length) * 100), implemented, total: requiredApis.length,
+      requestCount: state.requests.size, sessionCount: state.sessions.size,
+      activeSessionCount: activeRuntime.length,
+      activeRuntimeSessionCount: activeRuntime.length,
+      activeValidationSessionCount: activeValidation.length,
+      validationSessionCount: validationSessions.length,
+      evidenceCount: state.evidence.size, hypothesisCount: state.hypotheses.size, reportCount: state.reports.size, handoffCount: state.handoffs.size, relationshipCount: state.relationships.length, states: clone(WORKFLOW_STATES),
+      runtimeSignature: "IDE-130-FULL-VALIDATION-24-v1.0.2",
+      expectedValidationCheckCount: 24,
+      lastValidation: validation ? clone({ valid: validation.valid, passed: validation.passed, failed: validation.failed, total: validation.total, health: validation.health, runtimeSignature: validation.runtimeSignature || "", validatedAt: validation.validatedAt }) : null, statusApiMode: "Lightweight / no self-validation execution",
+      dependsOn: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "Search Regression Baseline", "Relationship Platform"], provides: ["Investigation Request Intake", "Policy-driven State Workflow", "Progressive Scope", "Strategy Router", "Evidence Registry", "Hypothesis Graph", "Transactional Instrumentation", "Performance Investigation", "Structured Report", "Restore Gate", "Handoff Gate"], releaseStatus: validation && validation.valid && validation.total === 24 ? "Official" : "Not Validated", nextTask: validation && validation.valid && validation.total === 24 ? "Run IDE-135 full validation and confirm all release gates." : "Run validateInvestigationWorkflow() once before IDE-135 full validation.", lastError: clone(state.lastError), updatedAt: state.updatedAt };
   }
 
   const api = {
