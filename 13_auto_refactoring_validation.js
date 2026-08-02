@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_validation.js
    IDE-150 Auto Refactoring Validation / Status / Integration
-   Version: 1.0.1
+   Version: 1.1.0
    Status: Core Phase 1 Completed / Smartphone Freeze Fix
    ============================================================ */
 (function (global) {
@@ -19,6 +19,7 @@
   const REQUEST_STATES = internal.REQUEST_STATES;
   const DEFAULT_BUDGET = internal.DEFAULT_BUDGET;
   const state = internal.state;
+  const CORE_PHASE_2_CAPABILITIES = internal.CORE_PHASE_2_CAPABILITIES || [];
   const nowIso = internal.nowIso;
   const asArray = internal.asArray;
   const clone = internal.clone;
@@ -166,6 +167,13 @@
     check("Status API does not hydrate details", !/getAutoRefactoringCandidate\(/.test(getAutoRefactoringStatus.toString()) && !/beforeFunctionSource/.test(getAutoRefactoringStatus.toString()));
     check("Integration validation uses compact state", /getCompactAnalyticsPhase2BState/.test(validateIDE140ToIDE150Integration.toString()) && !/getDevelopmentAnalyticsPublicationPackage\(/.test(validateIDE140ToIDE150Integration.toString()));
     check("No direct IDE-140 state mutation", !/state\.handoffs\.set/.test(createAutoRefactoringRequestFromHandoff.toString()));
+    check("Core Phase 2 capability count", CORE_PHASE_2_CAPABILITIES.length === 3, "count=" + CORE_PHASE_2_CAPABILITIES.length);
+    check("Full Dependency Analysis API", typeof global.analyzeAutoRefactoringDependencies === "function");
+    check("External Policy Adapter API", typeof global.registerAutoRefactoringPolicyAdapter === "function" && typeof global.evaluateAutoRefactoringPolicy === "function");
+    check("Governed Plan API", typeof global.createGovernedAutoRefactoringPlan === "function");
+    check("Governed Candidate API", typeof global.createGovernedAutoRefactoringCandidate === "function");
+    check("Governed Patch APIs", typeof global.generateAutoRefactoringPatch === "function" && typeof global.verifyAutoRefactoringPatch === "function");
+    check("Phase 2 Status API", typeof global.getAutoRefactoringPhase2Status === "function");
 
     const passed = checks.filter(function pass(item) { return item.passed; }).length;
     const result = {
@@ -229,6 +237,50 @@
       check("Repository validation", applied.validation.passed === true);
       const rolledBack = rollbackAutoRefactoringTransaction(applied.transaction.id, { actor: "Validator", reason: "Deep validation rollback" }, { adapter: adapter });
       check("Rollback", rolledBack.rolledBack === true && rolledBack.rollback.verified === true);
+
+      const policyRegistration = global.registerAutoRefactoringPolicyAdapter({
+        id: "IDE150-DEEP-VALIDATION-POLICY",
+        version: "1.0.0",
+        evaluate: function evaluate(context) {
+          return { allowed: Boolean(context && context.dependencyAnalysis && context.dependencyAnalysis.passed), reason: "Deep validation policy" };
+        }
+      }, { active: true });
+      check("Phase 2 Policy Adapter registration", policyRegistration.registered === true);
+      const request2 = createAutoRefactoringRequest({ recommendationId: "REC-PHASE2-DEEP", recommendationSummary: "Phase 2 governed validation", evidenceReferences: ["EVIDENCE-PHASE2-DEEP"], riskLevel: "Medium", requestedBy: "Validator" });
+      const scope2 = defineAutoRefactoringScope(request2.request.id, { targetFile: "phase2-validation.js", targetFunction: "phase2Target", actor: "Validator" });
+      const plan2 = global.createGovernedAutoRefactoringPlan(request2.request.id, { objective: "Governed patch", policyAdapterId: "IDE150-DEEP-VALIDATION-POLICY", actor: "Validator" });
+      check("Phase 2 Governed Plan", plan2.created === true && plan2.plan.governanceMode === "Core Phase 2");
+      const phase2Sources = [
+        { fileName: "phase2-validation.js", code: "function phase2Target(value) {\n  return helper(value);\n}\nfunction helper(value) { return value + 1; }" },
+        { fileName: "consumer.js", code: "function consumer(value) { return phase2Target(value); }" }
+      ];
+      const candidate2 = global.createGovernedAutoRefactoringCandidate(plan2.plan.id, {
+        beforeFunctionSource: "function phase2Target(value) {\n  return helper(value);\nn}".replace("\nn}", "\n}"),
+        afterFunctionSource: "function phase2Target(value) {\n  const result = helper(value);\n  return result;\n}",
+        riskLevel: "Medium",
+        actor: "Validator"
+      }, { sources: phase2Sources });
+      check("Phase 2 Governed Candidate", candidate2.created === true && candidate2.candidate.externalPolicyStatus === "Allowed");
+      check("Phase 2 Dependency impact", candidate2.dependencyAnalysis && candidate2.dependencyAnalysis.summary.inboundReferenceCount === 1 && candidate2.dependencyAnalysis.summary.impactedFileCount === 2);
+      const patch2 = global.generateAutoRefactoringPatch(candidate2.candidate.id, { actor: "Validator" });
+      check("Phase 2 Patch generation", patch2.generated === true && patch2.patch.autoApply === false);
+      const phase2Repository = { "phase2-validation.js": phase2Sources[0].code, "consumer.js": phase2Sources[1].code };
+      const phase2Adapter = {
+        getFileText: function get(name) { return Object.prototype.hasOwnProperty.call(phase2Repository, name) ? phase2Repository[name] : null; },
+        setFileText: function set(name, value) { phase2Repository[name] = String(value); return true; }
+      };
+      const patchVerification2 = global.verifyAutoRefactoringPatch(patch2.patch.id, { adapter: phase2Adapter });
+      check("Phase 2 Patch verification", patchVerification2.verified === true);
+      check("Phase 2 separated artifact persistence", state.lastPersistence && state.lastPersistence.dependencyArtifactCount >= 1 && state.lastPersistence.patchArtifactCount >= 1 && state.lastPersistence.policyArtifactCount >= 1);
+      const sandbox2 = runAutoRefactoringSandbox(candidate2.candidate.id, { adapter: phase2Adapter });
+      check("Phase 2 Sandbox", sandbox2.passed === true);
+      const approval2 = approveAutoRefactoringCandidate(candidate2.candidate.id, { approved: true, actor: "Validator", reason: "Phase 2 deep validation" });
+      check("Phase 2 Explicit Approval", approval2.approved === true);
+      const applied2 = applyAutoRefactoringCandidate(candidate2.candidate.id, { adapter: phase2Adapter });
+      check("Phase 2 Transactional application", applied2.applied === true && applied2.implementationPackage.governance.patchVerified === true);
+      const rollback2 = rollbackAutoRefactoringTransaction(applied2.transaction.id, { actor: "Validator", reason: "Phase 2 rollback" }, { adapter: phase2Adapter });
+      check("Phase 2 Rollback", rollback2.rolledBack === true);
+      global.unregisterAutoRefactoringPolicyAdapter("IDE150-DEEP-VALIDATION-POLICY");
     } catch (error) {
       check("Unexpected exception", false, error && error.stack ? error.stack : String(error));
     }
@@ -242,6 +294,9 @@
     restoreMap(state.rollbacks, beforeState.rollbacks);
     restoreMap(state.reports, beforeState.reports);
     restoreMap(state.packages, beforeState.packages);
+    restoreMap(state.dependencyAnalyses, beforeState.dependencyAnalyses);
+    restoreMap(state.patches, beforeState.patches);
+    restoreMap(state.policyDecisions, beforeState.policyDecisions);
     state.history = asArray(beforeState.history).slice(-MAX_HISTORY);
     state.sequence = beforeState.sequence;
     state.lastPersistence = clone(beforeState.lastPersistence);
@@ -289,11 +344,11 @@
       version: VERSION,
       status: validationReady && integrationReady ? "Ready" : "Attention",
       lifecycleStatus: "Implementation",
-      implementationPhase: "Core Phase 1",
+      implementationPhase: "Core Phase 2",
       phaseStatus: validationReady ? "Completed" : "Attention",
       ready: validationReady && integrationReady,
       health: Math.min(validation ? validation.health : 100, integrationReady ? 100 : 0),
-      progress: 50,
+      progress: 75,
       implementedStages: CORE_PHASE_1_STAGES.length,
       totalStages: PIPELINE_STAGES.length,
       requestCount: state.requests.size,
@@ -305,6 +360,9 @@
       rollbackCount: state.rollbacks.size,
       reportCount: state.reports.size,
       packageCount: state.packages.size,
+      dependencyAnalysisCount: state.dependencyAnalyses.size,
+      governedPatchCount: state.patches.size,
+      policyDecisionCount: state.policyDecisions.size,
       latestRequest: compactRequest(latestRequest),
       latestCandidate: compactCandidate(latestCandidate),
       latestTransaction: compactTransaction(latestTransaction),
@@ -327,7 +385,10 @@
         explicitApprovalRequired: true,
         rollbackRequired: true,
         rootCauseAuthority: "IDE-130",
-        policyMode: "Fail-Closed Core Policy Adapter",
+        policyMode: "External Policy Platform + Fail-Closed Core Policy",
+        fullDependencyAnalysis: true,
+        governedPatchRequiredForPhase2: true,
+        externalPolicyFailClosed: true,
         statusApiLightweight: true,
         validationDefaultLightweight: true,
         handoffSummaryHydration: false,
@@ -348,9 +409,15 @@
         "ACID-R Transaction Core",
         "Rollback Verification",
         "Change Report",
-        "Implementation Package"
+        "Implementation Package",
+        "Governed Patch Generation",
+        "Full Dependency Analysis",
+        "External Policy Platform Adapter"
       ],
-      nextTask: "Implement Core Phase 2: governed Patch generation, full Dependency Analysis and external Policy Platform adapter.",
+      corePhase2: typeof global.getAutoRefactoringPhase2Status === "function" ? global.getAutoRefactoringPhase2Status() : { status: "Unavailable" },
+      fullDesignFreezeCompleted: false,
+      designFreezeCompliance: "Partial - Core Phase 2 Completed",
+      nextTask: "Run a governed Patch on an actual project file, then complete the remaining Design Freeze production adapters and UI workflow.",
       lastError: clone(state.lastError),
       updatedAt: nowIso()
     };
@@ -379,12 +446,12 @@
     global.registerIdeComponent({
       id: COMPONENT_ID,
       title: "Auto Refactoring",
-      summary: "Evidence-based function-level Repository modification with Preview, Diff, Sandbox, Approval, Validation and Rollback.",
+      summary: "Evidence-based function-level Repository modification with governed Patch, full Dependency Analysis, external Policy decision, Preview, Sandbox, Approval, Validation and Rollback.",
       icon: "🛠️",
       version: VERSION,
-      status: "Core Phase 1 Completed",
+      status: "Core Phase 2 Completed",
       ready: true,
-      progress: 50,
+      progress: 75,
       health: 100,
       validator: "validateAutoRefactoring",
       probe: "getAutoRefactoringStatus",
