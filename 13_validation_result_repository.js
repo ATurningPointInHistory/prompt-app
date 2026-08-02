@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_validation_result_repository.js
    Validation Result Repository
-   Version: 1.2.0
+   Version: 1.2.1
    Status: Ready
 
    Purpose:
@@ -13,7 +13,7 @@
   "use strict";
 
   const COMPONENT_ID = "VALIDATION-RESULT-REPOSITORY";
-  const VERSION = "1.2.0";
+  const VERSION = "1.2.1";
   const STORAGE_KEY = "AI_PROMPT_OS_VALIDATION_RESULT_REPOSITORY_V1";
   const MAX_RECORDS = 100;
 
@@ -31,6 +31,29 @@
   function text(value, fallback) { const result = String(value == null ? "" : value).trim(); return result || String(fallback || ""); }
   function finite(value, fallback) { const number = Number(value); return Number.isFinite(number) ? number : fallback; }
   function unique(values) { return [...new Set(asArray(values).filter(Boolean).map(String))]; }
+
+  function compactRecordSummary(record) {
+    if (!record || typeof record !== "object") return null;
+    return {
+      recordId: text(record.recordId, ""),
+      id: text(record.id, ""),
+      sourceComponent: text(record.sourceComponent, ""),
+      sourceType: text(record.sourceType, ""),
+      targetComponent: text(record.targetComponent, ""),
+      resultVersion: text(record.resultVersion, ""),
+      repositoryVersion: text(record.repositoryVersion, ""),
+      datasetVersion: text(record.datasetVersion, ""),
+      status: text(record.status, "Unknown"),
+      releaseAllowed: record.releaseAllowed === true,
+      implementationReady: record.implementationReady === true,
+      official: record.official === true,
+      health: finite(record.health, 0),
+      completedAt: text(record.completedAt, ""),
+      savedAt: text(record.savedAt, ""),
+      updatedAt: text(record.updatedAt, ""),
+      contentHash: text(record.contentHash, "")
+    };
+  }
 
   function stableStringify(value) {
     if (Array.isArray(value)) return "[" + value.map(stableStringify).join(",") + "]";
@@ -189,7 +212,7 @@
         saved: true,
         replaced: index >= 0,
         persisted: persistence.persisted === true,
-        record: clone(Object.assign({}, record, { payload: undefined })),
+        record: compactRecordSummary(record),
         storageKey: STORAGE_KEY,
         error: persistence.persisted === false && !persistence.skipped ? persistence.reason : null
       };
@@ -532,9 +555,47 @@
   }
 
   function getValidationResultRepositoryStatus() {
-    const officialCount = state.records.filter(item => item.official).length; const latest = state.records.length ? state.records[0] : null; const ready = state.loaded === true && !state.lastError;
-    return { id: COMPONENT_ID, title: "Validation Result Repository", name: "Validation Result Repository", version: VERSION, status: ready ? "Ready" : "Attention", lifecycleStatus: "Active", ready, health: state.lastValidation ? state.lastValidation.health : (ready ? 100 : 70), progress: 100, recordCount: state.records.length, officialRecordCount: officialCount, latestRecord: latest ? clone(Object.assign({}, latest, { payload: undefined })) : null,
-      contractVersion: "Compact Canonical Validation Record v1.2", preserves: ["Root Cause reference", "Scenario Findings", "Analytics Metrics Package", "Evidence references", "Handoff requirements"], storage: { adapter: "localStorage", storageKey: STORAGE_KEY, loaded: state.loaded, maxRecords: MAX_RECORDS }, repositoryAdapter: { type: "MemoBox Repository", available: typeof global.getMemoBoxList === "function" && typeof global.saveMemoBoxes === "function", automatic: false }, provides: ["Persistent Validation Result Storage", "Canonical Validation Record", "Official Result Query", "MemoBox Repository Publication Adapter", "IDE-140 Analytics Intake"], nextTask: state.records.length ? "Use official validation records as IDE-140 analytics input." : "Run an official validation to create the first persistent record.", lastValidation: state.lastValidation ? clone({ valid: state.lastValidation.valid, passed: state.lastValidation.passed, failed: state.lastValidation.failed, total: state.lastValidation.total, health: state.lastValidation.health, validatedAt: state.lastValidation.validatedAt }) : null, lastError: clone(state.lastError), updatedAt: state.updatedAt };
+    const officialCount = state.records.filter(item => item.official).length;
+    const latest = state.records.length ? state.records[0] : null;
+    const ready = state.loaded === true && !state.lastError;
+    const releaseAllowed = ready;
+    return {
+      id: COMPONENT_ID,
+      title: "Validation Result Repository",
+      name: "Validation Result Repository",
+      version: VERSION,
+      status: ready ? "Ready" : "Attention",
+      lifecycleStatus: ready ? "Active" : "Attention",
+      officialStatus: releaseAllowed ? "Official" : "Unavailable",
+      releaseStatus: releaseAllowed ? "Official" : "Unavailable",
+      ready: ready,
+      releaseAllowed: releaseAllowed,
+      health: state.lastValidation ? state.lastValidation.health : (ready ? 100 : 70),
+      progress: ready ? 100 : 70,
+      recordCount: state.records.length,
+      officialRecordCount: officialCount,
+      latestRecord: compactRecordSummary(latest),
+      releaseEvidence: {
+        available: releaseAllowed,
+        source: "Validation Result Repository",
+        evidenceType: "Repository Readiness",
+        storageLoaded: state.loaded === true,
+        recordCount: state.records.length,
+        officialRecordCount: officialCount,
+        storageKey: STORAGE_KEY,
+        updatedAt: state.updatedAt
+      },
+      contractVersion: "Compact Canonical Validation Record v1.2.1",
+      preserves: ["Root Cause reference", "Scenario Findings", "Analytics Metrics Package", "Evidence references", "Handoff requirements"],
+      storage: { adapter: "localStorage", storageKey: STORAGE_KEY, loaded: state.loaded, maxRecords: MAX_RECORDS },
+      repositoryAdapter: { type: "MemoBox Repository", available: typeof global.getMemoBoxList === "function" && typeof global.saveMemoBoxes === "function", automatic: false },
+      provides: ["Persistent Validation Result Storage", "Canonical Validation Record", "Official Result Query", "MemoBox Repository Publication Adapter", "IDE-140 Analytics Intake"],
+      nextTask: state.records.length ? "Use official validation records as IDE-140 analytics input." : "Run an official validation to create the first persistent record.",
+      lastValidation: state.lastValidation ? clone({ valid: state.lastValidation.valid, passed: state.lastValidation.passed, failed: state.lastValidation.failed, total: state.lastValidation.total, health: state.lastValidation.health, validatedAt: state.lastValidation.validatedAt }) : null,
+      lastError: clone(state.lastError),
+      statusApiMode: "Lightweight / compact metadata only",
+      updatedAt: state.updatedAt
+    };
   }
 
   const api = {
