@@ -15,6 +15,93 @@ let devConsoleFavorites =
     []
   );
 
+const DEV_CONSOLE_HISTORY_ENTRY_LIMIT =
+  12000;
+
+const DEV_CONSOLE_HISTORY_TOTAL_LIMIT =
+  60000;
+
+function buildPersistableDevConsoleHistory() {
+
+  const result = [];
+  let total = 0;
+
+  for (const item of devConsoleHistory) {
+
+    const value =
+      String(item || "");
+
+    if (
+      !value ||
+      value.length >
+        DEV_CONSOLE_HISTORY_ENTRY_LIMIT
+    ) {
+      continue;
+    }
+
+    if (
+      total + value.length >
+      DEV_CONSOLE_HISTORY_TOTAL_LIMIT
+    ) {
+      break;
+    }
+
+    result.push(value);
+    total += value.length;
+
+    if (result.length >= 20) {
+      break;
+    }
+
+  }
+
+  return result;
+
+}
+
+function persistDevConsoleHistory() {
+
+  const persistable =
+    buildPersistableDevConsoleHistory();
+
+  try {
+
+    localStorage.setItem(
+      "devConsoleHistory",
+      JSON.stringify(
+        persistable
+      )
+    );
+
+    return {
+      saved: true,
+      count: persistable.length
+    };
+
+  } catch (error) {
+
+    if (
+      typeof recordDevConsoleStorageWarning ===
+      "function"
+    ) {
+
+      return recordDevConsoleStorageWarning(
+        "実行履歴",
+        error
+      );
+
+    }
+
+    return {
+      saved: false,
+      reason:
+        String(error && error.message || error)
+    };
+
+  }
+
+}
+
 function saveDevConsoleHistory(
   code
 ) {
@@ -36,12 +123,7 @@ function saveDevConsoleHistory(
     devConsoleHistory.length = 30;
   }
 
-  localStorage.setItem(
-    "devConsoleHistory",
-    JSON.stringify(
-      devConsoleHistory
-    )
-  );
+  return persistDevConsoleHistory();
 
 }
 
@@ -160,14 +242,40 @@ function saveDevConsoleFavorite() {
     devConsoleFavorites.length = 50;
   }
 
-  localStorage.setItem(
-    "devConsoleFavorites",
-    JSON.stringify(
-      devConsoleFavorites
-    )
-  );
+  let persisted = false;
 
-  alert("Favorite保存しました");
+  try {
+
+    localStorage.setItem(
+      "devConsoleFavorites",
+      JSON.stringify(
+        devConsoleFavorites
+      )
+    );
+
+    persisted = true;
+
+  } catch (error) {
+
+    if (
+      typeof recordDevConsoleStorageWarning ===
+      "function"
+    ) {
+
+      recordDevConsoleStorageWarning(
+        "Favorite",
+        error
+      );
+
+    }
+
+  }
+
+  alert(
+    persisted
+      ? "Favorite保存しました"
+      : "保存容量不足のためFavoriteを永続保存できませんでした。\n現在の画面では利用できます。"
+  );
 
 }
 
@@ -262,12 +370,30 @@ function deleteDevConsoleFavorite(
     1
   );
 
-  localStorage.setItem(
-    "devConsoleFavorites",
-    JSON.stringify(
-      devConsoleFavorites
-    )
-  );
+  try {
+
+    localStorage.setItem(
+      "devConsoleFavorites",
+      JSON.stringify(
+        devConsoleFavorites
+      )
+    );
+
+  } catch (error) {
+
+    if (
+      typeof recordDevConsoleStorageWarning ===
+      "function"
+    ) {
+
+      recordDevConsoleStorageWarning(
+        "Favorite削除",
+        error
+      );
+
+    }
+
+  }
 
   showDevConsoleFavorites();
 
