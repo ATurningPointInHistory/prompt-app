@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_validation.js
    IDE-150 Auto Refactoring Validation / Status / Integration
-   Version: 1.1.2
+   Version: 1.2.0
    Status: Core Phase 1 Completed / Smartphone Freeze Fix
    ============================================================ */
 (function (global) {
@@ -183,6 +183,13 @@
     check("Dry Run success reason contract", /reason:\s*""/.test(global.runStandardAutoRefactoringDryRun.toString()));
     const runtimePhase2Status = typeof global.getAutoRefactoringPhase2Status === "function" ? global.getAutoRefactoringPhase2Status() : null;
     check("Core Phase 2 runtime ready", Boolean(runtimePhase2Status && runtimePhase2Status.runtimeReady === true && runtimePhase2Status.externalPolicyStatus === "Standard Policy Connected"));
+    check("Controlled Application preparation API", typeof global.prepareControlledAutoRefactoringApplication === "function");
+    check("Controlled Application Approval API", typeof global.approveControlledAutoRefactoringApplication === "function");
+    check("Controlled Application execution API", typeof global.executeControlledAutoRefactoringApplication === "function");
+    check("Controlled Application Status API", typeof global.getControlledAutoRefactoringApplicationStatus === "function");
+    check("Controlled Project File Store Status API", typeof global.getControlledProjectFileStoreStatus === "function");
+    check("Controlled Application Approval UI", typeof global.openControlledAutoRefactoringApprovalPanel === "function");
+    check("Controlled Application validation API", typeof global.validateControlledAutoRefactoringApplication === "function");
 
     const passed = checks.filter(function pass(item) { return item.passed; }).length;
     const result = {
@@ -383,6 +390,10 @@
         afterFunctionSource: practicalAfter
       });
       check("Practical Dry Run concurrent-change guard", practicalMismatch.completed === false && practicalMismatch.status === "Concurrent Change Detected" && practicalMismatch.repositoryWriteCount === 0);
+      const controlledValidation = global.validateControlledAutoRefactoringApplication();
+      (controlledValidation.checks || []).forEach(function addControlledCheck(item) {
+        check("Controlled Application: " + item.name, item.passed === true, item.detail);
+      });
     } catch (error) {
       check("Unexpected exception", false, error && error.stack ? error.stack : String(error));
     }
@@ -446,11 +457,11 @@
       version: VERSION,
       status: validationReady && integrationReady ? "Ready" : "Attention",
       lifecycleStatus: "Implementation",
-      implementationPhase: "Core Phase 2 + Practical Governed Dry Run",
+      implementationPhase: "Controlled Application Trial",
       phaseStatus: validationReady ? "Completed" : "Attention",
       ready: validationReady && integrationReady,
       health: Math.min(validation ? validation.health : 100, integrationReady ? 100 : 0),
-      progress: 82,
+      progress: 90,
       implementedStages: CORE_PHASE_1_STAGES.length,
       totalStages: PIPELINE_STAGES.length,
       requestCount: state.requests.size,
@@ -516,12 +527,19 @@
         "Full Dependency Analysis",
         "External Policy Platform Adapter",
         "Standard Fail-Closed Policy Adapter",
-        "Read-only Governed Patch Dry Run"
+        "Read-only Governed Patch Dry Run",
+        "Manual Before/After Practical Dry Run",
+        "Two-step Explicit Controlled Approval",
+        "Temporary Runtime Project Application",
+        "Post-Application Validation",
+        "Mandatory Automatic Rollback",
+        "Controlled Application Approval UI"
       ],
       corePhase2: typeof global.getAutoRefactoringPhase2Status === "function" ? global.getAutoRefactoringPhase2Status() : { status: "Unavailable" },
+      controlledApplication: typeof global.getControlledAutoRefactoringApplicationStatus === "function" ? global.getControlledAutoRefactoringApplicationStatus() : { status: "Unavailable" },
       fullDesignFreezeCompleted: false,
-      designFreezeCompliance: "Partial - Core Phase 2 Runtime Policy and Dry Run Completed",
-      nextTask: "Run the Standard Governed Dry Run on Android, then implement the production Project File Store write adapter and Approval UI without automatic application.",
+      designFreezeCompliance: "Partial - Controlled Application Trial Completed; Persistent Commit Disabled",
+      nextTask: "Implement an explicit persistent Commit Gate, durable Project Package write workflow and post-reload verification. Keep automatic application prohibited.",
       lastError: clone(state.lastError),
       updatedAt: nowIso()
     };
@@ -553,9 +571,9 @@
       summary: "Evidence-based function-level Repository modification with governed Patch, full Dependency Analysis, external Policy decision, Preview, Sandbox, Approval, Validation and Rollback.",
       icon: "🛠️",
       version: VERSION,
-      status: "Core Phase 2 Runtime Policy Completed",
+      status: "Controlled Application Trial Completed",
       ready: true,
-      progress: 80,
+      progress: 90,
       health: 100,
       validator: "validateAutoRefactoring",
       probe: "getAutoRefactoringStatus",
