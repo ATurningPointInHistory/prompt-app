@@ -1869,7 +1869,7 @@ function getNextMissingCapabilityName(capabilities) {
    Migration Registry
 =============================== */
 
-function getKnowledgeMigrationRegistry() {
+function getDashboardKnowledgeMigrationRegistryLegacy() {
 
   return {
 
@@ -1957,7 +1957,7 @@ function getKnowledgeMigrationRegistry() {
    Migration Scanner
 =============================== */
 
-function scanKnowledgeMigration() {
+function scanDashboardKnowledgeMigrationLegacy() {
 
   const registry =
     getKnowledgeMigrationRegistry();
