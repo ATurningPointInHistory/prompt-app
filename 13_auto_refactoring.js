@@ -1,15 +1,15 @@
 /* ============================================================
    FILE: 13_auto_refactoring.js
    IDE-150 Auto Refactoring
-   Version: 1.2.0
-   Status: Controlled Application Trial Completed
+   Version: 1.2.2
+   Status: Controlled Application Trial Snapshot Persistence Hardened
    Design Freeze: 2026-07-26
    ============================================================ */
 (function (global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-150";
-  const VERSION = "1.2.0";
+  const VERSION = "1.2.2";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CORE_V1";
   const STORAGE_SCHEMA_VERSION = 2;
   const IDE140_PHASE2B_STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2B_V1";
@@ -374,9 +374,17 @@
 
     [...state.transactions.values()].forEach(function saveTransaction(item) {
       if (!item || !item.artifactKey || !keepKeys.has(item.artifactKey)) return;
-      if (!item.rollbackSnapshot || typeof item.rollbackSnapshot.source !== "string") return;
+      if (!item.rollbackSnapshot) return;
+      const hasInlineSource = typeof item.rollbackSnapshot.source === "string" && item.rollbackSnapshot.source.length > 0;
+      const hasSnapshotReference = typeof item.rollbackSnapshot.storageKey === "string" && item.rollbackSnapshot.storageKey.length > 0;
+      if (!hasInlineSource && !hasSnapshotReference) return;
       try {
-        const raw = JSON.stringify(item);
+        const persistedItem = clone(item);
+        if (hasSnapshotReference && persistedItem.rollbackSnapshot) {
+          persistedItem.rollbackSnapshot.source = "";
+          persistedItem.rollbackSnapshot.sourceStoredSeparately = true;
+        }
+        const raw = JSON.stringify(persistedItem);
         global.localStorage.setItem(item.artifactKey, raw);
         transactionArtifactCount += 1;
         estimatedBytes += raw.length * 2;
@@ -461,13 +469,33 @@
     return current;
   }
 
+  function hydrateTransactionSnapshot(item) {
+    if (!item || !item.rollbackSnapshot) return item;
+    if (typeof item.rollbackSnapshot.source === "string" && item.rollbackSnapshot.source.length > 0) return item;
+    const storageKey = text(item.rollbackSnapshot.storageKey, "");
+    if (!storageKey) return item;
+    const snapshot = readArtifact(storageKey);
+    if (!snapshot || snapshot.transactionId !== item.id || typeof snapshot.source !== "string") return item;
+    if (snapshot.sourceHash && hashText(snapshot.source) !== snapshot.sourceHash) return item;
+    item.rollbackSnapshot.source = snapshot.source;
+    item.rollbackSnapshot.sourceHash = snapshot.sourceHash || item.rollbackSnapshot.sourceHash;
+    item.rollbackSnapshot.persisted = true;
+    item.rollbackSnapshot.verifiedAt = snapshot.verifiedAt || item.rollbackSnapshot.verifiedAt || "";
+    return item;
+  }
+
   function getTransactionRecord(id) {
     const key = String(id || "");
     const current = state.transactions.get(key) || null;
     if (!current) return null;
-    if (current.rollbackSnapshot && typeof current.rollbackSnapshot.source === "string") return current;
+    hydrateTransactionSnapshot(current);
+    if (current.rollbackSnapshot && typeof current.rollbackSnapshot.source === "string" && current.rollbackSnapshot.source.length > 0) return current;
     const artifact = readArtifact(current.artifactKey);
-    if (artifact && artifact.id === key) { state.transactions.set(key, artifact); return artifact; }
+    if (artifact && artifact.id === key) {
+      hydrateTransactionSnapshot(artifact);
+      state.transactions.set(key, artifact);
+      return artifact;
+    }
     return current;
   }
 
