@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_phase2.js
    IDE-150 Auto Refactoring Core Phase 2
-   Version: 1.1.0
+   Version: 1.1.1
    Status: Completed
 
    Responsibilities:
@@ -17,7 +17,7 @@
 
   const COMPONENT_ID = internal.COMPONENT_ID;
   const VERSION = internal.VERSION;
-  const PHASE_VERSION = "1.1.0";
+  const PHASE_VERSION = "1.1.1";
   const MAX_RECORDS = internal.MAX_RECORDS;
   const state = internal.state;
   const nowIso = internal.nowIso;
@@ -49,11 +49,42 @@
     return text(item && (item.fileName || item.name || item.path), "unknown").replace(/^\.\//, "");
   }
 
+  function stripNonExecutableText(code) {
+    const source = String(code || "");
+    const output = source.split("");
+    let quote = "";
+    let escaped = false;
+    let lineComment = false;
+    let blockComment = false;
+    for (let index = 0; index < source.length; index += 1) {
+      const char = source[index];
+      const next = source[index + 1];
+      if (lineComment) {
+        if (char === "\n") lineComment = false;
+        else output[index] = " ";
+        continue;
+      }
+      if (blockComment) {
+        output[index] = char === "\n" ? "\n" : " ";
+        if (char === "*" && next === "/") { output[index + 1] = " "; blockComment = false; index += 1; }
+        continue;
+      }
+      if (quote) {
+        output[index] = char === "\n" ? "\n" : " ";
+        if (escaped) { escaped = false; continue; }
+        if (char === "\\") { escaped = true; continue; }
+        if (char === quote) quote = "";
+        continue;
+      }
+      if (char === "/" && next === "/") { output[index] = " "; output[index + 1] = " "; lineComment = true; index += 1; continue; }
+      if (char === "/" && next === "*") { output[index] = " "; output[index + 1] = " "; blockComment = true; index += 1; continue; }
+      if (char === "\"" || char === "'" || char === "`") { output[index] = " "; quote = char; }
+    }
+    return output.join("");
+  }
+
   function extractCallsFallback(code) {
-    const source = String(code || "")
-      .replace(/\/\*[\s\S]*?\*\//g, " ")
-      .replace(/(^|[^:])\/\/.*$/gm, "$1 ")
-      .replace(/(['\"`])(?:\\.|(?!\1)[\s\S])*?\1/g, " ");
+    const source = stripNonExecutableText(code);
     const ignore = new Set(["if", "for", "while", "switch", "catch", "function", "return", "typeof", "new", "super", "this", "setTimeout", "setInterval", "Promise", "Array", "Object", "String", "Number", "Boolean", "Date", "Math", "JSON", "RegExp", "Error"]);
     const calls = [];
     const pattern = /\b([A-Za-z_$][\w$]*)\s*\(/g;
@@ -65,26 +96,68 @@
   }
 
   function extractCalls(code) {
-    if (typeof global.extractCalledFunctions === "function") {
-      try { return unique(global.extractCalledFunctions(String(code || ""))); }
-      catch (_) {}
+    const source = String(code || "");
+    const safeCalls = extractCallsFallback(source);
+    if (safeCalls.length || typeof global.extractCalledFunctions !== "function") return safeCalls;
+    try { return unique(global.extractCalledFunctions(source)); }
+    catch (_) { return safeCalls; }
+  }
+
+  function isExecutableCodePosition(sourceTextValue, position) {
+    const source = String(sourceTextValue || "");
+    const limit = Math.max(0, Math.min(source.length, finite(position, 0)));
+    let quote = "";
+    let escaped = false;
+    let lineComment = false;
+    let blockComment = false;
+    for (let index = 0; index < limit; index += 1) {
+      const char = source[index];
+      const next = source[index + 1];
+      if (lineComment) {
+        if (char === "\n") lineComment = false;
+        continue;
+      }
+      if (blockComment) {
+        if (char === "*" && next === "/") { blockComment = false; index += 1; }
+        continue;
+      }
+      if (quote) {
+        if (escaped) { escaped = false; continue; }
+        if (char === "\\") { escaped = true; continue; }
+        if (char === quote) quote = "";
+        continue;
+      }
+      if (char === "/" && next === "/") { lineComment = true; index += 1; continue; }
+      if (char === "/" && next === "*") { blockComment = true; index += 1; continue; }
+      if (char === "\"" || char === "'" || char === "`") quote = char;
     }
-    return extractCallsFallback(code);
+    return !quote && !lineComment && !blockComment;
+  }
+
+  function filterExecutableBlocks(sourceTextValue, blocks) {
+    const source = String(sourceTextValue || "");
+    return asArray(blocks).filter(function executable(block) {
+      const blockText = String(block && (block.code || block.block) || "");
+      const start = Number.isFinite(Number(block && block.start))
+        ? Number(block.start)
+        : source.indexOf(blockText);
+      return start >= 0 && isExecutableCodePosition(source, start);
+    });
   }
 
   function extractBlocks(code) {
+    const source = String(code || "");
     if (typeof global.extractFunctionBlocksFromText === "function") {
-      try { return asArray(global.extractFunctionBlocksFromText(String(code || ""))); }
+      try { return filterExecutableBlocks(source, global.extractFunctionBlocksFromText(source)); }
       catch (_) {}
     }
     const result = [];
-    const source = String(code || "");
     const names = unique((source.match(/\b(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/g) || []).map(function (line) {
       const m = /function\s+([A-Za-z_$][\w$]*)/.exec(line); return m ? m[1] : "";
     }));
     names.forEach(function add(name) {
       const block = findFunctionBlock(source, name);
-      if (block) result.push({ name: name, start: block.start, end: block.end, block: block.block, code: block.block });
+      if (block && isExecutableCodePosition(source, block.start)) result.push({ name: name, start: block.start, end: block.end, block: block.block, code: block.block });
     });
     return result;
   }
