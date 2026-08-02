@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_auto_refactoring_controlled_application.js
    IDE-150 Controlled Application Trial
-   Version: 1.0.3
-   Status: Controlled Application Trial
+   Version: 1.0.4
+   Status: Validation Storage Isolated
    ============================================================ */
 (function (global) {
   "use strict";
@@ -12,7 +12,7 @@
 
   const COMPONENT_ID = internal.COMPONENT_ID;
   const VERSION = internal.VERSION;
-  const CONTROLLED_VERSION = "1.0.3";
+  const CONTROLLED_VERSION = "1.0.4";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CONTROLLED_APPLICATION_V1";
   const MAX_SESSIONS = 20;
   const nowIso = internal.nowIso;
@@ -21,6 +21,15 @@
   const finite = internal.finite;
   const hashText = internal.hashText;
   const findFunctionBlock = internal.findFunctionBlock;
+  const getStorage = typeof internal.getStorage === "function"
+    ? internal.getStorage
+    : function fallbackStorage() { try { return global.localStorage || null; } catch (_) { return null; } };
+  const createMemoryStorage = typeof internal.createMemoryStorage === "function"
+    ? internal.createMemoryStorage
+    : null;
+  const runWithStorage = typeof internal.runWithStorage === "function"
+    ? internal.runWithStorage
+    : function directRun(_, callback) { return callback(); };
 
   const sessions = new Map();
   let lastValidation = null;
@@ -75,8 +84,9 @@
   }
 
   function persistSessions() {
-    if (!global.localStorage || typeof global.localStorage.setItem !== "function") {
-      return { persisted: false, reason: "localStorage is unavailable." };
+    const storage = getStorage();
+    if (!storage || typeof storage.setItem !== "function") {
+      return { persisted: false, reason: "Storage is unavailable." };
     }
     try {
       const payload = {
@@ -87,7 +97,7 @@
         sessions: [...sessions.values()].slice(-MAX_SESSIONS).map(compactSession),
         updatedAt: nowIso()
       };
-      global.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      storage.setItem(STORAGE_KEY, JSON.stringify(payload));
       return { persisted: true, storageKey: STORAGE_KEY, sessionCount: payload.sessions.length };
     } catch (error) {
       return { persisted: false, reason: error && error.message ? error.message : String(error) };
@@ -97,9 +107,10 @@
   function loadSessions() {
     if (loaded) return { loaded: true, sessionCount: sessions.size };
     loaded = true;
-    if (!global.localStorage || typeof global.localStorage.getItem !== "function") return { loaded: false, reason: "localStorage is unavailable." };
+    const storage = getStorage();
+    if (!storage || typeof storage.getItem !== "function") return { loaded: false, reason: "Storage is unavailable." };
     try {
-      const payload = safeParse(global.localStorage.getItem(STORAGE_KEY), null);
+      const payload = safeParse(storage.getItem(STORAGE_KEY), null);
       if (!payload || payload.schemaVersion !== 1) return { loaded: true, sessionCount: 0 };
       (Array.isArray(payload.sessions) ? payload.sessions : []).forEach(function restore(item) {
         if (item && item.id) sessions.set(String(item.id), Object.assign({}, item));
@@ -537,6 +548,21 @@
   }
 
   function validateControlledAutoRefactoringApplication() {
+    const validationStorage = createMemoryStorage ? createMemoryStorage() : getStorage();
+    const standardInternal = global.__IDE150StandardPolicyInternal;
+    const standardState = standardInternal && typeof standardInternal.captureRuntimeState === "function"
+      ? standardInternal.captureRuntimeState()
+      : null;
+    try {
+      return runWithStorage(validationStorage, validateControlledAutoRefactoringApplicationIsolated);
+    } finally {
+      if (standardState && standardInternal && typeof standardInternal.restoreRuntimeState === "function") {
+        standardInternal.restoreRuntimeState(standardState);
+      }
+    }
+  }
+
+  function validateControlledAutoRefactoringApplicationIsolated() {
     const beforeSessions = [...sessions.entries()].map(function copy(entry) { return [entry[0], clone(entry[1])]; });
     const checks = [];
     function check(name, passed, detail) { checks.push({ name: name, passed: passed === true, detail: text(detail, "") }); }
@@ -632,23 +658,25 @@
       let rollbackSnapshotArtifact = null;
       let rollbackSnapshotKey = "";
       try {
-        const corePayload = global.localStorage ? safeParse(global.localStorage.getItem(internal.STORAGE_KEY), null) : null;
+        const validationStorage = getStorage();
+        const corePayload = validationStorage ? safeParse(validationStorage.getItem(internal.STORAGE_KEY), null) : null;
         const compactTransaction = corePayload && Array.isArray(corePayload.transactions)
           ? corePayload.transactions.find(function find(item) { return item && item.id === transactionId; })
           : null;
-        transactionArtifact = compactTransaction && compactTransaction.artifactKey && global.localStorage
-          ? safeParse(global.localStorage.getItem(compactTransaction.artifactKey), null)
+        transactionArtifact = compactTransaction && compactTransaction.artifactKey && validationStorage
+          ? safeParse(validationStorage.getItem(compactTransaction.artifactKey), null)
           : null;
         rollbackSnapshotKey = text(transactionArtifact && transactionArtifact.rollbackSnapshot && transactionArtifact.rollbackSnapshot.storageKey, "");
-        rollbackSnapshotArtifact = rollbackSnapshotKey && global.localStorage
-          ? safeParse(global.localStorage.getItem(rollbackSnapshotKey), null)
+        rollbackSnapshotArtifact = rollbackSnapshotKey && validationStorage
+          ? safeParse(validationStorage.getItem(rollbackSnapshotKey), null)
           : null;
       } catch (_) {}
       check("Dedicated Rollback Snapshot reference", Boolean(rollbackSnapshotKey));
       check("Rollback Snapshot read-back verified", Boolean(rollbackSnapshotArtifact && rollbackSnapshotArtifact.transactionId === transactionId && typeof rollbackSnapshotArtifact.source === "string" && rollbackSnapshotArtifact.source.length > 0 && hashText(rollbackSnapshotArtifact.source) === rollbackSnapshotArtifact.sourceHash));
       check("Transaction Artifact excludes duplicate Snapshot source", Boolean(transactionArtifact && transactionArtifact.rollbackSnapshot && transactionArtifact.rollbackSnapshot.source === "" && transactionArtifact.rollbackSnapshot.sourceStoredSeparately === true));
-      const rollbackSnapshotKeyCount = global.localStorage
-        ? Array.from({ length: global.localStorage.length }, function key(_, index) { return global.localStorage.key(index); }).filter(function filter(key) { return key && key.indexOf("AI_PROMPT_OS_IDE150_ROLLBACK_SNAPSHOT_V1:") === 0; }).length
+      const validationStorageForCount = getStorage();
+      const rollbackSnapshotKeyCount = validationStorageForCount
+        ? Array.from({ length: validationStorageForCount.length }, function key(_, index) { return validationStorageForCount.key(index); }).filter(function filter(key) { return key && key.indexOf("AI_PROMPT_OS_IDE150_ROLLBACK_SNAPSHOT_V1:") === 0; }).length
         : 0;
       check("Rollback Snapshot retention limit", rollbackSnapshotKeyCount <= 10, "count=" + rollbackSnapshotKeyCount);
       const compact = getControlledAutoRefactoringApplicationSession(prepared.session.id);
