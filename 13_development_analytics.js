@@ -82,6 +82,7 @@
     sequence: 0,
     lastSnapshot: null,
     lastError: null,
+    lastValidation: null,
     loaded: false,
     updatedAt: new Date().toISOString()
   };
@@ -740,7 +741,7 @@
       check("Unexpected exception", false, error && error.message ? error.message : String(error));
     }
     const passed = checks.filter(function pass(item) { return item.passed; }).length;
-    return {
+    const result = {
       id: "IDE-140-VALIDATION",
       componentId: COMPONENT_ID,
       version: VERSION,
@@ -754,86 +755,16 @@
       checks: checks,
       validatedAt: nowIso()
     };
+    state.lastValidation = clone(result); return result;
   }
 
   function getDevelopmentAnalyticsStatus() {
-    const validation = validateDevelopmentAnalytics();
-    const officialRecords = typeof global.getValidationResults === "function"
-      ? global.getValidationResults({ official: true, limit: 100 })
-      : [];
-    const hasSource = officialRecords.length > 0;
-    const hasSnapshot = Boolean(state.lastSnapshot);
-    const phase2AStatus = typeof global.getDevelopmentAnalyticsPhase2AStatus === "function"
-      ? global.getDevelopmentAnalyticsPhase2AStatus()
-      : null;
-    const phase2ACompleted = Boolean(phase2AStatus && phase2AStatus.resultCount > 0 && phase2AStatus.lastResult && phase2AStatus.lastResult.status === "Completed");
-    const phase2BStatus = typeof global.getDevelopmentAnalyticsPhase2BStatus === "function"
-      ? global.getDevelopmentAnalyticsPhase2BStatus()
-      : null;
-    const phase2BImplemented = Boolean(phase2BStatus && phase2BStatus.ready === true);
-    const phase2BPublished = Boolean(phase2BStatus && phase2BStatus.publicationStatus === "Published" && phase2BStatus.releaseStatus === "Official");
-    let nextTask = "Run IDE-135 full validation to create an Official Result.";
-    if (hasSource && !hasSnapshot) nextTask = "Run runDevelopmentAnalytics() to generate the first Analytics Snapshot.";
-    if (hasSnapshot && !phase2ACompleted) nextTask = "Run runDevelopmentAnalyticsPhase2A() to generate Trend, Pattern, Root Cause and Quality Analytics.";
-    if (phase2ACompleted && !phase2BStatus) nextTask = "Load IDE-140 Phase 2B and prepare Publication Gate review.";
-    if (phase2BStatus) nextTask = phase2BStatus.nextTask;
-    if (phase2BPublished) nextTask = "Begin IDE-150 Auto Refactoring implementation using the Published Analytics Handoff.";
-    return {
-      id: COMPONENT_ID,
-      title: "Development Analytics",
-      name: "Development Analytics",
-      version: VERSION,
-      status: validation.valid ? "Ready" : "Attention",
-      lifecycleStatus: phase2BImplemented ? "Completed" : "Implementation",
-      implementationPhase: phase2BImplemented ? "Phase 2B" : phase2ACompleted ? "Phase 2A" : "Core Phase 1",
-      ready: validation.valid,
-      health: validation.health,
-      progress: Math.round((IMPLEMENTED_STAGES.length / PIPELINE_STAGES.length) * 100),
-      implementedStages: IMPLEMENTED_STAGES.length,
-      totalStages: PIPELINE_STAGES.length,
-      registeredMetrics: state.metricRegistry.size,
-      officialSourceRecordCount: officialRecords.length,
-      requestCount: state.requests.size,
-      sessionCount: state.sessions.size,
-      snapshotCount: state.snapshots.size,
-      findingCount: state.findings.size,
-      recommendationCount: state.recommendations.size,
-      phase2A: clone(phase2AStatus),
-      phase2ACompleted: phase2ACompleted,
-      phase2AProgress: phase2ACompleted ? 100 : 0,
-      phase2B: clone(phase2BStatus),
-      phase2BImplemented: phase2BImplemented,
-      phase2BProgress: phase2BImplemented ? 100 : 0,
-      lastSnapshot: getDevelopmentAnalyticsSnapshotSummary(),
-      publicationStatus: phase2BStatus ? phase2BStatus.publicationStatus : state.lastSnapshot ? state.lastSnapshot.publicationStatus : "Not Generated",
-      releaseStatus: phase2BStatus ? phase2BStatus.releaseStatus : "Not Released",
-      approvalStatus: phase2BStatus ? phase2BStatus.approvalStatus : "Not Requested",
-      handoffEligible: Boolean(phase2BStatus && phase2BStatus.handoffEligible),
-      handoffStatus: phase2BStatus ? phase2BStatus.handoffStatus : "Not Available",
-      closureStatus: phase2BStatus ? phase2BStatus.closureStatus : "Open",
-      persistence: {
-        adapter: "localStorage",
-        storageKey: STORAGE_KEY,
-        loaded: state.loaded
-      },
-      dependsOn: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "IDE-130", "IDE-135", "Validation Result Repository", "Relationship Platform"],
-      provides: [
-        "Official Result Intake",
-        "Canonical Analytics Model",
-        "Governed Metric Registry",
-        "Validation Quality Metrics",
-        "Version-aware Trend and Pattern Analytics",
-        "IDE-130 Confirmed Root Cause Analytics",
-        "Quality Graph and Reliability Report",
-        "Gate-based Publication",
-        "Published Analytics Package",
-        "Published-only IDE-150 Handoff",
-        "Analytics Closure"
-      ],
-      nextTask: nextTask,
-      lastError: clone(state.lastError),
-      updatedAt: nowIso()
-    };
+    const requiredApis = ["createDevelopmentAnalyticsRequest", "runDevelopmentAnalytics", "getDevelopmentAnalyticsSnapshotSummary", "getDevelopmentAnalyticsSnapshots", "getDevelopmentAnalyticsStatus"]; const implemented = requiredApis.filter(name => typeof global[name] === "function").length; const platformReady = implemented === requiredApis.length && state.loaded === true;
+    const repositorySummary = typeof global.getValidationResultRepositorySummary === "function" ? global.getValidationResultRepositorySummary({ official: true }) : null; const officialSourceRecordCount = repositorySummary ? repositorySummary.count : 0; const hasSource = officialSourceRecordCount > 0; const hasSnapshot = Boolean(state.lastSnapshot);
+    const phase2AStatus = typeof global.getDevelopmentAnalyticsPhase2AStatus === "function" ? global.getDevelopmentAnalyticsPhase2AStatus() : null; const phase2ACompleted = Boolean(phase2AStatus && phase2AStatus.resultCount > 0 && phase2AStatus.lastResult && phase2AStatus.lastResult.status === "Completed");
+    const phase2BStatus = typeof global.getDevelopmentAnalyticsPhase2BStatus === "function" ? global.getDevelopmentAnalyticsPhase2BStatus() : null; const phase2BImplemented = Boolean(phase2BStatus && phase2BStatus.ready === true); const phase2BPublished = Boolean(phase2BStatus && phase2BStatus.publicationStatus === "Published" && phase2BStatus.releaseStatus === "Official");
+    let nextTask = "Run IDE-135 full validation to create an Official Result."; if (hasSource && !hasSnapshot) nextTask = "Run runDevelopmentAnalytics() to generate the first Analytics Snapshot."; if (hasSnapshot && !phase2ACompleted) nextTask = "Run runDevelopmentAnalyticsPhase2A() to generate Trend, Pattern, Root Cause and Quality Analytics."; if (phase2ACompleted && !phase2BStatus) nextTask = "Load IDE-140 Phase 2B and prepare Publication Gate review."; if (phase2BStatus) nextTask = phase2BStatus.nextTask; if (phase2BPublished) nextTask = "Begin IDE-150 Auto Refactoring implementation using the Published Analytics Handoff.";
+    return { id: COMPONENT_ID, title: "Development Analytics", name: "Development Analytics", version: VERSION, status: platformReady ? "Ready" : "Attention", lifecycleStatus: phase2BImplemented ? "Completed" : "Implementation", implementationPhase: phase2BImplemented ? "Phase 2B" : phase2ACompleted ? "Phase 2A" : "Core Phase 1", implementationScope: "IDE-135 canonical Official Result intake with traceable upstream references", directIDE110To130Adapters: "Deferred / canonical intake is authoritative", architectureStatus: "Design Freeze Approved", designFreezeCompliance: phase2BPublished ? "Partial - Published Core Workflow Completed" : "Implementation", deferredDesignFreezeCapabilities: ["Direct IDE-110..130 source adapters", "Shared Relationship Platform registration", "Semantic Analytics Workspace UI and drill-down"], ready: platformReady, health: state.lastValidation ? state.lastValidation.health : (platformReady ? 90 : 70), progress: Math.round((IMPLEMENTED_STAGES.length / PIPELINE_STAGES.length) * 100), implementedStages: IMPLEMENTED_STAGES.length, totalStages: PIPELINE_STAGES.length, designWorkflowStages: 15, implementationStageMapping: "15 Design stages mapped to 12 implementation stages; Trend/RootCause/Quality/Reliability are grouped in Analytics Processing extensions.", registeredMetrics: state.metricRegistry.size, officialSourceRecordCount: officialSourceRecordCount, requestCount: state.requests.size, sessionCount: state.sessions.size, snapshotCount: state.snapshots.size, findingCount: state.findings.size, recommendationCount: state.recommendations.size, phase2A: clone(phase2AStatus), phase2ACompleted, phase2AProgress: phase2ACompleted ? 100 : 0, phase2B: clone(phase2BStatus), phase2BImplemented, phase2BProgress: phase2BImplemented ? 100 : 0, lastSnapshot: getDevelopmentAnalyticsSnapshotSummary(), publicationStatus: phase2BStatus ? phase2BStatus.publicationStatus : state.lastSnapshot ? state.lastSnapshot.publicationStatus : "Not Generated", releaseStatus: phase2BStatus ? phase2BStatus.releaseStatus : "Not Released", approvalStatus: phase2BStatus ? phase2BStatus.approvalStatus : "Not Requested", handoffEligible: Boolean(phase2BStatus && phase2BStatus.handoffEligible), handoffStatus: phase2BStatus ? phase2BStatus.handoffStatus : "Not Available", closureStatus: phase2BStatus ? phase2BStatus.closureStatus : "Open", persistence: { adapter: "localStorage", storageKey: STORAGE_KEY, loaded: state.loaded }, statusApiMode: "Lightweight / no Core self-validation execution", nextTask, updatedAt: state.updatedAt };
   }
 
   loadDevelopmentAnalyticsState();
