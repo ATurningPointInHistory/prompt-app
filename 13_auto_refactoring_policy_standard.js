@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_policy_standard.js
    IDE-150 Standard Policy Adapter / Governed Dry Run
-   Version: 1.0.0
+   Version: 1.1.0
    Status: Completed
 
    Responsibilities:
@@ -19,9 +19,10 @@
   const COMPONENT_ID = internal.COMPONENT_ID;
   const VERSION = internal.VERSION;
   const ADAPTER_ID = "AI-PROMPT-OS-STANDARD-REFACTORING-POLICY";
-  const ADAPTER_VERSION = "1.0.0";
-  const POLICY_VERSION = "IDE-150-STANDARD-POLICY-v1.0.0";
+  const ADAPTER_VERSION = "1.1.0";
+  const POLICY_VERSION = "IDE-150-STANDARD-POLICY-v1.1.0";
   const DRY_RUN_STORAGE_KEY = "AI_PROMPT_OS_IDE150_STANDARD_DRY_RUN_V1";
+  const PRACTICAL_DRY_RUN_VERSION = "1.0.0";
   const nowIso = internal.nowIso;
   const clone = internal.clone;
   const text = internal.text;
@@ -355,6 +356,9 @@
       standardPolicyVersion: POLICY_VERSION,
       completed: true,
       status: "Dry Run Passed",
+      reason: "",
+      mode: settings.afterFunctionSource ? "Manual Before/After Read-only Dry Run" : "Standard Read-only Governed Patch Dry Run",
+      manualCandidate: Boolean(settings.afterFunctionSource),
       repositoryMutation: false,
       repositoryWriteCount: repositoryWriteCount,
       sourceUnchanged: beforeFileHash === afterFileHash,
@@ -412,6 +416,9 @@
     lastDryRun = {
       id: result.id,
       status: result.status,
+      reason: "",
+      mode: result.mode,
+      manualCandidate: result.manualCandidate === true,
       target: clone(result.target),
       repositoryMutation: result.repositoryMutation,
       repositoryWriteCount: result.repositoryWriteCount,
@@ -428,12 +435,186 @@
     return result;
   }
 
+
+  function countLines(value) {
+    return String(value == null ? "" : value).replace(/\r\n/g, "\n").split("\n").length;
+  }
+
+  function resolveDryRunTarget(options) {
+    const settings = options && typeof options === "object" ? options : {};
+    const targetFile = text(settings.targetFile, "13_auto_refactoring_phase2.js");
+    const targetFunction = text(settings.targetFunction, "sourceName");
+    const sources = phase2.resolveProjectSources(settings);
+    if (!sources.length) return { resolved: false, reason: "Project sources are unavailable. Dry Run is fail-closed." };
+    const file = sources.find(function find(item) { return item.fileName === targetFile || item.fileName.endsWith("/" + targetFile); });
+    if (!file) return { resolved: false, reason: "Dry Run target file is unavailable.", target: { file: targetFile, function: targetFunction } };
+    const block = findFunctionBlock(file.code, targetFunction);
+    if (!block) return { resolved: false, reason: "Dry Run target function is unavailable.", target: { file: targetFile, function: targetFunction } };
+    const beforeFunctionSource = block.block.trim();
+    return {
+      resolved: true,
+      target: { file: targetFile, function: targetFunction },
+      sources: sources,
+      file: file,
+      beforeFunctionSource: beforeFunctionSource,
+      beforeHash: hashText(beforeFunctionSource),
+      fileHash: hashText(file.code)
+    };
+  }
+
+  function prepareAutoRefactoringDryRunTemplate(options) {
+    const resolved = resolveDryRunTarget(options);
+    if (!resolved.resolved) return { prepared: false, reason: resolved.reason, target: resolved.target || null };
+    return {
+      prepared: true,
+      status: "Awaiting Manual After Function",
+      reason: "",
+      mode: "Manual Before/After Read-only Dry Run",
+      practicalDryRunVersion: PRACTICAL_DRY_RUN_VERSION,
+      target: clone(resolved.target),
+      beforeFunctionSource: resolved.beforeFunctionSource,
+      beforeHash: resolved.beforeHash,
+      beforeLineCount: countLines(resolved.beforeFunctionSource),
+      afterFunctionSource: resolved.beforeFunctionSource,
+      requiresManualChange: true,
+      repositoryMutation: false,
+      instructions: [
+        "Keep the same target function name.",
+        "Edit only afterFunctionSource.",
+        "Pass beforeFunctionSource back to enable the concurrent-change guard.",
+        "The Dry Run never requests approval or writes to the Repository."
+      ]
+    };
+  }
+
+  function compactDependencyImpact(analysis) {
+    const source = analysis && typeof analysis === "object" ? analysis : {};
+    return {
+      id: source.id,
+      status: source.status,
+      passed: source.passed === true,
+      riskScore: finite(source.riskScore, 0),
+      riskLevel: text(source.riskLevel, "Unknown"),
+      repositoryFileCount: finite(source.repositoryFileCount, 0),
+      definitions: clone(source.definitions || []),
+      inboundReferences: clone(source.inboundReferences || []),
+      impactedFiles: clone(source.impactedFiles || []),
+      outboundBefore: clone(source.outboundBefore || []),
+      outboundAfter: clone(source.outboundAfter || []),
+      addedCallees: clone(source.addedCallees || []),
+      removedCallees: clone(source.removedCallees || []),
+      globalExposure: clone(source.globalExposure || []),
+      summary: clone(source.summary || {}),
+      checks: clone(source.checks || [])
+    };
+  }
+
+  function runPracticalAutoRefactoringDryRun(options) {
+    const settings = options && typeof options === "object" ? options : {};
+    const resolved = resolveDryRunTarget(settings);
+    if (!resolved.resolved) return { completed: false, status: "Blocked", reason: resolved.reason, target: resolved.target || null };
+    const afterFunctionSource = text(settings.afterFunctionSource, "");
+    if (!afterFunctionSource) {
+      return {
+        completed: false,
+        status: "Awaiting Manual After Function",
+        reason: "afterFunctionSource is required for a Practical Dry Run.",
+        template: prepareAutoRefactoringDryRunTemplate(settings)
+      };
+    }
+    const expectedBefore = text(settings.beforeFunctionSource, "");
+    if (expectedBefore && expectedBefore.trim() !== resolved.beforeFunctionSource) {
+      return {
+        completed: false,
+        status: "Concurrent Change Detected",
+        reason: "beforeFunctionSource does not match the current Project function.",
+        target: clone(resolved.target),
+        expectedBeforeHash: hashText(expectedBefore.trim()),
+        currentBeforeHash: resolved.beforeHash,
+        repositoryMutation: false,
+        repositoryWriteCount: 0
+      };
+    }
+    if (afterFunctionSource.trim() === resolved.beforeFunctionSource) {
+      return {
+        completed: false,
+        status: "No Change",
+        reason: "afterFunctionSource must differ from the current Project function.",
+        target: clone(resolved.target),
+        repositoryMutation: false,
+        repositoryWriteCount: 0
+      };
+    }
+
+    const result = runStandardAutoRefactoringDryRun(Object.assign({}, settings, {
+      sources: resolved.sources,
+      targetFile: resolved.target.file,
+      targetFunction: resolved.target.function,
+      afterFunctionSource: afterFunctionSource,
+      recommendationId: text(settings.recommendationId, "IDE-150-PRACTICAL-DRY-RUN"),
+      recommendationSummary: text(settings.recommendationSummary, "Manually proposed function-level change candidate."),
+      objective: text(settings.objective, "Evaluate the manually supplied Before/After function change without Repository mutation.")
+    }));
+    if (!result.completed) return result;
+
+    const dependency = typeof global.getAutoRefactoringDependencyAnalysis === "function"
+      ? global.getAutoRefactoringDependencyAnalysis(result.dependencyAnalysis && result.dependencyAnalysis.id)
+      : null;
+    const policyDecision = typeof global.getAutoRefactoringPolicyDecision === "function"
+      ? global.getAutoRefactoringPolicyDecision(result.policyDecision && result.policyDecision.id)
+      : null;
+    const patch = typeof global.getAutoRefactoringPatch === "function"
+      ? global.getAutoRefactoringPatch(result.patch && result.patch.id)
+      : null;
+    const normalizedAfter = patch && patch.replacement && patch.replacement.source
+      ? patch.replacement.source
+      : afterFunctionSource.trim();
+    const diff = patch && patch.replacement && patch.replacement.diff
+      ? clone(patch.replacement.diff)
+      : clone(result.patch && result.patch.diff);
+
+    return Object.assign({}, result, {
+      reason: "",
+      mode: "Manual Before/After Read-only Dry Run",
+      practicalDryRunVersion: PRACTICAL_DRY_RUN_VERSION,
+      manualCandidate: true,
+      candidateInput: {
+        beforeFunctionSource: resolved.beforeFunctionSource,
+        afterFunctionSource: normalizedAfter,
+        beforeHash: resolved.beforeHash,
+        afterHash: hashText(normalizedAfter),
+        beforeLineCount: countLines(resolved.beforeFunctionSource),
+        afterLineCount: countLines(normalizedAfter),
+        expectedBeforeVerified: expectedBefore ? expectedBefore.trim() === resolved.beforeFunctionSource : true
+      },
+      diff: diff,
+      dependencyImpact: compactDependencyImpact(dependency),
+      policyEvaluation: {
+        id: policyDecision && policyDecision.id,
+        status: policyDecision && policyDecision.status,
+        allowed: Boolean(policyDecision && policyDecision.allowed === true),
+        reason: text(policyDecision && policyDecision.reason, ""),
+        passedRules: policyDecision && policyDecision.rules ? policyDecision.rules.filter(function pass(item) { return item.passed; }).length : 0,
+        failedRules: policyDecision && policyDecision.rules ? policyDecision.rules.filter(function fail(item) { return !item.passed; }) : [],
+        rules: clone(policyDecision && policyDecision.rules || [])
+      },
+      repository: {
+        mutation: false,
+        writeCount: result.repositoryWriteCount,
+        sourceUnchanged: result.sourceUnchanged,
+        approvalRequested: false,
+        applicationAttempted: false
+      }
+    });
+  }
+
   const originalPhase2Status = global.getAutoRefactoringPhase2Status;
   function getAutoRefactoringPhase2RuntimeStatus() {
     const base = typeof originalPhase2Status === "function" ? originalPhase2Status() : {};
     const standard = getStandardAutoRefactoringPolicyStatus();
     return Object.assign({}, base, {
-      phaseVersion: "1.1.0",
+      phaseVersion: base.phaseVersion || "1.1.0",
+      practicalDryRunVersion: PRACTICAL_DRY_RUN_VERSION,
       runtimeReady: standard.installed && standard.active,
       externalPolicyStatus: standard.installed && standard.active ? "Standard Policy Connected" : "Not Connected",
       standardPolicy: {
@@ -446,7 +627,14 @@
         deterministic: true
       },
       governedDryRun: clone(lastDryRun || { status: "Not Run" }),
-      capabilities: unique([].concat(base.capabilities || [], ["Standard Fail-Closed Policy", "Read-only Governed Patch Dry Run"])),
+      practicalDryRun: {
+        version: PRACTICAL_DRY_RUN_VERSION,
+        templateApi: "prepareAutoRefactoringDryRunTemplate",
+        executionApi: "runPracticalAutoRefactoringDryRun",
+        manualAfterRequired: true,
+        repositoryWriteProhibited: true
+      },
+      capabilities: unique([].concat(base.capabilities || [], ["Standard Fail-Closed Policy", "Read-only Governed Patch Dry Run", "Manual Before/After Practical Dry Run"])),
       updatedAt: nowIso()
     });
   }
@@ -457,7 +645,9 @@
     setStandardAutoRefactoringPolicyConfig: setStandardAutoRefactoringPolicyConfig,
     getStandardAutoRefactoringPolicyStatus: getStandardAutoRefactoringPolicyStatus,
     evaluateStandardAutoRefactoringPolicy: evaluateStandardAutoRefactoringPolicy,
+    prepareAutoRefactoringDryRunTemplate: prepareAutoRefactoringDryRunTemplate,
     runStandardAutoRefactoringDryRun: runStandardAutoRefactoringDryRun,
+    runPracticalAutoRefactoringDryRun: runPracticalAutoRefactoringDryRun,
     getAutoRefactoringPhase2Status: getAutoRefactoringPhase2RuntimeStatus
   };
 
@@ -467,11 +657,13 @@
     adapterId: ADAPTER_ID,
     adapterVersion: ADAPTER_VERSION,
     policyVersion: POLICY_VERSION,
+    practicalDryRunVersion: PRACTICAL_DRY_RUN_VERSION,
     dryRunStorageKey: DRY_RUN_STORAGE_KEY,
     defaultConfig: clone(DEFAULT_CONFIG)
   };
   global.IDE150AutoRefactoring = Object.assign(global.IDE150AutoRefactoring || {}, api, {
     standardPolicyAdapterVersion: ADAPTER_VERSION,
-    standardPolicyVersion: POLICY_VERSION
+    standardPolicyVersion: POLICY_VERSION,
+    practicalDryRunVersion: PRACTICAL_DRY_RUN_VERSION
   });
 })(typeof window !== "undefined" ? window : globalThis);
