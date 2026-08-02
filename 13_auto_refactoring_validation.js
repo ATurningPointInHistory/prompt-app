@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_validation.js
    IDE-150 Auto Refactoring Validation / Status / Integration
-   Version: 1.1.0
+   Version: 1.1.1
    Status: Core Phase 1 Completed / Smartphone Freeze Fix
    ============================================================ */
 (function (global) {
@@ -174,6 +174,12 @@
     check("Governed Candidate API", typeof global.createGovernedAutoRefactoringCandidate === "function");
     check("Governed Patch APIs", typeof global.generateAutoRefactoringPatch === "function" && typeof global.verifyAutoRefactoringPatch === "function");
     check("Phase 2 Status API", typeof global.getAutoRefactoringPhase2Status === "function");
+    check("Standard Policy Adapter API", typeof global.installStandardAutoRefactoringPolicyAdapter === "function" && typeof global.evaluateStandardAutoRefactoringPolicy === "function");
+    const standardPolicyStatus = typeof global.getStandardAutoRefactoringPolicyStatus === "function" ? global.getStandardAutoRefactoringPolicyStatus() : null;
+    check("Standard Policy Adapter installed", Boolean(standardPolicyStatus && standardPolicyStatus.installed === true && standardPolicyStatus.active === true));
+    check("Governed Dry Run API", typeof global.runStandardAutoRefactoringDryRun === "function");
+    const runtimePhase2Status = typeof global.getAutoRefactoringPhase2Status === "function" ? global.getAutoRefactoringPhase2Status() : null;
+    check("Core Phase 2 runtime ready", Boolean(runtimePhase2Status && runtimePhase2Status.runtimeReady === true && runtimePhase2Status.externalPolicyStatus === "Standard Policy Connected"));
 
     const passed = checks.filter(function pass(item) { return item.passed; }).length;
     const result = {
@@ -281,6 +287,58 @@
       const rollback2 = rollbackAutoRefactoringTransaction(applied2.transaction.id, { actor: "Validator", reason: "Phase 2 rollback" }, { adapter: phase2Adapter });
       check("Phase 2 Rollback", rollback2.rolledBack === true);
       global.unregisterAutoRefactoringPolicyAdapter("IDE150-DEEP-VALIDATION-POLICY");
+
+      const standardStatus = global.getStandardAutoRefactoringPolicyStatus();
+      check("Standard Policy ready", standardStatus.installed === true && standardStatus.active === true);
+      const standardContext = {
+        phase: "Core Phase 2",
+        riskLevel: "Low",
+        plan: {
+          targetFile: "safe.js",
+          targetFunction: "safeTarget",
+          operation: "Replace Existing Function",
+          budget: { fileLimit: 1, functionLimit: 1, changedLineLimit: 20 },
+          explicitApprovalRequired: true,
+          rollbackRequired: true,
+          autoApply: false
+        },
+        diff: { changedLines: 2, truncated: false, text: "@@ function lines 2 @@\n+  const result = value + 1;" },
+        dependencyAnalysis: {
+          passed: true,
+          status: "Passed",
+          riskLevel: "Low",
+          definitions: [{ fileName: "safe.js", functionName: "safeTarget" }],
+          inboundReferences: [],
+          impactedFiles: ["safe.js"],
+          addedCallees: [],
+          globalExposure: [],
+          summary: { inboundReferenceCount: 0, impactedFileCount: 1, addedCalleeCount: 0, globalExposureCount: 0 }
+        }
+      };
+      const standardAllowed = global.evaluateStandardAutoRefactoringPolicy(standardContext);
+      check("Standard Policy allows safe function patch", standardAllowed.allowed === true && standardAllowed.summary.failed === 0);
+      const dangerousContext = clone(standardContext);
+      dangerousContext.diff = { changedLines: 2, truncated: false, text: "@@ function lines 2 @@\n+  return fetch('/unsafe');" };
+      const standardDenied = global.evaluateStandardAutoRefactoringPolicy(dangerousContext);
+      check("Standard Policy rejects dangerous API addition", standardDenied.allowed === false && standardDenied.rules.some(function denied(item) { return item.id === "STD-PATTERN-NETWORK-WRITE" && item.passed === false; }));
+
+      const actualPhase2Source = [
+        "function sourceName(item) {",
+        "  return text(item && (item.fileName || item.name || item.path), \"unknown\").replace(/^\\.\\//, \"\");",
+        "}",
+        "function dryRunCaller(item) { return sourceName(item); }"
+      ].join("\n");
+      const governedDryRun = global.runStandardAutoRefactoringDryRun({
+        sources: [
+          { fileName: "13_auto_refactoring_phase2.js", code: actualPhase2Source },
+          { fileName: "dry-run-consumer.js", code: "function anotherDryRunCaller(item) { return sourceName(item); }" }
+        ],
+        actor: "Validator"
+      });
+      check("Actual-project Governed Dry Run", governedDryRun.completed === true && governedDryRun.status === "Dry Run Passed");
+      check("Dry Run repository remains unchanged", governedDryRun.repositoryMutation === false && governedDryRun.repositoryWriteCount === 0 && governedDryRun.sourceUnchanged === true);
+      check("Dry Run Patch and Sandbox", governedDryRun.patch && governedDryRun.patch.verified === true && governedDryRun.sandbox && governedDryRun.sandbox.passed === true);
+      check("Dry Run remains unapproved and unapplied", governedDryRun.approvalRequested === false && governedDryRun.applicationAttempted === false && governedDryRun.patch.autoApply === false);
     } catch (error) {
       check("Unexpected exception", false, error && error.stack ? error.stack : String(error));
     }
@@ -344,11 +402,11 @@
       version: VERSION,
       status: validationReady && integrationReady ? "Ready" : "Attention",
       lifecycleStatus: "Implementation",
-      implementationPhase: "Core Phase 2",
+      implementationPhase: "Core Phase 2 + Standard Policy Dry Run",
       phaseStatus: validationReady ? "Completed" : "Attention",
       ready: validationReady && integrationReady,
       health: Math.min(validation ? validation.health : 100, integrationReady ? 100 : 0),
-      progress: 75,
+      progress: 80,
       implementedStages: CORE_PHASE_1_STAGES.length,
       totalStages: PIPELINE_STAGES.length,
       requestCount: state.requests.size,
@@ -412,12 +470,14 @@
         "Implementation Package",
         "Governed Patch Generation",
         "Full Dependency Analysis",
-        "External Policy Platform Adapter"
+        "External Policy Platform Adapter",
+        "Standard Fail-Closed Policy Adapter",
+        "Read-only Governed Patch Dry Run"
       ],
       corePhase2: typeof global.getAutoRefactoringPhase2Status === "function" ? global.getAutoRefactoringPhase2Status() : { status: "Unavailable" },
       fullDesignFreezeCompleted: false,
-      designFreezeCompliance: "Partial - Core Phase 2 Completed",
-      nextTask: "Run a governed Patch on an actual project file, then complete the remaining Design Freeze production adapters and UI workflow.",
+      designFreezeCompliance: "Partial - Core Phase 2 Runtime Policy and Dry Run Completed",
+      nextTask: "Run the Standard Governed Dry Run on Android, then implement the production Project File Store write adapter and Approval UI without automatic application.",
       lastError: clone(state.lastError),
       updatedAt: nowIso()
     };
@@ -449,9 +509,9 @@
       summary: "Evidence-based function-level Repository modification with governed Patch, full Dependency Analysis, external Policy decision, Preview, Sandbox, Approval, Validation and Rollback.",
       icon: "🛠️",
       version: VERSION,
-      status: "Core Phase 2 Completed",
+      status: "Core Phase 2 Runtime Policy Completed",
       ready: true,
-      progress: 75,
+      progress: 80,
       health: 100,
       validator: "validateAutoRefactoring",
       probe: "getAutoRefactoringStatus",
