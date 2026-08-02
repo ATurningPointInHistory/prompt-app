@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring.js
    IDE-150 Auto Refactoring
-   Version: 1.1.1
+   Version: 1.1.2
    Status: Core Phase 2 Completed
    Design Freeze: 2026-07-26
    ============================================================ */
@@ -9,7 +9,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-150";
-  const VERSION = "1.1.1";
+  const VERSION = "1.1.2";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CORE_V1";
   const STORAGE_SCHEMA_VERSION = 2;
   const IDE140_PHASE2B_STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2B_V1";
