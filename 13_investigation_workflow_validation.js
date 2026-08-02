@@ -753,6 +753,10 @@
       repositoryVersion: "memo-current",
       datasetVersion: "golden-core-v1.0.0",
       permission: { readOnly: true, instrumentation: false },
+      executionContext: {
+        validationOwned: true,
+        validationComponent: "IDE-135"
+      },
       budget: { concurrentSessionLimit: 50 }
     }, source);
     result.budget = Object.assign({ concurrentSessionLimit: 50 }, source.budget || {});
