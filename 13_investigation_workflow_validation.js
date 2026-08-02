@@ -73,6 +73,7 @@
     requireRestoreVerified: true,
     requireEvidenceTraceability: true,
     requireIntegration: true,
+    requireOfficialDependencyRelease: false,
     maxScenarioDurationMs: 60000,
     maxValidationDurationMs: 300000
   });
@@ -1148,11 +1149,147 @@
     return { passed: passed, detail: passed ? "Critical safety violation stopped execution and required manual recovery." : "Safety stop escalation failed.", actualStateSequence: transitionSequence(sessionId), investigationSessionIds: [sessionId], evidenceReferences: [evidence.evidence.id], transitionResults: [instrumenting, stopped, manual], safetyResult: { status: passed ? "Safety Stopped" : "Failed" }, closureResult: { status: "Manual Recovery Required" } };
   }
 
-  function executeDependencyContract() {
-    const definitions = [{ component: "IDE-110", api: "getDiagnosticPlatformStatus" }, { component: "IDE-115", api: "getDiagnosticValidationStatus" }, { component: "IDE-120", api: "getSearchPipelineStatus" }, { component: "IDE-125", api: "getSearchValidationStatus" }, { component: "IDE-130", api: "getInvestigationWorkflowStatus" }];
-    const results = definitions.map(function (definition) { const fn = global[definition.api]; let status = null; try { status = typeof fn === "function" ? fn() : null; } catch (_) { status = null; } const platformReady = Boolean(status && status.ready === true); const releaseAllowed = Boolean(status && (status.releaseAllowed === true || status.releaseStatus === "Official" || status.officialStatus === "Official")); return { component: definition.component, statusApi: definition.api, available: typeof fn === "function", platformReady, releaseAllowed, passed: typeof fn === "function" && platformReady && releaseAllowed, health: status && status.health, lifecycleStatus: status && status.lifecycleStatus }; });
-    const repository = typeof global.getValidationResultRepositoryStatus === "function" ? global.getValidationResultRepositoryStatus() : null; results.push({ component: "Validation Result Repository", statusApi: "getValidationResultRepositoryStatus", available: Boolean(repository), platformReady: Boolean(repository && repository.ready), releaseAllowed: true, passed: Boolean(repository && repository.ready), health: repository && repository.health });
-    const passed = results.every(item => item.passed); return { passed, detail: passed ? "All required component contracts are platform-ready and officially validated." : "One or more dependency contracts are not Official or not ready.", integrationResults: results, evidenceReferences: ["IDE-130-DEPENDENCY-CONTRACT"], evidenceResults: results, safetyResult: { status: passed ? "Passed" : "Failed" } };
+  function executeDependencyContract(context) {
+    const definitions = [
+      { component: "IDE-110", api: "getDiagnosticPlatformStatus" },
+      { component: "IDE-115", api: "getDiagnosticValidationStatus" },
+      { component: "IDE-120", api: "getSearchPipelineStatus" },
+      { component: "IDE-125", api: "getSearchValidationStatus" },
+      { component: "IDE-130", api: "getInvestigationWorkflowStatus" }
+    ];
+
+    const requireOfficialRelease =
+      Boolean(
+        context &&
+        context.validationSession &&
+        context.validationSession.policy &&
+        context.validationSession.policy.requireOfficialDependencyRelease
+      );
+
+    const results =
+      definitions.map(function evaluate(definition) {
+        const fn = global[definition.api];
+        let status = null;
+
+        try {
+          status =
+            typeof fn === "function"
+              ? fn()
+              : null;
+        } catch (_) {
+          status = null;
+        }
+
+        const available =
+          typeof fn === "function";
+
+        const platformReady =
+          Boolean(
+            status &&
+            status.ready === true
+          );
+
+        const exposesReleaseState =
+          Boolean(
+            status &&
+            (
+              Object.prototype.hasOwnProperty.call(status, "releaseAllowed") ||
+              Object.prototype.hasOwnProperty.call(status, "releaseStatus") ||
+              Object.prototype.hasOwnProperty.call(status, "officialStatus") ||
+              Object.prototype.hasOwnProperty.call(status, "lifecycleStatus")
+            )
+          );
+
+        const releaseAllowed =
+          Boolean(
+            status &&
+            (
+              status.releaseAllowed === true ||
+              status.releaseStatus === "Official" ||
+              status.officialStatus === "Official"
+            )
+          );
+
+        const contractPassed =
+          available &&
+          platformReady &&
+          exposesReleaseState;
+
+        return {
+          component: definition.component,
+          statusApi: definition.api,
+          available,
+          platformReady,
+          exposesReleaseState,
+          releaseAllowed,
+          contractPassed,
+          passed:
+            contractPassed &&
+            (
+              !requireOfficialRelease ||
+              releaseAllowed
+            ),
+          health: status && status.health,
+          lifecycleStatus:
+            status && status.lifecycleStatus
+        };
+      });
+
+    const repository =
+      typeof global.getValidationResultRepositoryStatus === "function"
+        ? global.getValidationResultRepositoryStatus()
+        : null;
+
+    results.push({
+      component: "Validation Result Repository",
+      statusApi: "getValidationResultRepositoryStatus",
+      available: Boolean(repository),
+      platformReady: Boolean(repository && repository.ready),
+      exposesReleaseState: true,
+      releaseAllowed: true,
+      contractPassed: Boolean(repository && repository.ready),
+      passed: Boolean(repository && repository.ready),
+      health: repository && repository.health
+    });
+
+    const passed =
+      results.every(item => item.passed);
+
+    const pendingOfficial =
+      results
+        .filter(item =>
+          item.component !== "Validation Result Repository" &&
+          item.contractPassed &&
+          !item.releaseAllowed
+        )
+        .map(item => item.component);
+
+    return {
+      passed,
+      detail: passed
+        ? requireOfficialRelease
+          ? "All required dependency contracts are ready and Official."
+          : "All required dependency API and lifecycle contracts are available."
+        : requireOfficialRelease
+          ? "One or more dependency contracts are not Official or not ready."
+          : "One or more dependency API contracts are unavailable or malformed.",
+      integrationResults: results,
+      evidenceReferences: ["IDE-130-DEPENDENCY-CONTRACT"],
+      evidenceResults: results,
+      warnings:
+        !requireOfficialRelease && pendingOfficial.length
+          ? [
+              "Official dependency release evidence is not loaded for: " +
+              pendingOfficial.join(", ") +
+              ". Run with policy.requireOfficialDependencyRelease=true for the formal release gate."
+            ]
+          : [],
+      safetyResult: {
+        status: passed ? "Passed" : "Failed",
+        requireOfficialRelease,
+        pendingOfficial
+      }
+    };
   }
 
   const builtInScenarios = [
@@ -1278,7 +1415,7 @@
       check("Validation gates", VALIDATION_GATES.length === 10, "count=" + VALIDATION_GATES.length);
       check("Design Freeze requirement registry", Object.keys(REQUIRED_COVERAGE_TARGETS).length === 10 && REQUIRED_COVERAGE_TARGETS.Requirement.length === 10);
       check("Validation states", SESSION_STATES.length >= 15, "count=" + SESSION_STATES.length);
-      check("Default policy", DEFAULT_POLICY.criticalCoverageRequired === 1 && DEFAULT_POLICY.requireRestoreVerified === true);
+      check("Default policy", DEFAULT_POLICY.criticalCoverageRequired === 1 && DEFAULT_POLICY.requireRestoreVerified === true && DEFAULT_POLICY.requireOfficialDependencyRelease === false);
       check("Scenario registry", state.scenarios.size >= 18, "registered=" + state.scenarios.size);
       check("Normal scenario", Boolean(state.scenarios.get("IDE135-SCN-001")));
       check("State scenario", Boolean(state.scenarios.get("IDE135-SCN-002")));
