@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_phase2.js
    IDE-150 Auto Refactoring Core Phase 2
-   Version: 1.0.0
+   Version: 1.1.0
    Status: Completed
 
    Responsibilities:
@@ -17,7 +17,7 @@
 
   const COMPONENT_ID = internal.COMPONENT_ID;
   const VERSION = internal.VERSION;
-  const PHASE_VERSION = "1.0.0";
+  const PHASE_VERSION = "1.1.0";
   const MAX_RECORDS = internal.MAX_RECORDS;
   const state = internal.state;
   const nowIso = internal.nowIso;
@@ -146,7 +146,10 @@
     const globalExposure = [];
     const impactedFiles = new Set([plan.targetFile]);
 
+    let candidateFileCount = 0;
     sources.forEach(function scan(file) {
+      if (!String(file.code || "").includes(plan.targetFunction)) return;
+      candidateFileCount += 1;
       const blocks = extractBlocks(file.code);
       blocks.forEach(function scanBlock(block) {
         const blockCode = String(block.code || block.block || "");
@@ -219,7 +222,9 @@
         addedCalleeCount: addedCallees.length,
         removedCalleeCount: removedCallees.length,
         globalExposureCount: globalExposure.length,
-        impactedFileCount: impactedFiles.size
+        impactedFileCount: impactedFiles.size,
+        candidateFileCount: candidateFileCount,
+        skippedFileCount: Math.max(0, sources.length - candidateFileCount)
       },
       checks: checks,
       analyzedAt: nowIso()
