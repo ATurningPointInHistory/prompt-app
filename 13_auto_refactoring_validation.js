@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_auto_refactoring_validation.js
    IDE-150 Auto Refactoring Validation / Status / Integration
-   Version: 1.2.1
-   Status: Current Project Source Auto-Load Validation
+   Version: 1.2.2
+   Status: Isolated Deep Transaction Validation
    ============================================================ */
 (function (global) {
   "use strict";
@@ -33,6 +33,12 @@
   const validateHandoffContract = internal.validateHandoffContract;
   const getCompactAnalyticsPhase2BState = internal.getCompactAnalyticsPhase2BState;
   const getCompactPublicationPackage = internal.getCompactPublicationPackage;
+  const createMemoryStorage = typeof internal.createMemoryStorage === "function"
+    ? internal.createMemoryStorage
+    : null;
+  const runWithStorage = typeof internal.runWithStorage === "function"
+    ? internal.runWithStorage
+    : function directRun(_, callback) { return callback(); };
 
   const createAutoRefactoringRequest = global.createAutoRefactoringRequest;
   const createAutoRefactoringRequestFromHandoff = global.createAutoRefactoringRequestFromHandoff;
@@ -216,6 +222,21 @@
   }
 
   function validateAutoRefactoringDeep() {
+    const validationStorage = createMemoryStorage ? createMemoryStorage() : null;
+    const standardInternal = global.__IDE150StandardPolicyInternal;
+    const standardState = standardInternal && typeof standardInternal.captureRuntimeState === "function"
+      ? standardInternal.captureRuntimeState()
+      : null;
+    try {
+      return runWithStorage(validationStorage, validateAutoRefactoringDeepIsolated);
+    } finally {
+      if (standardState && standardInternal && typeof standardInternal.restoreRuntimeState === "function") {
+        standardInternal.restoreRuntimeState(standardState);
+      }
+    }
+  }
+
+  function validateAutoRefactoringDeepIsolated() {
     const startedAt = clockNow();
     const beforeState = captureRuntimeState();
     const checks = [];
@@ -249,10 +270,13 @@
       const approval = approveAutoRefactoringCandidate(candidateId, { approved: true, actor: "Validator", reason: "Deep validation" });
       check("Explicit approval", approval.approved === true);
       const applied = applyAutoRefactoringCandidate(candidateId, { adapter: adapter });
-      check("Transactional application", applied.applied === true && applied.transaction.status === "Committed");
-      check("Repository validation", applied.validation.passed === true);
-      const rolledBack = rollbackAutoRefactoringTransaction(applied.transaction.id, { actor: "Validator", reason: "Deep validation rollback" }, { adapter: adapter });
-      check("Rollback", rolledBack.rolledBack === true && rolledBack.rollback.verified === true);
+      const phase1Applied = Boolean(applied && applied.applied === true && applied.transaction && applied.transaction.status === "Committed");
+      check("Transactional application", phase1Applied, applied && applied.reason);
+      check("Repository validation", Boolean(applied && applied.validation && applied.validation.passed === true), applied && applied.reason);
+      const rolledBack = phase1Applied
+        ? rollbackAutoRefactoringTransaction(applied.transaction.id, { actor: "Validator", reason: "Deep validation rollback" }, { adapter: adapter })
+        : { rolledBack: false, reason: text(applied && applied.reason, "Application did not reach rollback stage.") };
+      check("Rollback", Boolean(rolledBack && rolledBack.rolledBack === true && rolledBack.rollback && rolledBack.rollback.verified === true), rolledBack && rolledBack.reason);
 
       const policyRegistration = global.registerAutoRefactoringPolicyAdapter({
         id: "IDE150-DEEP-VALIDATION-POLICY",
@@ -293,9 +317,12 @@
       const approval2 = approveAutoRefactoringCandidate(candidate2.candidate.id, { approved: true, actor: "Validator", reason: "Phase 2 deep validation" });
       check("Phase 2 Explicit Approval", approval2.approved === true);
       const applied2 = applyAutoRefactoringCandidate(candidate2.candidate.id, { adapter: phase2Adapter });
-      check("Phase 2 Transactional application", applied2.applied === true && applied2.implementationPackage.governance.patchVerified === true);
-      const rollback2 = rollbackAutoRefactoringTransaction(applied2.transaction.id, { actor: "Validator", reason: "Phase 2 rollback" }, { adapter: phase2Adapter });
-      check("Phase 2 Rollback", rollback2.rolledBack === true);
+      const phase2Applied = Boolean(applied2 && applied2.applied === true && applied2.implementationPackage && applied2.implementationPackage.governance && applied2.implementationPackage.governance.patchVerified === true);
+      check("Phase 2 Transactional application", phase2Applied, applied2 && applied2.reason);
+      const rollback2 = phase2Applied
+        ? rollbackAutoRefactoringTransaction(applied2.transaction.id, { actor: "Validator", reason: "Phase 2 rollback" }, { adapter: phase2Adapter })
+        : { rolledBack: false, reason: text(applied2 && applied2.reason, "Phase 2 application did not reach rollback stage.") };
+      check("Phase 2 Rollback", Boolean(rollback2 && rollback2.rolledBack === true), rollback2 && rollback2.reason);
       global.unregisterAutoRefactoringPolicyAdapter("IDE150-DEEP-VALIDATION-POLICY");
 
       const standardStatus = global.getStandardAutoRefactoringPolicyStatus();
@@ -586,10 +613,16 @@
       ? global.validateControlledAutoRefactoringApplication()
       : { valid: false, passed: 0, failed: 1, total: 1, health: 0, reason: "Controlled Application validator is unavailable." };
 
+    const runtimeValid = lightweight.valid === true && deep.valid === true && controlled.valid === true;
+    const failedGroups = [];
+    if (lightweight.valid !== true) failedGroups.push("Lightweight: " + (lightweight.checks || []).filter(function failed(item) { return !item.passed; }).map(function name(item) { return item.name; }).join(", "));
+    if (deep.valid !== true) failedGroups.push("Deep: " + (deep.checks || []).filter(function failed(item) { return !item.passed; }).map(function name(item) { return item.name; }).join(", "));
+    if (controlled.valid !== true) failedGroups.push("Controlled: " + (controlled.checks || []).filter(function failed(item) { return !item.passed; }).map(function name(item) { return item.name; }).join(", "));
+
     return {
-      valid: lightweight.valid === true && deep.valid === true && controlled.valid === true,
-      status: lightweight.valid === true && deep.valid === true && controlled.valid === true ? "Ready" : "Failed",
-      reason: "",
+      valid: runtimeValid,
+      status: runtimeValid ? "Ready" : "Failed",
+      reason: runtimeValid ? "" : failedGroups.filter(Boolean).join(" | "),
       sourceLoad: sourceLoad,
       lightweight: lightweight,
       deep: deep,
