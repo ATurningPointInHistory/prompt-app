@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_auto_refactoring_transaction.js
    IDE-150 Auto Refactoring Transaction Extension
-   Version: 1.2.3
-   Status: Validation-Isolated Rollback Persistence
+   Version: 1.2.4
+   Status: Function-Level Rollback Snapshot Persistence
    ============================================================ */
 (function (global) {
   "use strict";
@@ -80,58 +80,160 @@
     return removed;
   }
 
-  function persistRollbackSnapshot(transaction) {
-    const storage = getStorage();
-    if (!storage) return { persisted: false, reason: "Storage is unavailable." };
-    if (!transaction || !transaction.rollbackSnapshot || typeof transaction.rollbackSnapshot.source !== "string") {
-      return { persisted: false, reason: "Rollback Snapshot source is unavailable." };
+  function isQuotaError(error) {
+    if (!error) return false;
+    return error.name === "QuotaExceededError" ||
+      error.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+      error.code === 22 || error.code === 1014 ||
+      /quota|storage.*full|exceeded/i.test(String(error.message || ""));
+  }
+
+  function pruneRollbackSnapshotsForCapacity(protectedKey, keepCount) {
+    const records = listRollbackSnapshotRecords().filter(function keep(item) { return item.key !== protectedKey; });
+    const keep = Math.max(0, Number(keepCount) || 0);
+    const removeCount = Math.max(0, records.length - keep);
+    const removed = [];
+    for (let index = 0; index < removeCount; index += 1) {
+      try {
+        const storage = getStorage();
+        if (storage) storage.removeItem(records[index].key);
+        removed.push(records[index].key);
+      } catch (_) {}
     }
-    const storageKey = ROLLBACK_SNAPSHOT_PREFIX + transaction.id;
-    const payload = {
+    return removed;
+  }
+
+  function buildRollbackSnapshotPayload(transaction) {
+    const snapshot = transaction && transaction.rollbackSnapshot || null;
+    if (!snapshot) return null;
+    const beforeFunctionSource = typeof snapshot.beforeFunctionSource === "string"
+      ? snapshot.beforeFunctionSource
+      : "";
+    if (beforeFunctionSource) {
+      return {
+        schemaVersion: 2,
+        componentId: COMPONENT_ID,
+        version: VERSION,
+        mode: "Function-Level",
+        transactionId: transaction.id,
+        candidateId: transaction.candidateId,
+        targetFile: transaction.targetFile,
+        targetFunction: transaction.targetFunction,
+        beforeFunctionSource: beforeFunctionSource,
+        beforeFunctionHash: snapshot.beforeFunctionHash || hashText(beforeFunctionSource),
+        afterFunctionHash: snapshot.afterFunctionHash || "",
+        beforeFileHash: transaction.beforeFileHash,
+        afterFileHash: transaction.afterFileHash,
+        capturedAt: snapshot.capturedAt || nowIso(),
+        verifiedAt: nowIso()
+      };
+    }
+    if (typeof snapshot.source !== "string") return null;
+    return {
       schemaVersion: 1,
       componentId: COMPONENT_ID,
       version: VERSION,
+      mode: "Full-File",
       transactionId: transaction.id,
       candidateId: transaction.candidateId,
       targetFile: transaction.targetFile,
-      source: transaction.rollbackSnapshot.source,
-      sourceHash: transaction.rollbackSnapshot.sourceHash || hashText(transaction.rollbackSnapshot.source),
-      capturedAt: transaction.rollbackSnapshot.capturedAt || nowIso(),
+      targetFunction: transaction.targetFunction,
+      source: snapshot.source,
+      sourceHash: snapshot.sourceHash || hashText(snapshot.source),
+      beforeFileHash: transaction.beforeFileHash,
+      afterFileHash: transaction.afterFileHash,
+      capturedAt: snapshot.capturedAt || nowIso(),
       verifiedAt: nowIso()
     };
+  }
+
+  function verifyRollbackSnapshotPayload(stored, transaction) {
+    if (!stored || stored.transactionId !== transaction.id || stored.targetFile !== transaction.targetFile) {
+      return { verified: false, reason: "Rollback Snapshot identity verification failed." };
+    }
+    if (stored.mode === "Function-Level" || stored.schemaVersion === 2) {
+      const source = typeof stored.beforeFunctionSource === "string" ? stored.beforeFunctionSource : "";
+      const expectedHash = text(stored.beforeFunctionHash, "");
+      const verified = Boolean(
+        source &&
+        stored.targetFunction === transaction.targetFunction &&
+        expectedHash &&
+        hashText(source) === expectedHash &&
+        stored.beforeFileHash === transaction.beforeFileHash &&
+        stored.afterFileHash === transaction.afterFileHash
+      );
+      return { verified: verified, reason: verified ? "" : "Function-level Rollback Snapshot verification failed." };
+    }
+    const source = typeof stored.source === "string" ? stored.source : "";
+    const expectedHash = text(stored.sourceHash, "");
+    const verified = Boolean(source && expectedHash && hashText(source) === expectedHash);
+    return { verified: verified, reason: verified ? "" : "Full-file Rollback Snapshot verification failed." };
+  }
+
+  function persistRollbackSnapshot(transaction) {
+    const storage = getStorage();
+    if (!storage) return { persisted: false, reason: "Storage is unavailable." };
+    const payload = buildRollbackSnapshotPayload(transaction);
+    if (!payload) return { persisted: false, reason: "Rollback Snapshot source is unavailable." };
+    const storageKey = ROLLBACK_SNAPSHOT_PREFIX + transaction.id;
     const raw = JSON.stringify(payload);
     let lastError = "";
-    for (let attempt = 0; attempt < 2; attempt += 1) {
+    let reclaimedKeys = [];
+
+    // Retention cleanup happens before the first write, not only after failure.
+    pruneRollbackSnapshots(storageKey);
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
-        if (attempt > 0) pruneRollbackSnapshots(storageKey);
+        if (attempt === 1) {
+          reclaimedKeys = reclaimedKeys.concat(pruneRollbackSnapshotsForCapacity(storageKey, 2));
+          // Development-console input is a rebuildable cache, never Project data.
+          try { storage.removeItem("devConsoleLastInput"); } catch (_) {}
+        }
+        if (attempt === 2) {
+          reclaimedKeys = reclaimedKeys.concat(pruneRollbackSnapshotsForCapacity(storageKey, 0));
+          try { storage.removeItem("devConsoleHistory"); } catch (_) {}
+        }
         storage.setItem(storageKey, raw);
         const storedRaw = storage.getItem(storageKey);
         const stored = storedRaw ? JSON.parse(storedRaw) : null;
-        const verified = Boolean(
-          stored &&
-          stored.transactionId === transaction.id &&
-          stored.targetFile === transaction.targetFile &&
-          typeof stored.source === "string" &&
-          hashText(stored.source) === payload.sourceHash
-        );
-        if (!verified) throw new Error("Rollback Snapshot read-back verification failed.");
+        const verification = verifyRollbackSnapshotPayload(stored, transaction);
+        if (!verification.verified) throw new Error(verification.reason || "Rollback Snapshot read-back verification failed.");
+
         transaction.rollbackSnapshot.storageKey = storageKey;
         transaction.rollbackSnapshot.persisted = true;
+        transaction.rollbackSnapshot.persistenceMode = payload.mode;
+        transaction.rollbackSnapshot.schemaVersion = payload.schemaVersion;
         transaction.rollbackSnapshot.verifiedAt = stored.verifiedAt || payload.verifiedAt;
+        transaction.rollbackSnapshot.estimatedBytes = raw.length * 2;
         pruneRollbackSnapshots(storageKey);
         return {
           persisted: true,
           verified: true,
           storageKey: storageKey,
-          sourceHash: payload.sourceHash,
+          mode: payload.mode,
+          schemaVersion: payload.schemaVersion,
+          sourceHash: payload.sourceHash || payload.beforeFunctionHash,
           estimatedBytes: raw.length * 2,
+          reclaimedKeys: Array.from(new Set(reclaimedKeys)),
           verifiedAt: transaction.rollbackSnapshot.verifiedAt
         };
       } catch (error) {
         lastError = error && error.message ? error.message : String(error);
+        if (!isQuotaError(error) && attempt === 0) break;
       }
     }
-    return { persisted: false, verified: false, storageKey: storageKey, reason: lastError || "Rollback Snapshot persistence failed." };
+    return {
+      persisted: false,
+      verified: false,
+      storageKey: storageKey,
+      mode: payload.mode,
+      schemaVersion: payload.schemaVersion,
+      estimatedBytes: raw.length * 2,
+      reclaimedKeys: Array.from(new Set(reclaimedKeys)),
+      quotaError: /quota|storage.*full|exceeded/i.test(lastError),
+      reason: lastError || "Rollback Snapshot persistence failed."
+    };
   }
 
   function removeRollbackSnapshot(storageKey) {
@@ -162,13 +264,14 @@
       }
       const snapshotRaw = storage.getItem(snapshotKey);
       const snapshot = snapshotRaw ? JSON.parse(snapshotRaw) : null;
-      if (!snapshot || snapshot.transactionId !== transaction.id || typeof snapshot.source !== "string") {
-        return { verified: false, reason: "Rollback Snapshot read-back failed." };
-      }
-      if (hashText(snapshot.source) !== transaction.rollbackSnapshot.sourceHash) {
-        return { verified: false, reason: "Rollback Snapshot Hash verification failed." };
-      }
-      return { verified: true, artifactKey: compact.artifactKey, snapshotKey: snapshotKey };
+      const verification = verifyRollbackSnapshotPayload(snapshot, transaction);
+      if (!verification.verified) return { verified: false, reason: verification.reason || "Rollback Snapshot read-back failed." };
+      return {
+        verified: true,
+        artifactKey: compact.artifactKey,
+        snapshotKey: snapshotKey,
+        snapshotMode: snapshot.mode || (snapshot.schemaVersion === 2 ? "Function-Level" : "Full-File")
+      };
     } catch (error) {
       return { verified: false, reason: error && error.message ? error.message : String(error) };
     }
@@ -448,9 +551,14 @@
       rollbackStatus: "Available",
       rollbackSnapshot: {
         id: nextId("IDE-150-SNAPSHOT"),
+        mode: "Function-Level",
         targetFile: candidate.targetFile,
-        source: virtual.fileSource,
-        sourceHash: virtual.beforeFileHash,
+        targetFunction: candidate.targetFunction,
+        beforeFunctionSource: candidate.beforeFunctionSource,
+        beforeFunctionHash: candidate.beforeHash,
+        afterFunctionHash: candidate.afterHash,
+        beforeFileHash: virtual.beforeFileHash,
+        afterFileHash: virtual.afterFileHash,
         capturedAt: nowIso()
       },
       startedAt: nowIso(),
@@ -566,7 +674,7 @@
   function rollbackAutoRefactoringTransaction(transactionId, input, options) {
     const transaction = getTransactionRecord(transactionId);
     if (!transaction) return { rolledBack: false, reason: "Transaction not found." };
-    if (!transaction.rollbackSnapshot || !transaction.rollbackSnapshot.source) return { rolledBack: false, reason: "Rollback Snapshot is unavailable." };
+    if (!transaction.rollbackSnapshot) return { rolledBack: false, reason: "Rollback Snapshot is unavailable." };
     const source = input && typeof input === "object" ? input : {};
     const actor = text(source.actor, "");
     const reason = text(source.reason, "");
@@ -578,7 +686,27 @@
     if (hashText(currentSource) !== transaction.afterFileHash && source.force !== true) {
       return { rolledBack: false, reason: "Concurrent Change detected after Commit. force:true and explicit review are required." };
     }
-    const written = adapter.setFileText(transaction.targetFile, transaction.rollbackSnapshot.source) === true;
+    let rollbackSource = "";
+    const snapshot = transaction.rollbackSnapshot;
+    if (typeof snapshot.source === "string" && snapshot.source.length > 0) {
+      rollbackSource = snapshot.source;
+    } else if (typeof snapshot.beforeFunctionSource === "string" && snapshot.beforeFunctionSource.length > 0) {
+      const currentBlock = findFunctionBlock(currentSource, transaction.targetFunction);
+      if (!currentBlock) return { rolledBack: false, reason: "Current target function is unavailable for function-level Rollback." };
+      const currentFunctionHash = hashText(currentBlock.block.trim());
+      const expectedAfterHash = text(snapshot.afterFunctionHash, "");
+      if (expectedAfterHash && currentFunctionHash !== expectedAfterHash && source.force !== true) {
+        return { rolledBack: false, reason: "Concurrent Change detected in target function after Commit." };
+      }
+      rollbackSource = currentSource.slice(0, currentBlock.start) + snapshot.beforeFunctionSource + currentSource.slice(currentBlock.end);
+    } else {
+      return { rolledBack: false, reason: "Rollback Snapshot content is unavailable." };
+    }
+    const reconstructedHash = hashText(rollbackSource);
+    if (reconstructedHash !== transaction.beforeFileHash && source.force !== true) {
+      return { rolledBack: false, reason: "Function-level Rollback reconstruction Hash verification failed." };
+    }
+    const written = adapter.setFileText(transaction.targetFile, rollbackSource) === true;
     const restoredSource = written ? adapter.getFileText(transaction.targetFile) : null;
     const verified = typeof restoredSource === "string" && hashText(restoredSource) === transaction.beforeFileHash;
     const rollback = {
