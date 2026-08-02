@@ -712,6 +712,55 @@ function getIdeComponentStatus(
 }
 
 /* ===============================
+   Get IDE Registry Status
+=============================== */
+
+function getIdeRegistryStatus() {
+
+  const components =
+    getIdeRegistry();
+
+  const readyCount =
+    components.filter(component =>
+      resolveIdeComponentReady(component)
+    ).length;
+
+  const invalidCount =
+    components.filter(component =>
+      !component.id ||
+      !component.title ||
+      !component.version ||
+      !component.status ||
+      !Number.isFinite(component.progress) ||
+      !Number.isFinite(component.health)
+    ).length;
+
+  return {
+    id: "IDE-REGISTRY",
+    version: "1.0.1",
+    status:
+      components.length > 0 && invalidCount === 0
+        ? "Ready"
+        : "Needs Attention",
+    ready:
+      components.length > 0 &&
+      invalidCount === 0,
+    registered: components.length,
+    readyCount,
+    invalidCount,
+    health:
+      components.length > 0
+        ? Math.round(
+            (readyCount / components.length) * 100
+          )
+        : 0,
+    updatedAt:
+      new Date().toISOString()
+  };
+
+}
+
+/* ===============================
    Update IDE Component Status
 =============================== */
 
@@ -1123,6 +1172,9 @@ window.initIdeRegistry =
 
 window.getIdeComponentStatus =
   getIdeComponentStatus;
+
+window.getIdeRegistryStatus =
+  getIdeRegistryStatus;
 
 window.updateIdeComponentStatus =
   updateIdeComponentStatus;
