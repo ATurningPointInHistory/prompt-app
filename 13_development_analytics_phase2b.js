@@ -25,8 +25,8 @@
 
   const COMPONENT_ID = "IDE-140";
   const EXTENSION_ID = "IDE-140-PHASE-2B";
-  const VERSION = "1.0.3";
-  const OVERALL_VERSION = "1.2.2";
+  const VERSION = "1.0.4";
+  const OVERALL_VERSION = "1.2.3";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2B_V1";
   const MAX_RECORDS = 20;
   const STORAGE_SCHEMA_VERSION = 2;
@@ -463,7 +463,10 @@
     requireDependencies();
     const source = input && typeof input === "object" ? input : {};
     const snapshotId = text(source.baseSnapshotId || source.snapshotId, "");
-    const snapshot = global.getDevelopmentAnalyticsSnapshot(snapshotId || undefined);
+    const snapshotGetter = typeof global.getDevelopmentAnalyticsCoreSnapshot === "function"
+      ? global.getDevelopmentAnalyticsCoreSnapshot
+      : global.getDevelopmentAnalyticsSnapshot;
+    const snapshot = snapshotGetter(snapshotId || undefined);
     if (!snapshot) return { resolved: false, reason: "Analytics Snapshot is unavailable." };
     const phase2A = global.getDevelopmentAnalyticsPhase2AResultBySnapshot(snapshot.id);
     if (!phase2A) return { resolved: false, reason: "Phase 2A result is unavailable for snapshot " + snapshot.id + "." };
@@ -1194,8 +1197,8 @@
     function check(name, passed, detail) { checks.push({ name: name, passed: passed === true, detail: text(detail, "") }); }
     try {
       check("Extension identity", EXTENSION_ID === "IDE-140-PHASE-2B");
-      check("Extension version", VERSION === "1.0.3");
-      check("Overall version", OVERALL_VERSION === "1.2.2");
+      check("Extension version", VERSION === "1.0.4");
+      check("Overall version", OVERALL_VERSION === "1.2.3");
       check("State persistence", state.loaded === true && typeof persistDevelopmentAnalyticsPhase2BState === "function");
       check("Compact Storage schema", STORAGE_SCHEMA_VERSION === 2 && typeof compactCandidate === "function" && typeof compactPublicationPackage === "function");
       check("Compact record limit", MAX_RECORDS === 20, "max=" + MAX_RECORDS);
@@ -1208,20 +1211,66 @@
       check("Publication lifecycle", PUBLICATION_LIFECYCLE.length === 7, "count=" + PUBLICATION_LIFECYCLE.length);
       check("Recommendation lifecycle", RECOMMENDATION_LIFECYCLE.length === 8, "count=" + RECOMMENDATION_LIFECYCLE.length);
       check("Completion Gate model", COMPLETION_GATES.length === 11, "count=" + COMPLETION_GATES.length);
-      check("Core Snapshot dependency", typeof global.getDevelopmentAnalyticsSnapshot === "function");
+      check("Core Snapshot dependency", typeof global.getDevelopmentAnalyticsSnapshot === "function" && typeof global.getDevelopmentAnalyticsCoreSnapshot === "function");
       check("Core Snapshot list dependency", typeof global.getDevelopmentAnalyticsSnapshots === "function");
       check("Phase 2A dependency", typeof global.getDevelopmentAnalyticsPhase2AResultBySnapshot === "function");
-      check("Source resolver", typeof resolveAnalyticsSource === "function");
+      check("Source resolver", typeof resolveAnalyticsSource === "function" && /getDevelopmentAnalyticsCoreSnapshot/.test(resolveAnalyticsSource.toString()));
       check("Evidence collector", typeof collectEvidenceReferences === "function");
       check("Evidence-backed recommendation filter", typeof buildPublishableRecommendations === "function");
       check("Explicit approval normalizer", typeof normalizeApproval === "function");
       check("Publication Gate evaluator", typeof evaluatePublicationGates === "function");
-      check("Critical quality cannot be compensated", true);
+      const gateProbeSnapshot = {
+        id: "IDE-140-PHASE2B-PROBE-SNAPSHOT",
+        status: "Candidate",
+        canonicalModel: { relationship: {}, evidence: { references: ["IDE-140-PHASE2B-PROBE-EVIDENCE"] } },
+        metricResults: [{ id: "IDE-140-PHASE2B-PROBE-METRIC" }],
+        findings: [{ evidenceReferences: ["IDE-140-PHASE2B-PROBE-EVIDENCE"] }],
+        recommendationCandidates: [{
+          id: "IDE-140-PHASE2B-PROBE-RECOMMENDATION",
+          supportingEvidence: ["IDE-140-PHASE2B-PROBE-EVIDENCE"],
+          reliability: 1,
+          confidence: 1,
+          autoApply: false
+        }],
+        report: { executiveSummary: "Probe" }
+      };
+      const gateProbePhase2A = {
+        id: "IDE-140-PHASE2B-PROBE-PHASE2A",
+        status: "Completed",
+        closureStatus: "Open",
+        sourceRecords: [{ recordId: "IDE-140-PHASE2B-PROBE-RECORD", resultVersion: "1.0.0", repositoryVersion: "probe", contentHash: "probe-hash" }],
+        trendResults: [{ metricId: "IDE-140-PHASE2B-PROBE-METRIC", metricVersion: "1.0.0" }],
+        qualityAnalytics: { status: "Critical", issues: [{ severity: "Critical" }], evidenceCompleteness: 1, relationshipIntegrity: true },
+        reliabilityReport: {
+          sourceReliability: 1,
+          evidenceReliability: 1,
+          metricReliability: 1,
+          statisticalReliability: 1,
+          analysisReliability: 1,
+          recommendationReliability: 1
+        },
+        findings: [],
+        recommendationCandidates: [],
+        report: { executiveSummary: "Probe" }
+      };
+      const approvedProbe = normalizeApproval({ status: "Approved", actor: "Project Owner" });
+      const pendingProbe = normalizeApproval(null);
+      const criticalEvaluation = evaluatePublicationGates(gateProbeSnapshot, gateProbePhase2A, approvedProbe);
+      const qualityGateProbe = criticalEvaluation.gates.find(function find(item) { return item.name === "Quality"; });
+      const safeProbePhase2A = clone(gateProbePhase2A);
+      safeProbePhase2A.qualityAnalytics = { status: "High", issues: [], evidenceCompleteness: 1, relationshipIntegrity: true };
+      const pendingEvaluation = evaluatePublicationGates(gateProbeSnapshot, safeProbePhase2A, pendingProbe);
+      const approvedEvaluation = evaluatePublicationGates(gateProbeSnapshot, safeProbePhase2A, approvedProbe);
+      const autoApplyProbe = buildPublishableRecommendations({ recommendationCandidates: [
+        { id: "IDE-140-PROBE-SAFE", supportingEvidence: ["IDE-140-PHASE2B-PROBE-EVIDENCE"], reliability: 1, autoApply: false },
+        { id: "IDE-140-PROBE-AUTO", supportingEvidence: ["IDE-140-PHASE2B-PROBE-EVIDENCE"], reliability: 1, autoApply: true }
+      ] }, {});
+      check("Critical quality cannot be compensated", Boolean(qualityGateProbe && qualityGateProbe.passed === false && criticalEvaluation.technicalGatesPassed === false));
       check("Reliability threshold", /0\.8/.test(evaluatePublicationGates.toString()));
       check("Evidence required before Approved", /supportingEvidence\.length > 0/.test(buildPublishableRecommendations.toString()));
-      check("Recommendation autoApply disabled", !/autoApply:\s*true/.test(buildPublicationPackage.toString()));
+      check("Recommendation autoApply disabled", autoApplyProbe.approved.length === 1 && autoApplyProbe.approved[0].id === "IDE-140-PROBE-SAFE" && autoApplyProbe.approved[0].autoApply === false && autoApplyProbe.excluded.some(function find(item) { return item.id === "IDE-140-PROBE-AUTO" && item.autoApply === true; }));
       check("Root Cause authority remains IDE-130", /IDE-130/.test(buildPublicationPackage.toString()));
-      check("Publication requires explicit approval", /approval\.valid/.test(evaluatePublicationGates.toString()));
+      check("Publication requires explicit approval", pendingEvaluation.allGatesPassed === false && approvedEvaluation.allGatesPassed === true && pendingEvaluation.gates.find(function find(item) { return item.name === "Publication"; }).passed === false);
       check("Publication Package", typeof buildPublicationPackage === "function");
       check("Dashboard Snapshot", /dashboardSnapshot/.test(buildPublicationPackage.toString()));
       check("Structured Result", /structuredResult/.test(buildPublicationPackage.toString()));
@@ -1233,7 +1282,7 @@
       check("Analytics Closure", /closureStatus:\s*"Completed"/.test(buildPublicationPackage.toString()));
       check("Superseded history", typeof supersedePreviousPackages === "function");
       check("Compact Superseded Handoff", /item\.handoffId/.test(supersedePreviousPackages.toString()));
-      check("Source mutation prohibited", true);
+      check("Source mutation prohibited", /sourceMutated:\s*false/.test(buildPublicationPackage.toString()) && /rawEvidenceDuplicated:\s*false/.test(buildPublicationPackage.toString()));
       check("Prepare API", typeof prepareDevelopmentAnalyticsPublication === "function");
       check("Approve API", typeof approveDevelopmentAnalyticsPublication === "function");
       check("Run API", typeof runDevelopmentAnalyticsPhase2B === "function");
@@ -1288,6 +1337,9 @@
       overallVersion: OVERALL_VERSION,
       status: "Ready",
       lifecycleStatus: publishedComplete ? "Completed" : candidate ? "Publication Review" : "Implementation",
+      completionScope: publishedComplete ? "Published Core Workflow" : "Implementation",
+      fullDesignFreezeCompleted: false,
+      fullDesignFreezeStatus: "Partial - Semantic Workspace, direct adapters and shared Relationship registration remain deferred",
       implementationPhase: "Phase 2B",
       ready: true,
       health: validation.health,
