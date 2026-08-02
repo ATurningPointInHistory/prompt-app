@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_auto_refactoring_transaction.js
    IDE-150 Auto Refactoring Transaction Extension
-   Version: 1.0.1
-   Status: Core Phase 1 Completed
+   Version: 1.1.0
+   Status: Core Phase 2 Completed
    ============================================================ */
 (function (global) {
   "use strict";
@@ -85,6 +85,11 @@
   function runAutoRefactoringSandbox(candidateId, options) {
     const candidate = getCandidateRecord(candidateId);
     if (!candidate) return { passed: false, reason: "Refactoring Candidate not found." };
+    if (candidate.governanceMode === "Core Phase 2") {
+      if (candidate.dependencyAnalysisStatus !== "Passed") return { passed: false, reason: "Passed Full Dependency Analysis is required." };
+      if (candidate.externalPolicyStatus !== "Allowed") return { passed: false, reason: "Allowed external Policy Decision is required." };
+      if (candidate.patchStatus !== "Verified") return { passed: false, reason: "Verified Governed Patch is required." };
+    }
     const adapter = resolveRepositoryAdapter(options);
     if (!adapter) return { passed: false, reason: "Repository Adapter is unavailable." };
     const virtual = buildVirtualFile(candidate, adapter);
@@ -205,6 +210,13 @@
       },
       validationSummary: validation ? { id: validation.id, type: validation.type, passed: validation.passed, health: validation.health } : null,
       rollbackSummary: rollback ? { id: rollback.id, status: rollback.status, verified: rollback.verified === true } : null,
+      governance: {
+        mode: candidate.governanceMode || "Core Phase 1",
+        dependencyAnalysisId: candidate.dependencyAnalysisId || "",
+        policyDecisionId: candidate.externalPolicyDecisionId || "",
+        patchId: candidate.patchId || "",
+        patchStatus: candidate.patchStatus || "Not Required"
+      },
       traceability: clone(candidate.traceability),
       beforeFunctionHash: candidate.beforeHash,
       afterFunctionHash: candidate.afterHash,
@@ -243,6 +255,13 @@
         rollbackAvailable: Boolean(transaction.rollbackSnapshot && transaction.rollbackSnapshot.source)
       },
       approvalId: candidate.approvalId,
+      governance: {
+        mode: candidate.governanceMode || "Core Phase 1",
+        dependencyAnalysisId: candidate.dependencyAnalysisId || "",
+        policyDecisionId: candidate.externalPolicyDecisionId || "",
+        patchId: candidate.patchId || "",
+        patchVerified: candidate.patchStatus === "Verified"
+      },
       traceability: clone(candidate.traceability),
       safety: {
         evidenceFirst: true,
@@ -263,6 +282,11 @@
   function applyAutoRefactoringCandidate(candidateId, options) {
     const candidate = getCandidateRecord(candidateId);
     if (!candidate) return { applied: false, reason: "Refactoring Candidate not found." };
+    if (candidate.governanceMode === "Core Phase 2") {
+      if (candidate.dependencyAnalysisStatus !== "Passed") return { applied: false, reason: "Passed Full Dependency Analysis is required." };
+      if (candidate.externalPolicyStatus !== "Allowed") return { applied: false, reason: "Allowed external Policy Decision is required." };
+      if (candidate.patchStatus !== "Verified") return { applied: false, reason: "Verified Governed Patch is required." };
+    }
     if (candidate.sandboxStatus !== "Passed") return { applied: false, reason: "Sandbox Validation has not passed." };
     if (candidate.approvalStatus !== "Approved" || !candidate.approvalId) return { applied: false, reason: "Explicit Approval is required." };
     const adapter = resolveRepositoryAdapter(options);
