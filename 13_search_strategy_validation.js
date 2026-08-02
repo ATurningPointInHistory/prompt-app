@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_search_strategy_validation.js
    IDE-125 Search Strategy Validation
-   Version: 1.0.2
+   Version: 1.0.4
    Status: Completed
    Design Freeze: 2026-07-25
    ============================================================ */
@@ -9,7 +9,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-125";
-  const VERSION = "1.0.2";
+  const VERSION = "1.0.4";
   const validationRegistry = new Map();
   const datasetRegistry = new Map();
   const validationHistory = [];
@@ -638,77 +638,27 @@
       const failedGates = asArray(validation.gates).filter(gate => !gate.passed).map(gate => gate.name).join(", ");
       return `Resolve failed validation gates${failedGates ? `: ${failedGates}` : ""}, then rerun golden-core validation.`;
     }
-    return "IDE-120 and IDE-125 are formally completed. Start IDE-130 Investigation Workflow.";
+    const baseline = typeof global.getPerformanceBaseline === "function" ? global.getPerformanceBaseline() : null;
+    const calibrated = Boolean(baseline && baseline.calibration && baseline.calibration.status === "Calibrated");
+    return calibrated
+      ? "IDE-120 and IDE-125 are formally completed. Start IDE-130 Investigation Workflow."
+      : "Functional search validation passed. Calibrate the device-aware Performance Baseline before claiming full Design Freeze compliance.";
   }
 
   function getSearchValidationStatus() {
-    const platformReady = typeof global.executeSearchPipeline === "function" && typeof global.getSearchStrategies === "function";
-    const goldenCore = datasetRegistry.get("golden-core") || null;
-    const requestCounts = investigationRequests.reduce((counts, request) => {
-      const status = String(request.status || "Open").toLowerCase();
-      counts.total++;
-      if (status === "open") counts.open++;
-      else if (status === "resolved") counts.resolved++;
-      else if (status === "invalidated") counts.invalidated++;
-      else counts.other++;
-      return counts;
-    }, { total: 0, open: 0, resolved: 0, invalidated: 0, other: 0 });
-    const qualityGate = lastValidation && asArray(lastValidation.gates).find(gate => gate.name === "Quality Gate");
-    const bridgeStatus = typeof global.getGoldenCoreSyncStatus === "function" ? global.getGoldenCoreSyncStatus() : null;
-
-    return {
-      id: COMPONENT_ID,
-      title: "Search Strategy Validation",
-      name: "Search Quality Assurance Platform",
-      version: VERSION,
-      status: platformReady ? "Ready" : "Blocked",
-      lifecycleStatus: "Completed",
-      officialStatus: "Official",
-      performanceBaselineVersion: "1.0.0",
-      regressionBaselineVersion: "golden-core-v1.0.0",
-      platformStatus: platformReady ? "Ready" : "Blocked",
-      ready: platformReady,
-      health: platformReady ? 100 : 0,
-      platformHealth: platformReady ? 100 : 0,
-      progress: 100,
-      releaseStatus: lastValidation ? lastValidation.status : "Not Run",
-      releaseAllowed: Boolean(lastValidation && lastValidation.releaseAllowed),
-      validationHealth: lastValidation ? lastValidation.health : null,
-      registeredValidations: validationRegistry.size,
-      registeredDatasets: datasetRegistry.size,
-      executableDatasetCount: [...datasetRegistry.values()].filter(dataset => asArray(dataset.cases).length > 0).length,
-      goldenCoreCaseCount: goldenCore ? asArray(goldenCore.cases).length : 0,
-      goldenCore: goldenCore ? {
-        id: goldenCore.id,
-        version: goldenCore.version,
-        caseCount: asArray(goldenCore.cases).length,
-        source: goldenCore.profile && goldenCore.profile.source || "",
-        syncedAt: goldenCore.profile && goldenCore.profile.syncedAt || null,
-        updatedAt: goldenCore.updatedAt
-      } : null,
-      goldenCoreSync: bridgeStatus,
-      historyCount: validationHistory.length,
-      evidenceCount: evidenceRegistry.size,
-      investigationRequestCount: requestCounts.total,
-      openInvestigationRequestCount: requestCounts.open,
-      investigationRequests: requestCounts,
-      lastValidation: lastValidation ? {
-        id: lastValidation.id,
-        datasetId: lastValidation.datasetId,
-        datasetVersion: lastValidation.datasetVersion,
-        status: lastValidation.status,
-        severity: lastValidation.severity,
-        releaseAllowed: lastValidation.releaseAllowed,
-        health: lastValidation.health,
-        failedGates: asArray(lastValidation.gates).filter(gate => !gate.passed).map(gate => gate.name),
-        quality: qualityGate ? clone(qualityGate.metrics) : null,
-        completedAt: lastValidation.completedAt
-      } : null,
-      dependsOn: ["IDE-110", "IDE-115", "IDE-120", "Relationship Platform", "Information Platform", "Repository", "Registry"],
-      provides: ["Search Strategy Validation", "Search Quality Validation", "Search Performance Validation", "Search Consistency Validation", "Fallback Validation", "Validation Evidence", "Release Gate", "Investigation Handoff"],
-      nextTask: buildNextTask(platformReady, goldenCore, lastValidation),
-      updatedAt: nowIso()
-    };
+    const platformReady = typeof global.executeSearchPipeline === "function" && typeof global.getSearchStrategies === "function"; const goldenCore = datasetRegistry.get("golden-core") || null;
+    const requestCounts = investigationRequests.reduce(function (counts, request) { const status = String(request.status || "Open").toLowerCase(); counts.total += 1; if (status === "open") counts.open += 1; else if (status === "resolved") counts.resolved += 1; else if (status === "invalidated") counts.invalidated += 1; else counts.other += 1; return counts; }, { total: 0, open: 0, resolved: 0, invalidated: 0, other: 0 });
+    const qualityGate = lastValidation && asArray(lastValidation.gates).find(gate => gate.name === "Quality Gate"); const bridgeStatus = typeof global.getGoldenCoreSyncStatus === "function" ? global.getGoldenCoreSyncStatus() : null; const releaseAllowed = Boolean(lastValidation && lastValidation.releaseAllowed === true);
+    const baseline = typeof global.getPerformanceBaseline === "function" ? global.getPerformanceBaseline() : null; const baselineCalibrated = Boolean(baseline && baseline.calibration && baseline.calibration.status === "Calibrated");
+    return { id: COMPONENT_ID, title: "Search Strategy Validation", name: "Search Quality Assurance Platform", version: VERSION,
+      status: platformReady ? "Ready" : "Blocked", lifecycleStatus: releaseAllowed ? (baselineCalibrated ? "Completed" : "Completed with Calibration Pending") : "Implementation", officialStatus: releaseAllowed ? (baselineCalibrated ? "Official" : "Conditional Official") : "Not Official", platformStatus: platformReady ? "Ready" : "Blocked",
+      ready: platformReady, releaseAllowed, health: lastValidation ? lastValidation.health : (platformReady ? 90 : 0), platformHealth: platformReady ? 100 : 0, progress: releaseAllowed ? 100 : platformReady ? 90 : 0,
+      releaseStatus: lastValidation ? lastValidation.status : "Not Run", validationHealth: lastValidation ? lastValidation.health : null, performanceBaselineVersion: baseline ? baseline.version : "Not Available", performanceBaselineStatus: baselineCalibrated ? "Calibrated" : "Provisional Policy Baseline", performanceCalibrationRequired: !baselineCalibrated, designFreezeCompliance: baselineCalibrated ? "Complete" : "Partial - Performance Calibration Pending", regressionBaselineVersion: "golden-core-v1.0.0",
+      registeredValidations: validationRegistry.size, registeredDatasets: datasetRegistry.size, executableDatasetCount: [...datasetRegistry.values()].filter(dataset => asArray(dataset.cases).length > 0).length, goldenCoreCaseCount: goldenCore ? asArray(goldenCore.cases).length : 0,
+      goldenCore: goldenCore ? { id: goldenCore.id, version: goldenCore.version, caseCount: asArray(goldenCore.cases).length, source: goldenCore.profile && goldenCore.profile.source || "", syncedAt: goldenCore.profile && goldenCore.profile.syncedAt || null, updatedAt: goldenCore.updatedAt } : null,
+      goldenCoreSync: bridgeStatus, historyCount: validationHistory.length, evidenceCount: evidenceRegistry.size, investigationRequestCount: requestCounts.total, openInvestigationRequestCount: requestCounts.open, investigationRequests: requestCounts,
+      lastValidation: lastValidation ? { id: lastValidation.id, datasetId: lastValidation.datasetId, datasetVersion: lastValidation.datasetVersion, status: lastValidation.status, severity: lastValidation.severity, releaseAllowed: lastValidation.releaseAllowed, health: lastValidation.health, failedGates: asArray(lastValidation.gates).filter(gate => !gate.passed).map(gate => gate.name), quality: qualityGate ? clone(qualityGate.metrics) : null, completedAt: lastValidation.completedAt } : null,
+      dependsOn: ["IDE-110", "IDE-115", "IDE-120", "Relationship Platform", "Information Platform", "Repository", "Registry"], provides: ["Search Strategy Validation", "Search Quality Validation", "Search Performance Validation", "Search Consistency Validation", "Fallback Validation", "Validation Evidence", "Release Gate", "Investigation Handoff"], nextTask: buildNextTask(platformReady, goldenCore, lastValidation), updatedAt: nowIso() };
   }
 
   function getSearchValidationHistory() { return clone(validationHistory); }
@@ -753,9 +703,9 @@
       check("Read only responsibility", !["updateRepository", "writeRepository", "replaceSearchEngine"].some(name => typeof global[name] === "function" && global[name] === runSearchValidation), "IDE-125 exposes no repository/source update API");
       check("IDE-120 integration", typeof global.executeSearchPipeline === "function" && typeof global.getSearchStrategies === "function");
       check("Public API", ["validateSearchStrategies", "validateSearchPipeline", "validateSearchRanking", "validateFallback", "validateSearchPerformance", "validateSearchConsistency", "runSearchValidation", "getSearchValidationStatus"].every(name => typeof global[name] === "function"));
-      check("IDE Registry integration", typeof global.registerIDE === "function" || typeof global.getIDERegistryStatus === "function" || true);
-      check("Dashboard integration", Array.isArray(global.DEVELOPMENT_DASHBOARD_MODULE_REGISTRY) ? global.DEVELOPMENT_DASHBOARD_MODULE_REGISTRY.some(item => item.id === COMPONENT_ID) : true);
-      check("No platform errors", true);
+      check("IDE Registry integration", typeof global.registerIdeComponent === "function" && typeof global.getIdeRegistryStatus === "function");
+      check("Dashboard integration", typeof global.getDevelopmentDashboardStatus === "function" || typeof global.validateDevelopmentDashboard === "function");
+      check("No platform errors", !lastValidation || !lastValidation.error, lastValidation && lastValidation.error ? lastValidation.error : "");
     } finally {
       validationRegistry.delete(tempValidationId);
       datasetRegistry.delete(tempDatasetId);
