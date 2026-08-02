@@ -1,15 +1,15 @@
 /* ============================================================
    FILE: 13_auto_refactoring.js
    IDE-150 Auto Refactoring
-   Version: 1.2.3
-   Status: Current Project Source Auto-Load Hardened
+   Version: 1.2.4
+   Status: Validation Storage Isolation Hardened
    Design Freeze: 2026-07-26
    ============================================================ */
 (function (global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-150";
-  const VERSION = "1.2.3";
+  const VERSION = "1.2.4";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CORE_V1";
   const STORAGE_SCHEMA_VERSION = 2;
   const IDE140_PHASE2B_STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2B_V1";
@@ -70,6 +70,35 @@
     dependencyReferenceLimit: 100,
     rollbackSnapshotLimit: MAX_ROLLBACK_SNAPSHOTS
   });
+
+  let storageOverride = null;
+
+  function getStorage() {
+    if (storageOverride) return storageOverride;
+    try { return global.localStorage || null; } catch (_) { return null; }
+  }
+
+  function createMemoryStorage(seed) {
+    const records = new Map();
+    const initial = seed && typeof seed === "object" ? seed : {};
+    Object.keys(initial).forEach(function add(key) { records.set(String(key), String(initial[key])); });
+    return {
+      get length() { return records.size; },
+      key: function key(index) { return [...records.keys()][Number(index)] || null; },
+      getItem: function getItem(key) { const name = String(key); return records.has(name) ? records.get(name) : null; },
+      setItem: function setItem(key, value) { records.set(String(key), String(value)); },
+      removeItem: function removeItem(key) { records.delete(String(key)); },
+      clear: function clear() { records.clear(); }
+    };
+  }
+
+  function runWithStorage(storage, callback) {
+    if (typeof callback !== "function") throw new TypeError("Storage callback is required.");
+    const previous = storageOverride;
+    storageOverride = storage || null;
+    try { return callback(); }
+    finally { storageOverride = previous; }
+  }
 
   const state = {
     requests: new Map(),
@@ -342,13 +371,16 @@
 
   function readStoredPayload() {
     try {
-      if (!global.localStorage) return null;
-      const raw = global.localStorage.getItem(STORAGE_KEY);
+      const storage = getStorage();
+      if (!storage) return null;
+      const raw = storage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : null;
     } catch (_) { return null; }
   }
 
   function persistArtifactRecords(payload, previousPayload) {
+    const storage = getStorage();
+    if (!storage) return { persisted: false, failed: [{ key: STORAGE_KEY, error: "Storage unavailable" }] };
     const keepKeys = new Set(asArray(payload && payload.artifactIndex));
     const previousKeys = asArray(previousPayload && previousPayload.artifactIndex);
     let candidateArtifactCount = 0;
@@ -364,7 +396,7 @@
       if (typeof item.beforeFunctionSource !== "string" || typeof item.afterFunctionSource !== "string") return;
       try {
         const raw = JSON.stringify(item);
-        global.localStorage.setItem(item.artifactKey, raw);
+        storage.setItem(item.artifactKey, raw);
         candidateArtifactCount += 1;
         estimatedBytes += raw.length * 2;
       } catch (error) {
@@ -385,7 +417,7 @@
           persistedItem.rollbackSnapshot.sourceStoredSeparately = true;
         }
         const raw = JSON.stringify(persistedItem);
-        global.localStorage.setItem(item.artifactKey, raw);
+        storage.setItem(item.artifactKey, raw);
         transactionArtifactCount += 1;
         estimatedBytes += raw.length * 2;
       } catch (error) {
@@ -398,7 +430,7 @@
       if (!Array.isArray(item.inboundReferences) || !Array.isArray(item.checks)) return;
       try {
         const raw = JSON.stringify(item);
-        global.localStorage.setItem(item.artifactKey, raw);
+        storage.setItem(item.artifactKey, raw);
         dependencyArtifactCount += 1;
         estimatedBytes += raw.length * 2;
       } catch (error) {
@@ -411,7 +443,7 @@
       if (!item.replacement || typeof item.replacement.source !== "string") return;
       try {
         const raw = JSON.stringify(item);
-        global.localStorage.setItem(item.artifactKey, raw);
+        storage.setItem(item.artifactKey, raw);
         patchArtifactCount += 1;
         estimatedBytes += raw.length * 2;
       } catch (error) {
@@ -424,7 +456,7 @@
       if (!item.rawDecision && !Array.isArray(item.rules)) return;
       try {
         const raw = JSON.stringify(item);
-        global.localStorage.setItem(item.artifactKey, raw);
+        storage.setItem(item.artifactKey, raw);
         policyArtifactCount += 1;
         estimatedBytes += raw.length * 2;
       } catch (error) {
@@ -434,7 +466,7 @@
 
     previousKeys.forEach(function removeStale(key) {
       if (!keepKeys.has(key)) {
-        try { global.localStorage.removeItem(key); } catch (_) {}
+        try { storage.removeItem(key); } catch (_) {}
       }
     });
 
@@ -453,8 +485,9 @@
 
   function readArtifact(key) {
     try {
-      if (!global.localStorage || !key) return null;
-      const raw = global.localStorage.getItem(key);
+      const storage = getStorage();
+      if (!storage || !key) return null;
+      const raw = storage.getItem(key);
       return raw ? JSON.parse(raw) : null;
     } catch (_) { return null; }
   }
@@ -537,8 +570,9 @@
 
   function persistAutoRefactoringState() {
     try {
-      if (!global.localStorage) {
-        state.lastPersistence = { persisted: false, reason: "localStorage unavailable", storageKey: STORAGE_KEY };
+      const storage = getStorage();
+      if (!storage) {
+        state.lastPersistence = { persisted: false, reason: "Storage unavailable", storageKey: STORAGE_KEY };
         return clone(state.lastPersistence);
       }
       const previousPayload = readStoredPayload();
@@ -546,7 +580,7 @@
       const artifacts = persistArtifactRecords(serialized, previousPayload);
       if (!artifacts.persisted) throw new Error("IDE-150 artifact persistence failed.");
       const payload = JSON.stringify(serialized);
-      global.localStorage.setItem(STORAGE_KEY, payload);
+      storage.setItem(STORAGE_KEY, payload);
       state.lastPersistence = {
         persisted: true,
         compactLifecycle: true,
@@ -578,11 +612,12 @@
 
   function loadAutoRefactoringState() {
     try {
-      if (!global.localStorage) {
+      const storage = getStorage();
+      if (!storage) {
         state.loaded = true;
-        return { loaded: true, restored: false, reason: "localStorage unavailable" };
+        return { loaded: true, restored: false, reason: "Storage unavailable" };
       }
-      const raw = global.localStorage.getItem(STORAGE_KEY);
+      const raw = storage.getItem(STORAGE_KEY);
       if (!raw) {
         state.loaded = true;
         return { loaded: true, restored: false, storageKey: STORAGE_KEY };
@@ -615,10 +650,11 @@
   }
 
   function clearAutoRefactoringStorage() {
-    if (global.localStorage) {
+    const storage = getStorage();
+    if (storage) {
       const previous = readStoredPayload();
-      asArray(previous && previous.artifactIndex).forEach(function remove(key) { try { global.localStorage.removeItem(key); } catch (_) {} });
-      global.localStorage.removeItem(STORAGE_KEY);
+      asArray(previous && previous.artifactIndex).forEach(function remove(key) { try { storage.removeItem(key); } catch (_) {} });
+      storage.removeItem(STORAGE_KEY);
     }
     [state.requests, state.plans, state.candidates, state.validations, state.approvals, state.transactions, state.rollbacks, state.reports, state.packages, state.dependencyAnalyses, state.patches, state.policyDecisions].forEach(function clear(map) { map.clear(); });
     state.history = [];
@@ -1229,6 +1265,9 @@
     getDependencyAnalysisRecord: getDependencyAnalysisRecord,
     getPatchRecord: getPatchRecord,
     getPolicyDecisionRecord: getPolicyDecisionRecord,
+    getStorage: getStorage,
+    createMemoryStorage: createMemoryStorage,
+    runWithStorage: runWithStorage,
     captureRuntimeState: captureRuntimeState,
     persistAutoRefactoringState: persistAutoRefactoringState,
     restoreMap: restoreMap,
