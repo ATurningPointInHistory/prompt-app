@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_controlled_application.js
    IDE-150 Controlled Application Trial
-   Version: 1.0.1
+   Version: 1.0.2
    Status: Controlled Application Trial
    ============================================================ */
 (function (global) {
@@ -12,7 +12,7 @@
 
   const COMPONENT_ID = internal.COMPONENT_ID;
   const VERSION = internal.VERSION;
-  const CONTROLLED_VERSION = "1.0.1";
+  const CONTROLLED_VERSION = "1.0.2";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CONTROLLED_APPLICATION_V1";
   const MAX_SESSIONS = 20;
   const nowIso = internal.nowIso;
@@ -588,6 +588,30 @@
       check("Source restored", executed.repository && executed.repository.sourceRestored === true && repository["controlled-validation.js"] === original);
       check("Exactly apply and rollback writes", executed.repository && executed.repository.writeCount === 2);
       check("Controlled trial completed", executed.executed === true && executed.status === "Trial Completed and Rolled Back");
+      const transactionId = executed.application && executed.application.transactionId;
+      let transactionArtifact = null;
+      let rollbackSnapshotArtifact = null;
+      let rollbackSnapshotKey = "";
+      try {
+        const corePayload = global.localStorage ? safeParse(global.localStorage.getItem(internal.STORAGE_KEY), null) : null;
+        const compactTransaction = corePayload && Array.isArray(corePayload.transactions)
+          ? corePayload.transactions.find(function find(item) { return item && item.id === transactionId; })
+          : null;
+        transactionArtifact = compactTransaction && compactTransaction.artifactKey && global.localStorage
+          ? safeParse(global.localStorage.getItem(compactTransaction.artifactKey), null)
+          : null;
+        rollbackSnapshotKey = text(transactionArtifact && transactionArtifact.rollbackSnapshot && transactionArtifact.rollbackSnapshot.storageKey, "");
+        rollbackSnapshotArtifact = rollbackSnapshotKey && global.localStorage
+          ? safeParse(global.localStorage.getItem(rollbackSnapshotKey), null)
+          : null;
+      } catch (_) {}
+      check("Dedicated Rollback Snapshot reference", Boolean(rollbackSnapshotKey));
+      check("Rollback Snapshot read-back verified", Boolean(rollbackSnapshotArtifact && rollbackSnapshotArtifact.transactionId === transactionId && typeof rollbackSnapshotArtifact.source === "string" && rollbackSnapshotArtifact.source.length > 0 && hashText(rollbackSnapshotArtifact.source) === rollbackSnapshotArtifact.sourceHash));
+      check("Transaction Artifact excludes duplicate Snapshot source", Boolean(transactionArtifact && transactionArtifact.rollbackSnapshot && transactionArtifact.rollbackSnapshot.source === "" && transactionArtifact.rollbackSnapshot.sourceStoredSeparately === true));
+      const rollbackSnapshotKeyCount = global.localStorage
+        ? Array.from({ length: global.localStorage.length }, function key(_, index) { return global.localStorage.key(index); }).filter(function filter(key) { return key && key.indexOf("AI_PROMPT_OS_IDE150_ROLLBACK_SNAPSHOT_V1:") === 0; }).length
+        : 0;
+      check("Rollback Snapshot retention limit", rollbackSnapshotKeyCount <= 10, "count=" + rollbackSnapshotKeyCount);
       const compact = getControlledAutoRefactoringApplicationSession(prepared.session.id);
       check("Compact Session status", compact && compact.sourceRestored === true && compact.persistentCommitAllowed === false);
 
@@ -803,7 +827,15 @@
           "書込み回数: " + finite(result.repository && result.repository.writeCount, 0)
         ].join("\n");
       }
-      return "トライアルを完了できませんでした。\n理由: " + jaReason(result && result.reason);
+      const writeCount = finite(result && result.repository && result.repository.writeCount, 0);
+      const restored = Boolean(result && result.repository && result.repository.sourceRestored);
+      return [
+        "安全のためトライアルを停止しました。",
+        "理由: " + jaReason(result && result.reason),
+        writeCount === 0 ? "実行時プロジェクトの変更: なし" : "一時書込み回数: " + writeCount,
+        restored ? "元ソースの状態: 復元確認済み" : "元ソースの状態: 手動確認が必要",
+        "このセッションは再実行せず、パネルを閉じて新しいトライアルを作成してください。"
+      ].join("\n");
     }
 
     const overlay = global.document.createElement("div");
@@ -927,7 +959,9 @@
     const output = global.document.createElement("pre");
     output.textContent = session.status === "Trial Completed and Rolled Back"
       ? "トライアル完了・ロールバック確認済みです。"
-      : "まだ実行されていません。";
+      : session.status === "Manual Review Required"
+        ? "このトライアルは安全停止済みです。再実行せず、新しいトライアルを作成してください。"
+        : "まだ実行されていません。";
     output.style.cssText = "white-space:pre-wrap;background:#0b1220;padding:12px;border-radius:8px;line-height:1.5;";
     panel.appendChild(output);
 
@@ -969,9 +1003,20 @@
       rollbackAck.disabled = true;
     }
 
+    function lockFailedUi() {
+      approveButton.textContent = "承認済み";
+      executeButton.textContent = "安全停止・新規トライアルが必要";
+      setDisabled(approveButton, true);
+      setDisabled(executeButton, true);
+      [actor, reason, confirmation, execution].forEach(function lock(input) { input.readOnly = true; });
+      mutationAck.disabled = true;
+      rollbackAck.disabled = true;
+    }
+
     setDisabled(approveButton, session.status !== "Awaiting Explicit Approval");
     setDisabled(executeButton, session.status !== "Approved");
     if (session.status === "Trial Completed and Rolled Back") lockCompletedUi();
+    if (session.status === "Manual Review Required") lockFailedUi();
 
     approveButton.onclick = function approveClick() {
       const result = approveControlledAutoRefactoringApplication(session.id, {
@@ -1004,6 +1049,8 @@
       rawOutput.textContent = JSON.stringify(result, null, 2);
       if (result.executed === true) {
         lockCompletedUi();
+      } else if (result.session && result.session.status === "Manual Review Required") {
+        lockFailedUi();
       } else {
         executeButton.textContent = "一時適用・検証・ロールバック";
         setDisabled(executeButton, false);
