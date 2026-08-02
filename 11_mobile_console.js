@@ -12,6 +12,212 @@ let devConsoleResult = "";
 let devConsoleExecuting =
   false;
 
+const DEV_CONSOLE_LAST_INPUT_KEY =
+  "devConsoleLastInput";
+
+const DEV_CONSOLE_LAST_INPUT_PERSIST_LIMIT =
+  12000;
+
+let devConsoleLastInputMemory =
+  "";
+
+let devConsoleStorageWarningCount =
+  0;
+
+function isDevConsoleQuotaError(
+  error
+) {
+
+  if (!error) {
+    return false;
+  }
+
+  return (
+    error.name === "QuotaExceededError" ||
+    error.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+    error.code === 22 ||
+    error.code === 1014 ||
+    /quota/i.test(String(error.message || ""))
+  );
+
+}
+
+function recordDevConsoleStorageWarning(
+  context,
+  error
+) {
+
+  devConsoleStorageWarningCount += 1;
+
+  const reason =
+    isDevConsoleQuotaError(error)
+      ? "保存容量が不足しています。"
+      : String(error && error.message || "保存できませんでした。");
+
+  if (
+    typeof addMobileConsoleLog ===
+    "function"
+  ) {
+
+    addMobileConsoleLog(
+      "warn",
+      [
+        "開発コンソールの入力履歴を保存できませんでした。",
+        "コード実行は継続します。",
+        "対象: " + String(context || "入力キャッシュ"),
+        "理由: " + reason
+      ].join("\n")
+    );
+
+  }
+
+  return {
+    saved: false,
+    reason,
+    context: String(context || "")
+  };
+
+}
+
+function loadDevConsoleLastInput() {
+
+  if (devConsoleLastInputMemory) {
+    return devConsoleLastInputMemory;
+  }
+
+  try {
+
+    devConsoleLastInputMemory =
+      String(
+        localStorage.getItem(
+          DEV_CONSOLE_LAST_INPUT_KEY
+        ) ||
+        ""
+      );
+
+  } catch (error) {
+
+    recordDevConsoleStorageWarning(
+      "前回入力の読込み",
+      error
+    );
+
+  }
+
+  return devConsoleLastInputMemory;
+
+}
+
+function saveDevConsoleLastInput(
+  source,
+  options = {}
+) {
+
+  const value =
+    String(source || "");
+
+  devConsoleLastInputMemory =
+    value;
+
+  if (options.persist === false) {
+    return {
+      saved: false,
+      skipped: true,
+      reason: "Memory only"
+    };
+  }
+
+  if (
+    value.length >
+    DEV_CONSOLE_LAST_INPUT_PERSIST_LIMIT
+  ) {
+
+    return {
+      saved: false,
+      skipped: true,
+      reason:
+        "Persistent input cache limit exceeded",
+      length: value.length,
+      limit:
+        DEV_CONSOLE_LAST_INPUT_PERSIST_LIMIT
+    };
+
+  }
+
+  try {
+
+    localStorage.setItem(
+      DEV_CONSOLE_LAST_INPUT_KEY,
+      value
+    );
+
+    return {
+      saved: true,
+      skipped: false,
+      length: value.length
+    };
+
+  } catch (error) {
+
+    if (isDevConsoleQuotaError(error)) {
+
+      try {
+        localStorage.removeItem(
+          DEV_CONSOLE_LAST_INPUT_KEY
+        );
+      } catch (_) {
+        // Best-effort cache cleanup only.
+      }
+
+    }
+
+    return recordDevConsoleStorageWarning(
+      "入力キャッシュ",
+      error
+    );
+
+  }
+
+}
+
+function getDevConsoleStorageStatus() {
+
+  let persistedLength = 0;
+  let persisted = false;
+
+  try {
+
+    const value =
+      localStorage.getItem(
+        DEV_CONSOLE_LAST_INPUT_KEY
+      );
+
+    persisted =
+      value !== null;
+
+    persistedLength =
+      String(value || "").length;
+
+  } catch (_) {
+    // Status remains best-effort.
+  }
+
+  return {
+    key: DEV_CONSOLE_LAST_INPUT_KEY,
+    memoryLength:
+      devConsoleLastInputMemory.length,
+    persisted,
+    persistedLength,
+    persistLimit:
+      DEV_CONSOLE_LAST_INPUT_PERSIST_LIMIT,
+    warningCount:
+      devConsoleStorageWarningCount,
+    executionBlockedByCacheFailure:
+      false
+  };
+
+}
+
 function initMobileConsole() {
 
   if (mobileConsoleInitialized) {
@@ -187,8 +393,7 @@ function buildDevConsoleInputHtml() {
   "
   placeholder="JavaScriptを入力"
 >${escapeHtml(
-  localStorage.getItem("devConsoleLastInput") ||
-  ""
+  loadDevConsoleLastInput()
 )}</textarea>
 `;
 
@@ -394,34 +599,29 @@ function executeDevConsole() {
     return;
   }
 
-  try {
+  saveDevConsoleLastInput(
+    code
+  );
 
-    localStorage.setItem(
-      "devConsoleLastInput",
-      code
-    );
+  if (
+    typeof saveDevConsoleHistory ===
+    "function"
+  ) {
 
-    if (
-      typeof saveDevConsoleHistory ===
-      "function"
-    ) {
+    try {
 
       saveDevConsoleHistory(
         code
       );
 
-    }
+    } catch (error) {
 
-  } catch (error) {
-
-    alert(
-      "実行準備に失敗しました\n\n" +
-      formatDevConsoleError(
+      recordDevConsoleStorageWarning(
+        "実行履歴",
         error
-      )
-    );
+      );
 
-    return;
+    }
 
   }
 
@@ -1415,8 +1615,7 @@ async function pasteDevConsoleInput() {
       input.selectionEnd =
         input.value.length;
 
-    localStorage.setItem(
-      "devConsoleLastInput",
+    saveDevConsoleLastInput(
       input.value
     );
 
@@ -1448,8 +1647,7 @@ function clearDevConsoleInput() {
 
   input.value = "";
 
-  localStorage.setItem(
-    "devConsoleLastInput",
+  saveDevConsoleLastInput(
     ""
   );
 
@@ -1487,8 +1685,7 @@ function setDevConsoleInput(
   const input =
     get("devConsoleInput");
 
-  localStorage.setItem(
-    "devConsoleLastInput",
+  saveDevConsoleLastInput(
     source
   );
 
