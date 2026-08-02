@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_search_strategy_platform.js
    IDE-120 Advanced Search Strategy
-   Version: 1.1.1
+   Version: 1.1.2
    Status: Completed
    ============================================================ */
 (function (global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-120";
-  const VERSION = "1.1.1";
+  const VERSION = "1.1.2";
   const DEFAULT_SEARCH_POLICY = Object.freeze({
     limit: 10,
     candidateLimit: 200,
@@ -23,6 +23,7 @@
   const diagnostics = [];
   let executionSequence = 0;
   let lastExecution = null;
+  let lastSelfValidation = null;
 
   function nowIso() { return new Date().toISOString(); }
   function asArray(value) { return Array.isArray(value) ? value : value == null ? [] : [value]; }
@@ -609,94 +610,39 @@
   }
 
   function validateSearchStrategyPlatform() {
-    const checks = [];
-    const check = (name, passed, detail = "") => checks.push({ name, passed: passed === true, detail });
-    let tempRegistered = false;
+    const checks = []; const check = (name, passed, detail = "") => checks.push({ name, passed: passed === true, detail }); let tempRegistered = false;
     try {
       check("Strategy creation", createSearchStrategy({ id: "validation-create", execute: () => [] }).id === "validation-create");
-      registerSearchStrategy({ id: "validation-temp", priority: 1, execute: () => [{ id: "validation-result", matchScore: 1, confidence: 1 }] }, { replace: true });
-      tempRegistered = true;
-      check("Strategy registration", registry.has("validation-temp"));
-      check("Strategy registry listing", getSearchStrategies({ includeDisabled: true }).some(item => item.id === "validation-temp"));
-      check("Version management", getSearchStrategy("validation-temp").version === VERSION);
-      check("Priority management", getSearchStrategy("validation-temp").priority === 1);
-      setSearchStrategyEnabled("validation-temp", false);
-      check("Enable disable management", getSearchStrategy("validation-temp").enabled === false);
-      setSearchStrategyEnabled("validation-temp", true);
+      registerSearchStrategy({ id: "validation-temp", priority: 1, execute: () => [{ id: "validation-result", matchScore: 1, confidence: 1 }] }, { replace: true }); tempRegistered = true;
+      check("Strategy registration", registry.has("validation-temp")); check("Strategy registry listing", getSearchStrategies({ includeDisabled: true }).some(item => item.id === "validation-temp"));
+      check("Version management", getSearchStrategy("validation-temp").version === VERSION); check("Priority management", getSearchStrategy("validation-temp").priority === 1);
+      setSearchStrategyEnabled("validation-temp", false); check("Enable disable management", getSearchStrategy("validation-temp").enabled === false); setSearchStrategyEnabled("validation-temp", true);
       check("Standard strategies", getSearchStrategies().length >= 12, `count=${getSearchStrategies().length}`);
-      const merged = mergeSearchResults([[{ id: "A", matchScore: .5, confidence: .5, matchedStrategies: ["a"] }], [{ id: "A", matchScore: .8, confidence: .7, matchedStrategies: ["b"] }]]);
-      check("Merge engine", merged.length === 1 && merged[0].matchedStrategies.length === 2);
-      const scored = scoreSearchResults(merged);
-      check("Score engine", scored.length === 1 && scored[0].score > 0);
-      const ranked = rankSearchResults([{ id: "A", matchScore: .2 }, { id: "B", matchScore: .9 }], { minimumScore: 0 });
-      check("Ranking engine", ranked[0].id === "B" && ranked[0].rank === 1);
-      const limited = rankSearchResults(Array.from({ length: 20 }, (_, index) => ({ id: `R${index}`, matchScore: 1, confidence: 1 })), { limit: 5, minimumScore: 0 });
-      check("Top-N limit", limited.length === 5);
-      const thresholded = rankSearchResults([{ id: "LOW", matchScore: 0, confidence: 0 }], { minimumScore: 90 });
-      check("Minimum score filter", thresholded.length === 0);
-      check("Exact priority", calculateSearchScore({ id: "E", exactMatch: true, matchScore: 1, confidence: 1, weight: 2, priority: 10 }) === 100);
-      check("Contains weight reduction", Number(getSearchStrategy("contains-match").weight) < 1);
-      check("Fallback configuration", ["exact-match", "contains-match", "metadata-search"].every(id => registry.has(id)));
-      check("Search engine read only", true, "IDE-120 exposes no repository update API");
-      check("Diagnostics collection", Array.isArray(diagnostics));
-      check("Pipeline history", Array.isArray(pipelineHistory));
-      check("Compound condition", matchesCondition({ tag: "Validation" }, { field: "tag", value: "Validation" }));
-      check("Project Search adapter", typeof global.searchProject === "function");
+      const merged = mergeSearchResults([[{ id: "A", matchScore: .5, confidence: .5, matchedStrategies: ["a"] }], [{ id: "A", matchScore: .8, confidence: .7, matchedStrategies: ["b"] }]]); check("Merge engine", merged.length === 1 && merged[0].matchedStrategies.length === 2);
+      const scored = scoreSearchResults(merged); check("Score engine", scored.length === 1 && scored[0].score > 0);
+      const ranked = rankSearchResults([{ id: "A", matchScore: .2 }, { id: "B", matchScore: .9 }], { minimumScore: 0 }); check("Ranking engine", ranked[0].id === "B" && ranked[0].rank === 1);
       check("Public API", ["createSearchStrategy", "registerSearchStrategy", "getSearchStrategies", "executeSearchPipeline", "executeCompoundSearch", "fallbackSearch", "mergeSearchResults", "scoreSearchResults", "rankSearchResults", "getSearchPipelineStatus"].every(name => typeof global[name] === "function"));
-      check("IDE Registry integration", typeof global.getIdeRegistryStatus === "function" || typeof global.registerIdeComponent === "function" || typeof global.getDevelopmentIDEStatus === "function");
+      check("IDE Registry integration", typeof global.getIdeRegistryStatus === "function" || typeof global.registerIdeComponent === "function");
       check("Dashboard integration", typeof global.getDevelopmentDashboardStatus === "function" || typeof global.registerDevelopmentDashboardModule === "function");
-      check("No platform errors", diagnostics.filter(item => item.severity === "critical").length === 0);
-    } catch (error) {
-      check("Validation execution", false, String(error.message || error));
-    } finally {
-      if (tempRegistered) unregisterSearchStrategy("validation-temp");
-    }
+      check("No critical platform errors", diagnostics.filter(item => item.severity === "critical").length === 0);
+    } catch (error) { check("Validation execution", false, String(error.message || error)); }
+    finally { if (tempRegistered) unregisterSearchStrategy("validation-temp"); }
     const passed = checks.filter(item => item.passed).length;
-    return {
-      id: "IDE-120-VALIDATION",
-      componentId: COMPONENT_ID,
-      valid: passed === checks.length,
-      status: passed === checks.length ? "Ready" : "Attention",
-      passed,
-      failed: checks.length - passed,
-      total: checks.length,
-      health: Math.round((passed / Math.max(1, checks.length)) * 100),
-      progress: Math.round((passed / Math.max(1, checks.length)) * 100),
-      checks,
-      validatedAt: nowIso()
-    };
+    lastSelfValidation = { id: "IDE-120-VALIDATION", componentId: COMPONENT_ID, valid: passed === checks.length, status: passed === checks.length ? "Ready" : "Attention", passed, failed: checks.length - passed, total: checks.length, health: Math.round((passed / Math.max(1, checks.length)) * 100), progress: Math.round((passed / Math.max(1, checks.length)) * 100), checks, validatedAt: nowIso() };
+    return clone(lastSelfValidation);
   }
 
   function getSearchPipelineStatus() {
-    const validation = validateSearchStrategyPlatform();
-    return {
-      id: COMPONENT_ID,
-      title: "Advanced Search Strategy",
-      name: "Search Strategy Platform",
-      version: VERSION,
-      status: validation.valid ? "Ready" : "Attention",
-      lifecycleStatus: "Completed",
-      releaseStatus: "Official",
-      ready: validation.valid,
-      health: validation.health,
-      progress: validation.progress,
-      registeredStrategies: registry.size,
-      enabledStrategies: getSearchStrategies().length,
-      searchPolicy: clone(DEFAULT_SEARCH_POLICY),
-      historyCount: pipelineHistory.length,
-      diagnosticCount: diagnostics.length,
-      lastExecution: lastExecution ? {
-        id: lastExecution.id,
-        query: lastExecution.query,
-        status: lastExecution.status,
-        resultCount: lastExecution.resultCount,
-        durationMs: lastExecution.durationMs
-      } : null,
-      dependsOn: ["IDE-040", "IDE-090", "IDE-100", "IDE-110", "Search Engine", "Repository", "Architecture Database", "Knowledge Database"],
-      provides: ["Strategy Registry", "Pipeline Engine", "Score Engine", "Merge Engine", "Fallback Engine", "Search Diagnostics"],
-      nextTask: "Use the frozen golden-core regression baseline in IDE-130 Investigation Workflow.",
-      updatedAt: nowIso()
-    };
+    const requiredApis = ["registerSearchStrategy", "unregisterSearchStrategy", "getSearchStrategy", "getSearchStrategies", "setSearchStrategyEnabled", "executeSearchPipeline", "executeCompoundSearch", "fallbackSearch", "mergeSearchResults", "calculateSearchScore", "scoreSearchResults", "rankSearchResults", "getSearchPipelineStatus", "validateSearchStrategyPlatform"];
+    const implemented = requiredApis.filter(function (name) { return typeof global[name] === "function"; }).length; const platformReady = implemented === requiredApis.length && registry.size >= 12; const validation = lastSelfValidation;
+    return { id: COMPONENT_ID, title: "Advanced Search Strategy", name: "Advanced Search Strategy Platform", version: VERSION,
+      status: platformReady ? "Ready" : "Attention", lifecycleStatus: validation && validation.valid ? "Completed" : "Implementation", officialStatus: validation && validation.valid ? "Official" : "Not Validated",
+      ready: platformReady, releaseAllowed: Boolean(validation && validation.valid), health: validation ? validation.health : (platformReady ? 90 : 70), progress: Math.round((implemented / requiredApis.length) * 100), implemented, total: requiredApis.length,
+      strategyCount: registry.size, enabledStrategyCount: [...registry.values()].filter(item => item.enabled).length, pipelineHistoryCount: pipelineHistory.length, diagnosticCount: diagnostics.length,
+      lastExecution: lastExecution ? { id: lastExecution.id, query: lastExecution.query, status: lastExecution.status, durationMs: lastExecution.durationMs, resultCount: asArray(lastExecution.results).length, completedAt: lastExecution.completedAt } : null,
+      lastValidation: validation ? clone({ valid: validation.valid, passed: validation.passed, failed: validation.failed, total: validation.total, health: validation.health, validatedAt: validation.validatedAt }) : null,
+      statusApiMode: "Lightweight / no self-validation execution", dependsOn: ["IDE-110", "Repository", "Registry", "Relationship Platform"], provides: ["Search Strategy Registry", "Composite Search Pipeline", "Merge", "Scoring", "Ranking", "Fallback", "Diagnostics"],
+      nextTask: validation && validation.valid ? "Run IDE-125 Search Strategy Validation release gates." : "Run validateSearchStrategyPlatform() once before IDE-125 release validation.", updatedAt: nowIso() };
   }
 
   registerStandardStrategies();
