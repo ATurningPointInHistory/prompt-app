@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_validation_result_repository.js
    Validation Result Repository
-   Version: 1.0.0
+   Version: 1.1.0
    Status: Ready
 
    Purpose:
@@ -13,7 +13,7 @@
   "use strict";
 
   const COMPONENT_ID = "VALIDATION-RESULT-REPOSITORY";
-  const VERSION = "1.0.0";
+  const VERSION = "1.1.0";
   const STORAGE_KEY = "AI_PROMPT_OS_VALIDATION_RESULT_REPOSITORY_V1";
   const MAX_RECORDS = 100;
 
@@ -21,6 +21,7 @@
     records: [],
     loaded: false,
     lastError: null,
+    lastValidation: null,
     updatedAt: new Date().toISOString()
   };
 
@@ -62,31 +63,7 @@
 
   function compactScenarioResult(item) {
     const source = item && typeof item === "object" ? item : {};
-    return {
-      id: text(source.id, ""),
-      scenarioId: text(source.scenarioId, ""),
-      title: text(source.title, ""),
-      category: text(source.category, ""),
-      critical: source.critical === true,
-      risk: text(source.risk, "Unknown"),
-      passed: source.passed === true,
-      status: text(source.status, source.passed === true ? "Passed" : "Failed"),
-      detail: text(source.detail, ""),
-      durationMs: finite(source.durationMs, 0),
-      actualStateSequence: unique(source.actualStateSequence),
-      expectedStateSequence: unique(source.expectedStateSequence),
-      policyResults: clone(asArray(source.policyResults)),
-      evidenceReferences: unique(source.evidenceReferences),
-      restoreResult: clone(source.restoreResult || {}),
-      safetyResult: clone(source.safetyResult || {}),
-      closureResult: clone(source.closureResult || {}),
-      integrationResults: clone(asArray(source.integrationResults)),
-      performanceResults: clone(source.performanceResults || {}),
-      expectedRestoreResult: text(source.expectedRestoreResult, ""),
-      expectedClosureResult: text(source.expectedClosureResult, ""),
-      expectedReopenDecision: text(source.expectedReopenDecision, ""),
-      executedAt: text(source.executedAt, "")
-    };
+    return { id: text(source.id, ""), scenarioId: text(source.scenarioId, ""), title: text(source.title, ""), category: text(source.category, ""), critical: source.critical === true, risk: text(source.risk, "Unknown"), passed: source.passed === true, status: text(source.status, source.passed === true ? "Passed" : "Failed"), detail: text(source.detail, ""), durationMs: finite(source.durationMs, 0), actualStateSequence: unique(source.actualStateSequence), expectedStateSequence: unique(source.expectedStateSequence), findings: clone(asArray(source.findings)), policyResults: clone(asArray(source.policyResults)), evidenceResults: clone(asArray(source.evidenceResults)), evidenceReferences: unique(source.evidenceReferences), restoreResult: clone(source.restoreResult || {}), safetyResult: clone(source.safetyResult || {}), closureResult: clone(source.closureResult || {}), integrationResults: clone(asArray(source.integrationResults)), performanceResults: clone(source.performanceResults || {}), expectedRestoreResult: text(source.expectedRestoreResult, ""), expectedClosureResult: text(source.expectedClosureResult, ""), expectedReopenDecision: text(source.expectedReopenDecision, ""), executedAt: text(source.executedAt, "") };
   }
 
   function collectEvidenceReferences(result) {
@@ -101,61 +78,11 @@
   }
 
   function compactValidationPayload(result) {
-    const source = result && typeof result === "object" ? result : {};
-    const scenarioResults = asArray(source.scenarioResults).map(compactScenarioResult);
-    const report = source.report && typeof source.report === "object" ? source.report : {};
-    const handoff = source.handoff && typeof source.handoff === "object" ? source.handoff : {};
-    const evidencePackage = source.evidencePackage && typeof source.evidencePackage === "object" ? source.evidencePackage : {};
-
-    return {
-      id: text(source.id, ""),
-      componentId: text(source.componentId, "Unknown"),
-      version: text(source.version, ""),
-      targetComponent: text(source.targetComponent, ""),
-      targetVersion: text(source.targetVersion, ""),
-      status: text(source.status, "Unknown"),
-      severity: text(source.severity, "Unknown"),
-      releaseAllowed: source.releaseAllowed === true,
-      implementationReady: source.implementationReady === true,
-      passed: finite(source.passed, 0),
-      failed: finite(source.failed, 0),
-      warnings: finite(source.warnings, 0),
-      total: finite(source.total, scenarioResults.length),
-      health: finite(source.health, 0),
-      progress: finite(source.progress, 0),
-      gates: clone(asArray(source.gates)),
-      coverageResults: clone(asArray(source.coverageResults)),
-      scenarioResults: scenarioResults,
-      evidenceReferences: collectEvidenceReferences(source),
-      evidencePackage: {
-        id: text(evidencePackage.id, ""),
-        decision: text(evidencePackage.decision, source.status || ""),
-        releaseAllowed: evidencePackage.releaseAllowed === true,
-        createdAt: text(evidencePackage.createdAt, "")
-      },
-      report: {
-        id: text(report.id, ""),
-        title: text(report.title, ""),
-        executiveSummary: text(report.executiveSummary, ""),
-        generatedAt: text(report.generatedAt, "")
-      },
-      handoff: {
-        id: text(handoff.id, ""),
-        validationDecision: text(handoff.validationDecision, ""),
-        restoreStatus: text(handoff.restoreStatus, ""),
-        safetyStatus: text(handoff.safetyStatus, ""),
-        responsibleWorkflow: text(handoff.responsibleWorkflow, ""),
-        recommendedActions: unique(handoff.recommendedActions),
-        regressionRequirements: unique(handoff.regressionRequirements),
-        releaseAllowed: handoff.releaseAllowed === true,
-        generatedAt: text(handoff.generatedAt, "")
-      },
-      durationMs: finite(source.durationMs, 0),
-      startedAt: text(source.startedAt, ""),
-      completedAt: text(source.completedAt, ""),
-      repositoryVersion: text(source.repositoryVersion, ""),
-      datasetVersion: text(source.datasetVersion, "")
-    };
+    const source = result && typeof result === "object" ? result : {}; const scenarioResults = asArray(source.scenarioResults).map(compactScenarioResult); const report = source.report && typeof source.report === "object" ? source.report : {}; const handoff = source.handoff && typeof source.handoff === "object" ? source.handoff : {}; const evidencePackage = source.evidencePackage && typeof source.evidencePackage === "object" ? source.evidencePackage : {}; const metrics = source.analyticsMetricsPackage && typeof source.analyticsMetricsPackage === "object" ? source.analyticsMetricsPackage : {}; const conclusion = source.conclusion && typeof source.conclusion === "object" ? source.conclusion : (report.conclusion && typeof report.conclusion === "object" ? report.conclusion : {});
+    return { id: text(source.id, ""), componentId: text(source.componentId, "Unknown"), version: text(source.version, ""), targetComponent: text(source.targetComponent, ""), targetVersion: text(source.targetVersion, ""), status: text(source.status, "Unknown"), severity: text(source.severity, "Unknown"), releaseAllowed: source.releaseAllowed === true, implementationReady: source.implementationReady === true, passed: finite(source.passed, 0), failed: finite(source.failed, 0), warnings: finite(source.warnings, 0), total: finite(source.total, scenarioResults.length), health: finite(source.health, 0), progress: finite(source.progress, 0), gates: clone(asArray(source.gates)), coverageResults: clone(asArray(source.coverageResults)), scenarioResults,
+      findings: clone(asArray(source.findings || report.findings)), conclusion: { status: text(conclusion.status || conclusion.conclusionStatus, ""), rootCause: text(conclusion.rootCause, ""), contributingFactors: unique(conclusion.contributingFactors), evidenceReferences: unique(conclusion.evidenceReferences), confidence: conclusion.confidence == null ? null : finite(conclusion.confidence, 0), decisionReason: text(conclusion.decisionReason, "") },
+      analyticsMetricsPackage: { validationMetrics: clone(asArray(metrics.validationMetrics)), coverageMetrics: clone(asArray(metrics.coverageMetrics)), safetyMetrics: clone(asArray(metrics.safetyMetrics)), restoreMetrics: clone(asArray(metrics.restoreMetrics)), evidenceMetrics: clone(asArray(metrics.evidenceMetrics)), performanceMetrics: clone(asArray(metrics.performanceMetrics)), qualityMetrics: clone(asArray(metrics.qualityMetrics)), trendMetrics: clone(asArray(metrics.trendMetrics)), repositoryVersion: text(metrics.repositoryVersion, source.repositoryVersion || ""), validationVersion: text(metrics.validationVersion, source.version || "") },
+      evidenceReferences: collectEvidenceReferences(source), evidencePackage: { id: text(evidencePackage.id, ""), decision: text(evidencePackage.decision, source.status || ""), releaseAllowed: evidencePackage.releaseAllowed === true, createdAt: text(evidencePackage.createdAt, "") }, report: { id: text(report.id, ""), title: text(report.title, ""), executiveSummary: text(report.executiveSummary, ""), rootCause: text(report.rootCause || conclusion.rootCause, ""), findings: clone(asArray(report.findings)), generatedAt: text(report.generatedAt, "") }, handoff: { id: text(handoff.id, ""), validationDecision: text(handoff.validationDecision, ""), restoreStatus: text(handoff.restoreStatus, ""), safetyStatus: text(handoff.safetyStatus, ""), responsibleWorkflow: text(handoff.responsibleWorkflow, ""), recommendedActions: unique(handoff.recommendedActions), prohibitedActions: unique(handoff.prohibitedActions), requiredFixScope: clone(handoff.requiredFixScope || {}), validationRequirements: unique(handoff.validationRequirements), regressionRequirements: unique(handoff.regressionRequirements), completionCriteria: unique(handoff.completionCriteria), releaseAllowed: handoff.releaseAllowed === true, generatedAt: text(handoff.generatedAt, "") }, durationMs: finite(source.durationMs, 0), startedAt: text(source.startedAt, ""), completedAt: text(source.completedAt, ""), repositoryVersion: text(source.repositoryVersion, ""), datasetVersion: text(source.datasetVersion, "") };
   }
 
   function normalizeStoredRecord(input) {
@@ -270,6 +197,40 @@
       setError(error, "saveValidationResult");
       return { saved: false, persisted: false, reason: state.lastError.message, storageKey: STORAGE_KEY };
     }
+  }
+
+  function getValidationResultRepositorySummary(filter) {
+    const settings = filter && typeof filter === "object" ? filter : {};
+    const matches = state.records.filter(function match(item) {
+      if (settings.sourceComponent && item.sourceComponent !== String(settings.sourceComponent)) return false;
+      if (settings.targetComponent && item.targetComponent !== String(settings.targetComponent)) return false;
+      if (settings.status && item.status !== String(settings.status)) return false;
+      if (settings.official === true && item.official !== true) return false;
+      if (settings.releaseAllowed === true && item.releaseAllowed !== true) return false;
+      return true;
+    });
+    const latest = matches.length ? matches[0] : null;
+    return {
+      count: matches.length,
+      officialCount: matches.filter(function official(item) { return item.official === true; }).length,
+      latest: latest ? {
+        recordId: latest.recordId,
+        id: latest.id,
+        sourceComponent: latest.sourceComponent,
+        targetComponent: latest.targetComponent,
+        resultVersion: latest.resultVersion,
+        repositoryVersion: latest.repositoryVersion,
+        status: latest.status,
+        official: latest.official === true,
+        releaseAllowed: latest.releaseAllowed === true,
+        implementationReady: latest.implementationReady === true,
+        health: latest.health,
+        completedAt: latest.completedAt,
+        savedAt: latest.savedAt
+      } : null,
+      loaded: state.loaded === true,
+      updatedAt: state.updatedAt
+    };
   }
 
   function getValidationResult(id) {
@@ -458,17 +419,22 @@
       check("Canonical normalizer", typeof normalizeStoredRecord === "function");
       check("Compact payload", typeof compactValidationPayload === "function");
       check("Save API", typeof saveValidationResult === "function");
+      check("Lightweight summary API", typeof getValidationResultRepositorySummary === "function");
       check("Load API", typeof loadValidationResultRepository === "function");
       check("Query API", typeof getValidationResults === "function" && typeof getLatestValidationResult === "function");
       check("Export/import API", typeof exportValidationResultRepository === "function" && typeof importValidationResultRepository === "function");
       check("Repository adapter", typeof publishValidationResultToRepository === "function");
       check("Evidence reference policy", compactValidationPayload({ id: "TEST", componentId: "TEST", scenarioResults: [{ evidenceReferences: ["E1", "E1"] }] }).evidenceReferences.length === 1);
       check("Raw Evidence not duplicated", !Object.prototype.hasOwnProperty.call(compactValidationPayload({ id: "TEST", componentId: "TEST" }), "rawEvidence"));
+      const contract = compactValidationPayload({ id: "TEST", componentId: "TEST", conclusion: { rootCause: "RC", evidenceReferences: ["E1"] }, findings: [{ id: "F1" }], analyticsMetricsPackage: { validationMetrics: [{ id: "M1" }] } });
+      check("Root Cause contract preserved", contract.conclusion.rootCause === "RC" && contract.conclusion.evidenceReferences.includes("E1"));
+      check("Finding contract preserved", contract.findings.length === 1);
+      check("Analytics metrics contract preserved", contract.analyticsMetricsPackage.validationMetrics.length === 1);
     } catch (error) {
       check("Unexpected exception", false, error && error.message ? error.message : String(error));
     }
     const passed = checks.filter(function pass(item) { return item.passed; }).length;
-    return {
+    const result = {
       id: COMPONENT_ID + "-VALIDATION",
       componentId: COMPONENT_ID,
       version: VERSION,
@@ -481,49 +447,13 @@
       checks: checks,
       validatedAt: nowIso()
     };
+    state.lastValidation = clone(result); return result;
   }
 
   function getValidationResultRepositoryStatus() {
-    const validation = validateValidationResultRepository();
-    const officialCount = state.records.filter(function official(item) { return item.official; }).length;
-    const latest = state.records.length ? state.records[0] : null;
-    return {
-      id: COMPONENT_ID,
-      title: "Validation Result Repository",
-      name: "Validation Result Repository",
-      version: VERSION,
-      status: validation.valid ? "Ready" : "Attention",
-      lifecycleStatus: "Active",
-      ready: validation.valid,
-      health: validation.health,
-      progress: 100,
-      recordCount: state.records.length,
-      officialRecordCount: officialCount,
-      latestRecord: latest ? clone(Object.assign({}, latest, { payload: undefined })) : null,
-      storage: {
-        adapter: "localStorage",
-        storageKey: STORAGE_KEY,
-        loaded: state.loaded,
-        maxRecords: MAX_RECORDS
-      },
-      repositoryAdapter: {
-        type: "MemoBox Repository",
-        available: typeof global.getMemoBoxList === "function" && typeof global.saveMemoBoxes === "function",
-        automatic: false
-      },
-      provides: [
-        "Persistent Validation Result Storage",
-        "Canonical Validation Record",
-        "Official Result Query",
-        "MemoBox Repository Publication Adapter",
-        "IDE-140 Analytics Intake"
-      ],
-      nextTask: state.records.length
-        ? "Use official validation records as IDE-140 analytics input."
-        : "Run an official validation to create the first persistent record.",
-      lastError: clone(state.lastError),
-      updatedAt: state.updatedAt
-    };
+    const officialCount = state.records.filter(item => item.official).length; const latest = state.records.length ? state.records[0] : null; const ready = state.loaded === true && !state.lastError;
+    return { id: COMPONENT_ID, title: "Validation Result Repository", name: "Validation Result Repository", version: VERSION, status: ready ? "Ready" : "Attention", lifecycleStatus: "Active", ready, health: state.lastValidation ? state.lastValidation.health : (ready ? 100 : 70), progress: 100, recordCount: state.records.length, officialRecordCount: officialCount, latestRecord: latest ? clone(Object.assign({}, latest, { payload: undefined })) : null,
+      contractVersion: "Compact Canonical Validation Record v1.1", preserves: ["Root Cause reference", "Scenario Findings", "Analytics Metrics Package", "Evidence references", "Handoff requirements"], storage: { adapter: "localStorage", storageKey: STORAGE_KEY, loaded: state.loaded, maxRecords: MAX_RECORDS }, repositoryAdapter: { type: "MemoBox Repository", available: typeof global.getMemoBoxList === "function" && typeof global.saveMemoBoxes === "function", automatic: false }, provides: ["Persistent Validation Result Storage", "Canonical Validation Record", "Official Result Query", "MemoBox Repository Publication Adapter", "IDE-140 Analytics Intake"], nextTask: state.records.length ? "Use official validation records as IDE-140 analytics input." : "Run an official validation to create the first persistent record.", lastValidation: state.lastValidation ? clone({ valid: state.lastValidation.valid, passed: state.lastValidation.passed, failed: state.lastValidation.failed, total: state.lastValidation.total, health: state.lastValidation.health, validatedAt: state.lastValidation.validatedAt }) : null, lastError: clone(state.lastError), updatedAt: state.updatedAt };
   }
 
   const api = {
@@ -531,6 +461,7 @@
     saveValidationResult: saveValidationResult,
     getValidationResult: getValidationResult,
     getValidationResults: getValidationResults,
+    getValidationResultRepositorySummary: getValidationResultRepositorySummary,
     getLatestValidationResult: getLatestValidationResult,
     removeValidationResult: removeValidationResult,
     clearValidationResultRepository: clearValidationResultRepository,
