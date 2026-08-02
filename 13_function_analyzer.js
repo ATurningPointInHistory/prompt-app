@@ -215,6 +215,63 @@ ${escapeHtml(
 
 }
 
+function jumpFunctionAnalyzer(
+  name
+) {
+
+  const functionName =
+    String(
+      name ||
+      window.currentFunctionAnalyzerName ||
+      ""
+    ).trim();
+
+  if (!functionName) {
+    return false;
+  }
+
+  const info =
+    getFunctionAnalyzerInfo(
+      functionName
+    );
+
+  if (!info) {
+    return false;
+  }
+
+  window.currentFunctionAnalyzerName =
+    functionName;
+
+  if (
+    typeof openRepairTarget ===
+    "function"
+  ) {
+    return Boolean(
+      openRepairTarget(
+        info.fileName || "",
+        Math.max(
+          1,
+          Number(info.line) || 1
+        )
+      )
+    );
+  }
+
+  if (
+    typeof jumpToFunction ===
+    "function"
+  ) {
+    return Boolean(
+      jumpToFunction(
+        functionName
+      )
+    );
+  }
+
+  return false;
+
+}
+
 function copyFunctionAnalyzerReport() {
 
   copyTextFallback(
