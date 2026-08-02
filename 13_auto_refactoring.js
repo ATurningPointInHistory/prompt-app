@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring.js
    IDE-150 Auto Refactoring
-   Version: 1.2.4
+   Version: 1.2.6
    Status: Validation Storage Isolation Hardened
    Design Freeze: 2026-07-26
    ============================================================ */
@@ -9,7 +9,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-150";
-  const VERSION = "1.2.4";
+  const VERSION = "1.2.6";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CORE_V1";
   const STORAGE_SCHEMA_VERSION = 2;
   const IDE140_PHASE2B_STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2B_V1";
@@ -408,13 +408,16 @@
       if (!item || !item.artifactKey || !keepKeys.has(item.artifactKey)) return;
       if (!item.rollbackSnapshot) return;
       const hasInlineSource = typeof item.rollbackSnapshot.source === "string" && item.rollbackSnapshot.source.length > 0;
+      const hasFunctionSnapshot = typeof item.rollbackSnapshot.beforeFunctionSource === "string" && item.rollbackSnapshot.beforeFunctionSource.length > 0;
       const hasSnapshotReference = typeof item.rollbackSnapshot.storageKey === "string" && item.rollbackSnapshot.storageKey.length > 0;
-      if (!hasInlineSource && !hasSnapshotReference) return;
+      if (!hasInlineSource && !hasFunctionSnapshot && !hasSnapshotReference) return;
       try {
         const persistedItem = clone(item);
         if (hasSnapshotReference && persistedItem.rollbackSnapshot) {
           persistedItem.rollbackSnapshot.source = "";
+          persistedItem.rollbackSnapshot.beforeFunctionSource = "";
           persistedItem.rollbackSnapshot.sourceStoredSeparately = true;
+          persistedItem.rollbackSnapshot.functionSourceStoredSeparately = hasFunctionSnapshot;
         }
         const raw = JSON.stringify(persistedItem);
         storage.setItem(item.artifactKey, raw);
@@ -504,15 +507,31 @@
 
   function hydrateTransactionSnapshot(item) {
     if (!item || !item.rollbackSnapshot) return item;
-    if (typeof item.rollbackSnapshot.source === "string" && item.rollbackSnapshot.source.length > 0) return item;
+    const hasFullSource = typeof item.rollbackSnapshot.source === "string" && item.rollbackSnapshot.source.length > 0;
+    const hasFunctionSource = typeof item.rollbackSnapshot.beforeFunctionSource === "string" && item.rollbackSnapshot.beforeFunctionSource.length > 0;
+    if (hasFullSource || hasFunctionSource) return item;
     const storageKey = text(item.rollbackSnapshot.storageKey, "");
     if (!storageKey) return item;
     const snapshot = readArtifact(storageKey);
-    if (!snapshot || snapshot.transactionId !== item.id || typeof snapshot.source !== "string") return item;
-    if (snapshot.sourceHash && hashText(snapshot.source) !== snapshot.sourceHash) return item;
-    item.rollbackSnapshot.source = snapshot.source;
-    item.rollbackSnapshot.sourceHash = snapshot.sourceHash || item.rollbackSnapshot.sourceHash;
+    if (!snapshot || snapshot.transactionId !== item.id) return item;
+    if (snapshot.mode === "Function-Level" || snapshot.schemaVersion === 2) {
+      if (typeof snapshot.beforeFunctionSource !== "string" || !snapshot.beforeFunctionSource) return item;
+      if (snapshot.beforeFunctionHash && hashText(snapshot.beforeFunctionSource) !== snapshot.beforeFunctionHash) return item;
+      item.rollbackSnapshot.mode = "Function-Level";
+      item.rollbackSnapshot.beforeFunctionSource = snapshot.beforeFunctionSource;
+      item.rollbackSnapshot.beforeFunctionHash = snapshot.beforeFunctionHash || item.rollbackSnapshot.beforeFunctionHash;
+      item.rollbackSnapshot.afterFunctionHash = snapshot.afterFunctionHash || item.rollbackSnapshot.afterFunctionHash;
+      item.rollbackSnapshot.beforeFileHash = snapshot.beforeFileHash || item.beforeFileHash;
+      item.rollbackSnapshot.afterFileHash = snapshot.afterFileHash || item.afterFileHash;
+    } else {
+      if (typeof snapshot.source !== "string") return item;
+      if (snapshot.sourceHash && hashText(snapshot.source) !== snapshot.sourceHash) return item;
+      item.rollbackSnapshot.mode = "Full-File";
+      item.rollbackSnapshot.source = snapshot.source;
+      item.rollbackSnapshot.sourceHash = snapshot.sourceHash || item.rollbackSnapshot.sourceHash;
+    }
     item.rollbackSnapshot.persisted = true;
+    item.rollbackSnapshot.schemaVersion = snapshot.schemaVersion || 1;
     item.rollbackSnapshot.verifiedAt = snapshot.verifiedAt || item.rollbackSnapshot.verifiedAt || "";
     return item;
   }
@@ -522,7 +541,10 @@
     const current = state.transactions.get(key) || null;
     if (!current) return null;
     hydrateTransactionSnapshot(current);
-    if (current.rollbackSnapshot && typeof current.rollbackSnapshot.source === "string" && current.rollbackSnapshot.source.length > 0) return current;
+    if (current.rollbackSnapshot && (
+      (typeof current.rollbackSnapshot.source === "string" && current.rollbackSnapshot.source.length > 0) ||
+      (typeof current.rollbackSnapshot.beforeFunctionSource === "string" && current.rollbackSnapshot.beforeFunctionSource.length > 0)
+    )) return current;
     const artifact = readArtifact(current.artifactKey);
     if (artifact && artifact.id === key) {
       hydrateTransactionSnapshot(artifact);
