@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_auto_refactoring_validation.js
    IDE-150 Auto Refactoring Validation / Status / Integration
-   Version: 1.2.0
-   Status: Core Phase 1 Completed / Smartphone Freeze Fix
+   Version: 1.2.1
+   Status: Current Project Source Auto-Load Validation
    ============================================================ */
 (function (global) {
   "use strict";
@@ -545,10 +545,64 @@
     };
   }
 
+  async function validateAutoRefactoringRuntime(options) {
+    const settings = options && typeof options === "object" ? options : {};
+    let sourceLoad = {
+      ready: false,
+      loadedNow: false,
+      sourceCount: 0,
+      failedFileCount: 0,
+      failedFiles: [],
+      reason: "Current Project source loader is unavailable."
+    };
+
+    if (typeof global.ensureCurrentProjectAnalyzeSources === "function") {
+      const loaded = await global.ensureCurrentProjectAnalyzeSources({ silent: settings.silent !== false });
+      sourceLoad = {
+        ready: Boolean(loaded && loaded.ready),
+        loadedNow: Boolean(loaded && loaded.loadedNow),
+        sourceCount: Number(loaded && loaded.sourceCount) || 0,
+        failedFileCount: Number(loaded && loaded.failedFileCount) || 0,
+        failedFiles: clone(loaded && loaded.failedFiles || []),
+        reason: loaded && loaded.reason ? String(loaded.reason) : ""
+      };
+    }
+
+    if (!sourceLoad.ready) {
+      return {
+        valid: false,
+        status: "Blocked",
+        reason: sourceLoad.reason || "Current Project sources are unavailable.",
+        sourceLoad: sourceLoad,
+        lightweight: null,
+        deep: null,
+        controlled: null
+      };
+    }
+
+    const lightweight = validateAutoRefactoring();
+    const deep = validateAutoRefactoring({ deep: true });
+    const controlled = typeof global.validateControlledAutoRefactoringApplication === "function"
+      ? global.validateControlledAutoRefactoringApplication()
+      : { valid: false, passed: 0, failed: 1, total: 1, health: 0, reason: "Controlled Application validator is unavailable." };
+
+    return {
+      valid: lightweight.valid === true && deep.valid === true && controlled.valid === true,
+      status: lightweight.valid === true && deep.valid === true && controlled.valid === true ? "Ready" : "Failed",
+      reason: "",
+      sourceLoad: sourceLoad,
+      lightweight: lightweight,
+      deep: deep,
+      controlled: controlled,
+      validatedAt: nowIso()
+    };
+  }
+
   const validationApi = {
     validateIDE140ToIDE150Integration: validateIDE140ToIDE150Integration,
     validateAutoRefactoring: validateAutoRefactoring,
     validateAutoRefactoringDeep: validateAutoRefactoringDeep,
+    validateAutoRefactoringRuntime: validateAutoRefactoringRuntime,
     getAutoRefactoringStatus: getAutoRefactoringStatus,
     getAutoRefactoringPipelineStages: function getStages() { return PIPELINE_STAGES.slice(); },
     getAutoRefactoringRequestStates: function getStates() { return REQUEST_STATES.slice(); },
