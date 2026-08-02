@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_search_regression_baseline.js
    IDE-120 / IDE-125 Official Release Baseline
-   Version: 1.0.0
-   Status: Frozen
+   Version: 1.0.1
+   Status: Provisional / Regression Dataset Frozen
    ============================================================ */
 (function (global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-120-125-BASELINE";
-  const VERSION = "1.0.0";
+  const VERSION = "1.0.1";
   const STORAGE_KEY = "AI_PROMPT_OS_GOLDEN_CORE_REGRESSION_BASELINE_V1";
   const DATASET_ID = "golden-core";
   const EXPECTED_CASE_COUNT = 30;
@@ -16,8 +16,9 @@
   const PERFORMANCE_BASELINE = deepFreeze({
     id: "PERFORMANCE-BASELINE-V1.0",
     version: VERSION,
-    status: "Frozen",
-    baselineType: "Policy and Release Baseline",
+    status: "Provisional",
+    baselineType: "Provisional Policy Baseline",
+    calibration: { status: "Not Calibrated", source: "Default thresholds", deviceProfiles: 0, measuredRuns: 0 },
     strategyVersion: "1.1.1",
     validationVersion: "1.0.2",
     dataset: {
@@ -209,7 +210,7 @@
     const snapshot = state.snapshot || readStoredSnapshot();
     const checks = [
       { name: "Performance baseline version", passed: PERFORMANCE_BASELINE.version === "1.0.0" },
-      { name: "Performance baseline frozen", passed: PERFORMANCE_BASELINE.status === "Frozen" },
+      { name: "Performance baseline declared provisional", passed: PERFORMANCE_BASELINE.status === "Provisional" && PERFORMANCE_BASELINE.calibration.status === "Not Calibrated" },
       { name: "IDE-120 official completion", passed: PERFORMANCE_BASELINE.release.IDE120 === "Completed" },
       { name: "IDE-125 official completion", passed: PERFORMANCE_BASELINE.release.IDE125 === "Completed" },
       { name: "Release allowed", passed: PERFORMANCE_BASELINE.release.releaseAllowed === true },
