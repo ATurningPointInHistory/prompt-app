@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_auto_refactoring_transaction.js
    IDE-150 Auto Refactoring Transaction Extension
-   Version: 1.2.2
-   Status: Rollback Snapshot Persistence Hardened
+   Version: 1.2.3
+   Status: Validation-Isolated Rollback Persistence
    ============================================================ */
 (function (global) {
   "use strict";
@@ -33,19 +33,23 @@
   const persistAutoRefactoringState = internal.persistAutoRefactoringState;
   const findFunctionBlock = internal.findFunctionBlock;
   const countFunctionDefinitions = internal.countFunctionDefinitions;
+  const getStorage = typeof internal.getStorage === "function"
+    ? internal.getStorage
+    : function fallbackStorage() { try { return global.localStorage || null; } catch (_) { return null; } };
   const ROLLBACK_SNAPSHOT_PREFIX = "AI_PROMPT_OS_IDE150_ROLLBACK_SNAPSHOT_V1:";
   const ROLLBACK_SNAPSHOT_LIMIT = Math.max(3, Number(MAX_ROLLBACK_SNAPSHOTS) || 10);
 
   function listRollbackSnapshotRecords() {
     const records = [];
-    if (!global.localStorage) return records;
+    const storage = getStorage();
+    if (!storage) return records;
     try {
-      for (let index = 0; index < global.localStorage.length; index += 1) {
-        const key = global.localStorage.key(index);
+      for (let index = 0; index < storage.length; index += 1) {
+        const key = storage.key(index);
         if (!key || key.indexOf(ROLLBACK_SNAPSHOT_PREFIX) !== 0) continue;
         let payload = null;
         try {
-          const raw = global.localStorage.getItem(key);
+          const raw = storage.getItem(key);
           payload = raw ? JSON.parse(raw) : null;
         } catch (_) {}
         records.push({
@@ -68,7 +72,8 @@
     const removed = [];
     for (let index = 0; index < removeCount; index += 1) {
       try {
-        global.localStorage.removeItem(records[index].key);
+        const storage = getStorage();
+        if (storage) storage.removeItem(records[index].key);
         removed.push(records[index].key);
       } catch (_) {}
     }
@@ -76,7 +81,8 @@
   }
 
   function persistRollbackSnapshot(transaction) {
-    if (!global.localStorage) return { persisted: false, reason: "localStorage is unavailable." };
+    const storage = getStorage();
+    if (!storage) return { persisted: false, reason: "Storage is unavailable." };
     if (!transaction || !transaction.rollbackSnapshot || typeof transaction.rollbackSnapshot.source !== "string") {
       return { persisted: false, reason: "Rollback Snapshot source is unavailable." };
     }
@@ -98,8 +104,8 @@
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
         if (attempt > 0) pruneRollbackSnapshots(storageKey);
-        global.localStorage.setItem(storageKey, raw);
-        const storedRaw = global.localStorage.getItem(storageKey);
+        storage.setItem(storageKey, raw);
+        const storedRaw = storage.getItem(storageKey);
         const stored = storedRaw ? JSON.parse(storedRaw) : null;
         const verified = Boolean(
           stored &&
@@ -129,30 +135,32 @@
   }
 
   function removeRollbackSnapshot(storageKey) {
-    if (!global.localStorage || !storageKey) return false;
+    const storage = getStorage();
+    if (!storage || !storageKey) return false;
     try {
-      global.localStorage.removeItem(storageKey);
-      return global.localStorage.getItem(storageKey) === null;
+      storage.removeItem(storageKey);
+      return storage.getItem(storageKey) === null;
     } catch (_) { return false; }
   }
 
   function verifyPersistedTransaction(transaction) {
-    if (!transaction || !global.localStorage) return { verified: false, reason: "Transaction persistence cannot be verified." };
+    const storage = getStorage();
+    if (!transaction || !storage) return { verified: false, reason: "Transaction persistence cannot be verified." };
     try {
-      const coreRaw = global.localStorage.getItem(internal.STORAGE_KEY);
+      const coreRaw = storage.getItem(internal.STORAGE_KEY);
       const core = coreRaw ? JSON.parse(coreRaw) : null;
       const compact = core && Array.isArray(core.transactions)
         ? core.transactions.find(function find(item) { return item && item.id === transaction.id; })
         : null;
       if (!compact || !compact.artifactKey) return { verified: false, reason: "Compact Transaction record is unavailable." };
-      const artifactRaw = global.localStorage.getItem(compact.artifactKey);
+      const artifactRaw = storage.getItem(compact.artifactKey);
       const artifact = artifactRaw ? JSON.parse(artifactRaw) : null;
       if (!artifact || artifact.id !== transaction.id) return { verified: false, reason: "Transaction Artifact read-back failed." };
       const snapshotKey = text(artifact.rollbackSnapshot && artifact.rollbackSnapshot.storageKey, "");
       if (!snapshotKey || snapshotKey !== text(transaction.rollbackSnapshot && transaction.rollbackSnapshot.storageKey, "")) {
         return { verified: false, reason: "Transaction Artifact does not reference the persisted Rollback Snapshot." };
       }
-      const snapshotRaw = global.localStorage.getItem(snapshotKey);
+      const snapshotRaw = storage.getItem(snapshotKey);
       const snapshot = snapshotRaw ? JSON.parse(snapshotRaw) : null;
       if (!snapshot || snapshot.transactionId !== transaction.id || typeof snapshot.source !== "string") {
         return { verified: false, reason: "Rollback Snapshot read-back failed." };
