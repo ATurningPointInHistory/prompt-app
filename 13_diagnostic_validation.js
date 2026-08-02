@@ -1,13 +1,13 @@
 /* ===============================
    FILE: 13_diagnostic_validation.js
    AI Prompt OS v7.0
-   IDE-115 Diagnostic Validation Platform v1.0.1
+   IDE-115 Diagnostic Validation Platform v1.0.2
 =============================== */
 (function (global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-115";
-  const VERSION = "1.0.1";
+  const VERSION = "1.0.2";
   const MAX_HISTORY = 50;
 
   const state = {
@@ -191,12 +191,16 @@
     const requiredApis = ["registerDiagnosticValidationRule", "unregisterDiagnosticValidationRule", "listDiagnosticValidationRules", "runDiagnosticValidation", "runDiagnosticValidationGroup", "runAllDiagnosticValidations", "buildDiagnosticValidationReport", "calculateDiagnosticValidationHealth", "getDiagnosticValidationHistory", "getDiagnosticValidationStatus", "validateDiagnosticValidationPlatform"];
     const implemented = requiredApis.filter(function (name) { return typeof global[name] === "function"; }).length;
     const ruleCount = Object.keys(state.rules).length; const platformReady = implemented === requiredApis.length && ruleCount >= 20;
-    const last = state.lastResult; const releaseAllowed = Boolean(last && last.valid === true && last.failed === 0 && last.critical === 0);
+    const last = state.lastResult;
+    const releaseEvidence = typeof global.getDevelopmentReleaseEvidence === "function"
+      ? global.getDevelopmentReleaseEvidence(COMPONENT_ID, { componentVersion: VERSION })
+      : null;
+    const releaseAllowed = Boolean((last && last.valid === true && last.failed === 0 && last.critical === 0) || (releaseEvidence && releaseEvidence.releaseAllowed));
     return { id: COMPONENT_ID, title: "Diagnostic Validation Platform", name: "Diagnostic Validation Platform", version: VERSION,
       status: platformReady ? "Ready" : "In Progress", lifecycleStatus: releaseAllowed ? "Completed" : "Implementation", officialStatus: releaseAllowed ? "Official" : "Not Run",
-      ready: platformReady, releaseAllowed: releaseAllowed, progress: Math.round((implemented / requiredApis.length) * 100), health: last ? last.health : (platformReady ? 90 : 70),
+      ready: platformReady, releaseAllowed: releaseAllowed, progress: Math.round((implemented / requiredApis.length) * 100), health: last ? last.health : (releaseEvidence ? releaseEvidence.health : (platformReady ? 90 : 70)),
       implemented: implemented, total: requiredApis.length, registeredRules: ruleCount, historyCount: state.history.length, reportCount: state.reports.length,
-      lastValidation: last ? clone(last) : null, warnings: releaseAllowed ? [] : ["Platform readiness does not equal an Official validation result."], errors: state.lastError ? [clone(state.lastError)] : [],
+      lastValidation: last ? clone(last) : (releaseEvidence ? clone({ valid: true, failed: 0, health: releaseEvidence.health, validatedAt: releaseEvidence.completedAt, source: releaseEvidence.source }) : null), releaseEvidence: releaseEvidence, warnings: releaseAllowed ? [] : ["Platform readiness does not equal an Official validation result."], errors: state.lastError ? [clone(state.lastError)] : [],
       nextTask: releaseAllowed ? "IDE-115 Official validation is available for downstream gates." : "Run validateDiagnosticValidationPlatform() and resolve all Critical failures.",
       dependsOn: ["IDE-110", "IDE-090", "VALIDATION-001"], provides: ["Validation Registry", "Validation Runner", "Health Calculation", "Validation History", "Validation Reporting", "Validation Status API"], updatedAt: state.updatedAt };
   }
@@ -232,8 +236,11 @@
   });
 
   function validateDiagnosticValidationPlatform() {
-    const result = runDiagnosticValidationGroup("IDE-110");
-    return Object.assign({}, result, { id: "IDE-115-VALIDATION" });
+    const result = Object.assign({}, runDiagnosticValidationGroup("IDE-110"), { id: "IDE-115-VALIDATION", componentId: COMPONENT_ID, version: VERSION });
+    if (result.valid && result.failed === 0 && typeof global.saveDevelopmentReleaseEvidence === "function") {
+      global.saveDevelopmentReleaseEvidence(COMPONENT_ID, result, { componentVersion: VERSION, releaseAllowed: true });
+    }
+    return result;
   }
 
   const api = {
