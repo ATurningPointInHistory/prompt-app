@@ -4,6 +4,113 @@
    Knowledge Migration Engine v2
 =============================== */
 
+
+/* ===============================
+   Migration Registry
+=============================== */
+
+function getKnowledgeMigrationRegistry() {
+
+  return {
+    version: "7.0.1",
+    replacements: [
+      { from: "IMPORT-001", to: "TRANSFER-001" },
+      { from: "LOGGING-001", to: "OBSERVABILITY-001" },
+      { from: "SEARCH-001", to: "RETRIEVAL-001" },
+      { from: "DATABASE-001", to: "REPOSITORY-001" },
+      { from: "SETTING-001", to: "CONFIGURATION-001" },
+      { from: "TEST-001", to: "VALIDATION-001" },
+      { from: "QUALITY-001", to: "VALIDATION-001" },
+      { from: "AUDIT-001", to: "OBSERVABILITY-001" },
+      { from: "MONITORING-001", to: "OBSERVABILITY-001" },
+      { from: "HEALTH-001", to: "OBSERVABILITY-001" }
+    ],
+    metadataFields: [
+      { field: "Authority:", key: "authority", insertAfter: "Owner:" },
+      { field: "DependsOn:", key: "dependsOn", insertAfter: "Authority:" },
+      { field: "Provides:", key: "provides", insertAfter: "DependsOn:" }
+    ],
+    rules: {
+      preserveMemoCount: true,
+      preserveUserText: true,
+      overwriteKnownRulesOnly: true,
+      useSaveMemoBoxes: true
+    }
+  };
+
+}
+
+/* ===============================
+   Migration Scanner
+=============================== */
+
+function scanKnowledgeMigration() {
+
+  const registry =
+    getKnowledgeMigrationRegistry();
+
+  const list =
+    getKnowledgeMigrationMemoList();
+
+  const results = [];
+
+  list.forEach((memo, index) => {
+
+    if (!memo || typeof memo !== "object") {
+      return;
+    }
+
+    const text =
+      [
+        memo.id,
+        memo.name,
+        memo.title,
+        memo.summary,
+        memo.text,
+        memo.relationships,
+        memo.dependsOn,
+        memo.provides
+      ]
+        .join("\n");
+
+    const replacements =
+      registry.replacements.filter(rule =>
+        text.includes(rule.from)
+      );
+
+    const missingMetadata =
+      registry.metadataFields.filter(rule =>
+        !memo[rule.key]
+      );
+
+    if (
+      replacements.length ||
+      missingMetadata.length
+    ) {
+      results.push({
+        index,
+        id: memo.id || "",
+        name: memo.name || "",
+        title: memo.title || "",
+        replacements,
+        missingMetadata
+      });
+    }
+
+  });
+
+  return {
+    version: registry.version,
+    checked: list.length,
+    candidates: results.length,
+    results,
+    changed: false,
+    message: "Scan completed. No data was modified.",
+    updatedAt: Date.now()
+  };
+
+}
+
 /* ===============================
    Memo List Access
 =============================== */
@@ -49,11 +156,21 @@ function patchKnowledgeObjectTextV7(text) {
 
   registry.metadataFields.forEach(rule => {
 
+    const field =
+      typeof rule === "string"
+        ? rule + (rule.endsWith(":") ? "" : ":")
+        : rule.field;
+
+    const insertAfter =
+      typeof rule === "string"
+        ? "Owner:"
+        : rule.insertAfter;
+
     source =
       addMissingMetadataFieldV7(
         source,
-        rule.field,
-        rule.insertAfter
+        field,
+        insertAfter
       );
 
   });
@@ -75,21 +192,69 @@ function addMissingMetadataFieldV7(
   const source =
     String(text || "");
 
+  const targetField =
+    String(field || "").trim();
+
+  const anchorField =
+    String(insertAfter || "").trim();
+
   if (
-    !field ||
-    source.includes(field)
+    !targetField ||
+    source.includes(targetField)
   ) {
     return source;
   }
 
-  if (!source.includes(insertAfter)) {
+  const lines =
+    source.split(/\r?\n/);
+
+  const anchorIndex =
+    lines.findIndex(line =>
+      String(line || "").trim() ===
+      anchorField
+    );
+
+  if (anchorIndex < 0) {
     return source;
   }
 
-  return source.replace(
-    insertAfter,
-    insertAfter + "\n\n" + field
+  let insertIndex =
+    anchorIndex + 1;
+
+  const anchorHasInlineValue =
+    anchorField.includes(":") &&
+    String(lines[anchorIndex] || "")
+      .trim() !== anchorField;
+
+  if (
+    !anchorHasInlineValue &&
+    insertIndex < lines.length
+  ) {
+    const nextLine =
+      String(lines[insertIndex] || "")
+        .trim();
+
+    const nextIsMetadataLabel =
+      /^[A-Za-z][A-Za-z0-9 _-]*:\s*$/.test(
+        nextLine
+      );
+
+    if (
+      nextLine &&
+      !nextIsMetadataLabel
+    ) {
+      insertIndex += 1;
+    }
+  }
+
+  lines.splice(
+    insertIndex,
+    0,
+    "",
+    targetField
   );
+
+  return lines.join("\n");
 
 }
 
