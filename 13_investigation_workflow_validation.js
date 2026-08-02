@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_investigation_workflow_validation.js
    IDE-135 Investigation Workflow Validation
-   Version: 1.2.3
+   Version: 1.2.4
    Status: Ready
    Design Freeze: 2026-07-26
    ============================================================ */
@@ -9,7 +9,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-135";
-  const VERSION = "1.2.3";
+  const VERSION = "1.2.4";
   const TARGET_COMPONENT = "IDE-130";
   const MAX_HISTORY = 100;
 
@@ -1246,16 +1246,38 @@
         ? global.getValidationResultRepositoryStatus()
         : null;
 
+    const repositoryReady = Boolean(repository && repository.ready);
+    const repositoryReleaseAllowed = Boolean(
+      repositoryReady &&
+      (
+        repository.releaseAllowed === true ||
+        repository.releaseStatus === "Official" ||
+        repository.officialStatus === "Official"
+      )
+    );
+
     results.push({
       component: "Validation Result Repository",
       statusApi: "getValidationResultRepositoryStatus",
       available: Boolean(repository),
-      platformReady: Boolean(repository && repository.ready),
-      exposesReleaseState: true,
-      releaseAllowed: true,
-      contractPassed: Boolean(repository && repository.ready),
-      passed: Boolean(repository && repository.ready),
-      health: repository && repository.health
+      platformReady: repositoryReady,
+      exposesReleaseState: Boolean(
+        repository &&
+        (
+          Object.prototype.hasOwnProperty.call(repository, "releaseAllowed") ||
+          Object.prototype.hasOwnProperty.call(repository, "releaseStatus") ||
+          Object.prototype.hasOwnProperty.call(repository, "officialStatus")
+        )
+      ),
+      releaseAllowed: repositoryReleaseAllowed,
+      contractPassed: repositoryReady && repositoryReleaseAllowed,
+      passed: repositoryReady && repositoryReleaseAllowed,
+      health: repository && repository.health,
+      lifecycleStatus: repository && repository.lifecycleStatus,
+      releaseStatus: repository && (repository.releaseStatus || repository.officialStatus),
+      releaseEvidenceSource:
+        repository && repository.releaseEvidence && repository.releaseEvidence.source ||
+        "Validation Result Repository"
     });
 
     const passed =
