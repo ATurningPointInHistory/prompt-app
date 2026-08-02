@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_auto_refactoring_controlled_application.js
    IDE-150 Controlled Application Trial
-   Version: 1.0.4
-   Status: Validation Storage Isolated
+   Version: 1.0.5
+   Status: Function-Level Rollback Snapshot Compatible
    ============================================================ */
 (function (global) {
   "use strict";
@@ -12,7 +12,7 @@
 
   const COMPONENT_ID = internal.COMPONENT_ID;
   const VERSION = internal.VERSION;
-  const CONTROLLED_VERSION = "1.0.4";
+  const CONTROLLED_VERSION = "1.0.5";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CONTROLLED_APPLICATION_V1";
   const MAX_SESSIONS = 20;
   const nowIso = internal.nowIso;
@@ -483,7 +483,10 @@
         transactionId: applied.transaction && applied.transaction.id,
         transactionStatus: applied.transaction && applied.transaction.status,
         repositoryValidation: clone(applied.validation || null),
-        implementationPackageId: applied.implementationPackage && applied.implementationPackage.id
+        implementationPackageId: applied.implementationPackage && applied.implementationPackage.id,
+        rollbackSnapshotPersistence: clone(applied.rollbackSnapshotPersistence || null),
+        transactionPersistence: clone(applied.persistence || null),
+        persistenceVerification: clone(applied.persistenceVerification || null)
       } : null,
       postValidation: clone(postValidation),
       rollback: rollback ? {
@@ -672,8 +675,29 @@
           : null;
       } catch (_) {}
       check("Dedicated Rollback Snapshot reference", Boolean(rollbackSnapshotKey));
-      check("Rollback Snapshot read-back verified", Boolean(rollbackSnapshotArtifact && rollbackSnapshotArtifact.transactionId === transactionId && typeof rollbackSnapshotArtifact.source === "string" && rollbackSnapshotArtifact.source.length > 0 && hashText(rollbackSnapshotArtifact.source) === rollbackSnapshotArtifact.sourceHash));
-      check("Transaction Artifact excludes duplicate Snapshot source", Boolean(transactionArtifact && transactionArtifact.rollbackSnapshot && transactionArtifact.rollbackSnapshot.source === "" && transactionArtifact.rollbackSnapshot.sourceStoredSeparately === true));
+      const functionSnapshotVerified = Boolean(
+        rollbackSnapshotArtifact &&
+        rollbackSnapshotArtifact.transactionId === transactionId &&
+        rollbackSnapshotArtifact.mode === "Function-Level" &&
+        typeof rollbackSnapshotArtifact.beforeFunctionSource === "string" &&
+        rollbackSnapshotArtifact.beforeFunctionSource.length > 0 &&
+        hashText(rollbackSnapshotArtifact.beforeFunctionSource) === rollbackSnapshotArtifact.beforeFunctionHash
+      );
+      const fullSnapshotVerified = Boolean(
+        rollbackSnapshotArtifact &&
+        rollbackSnapshotArtifact.transactionId === transactionId &&
+        typeof rollbackSnapshotArtifact.source === "string" &&
+        rollbackSnapshotArtifact.source.length > 0 &&
+        hashText(rollbackSnapshotArtifact.source) === rollbackSnapshotArtifact.sourceHash
+      );
+      check("Rollback Snapshot read-back verified", functionSnapshotVerified || fullSnapshotVerified);
+      check("Transaction Artifact excludes duplicate Snapshot source", Boolean(
+        transactionArtifact &&
+        transactionArtifact.rollbackSnapshot &&
+        transactionArtifact.rollbackSnapshot.source === "" &&
+        transactionArtifact.rollbackSnapshot.beforeFunctionSource === "" &&
+        transactionArtifact.rollbackSnapshot.sourceStoredSeparately === true
+      ));
       const validationStorageForCount = getStorage();
       const rollbackSnapshotKeyCount = validationStorageForCount
         ? Array.from({ length: validationStorageForCount.length }, function key(_, index) { return validationStorageForCount.key(index); }).filter(function filter(key) { return key && key.indexOf("AI_PROMPT_OS_IDE150_ROLLBACK_SNAPSHOT_V1:") === 0; }).length
@@ -802,7 +826,9 @@
       "Execution actor must match the explicit Approval actor.": "実行者は承認者と一致する必要があります。",
       "Execution confirmation text does not match the required challenge.": "実行用確認文字列が一致しません。",
       "Current Project Runtime File Store Adapter is unavailable.": "現在のプロジェクト実行時ファイルストアを利用できません。",
-      "Target Project source is unavailable.": "対象プロジェクトのソースを取得できません。"
+      "Target Project source is unavailable.": "対象プロジェクトのソースを取得できません。",
+      "Rollback Snapshot must be persisted and verified before Repository modification.": "リポジトリ変更前にロールバック用スナップショットを保存・検証できませんでした。保存容量を確認し、新しいトライアルを作成してください。",
+      "Rollback Snapshot and Transaction State must be persisted before Repository modification.": "リポジトリ変更前にロールバック情報とトランザクション状態を保存・検証できませんでした。"
     };
 
     function ja(value, fallback) {
