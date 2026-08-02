@@ -427,9 +427,6 @@ window.registerArchitectureObject =
 window.getArchitectureObject =
   getArchitectureObject;
 
-window.searchArchitectureObjects =
-  searchArchitectureObjects;
-
 window.addArchitectureRelationship =
   addArchitectureRelationship;
 
