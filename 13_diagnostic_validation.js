@@ -1,13 +1,13 @@
 /* ===============================
    FILE: 13_diagnostic_validation.js
    AI Prompt OS v7.0
-   IDE-115 Diagnostic Validation Platform v1.0.0
+   IDE-115 Diagnostic Validation Platform v1.0.1
 =============================== */
 (function (global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-115";
-  const VERSION = "1.0.0";
+  const VERSION = "1.0.1";
   const MAX_HISTORY = 50;
 
   const state = {
@@ -188,37 +188,17 @@
   }
 
   function getDiagnosticValidationStatus() {
-    const requiredApis = [
-      "registerDiagnosticValidationRule", "unregisterDiagnosticValidationRule", "listDiagnosticValidationRules",
-      "runDiagnosticValidation", "runDiagnosticValidationGroup", "runAllDiagnosticValidations",
-      "buildDiagnosticValidationReport", "calculateDiagnosticValidationHealth",
-      "getDiagnosticValidationHistory", "getDiagnosticValidationStatus", "validateDiagnosticValidationPlatform"
-    ];
+    const requiredApis = ["registerDiagnosticValidationRule", "unregisterDiagnosticValidationRule", "listDiagnosticValidationRules", "runDiagnosticValidation", "runDiagnosticValidationGroup", "runAllDiagnosticValidations", "buildDiagnosticValidationReport", "calculateDiagnosticValidationHealth", "getDiagnosticValidationHistory", "getDiagnosticValidationStatus", "validateDiagnosticValidationPlatform"];
     const implemented = requiredApis.filter(function (name) { return typeof global[name] === "function"; }).length;
-    const ruleCount = Object.keys(state.rules).length;
-    const ready = implemented === requiredApis.length && ruleCount >= 20;
-    return {
-      id: COMPONENT_ID,
-      title: "Diagnostic Validation Platform",
-      name: "Diagnostic Validation Platform",
-      version: VERSION,
-      status: ready ? "Ready" : "In Progress",
-      ready,
-      progress: Math.round((implemented / requiredApis.length) * 100),
-      health: state.lastResult ? state.lastResult.health : (ready ? 100 : 90),
-      implemented,
-      total: requiredApis.length,
-      registeredRules: ruleCount,
-      historyCount: state.history.length,
-      reportCount: state.reports.length,
-      lastValidation: clone(state.lastResult),
-      warnings: [],
-      errors: state.lastError ? [clone(state.lastError)] : [],
-      nextTask: ready ? "Run IDE-120 Advanced Search Strategy implementation." : "Complete IDE-115 Diagnostic Validation APIs.",
-      dependsOn: ["IDE-110", "IDE-090", "VALIDATION-001"],
-      provides: ["Validation Registry", "Validation Runner", "Health Calculation", "Validation History", "Validation Reporting", "Validation Status API"],
-      updatedAt: state.updatedAt
-    };
+    const ruleCount = Object.keys(state.rules).length; const platformReady = implemented === requiredApis.length && ruleCount >= 20;
+    const last = state.lastResult; const releaseAllowed = Boolean(last && last.valid === true && last.failed === 0 && last.critical === 0);
+    return { id: COMPONENT_ID, title: "Diagnostic Validation Platform", name: "Diagnostic Validation Platform", version: VERSION,
+      status: platformReady ? "Ready" : "In Progress", lifecycleStatus: releaseAllowed ? "Completed" : "Implementation", officialStatus: releaseAllowed ? "Official" : "Not Run",
+      ready: platformReady, releaseAllowed: releaseAllowed, progress: Math.round((implemented / requiredApis.length) * 100), health: last ? last.health : (platformReady ? 90 : 70),
+      implemented: implemented, total: requiredApis.length, registeredRules: ruleCount, historyCount: state.history.length, reportCount: state.reports.length,
+      lastValidation: last ? clone(last) : null, warnings: releaseAllowed ? [] : ["Platform readiness does not equal an Official validation result."], errors: state.lastError ? [clone(state.lastError)] : [],
+      nextTask: releaseAllowed ? "IDE-115 Official validation is available for downstream gates." : "Run validateDiagnosticValidationPlatform() and resolve all Critical failures.",
+      dependsOn: ["IDE-110", "IDE-090", "VALIDATION-001"], provides: ["Validation Registry", "Validation Runner", "Health Calculation", "Validation History", "Validation Reporting", "Validation Status API"], updatedAt: state.updatedAt };
   }
 
   function apiExists(name) { return typeof global[name] === "function"; }
@@ -241,9 +221,9 @@
     ["IDE115-014", "Source restore", "Restore", "critical", function () { return apiExists("restoreSource"); }],
     ["IDE115-015", "Restore verification", "Restore", "critical", function () { return apiExists("verifyRestore"); }],
     ["IDE115-016", "Diagnostic reporting", "Report", "error", function () { return apiExists("buildDiagnosticReport"); }],
-    ["IDE115-017", "IDE Registry integration", "Registry", "warning", function () { return apiExists("registerIdeComponent") && apiExists("getIdeComponent"); }],
+    ["IDE115-017", "IDE Registry integration", "Registry", "warning", function () { return apiExists("registerIdeComponent") && (apiExists("getIdeComponent") || apiExists("getIdeRegistryStatus")); }],
     ["IDE115-018", "Development Dashboard integration", "Dashboard", "warning", function () { return typeof global.getDevelopmentDashboardStatus === "function" || typeof global.validateDevelopmentDashboard === "function"; }],
-    ["IDE115-019", "Status consistency", "Quality", "error", function () { const s = global.getDiagnosticPlatformStatus(); return s.health === 100 && s.progress === 100 && s.implemented === s.total; }],
+    ["IDE115-019", "Status consistency", "Quality", "error", function () { const s = global.getDiagnosticPlatformStatus(); return s.ready === true && s.progress === 100 && s.implemented === s.total; }],
     ["IDE115-020", "No diagnostic errors", "Quality", "critical", function () { const s = global.getDiagnosticPlatformStatus(); return Array.isArray(s.errors) && s.errors.length === 0; }]
   ];
 
