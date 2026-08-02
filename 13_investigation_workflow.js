@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_investigation_workflow.js
    IDE-130 Investigation Workflow
-   Version: 1.0.0
+   Version: 1.0.1
    Status: Completed
    Design Freeze: 2026-07-26
    ============================================================ */
@@ -9,7 +9,7 @@
   "use strict";
 
   const COMPONENT_ID = "IDE-130";
-  const VERSION = "1.0.0";
+  const VERSION = "1.0.1";
   const MAX_HISTORY = 500;
 
   const WORKFLOW_STATES = Object.freeze([
@@ -70,6 +70,7 @@
     history: [],
     sequence: 0,
     lastError: null,
+    lastValidation: null,
     updatedAt: new Date().toISOString()
   };
 
@@ -845,9 +846,17 @@
 
   function verifyInvestigationIntegrity(sessionId) {
     const session = requireSession(sessionId);
-    const missingEvidence = session.evidenceReferences.filter(function missing(id) { return !state.evidence.has(id); });
+    const report = session.reportId ? state.reports.get(session.reportId) : null;
+    const handoff = session.handoffId ? state.handoffs.get(session.handoffId) : null;
+    const referencedEvidence = unique([
+      ...asArray(session.evidenceReferences),
+      ...asArray(session.conclusion && session.conclusion.evidenceReferences),
+      ...asArray(report && report.evidenceReferences),
+      ...asArray(handoff && handoff.evidenceReferences)
+    ]);
+    const missingEvidence = referencedEvidence.filter(function missing(id) { return !state.evidence.has(id); });
     const missingHypotheses = session.hypothesisReferences.filter(function missing(id) { return !state.hypotheses.has(id); });
-    const reportExists = Boolean(session.reportId && state.reports.has(session.reportId));
+    const reportExists = Boolean(session.reportId && report);
     const restoreComplete = ["Verified", "Not Required"].includes(session.restoreStatus);
     const passed = missingEvidence.length === 0 && missingHypotheses.length === 0 && reportExists && restoreComplete;
     session.integrityStatus = passed ? "Verified" : "Failed";
@@ -1061,7 +1070,7 @@
       cleanupValidationArtifacts(ids);
     }
     const passed = checks.filter(function passedCheck(item) { return item.passed; }).length;
-    return {
+    const result = {
       id: "IDE-130-VALIDATION",
       componentId: COMPONENT_ID,
       version: VERSION,
@@ -1075,40 +1084,18 @@
       checks: checks,
       validatedAt: nowIso()
     };
+    state.lastValidation = clone(result); touch(); return result;
   }
 
   function getInvestigationWorkflowStatus() {
-    const validation = validateInvestigationWorkflow();
-    const sessions = [...state.sessions.values()];
-    const active = sessions.filter(function activeSession(item) { return !TERMINAL_STATES.includes(item.state); });
-    return {
-      id: COMPONENT_ID,
-      title: "Investigation Workflow",
-      name: "Investigation Workflow",
-      version: VERSION,
-      status: validation.valid ? "Ready" : "Attention",
-      lifecycleStatus: "Completed",
-      ready: validation.valid,
-      health: validation.health,
-      progress: 100,
-      implemented: validation.passed,
-      total: validation.total,
-      requestCount: state.requests.size,
-      sessionCount: state.sessions.size,
-      activeSessionCount: active.length,
-      evidenceCount: state.evidence.size,
-      hypothesisCount: state.hypotheses.size,
-      reportCount: state.reports.size,
-      handoffCount: state.handoffs.size,
-      relationshipCount: state.relationships.length,
-      states: clone(WORKFLOW_STATES),
-      dependsOn: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "Search Regression Baseline", "Relationship Platform"],
-      provides: ["Investigation Request Intake", "Policy-driven State Workflow", "Progressive Scope", "Strategy Router", "Evidence Registry", "Hypothesis Graph", "Transactional Instrumentation", "Performance Investigation", "Structured Report", "Restore Gate", "Handoff Gate"],
-      releaseStatus: "Official",
-      nextTask: "Run IDE-135 full validation and confirm all release gates.",
-      lastError: clone(state.lastError),
-      updatedAt: nowIso()
-    };
+    const requiredApis = ["createInvestigationRequest", "createInvestigationSession", "defineInvestigationScope", "runInvestigationSearch", "addInvestigationEvidence", "createInvestigationHypothesis", "createInstrumentationTransaction", "restoreInvestigationSession", "buildInvestigationReport", "buildInvestigationHandoff", "closeInvestigation", "getInvestigationWorkflowStatus"];
+    const implemented = requiredApis.filter(name => typeof global[name] === "function").length; const platformReady = implemented === requiredApis.length; const validation = state.lastValidation;
+    const sessions = [...state.sessions.values()]; const active = sessions.filter(item => !TERMINAL_STATES.includes(item.state));
+    return { id: COMPONENT_ID, title: "Investigation Workflow", name: "Investigation Workflow", version: VERSION,
+      status: platformReady ? "Ready" : "Attention", lifecycleStatus: validation && validation.valid ? "Completed" : "Implementation", ready: platformReady, releaseAllowed: Boolean(validation && validation.valid), health: validation ? validation.health : (platformReady ? 90 : 70), progress: Math.round((implemented / requiredApis.length) * 100), implemented, total: requiredApis.length,
+      requestCount: state.requests.size, sessionCount: state.sessions.size, activeSessionCount: active.length, evidenceCount: state.evidence.size, hypothesisCount: state.hypotheses.size, reportCount: state.reports.size, handoffCount: state.handoffs.size, relationshipCount: state.relationships.length, states: clone(WORKFLOW_STATES),
+      lastValidation: validation ? clone({ valid: validation.valid, passed: validation.passed, failed: validation.failed, total: validation.total, health: validation.health, validatedAt: validation.validatedAt }) : null, statusApiMode: "Lightweight / no self-validation execution",
+      dependsOn: ["IDE-110", "IDE-115", "IDE-120", "IDE-125", "Search Regression Baseline", "Relationship Platform"], provides: ["Investigation Request Intake", "Policy-driven State Workflow", "Progressive Scope", "Strategy Router", "Evidence Registry", "Hypothesis Graph", "Transactional Instrumentation", "Performance Investigation", "Structured Report", "Restore Gate", "Handoff Gate"], releaseStatus: validation && validation.valid ? "Official" : "Not Validated", nextTask: validation && validation.valid ? "Run IDE-135 full validation and confirm all release gates." : "Run validateInvestigationWorkflow() once before IDE-135 full validation.", lastError: clone(state.lastError), updatedAt: state.updatedAt };
   }
 
   const api = {
