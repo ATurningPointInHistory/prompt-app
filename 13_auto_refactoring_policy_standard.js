@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_policy_standard.js
    IDE-150 Standard Policy Adapter / Governed Dry Run
-   Version: 1.1.1
+   Version: 1.1.2
    Status: Completed
 
    Responsibilities:
@@ -19,8 +19,8 @@
   const COMPONENT_ID = internal.COMPONENT_ID;
   const VERSION = internal.VERSION;
   const ADAPTER_ID = "AI-PROMPT-OS-STANDARD-REFACTORING-POLICY";
-  const ADAPTER_VERSION = "1.1.1";
-  const POLICY_VERSION = "IDE-150-STANDARD-POLICY-v1.1.1";
+  const ADAPTER_VERSION = "1.1.2";
+  const POLICY_VERSION = "IDE-150-STANDARD-POLICY-v1.1.2";
   const DRY_RUN_STORAGE_KEY = "AI_PROMPT_OS_IDE150_STANDARD_DRY_RUN_V1";
   const PRACTICAL_DRY_RUN_VERSION = "1.0.1";
   const nowIso = internal.nowIso;
@@ -30,6 +30,9 @@
   const unique = internal.unique;
   const findFunctionBlock = internal.findFunctionBlock;
   const hashText = internal.hashText;
+  const getStorage = typeof internal.getStorage === "function"
+    ? internal.getStorage
+    : function fallbackStorage() { try { return global.localStorage || null; } catch (_) { return null; } };
 
   const RISK_ORDER = Object.freeze({ Low: 0, Medium: 1, High: 2, Critical: 3 });
   const DEFAULT_CONFIG = Object.freeze({
@@ -62,8 +65,9 @@
 
   function loadLastDryRun() {
     try {
-      if (!global.localStorage) return null;
-      const raw = global.localStorage.getItem(DRY_RUN_STORAGE_KEY);
+      const storage = getStorage();
+      if (!storage) return null;
+      const raw = storage.getItem(DRY_RUN_STORAGE_KEY);
       return raw ? JSON.parse(raw) : null;
     } catch (_) {
       return null;
@@ -72,8 +76,9 @@
 
   function persistLastDryRun(summary) {
     try {
-      if (!global.localStorage) return { persisted: false, reason: "localStorage unavailable" };
-      global.localStorage.setItem(DRY_RUN_STORAGE_KEY, JSON.stringify(summary));
+      const storage = getStorage();
+      if (!storage) return { persisted: false, reason: "Storage unavailable" };
+      storage.setItem(DRY_RUN_STORAGE_KEY, JSON.stringify(summary));
       return { persisted: true, storageKey: DRY_RUN_STORAGE_KEY };
     } catch (error) {
       return { persisted: false, storageKey: DRY_RUN_STORAGE_KEY, error: error && error.message ? error.message : String(error) };
@@ -732,7 +737,23 @@
     policyVersion: POLICY_VERSION,
     practicalDryRunVersion: PRACTICAL_DRY_RUN_VERSION,
     dryRunStorageKey: DRY_RUN_STORAGE_KEY,
-    defaultConfig: clone(DEFAULT_CONFIG)
+    defaultConfig: clone(DEFAULT_CONFIG),
+    captureRuntimeState: function captureRuntimeState() {
+      return {
+        config: clone(config),
+        installedAt: installedAt,
+        lastEvaluation: clone(lastEvaluation),
+        lastDryRun: clone(lastDryRun)
+      };
+    },
+    restoreRuntimeState: function restoreRuntimeState(snapshot) {
+      const source = snapshot && typeof snapshot === "object" ? snapshot : {};
+      config = normalizeConfig(source.config || DEFAULT_CONFIG);
+      installedAt = text(source.installedAt, installedAt);
+      lastEvaluation = clone(source.lastEvaluation || null);
+      lastDryRun = clone(source.lastDryRun || null);
+      return true;
+    }
   };
   global.IDE150AutoRefactoring = Object.assign(global.IDE150AutoRefactoring || {}, api, {
     standardPolicyAdapterVersion: ADAPTER_VERSION,
