@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_search_strategy_platform.js
    IDE-120 Advanced Search Strategy
-   Version: 1.1.2
+   Version: 1.1.3
    Status: Completed
    ============================================================ */
 (function (global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-120";
-  const VERSION = "1.1.2";
+  const VERSION = "1.1.3";
   const DEFAULT_SEARCH_POLICY = Object.freeze({
     limit: 10,
     candidateLimit: 200,
@@ -628,21 +628,28 @@
     } catch (error) { check("Validation execution", false, String(error.message || error)); }
     finally { if (tempRegistered) unregisterSearchStrategy("validation-temp"); }
     const passed = checks.filter(item => item.passed).length;
-    lastSelfValidation = { id: "IDE-120-VALIDATION", componentId: COMPONENT_ID, valid: passed === checks.length, status: passed === checks.length ? "Ready" : "Attention", passed, failed: checks.length - passed, total: checks.length, health: Math.round((passed / Math.max(1, checks.length)) * 100), progress: Math.round((passed / Math.max(1, checks.length)) * 100), checks, validatedAt: nowIso() };
+    lastSelfValidation = { id: "IDE-120-VALIDATION", componentId: COMPONENT_ID, version: VERSION, valid: passed === checks.length, status: passed === checks.length ? "Ready" : "Attention", passed, failed: checks.length - passed, total: checks.length, health: Math.round((passed / Math.max(1, checks.length)) * 100), progress: Math.round((passed / Math.max(1, checks.length)) * 100), checks, validatedAt: nowIso() };
+    if (lastSelfValidation.valid && typeof global.saveDevelopmentReleaseEvidence === "function") {
+      global.saveDevelopmentReleaseEvidence(COMPONENT_ID, lastSelfValidation, { componentVersion: VERSION, releaseAllowed: true });
+    }
     return clone(lastSelfValidation);
   }
 
   function getSearchPipelineStatus() {
     const requiredApis = ["registerSearchStrategy", "unregisterSearchStrategy", "getSearchStrategy", "getSearchStrategies", "setSearchStrategyEnabled", "executeSearchPipeline", "executeCompoundSearch", "fallbackSearch", "mergeSearchResults", "calculateSearchScore", "scoreSearchResults", "rankSearchResults", "getSearchPipelineStatus", "validateSearchStrategyPlatform"];
     const implemented = requiredApis.filter(function (name) { return typeof global[name] === "function"; }).length; const platformReady = implemented === requiredApis.length && registry.size >= 12; const validation = lastSelfValidation;
+    const releaseEvidence = typeof global.getDevelopmentReleaseEvidence === "function"
+      ? global.getDevelopmentReleaseEvidence(COMPONENT_ID, { componentVersion: VERSION })
+      : null;
+    const releaseAllowed = Boolean((validation && validation.valid) || (releaseEvidence && releaseEvidence.releaseAllowed));
     return { id: COMPONENT_ID, title: "Advanced Search Strategy", name: "Advanced Search Strategy Platform", version: VERSION,
-      status: platformReady ? "Ready" : "Attention", lifecycleStatus: validation && validation.valid ? "Completed" : "Implementation", officialStatus: validation && validation.valid ? "Official" : "Not Validated",
-      ready: platformReady, releaseAllowed: Boolean(validation && validation.valid), health: validation ? validation.health : (platformReady ? 90 : 70), progress: Math.round((implemented / requiredApis.length) * 100), implemented, total: requiredApis.length,
+      status: platformReady ? "Ready" : "Attention", lifecycleStatus: releaseAllowed ? "Completed" : "Implementation", officialStatus: releaseAllowed ? "Official" : "Not Validated",
+      ready: platformReady, releaseAllowed: releaseAllowed, health: validation ? validation.health : (releaseEvidence ? releaseEvidence.health : (platformReady ? 90 : 70)), progress: Math.round((implemented / requiredApis.length) * 100), implemented, total: requiredApis.length,
       strategyCount: registry.size, enabledStrategyCount: [...registry.values()].filter(item => item.enabled).length, pipelineHistoryCount: pipelineHistory.length, diagnosticCount: diagnostics.length,
       lastExecution: lastExecution ? { id: lastExecution.id, query: lastExecution.query, status: lastExecution.status, durationMs: lastExecution.durationMs, resultCount: asArray(lastExecution.results).length, completedAt: lastExecution.completedAt } : null,
-      lastValidation: validation ? clone({ valid: validation.valid, passed: validation.passed, failed: validation.failed, total: validation.total, health: validation.health, validatedAt: validation.validatedAt }) : null,
+      lastValidation: validation ? clone({ valid: validation.valid, passed: validation.passed, failed: validation.failed, total: validation.total, health: validation.health, validatedAt: validation.validatedAt, source: "Runtime" }) : (releaseEvidence ? clone({ valid: true, failed: 0, health: releaseEvidence.health, validatedAt: releaseEvidence.completedAt, source: releaseEvidence.source }) : null), releaseEvidence: releaseEvidence,
       statusApiMode: "Lightweight / no self-validation execution", dependsOn: ["IDE-110", "Repository", "Registry", "Relationship Platform"], provides: ["Search Strategy Registry", "Composite Search Pipeline", "Merge", "Scoring", "Ranking", "Fallback", "Diagnostics"],
-      nextTask: validation && validation.valid ? "Run IDE-125 Search Strategy Validation release gates." : "Run validateSearchStrategyPlatform() once before IDE-125 release validation.", updatedAt: nowIso() };
+      nextTask: releaseAllowed ? "Run IDE-125 Search Strategy Validation release gates." : "Run validateSearchStrategyPlatform() once before IDE-125 release validation.", updatedAt: nowIso() };
   }
 
   registerStandardStrategies();
