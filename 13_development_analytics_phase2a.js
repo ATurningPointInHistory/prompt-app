@@ -1195,14 +1195,23 @@
   }
 
   function getDevelopmentAnalyticsPhase2AStatus() {
-    const validation = validateDevelopmentAnalyticsPhase2A();
-    const officialRecords = typeof global.getValidationResults === "function"
-      ? global.getValidationResults({ official: true, limit: MAX_RESULTS })
-      : [];
+    const repositorySummary = typeof global.getValidationResultRepositorySummary === "function"
+      ? global.getValidationResultRepositorySummary({ official: true })
+      : null;
+    const officialSourceRecordCount = repositorySummary ? repositorySummary.count : 0;
     const last = summarizeDevelopmentAnalyticsPhase2AResult(state.lastResult);
+    const completed = Boolean(last && last.status === "Completed");
+    const validation = { valid: state.loaded === true, health: completed ? 100 : (state.loaded ? 90 : 70) };
     let nextTask = "Run IDE-135 full validation to create Official Results.";
-    if (officialRecords.length && !last) nextTask = "Run runDevelopmentAnalytics() or runDevelopmentAnalyticsPhase2A() to generate Phase 2A analytics.";
-    if (last && last.status === "Completed") nextTask = "Implement IDE-140 Phase 2B: Publication Gate, IDE-150 handoff and Analytics Closure.";
+    if (officialSourceRecordCount && !last) nextTask = "Run runDevelopmentAnalytics() or runDevelopmentAnalyticsPhase2A() to generate Phase 2A analytics.";
+    if (last && last.status === "Completed") {
+      const phase2BStatus = typeof global.getDevelopmentAnalyticsPhase2BStatus === "function"
+        ? global.getDevelopmentAnalyticsPhase2BStatus()
+        : null;
+      nextTask = phase2BStatus && phase2BStatus.nextTask
+        ? phase2BStatus.nextTask
+        : "Implement IDE-140 Phase 2B: Publication Gate, IDE-150 handoff and Analytics Closure.";
+    }
     return {
       id: EXTENSION_ID,
       componentId: COMPONENT_ID,
@@ -1211,12 +1220,12 @@
       version: VERSION,
       overallVersion: OVERALL_VERSION,
       status: validation.valid ? "Ready" : "Attention",
-      lifecycleStatus: "Implementation",
+      lifecycleStatus: completed ? "Completed" : "Implementation",
       implementationPhase: "Phase 2A",
       ready: validation.valid,
       health: validation.health,
       progress: last && last.status === "Completed" ? 100 : 0,
-      officialSourceRecordCount: officialRecords.length,
+      officialSourceRecordCount: officialSourceRecordCount,
       resultCount: state.results.size,
       lastResult: last,
       publicationStatus: "Draft",
