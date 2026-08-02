@@ -182,10 +182,28 @@ function saveDevConsoleAutocompleteUse(
   stats[name] =
     Number(stats[name] || 0) + 1;
 
-  localStorage.setItem(
-    "devConsoleAutocompleteUseStats",
-    JSON.stringify(stats)
-  );
+  try {
+
+    localStorage.setItem(
+      "devConsoleAutocompleteUseStats",
+      JSON.stringify(stats)
+    );
+
+  } catch (error) {
+
+    if (
+      typeof recordDevConsoleStorageWarning ===
+      "function"
+    ) {
+
+      recordDevConsoleStorageWarning(
+        "入力候補の利用統計",
+        error
+      );
+
+    }
+
+  }
 
 }
 
@@ -234,10 +252,27 @@ function applyDevConsoleAutocomplete(
   input.selectionEnd =
     newPos;
 
-  localStorage.setItem(
-    "devConsoleLastInput",
-    input.value
-  );
+  if (
+    typeof saveDevConsoleLastInput ===
+    "function"
+  ) {
+
+    saveDevConsoleLastInput(
+      input.value
+    );
+
+  } else {
+
+    try {
+      localStorage.setItem(
+        "devConsoleLastInput",
+        input.value
+      );
+    } catch (_) {
+      // Autocomplete must not fail because cache persistence is unavailable.
+    }
+
+  }
 
   saveDevConsoleAutocompleteUse(
     item.name
