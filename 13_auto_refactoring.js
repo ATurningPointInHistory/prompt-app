@@ -1,15 +1,15 @@
 /* ============================================================
    FILE: 13_auto_refactoring.js
    IDE-150 Auto Refactoring
-   Version: 1.2.7
-   Status: Controlled Session Compact Persistence Hardened
+   Version: 1.2.8
+   Status: Dedicated Transaction Journal Persistence
    Design Freeze: 2026-07-26
    ============================================================ */
 (function (global) {
   "use strict";
 
   const COMPONENT_ID = "IDE-150";
-  const VERSION = "1.2.7";
+  const VERSION = "1.2.8";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CORE_V1";
   const STORAGE_SCHEMA_VERSION = 2;
   const IDE140_PHASE2B_STORAGE_KEY = "AI_PROMPT_OS_IDE140_PHASE2B_V1";
