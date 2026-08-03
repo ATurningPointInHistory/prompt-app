@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_auto_refactoring_transaction.js
    IDE-150 Auto Refactoring Transaction Extension
-   Version: 1.2.4
-   Status: Function-Level Rollback Snapshot Persistence
+   Version: 1.2.5
+   Status: Dedicated Transaction Journal + Function-Level Rollback Snapshot
    ============================================================ */
 (function (global) {
   "use strict";
@@ -38,6 +38,8 @@
     : function fallbackStorage() { try { return global.localStorage || null; } catch (_) { return null; } };
   const ROLLBACK_SNAPSHOT_PREFIX = "AI_PROMPT_OS_IDE150_ROLLBACK_SNAPSHOT_V1:";
   const ROLLBACK_SNAPSHOT_LIMIT = Math.max(3, Number(MAX_ROLLBACK_SNAPSHOTS) || 10);
+  const TRANSACTION_JOURNAL_PREFIX = "AI_PROMPT_OS_IDE150_TRANSACTION_JOURNAL_V1:";
+  const TRANSACTION_JOURNAL_LIMIT = Math.max(3, Number(MAX_ROLLBACK_SNAPSHOTS) || 10);
 
   function listRollbackSnapshotRecords() {
     const records = [];
@@ -243,6 +245,215 @@
       storage.removeItem(storageKey);
       return storage.getItem(storageKey) === null;
     } catch (_) { return false; }
+  }
+
+
+  function listTransactionJournalRecords() {
+    const records = [];
+    const storage = getStorage();
+    if (!storage) return records;
+    try {
+      for (let index = 0; index < storage.length; index += 1) {
+        const key = storage.key(index);
+        if (!key || key.indexOf(TRANSACTION_JOURNAL_PREFIX) !== 0) continue;
+        const raw = storage.getItem(key);
+        const payload = raw ? JSON.parse(raw) : null;
+        records.push({
+          key: key,
+          transactionId: text(payload && payload.transactionId, ""),
+          status: text(payload && payload.status, ""),
+          updatedAt: text(payload && payload.updatedAt, payload && payload.startedAt)
+        });
+      }
+    } catch (_) {}
+    records.sort(function order(left, right) {
+      return String(left.updatedAt || "").localeCompare(String(right.updatedAt || ""));
+    });
+    return records;
+  }
+
+  function pruneTransactionJournals(protectedKey, keepCount) {
+    const storage = getStorage();
+    if (!storage) return [];
+    const keep = Math.max(0, Number(keepCount) || (TRANSACTION_JOURNAL_LIMIT - 1));
+    const records = listTransactionJournalRecords().filter(function keepItem(item) { return item.key !== protectedKey; });
+    const removeCount = Math.max(0, records.length - keep);
+    const removed = [];
+    for (let index = 0; index < removeCount; index += 1) {
+      try {
+        storage.removeItem(records[index].key);
+        removed.push(records[index].key);
+      } catch (_) {}
+    }
+    return removed;
+  }
+
+  function buildTransactionJournalPayload(transaction, snapshotPersistence) {
+    return {
+      schemaVersion: 1,
+      componentId: COMPONENT_ID,
+      version: VERSION,
+      transactionId: transaction.id,
+      requestId: transaction.requestId,
+      candidateId: transaction.candidateId,
+      approvalId: transaction.approvalId,
+      status: text(transaction.status, "Applying"),
+      targetFile: transaction.targetFile,
+      targetFunction: transaction.targetFunction,
+      beforeFileHash: transaction.beforeFileHash,
+      afterFileHash: transaction.afterFileHash,
+      beforeFunctionHash: text(transaction.rollbackSnapshot && transaction.rollbackSnapshot.beforeFunctionHash, ""),
+      afterFunctionHash: text(transaction.rollbackSnapshot && transaction.rollbackSnapshot.afterFunctionHash, ""),
+      rollbackSnapshot: {
+        storageKey: text(snapshotPersistence && snapshotPersistence.storageKey, ""),
+        mode: text(snapshotPersistence && snapshotPersistence.mode, ""),
+        schemaVersion: finite(snapshotPersistence && snapshotPersistence.schemaVersion, 0),
+        sourceHash: text(snapshotPersistence && snapshotPersistence.sourceHash, "")
+      },
+      startedAt: text(transaction.startedAt, nowIso()),
+      updatedAt: nowIso()
+    };
+  }
+
+  function verifyTransactionJournalPayload(stored, transaction, snapshotPersistence) {
+    const verified = Boolean(
+      stored &&
+      stored.transactionId === transaction.id &&
+      stored.candidateId === transaction.candidateId &&
+      stored.targetFile === transaction.targetFile &&
+      stored.targetFunction === transaction.targetFunction &&
+      stored.beforeFileHash === transaction.beforeFileHash &&
+      stored.afterFileHash === transaction.afterFileHash &&
+      stored.rollbackSnapshot &&
+      stored.rollbackSnapshot.storageKey === text(snapshotPersistence && snapshotPersistence.storageKey, "")
+    );
+    return { verified: verified, reason: verified ? "" : "Transaction Journal read-back verification failed." };
+  }
+
+  function persistTransactionJournal(transaction, snapshotPersistence) {
+    const storage = getStorage();
+    if (!storage) return { persisted: false, verified: false, reason: "Storage is unavailable." };
+    const storageKey = TRANSACTION_JOURNAL_PREFIX + transaction.id;
+    const payload = buildTransactionJournalPayload(transaction, snapshotPersistence);
+    const raw = JSON.stringify(payload);
+    let lastError = "";
+    let reclaimedKeys = [];
+    pruneTransactionJournals(storageKey, TRANSACTION_JOURNAL_LIMIT - 1);
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        if (attempt === 1) {
+          reclaimedKeys = reclaimedKeys.concat(pruneTransactionJournals(storageKey, 2));
+          try { storage.removeItem("devConsoleLastInput"); } catch (_) {}
+        }
+        if (attempt === 2) {
+          reclaimedKeys = reclaimedKeys.concat(pruneTransactionJournals(storageKey, 0));
+          try { storage.removeItem("devConsoleHistory"); } catch (_) {}
+        }
+        storage.setItem(storageKey, raw);
+        const storedRaw = storage.getItem(storageKey);
+        const stored = storedRaw ? JSON.parse(storedRaw) : null;
+        const verification = verifyTransactionJournalPayload(stored, transaction, snapshotPersistence);
+        if (!verification.verified) throw new Error(verification.reason);
+        transaction.transactionJournal = {
+          storageKey: storageKey,
+          persisted: true,
+          verifiedAt: nowIso(),
+          estimatedBytes: raw.length * 2
+        };
+        return {
+          persisted: true,
+          verified: true,
+          storageKey: storageKey,
+          estimatedBytes: raw.length * 2,
+          reclaimedKeys: Array.from(new Set(reclaimedKeys)),
+          verifiedAt: transaction.transactionJournal.verifiedAt
+        };
+      } catch (error) {
+        lastError = error && error.message ? error.message : String(error);
+        if (!isQuotaError(error) && attempt === 0) break;
+      }
+    }
+    return {
+      persisted: false,
+      verified: false,
+      storageKey: storageKey,
+      estimatedBytes: raw.length * 2,
+      reclaimedKeys: Array.from(new Set(reclaimedKeys)),
+      quotaError: /quota|storage.*full|exceeded/i.test(lastError),
+      reason: lastError || "Transaction Journal persistence failed."
+    };
+  }
+
+  function updateTransactionJournal(transactionId, updates) {
+    const storage = getStorage();
+    const storageKey = TRANSACTION_JOURNAL_PREFIX + String(transactionId || "");
+    if (!storage || !transactionId) return { persisted: false, verified: false, reason: "Transaction Journal is unavailable." };
+    try {
+      const raw = storage.getItem(storageKey);
+      const current = raw ? JSON.parse(raw) : null;
+      if (!current || current.transactionId !== transactionId) return { persisted: false, verified: false, reason: "Transaction Journal record was not found." };
+      const next = Object.assign({}, current, updates || {}, { updatedAt: nowIso() });
+      storage.setItem(storageKey, JSON.stringify(next));
+      const stored = JSON.parse(storage.getItem(storageKey));
+      const verified = Boolean(stored && stored.transactionId === transactionId && stored.status === next.status);
+      return { persisted: verified, verified: verified, storageKey: storageKey, status: stored && stored.status, reason: verified ? "" : "Transaction Journal update verification failed." };
+    } catch (error) {
+      return { persisted: false, verified: false, storageKey: storageKey, reason: error && error.message ? error.message : String(error) };
+    }
+  }
+
+  function getAutoRefactoringTransactionJournal(transactionId) {
+    const storage = getStorage();
+    if (!storage || !transactionId) return null;
+    try {
+      const raw = storage.getItem(TRANSACTION_JOURNAL_PREFIX + String(transactionId));
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) { return null; }
+  }
+
+  function resolveTransactionRecord(transactionId) {
+    const current = getTransactionRecord(transactionId);
+    if (current) return current;
+    const journal = getAutoRefactoringTransactionJournal(transactionId);
+    if (!journal) return null;
+    const snapshotKey = text(journal.rollbackSnapshot && journal.rollbackSnapshot.storageKey, "");
+    const storage = getStorage();
+    let snapshot = null;
+    try {
+      const raw = storage && snapshotKey ? storage.getItem(snapshotKey) : null;
+      snapshot = raw ? JSON.parse(raw) : null;
+    } catch (_) {}
+    return {
+      id: journal.transactionId,
+      componentId: COMPONENT_ID,
+      version: VERSION,
+      requestId: journal.requestId,
+      candidateId: journal.candidateId,
+      approvalId: journal.approvalId,
+      status: journal.status,
+      targetFile: journal.targetFile,
+      targetFunction: journal.targetFunction,
+      beforeFileHash: journal.beforeFileHash,
+      afterFileHash: journal.afterFileHash,
+      rollbackStatus: "Available",
+      rollbackSnapshot: snapshot && (snapshot.mode === "Function-Level" || snapshot.schemaVersion === 2)
+        ? {
+            mode: "Function-Level",
+            storageKey: snapshotKey,
+            beforeFunctionSource: snapshot.beforeFunctionSource,
+            beforeFunctionHash: snapshot.beforeFunctionHash,
+            afterFunctionHash: snapshot.afterFunctionHash,
+            beforeFileHash: snapshot.beforeFileHash,
+            afterFileHash: snapshot.afterFileHash,
+            persisted: true
+          }
+        : snapshot && typeof snapshot.source === "string"
+          ? { mode: "Full-File", storageKey: snapshotKey, source: snapshot.source, sourceHash: snapshot.sourceHash, persisted: true }
+          : null,
+      transactionJournal: { storageKey: TRANSACTION_JOURNAL_PREFIX + journal.transactionId, persisted: true },
+      startedAt: journal.startedAt,
+      committedAt: journal.committedAt || ""
+    };
   }
 
   function verifyPersistedTransaction(transaction) {
@@ -584,22 +795,32 @@
     }
 
     state.transactions.set(transaction.id, transaction);
-    const snapshotPersistence = persistAutoRefactoringState();
-    const persistenceVerification = snapshotPersistence.persisted ? verifyPersistedTransaction(transaction) : { verified: false, reason: "Core Transaction State persistence failed." };
-    if (!snapshotPersistence.persisted || persistenceVerification.verified !== true) {
+    const transactionJournalPersistence = persistTransactionJournal(transaction, rollbackSnapshotPersistence);
+    if (!transactionJournalPersistence.persisted || transactionJournalPersistence.verified !== true) {
       state.transactions.delete(transaction.id);
       removeRollbackSnapshot(rollbackSnapshotPersistence.storageKey);
       if (request) { request.status = "Approved"; request.updatedAt = nowIso(); state.requests.set(request.id, request); }
-      recordEvent("Transaction Blocked", { requestId: candidate.requestId, candidateId: candidate.id, reason: "Rollback Snapshot or Transaction persistence verification failed." });
+      recordEvent("Transaction Blocked", { requestId: candidate.requestId, candidateId: candidate.id, reason: "Dedicated Transaction Journal persistence failed." });
       persistAutoRefactoringState();
       return {
         applied: false,
-        reason: "Rollback Snapshot and Transaction State must be persisted before Repository modification.",
-        persistence: snapshotPersistence,
+        reason: "Rollback Snapshot and Transaction Journal must be persisted and verified before Repository modification.",
         rollbackSnapshotPersistence: rollbackSnapshotPersistence,
-        persistenceVerification: persistenceVerification
+        transactionJournalPersistence: transactionJournalPersistence,
+        persistenceVerification: { verified: false, reason: transactionJournalPersistence.reason }
       };
     }
+
+    // The dedicated Snapshot + Transaction Journal are the authoritative pre-write safety evidence.
+    // Full Core persistence is best-effort here because it may be much larger than the journal.
+    const preWriteCorePersistence = persistAutoRefactoringState();
+    const persistenceVerification = {
+      verified: true,
+      mode: "Dedicated Snapshot + Transaction Journal",
+      snapshotKey: rollbackSnapshotPersistence.storageKey,
+      journalKey: transactionJournalPersistence.storageKey,
+      corePersistence: preWriteCorePersistence
+    };
 
     let writeSucceeded = false;
     try {
@@ -647,8 +868,25 @@
       const report = createChangeReport(transaction, candidate, validation, null);
       const implementationPackage = buildImplementationPackage(transaction, candidate, validation, report);
       recordEvent("Transaction Committed", { requestId: candidate.requestId, candidateId: candidate.id, transactionId: transaction.id, reportId: report.id, packageId: implementationPackage.id });
+      const transactionJournalPersistenceAfterCommit = updateTransactionJournal(transaction.id, {
+        status: "Committed",
+        validationId: validation.id,
+        reportId: report.id,
+        implementationPackageId: implementationPackage.id,
+        committedAt: transaction.committedAt
+      });
       const persistence = persistAutoRefactoringState();
-      return { applied: true, transaction: compactTransaction(transaction), validation: clone(validation), report: clone(report), implementationPackage: clone(implementationPackage), persistence: persistence };
+      return {
+        applied: true,
+        transaction: compactTransaction(transaction),
+        validation: clone(validation),
+        report: clone(report),
+        implementationPackage: clone(implementationPackage),
+        rollbackSnapshotPersistence: rollbackSnapshotPersistence,
+        transactionJournalPersistence: transactionJournalPersistenceAfterCommit,
+        persistenceVerification: persistenceVerification,
+        persistence: persistence
+      };
     } catch (error) {
       let restored = false;
       if (writeSucceeded) {
@@ -666,13 +904,19 @@
       if (request) { request.status = restored ? "Rolled Back" : "Failed"; request.updatedAt = nowIso(); state.requests.set(request.id, request); }
       state.lastError = { operation: "Apply", message: transaction.error, transactionId: transaction.id, at: nowIso() };
       recordEvent("Transaction Failed", { requestId: candidate.requestId, candidateId: candidate.id, transactionId: transaction.id, restored: restored, error: transaction.error });
+      const transactionJournalFailure = updateTransactionJournal(transaction.id, {
+        status: transaction.status,
+        rollbackStatus: transaction.rollbackStatus,
+        error: transaction.error,
+        failedAt: transaction.failedAt
+      });
       persistAutoRefactoringState();
-      return { applied: false, reason: transaction.error, restored: restored, transaction: compactTransaction(transaction) };
+      return { applied: false, reason: transaction.error, restored: restored, transaction: compactTransaction(transaction), transactionJournalPersistence: transactionJournalFailure };
     }
   }
 
   function rollbackAutoRefactoringTransaction(transactionId, input, options) {
-    const transaction = getTransactionRecord(transactionId);
+    const transaction = resolveTransactionRecord(transactionId);
     if (!transaction) return { rolledBack: false, reason: "Transaction not found." };
     if (!transaction.rollbackSnapshot) return { rolledBack: false, reason: "Rollback Snapshot is unavailable." };
     const source = input && typeof input === "object" ? input : {};
@@ -736,8 +980,15 @@
     const validation = transaction.validationId ? state.validations.get(transaction.validationId) : null;
     if (candidate) createChangeReport(transaction, candidate, validation, rollback);
     recordEvent("Rollback", { requestId: transaction.requestId, candidateId: transaction.candidateId, transactionId: transaction.id, rollbackId: rollback.id, verified: verified });
+    const transactionJournalPersistence = updateTransactionJournal(transaction.id, {
+      status: transaction.status,
+      rollbackStatus: transaction.rollbackStatus,
+      rollbackId: rollback.id,
+      rollbackVerified: verified,
+      rolledBackAt: rollback.rolledBackAt
+    });
     persistAutoRefactoringState();
-    return { rolledBack: verified, rollback: clone(rollback), transaction: compactTransaction(transaction) };
+    return { rolledBack: verified, rollback: clone(rollback), transaction: compactTransaction(transaction), transactionJournalPersistence: transactionJournalPersistence };
   }
 
   function getAutoRefactoringRequest(id) { return clone(state.requests.get(String(id || "")) || null); }
@@ -774,7 +1025,9 @@
     getAutoRefactoringCandidate: getAutoRefactoringCandidate,
     getAutoRefactoringTransaction: getAutoRefactoringTransaction,
     getAutoRefactoringImplementationPackage: getAutoRefactoringImplementationPackage,
-    getAutoRefactoringRecords: getAutoRefactoringRecords
+    getAutoRefactoringRecords: getAutoRefactoringRecords,
+    getAutoRefactoringTransactionJournal: getAutoRefactoringTransactionJournal,
+    listAutoRefactoringTransactionJournals: function listAutoRefactoringTransactionJournals() { return clone(listTransactionJournalRecords()); }
   };
 
   Object.keys(transactionApi).forEach(function expose(name) { global[name] = transactionApi[name]; });
