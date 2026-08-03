@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_validation.js
    IDE-150 Auto Refactoring Validation / Status / Integration
-   Version: 1.2.3
+   Version: 1.2.4
    Status: Isolated Deep Transaction Validation
    ============================================================ */
 (function (global) {
@@ -196,6 +196,7 @@
     check("Controlled Project File Store Status API", typeof global.getControlledProjectFileStoreStatus === "function");
     check("Controlled Application Approval UI", typeof global.openControlledAutoRefactoringApprovalPanel === "function");
     check("Controlled Application validation API", typeof global.validateControlledAutoRefactoringApplication === "function");
+    check("Dedicated Transaction Journal API", typeof global.getAutoRefactoringTransactionJournal === "function" && typeof global.listAutoRefactoringTransactionJournals === "function");
 
     const passed = checks.filter(function pass(item) { return item.passed; }).length;
     const result = {
