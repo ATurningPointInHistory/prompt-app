@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_auto_refactoring_controlled_application.js
    IDE-150 Controlled Application Trial
-   Version: 1.0.6
+   Version: 1.0.7
    Status: Compact Controlled Session Persistence
    ============================================================ */
 (function (global) {
@@ -12,7 +12,7 @@
 
   const COMPONENT_ID = internal.COMPONENT_ID;
   const VERSION = internal.VERSION;
-  const CONTROLLED_VERSION = "1.0.6";
+  const CONTROLLED_VERSION = "1.0.7";
   const STORAGE_KEY = "AI_PROMPT_OS_IDE150_CONTROLLED_APPLICATION_V1";
   const STORAGE_SCHEMA_VERSION = 2;
   const MAX_SESSIONS = 20;
@@ -636,6 +636,7 @@
         repositoryValidation: clone(applied.validation || null),
         implementationPackageId: applied.implementationPackage && applied.implementationPackage.id,
         rollbackSnapshotPersistence: clone(applied.rollbackSnapshotPersistence || null),
+        transactionJournalPersistence: clone(applied.transactionJournalPersistence || null),
         transactionPersistence: clone(applied.persistence || null),
         persistenceVerification: clone(applied.persistenceVerification || null)
       } : null,
@@ -689,6 +690,8 @@
         functionLevelOnly: true,
         targetOnlyWriteGuard: true,
         rollbackSnapshotPersistedBeforeWrite: true,
+        transactionJournalPersistedBeforeWrite: true,
+        fullCorePersistenceNotRequiredBeforeTrialWrite: true,
         readAfterWriteVerification: true,
         postApplicationValidation: true,
         automaticRollbackRequired: true,
@@ -845,6 +848,16 @@
         hashText(rollbackSnapshotArtifact.source) === rollbackSnapshotArtifact.sourceHash
       );
       check("Rollback Snapshot read-back verified", functionSnapshotVerified || fullSnapshotVerified);
+      const transactionJournal = typeof global.getAutoRefactoringTransactionJournal === "function"
+        ? global.getAutoRefactoringTransactionJournal(transactionId)
+        : null;
+      check("Dedicated Transaction Journal read-back verified", Boolean(
+        transactionJournal &&
+        transactionJournal.transactionId === transactionId &&
+        transactionJournal.rollbackSnapshot &&
+        transactionJournal.rollbackSnapshot.storageKey === rollbackSnapshotKey
+      ));
+      check("Transaction Journal final status", Boolean(transactionJournal && transactionJournal.status === "Rolled Back" && transactionJournal.rollbackVerified === true));
       check("Transaction Artifact excludes duplicate Snapshot source", Boolean(
         transactionArtifact &&
         transactionArtifact.rollbackSnapshot &&
@@ -993,6 +1006,7 @@
       "Current Project Runtime File Store Adapter is unavailable.": "現在のプロジェクト実行時ファイルストアを利用できません。",
       "Target Project source is unavailable.": "対象プロジェクトのソースを取得できません。",
       "Rollback Snapshot must be persisted and verified before Repository modification.": "リポジトリ変更前にロールバック用スナップショットを保存・検証できませんでした。保存容量を確認し、新しいトライアルを作成してください。",
+      "Rollback Snapshot and Transaction Journal must be persisted and verified before Repository modification.": "リポジトリ変更前にロールバック情報と最小トランザクションジャーナルを保存・検証できませんでした。保存容量を確認し、新しいトライアルを作成してください。",
       "Rollback Snapshot and Transaction State must be persisted before Repository modification.": "リポジトリ変更前にロールバック情報とトランザクション状態を保存・検証できませんでした。"
     };
 
