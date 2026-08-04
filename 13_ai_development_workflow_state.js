@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_ai_development_workflow_state.js
    IDE-160 AI Development Workflow State / Failure / Recovery
-   Version: 1.3.0
+   Version: 1.4.0
    Phase: 3 - Component Adapter / Workflow Execution Foundation
    ============================================================ */
 (function (global) {
@@ -71,7 +71,8 @@
     failures: [],
     recoveries: [],
     attempts: [],
-    decisions: []
+    decisions: [],
+    approvals: []
   };
 
   const STATUS_TRANSITIONS = Object.freeze({
@@ -134,6 +135,7 @@
       foundationRecordStore.recoveries = Array.isArray(records.store.recoveries) ? records.store.recoveries.slice(-100) : [];
       foundationRecordStore.attempts = Array.isArray(records.store.attempts) ? records.store.attempts.slice(-100) : [];
       foundationRecordStore.decisions = Array.isArray(records.store.decisions) ? records.store.decisions.slice(-50) : [];
+      foundationRecordStore.approvals = Array.isArray(records.store.approvals) ? records.store.approvals.slice(-50) : [];
     }
   }
 
