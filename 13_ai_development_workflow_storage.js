@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_ai_development_workflow_storage.js
    IDE-160 AI Development Workflow Storage
-   Version: 1.2.0
+   Version: 1.3.0
    Phase: 3 - Component Adapter / Workflow Execution Foundation
    ============================================================ */
 (function (global) {
@@ -359,14 +359,15 @@
 
   function loadRecordStorePayload() {
     const result = readVerified(STORAGE_KEYS.recordStore);
-    const empty = { failures: [], recoveries: [], attempts: [] };
+    const empty = { failures: [], recoveries: [], attempts: [], decisions: [] };
     if (!result.ok || !result.data || !result.data.payload) return { store: empty, readResult: result };
     const source = result.data.payload;
     return {
       store: {
         failures: Array.isArray(source.failures) ? source.failures : [],
         recoveries: Array.isArray(source.recoveries) ? source.recoveries : [],
-        attempts: Array.isArray(source.attempts) ? source.attempts : []
+        attempts: Array.isArray(source.attempts) ? source.attempts : [],
+        decisions: Array.isArray(source.decisions) ? source.decisions : []
       },
       readResult: result
     };
@@ -378,6 +379,7 @@
       failures: Array.isArray(source.failures) ? source.failures.slice(-RETENTION.failureRecoveryRecords) : [],
       recoveries: Array.isArray(source.recoveries) ? source.recoveries.slice(-RETENTION.failureRecoveryRecords) : [],
       attempts: Array.isArray(source.attempts) ? source.attempts.slice(-RETENTION.failureRecoveryRecords) : [],
+      decisions: Array.isArray(source.decisions) ? source.decisions.slice(-RETENTION.decisionRecords) : [],
       updatedAt: internal.nowIso()
     });
   }
