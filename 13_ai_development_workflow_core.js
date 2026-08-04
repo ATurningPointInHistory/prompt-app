@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_ai_development_workflow_core.js
    IDE-160 AI Development Workflow
-   Version: 1.1.0
-   Phase: 2 - Workflow Planning
+   Version: 1.2.0
+   Phase: 3 - Component Adapter / Workflow Execution
    Design Freeze: 2026-08-04
    ============================================================ */
 (function (global) {
@@ -10,11 +10,11 @@
 
   const COMPONENT_ID = "IDE-160";
   const COMPONENT_NAME = "AI Development Workflow";
-  const VERSION = "1.1.0";
+  const VERSION = "1.2.0";
   const SCHEMA_VERSION = 1;
   const ARCHITECTURE_VERSION = "1.0";
   const DESIGN_FREEZE_VERSION = "1.0";
-  const IMPLEMENTATION_PHASE = "Phase 2 - Workflow Planning";
+  const IMPLEMENTATION_PHASE = "Phase 3 - Component Adapter / Workflow Execution";
   const MAX_ACTIVE_WORKFLOWS = 1;
   const MAX_DEFINITIONS = 50;
   const MAX_WORKFLOW_SUMMARIES = 5;
@@ -557,7 +557,9 @@
       core: Boolean(namespace.modules && namespace.modules.core),
       storage: Boolean(namespace.modules && namespace.modules.storage),
       state: Boolean(namespace.modules && namespace.modules.state),
-      planning: Boolean(namespace.modules && namespace.modules.planning)
+      planning: Boolean(namespace.modules && namespace.modules.planning),
+      adapter: Boolean(namespace.modules && namespace.modules.adapter),
+      execution: Boolean(namespace.modules && namespace.modules.execution)
     };
     const active = state.activeWorkflowId ? state.workflows.get(state.activeWorkflowId) : null;
     const validation = state.lastValidation;
@@ -570,9 +572,9 @@
       architectureVersion: ARCHITECTURE_VERSION,
       designFreezeVersion: DESIGN_FREEZE_VERSION,
       implementationPhase: IMPLEMENTATION_PHASE,
-      implementationStatus: moduleStatus.planning ? "Phase 2 Implemented" : "Phase 1 Implemented",
+      implementationStatus: moduleStatus.execution ? "Phase 3 Implemented" : moduleStatus.planning ? "Phase 2 Implemented" : "Phase 1 Implemented",
       status: state.lastError ? "Degraded" : state.initialized ? "Ready" : "Loaded",
-      ready: Boolean(state.initialized && moduleStatus.core && moduleStatus.storage && moduleStatus.state && moduleStatus.planning && !state.lastError),
+      ready: Boolean(state.initialized && moduleStatus.core && moduleStatus.storage && moduleStatus.state && moduleStatus.planning && moduleStatus.adapter && moduleStatus.execution && !state.lastError),
       available: true,
       initialized: state.initialized === true,
       modules: moduleStatus,
@@ -585,7 +587,11 @@
       validationStatus: validation ? validation.status : "Not Run",
       health: validation && Number.isFinite(validation.health) ? validation.health : null,
       healthStatus: validation && Number.isFinite(validation.health) ? "Measured" : "Not Run",
-      repositoryIntegrity: "Not Evaluated in Phase 2",
+      adapterStatus: namespace.api && typeof namespace.api.getIDE160AdapterRegistryStatus === "function" ? namespace.api.getIDE160AdapterRegistryStatus() : null,
+      executionStatus: active && active.execution && active.execution.status || "Not Started",
+      currentExecutionSessionId: active && active.execution && active.execution.currentSession && active.execution.currentSession.executionSessionId || null,
+      currentTaskId: active && active.execution && active.execution.currentSession && active.execution.currentSession.currentTaskId || null,
+      repositoryIntegrity: active && active.execution && active.execution.executionSummary ? internal.clone(active.execution.executionSummary.repositoryIntegrity) : "Not Evaluated in Phase 3",
       persistentCommitAllowed: false,
       zipFileMutationAllowed: false,
       lastPersistence: clone(state.lastPersistence),
@@ -602,6 +608,12 @@
     }
     if (namespace.api && typeof namespace.api.validateWorkflowPlanning === "function") {
       results.push({ name: "Planning", result: namespace.api.validateWorkflowPlanning(settings) });
+    }
+    if (namespace.api && typeof namespace.api.validateWorkflowAdapter === "function") {
+      results.push({ name: "Adapter", result: namespace.api.validateWorkflowAdapter(settings) });
+    }
+    if (namespace.api && typeof namespace.api.validateWorkflowExecution === "function") {
+      results.push({ name: "Execution", result: namespace.api.validateWorkflowExecution(settings) });
     }
     if (!results.length) {
       const notRun = {
@@ -652,7 +664,7 @@
       id: nextId("IDE-160-VALIDATION"),
       componentId: COMPONENT_ID,
       version: VERSION,
-      mode: text(settings.mode, "Phase 2 Integrated Validation"),
+      mode: text(settings.mode, "Phase 3 Integrated Validation"),
       valid: failed === 0 && total > 0,
       passed: passed,
       failed: failed,
@@ -676,7 +688,7 @@
       status: getAIDevelopmentWorkflowStatus()
     }, {
       warnings: ["IDE-160 Mobile UI is scheduled for Implementation Phase 8."],
-      error: { message: "IDE-160 UI is not implemented in Phase 1.", category: "Dependency Failure", severity: "Low" }
+      error: { message: "IDE-160 UI is not implemented in Phase 3.", category: "Dependency Failure", severity: "Low" }
     });
   }
 
