@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_ai_development_workflow_state.js
    IDE-160 AI Development Workflow State / Failure / Recovery
-   Version: 1.0.0
-   Phase: 1 - Workflow Foundation
+   Version: 1.1.0
+   Phase: 2 - Workflow Planning Foundation
    ============================================================ */
 (function (global) {
   "use strict";
@@ -727,7 +727,7 @@
         const storageStatus = namespace.api.getIDE160StorageStatus();
         check("Storage budget reported", storageStatus && storageStatus.usage && Number.isFinite(storageStatus.usage.bytes), JSON.stringify(storageStatus.usage), "Storage");
         const status = namespace.api.getAIDevelopmentWorkflowStatus();
-        check("Lightweight Status available", status && status.componentId === "IDE-160" && status.healthStatus === "Not Run", status.status, "Status");
+        check("Lightweight Status available", status && status.componentId === "IDE-160" && status.status === "Ready" && status.ready === true && (status.healthStatus === "Not Run" || status.healthStatus === "Measured"), status.status + "/" + status.healthStatus, "Status");
       } finally {
         internal.importRuntimeState(originalState);
         transitionJournal.splice(0, transitionJournal.length, ...originalJournal);
