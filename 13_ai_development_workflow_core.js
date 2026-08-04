@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_ai_development_workflow_core.js
    IDE-160 AI Development Workflow
-   Version: 1.0.0
-   Phase: 1 - Workflow Foundation
+   Version: 1.1.0
+   Phase: 2 - Workflow Planning
    Design Freeze: 2026-08-04
    ============================================================ */
 (function (global) {
@@ -10,11 +10,11 @@
 
   const COMPONENT_ID = "IDE-160";
   const COMPONENT_NAME = "AI Development Workflow";
-  const VERSION = "1.0.0";
+  const VERSION = "1.1.0";
   const SCHEMA_VERSION = 1;
   const ARCHITECTURE_VERSION = "1.0";
   const DESIGN_FREEZE_VERSION = "1.0";
-  const IMPLEMENTATION_PHASE = "Phase 1 - Workflow Foundation";
+  const IMPLEMENTATION_PHASE = "Phase 2 - Workflow Planning";
   const MAX_ACTIVE_WORKFLOWS = 1;
   const MAX_DEFINITIONS = 50;
   const MAX_WORKFLOW_SUMMARIES = 5;
@@ -556,7 +556,8 @@
     const moduleStatus = {
       core: Boolean(namespace.modules && namespace.modules.core),
       storage: Boolean(namespace.modules && namespace.modules.storage),
-      state: Boolean(namespace.modules && namespace.modules.state)
+      state: Boolean(namespace.modules && namespace.modules.state),
+      planning: Boolean(namespace.modules && namespace.modules.planning)
     };
     const active = state.activeWorkflowId ? state.workflows.get(state.activeWorkflowId) : null;
     const validation = state.lastValidation;
@@ -569,9 +570,9 @@
       architectureVersion: ARCHITECTURE_VERSION,
       designFreezeVersion: DESIGN_FREEZE_VERSION,
       implementationPhase: IMPLEMENTATION_PHASE,
-      implementationStatus: "Phase 1 Implemented",
+      implementationStatus: moduleStatus.planning ? "Phase 2 Implemented" : "Phase 1 Implemented",
       status: state.lastError ? "Degraded" : state.initialized ? "Ready" : "Loaded",
-      ready: Boolean(state.initialized && moduleStatus.core && moduleStatus.storage && moduleStatus.state && !state.lastError),
+      ready: Boolean(state.initialized && moduleStatus.core && moduleStatus.storage && moduleStatus.state && moduleStatus.planning && !state.lastError),
       available: true,
       initialized: state.initialized === true,
       modules: moduleStatus,
@@ -584,7 +585,7 @@
       validationStatus: validation ? validation.status : "Not Run",
       health: validation && Number.isFinite(validation.health) ? validation.health : null,
       healthStatus: validation && Number.isFinite(validation.health) ? "Measured" : "Not Run",
-      repositoryIntegrity: "Not Evaluated in Phase 1",
+      repositoryIntegrity: "Not Evaluated in Phase 2",
       persistentCommitAllowed: false,
       zipFileMutationAllowed: false,
       lastPersistence: clone(state.lastPersistence),
@@ -594,29 +595,79 @@
   }
 
   function validateAIDevelopmentWorkflow(options) {
+    const settings = isPlainObject(options) ? options : {};
+    const results = [];
     if (namespace.api && typeof namespace.api.validateWorkflowFoundation === "function") {
-      const result = namespace.api.validateWorkflowFoundation(options || {});
-      state.lastValidation = clone(result);
-      touch();
-      return result;
+      results.push({ name: "Foundation", result: namespace.api.validateWorkflowFoundation(settings) });
     }
-    const result = {
+    if (namespace.api && typeof namespace.api.validateWorkflowPlanning === "function") {
+      results.push({ name: "Planning", result: namespace.api.validateWorkflowPlanning(settings) });
+    }
+    if (!results.length) {
+      const notRun = {
+        id: nextId("IDE-160-VALIDATION"),
+        componentId: COMPONENT_ID,
+        version: VERSION,
+        valid: false,
+        passed: 0,
+        failed: 0,
+        total: 0,
+        health: null,
+        status: "Not Run",
+        groups: {},
+        checks: [],
+        phases: {},
+        warnings: ["IDE-160 Validation Modules are not ready."],
+        executedAt: null
+      };
+      state.lastValidation = clone(notRun);
+      return notRun;
+    }
+
+    const checks = [];
+    const groups = {};
+    const phases = {};
+    let passed = 0;
+    let failed = 0;
+    let total = 0;
+    const warnings = [];
+    results.forEach(function mergeValidation(item) {
+      const result = item.result || {};
+      phases[item.name] = clone(result);
+      passed += Number(result.passed) || 0;
+      failed += Number(result.failed) || 0;
+      total += Number(result.total) || 0;
+      asArray(result.warnings).forEach(function addWarning(warning) { warnings.push(String(warning)); });
+      asArray(result.checks).forEach(function addCheck(check) {
+        const copy = clone(check) || {};
+        copy.phase = item.name;
+        checks.push(copy);
+      });
+      Object.keys(result.groups || {}).forEach(function mergeGroup(groupName) {
+        const key = item.name + " / " + groupName;
+        groups[key] = clone(result.groups[groupName]);
+      });
+    });
+    const overall = {
       id: nextId("IDE-160-VALIDATION"),
       componentId: COMPONENT_ID,
       version: VERSION,
-      valid: false,
-      passed: 0,
-      failed: 0,
-      total: 0,
-      health: null,
-      status: "Not Run",
-      groups: {},
-      checks: [],
-      warnings: ["IDE-160 State Module is not ready."],
-      executedAt: null
+      mode: text(settings.mode, "Phase 2 Integrated Validation"),
+      valid: failed === 0 && total > 0,
+      passed: passed,
+      failed: failed,
+      total: total,
+      health: total ? Number(((passed / total) * 100).toFixed(2)) : null,
+      status: failed === 0 && total > 0 ? "Passed" : "Failed",
+      groups: groups,
+      phases: phases,
+      checks: checks,
+      warnings: unique(warnings),
+      executedAt: nowIso()
     };
-    state.lastValidation = clone(result);
-    return result;
+    state.lastValidation = clone(overall);
+    touch();
+    return overall;
   }
 
   function showAIDevelopmentWorkflow() {
