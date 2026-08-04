@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_ai_development_workflow_state.js
    IDE-160 AI Development Workflow State / Failure / Recovery
-   Version: 1.2.0
+   Version: 1.3.0
    Phase: 3 - Component Adapter / Workflow Execution Foundation
    ============================================================ */
 (function (global) {
@@ -70,7 +70,8 @@
   const foundationRecordStore = {
     failures: [],
     recoveries: [],
-    attempts: []
+    attempts: [],
+    decisions: []
   };
 
   const STATUS_TRANSITIONS = Object.freeze({
@@ -132,6 +133,7 @@
       foundationRecordStore.failures = Array.isArray(records.store.failures) ? records.store.failures.slice(-100) : [];
       foundationRecordStore.recoveries = Array.isArray(records.store.recoveries) ? records.store.recoveries.slice(-100) : [];
       foundationRecordStore.attempts = Array.isArray(records.store.attempts) ? records.store.attempts.slice(-100) : [];
+      foundationRecordStore.decisions = Array.isArray(records.store.decisions) ? records.store.decisions.slice(-50) : [];
     }
   }
 
@@ -602,6 +604,7 @@
         foundationRecordStore.failures = [];
         foundationRecordStore.recoveries = [];
         foundationRecordStore.attempts = [];
+        foundationRecordStore.decisions = [];
 
         check("Namespace available", Boolean(global.AIPromptOSIDE160), "window.AIPromptOSIDE160", "Core");
         check("Core module loaded", Boolean(namespace.modules.core), namespace.modules.core && namespace.modules.core.status, "Core");
@@ -734,6 +737,7 @@
         foundationRecordStore.failures = originalRecords.failures || [];
         foundationRecordStore.recoveries = originalRecords.recoveries || [];
         foundationRecordStore.attempts = originalRecords.attempts || [];
+        foundationRecordStore.decisions = originalRecords.decisions || [];
         state.lastValidation = originalValidation;
         state.lastPersistence = originalPersistence;
         state.lastError = originalError;
