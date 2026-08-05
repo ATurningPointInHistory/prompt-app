@@ -1,7 +1,17 @@
 /* ===============================
    FILE: 07_project_package.js
    Project Package Builder
+   Static Manifest Build v1.0.0
 =============================== */
+
+const AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE =
+  "./00_script_manifest.json";
+
+const AI_PRO_SCRIPT_BLOCK_START =
+  "<!-- AI_PRO_SCRIPT_BLOCK_START -->";
+
+const AI_PRO_SCRIPT_BLOCK_END =
+  "<!-- AI_PRO_SCRIPT_BLOCK_END -->";
 
 
 async function saveProjectPackage() {
@@ -34,10 +44,10 @@ async function saveProjectPackage() {
 
     const zip = new JSZip();
 
-    const html =
+    const cleanHtml =
       await getCleanProjectIndexHtml();
 
-    if (!html) {
+    if (!cleanHtml) {
       alert(
         "プロジェクト保存を中止しました\n\n" +
         "Clean index.htmlを取得できません。"
@@ -49,6 +59,32 @@ async function saveProjectPackage() {
         reason: "CLEAN_INDEX_UNAVAILABLE"
       };
     }
+
+    const manifestBuild =
+      await buildProjectIndexFromStaticManifest(
+        cleanHtml
+      );
+
+    if (!manifestBuild.ok) {
+      alert(
+        "プロジェクト保存を中止しました\n\n" +
+        "Script Manifest検証に失敗しました。\n" +
+        manifestBuild.errors
+          .map(error => "- " + error)
+          .join("\n")
+      );
+
+      return {
+        ok: false,
+        complete: false,
+        reason: "SCRIPT_MANIFEST_INVALID",
+        manifestValidation:
+          manifestBuild.validation,
+        errors: manifestBuild.errors
+      };
+    }
+
+    const html = manifestBuild.html;
 
     const references =
       getProjectPackageReferences(html);
@@ -64,6 +100,18 @@ async function saveProjectPackage() {
     zip.file("index.html", html);
 
     for (const item of references.local) {
+
+      if (
+        item.path ===
+        manifestBuild.manifestPath
+      ) {
+        zip.file(
+          item.path,
+          manifestBuild.manifestText
+        );
+        savedFiles.push(item.path);
+        continue;
+      }
 
       try {
 
@@ -103,7 +151,7 @@ async function saveProjectPackage() {
     if (missingFiles.length) {
       alert(
         "プロジェクト保存を中止しました\n\n" +
-        "必須ファイルを取得できません。\n" +
+        "Manifest参照を含む必須ファイルを取得できません。\n" +
         missingFiles
           .map(item => "- " + item.path)
           .join("\n")
@@ -114,7 +162,9 @@ async function saveProjectPackage() {
         complete: false,
         requestedFiles,
         savedFiles,
-        missingFiles
+        missingFiles,
+        manifestValidation:
+          manifestBuild.validation
       };
     }
 
@@ -143,15 +193,23 @@ async function saveProjectPackage() {
       fileCount:
         savedFiles.length + 1,
       cleanIndex: true,
+      scriptManifestSource:
+        manifestBuild.manifestPath,
       scriptManifestVersion:
-        window.AI_PRO_SCRIPT_MANIFEST_VERSION ||
-        "unknown",
+        manifestBuild.manifest.version,
       scriptManifestCount:
-        Array.isArray(
-          window.AI_PRO_SCRIPT_MANIFEST
-        )
-          ? window.AI_PRO_SCRIPT_MANIFEST.length
-          : 0
+        manifestBuild.manifest.scripts.length,
+      scriptLoading: {
+        mode:
+          "Build-time Manifest to Static Scripts",
+        runtimeLoader: false,
+        documentWrite: false,
+        first:
+          manifestBuild.validation.first,
+        last:
+          manifestBuild.validation.last,
+        generatedAtSave: true
+      }
     };
 
     zip.file(
@@ -205,6 +263,8 @@ async function saveProjectPackage() {
       "プロジェクト保存完了\n\n" +
       "Files : " +
       projectInfo.fileCount + "\n" +
+      "Scripts : " +
+      projectInfo.scriptManifestCount + "\n" +
       "Missing : 0\n" +
       "Complete : true"
     );
@@ -213,7 +273,9 @@ async function saveProjectPackage() {
       ok: true,
       complete: true,
       fileName: a.download,
-      projectInfo
+      projectInfo,
+      manifestValidation:
+        manifestBuild.validation
     };
 
   } catch (e) {
@@ -222,9 +284,470 @@ async function saveProjectPackage() {
       "保存失敗\n\n" +
       e.message
     );
+
+    return {
+      ok: false,
+      complete: false,
+      reason: "UNEXPECTED_ERROR",
+      error: e && e.message
+        ? e.message
+        : String(e)
+    };
   }
 }
 
+
+function normalizeStaticScriptPath(src) {
+  return String(src || "")
+    .trim()
+    .split("#")[0]
+    .split("?")[0]
+    .replace(/^\.\//, "");
+}
+
+
+function validateStaticScriptManifest(manifest) {
+
+  const errors = [];
+
+  if (
+    !manifest ||
+    typeof manifest !== "object" ||
+    Array.isArray(manifest)
+  ) {
+    errors.push(
+      "ManifestはJSONオブジェクトである必要があります"
+    );
+  }
+
+  const version =
+    manifest && typeof manifest.version === "string"
+      ? manifest.version.trim()
+      : "";
+
+  if (!version) {
+    errors.push(
+      "Manifest versionがありません"
+    );
+  }
+
+  const scripts =
+    manifest && Array.isArray(manifest.scripts)
+      ? manifest.scripts
+      : [];
+
+  if (!scripts.length) {
+    errors.push(
+      "Manifest scriptsが空です"
+    );
+  }
+
+  const invalidItems = scripts.filter(src =>
+    typeof src !== "string" ||
+    !src.trim()
+  );
+
+  if (invalidItems.length) {
+    errors.push(
+      "Manifestに空または文字列以外の項目があります"
+    );
+  }
+
+  const normalized = scripts
+    .filter(src => typeof src === "string")
+    .map(normalizeStaticScriptPath);
+
+  const invalidPaths = scripts.filter(src => {
+    if (typeof src !== "string") {
+      return true;
+    }
+
+    const value = src.trim();
+    const path = normalizeStaticScriptPath(value);
+
+    return Boolean(
+      !value ||
+      /^(?:https?:)?\/\//i.test(value) ||
+      /^(?:data:|blob:|#)/i.test(value) ||
+      value.startsWith("/") ||
+      value.includes("../") ||
+      value.includes("\\") ||
+      !/\.js$/i.test(path)
+    );
+  });
+
+  if (invalidPaths.length) {
+    errors.push(
+      "ManifestにはProject内の相対JSだけを登録してください: " +
+      invalidPaths.map(String).join(", ")
+    );
+  }
+
+  const duplicates = normalized.filter(
+    (path, index) =>
+      normalized.indexOf(path) !== index
+  );
+
+  if (duplicates.length) {
+    errors.push(
+      "Manifestに重複があります: " +
+      [...new Set(duplicates)].join(", ")
+    );
+  }
+
+  const first = normalized[0] || "";
+  const last =
+    normalized[normalized.length - 1] || "";
+
+  if (first !== "00_core.js") {
+    errors.push(
+      "00_core.jsがManifestの先頭ではありません"
+    );
+  }
+
+  if (last !== "99_init.js") {
+    errors.push(
+      "99_init.jsがManifestの最後ではありません"
+    );
+  }
+
+  const forbidden = [
+    "00_script_loader.js",
+    "00_script_manifest.js"
+  ].filter(path => normalized.includes(path));
+
+  if (forbidden.length) {
+    errors.push(
+      "実行時LoaderをManifestへ登録できません: " +
+      forbidden.join(", ")
+    );
+  }
+
+  return {
+    ok: errors.length === 0,
+    errors,
+    version: version || "unknown",
+    scriptCount: scripts.length,
+    first,
+    last,
+    normalizedScripts: normalized
+  };
+}
+
+
+function escapeStaticScriptAttribute(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+
+function buildStaticScriptBlock(manifest) {
+  return manifest.scripts
+    .map(src =>
+      '<script src="' +
+      escapeStaticScriptAttribute(src) +
+      '"></script>'
+    )
+    .join("\n");
+}
+
+
+function countProjectPackageToken(source, token) {
+  if (!token) {
+    return 0;
+  }
+
+  return String(source || "")
+    .split(token)
+    .length - 1;
+}
+
+
+function replaceStaticScriptBlock(
+  html,
+  scriptBlock
+) {
+  const source = String(html || "");
+
+  const startCount =
+    countProjectPackageToken(
+      source,
+      AI_PRO_SCRIPT_BLOCK_START
+    );
+
+  const endCount =
+    countProjectPackageToken(
+      source,
+      AI_PRO_SCRIPT_BLOCK_END
+    );
+
+  if (startCount !== 1 || endCount !== 1) {
+    throw new Error(
+      "index.htmlのScript Blockマーカーは開始・終了各1個が必要です"
+    );
+  }
+
+  const startIndex = source.indexOf(
+    AI_PRO_SCRIPT_BLOCK_START
+  );
+
+  const endIndex = source.indexOf(
+    AI_PRO_SCRIPT_BLOCK_END
+  );
+
+  if (
+    startIndex < 0 ||
+    endIndex < 0 ||
+    endIndex <= startIndex
+  ) {
+    throw new Error(
+      "index.htmlのScript Blockマーカー順序が不正です"
+    );
+  }
+
+  return (
+    source.slice(
+      0,
+      startIndex +
+      AI_PRO_SCRIPT_BLOCK_START.length
+    ) +
+    "\n" +
+    scriptBlock +
+    "\n" +
+    source.slice(endIndex)
+  );
+}
+
+
+function validateGeneratedStaticScriptIndex(
+  html,
+  manifest
+) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(
+    String(html || ""),
+    "text/html"
+  );
+
+  const actualScripts = [
+    ...doc.querySelectorAll("script[src]")
+  ]
+    .map(el => String(
+      el.getAttribute("src") || ""
+    ).trim())
+    .filter(src =>
+      src &&
+      !/^(?:https?:)?\/\//i.test(src)
+    );
+
+  const expectedScripts =
+    manifest.scripts.map(src => String(src).trim());
+
+  const errors = [];
+
+  if (
+    countProjectPackageToken(
+      html,
+      AI_PRO_SCRIPT_BLOCK_START
+    ) !== 1 ||
+    countProjectPackageToken(
+      html,
+      AI_PRO_SCRIPT_BLOCK_END
+    ) !== 1
+  ) {
+    errors.push(
+      "生成後index.htmlのScript Blockマーカーが不正です"
+    );
+  }
+
+  if (
+    actualScripts.length !==
+    expectedScripts.length
+  ) {
+    errors.push(
+      "生成後Script数がManifestと一致しません"
+    );
+  }
+
+  const mismatchIndex = expectedScripts.findIndex(
+    (src, index) =>
+      actualScripts[index] !== src
+  );
+
+  if (mismatchIndex >= 0) {
+    errors.push(
+      "生成後Script順序がManifestと一致しません: index " +
+      mismatchIndex
+    );
+  }
+
+  if (
+    actualScripts.some(src =>
+      normalizeStaticScriptPath(src) ===
+      "00_script_loader.js"
+    )
+  ) {
+    errors.push(
+      "生成後index.htmlに実行時Loaderが含まれています"
+    );
+  }
+
+  return {
+    ok: errors.length === 0,
+    errors,
+    actualScriptCount: actualScripts.length,
+    expectedScriptCount:
+      expectedScripts.length,
+    mismatchIndex
+  };
+}
+
+
+async function loadStaticScriptManifest() {
+  try {
+    const manifestUrl = new URL(
+      AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE,
+      document.baseURI
+    );
+
+    manifestUrl.searchParams.set(
+      "packageSource",
+      Date.now()
+    );
+
+    const response = await fetch(
+      manifestUrl.href,
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        "00_script_manifest.json fetch failed: " +
+        response.status
+      );
+    }
+
+    const manifestText =
+      await response.text();
+
+    let manifest;
+
+    try {
+      manifest = JSON.parse(manifestText);
+    } catch (error) {
+      throw new Error(
+        "00_script_manifest.jsonのJSON形式が不正です: " +
+        error.message
+      );
+    }
+
+    const validation =
+      validateStaticScriptManifest(manifest);
+
+    return {
+      ok: validation.ok,
+      errors: validation.errors,
+      manifest,
+      manifestText,
+      manifestPath:
+        cleanProjectPackagePath(
+          AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE
+        ),
+      validation
+    };
+
+  } catch (error) {
+    return {
+      ok: false,
+      errors: [
+        error && error.message
+          ? error.message
+          : String(error)
+      ],
+      manifest: null,
+      manifestText: "",
+      manifestPath:
+        cleanProjectPackagePath(
+          AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE
+        ),
+      validation: {
+        ok: false,
+        errors: [
+          error && error.message
+            ? error.message
+            : String(error)
+        ],
+        version: "unknown",
+        scriptCount: 0,
+        first: "",
+        last: "",
+        normalizedScripts: []
+      }
+    };
+  }
+}
+
+
+async function buildProjectIndexFromStaticManifest(
+  cleanHtml
+) {
+  const loaded =
+    await loadStaticScriptManifest();
+
+  if (!loaded.ok) {
+    return loaded;
+  }
+
+  try {
+    const scriptBlock =
+      buildStaticScriptBlock(
+        loaded.manifest
+      );
+
+    const html =
+      replaceStaticScriptBlock(
+        cleanHtml,
+        scriptBlock
+      );
+
+    const generatedValidation =
+      validateGeneratedStaticScriptIndex(
+        html,
+        loaded.manifest
+      );
+
+    if (!generatedValidation.ok) {
+      return {
+        ...loaded,
+        ok: false,
+        errors:
+          generatedValidation.errors,
+        generatedValidation
+      };
+    }
+
+    return {
+      ...loaded,
+      ok: true,
+      html,
+      generatedValidation
+    };
+
+  } catch (error) {
+    return {
+      ...loaded,
+      ok: false,
+      errors: [
+        error && error.message
+          ? error.message
+          : String(error)
+      ]
+    };
+  }
+}
 
 function validateCleanProjectIndexHtml(html) {
 
@@ -234,6 +757,19 @@ function validateCleanProjectIndexHtml(html) {
   if (!source.trim()) {
     return false;
   }
+
+  const markerReady = Boolean(
+    countProjectPackageToken(
+      source,
+      AI_PRO_SCRIPT_BLOCK_START
+    ) === 1 &&
+    countProjectPackageToken(
+      source,
+      AI_PRO_SCRIPT_BLOCK_END
+    ) === 1 &&
+    source.indexOf(AI_PRO_SCRIPT_BLOCK_START) <
+      source.indexOf(AI_PRO_SCRIPT_BLOCK_END)
+  );
 
   const parser = new DOMParser();
   const doc = parser.parseFromString(
@@ -254,15 +790,13 @@ function validateCleanProjectIndexHtml(html) {
       !/^(?:https?:)?\/\//i.test(path)
     );
 
-  const loaderBootstrap =
-    localScripts.includes(
-      "00_script_loader.js"
-    );
-
   const staticBootstrap = Boolean(
     localScripts[0] === "00_core.js" &&
     localScripts[localScripts.length - 1] ===
-      "99_init.js"
+      "99_init.js" &&
+    !localScripts.includes(
+      "00_script_loader.js"
+    )
   );
 
   const runtimeOnly = [
@@ -292,7 +826,8 @@ function validateCleanProjectIndexHtml(html) {
     });
 
   return Boolean(
-    (loaderBootstrap || staticBootstrap) &&
+    markerReady &&
+    staticBootstrap &&
     !runtimeOnly &&
     !dirtyContainer
   );
@@ -377,21 +912,9 @@ function getProjectPackageReferences(html) {
       el.getAttribute("src")
     ));
 
-  const manifestSource =
-    window.AI_PRO_SCRIPT_MANIFEST_SOURCE;
-
-  if (manifestSource) {
-    values.push(manifestSource);
-  }
-
-  if (
-    Array.isArray(
-      window.AI_PRO_SCRIPT_MANIFEST
-    )
-  ) {
-    window.AI_PRO_SCRIPT_MANIFEST
-      .forEach(src => values.push(src));
-  }
+  values.push(
+    AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE
+  );
 
   const localMap = new Map();
   const external = [];
