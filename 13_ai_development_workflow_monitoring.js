@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_ai_development_workflow_monitoring.js
    IDE-160 AI Development Workflow Monitoring / Metrics
-   Version: 2.0.0
+   Version: 2.0.1
    Phase: 6 - Workflow Monitoring
    ============================================================ */
 (function (global) {
