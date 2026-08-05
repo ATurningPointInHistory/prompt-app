@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_intelligence_validation.js
    IDE-170 Intelligence Platform
-   Version: 1.0.0
-   Phase: 1 Foundation - Independent Validation Gate
+   Version: 1.1.0
+   Phase: 2 Source Intake and Canonical Model - Independent Validation Gate
    ============================================================ */
 (function (global) {
   "use strict";
@@ -15,7 +15,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.0.0";
+  const VERSION = "1.1.0";
   const VALIDATION_CAPABILITY_ID = "IDE-170-VALIDATION";
 
   function buildCheck(name, passed, detail, group, severity) {
@@ -66,14 +66,16 @@
       type: "Validation",
       status: "Active",
       owner: "IDE-170",
-      description: "Validates Phase 1 Foundation independently from Confidence or future Insight output.",
+      description: "Validates Phase 1 Foundation and Phase 2 Source Intake/Canonical Model independently from future Insight output.",
       dependencies: [
-        { capabilityId: "IDE-170-CORE", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-SCHEMA-REGISTRY", minimumVersion: VERSION, optional: false }
+        { capabilityId: "IDE-170-CORE", minimumVersion: "1.0.0", optional: false },
+        { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: "1.0.0", optional: false },
+        { capabilityId: "IDE-170-SCHEMA-REGISTRY", minimumVersion: "1.0.0", optional: false },
+        { capabilityId: "IDE-170-SOURCE-ADAPTER-FRAMEWORK", minimumVersion: "1.0.0", optional: false },
+        { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: "1.0.0", optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-VALIDATION-RESULT"],
-      provides: ["Core Validation", "Release Gate", "Regression Validation"],
+      provides: ["Core Validation", "Source Intake Validation", "Canonical Model Validation", "Release Gate", "Regression Validation"],
       source: "built-in"
     });
   }
@@ -85,7 +87,10 @@
     const validationArtifacts = {
       capabilityIds: [],
       schemaIds: [],
-      sessionIds: []
+      sessionIds: [],
+      adapterIds: [],
+      intakeIds: [],
+      snapshotIds: []
     };
 
     function check(name, passed, detail, group, severity) {
@@ -101,6 +106,21 @@
       validationArtifacts.capabilityIds.forEach(function removeCapability(capabilityId) {
         if (typeof internal.removeCapabilityForValidation === "function") {
           internal.removeCapabilityForValidation(capabilityId);
+        }
+      });
+      validationArtifacts.snapshotIds.forEach(function removeSnapshot(snapshotId) {
+        if (typeof internal.removeCanonicalSnapshotForValidation === "function") {
+          internal.removeCanonicalSnapshotForValidation(snapshotId);
+        }
+      });
+      validationArtifacts.intakeIds.forEach(function removeIntake(intakeId) {
+        if (typeof internal.removeSourceIntakeForValidation === "function") {
+          internal.removeSourceIntakeForValidation(intakeId);
+        }
+      });
+      validationArtifacts.adapterIds.forEach(function removeAdapter(adapterId) {
+        if (typeof internal.removeSourceAdapterForValidation === "function") {
+          internal.removeSourceAdapterForValidation(adapterId);
         }
       });
       validationArtifacts.schemaIds.forEach(function removeSchema(schemaId) {
@@ -136,7 +156,7 @@
 
       const dependencyStatus = namespace.getDependencyStatus();
       check(
-        "Required Phase 1 modules are loaded",
+        "Required Phase 2 modules are loaded",
         dependencyStatus.requiredReady === true,
         JSON.stringify(dependencyStatus.required),
         "Foundation"
@@ -167,12 +187,21 @@
           "cancelSession",
           "freezeSession",
           "getAuditRecords",
+          "validateSourceAdapter",
+          "registerSourceAdapter",
+          "getSourceAdapters",
+          "captureSources",
+          "getSourceIntake",
+          "createCanonicalRecord",
+          "buildCanonicalSnapshot",
+          "getCanonicalSnapshot",
+          "validateCanonicalSnapshot",
           "runValidation",
           "getReleaseStatus"
         ].every(function hasApi(apiName) {
           return typeof namespace[apiName] === "function";
         }),
-        "Phase 1 APIs",
+        "Phase 1 and Phase 2 APIs",
         "Foundation"
       );
 
@@ -534,9 +563,19 @@
         "Status and Release"
       );
       check(
-        "Phase 2 remains not started",
-        status.phase2Started === false,
-        String(status.phase2Started),
+        "Phase 2 is started and implemented",
+        status.phase2Started === true && status.phase2Complete === true && status.progress === 25,
+        JSON.stringify({
+          phase2Started: status.phase2Started,
+          phase2Complete: status.phase2Complete,
+          progress: status.progress
+        }),
+        "Status and Release"
+      );
+      check(
+        "Phase 3 remains not started",
+        status.phase3Started === false,
+        String(status.phase3Started),
         "Status and Release"
       );
       check(
@@ -635,6 +674,517 @@
         );
       }
 
+      check(
+        "Source Adapter Framework module is loaded",
+        Boolean(namespace.modules.sourceAdapterFramework && namespace.modules.sourceAdapterFramework.status === "Ready"),
+        JSON.stringify(namespace.modules.sourceAdapterFramework),
+        "Phase 2 Foundation"
+      );
+      check(
+        "Repository Source Adapter module is loaded",
+        Boolean(namespace.modules.repositorySourceAdapters && namespace.modules.repositorySourceAdapters.status === "Ready"),
+        JSON.stringify(namespace.modules.repositorySourceAdapters),
+        "Phase 2 Foundation"
+      );
+      check(
+        "Platform Source Adapter module is loaded",
+        Boolean(namespace.modules.platformSourceAdapters && namespace.modules.platformSourceAdapters.status === "Ready"),
+        JSON.stringify(namespace.modules.platformSourceAdapters),
+        "Phase 2 Foundation"
+      );
+      check(
+        "Canonical Model module is loaded",
+        Boolean(namespace.modules.canonicalModel && namespace.modules.canonicalModel.status === "Ready"),
+        JSON.stringify(namespace.modules.canonicalModel),
+        "Phase 2 Foundation"
+      );
+
+      const builtInAdapterIds = [
+        "IDE-170-ADAPTER-REPOSITORY",
+        "IDE-170-ADAPTER-PROJECT",
+        "IDE-170-ADAPTER-FUNCTION",
+        "IDE-170-ADAPTER-MODULE",
+        "IDE-170-ADAPTER-ARCHITECTURE",
+        "IDE-170-ADAPTER-WORKFLOW"
+      ];
+      const builtInAdapters = namespace.getSourceAdapters({});
+      check(
+        "Six official Source Adapters are registered",
+        builtInAdapterIds.every(function hasAdapter(adapterId) {
+          return Boolean(namespace.getSourceAdapter(adapterId));
+        }),
+        "count=" + builtInAdapters.length,
+        "Source Adapter Registry"
+      );
+      check(
+        "Source Adapter Capabilities are governed",
+        builtInAdapterIds.every(function governed(adapterId) {
+          const adapter = namespace.getSourceAdapter(adapterId);
+          return adapter && namespace.getCapability(adapter.capabilityId);
+        }),
+        "Governed Capability Registry",
+        "Source Adapter Registry"
+      );
+      const frameworkDependencyStatus = namespace.checkCapabilityDependencies(
+        "IDE-170-SOURCE-ADAPTER-FRAMEWORK"
+      );
+      check(
+        "Source Adapter Framework dependencies are ready",
+        frameworkDependencyStatus.ready === true,
+        JSON.stringify(frameworkDependencyStatus),
+        "Source Adapter Registry"
+      );
+      const phase2SchemaIds = [
+        "IDE-170-SCHEMA-SOURCE-ADAPTER-DEFINITION",
+        "IDE-170-SCHEMA-SOURCE-RECORD",
+        "IDE-170-SCHEMA-SOURCE-INTAKE",
+        "IDE-170-SCHEMA-CANONICAL-RECORD",
+        "IDE-170-SCHEMA-CANONICAL-SNAPSHOT"
+      ];
+      check(
+        "Phase 2 Schemas are registered",
+        phase2SchemaIds.every(function hasSchema(schemaId) {
+          return Boolean(namespace.getSchema(schemaId));
+        }),
+        phase2SchemaIds.join(", "),
+        "Phase 2 Schema"
+      );
+
+      const testAdapterId = "IDE-170-ADAPTER-VALIDATION-SOURCE";
+      const sourceFixture = [
+        {
+          recordType: "project",
+          sourceType: "validation-source",
+          sourceId: "project:validation",
+          sourceVersion: "1.0.0",
+          identity: {
+            sourceId: "project:validation",
+            name: "Validation Project",
+            qualifiedName: "Validation Project",
+            aliases: []
+          },
+          classification: {
+            domain: "repository",
+            category: "project",
+            subtype: "test",
+            lifecycle: "Active"
+          },
+          payload: {
+            name: "Validation Project",
+            version: "1.0.0"
+          },
+          metadata: {
+            fixture: true
+          },
+          quality: {
+            missingFields: [],
+            warnings: [],
+            errors: []
+          }
+        },
+        {
+          recordType: "file",
+          sourceType: "validation-source",
+          sourceId: "src/validation.js",
+          sourceVersion: "1.0.0",
+          identity: {
+            sourceId: "src/validation.js",
+            name: "validation.js",
+            qualifiedName: "src/validation.js",
+            aliases: []
+          },
+          classification: {
+            domain: "repository",
+            category: "file",
+            subtype: "js",
+            lifecycle: "Active"
+          },
+          payload: {
+            path: "src/validation.js",
+            fileName: "validation.js",
+            fileType: "js",
+            content: "function validationFixture() { return true; }"
+          },
+          metadata: {
+            fixture: true
+          },
+          quality: {
+            missingFields: [],
+            warnings: [],
+            errors: []
+          }
+        }
+      ];
+      const sourceFixtureBefore = JSON.stringify(sourceFixture);
+      const validAdapterDefinition = {
+        adapterId: testAdapterId,
+        capabilityId: testAdapterId,
+        name: "Validation Source Adapter",
+        version: VERSION,
+        status: "Experimental",
+        sourceType: "validation-source",
+        recordTypes: ["project", "file"],
+        domains: ["repository"],
+        required: false,
+        priority: 900,
+        owner: "IDE-170 Validation",
+        description: "Temporary Source Adapter for isolated Phase 2 Validation.",
+        isAvailable: function validationSourceAvailable() {
+          return { available: true, status: "Ready" };
+        },
+        read: function readValidationSource() {
+          return {
+            status: "Ready",
+            sourceVersion: "1.0.0",
+            records: sourceFixture,
+            metadata: { fixture: true }
+          };
+        }
+      };
+      const adapterDefinitionValidation = namespace.validateSourceAdapter(validAdapterDefinition);
+      check(
+        "Valid Source Adapter definition passes",
+        adapterDefinitionValidation.valid === true,
+        "passed=" + adapterDefinitionValidation.passed + "/" + adapterDefinitionValidation.total,
+        "Source Adapter Registry"
+      );
+      const adapterRegistration = namespace.registerSourceAdapter(validAdapterDefinition);
+      if (adapterRegistration.ok) {
+        validationArtifacts.adapterIds.push(testAdapterId);
+        validationArtifacts.capabilityIds.push(testAdapterId);
+      }
+      check(
+        "Source Adapter can be registered",
+        adapterRegistration.ok === true,
+        adapterRegistration.code,
+        "Source Adapter Registry"
+      );
+      const duplicateAdapter = namespace.registerSourceAdapter(validAdapterDefinition);
+      check(
+        "Duplicate Source Adapter is blocked",
+        duplicateAdapter.ok === false && duplicateAdapter.code === "SOURCE_ADAPTER_DUPLICATE",
+        duplicateAdapter.code,
+        "Source Adapter Registry"
+      );
+      const invalidAdapter = namespace.registerSourceAdapter({
+        adapterId: "invalid source adapter",
+        name: "",
+        version: "latest",
+        sourceType: "",
+        recordTypes: [],
+        write: function prohibitedWrite() {},
+        read: null
+      });
+      check(
+        "Invalid or writable Source Adapter is blocked",
+        invalidAdapter.ok === false && invalidAdapter.code === "SOURCE_ADAPTER_INVALID",
+        invalidAdapter.code,
+        "Source Adapter Registry"
+      );
+      const adapterAvailability = namespace.getSourceAvailability(testAdapterId);
+      check(
+        "Source availability can be checked",
+        adapterAvailability.available === true && adapterAvailability.status === "Ready",
+        JSON.stringify(adapterAvailability),
+        "Source Adapter Registry"
+      );
+
+      const sourceSessionResult = namespace.startSession({
+        purpose: "Phase 2 Source Intake Validation",
+        actor: "IDE-170 Validation",
+        requiredCapabilities: [testAdapterId]
+      });
+      const sourceSession = sourceSessionResult.ok && sourceSessionResult.data
+        ? sourceSessionResult.data.session
+        : null;
+      if (sourceSession) validationArtifacts.sessionIds.push(sourceSession.sessionId);
+      check(
+        "Source Intake Session can bind registered Adapter Capability",
+        Boolean(sourceSession && sourceSession.capabilityBindings.some(function bound(item) {
+          return item.capabilityId === testAdapterId;
+        })),
+        sourceSessionResult.code,
+        "Source Intake"
+      );
+
+      const intakeResult = sourceSession
+        ? namespace.captureSources(sourceSession.sessionId, {
+            adapterIds: [testAdapterId],
+            requiredAdapterIds: [testAdapterId],
+            actor: "IDE-170 Validation"
+          })
+        : { ok: false, code: "SESSION_NOT_CREATED" };
+      const intake = intakeResult.ok && intakeResult.data ? intakeResult.data.intake : null;
+      if (intake) validationArtifacts.intakeIds.push(intake.intakeId);
+      check(
+        "Source Intake captures registered Source",
+        Boolean(intakeResult.ok && intake && intake.status === "Ready"),
+        intakeResult.code,
+        "Source Intake"
+      );
+      check(
+        "Source Intake records retain provenance",
+        Boolean(intake && intake.adapterResults[0].records.every(function provenance(record) {
+          return record.adapterId === testAdapterId &&
+            record.adapterVersion === VERSION &&
+            record.sourceId && record.sourceType;
+        })),
+        intake && intake.adapterResults[0].recordCount,
+        "Source Intake"
+      );
+      check(
+        "Source Adapter does not mutate Source input",
+        JSON.stringify(sourceFixture) === sourceFixtureBefore &&
+          intake && intake.adapterResults[0].sourceReadOnly === true,
+        "Source fixture unchanged",
+        "Source Intake"
+      );
+      const intakeValidation = intake
+        ? namespace.validateSourceIntake(intake.intakeId)
+        : { valid: false, errors: [{ code: "INTAKE_NOT_FOUND" }] };
+      check(
+        "Source Intake passes independent Validation",
+        intakeValidation.valid === true,
+        "passed=" + intakeValidation.passed + "/" + intakeValidation.total,
+        "Source Intake"
+      );
+      check(
+        "Source Intake is frozen and immutable",
+        Boolean(intake && intake.frozen === true && intake.immutable === true),
+        intake && intake.status,
+        "Source Intake"
+      );
+      check(
+        "Source Intake contains no inferred fields",
+        Boolean(intake && intake.adapterResults[0].records.every(function noInference(record) {
+          return record.quality.inferredFields.length === 0;
+        })),
+        "Source-derived Fact only",
+        "Source Intake"
+      );
+
+      const firstSourceRecord = intake && intake.adapterResults[0].records[0];
+      const canonicalRecordResult = firstSourceRecord
+        ? namespace.createCanonicalRecord(firstSourceRecord)
+        : { ok: false, code: "SOURCE_RECORD_NOT_FOUND" };
+      const canonicalRecord = canonicalRecordResult.ok && canonicalRecordResult.data
+        ? canonicalRecordResult.data.record
+        : null;
+      check(
+        "Canonical Record can be created",
+        Boolean(canonicalRecordResult.ok && canonicalRecord),
+        canonicalRecordResult.code,
+        "Canonical Model"
+      );
+      check(
+        "Canonical ID is deterministic and typed",
+        Boolean(canonicalRecord && canonicalRecord.identity.canonicalId === "project:project:validation"),
+        canonicalRecord && canonicalRecord.identity.canonicalId,
+        "Canonical Model"
+      );
+      check(
+        "Canonical Record retains Source reference",
+        Boolean(canonicalRecord &&
+          canonicalRecord.source.sourceId === firstSourceRecord.sourceId &&
+          canonicalRecord.source.adapterId === testAdapterId),
+        canonicalRecord && JSON.stringify(canonicalRecord.source),
+        "Canonical Model"
+      );
+      check(
+        "Canonical Record separates Fact from inference",
+        Boolean(canonicalRecord &&
+          canonicalRecord.metadata.sourceDerivedFactOnly === true &&
+          canonicalRecord.quality.inferredFields.length === 0),
+        "inferredFields=0",
+        "Canonical Model"
+      );
+
+      const snapshotResult = sourceSession && intake
+        ? namespace.buildCanonicalSnapshot(sourceSession.sessionId, {
+            intakeId: intake.intakeId,
+            actor: "IDE-170 Validation"
+          })
+        : { ok: false, code: "SOURCE_INTAKE_NOT_FOUND" };
+      const snapshot = snapshotResult.ok && snapshotResult.data
+        ? snapshotResult.data.snapshot
+        : null;
+      if (snapshot) validationArtifacts.snapshotIds.push(snapshot.snapshotId);
+      check(
+        "Canonical Snapshot can be built and frozen",
+        Boolean(snapshotResult.ok && snapshot && snapshot.status === "Frozen"),
+        snapshotResult.code,
+        "Canonical Snapshot"
+      );
+      check(
+        "Canonical Snapshot preserves all Source Records",
+        Boolean(snapshot && snapshot.summary.recordCount === sourceFixture.length),
+        snapshot && snapshot.summary.recordCount,
+        "Canonical Snapshot"
+      );
+      const snapshotValidation = snapshot
+        ? namespace.validateCanonicalSnapshot(snapshot.snapshotId)
+        : { valid: false, passed: 0, total: 0 };
+      check(
+        "Canonical Snapshot passes independent Validation",
+        snapshotValidation.valid === true,
+        "passed=" + snapshotValidation.passed + "/" + snapshotValidation.total,
+        "Canonical Snapshot"
+      );
+      const snapshotSchemaValidation = snapshot
+        ? namespace.validateAgainstSchema("IDE-170-SCHEMA-CANONICAL-SNAPSHOT", snapshot)
+        : { valid: false, errors: [{ code: "SNAPSHOT_NOT_FOUND" }] };
+      check(
+        "Canonical Snapshot conforms to registered Schema",
+        snapshotSchemaValidation.valid === true,
+        "errors=" + snapshotSchemaValidation.errors.length,
+        "Canonical Snapshot"
+      );
+      if (snapshot) {
+        const externalCopy = namespace.getCanonicalSnapshot(snapshot.snapshotId);
+        externalCopy.records[0].identity.name = "MUTATED";
+        const protectedSnapshot = namespace.getCanonicalSnapshot(snapshot.snapshotId);
+        check(
+          "Frozen Canonical Snapshot is protected from external mutation",
+          protectedSnapshot.records[0].identity.name !== "MUTATED",
+          protectedSnapshot.records[0].identity.name,
+          "Canonical Snapshot"
+        );
+      } else {
+        check(
+          "Frozen Canonical Snapshot is protected from external mutation",
+          false,
+          "Snapshot not created",
+          "Canonical Snapshot"
+        );
+      }
+
+      const duplicateAdapterId = "IDE-170-ADAPTER-VALIDATION-DUPLICATE";
+      const duplicateAdapterRegistration = namespace.registerSourceAdapter({
+        adapterId: duplicateAdapterId,
+        capabilityId: duplicateAdapterId,
+        name: "Duplicate Canonical ID Validation Adapter",
+        version: VERSION,
+        status: "Experimental",
+        sourceType: "validation-duplicate-source",
+        recordTypes: ["file"],
+        domains: ["repository"],
+        owner: "IDE-170 Validation",
+        isAvailable: function duplicateSourceAvailable() { return true; },
+        read: function readDuplicateSource() {
+          function duplicateRecord(name) {
+            return {
+              recordType: "file",
+              sourceType: "validation-duplicate-source",
+              sourceId: "duplicate.js",
+              identity: {
+                sourceId: "duplicate.js",
+                name: name,
+                qualifiedName: "duplicate.js",
+                aliases: []
+              },
+              classification: {
+                domain: "repository",
+                category: "file",
+                subtype: "js",
+                lifecycle: "Active"
+              },
+              payload: { path: "duplicate.js", fileName: name },
+              metadata: {},
+              quality: { missingFields: [], warnings: [], errors: [] }
+            };
+          }
+          return { records: [duplicateRecord("one.js"), duplicateRecord("two.js")] };
+        }
+      });
+      if (duplicateAdapterRegistration.ok) {
+        validationArtifacts.adapterIds.push(duplicateAdapterId);
+        validationArtifacts.capabilityIds.push(duplicateAdapterId);
+      }
+      const duplicateSessionResult = namespace.startSession({
+        purpose: "Duplicate Canonical ID Validation",
+        actor: "IDE-170 Validation",
+        requiredCapabilities: [duplicateAdapterId]
+      });
+      const duplicateSession = duplicateSessionResult.ok && duplicateSessionResult.data
+        ? duplicateSessionResult.data.session
+        : null;
+      if (duplicateSession) validationArtifacts.sessionIds.push(duplicateSession.sessionId);
+      const duplicateIntakeResult = duplicateSession
+        ? namespace.captureSources(duplicateSession.sessionId, {
+            adapterIds: [duplicateAdapterId],
+            requiredAdapterIds: [duplicateAdapterId]
+          })
+        : { ok: false };
+      const duplicateIntake = duplicateIntakeResult.ok && duplicateIntakeResult.data
+        ? duplicateIntakeResult.data.intake
+        : null;
+      if (duplicateIntake) validationArtifacts.intakeIds.push(duplicateIntake.intakeId);
+      const duplicateSnapshotResult = duplicateSession && duplicateIntake
+        ? namespace.buildCanonicalSnapshot(duplicateSession.sessionId, {
+            intakeId: duplicateIntake.intakeId
+          })
+        : { ok: true, code: "SETUP_FAILED" };
+      check(
+        "Duplicate Canonical ID is blocked",
+        duplicateSnapshotResult.ok === false &&
+          duplicateSnapshotResult.code === "CANONICAL_SNAPSHOT_VALIDATION_BLOCKED",
+        duplicateSnapshotResult.code,
+        "Canonical Integrity"
+      );
+
+      const unavailableAdapterId = "IDE-170-ADAPTER-VALIDATION-UNAVAILABLE";
+      const unavailableRegistration = namespace.registerSourceAdapter({
+        adapterId: unavailableAdapterId,
+        capabilityId: unavailableAdapterId,
+        name: "Unavailable Source Validation Adapter",
+        version: VERSION,
+        status: "Experimental",
+        sourceType: "validation-unavailable-source",
+        recordTypes: ["project"],
+        domains: ["repository"],
+        owner: "IDE-170 Validation",
+        isAvailable: function unavailableSource() {
+          return { available: false, status: "Unavailable", reason: "Validation fixture" };
+        },
+        read: function noRead() { return []; }
+      });
+      if (unavailableRegistration.ok) {
+        validationArtifacts.adapterIds.push(unavailableAdapterId);
+        validationArtifacts.capabilityIds.push(unavailableAdapterId);
+      }
+      const unavailableSessionResult = namespace.startSession({
+        purpose: "Unavailable Source Validation",
+        actor: "IDE-170 Validation",
+        requiredCapabilities: [unavailableAdapterId]
+      });
+      const unavailableSession = unavailableSessionResult.ok && unavailableSessionResult.data
+        ? unavailableSessionResult.data.session
+        : null;
+      if (unavailableSession) validationArtifacts.sessionIds.push(unavailableSession.sessionId);
+      const unavailableIntakeResult = unavailableSession
+        ? namespace.captureSources(unavailableSession.sessionId, {
+            adapterIds: [unavailableAdapterId],
+            requiredAdapterIds: [unavailableAdapterId]
+          })
+        : { ok: true, code: "SETUP_FAILED" };
+      const unavailableIntake = unavailableIntakeResult.data && unavailableIntakeResult.data.intake;
+      if (unavailableIntake) validationArtifacts.intakeIds.push(unavailableIntake.intakeId);
+      check(
+        "Unavailable required Source is blocked without inference",
+        unavailableIntakeResult.ok === false &&
+          unavailableIntakeResult.code === "SOURCE_INTAKE_BLOCKED" &&
+          unavailableIntake && unavailableIntake.status === "Blocked",
+        unavailableIntakeResult.code,
+        "Source Governance"
+      );
+      check(
+        "Missing information inference remains prohibited",
+        namespace.getStatus().missingInformationInferenceAllowed === false &&
+          namespace.getStatus().canonicalFactInferenceAllowed === false,
+        "false / false",
+        "Source Governance"
+      );
+
       cleanupValidationArtifacts();
 
       const cleanedStatus = namespace.getStatus();
@@ -649,8 +1199,22 @@
       check(
         "Validation artifacts are removed from governed registries",
         namespace.getCapability(testCapabilityId) === null &&
-          namespace.getSchema(testSchemaId) === null,
-        "Temporary Capability and Schema removed",
+          namespace.getSchema(testSchemaId) === null &&
+          validationArtifacts.adapterIds.every(function adapterRemoved(adapterId) {
+            return namespace.getSourceAdapter(adapterId) === null &&
+              namespace.getCapability(adapterId) === null;
+          }),
+        "Temporary Capability, Schema and Source Adapter removed",
+        "Validation Isolation"
+      );
+      check(
+        "Validation Source Intakes and Canonical Snapshots are removed",
+        validationArtifacts.intakeIds.every(function intakeRemoved(intakeId) {
+          return namespace.getSourceIntake(intakeId) === null;
+        }) && validationArtifacts.snapshotIds.every(function snapshotRemoved(snapshotId) {
+          return namespace.getCanonicalSnapshot(snapshotId) === null;
+        }),
+        "Temporary Intake and Snapshot removed",
         "Validation Isolation"
       );
 
@@ -681,10 +1245,10 @@
       const result = {
         id: provisionalResult.id,
         componentId: namespace.componentId,
-        name: "IDE-170 Phase 1 Foundation Validation",
+        name: "IDE-170 Phase 2 Source Intake and Canonical Model Validation",
         version: VERSION,
         designFreezeVersion: namespace.designFreezeVersion,
-        mode: internal.text(settings.mode, "Phase 1 Foundation Integrated Validation"),
+        mode: internal.text(settings.mode, "Phase 2 Source Intake and Canonical Model Integrated Validation"),
         valid: summary.failed === 0 && summary.total > 0,
         passed: summary.passed,
         failed: summary.failed,
@@ -694,6 +1258,12 @@
         groups: summary.groups,
         checks: checks,
         warnings: internal.unique(warnings),
+        phase2Gate: "Passed - Phase 1 Release Frozen",
+        phase3Gate: summary.failed === 0 && settings.androidRealDevicePassed === true
+          ? "Passed"
+          : summary.failed === 0
+            ? "Blocked - Phase 2 Android Validation Pending"
+            : "Blocked",
         androidRealDeviceValidation: {
           required: true,
           passed: settings.androidRealDevicePassed === true,
@@ -701,11 +1271,6 @@
           evidence: internal.text(settings.androidEvidence, ""),
           validatedAt: settings.androidRealDevicePassed === true ? internal.nowIso() : null
         },
-        phase2Gate: summary.failed === 0 && settings.androidRealDevicePassed === true
-          ? "Passed"
-          : summary.failed === 0
-            ? "Blocked - Android Validation Pending"
-            : "Blocked",
         executedAt: internal.nowIso()
       };
 
@@ -739,7 +1304,7 @@
       const result = {
         id: internal.nextId("IDE-170-VALIDATION"),
         componentId: namespace.componentId,
-        name: "IDE-170 Phase 1 Foundation Validation",
+        name: "IDE-170 Phase 2 Source Intake and Canonical Model Validation",
         version: VERSION,
         valid: false,
         passed: summary.passed,
@@ -762,7 +1327,8 @@
           evidence: "",
           validatedAt: null
         },
-        phase2Gate: "Blocked",
+        phase2Gate: "Passed - Phase 1 Release Frozen",
+        phase3Gate: "Blocked",
         executedAt: internal.nowIso()
       };
       state.lastValidation = internal.clone(result);
@@ -806,6 +1372,8 @@
     independentGate: true,
     validationIsolation: true,
     regressionValidation: true,
+    sourceIntakeValidation: true,
+    canonicalModelValidation: true,
     loadedAt: internal.nowIso()
   };
 
