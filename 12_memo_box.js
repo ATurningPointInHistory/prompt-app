@@ -117,8 +117,6 @@ function saveMemoBoxLastDefaults(
 ) {
 
   memoBoxLastDefaults = {
-    name:
-      memo.name || "",
     type:
       memo.type || "Idea",
     status:
@@ -290,24 +288,6 @@ function saveMemoBoxCurrent() {
 
 }
 
-function useMemoForSearch() {
-
-  saveMemoBoxCurrent();
-
-  const box =
-    get("repairSearch");
-
-  if (!box) {
-    return;
-  }
-
-  box.value =
-    memoBoxList[
-      memoBoxActiveIndex
-    ].text;
-
-}
-
 function copyMemoBox() {
 
   saveMemoBoxCurrent();
@@ -320,48 +300,6 @@ function copyMemoBox() {
   copyTextFallback(
     buildMemoCopyText(memo)
   );
-
-}
-
-function addMemoBox() {
-
-  const defaults =
-    memoBoxLastDefaults || {};
-
-  memoBoxList.push({
-
-    name:
-      `メモ${memoBoxList.length + 1}`,
-
-    text: "",
-
-    type:
-      defaults.type || "Idea",
-
-    status:
-      defaults.status || "Active",
-
-    series:
-      defaults.series || "",
-
-    keywords: [],
-
-    relationships: [],
-
-    createdAt:
-      new Date().toISOString(),
-
-    updatedAt:
-      new Date().toISOString()
-
-  });
-
-  memoBoxActiveIndex =
-    memoBoxList.length - 1;
-
-  saveMemoBoxes();
-
-  showMemoBox();
 
 }
 
@@ -397,342 +335,6 @@ function deleteMemoBox() {
 
 }
 
-function showMemoBox() {
-
-  normalizeMemoBoxes();
-
-  const filtered =
-    filterMemoBoxes();
-
-  const memoCards =
-    filtered
-      .map(item => {
-
-        const index =
-          memoBoxList.indexOf(item);
-
-        return `
-<div class="memo-card ${
-  index === memoBoxActiveIndex
-    ? "active"
-    : ""
-}">
-
-  <div class="memo-card-select">
-
-    <input
-      type="checkbox"
-      ${
-        memoBoxSelected.has(index)
-          ? "checked"
-          : ""
-      }
-      onclick="event.stopPropagation()"
-      onchange="
-        toggleMemoSelection(
-          ${index},
-          this.checked
-        )
-      ">
-
-    <button
-      class="memo-lock-btn"
-      onclick="
-        event.stopPropagation();
-        toggleMemoLock(${index});
-      ">
-      ${isMemoLocked(item) ? "🔏" : "🖋"}
-    </button>
-
-  </div>
-
-    <div
-    class="memo-card-body"
-    onclick="selectMemoBox(${index})">
-
-    <div class="memo-card-title">
-
-            ${item.boxTitle
-        ? `<div class="small-muted">${escapeHtml(item.boxTitle)}</div>`
-        : ""}
-
-      ${item.id
-        ? `<div class="small-muted">${escapeHtml(item.id)}</div>`
-        : ""}
-
-      ${isMemoLocked(item) ? "🔏 " : "🖋 "}
-      ${escapeHtml(getMemoDisplayName(item))}
-
-    </div>
-
-    <div class="memo-card-meta">
-
-      <span>${escapeHtml(item.memoMode || inferMemoMode(item))}</span>
-      <span>${escapeHtml(item.knowledgeType || item.type || "-")}</span>
-      <span>${escapeHtml(item.status || "-")}</span>
-      <span>${escapeHtml(item.series || "-")}</span>
-
-      ${item.version
-        ? `<span>v${escapeHtml(item.version)}</span>`
-        : ""}
-
-    </div>
-
-    ${item.createdAt
-      ? `
-    <div class="small-muted memo-card-date">
-      ${escapeHtml(item.createdAt)}
-    </div>
-    `
-      : ""}
-
-    ${item.keywords?.length
-      ? `
-    <div class="small-muted memo-card-keywords">
-      ${escapeHtml(item.keywords.join(", "))}
-    </div>
-    `
-      : ""}
-
-    ${item.relationships?.length
-      ? `
-    <div class="memo-card-links">
-
-    ${item.relationships
-      .map(id => `
-      <button
-      class="memo-link-btn"
-      onclick="
-      event.stopPropagation();
-      openMemoById('${escapeJs(id)}');
-      ">
-      ${escapeHtml(id)}
-      </button>
-      `)
-      .join("")}
-
-    </div>
-    `
-      : ""}
-
-  </div>
-
-  <div class="memo-card-actions">
-
-    <button onclick="openMemoEditor(${index})">
-      ${isMemoLocked(item)
-        ? "🔏ロック中"
-        : "🖋編集"}
-    </button>
-
-    <button onclick="
-      event.stopPropagation();
-      copyMemoBoxByIndex(${index});
-    ">
-      📋コピー
-    </button>
-
-  </div>
-
-</div>
-`;
-
-      })
-      .join("");
-
-  openFloatPanel(
-    "MEMO BOX",
-`
-<div class="memo-actions">
-
-<button onclick="openMemoEditor()">
-＋新規
-</button>
-
-<button onclick="saveMemoBoxes()">
-💾保存
-</button>
-
-<button onclick="copyMemoBox()">
-📋コピー
-</button>
-
-<button onclick="deleteMemoBox()">
-🗑削除
-</button>
-
-<button onclick="selectAllMemoBoxes()">
-☑All
-</button>
-
-<button onclick="clearMemoSelection()">
-☐Clear
-</button>
-
-<button onclick="lockSelectedMemoBoxes()">
-🔒選択ロック
-</button>
-
-<button onclick="unlockSelectedMemoBoxes()">
-🔓選択ロック解除
-</button>
-
-<span class="small-muted">
-選択: ${memoBoxSelected.size}件
-</span>
-
-<button onclick="deleteSelectedMemoBoxes()">
-🗑選択削除
-</button>
-
-<button onclick="exportMemoBoxes()">
-Export
-</button>
-
-<button onclick="exportSelectedMemoBoxes()">
-選択Export
-</button>
-
-<button onclick="importMemoBoxes('merge')">
-追加Import
-</button>
-
-<button onclick="importMemoBoxes('replace')">
-全置換Import
-</button>
-
-</div>
-
-<hr>
-
-<details>
-<summary>
-Filter / Search
-</summary>
-
-<div class="memo-filter">
-
-
-<select
-id="memoFilterMode"
-onchange="
-memoBoxModeFilter=this.value;
-showMemoBox();
-">
-
-<option value="">
-Mode: All
-</option>
-
-${MEMO_BOX_MODES.map(v => `
-<option
-value="${v}"
-${memoBoxModeFilter === v ? "selected" : ""}>
-Mode: ${v}
-</option>
-`).join("")}
-
-</select>
-
-<select
-id="memoFilterType"
-onchange="
-memoBoxTypeFilter=this.value;
-showMemoBox();
-">
-
-<option value="">
-Type: All
-</option>
-
-${MEMO_BOX_TYPES.map(v => `
-<option
-value="${v}"
-${memoBoxTypeFilter === v ? "selected" : ""}>
-Type: ${v}
-</option>
-`).join("")}
-
-</select>
-
-<select
-id="memoFilterStatus"
-onchange="
-memoBoxStatusFilter=this.value;
-showMemoBox();
-">
-
-<option value="">
-Status: All
-</option>
-
-${MEMO_BOX_STATUSES.map(v => `
-<option
-value="${v}"
-${memoBoxStatusFilter === v ? "selected" : ""}>
-Status: ${v}
-</option>
-`).join("")}
-
-</select>
-
-<select
-id="memoFilterSeries"
-onchange="
-memoBoxSeriesFilter=this.value;
-showMemoBox();
-">
-
-<option value="">
-Series: All
-</option>
-
-${MEMO_BOX_SERIES.map(v => `
-<option
-value="${v}"
-${memoBoxSeriesFilter === v ? "selected" : ""}>
-Series: ${v || "なし"}
-</option>
-`).join("")}
-
-</select>
-
-<input
-id="memoSearch"
-class="input"
-placeholder="Search"
-value="${escapeHtml(memoBoxSearch)}"
-oninput="
-memoBoxSearch=this.value;
-showMemoBox();
-">
-
-</div>
-
-</details>
-
-<div class="memo-list">
-
-${memoCards || `
-<div class="small-muted">
-該当メモなし
-</div>
-`}
-
-</div>
-
-<input
-id="memoBoxImportFile"
-type="file"
-accept=".json,.md,.markdown,.txt,.html,.htm,.csv,.tsv"
-multiple
-style="display:none"
-onchange="loadMemoBoxesFile(event)">
-`
-  );
-
-}
-
 function openMemoEditor(index = null) {
 
   window.memoBoxParsedMetadata = {};
@@ -746,7 +348,22 @@ function openMemoEditor(index = null) {
 
   const current =
     isNew
-      ? memoBoxLastDefaults || {}
+      ? {
+          ...(memoBoxLastDefaults || {}),
+          memoMode: "simple",
+          boxTitle: "",
+          id: "",
+          name: "新しいメモ",
+          summary: "",
+          text: "",
+          category: "",
+          priority: "",
+          stability: "",
+          decisionLevel: "",
+          version: "",
+          keywords: [],
+          relationships: []
+        }
       : memoBoxList[index] || {};
 
   const locked =
@@ -808,7 +425,7 @@ value="${isNew ? "" : index}">
 📋本文
 </button>
 
-<button onclick="readMemoMetadataFromBody()">
+<button id="memoReadMetadataButton" onclick="readMemoMetadataFromBody()">
 🔄本文からMetadata読取
 </button>
 
@@ -963,6 +580,9 @@ rows="20"
 ${lockedAttr}>${escapeHtml(current.text || "")}</textarea>
 `
   );
+
+  // 初回表示もMode変更時と同じ表示ルールを適用する。
+  updateMemoEditorModeVisibility();
 
 }
 
@@ -1126,73 +746,6 @@ async function pasteMemoText() {
 
 }
 
-function extractMemoTitle(
-  text
-) {
-
-  const lines =
-    String(text || "")
-      .split(/\r?\n/)
-      .map(line =>
-        line.trim()
-      )
-      .filter(line =>
-        line &&
-        !/^=+$/.test(line)
-      );
-
-  const specPattern =
-    /Specification/i;
-
-  const idPattern =
-    /^[A-Z][A-Z0-9_-]*-\d+$/;
-
-  for (
-    let i = 0;
-    i < lines.length;
-    i++
-  ) {
-
-    if (
-      specPattern.test(lines[i]) &&
-      lines[i + 1] &&
-      idPattern.test(lines[i + 1])
-    ) {
-
-      if (
-        lines[i + 2] &&
-        !specPattern.test(lines[i + 2]) &&
-        !idPattern.test(lines[i + 2])
-      ) {
-        return `${lines[i + 1]} ${lines[i + 2]}`;
-      }
-
-      return `${lines[i]} ${lines[i + 1]}`;
-
-    }
-
-  }
-
-  for (
-    const line of lines
-  ) {
-
-    if (
-      /Specification\s+\d+/i
-        .test(line)
-    ) {
-      return line;
-    }
-
-  }
-
-  return (
-    lines[0] ||
-    "メモ"
-  );
-
-}
-
 function readMemoMetadataFromBody() {
 
   const mode =
@@ -1263,90 +816,107 @@ function saveMemoEditor() {
         )
       : {};
 
+  const existingMemo =
+    index >= 0 && index < memoBoxList.length
+      ? memoBoxList[index]
+      : {};
+
+  const isKnowledgeMode =
+    selectedMode === "knowledge";
+
+  const modeType =
+    selectedMode === "document"
+      ? "Document"
+      : selectedMode === "relation"
+        ? "Relation"
+        : "Memo";
+
   const memo = {
 
     memoMode:
       selectedMode,
 
     boxTitle:
-      get("memoBoxBoxTitle")?.value ||
-      extractBoxHeaderTitle(text) ||
-      "",
+      isKnowledgeMode
+        ? (get("memoBoxBoxTitle")?.value || extractBoxHeaderTitle(text) || "")
+        : (existingMemo.boxTitle || ""),
 
     id:
-      metadata.id ||
-      get("memoBoxId")?.value ||
-      "",
+      isKnowledgeMode
+        ? (metadata.id || get("memoBoxId")?.value || "")
+        : (existingMemo.id || ""),
 
     name:
-      getMemoMetadataTitle(metadata) ||
+      (isKnowledgeMode ? getMemoMetadataTitle(metadata) : "") ||
       get("memoBoxName")?.value ||
       "メモ",
 
     summary:
-      metadata.summary ||
-      get("memoBoxSummary")?.value ||
-      "",
+      isKnowledgeMode
+        ? (metadata.summary || get("memoBoxSummary")?.value || "")
+        : (existingMemo.summary || ""),
 
     text:
       text,
 
     knowledgeType:
-      metadata.knowledgeType ||
-      get("memoBoxType")?.value ||
-      "Memo",
+      isKnowledgeMode
+        ? (metadata.knowledgeType || get("memoBoxType")?.value || "Memo")
+        : (existingMemo.knowledgeType || modeType),
 
     category:
-      metadata.category ||
-      get("memoBoxCategory")?.value ||
-      "",
+      isKnowledgeMode
+        ? (metadata.category || get("memoBoxCategory")?.value || "")
+        : (existingMemo.category || ""),
 
     type:
-      get("memoBoxType")?.value || "Idea",
+      isKnowledgeMode
+        ? (get("memoBoxType")?.value || "Idea")
+        : (existingMemo.type || modeType),
 
     status:
-      metadata.status ||
-      get("memoBoxStatus")?.value ||
-      "Inbox",
+      isKnowledgeMode
+        ? (metadata.status || get("memoBoxStatus")?.value || "Inbox")
+        : (existingMemo.status || "Inbox"),
 
     series:
-      metadata.series ||
-      get("memoBoxSeries")?.value ||
-      "",
+      isKnowledgeMode
+        ? (metadata.series || get("memoBoxSeries")?.value || "")
+        : (existingMemo.series || ""),
 
     priority:
-      metadata.priority ||
-      get("memoBoxPriority")?.value ||
-      "",
+      isKnowledgeMode
+        ? (metadata.priority || get("memoBoxPriority")?.value || "")
+        : (existingMemo.priority || ""),
 
     stability:
-      metadata.stability ||
-      get("memoBoxStability")?.value ||
-      "",
+      isKnowledgeMode
+        ? (metadata.stability || get("memoBoxStability")?.value || "")
+        : (existingMemo.stability || ""),
 
     decisionLevel:
-      metadata.decisionLevel ||
-      get("memoBoxDecisionLevel")?.value ||
-      "",
+      isKnowledgeMode
+        ? (metadata.decisionLevel || get("memoBoxDecisionLevel")?.value || "")
+        : (existingMemo.decisionLevel || ""),
 
     version:
-      metadata.version ||
-      get("memoBoxVersion")?.value ||
-      "",
+      isKnowledgeMode
+        ? (metadata.version || get("memoBoxVersion")?.value || "")
+        : (existingMemo.version || ""),
 
     keywords:
-      metadata.keywords?.length
-        ? normalizeMemoArrayValue(metadata.keywords)
-        : normalizeMemoArrayValue(
-            get("memoBoxKeywords")?.value || ""
-          ),
+      isKnowledgeMode
+        ? (metadata.keywords?.length
+            ? normalizeMemoArrayValue(metadata.keywords)
+            : normalizeMemoArrayValue(get("memoBoxKeywords")?.value || ""))
+        : normalizeMemoArrayValue(existingMemo.keywords || []),
 
     relationships:
-      metadata.relationships?.length
-        ? normalizeMemoArrayValue(metadata.relationships)
-        : normalizeMemoArrayValue(
-            get("memoBoxRelationships")?.value || ""
-          ),
+      isKnowledgeMode
+        ? (metadata.relationships?.length
+            ? normalizeMemoArrayValue(metadata.relationships)
+            : normalizeMemoArrayValue(get("memoBoxRelationships")?.value || ""))
+        : normalizeMemoArrayValue(existingMemo.relationships || []),
 
     createdAt:
       getMemoMetadataCreated(metadata) ||
@@ -1809,7 +1379,7 @@ async function loadMemoBoxesFile(event) {
 
 function inferMemoMode(item = {}) {
 
-  if (item.memoMode) {
+  if (MEMO_BOX_MODES.includes(item.memoMode)) {
     return item.memoMode;
   }
 
@@ -1837,127 +1407,6 @@ function inferMemoMode(item = {}) {
   }
 
   return "simple";
-
-}
-
-function normalizeMemoBoxes() {
-
-  memoBoxList =
-    (memoBoxList || []).map(item => ({
-
-      /* ==========================
-         Basic
-      ========================== */
-
-      memoMode:
-        inferMemoMode(item),
-
-      boxTitle:
-        item.boxTitle || "",
-
-      id:
-        item.id || "",
-
-      name:
-        item.name || "",
-
-      summary:
-        item.summary || "",
-
-      text:
-        item.text || "",
-
-      /* ==========================
-         Knowledge
-      ========================== */
-
-      knowledgeType:
-        item.knowledgeType ||
-
-        item.type ||
-
-        "Memo",
-
-      category:
-        item.category || "",
-
-      /* ==========================
-         Memo
-      ========================== */
-
-      type:
-        item.type || "Idea",
-
-      status:
-        item.status || "Inbox",
-
-      series:
-        item.series || "",
-
-      /* ==========================
-         Metadata
-      ========================== */
-
-      priority:
-        item.priority || "",
-
-      stability:
-        item.stability || "",
-
-      decisionLevel:
-        item.decisionLevel || "",
-
-      version:
-        item.version || "",
-
-      /* ==========================
-         Relations
-      ========================== */
-
-      keywords:
-        Array.isArray(
-          item.keywords
-        )
-          ? item.keywords
-          : [],
-
-      relationships:
-        Array.isArray(
-          item.relationships
-        )
-          ? item.relationships
-          : [],
-
-      /* ==========================
-         locked
-      ========================== */
-
-      locked:
-        item.locked === true,
-
-      migrationLocked:
-        item.migrationLocked === true,
-
-      /* ==========================
-         History
-      ========================== */
-
-      createdAt:
-        item.createdAt || "",
-
-      updatedAt:
-        item.updatedAt || "",
-
-      sourceFileName:
-        item.sourceFileName || "",
-
-      sourceFormat:
-        item.sourceFormat || "",
-
-      importedAt:
-        item.importedAt || ""
-
-    }));
 
 }
 
@@ -2192,48 +1641,6 @@ function refreshMemoMetadataFromText() {
 
 
 
-function repairSuspiciousMemoTitles() {
-
-  normalizeMemoBoxes();
-
-  let repaired = 0;
-
-  memoBoxList.forEach(item => {
-
-    if (
-      isSuspiciousMemoTitle(item.name)
-    ) {
-
-      const next =
-        getSafeMemoTitleCandidate(item);
-
-      if (
-        next &&
-        next !== "メモ" &&
-        !isSuspiciousMemoTitle(next)
-      ) {
-        item.name = next;
-        item.updatedAt =
-          new Date().toISOString();
-        repaired++;
-      }
-
-    }
-
-  });
-
-  if (repaired > 0) {
-    saveMemoBoxes();
-    showMemoBox();
-  }
-
-  alert(
-    repaired > 0
-      ? `${repaired}件の題名を修復しました。`
-      : "修復対象はありませんでした。"
-  );
-}
-
 function isSuspiciousMemoTitle(value) {
 
   const text =
@@ -2368,6 +1775,9 @@ function updateMemoEditorModeVisibility() {
   const metadata =
     get("memoKnowledgeMetadataFields");
 
+  const metadataReadButton =
+    get("memoReadMetadataButton");
+
   const isKnowledge =
     mode === "knowledge";
 
@@ -2378,6 +1788,11 @@ function updateMemoEditorModeVisibility() {
 
   if (metadata) {
     metadata.style.display =
+      isKnowledge ? "" : "none";
+  }
+
+  if (metadataReadButton) {
+    metadataReadButton.style.display =
       isKnowledge ? "" : "none";
   }
 
@@ -2587,8 +2002,6 @@ window.loadMemoBoxesFile =
 
 window.inferMemoMode = inferMemoMode;
 
-window.showMemoBox =
-  showMemoBox;
 
 window.selectMemoBox =
   selectMemoBox;
@@ -2663,7 +2076,7 @@ function normalizeMemoBoxes() {
     knowledgeType: item.knowledgeType || item.type || "Memo",
     category: item.category || "",
     type: item.type || "Idea",
-    status: item.status || "Inbox",
+    status: item.status === "Archived" ? "Archive" : (item.status || "Inbox"),
     series: item.series || "",
     priority: item.priority || "",
     stability: item.stability || "",
@@ -2707,6 +2120,8 @@ function getVisibleMemoBoxes() {
 }
 
 function setMemoTab(tab) {
+  window.memoWorkingOnly = false;
+  window.memoFavoriteOnly = false;
   memoBoxActiveTab = tab || "all";
   memoBoxModeFilter = ["knowledge", "simple", "document", "relation"].includes(tab)
     ? tab : "";
@@ -2729,13 +2144,25 @@ function toggleMemoPin(index) {
   showMemoBox();
 }
 
+function canMutateMemo(memo) {
+  return Boolean(memo) && !isMemoLocked(memo);
+}
+
+function getNextMemoVersion(value) {
+  const base = String(value || "1.0").trim();
+  const match = base.match(/^(\d+)(?:\.(\d+))?/);
+  return match
+    ? `${match[1]}.${Number(match[2] || 0) + 1}`
+    : `${base}.1`;
+}
+
 function archiveSelectedMemoBoxes() {
   const selected = getSelectedMemoBoxes();
   if (!selected.length) return alert("選択されていません");
   if (!confirm(`${selected.length}件をArchiveへ移動しますか？`)) return;
   let changed = 0;
   selected.forEach(memo => {
-    if (memo.migrationLocked === true) return;
+    if (!canMutateMemo(memo)) return;
     memo.status = "Archive";
     memo.archivedAt = new Date().toISOString();
     memo.updatedAt = memo.archivedAt;
@@ -2789,7 +2216,7 @@ function batchEditSelectedMemoMetadata() {
 
   let changed = 0;
   selected.forEach(memo => {
-    if (memo.migrationLocked === true) return;
+    if (!canMutateMemo(memo)) return;
     memo[field] = value;
     if (field === "type") memo.knowledgeType = value;
     memo.updatedAt = new Date().toISOString();
@@ -2806,7 +2233,7 @@ function convertSelectedMemoMode(mode) {
   if (!selected.length) return alert("選択されていません");
   let changed = 0;
   selected.forEach(memo => {
-    if (memo.migrationLocked === true) return;
+    if (!canMutateMemo(memo)) return;
     memo.memoMode = mode;
     memo.updatedAt = new Date().toISOString();
     changed++;
@@ -2921,7 +2348,9 @@ function runMemoBatchAction() {
 function getMemoDuplicateKey(memo) {
   const id = String(memo.id || "").trim();
   if (id) return `id:${id}|v:${String(memo.version || "").trim()}`;
-  const source = String(memo.sourceFileName || "").trim();
+  const source = String(
+    memo.sourceRelativePath || memo.sourceFileName || ""
+  ).trim();
   if (source) return `file:${source}|name:${String(memo.name || "").trim()}`;
   return `name:${String(memo.name || "").trim()}|text:${String(memo.text || "").slice(0, 160)}`;
 }
@@ -3072,9 +2501,9 @@ Relation: ${c.relation || 0}
       return;
     }
     if (strategy === "version") {
-      const base = String(memo.version || memoBoxList[existingIndex].version || "1.0");
-      const match = base.match(/^(\d+)(?:\.(\d+))?/);
-      memo.version = match ? `${match[1]}.${Number(match[2] || 0) + 1}` : `${base}.1`;
+      memo.version = getNextMemoVersion(
+        memo.version || memoBoxList[existingIndex].version || "1.0"
+      );
       memo.status = "Draft";
       memoBoxList.push(memo);
       report.versioned++;
@@ -3091,115 +2520,6 @@ Relation: ${c.relation || 0}
   showLastMemoImportResult();
 }
 
-function showMemoBox() {
-  normalizeMemoBoxes();
-  const filtered = getVisibleMemoBoxes();
-  const memoCards = filtered.map(item => {
-    const index = memoBoxList.indexOf(item);
-    return `
-<div class="memo-card ${index === memoBoxActiveIndex ? "active" : ""}">
-  <div class="memo-card-select">
-    <input type="checkbox" ${memoBoxSelected.has(index) ? "checked" : ""}
-      onclick="event.stopPropagation()"
-      onchange="toggleMemoSelection(${index},this.checked);showMemoBox()">
-    <button class="memo-lock-btn" onclick="event.stopPropagation();toggleMemoLock(${index})">
-      ${isMemoLocked(item) ? "🔏" : "🖋"}
-    </button>
-    <button onclick="event.stopPropagation();toggleMemoPin(${index})">
-      ${item.pinned ? "📌" : "📍"}
-    </button>
-  </div>
-  <div class="memo-card-body" onclick="selectMemoBox(${index})">
-    <div class="memo-card-title">
-      ${item.boxTitle ? `<div class="small-muted">${escapeHtml(item.boxTitle)}</div>` : ""}
-      ${item.id ? `<div class="small-muted">${escapeHtml(item.id)}</div>` : ""}
-      ${item.pinned ? "📌 " : ""}${isMemoLocked(item) ? "🔏 " : "🖋 "}${escapeHtml(getMemoDisplayName(item))}
-    </div>
-    <div class="memo-card-meta">
-      <span>${escapeHtml(item.memoMode || inferMemoMode(item))}</span>
-      <span>${escapeHtml(item.status || "-")}</span>
-      <span>${escapeHtml(item.category || item.type || "-")}</span>
-      ${item.version ? `<span>v${escapeHtml(item.version)}</span>` : ""}
-      ${Array.isArray(item.relationships) && item.relationships.length
-        ? `<span>🔗${item.relationships.length}</span>`
-        : ""}
-    </div>
-    ${item.summary ? `<div class="small-muted">${escapeHtml(item.summary)}</div>` : ""}
-    ${item.updatedAt ? `<div class="small-muted">更新: ${escapeHtml(item.updatedAt)}</div>` : ""}
-    ${Array.isArray(item.relationships) && item.relationships.length
-      ? `
-      <div class="memo-card-links">
-        ${item.relationships.map(targetId => `
-          <button
-            class="memo-link-btn"
-            onclick="event.stopPropagation();openMemoById('${escapeJs(String(targetId))}')">
-            🔗${escapeHtml(String(targetId))}
-          </button>
-        `).join("")}
-      </div>
-      `
-      : ""}
-  </div>
-  <div class="memo-card-actions">
-    <button onclick="openMemoEditor(${index})">${isMemoLocked(item) ? "🔏表示" : "🖋編集"}</button>
-    <button onclick="event.stopPropagation();copyMemoBoxByIndex(${index})">📋コピー</button>
-  </div>
-</div>`;
-  }).join("");
-
-  const tab = (key, label) =>
-    `<button ${memoBoxActiveTab === key ? 'style="font-weight:bold"' : ""} onclick="setMemoTab('${key}')">${label}</button>`;
-
-  openFloatPanel("MEMO BOX", `
-<div class="memo-actions">
-<button onclick="openMemoEditor()">＋新規</button>
-
-<button onclick="selectAllMemoBoxes()">☑全選択</button>
-
-<button onclick="clearMemoSelection()">☐選択クリア</button>
-<button onclick="saveMemoBoxes()">💾保存</button>
-<button onclick="selectAllMemoBoxes()">☑All</button>
-<button onclick="clearMemoSelection()">☐Clear</button>
-<button onclick="runMemoBatchAction()">一括操作 (${memoBoxSelected.size})</button>
-<button onclick="importMemoBoxes('merge')">追加Import</button>
-<button onclick="importMemoBoxes('replace')">全置換Import</button>
-<button onclick="undoLastMemoImport()">↶ Import Undo</button>
-<button onclick="showLastMemoImportResult()">Import結果</button>
-<button onclick="exportMemoBoxes()">全Export</button>
-</div>
-<div class="memo-actions">
-${tab("all", "All")}${tab("knowledge", "Knowledge")}${tab("simple", "Simple")}${tab("document", "Document")}${tab("relation", "Relation")}${tab("archive", "Archive")}
-</div>
-<hr>
-<details open><summary>Filter / Search / Sort</summary>
-<div class="memo-filter">
-<input id="memoSearch" class="input" placeholder="Title / 本文 / ID / Keywords / Summary" value="${escapeHtml(memoBoxSearch)}"
- oninput="memoBoxSearch=this.value;showMemoBox()">
-<select onchange="setMemoSort(this.value)">
-<option value="updated-desc" ${memoBoxSortKey === "updated-desc" ? "selected" : ""}>更新日 新しい順</option>
-<option value="updated-asc" ${memoBoxSortKey === "updated-asc" ? "selected" : ""}>更新日 古い順</option>
-<option value="created-desc" ${memoBoxSortKey === "created-desc" ? "selected" : ""}>作成日 新しい順</option>
-<option value="created-asc" ${memoBoxSortKey === "created-asc" ? "selected" : ""}>作成日 古い順</option>
-<option value="name-asc" ${memoBoxSortKey === "name-asc" ? "selected" : ""}>名前 昇順</option>
-<option value="name-desc" ${memoBoxSortKey === "name-desc" ? "selected" : ""}>名前 降順</option>
-<option value="status-asc" ${memoBoxSortKey === "status-asc" ? "selected" : ""}>Status</option>
-<option value="version-desc" ${memoBoxSortKey === "version-desc" ? "selected" : ""}>Version</option>
-</select>
-<select onchange="memoBoxStatusFilter=this.value;memoBoxActiveTab='all';showMemoBox()">
-<option value="">Status: All</option>
-${MEMO_BOX_STATUSES.map(v => `<option value="${v}" ${memoBoxStatusFilter === v ? "selected" : ""}>${v}</option>`).join("")}
-</select>
-<select onchange="memoBoxTypeFilter=this.value;showMemoBox()">
-<option value="">Type: All</option>
-${MEMO_BOX_TYPES.map(v => `<option value="${v}" ${memoBoxTypeFilter === v ? "selected" : ""}>${v}</option>`).join("")}
-</select>
-</div></details>
-<div class="small-muted">表示 ${filtered.length} / 全 ${memoBoxList.length}件　選択 ${memoBoxSelected.size}件</div>
-<div class="memo-list">${memoCards || '<div class="small-muted">該当メモなし</div>'}</div>
-<input id="memoBoxImportFile" type="file" accept=".json,.md,.markdown,.txt,.html,.htm,.csv,.tsv" multiple style="display:none" onchange="loadMemoBoxesFile(event)">
-`);
-}
-
 window.setMemoTab = setMemoTab;
 window.setMemoSort = setMemoSort;
 window.toggleMemoPin = toggleMemoPin;
@@ -3213,7 +2533,6 @@ window.exportSelectedMemoPackage = exportSelectedMemoPackage;
 window.undoLastMemoImport = undoLastMemoImport;
 window.showLastMemoImportResult = showLastMemoImportResult;
 window.loadMemoBoxesFile = loadMemoBoxesFile;
-window.showMemoBox = showMemoBox;
 
 window.openMemoById = openMemoById;
 
@@ -3224,7 +2543,7 @@ window.openMemoById = openMemoById;
    Health / Repair / Dashboard / Recent / Working / Folder / ZIP
 ============================================================ */
 
-const MEMO_BOX_LTS_VERSION = "1.9.0-rc1";
+const MEMO_BOX_LTS_VERSION = "1.9.1";
 const MEMO_BOX_RECENT_KEY = "AI_PROMPT_OS_MEMO_RECENT_V1";
 const MEMO_BOX_BACKUP_KEY = "AI_PROMPT_OS_MEMO_AUTO_BACKUP_V1";
 const MEMO_BOX_RECENT_LIMIT = 8;
@@ -3242,7 +2561,7 @@ function getMemoRecentIds() {
 
 function rememberMemoOpened(item) {
   if (!item) return;
-  const key = String(item.id || item.name || "").trim();
+  const key = String(item.id || item.sourceRelativePath || item.name || "").trim();
   if (!key) return;
   const list = getMemoRecentIds().filter(v => v !== key);
   list.unshift(key);
@@ -3257,6 +2576,7 @@ function getRecentMemoItems() {
   return keys
     .map(key => memoBoxList.find(item =>
       String(item.id || "") === key ||
+      String(item.sourceRelativePath || "") === key ||
       String(item.name || "") === key
     ))
     .filter(Boolean);
@@ -3295,6 +2615,10 @@ function restoreMemoAutoBackup() {
   memoBoxActiveIndex = Number.isInteger(payload.activeIndex) ? payload.activeIndex : 0;
   memoBoxSelected.clear();
   normalizeMemoBoxes();
+  memoBoxActiveIndex = Math.min(
+    Math.max(0, memoBoxActiveIndex),
+    Math.max(0, memoBoxList.length - 1)
+  );
   saveMemoBoxes();
   showMemoBox();
 }
@@ -3386,7 +2710,7 @@ function inspectMemoHealth(item) {
 function buildSafeSummary(item) {
   const text = String(item.text || "");
   const purposeMatch = text.match(
-    /(?:^|\n)\s*(?:\d+\.\s*)?Purpose\s*[:：]?\s*(?:\n[-=]+\n|\n)([\s\S]*?)(?=\n={5,}|\n-{5,}|\n[A-Z][A-Za-z ]+\s*[:：]?\n|\Z)/i
+    /(?:^|\n)\s*(?:\d+\.\s*)?Purpose\s*[:：]?\s*(?:\n[-=]+\n|\n)([\s\S]*?)(?=\n={5,}|\n-{5,}|\n[A-Z][A-Za-z ]+\s*[:：]?\n|$)/i
   );
   const source = purposeMatch ? purposeMatch[1] : text;
   const lines = source
@@ -3432,7 +2756,11 @@ function buildMemoRepairPlan(item, index) {
 }
 
 function getMemoRepairPlans(scope = "all") {
-  const indexes = scope === "selected" && memoBoxSelected.size
+  if (scope === "selected" && !memoBoxSelected.size) {
+    return [];
+  }
+
+  const indexes = scope === "selected"
     ? [...memoBoxSelected]
     : memoBoxList.map((_, index) => index);
 
@@ -3478,6 +2806,11 @@ function showMemoHealthReport() {
 }
 
 function showMemoRepairPreview(scope = "all") {
+  if (scope === "selected" && !memoBoxSelected.size) {
+    alert("修復するメモを選択してください。");
+    return;
+  }
+
   const plans = getMemoRepairPlans(scope);
   if (!plans.length) {
     alert("修復候補はありません。");
@@ -3557,7 +2890,7 @@ function getMemoStatistics() {
   memoBoxList.forEach((item, index) => {
     const mode = item.memoMode || inferMemoMode(item);
     if (stats[mode] !== undefined) stats[mode]++;
-    if (item.archivedAt || item.status === "Archived") stats.archive++;
+    if (item.archivedAt || item.status === "Archive") stats.archive++;
     if (item.pinned) stats.favorite++;
     if (item.working) stats.working++;
     const health = inspectMemoHealth(item);
@@ -3578,13 +2911,13 @@ function buildMemoDashboardHtml() {
       <button onclick="setMemoTab('document')">Document<br><b>${s.document}</b></button>
       <button onclick="setMemoTab('relation')">Relation<br><b>${s.relation}</b></button>
       <button onclick="setMemoTab('archive')">Archive<br><b>${s.archive}</b></button>
-      <button onclick="memoBoxActiveTab='all';memoBoxSearch='';showMemoBox()">All<br><b>${s.total}</b></button>
+      <button onclick="showMemoQuickView('')">All<br><b>${s.total}</b></button>
     </div>
     <div class="memo-dashboard-row">
       <button onclick="showMemoHealthReport()">Health<br>🟢${s.healthy} 🟡${s.warning} 🔴${s.error}</button>
       <button onclick="showMemoRepairPreview('all')">Repair候補<br><b>${s.repairCandidates}</b></button>
-      <button onclick="memoBoxActiveTab='all';memoBoxSearch='';memoBoxStatusFilter='';window.memoWorkingOnly=true;showMemoBox()">Working<br><b>${s.working}</b></button>
-      <button onclick="memoBoxActiveTab='all';window.memoFavoriteOnly=true;showMemoBox()">Favorite<br><b>${s.favorite}</b></button>
+      <button onclick="showMemoQuickView('working')">Working<br><b>${s.working}</b></button>
+      <button onclick="showMemoQuickView('favorite')">Favorite<br><b>${s.favorite}</b></button>
     </div>
     <details>
       <summary>最近開いたメモ</summary>
@@ -3791,7 +3124,7 @@ Relation ${c.relation || 0}
       return;
     }
     if (strategy === "version") {
-      memo.version = `${memo.version || "1.0"}.1`;
+      memo.version = getNextMemoVersion(memo.version || "1.0");
       memo.status = "Draft";
       memoBoxList.push(memo);
       report.versioned++;
@@ -3799,6 +3132,8 @@ Relation ${c.relation || 0}
   });
 
   normalizeMemoBoxes();
+  memoBoxActiveIndex = 0;
+  memoBoxSelected.clear();
   saveMemoBoxes();
   memoBoxLastImportReport = report;
   showMemoBox();
@@ -3811,9 +3146,8 @@ const memoBoxOriginalSelectMemoBoxV19 =
 
 if (memoBoxOriginalSelectMemoBoxV19) {
   selectMemoBox = function(index) {
-    const result = memoBoxOriginalSelectMemoBoxV19(index);
     rememberMemoOpened(memoBoxList[index]);
-    return result;
+    return memoBoxOriginalSelectMemoBoxV19(index);
   };
 }
 
@@ -3822,13 +3156,12 @@ const memoBoxOriginalOpenMemoByIdV19 =
 
 if (memoBoxOriginalOpenMemoByIdV19) {
   openMemoById = function(id) {
-    const result = memoBoxOriginalOpenMemoByIdV19(id);
     const item = memoBoxList.find(memo =>
       String(memo.id || "") === String(id) ||
       String(memo.name || "") === String(id)
     );
     rememberMemoOpened(item);
-    return result;
+    return memoBoxOriginalOpenMemoByIdV19(id);
   };
 }
 
@@ -3853,14 +3186,23 @@ function getVisibleMemoBoxesV19() {
   return list;
 }
 
-function clearMemoQuickViewFilters() {
-  window.memoWorkingOnly = false;
-  window.memoFavoriteOnly = false;
+function showMemoQuickView(kind) {
   memoBoxActiveTab = "all";
+  memoBoxModeFilter = "";
+  memoBoxStatusFilter = "";
+  memoBoxTypeFilter = "";
+  memoBoxSeriesFilter = "";
+  memoBoxSearch = "";
+  window.memoWorkingOnly = kind === "working";
+  window.memoFavoriteOnly = kind === "favorite";
   showMemoBox();
 }
 
-function showMemoBoxV19() {
+function clearMemoQuickViewFilters() {
+  showMemoQuickView("");
+}
+
+function showMemoBox() {
   normalizeMemoBoxes();
   const filtered = getVisibleMemoBoxesV19();
   const memoCards = filtered.map(item => {
@@ -3927,6 +3269,8 @@ ${memoBoxDashboardVisible ? buildMemoDashboardHtml() : ""}
 <div class="memo-actions">
 <button onclick="memoBoxDashboardVisible=!memoBoxDashboardVisible;showMemoBox()">Dashboard</button>
 <button onclick="openMemoEditor()">＋新規</button>
+<button onclick="selectAllMemoBoxes()">☑全選択</button>
+<button onclick="clearMemoSelection()">☐選択クリア</button>
 <button onclick="runMemoBatchAction()">一括操作 (${memoBoxSelected.size})</button>
 <button onclick="showMemoHealthReport()">Health</button>
 <button onclick="showMemoRepairPreview('all')">Repair</button>
@@ -3958,9 +3302,7 @@ ${tab("all", "All")}${tab("knowledge", "Knowledge")}${tab("simple", "Simple")}${
 `);
 }
 
-showMemoBox = showMemoBoxV19;
-
-window.showMemoBox = showMemoBoxV19;
+window.showMemoBox = showMemoBox;
 window.showMemoHealthReport = showMemoHealthReport;
 window.showMemoRepairPreview = showMemoRepairPreview;
 window.applyMemoRepairPlans = applyMemoRepairPlans;
@@ -3968,8 +3310,9 @@ window.toggleMemoWorking = toggleMemoWorking;
 window.selectMemoFolderImport = selectMemoFolderImport;
 window.selectMemoZipImport = selectMemoZipImport;
 window.restoreMemoAutoBackup = restoreMemoAutoBackup;
+window.showMemoQuickView = showMemoQuickView;
 window.clearMemoQuickViewFilters = clearMemoQuickViewFilters;
 window.openMemoById = openMemoById;
 window.loadMemoBoxesFile = loadMemoBoxesFile;
 
-console.log("Memo Box v1.9 LTS RC loaded");
+console.log("Memo Box v1.9.1 loaded");
