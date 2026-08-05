@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "mode": "build-time-static-script-generation",
   "description": "ZIP保存時にindex.htmlの静的scriptブロックを生成する一覧。実行時Loaderでは使用しない。",
   "scripts": [
@@ -23,6 +23,7 @@
     "./05_repair_diff.js?v=5.8.6",
     "./05_repair_cleanup.js?v=5.8.6",
     "./05_repair.js?v=5.8.6",
+    "./05_repair_zip_paste_manager.js?v=1.0.0",
     "./06_search_core.js?v=6.1.0",
     "./06_search_ui.js?v=6.1.0",
     "./06_search_history.js?v=6.1.2",
@@ -119,5 +120,7 @@
     "./15_reasoning_engine.js?v=1.0.0",
     "./16_workflow_engine.js?v=1.0.0",
     "./99_init.js?v=5.8.6"
-  ]
+  ],
+  "updatedAt": "2026-08-05",
+  "change": "Added 05_repair_zip_paste_manager.js to static runtime order."
 }
