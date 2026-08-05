@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_canonical_model.js
    IDE-170 Intelligence Platform
-   Version: 1.1.0
+   Version: 1.2.0
    Phase: 2 Source Intake and Canonical Model
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.1.0";
+  const VERSION = "1.2.0";
   const CAPABILITY_ID = "IDE-170-CANONICAL-MODEL";
   const SUPPORTED_RECORD_TYPES = Object.freeze([
     "project",
