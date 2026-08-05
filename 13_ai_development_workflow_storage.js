@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_ai_development_workflow_storage.js
    IDE-160 AI Development Workflow Storage
-   Version: 1.4.0
-   Phase: 3 - Component Adapter / Workflow Execution Foundation
+   Version: 2.0.0
+   Phase: Complete - Monitoring / Package / Completion / Integration / Release
    ============================================================ */
 (function (global) {
   "use strict";
@@ -359,7 +359,7 @@
 
   function loadRecordStorePayload() {
     const result = readVerified(STORAGE_KEYS.recordStore);
-    const empty = { failures: [], recoveries: [], attempts: [], decisions: [], approvals: [] };
+    const empty = { failures: [], recoveries: [], attempts: [], decisions: [], approvals: [], monitoring: [], completions: [] };
     if (!result.ok || !result.data || !result.data.payload) return { store: empty, readResult: result };
     const source = result.data.payload;
     return {
@@ -368,7 +368,9 @@
         recoveries: Array.isArray(source.recoveries) ? source.recoveries : [],
         attempts: Array.isArray(source.attempts) ? source.attempts : [],
         decisions: Array.isArray(source.decisions) ? source.decisions : [],
-        approvals: Array.isArray(source.approvals) ? source.approvals : []
+        approvals: Array.isArray(source.approvals) ? source.approvals : [],
+        monitoring: Array.isArray(source.monitoring) ? source.monitoring : [],
+        completions: Array.isArray(source.completions) ? source.completions : []
       },
       readResult: result
     };
@@ -382,8 +384,46 @@
       attempts: Array.isArray(source.attempts) ? source.attempts.slice(-RETENTION.failureRecoveryRecords) : [],
       decisions: Array.isArray(source.decisions) ? source.decisions.slice(-RETENTION.decisionRecords) : [],
       approvals: Array.isArray(source.approvals) ? source.approvals.slice(-RETENTION.approvalRecords) : [],
+      monitoring: Array.isArray(source.monitoring) ? source.monitoring.slice(-RETENTION.monitoringRecords) : [],
+      completions: Array.isArray(source.completions) ? source.completions.slice(-50) : [],
       updatedAt: internal.nowIso()
     });
+  }
+
+  function persistWorkflowPackageStore(packages) {
+    const source = Array.isArray(packages) ? packages.slice(-RETENTION.packages) : [];
+    return writeVerified(STORAGE_KEYS.packageStore, {
+      packages: source,
+      count: source.length,
+      updatedAt: internal.nowIso()
+    });
+  }
+
+  function loadWorkflowPackageStore() {
+    const result = readVerified(STORAGE_KEYS.packageStore);
+    if (!result.ok || !result.data || !result.data.payload) return { packages: [], readResult: result };
+    return {
+      packages: Array.isArray(result.data.payload.packages) ? result.data.payload.packages : [],
+      readResult: result
+    };
+  }
+
+  function persistWorkflowBaselineStore(baselines) {
+    const source = Array.isArray(baselines) ? baselines.slice(-RETENTION.baselines) : [];
+    return writeVerified(STORAGE_KEYS.baselineStore, {
+      baselines: source,
+      count: source.length,
+      updatedAt: internal.nowIso()
+    });
+  }
+
+  function loadWorkflowBaselineStore() {
+    const result = readVerified(STORAGE_KEYS.baselineStore);
+    if (!result.ok || !result.data || !result.data.payload) return { baselines: [], readResult: result };
+    return {
+      baselines: Array.isArray(result.data.payload.baselines) ? result.data.payload.baselines : [],
+      readResult: result
+    };
   }
 
   function clearIDE160Storage(options) {
@@ -454,6 +494,10 @@
     loadTransitionJournal: loadTransitionJournal,
     loadFoundationRecordStore: loadRecordStorePayload,
     persistFoundationRecordStore: persistFoundationRecordStore,
+    persistWorkflowPackageStore: persistWorkflowPackageStore,
+    loadWorkflowPackageStore: loadWorkflowPackageStore,
+    persistWorkflowBaselineStore: persistWorkflowBaselineStore,
+    loadWorkflowBaselineStore: loadWorkflowBaselineStore,
     clearIDE160Storage: clearIDE160Storage,
     getIDE160StorageStatus: getIDE160StorageStatus
   });
