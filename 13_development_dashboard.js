@@ -86,6 +86,12 @@ const DEVELOPMENT_DASHBOARD_MODULE_REGISTRY = [
     title: "Investigation Workflow",
     statusApi: "getInvestigationWorkflowStatus",
     validator: "validateInvestigationWorkflow"
+  },
+  {
+    id: "IDE-160",
+    title: "AI Development Workflow",
+    statusApi: "getAIDevelopmentWorkflowStatus",
+    validator: "validateAIDevelopmentWorkflow"
   }
 ];
 
