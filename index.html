@@ -1,1045 +1,215 @@
 <!DOCTYPE html>
+
 <html lang="ja"><head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AIプロンプト生成Pro v6.0.0</title>
-
-<link rel="stylesheet" href="./00_style.css?v=6.0.0">
-
+<link href="./00_style.css?v=6.0.0" rel="stylesheet"/>
 </head>
-
 <body class="dark">
-
 <div class="card">
-  <h2>AIプロンプト生成Pro</h2>
-
-  <div class="tab-container">
-
-    <div class="tab active" id="appPageTab" onclick="switchAppPage('app')">
+<h2>AIプロンプト生成Pro</h2>
+<div class="tab-container">
+<div class="tab active" id="appPageTab" onclick="switchAppPage('app')">
       通常モード
 
     </div>
-
-    <div class="tab" id="repairPageTab" onclick="switchAppPage('repair')">
+<div class="tab" id="repairPageTab" onclick="switchAppPage('repair')">
       修復モード
 
     </div>
+</div>
+<div id="appPage" style="display: block;">
+<div class="small" id="versionLabel">v6.0.0</div>
+<div class="tab-container"> <div class="tab" id="tab1" onclick="switchTab(1)">マニュアル入力
 
   </div>
-
-  <div id="appPage" style="display: block;">
-
-  <div class="small" id="versionLabel">v7.0.0</div>
-
-  <div class="tab-container">    <div id="tab1" class="tab" onclick="switchTab(1)">マニュアル入力
+<div class="tab active" id="tab2" onclick="switchTab(2)">ラフから変換
 
   </div>
-
-    <div id="tab2" class="tab active" onclick="switchTab(2)">ラフから変換
-
-  </div>
-
-  </div>
-
-  <div id="mode-normal" style="display: none;">
-    <label for="role">役割</label>
-    <input id="role" placeholder="例：プログラマー、翻訳家、AIオーケストレーター">
-    <label for="task">目的</label>
-    <input id="task" placeholder="何をしたいですか？">
-    <label for="details">詳細（背景・条件など）</label>
-    <textarea id="details" rows="5" placeholder="具体的な指示や制約があれば入力"></textarea>
-    <label for="tone">トーン</label>
-    <select id="tone">
-      <option>プロフェッショナル</option>
-      <option>丁寧</option>
-      <option>カジュアル</option>
-      <option>簡潔に</option>
-    </select>
-
-  </div>
-
-  <div id="mode-auto" style="display: block;">
-    <label for="raw-input">やりたいことを自由に入力（AIに整理させます）</label>
-    <textarea id="raw-input" rows="8" placeholder="例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。"></textarea>
-<button type="button" onclick="toggleCommandMenu()" class="btn-secondary btn-full">
+</div>
+<div id="mode-normal" style="display: none;">
+<label for="role">役割</label>
+<input id="role" placeholder="例：プログラマー、翻訳家、AIオーケストレーター"/>
+<label for="task">目的</label>
+<input id="task" placeholder="何をしたいですか？"/>
+<label for="details">詳細（背景・条件など）</label>
+<textarea id="details" placeholder="具体的な指示や制約があれば入力" rows="5"></textarea>
+<label for="tone">トーン</label>
+<select id="tone">
+<option>プロフェッショナル</option>
+<option>丁寧</option>
+<option>カジュアル</option>
+<option>簡潔に</option>
+</select>
+</div>
+<div id="mode-auto" style="display: block;">
+<label for="raw-input">やりたいことを自由に入力（AIに整理させます）</label>
+<textarea id="raw-input" placeholder="例：プログラムのバグを直して。JSでボタンが動かない。初心者向けに説明して。" rows="8"></textarea>
+<button class="btn-secondary btn-full" onclick="toggleCommandMenu()" type="button">
   🧩 変換モード
 </button>
-
 <div id="commandMenu" style="display:none;">
-
-  <div class="small">
+<div class="small">
     変換モードをクリックすると入力欄に追加されます。
 
   </div>
-
-  <div id="commandBox" class="command-box"><button type="button" class="command-chip" data-cmd="tldr" onclick="addCommand('tldr')">
-      /tldr
-    </button><button type="button" class="command-chip" data-cmd="eli15" onclick="addCommand('eli15')">
-      /eli15
-    </button><button type="button" class="command-chip" data-cmd="human" onclick="addCommand('human')">
-      /human
-    </button><button type="button" class="command-chip" data-cmd="step" onclick="addCommand('step')">
-      /step
-    </button><button type="button" class="command-chip" data-cmd="enemy" onclick="addCommand('enemy')">
-      /enemy
-    </button><button type="button" class="command-chip" data-cmd="real" onclick="addCommand('real')">
-      /real
-    </button><button type="button" class="command-chip" data-cmd="gap" onclick="addCommand('gap')">
-      /gap
-    </button><button type="button" class="command-chip" data-cmd="sort" onclick="addCommand('sort')">
-      /sort
-    </button><button type="button" class="command-chip" data-cmd="priority" onclick="addCommand('priority')">
-      /priority
-    </button><button type="button" class="command-chip" data-cmd="schema" onclick="addCommand('schema')">
-      /schema
-    </button><button type="button" class="command-chip" data-cmd="code" onclick="addCommand('code')">
-      /code
-    </button><button type="button" class="command-chip" data-cmd="test" onclick="addCommand('test')">
-      /test
-    </button><button type="button" class="command-chip" data-cmd="prompt" onclick="addCommand('prompt')">
-      /prompt
-    </button></div>
-
+<div class="command-box" id="commandBox"></div>
 </div>
-
 <div class="small">用途別プリセット</div>
-
-<div id="presetBox" class="preset-box"><button type="button" class="preset-chip" onclick="applyPresetByName('要約')">
-      要約
-    </button><button type="button" class="preset-chip" onclick="applyPresetByName('初心者向け')">
-      初心者向け
-    </button><button type="button" class="preset-chip" onclick="applyPresetByName('設計レビュー')">
-      設計レビュー
-    </button><button type="button" class="preset-chip" onclick="applyPresetByName('実装支援')">
-      実装支援
-    </button><button type="button" class="preset-chip" onclick="applyPresetByName('JSON設計')">
-      JSON設計
-    </button></div>
-
-    <label for="rough-tone">トーン</label>
-    <select id="rough-tone">
-      <option>プロフェッショナル</option>
-      <option>丁寧</option>
-      <option>カジュアル</option>
-      <option>簡潔に</option>
-    </select>
-    <label for="ai-target">AI向け最適化</label>
-    <select id="ai-target">
-      <option value="chatgpt">ChatGPT</option>
-      <option value="claude">Claude</option>
-      <option value="gemini">Gemini</option>
-      <option value="cursor">Cursor</option>
-      <option value="copilot">Copilot</option>
-    </select>
-    <label for="rough-output-format">出力形式</label>
-    <select id="rough-output-format">
-      <option value="prompt">通常プロンプト</option>
-      <option value="json">JSON</option>
-    </select>
-
-  </div>
-
-  <div class="btn-group">
-    <button id="main-btn" class="btn-full" onclick="generatePrompt()">🪄 AI整形用プロンプトを作る</button>
-    <button onclick="copyText()" class="btn-secondary">📋 コピー</button>
-    <button onclick="download()" class="btn-secondary">💾 保存</button>
-    <button onclick="toggleDark()" class="btn-secondary">🌙 ダークモード</button>
-
-  </div>
-
-  <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
-  <input type="file" id="aiPresetFileInput" accept=".json,application/json" style="display:none;">
-  <label>生成結果</label>
-  <div id="output">ここに表示</div>
-  <div id="warningBox" class="warning-box" style="display: none;"></div>
-
-  <div id="debugBox" class="warning-box" style="display: none;"></div>
-  <div id="diagnoseBox" class="diagnose-box" style="display: none;"></div>
-
-  <div id="template-manager" class="section-box" style="display: none;">
-    <h3>テンプレ管理</h3>
-    <label for="templateSelect">固定テンプレ / 保存テンプレ</label>
-    <select id="templateSelect" onchange="applyTemplateFromSelect()"><option value="">テンプレを選択</option><option value="0">AIオーケストレーター</option></select>
-
-    <div class="small">下の入力欄から新しいテンプレも追加できます。</div>
-    <label for="tempName">テンプレ名</label>
-    <input id="tempName" placeholder="例：バグ修正用、営業文作成">
-    <label for="tempRole">役割</label>
-    <input id="tempRole" placeholder="例：シニアエンジニア">
-    <label for="tempTask">目的</label>
-    <input id="tempTask" placeholder="例：JavaScriptの不具合修正">
-    <label for="tempDetails">詳細</label>
-    <textarea id="tempDetails" rows="5" placeholder="テンプレの詳細内容"></textarea>
-    <label for="tempTone">トーン</label>
-    <select id="tempTone">
-      <option>プロフェッショナル</option>
-      <option>丁寧</option>
-      <option>カジュアル</option>
-      <option>簡潔に</option>
-    </select>
-    <button onclick="saveTemplate()" class="btn-full">テンプレ保存</button>
-    <h4>保存済みテンプレ一覧</h4>
-
-    <div id="templateList">
-    <div class="template-item">
-      <b>AIオーケストレーター</b><br>
-      <div class="small">役割: AIオーケストレーター</div>
-      <div class="item-actions">
-        <button onclick="applyTemplateAll(0)">使う</button>
-        
-      </div>
-    </div>
-  </div>
-
-  </div>
-
-  <div id="danger-manager" class="section-box" style="display: none;">
-    <h3>危険ワード管理</h3>
-
-    <div class="small">単語が含まれていたら警告します。
+<div class="preset-box" id="presetBox"></div>
+<label for="rough-tone">トーン</label>
+<select id="rough-tone">
+<option>プロフェッショナル</option>
+<option>丁寧</option>
+<option>カジュアル</option>
+<option>簡潔に</option>
+</select>
+<label for="ai-target">AI向け最適化</label>
+<select id="ai-target">
+<option value="chatgpt">ChatGPT</option>
+<option value="claude">Claude</option>
+<option value="gemini">Gemini</option>
+<option value="cursor">Cursor</option>
+<option value="copilot">Copilot</option>
+</select>
+<label for="rough-output-format">出力形式</label>
+<select id="rough-output-format">
+<option value="prompt">通常プロンプト</option>
+<option value="json">JSON</option>
+</select>
+</div>
+<div class="btn-group">
+<button class="btn-full" id="main-btn" onclick="generatePrompt()">🪄 AI整形用プロンプトを作る</button>
+<button class="btn-secondary" onclick="copyText()">📋 コピー</button>
+<button class="btn-secondary" onclick="download()">💾 保存</button>
+<button class="btn-secondary" onclick="toggleDark()">🌙 ダークモード</button>
+</div>
+<input accept=".json,application/json" id="fileInput" style="display:none;" type="file"/>
+<input accept=".json,application/json" id="aiPresetFileInput" style="display:none;" type="file"/>
+<label>生成結果</label>
+<div id="output">ここに表示</div>
+<div class="warning-box" id="warningBox" style="display: none;"></div>
+<div class="warning-box" id="debugBox" style="display: none;"></div>
+<div class="diagnose-box" id="diagnoseBox" style="display: none;"></div>
+<div class="section-box" id="template-manager" style="display: none;">
+<h3>テンプレ管理</h3>
+<label for="templateSelect">固定テンプレ / 保存テンプレ</label>
+<select id="templateSelect" onchange="applyTemplateFromSelect()"><option value="">テンプレを選択</option></select>
+<div class="small">下の入力欄から新しいテンプレも追加できます。</div>
+<label for="tempName">テンプレ名</label>
+<input id="tempName" placeholder="例：バグ修正用、営業文作成"/>
+<label for="tempRole">役割</label>
+<input id="tempRole" placeholder="例：シニアエンジニア"/>
+<label for="tempTask">目的</label>
+<input id="tempTask" placeholder="例：JavaScriptの不具合修正"/>
+<label for="tempDetails">詳細</label>
+<textarea id="tempDetails" placeholder="テンプレの詳細内容" rows="5"></textarea>
+<label for="tempTone">トーン</label>
+<select id="tempTone">
+<option>プロフェッショナル</option>
+<option>丁寧</option>
+<option>カジュアル</option>
+<option>簡潔に</option>
+</select>
+<button class="btn-full" onclick="saveTemplate()">テンプレ保存</button>
+<h4>保存済みテンプレ一覧</h4>
+<div id="templateList"></div>
+</div>
+<div class="section-box" id="danger-manager" style="display: none;">
+<h3>危険ワード管理</h3>
+<div class="small">単語が含まれていたら警告します。
 
 </div>
-
-    <label for="dangerWord">危険ワード</label>
-    <input id="dangerWord" placeholder="例：パスワード、住所、電話番号">
-    <button onclick="saveDangerWord()" class="btn-full">危険ワード追加</button>
-    <h4>固定危険ワード + 追加危険ワード</h4>
-
-    <div id="dangerList">
-    <div class="danger-item">
-      <b>パスワード</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>住所</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>電話番号</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>メールアドレス</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>マイナンバー</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>クレジットカード</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>カード番号</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>暗証番号</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>口座番号</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>銀行口座</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>本人確認書類</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>運転免許証</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>保険証</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>秘密の質問</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  
-    <div class="danger-item">
-      <b>生年月日</b>
-      <div class="item-actions">
-        <span class="small">固定ワード</span>
-      </div>
-    </div>
-  </div>
+<label for="dangerWord">危険ワード</label>
+<input id="dangerWord" placeholder="例：パスワード、住所、電話番号"/>
+<button class="btn-full" onclick="saveDangerWord()">危険ワード追加</button>
+<h4>固定危険ワード + 追加危険ワード</h4>
+<div id="dangerList"></div>
+</div>
+<div class="section-box" id="pattern-manager" style="display: none;">
+<h3>NGパターン管理</h3>
+<div class="small">形式で検出します。正規表現を追加できます。
 
   </div>
-
-  <div id="pattern-manager" class="section-box" style="display: none;">
-    <h3>NGパターン管理</h3>
-
-    <div class="small">形式で検出します。正規表現を追加できます。
-
-  </div>
-
-    <label for="patternName">パターン名</label>
-    <input id="patternName" placeholder="例：社員番号、会員ID">
-    <label for="patternRegex">正規表現</label>
-    <input id="patternRegex" placeholder="例：\\b[A-Z]{2}\\d{6}\\b">
-    <label for="patternFlags">フラグ</label>
-    <input id="patternFlags" placeholder="例：g または gi">
-
-    <div class="small">よく分からなければ、まずは g を入れてください。
+<label for="patternName">パターン名</label>
+<input id="patternName" placeholder="例：社員番号、会員ID"/>
+<label for="patternRegex">正規表現</label>
+<input id="patternRegex" placeholder="例：\\b[A-Z]{2}\\d{6}\\b"/>
+<label for="patternFlags">フラグ</label>
+<input id="patternFlags" placeholder="例：g または gi"/>
+<div class="small">よく分からなければ、まずは g を入れてください。
 
   </div>
-
-    <button onclick="savePattern()" class="btn-full">NGパターン追加</button>
-    <h4>固定NGパターン + 追加NGパターン</h4>
-
-    <div id="patternList">
-    <div class="pattern-item">
-      <b>メールアドレス</b>
-      <div class="code-like">/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g</div>
-      <div class="item-actions">
-        <span class="small">固定パターン</span>
-      </div>
-    </div>
-  
-    <div class="pattern-item">
-      <b>電話番号</b>
-      <div class="code-like">/(?:\+?\d{1,3}[-\s]?)?(?:\d{2,4}[-\s]?){2,4}\d{3,4}/g</div>
-      <div class="item-actions">
-        <span class="small">固定パターン</span>
-      </div>
-    </div>
-  
-    <div class="pattern-item">
-      <b>郵便番号</b>
-      <div class="code-like">/\b\d{3}-?\d{4}\b/g</div>
-      <div class="item-actions">
-        <span class="small">固定パターン</span>
-      </div>
-    </div>
-  
-    <div class="pattern-item">
-      <b>クレジットカード候補</b>
-      <div class="code-like">/\b(?:\d[ -]*?){13,16}\b/g</div>
-      <div class="item-actions">
-        <span class="small">固定パターン</span>
-      </div>
-    </div>
-  
-    <div class="pattern-item">
-      <b>マイナンバー候補</b>
-      <div class="code-like">/\b\d{12}\b/g</div>
-      <div class="item-actions">
-        <span class="small">固定パターン</span>
-      </div>
-    </div>
-  </div>
-
-  </div>
-
-<div id="ai-preset-manager" class="section-box" style="display: none;">
-  <h3>AIプリセット管理</h3>
-
-  <div class="small">AI別の変換方針を編集できます。
+<button class="btn-full" onclick="savePattern()">NGパターン追加</button>
+<h4>固定NGパターン + 追加NGパターン</h4>
+<div id="patternList"></div>
+</div>
+<div class="section-box" id="ai-preset-manager" style="display: none;">
+<h3>AIプリセット管理</h3>
+<div class="small">AI別の変換方針を編集できます。
 
 </div>
-
-  <label for="aiPresetTarget">対象AI</label>
-  <select id="aiPresetTarget" onchange="loadAiPresetToEditor()">
-    <option value="chatgpt">ChatGPT</option>
-    <option value="claude">Claude</option>
-    <option value="gemini">Gemini</option>
-    <option value="cursor">Cursor</option>
-    <option value="copilot">Copilot</option>
-  </select>
-  <label for="aiPresetName">表示名</label>
-  <input id="aiPresetName" placeholder="例：ChatGPT">
-  <label for="aiPresetInstruction">変換方針</label>
-  <textarea id="aiPresetInstruction" rows="6" placeholder="このAI向けの変換方針を入力"></textarea>
-  <div class="btn-group">
-    <button onclick="saveAiPresetFromEditor()">保存</button>
-    <button onclick="resetAiPreset()">初期値に戻す</button>
-
-  </div>
-
+<label for="aiPresetTarget">対象AI</label>
+<select id="aiPresetTarget" onchange="loadAiPresetToEditor()">
+<option value="chatgpt">ChatGPT</option>
+<option value="claude">Claude</option>
+<option value="gemini">Gemini</option>
+<option value="cursor">Cursor</option>
+<option value="copilot">Copilot</option>
+</select>
+<label for="aiPresetName">表示名</label>
+<input id="aiPresetName" placeholder="例：ChatGPT"/>
+<label for="aiPresetInstruction">変換方針</label>
+<textarea id="aiPresetInstruction" placeholder="このAI向けの変換方針を入力" rows="6"></textarea>
+<div class="btn-group">
+<button onclick="saveAiPresetFromEditor()">保存</button>
+<button onclick="resetAiPreset()">初期値に戻す</button>
 </div>
-
+</div>
 <div class="section-box">
-  <label>履歴（最新5件）</label>
-
-  <div id="history"></div>
-
+<label>履歴（最新5件）</label>
+<div id="history"></div>
 </div>
-
 </div>
-
 <div id="repairPage" style="display: none;">
-
-  <h3>🛠 修復モード</h3>
-
-  <div class="small">
+<h3>🛠 修復モード</h3>
+<div class="small">
     HTMLファイルを文字列として読み込み、
     編集して保存できます。
   </div>
-
-  <div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave OFF</div>
-
-  <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
-
-  <div id="repairPreview" class="code-preview" style="display:none;">
-  </div>
-
-  <div id="functionViewer" style="display:none;">
-  </div>
-
-  <label for="repairEditor">
+<div class="small" id="repairStatus" style="margin-top:8px;">状態：待機中</div>
+<div class="small" id="cursorStatus" style="margin-top:6px;">Ln 1 / Col 1</div>
+<div class="code-preview" id="repairPreview" style="display:none;"></div>
+<div id="functionViewer" style="display:none;"></div>
+<label for="repairEditor">
     HTML編集エリア
   </label>
-
-  <div class="repair-editor-wrap">
-
-    <div id="lineNumbers">
-<div class="line-number active" onmousedown="startRepairLinePress(1, event)" onmouseup="endRepairLinePress(1, event)" onmouseleave="cancelRepairLinePress()" ontouchstart="startRepairLinePress(1, event)" ontouchend="endRepairLinePress(1, event)" ontouchcancel="cancelRepairLinePress()">
-1
+<div class="repair-editor-wrap">
+<div id="lineNumbers">1</div>
+<textarea id="repairEditor" placeholder="ここにHTML全文が表示されます" rows="20" style="width:100%; max-width:100%;"></textarea>
 </div>
-</div>
+<div class="diagnose-box" id="functionListBox" style="display:none;"></div>
+</div> 
+<button class="btn-secondary" id="toolsBtn" onclick="toggleToolsMenu()">⚙</button>
+<div id="floatPanel" style="display: none; right: 18px; bottom: 40px;"></div>
+</div> 
 
-    <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます" style="width:100%; max-width:100%;"></textarea>
 
-  </div>
 
-  <div id="functionListBox" class="diagnose-box" style="display:none;">
-  </div>
 
-</div> <!-- repairPage -->
 
-<button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">×</button>
 
-<div id="floatPanel" style="display: block; right: 18px; bottom: 40px;"><div class="float-panel-header">
 
-      <span class="float-panel-title">
-        通常ツール
-      </span>
 
-      <button onclick="moveFloatPanelCorner('tl')">
-      ↖
-      </button>
 
-      <button onclick="moveFloatPanelCorner('tr')">
-      ↗
-      </button>
 
-      <button onclick="moveFloatPanelCorner('bl')">
-      ↙
-      </button>
 
-      <button onclick="moveFloatPanelCorner('br')">
-      ↘
-      </button>
 
-      <button onclick="resetFloatPanelPosition()">
-      □
-      </button>
-
-      <button onclick="backFloatPanel()">
-      ◀
-      </button>
-
-      <button onmousedown="event.preventDefault()" onclick="closeFloatPanelKeepEditorSelection()">
-      ×
-      </button>
-
-    </div>
-
-<div class="small">💚 診断・確認</div>
-
-<button class="float-list-btn" onclick="showMobileConsole()">
-📱 Console
-</button>
-
-<button class="float-list-btn" onclick="showHtmlHealth()">
-💚 HTML HEALTH
-</button>
-
-<button class="float-list-btn" onclick="diagnoseHtml()">
-🩺 HTML簡易診断
-</button>
-
-<button class="float-list-btn" onclick="analyzeProjectJsDependency()">
-🧭 JS読込診断
-</button>
-
-<button class="float-list-btn" onclick="showFunctionRelationMap()">
-🌳 関数関連図
-</button>
-
-<button class="float-list-btn" onclick="previewRepairHtml()">
-🎨 色分けプレビュー
-</button>
-
-<hr>
-
-<div class="small">💾 保存・バックアップ</div>
-
-<button class="float-list-btn" onclick="saveProjectPackage()">
-📦 プロジェクトZIP保存
-</button>
-
-<button class="float-list-btn" onclick="backupProgram()">
-💾 結合HTMLバックアップ
-</button>
-
-<button class="float-list-btn" onclick="saveProgramHtml()">
-💾 本体HTML保存
-</button>
-
-<button class="float-list-btn" onclick="showBackupHistory()">
-📚 バックアップ履歴
-</button>
-
-<button class="float-list-btn" onclick="restoreProgramBackup()">
-♻ 設定復元
-</button>
-
-<button class="float-list-btn" onclick="compareBackupSummary()">
-📊 バックアップ差分
-</button>
-
-<hr>
-
-<div class="small">🧩 設定・管理</div>
-
-<button class="float-list-btn" onclick="toggleTemplateManager()">
-🧩 テンプレ管理
-</button>
-
-<button class="float-list-btn" onclick="toggleDangerManager()">
-⚠ 危険ワード管理
-</button>
-
-<button class="float-list-btn" onclick="togglePatternManager()">
-🚫 NGパターン管理
-</button>
-
-<button class="float-list-btn" onclick="toggleAiPresetManager()">
-🤖 AIプリセット管理
-</button>
-
-<hr>
-
-<div class="small">🛠 通常モード支援</div>
-
-<button class="float-list-btn" onclick="reviewPrompt()">
-🛠 Promptレビュー
-</button>
-
-<button class="float-list-btn" onclick="testPromptObject()">
-🧩 内部JSONテスト
-</button>
-
-<button class="float-list-btn" onclick="testJsonFormat()">
-🧪 JSONテスト
-</button>
-
-<button class="float-list-btn" onclick="formatJsonOutput()">
-📦 JSON整形
-</button>
-
-<button class="float-list-btn" onclick="recheckOutput()">
-🔍 再チェック
-</button>
-
-<hr>
-
-<div class="small">📤 インポート・エクスポート</div>
-
-<button class="float-list-btn" onclick="exportTemplates()">
-📤 テンプレ保存
-</button>
-
-<button class="float-list-btn" onclick="importTemplates()">
-📥 テンプレ復元
-</button>
-
-<button class="float-list-btn" onclick="exportAiPresets()">
-🤖 AI設定バックアップ
-</button>
-
-<button class="float-list-btn" onclick="importAiPresets()">
-🤖 AI設定復元
-</button>
-
-<hr>
-
-<div class="small">📚 開発管理</div>
-
-<button class="float-list-btn" onclick="renderTodoList()">
-☑ 開発TODO
-</button>
-
-<button class="float-list-btn" onclick="renderDevLogList()">
-📚 開発履歴
-</button>
-
-<button class="float-list-btn" onclick="renderDevelopmentRules()">
-📖 開発ルール
-</button>
-
-
-<button class="float-list-btn" onclick="executeProjectValidation()">
-🧭 Validation
-</button>
-
-<hr>
-
-<div class="small">🧹 その他</div>
-
-<button class="float-list-btn" onclick="showMemoBox()">
-📝 Memo
-</button>
-
-<button class="float-list-btn" onclick="generateModuleRulesFromLoadedScripts()">
-📄 Module Rule
-</button>
-
-<button class="float-list-btn" onclick="copyMemoTitleList()">
-📋タイトル一覧
-</button>
-
-<button class="float-list-btn" onclick="clearOutput()">
-🧹 出力クリア
-</button>
-
-<button class="float-list-btn" onclick="clearHistory()">
-🗑 履歴全削除
-</button>
-
-<button class="float-list-btn" onclick="reloadAppPage()">
-🔄 ページ更新
-</button>
-
-</div>
-
-</div> <!-- card -->
 
 <!-- =====================================
   EXTERNAL LIBRARIES
-====================================== -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
-<!-- =====================================
-  CORE SYSTEM
-  UI基盤・共通処理・設定
-====================================== -->
-
-<script src="./00_core.js?v=5.8.6"></script>
-
-
-<script src="./01_task_manager.js?v=6.0.1"></script>
-
-<script src="./01_bootstrap.js?v=5.8.6"></script>
-<script src="./01_function_reference.js?v=5.8.6"></script>
-<script src="./01_project_config.js?v=5.8.6"></script>
-<script src="./01_project_manager.js?v=6.0.2"></script>
-<script src="./01_analyzer_common.js?v=6.0.1"></script>
-<script src="./01_memo_manager.js?v=7.0.1"></script>
-<!-- =====================================
-  PROMPT SYSTEM
-  プロンプト生成・保存・管理
-====================================== -->
-
-<script src="./02_prompt.js?v=5.8.6"></script>
-<script src="./03_data.js?v=6.0.3"></script>
-<script src="./03_development_rule_analyzer.js?v=6.0.3"></script>
-<script src="./03_development_rules.js?v=6.0.3"></script>
-<script src="./04_tools.js?v=5.8.6"></script>
-<script src="./04_repair_quick_buttons.js?v=5.8.7"></script>
-<!-- =====================================
-  REPAIR IDE
-  修復モード
-====================================== -->
-
-<script src="./05_repair_file.js?v=5.8.6"></script>
-<script src="./05_repair_zip_paste_manager.js?v=1.0.0"></script>
-<script src="./05_repair_function.js?v=5.8.6"></script>
-<script src="./05_repair_sort.js?v=5.8.6"></script>
-<script src="./05_repair_diff.js?v=5.8.6"></script>
-<script src="./05_repair_cleanup.js?v=5.8.6"></script>
-<script src="./05_repair.js?v=5.8.6"></script>
-
-<!-- =====================================
-  SEARCH SYSTEM
-  検索・置換
-====================================== -->
-
-<script src="./06_search_core.js?v=6.1.0"></script>
-<script src="./06_search_ui.js?v=6.1.0"></script>
-<script src="./06_search_history.js?v=6.1.2"></script>
-<script src="./06_search_global.js?v=6.1.0"></script>
-<script src="./06_search_suggest.js?v=6.1.0"></script>
-
-<!-- =====================================
-  HEALTH SYSTEM
-  診断・バックアップ・SafeMode
-====================================== -->
-
-<script src="./07_health_dependency.js?v=5.8.6"></script>
-<script src="./07_health_diagnose.js?v=5.8.6"></script>
-<script src="./07_health_unused.js?v=5.8.6"></script>
-<script src="./07_backup_manager.js?v=5.8.6"></script>
-<script src="./07_project_package.js?v=5.8.6"></script>
-<script src="./07_safe_mode.js?v=5.8.6"></script>
-<script src="./07_project_explorer.js?v=5.8.6"></script>
-<script src="./07_backup_health.js?v=5.8.6"></script>
-<script src="./07_project_validation.js?v=6.0.1"></script>
-
-<!-- =====================================
-  AI INTEGRATION
-  AIコード統合・解析
-====================================== -->
-
-<script src="./08_function_relation.js?v=5.8.6"></script>
-<script src="./08_ai_analyzer.js?v=5.8.6"></script>
-<script src="./08_ai_apply.js?v=5.8.6"></script>
-<script src="./08_ai_test.js?v=5.8.6"></script>
-<script src="./08_ai_integrator.js?v=5.8.6"></script>
-
-<!-- =====================================
-  AI INSTRUCTION
-  AI修正指示解析
-====================================== -->
-
-<script src="./09_ai_instruction.js?v=5.8.6"></script>
-
-<!-- =====================================
-  AI ERROR ANALYZER
-  JSエラー解析・AI調査プロンプト生成
-====================================== -->
-
-<script src="./09_ai_error_prompt.js?v=5.8.6"></script>
-
-<!-- =====================================
-  MACRO SYSTEM
-====================================== -->
-
-<script src="./10_macro.js?v=5.8.6"></script>
-
-<script src="./10_macro_favorite.js?v=5.8.6"></script>
-
-<!-- =====================================
-  console
-====================================== -->
-
-<script src="./11_mobile_console.js?v=6.0.2"></script>
-<script src="./11_function_help.js?v=7.0.0"></script>
-<script src="./11_command_palette.js?v=7.0.0"></script>
-<script src="./11_project_search.js?v=7.0.0"></script>
-<script src="./11_error_inspector.js?v=7.0.0"></script>
-<script src="./11_ide_registry.js?v=7.0.1"></script>
-<script src="./11_ide_launcher.js?v=7.0.0"></script>
-<script src="./11_quick_command.js?v=7.0.0"></script>
-<script src="./11_virtual_keyboard.js?v=7.0.0"></script>
-<script src="./11_autocomplete.js?v=7.0.0"></script>
-<script src="./11_ai_development_assistant.js?v=7.0.0"></script>
-<script src="./11_mobile_console_autocomplete.js?v=6.0.2"></script>
-
-<script src="./11_mobile_console_suggest.js?v=6.0.2"></script>
-
-<!-- =====================================
-  memo box
-====================================== -->
-
-<script src="./12_document_parser_v2.js?v=5.8.7"></script>
-<script src="./12_memo_box.js?v=5.8.7"></script>
-<script src="./12_dependency_manager.js?v=7.0.1"></script>
-<script src="./12_retrieval_engine.js?v=7.0.0"></script>
-<script src="./12_ai_package_builder.js?v=7.0.0"></script>
-<script src="./12_repository_order.js?v=7.0.0"></script>
-<script src="./12_knowledge_migration.js?v=7.0.4"></script>
-
-<script src="./13_module_analyzer.js?v=5.8.7"></script>
-<script src="./13_project_analyzer.js?v=6.0.2"></script>
-<script src="./13_project_database.js?v=6.0.1"></script>
-<script src="./13_function_analyzer.js?v=6.0.2"></script>
-<script src="./13_diagnostic_instrumentation.js?v=1.0.0"></script>
-<script src="./13_diagnostic_platform.js?v=1.2.1"></script>
-<script src="./13_diagnostic_validation.js?v=1.0.2"></script>
-<script src="./13_search_strategy_platform.js?v=1.1.3"></script>
-<script src="./13_search_strategy_validation.js?v=1.0.5"></script>
-<script src="./13_development_status_registry.js?v=1.0.0"></script>
-<script src="./13_development_dashboard.js?v=7.0.1"></script>
-<script src="./13_golden_core_memo_bridge.js?v=1.1.0"></script>
-<script src="./13_search_regression_baseline.js?v=1.0.1"></script>
-<script src="./13_validation_result_repository.js?v=1.2.1"></script>
-<script src="./13_investigation_workflow.js?v=1.0.3"></script>
-<script src="./13_investigation_workflow_validation.js?v=1.2.4"></script>
-<script src="./13_development_analytics.js?v=1.2.3"></script>
-<script src="./13_development_analytics_phase2a.js?v=1.0.2"></script>
-<script src="./13_development_analytics_phase2b.js?v=1.0.4"></script>
-<script src="./13_auto_refactoring.js?v=1.2.8"></script>
-<script src="./13_auto_refactoring_phase2.js?v=1.1.1"></script>
-<script src="./13_auto_refactoring_policy_standard.js?v=1.1.2"></script>
-<script src="./13_auto_refactoring_transaction.js?v=1.2.5"></script>
-<script src="./13_auto_refactoring_controlled_application.js?v=1.0.7"></script>
-<script src="./13_auto_refactoring_validation.js?v=1.2.4"></script>
-<script src="./13_ai_development_workflow_core.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_storage.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_state.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_planning.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_adapter.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_execution.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_decision.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_approval.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_monitoring.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_package.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_completion.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_integration.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_validation.js?v=2.0.0"></script>
-<script src="./13_project_report.js?v=6.0.3"></script>
-<script src="./13_project_handoff.js?v=6.0.2"></script>
-<script src="./13_function_relation_v3.js?v=6.0.2"></script>
-<script src="./13_project_governance.js?v=6.0.2"></script>
-<script src="./14_architecture_database.js?v=1.0.1"></script>
-<script src="./14_architecture_builder.js"></script>
-<script src="./14_architecture_repository.js"></script>
-
-<!-- =====================================
-  APPLICATION STARTUP
-====================================== -->
-<script src="./15_engine_core.js?v=1.0.0"></script>
-<script src="./16_search_engine.js?v=1.0.0"></script>
-<script src="./16_context_engine.js?v=1.0.0"></script>
-<script src="./16_perception_engine.js?v=1.0.0"></script>
-<script src="./16_validation_engine.js?v=1.0.0"></script>
-<script src="./15_reasoning_engine.js?v=1.0.0"></script>
-<script src="./16_workflow_engine.js?v=1.0.0"></script>
-
-
-<script src="./99_init.js?v=5.8.6"></script>
-
-
-
-
-<div id="repairSearchQuickPanel" class="repair-search-quick-panel" style="display: none;">
-
-  <button id="repairSearchQuickToggle" class="repair-search-quick-toggle" onclick="toggleRepairSearchQuickPanel()">
-    ▶
-  </button>
-
-  <div class="macro-quick-title">
-    Macro
-  </div>
-
-  <div id="repairQuickMacroButtons">
-<button class="macro-quick-btn" onclick="showMacroList()">
-  <span class="macro-quick-icon">▶</span>
-  <span class="macro-quick-label">Macro</span>
-</button>
-</div>
-
-</div><button id="repairQuickFavoriteToggle" class="repair-quick-favorite-toggle" onclick="toggleRepairQuickFavoritePanel()" style="display: none;">◀</button><div id="repairQuickFavoritePanel" class="repair-quick-favorite-panel" style="display: none;">
-
-  <div class="repair-quick-favorite-title">
-    Quick
-  </div>
-
-  <div id="repairQuickFavoriteList" class="repair-quick-favorite-list">
-
-<button class="repair-quick-favorite-btn" title="HTML HEALTH" onclick="runRepairQuickFavoriteAction('showHtmlHealth')">
-
-  <span class="repair-quick-favorite-icon">
-    💚
-  </span>
-
-  <span class="repair-quick-favorite-label">
-    HTML HEALTH
-  </span>
-
-</button>
-
-
-
-<button class="repair-quick-favorite-btn" title="診断" onclick="runRepairQuickFavoriteAction('diagnoseRepairHtml')">
-
-  <span class="repair-quick-favorite-icon">
-    🩺
-  </span>
-
-  <span class="repair-quick-favorite-label">
-    診断
-  </span>
-
-</button>
-
-
-
-<button class="repair-quick-favorite-btn" title="読込" onclick="runRepairQuickFavoriteAction('loadRepairHtml')">
-
-  <span class="repair-quick-favorite-icon">
-    📖
-  </span>
-
-  <span class="repair-quick-favorite-label">
-    読込
-  </span>
-
-</button>
-
-
-
-<button class="repair-quick-favorite-btn" title="保存" onclick="runRepairQuickFavoriteAction('saveRepairHtml')">
-
-  <span class="repair-quick-favorite-icon">
-    💾
-  </span>
-
-  <span class="repair-quick-favorite-label">
-    保存
-  </span>
-
-</button>
-
-
-
-<button class="repair-quick-favorite-btn" title="Undo" onclick="runRepairQuickFavoriteAction('undoRepairEdit')">
-
-  <span class="repair-quick-favorite-icon">
-    ↩
-  </span>
-
-  <span class="repair-quick-favorite-label">
-    Undo
-  </span>
-
-</button>
-
-
-
-<button class="repair-quick-favorite-btn" title="Redo" onclick="runRepairQuickFavoriteAction('redoRepairEdit')">
-
-  <span class="repair-quick-favorite-icon">
-    ↪
-  </span>
-
-  <span class="repair-quick-favorite-label">
-    Redo
-  </span>
-
-</button>
-
-
-
-<button class="repair-quick-favorite-btn" title="全ファイル検索" onclick="runRepairQuickFavoriteAction('searchAllRepairFiles')">
-
-  <span class="repair-quick-favorite-icon">
-    📚
-  </span>
-
-  <span class="repair-quick-favorite-label">
-    全ファイル検索
-  </span>
-
-</button>
-
-
-
-<button class="repair-quick-favorite-btn" title="インデント" onclick="runRepairQuickFavoriteAction('indentRepairSelection')">
-
-  <span class="repair-quick-favorite-icon">
-    ➡
-  </span>
-
-  <span class="repair-quick-favorite-label">
-    インデント
-  </span>
-
-</button>
-
-
-
-<button class="repair-quick-favorite-btn" title="HTMLコピー" onclick="runRepairQuickFavoriteAction('copyRepairHtml')">
-
-  <span class="repair-quick-favorite-icon">
-    📋
-  </span>
-
-  <span class="repair-quick-favorite-label">
-    HTMLコピー
-  </span>
-
-</button>
-
-
-
-<button class="repair-quick-favorite-btn" title="AutoSave" onclick="runRepairQuickFavoriteAction('toggleRepairAutoSave')">
-
-  <span class="repair-quick-favorite-icon">
-    💾
-  </span>
-
-  <span class="repair-quick-favorite-label">
-    AutoSave
-  </span>
-
-</button>
-
-
-
-<button class="repair-quick-favorite-btn" title="検索" onclick="runRepairQuickFavoriteAction('toggleRepairSearchPopup')">
-
-  <span class="repair-quick-favorite-icon">
-    🔍
-  </span>
-
-  <span class="repair-quick-favorite-label">
-    検索
-  </span>
-
-</button>
-
-</div>
-
-</div></body></html>
+====================================== --><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script><!-- =====================================
+  APPLICATION SCRIPT LOADER
+  Script一覧は00_script_manifest.jsで管理
+====================================== --><script src="./00_script_loader.js?v=1.0.0"></script></body></html>
