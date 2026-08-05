@@ -285,180 +285,17 @@
 
 </div> <!-- card -->
 
-<!-- =====================================
-  EXTERNAL LIBRARIES
-====================================== -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
-<!-- =====================================
-  CORE SYSTEM
-  UI基盤・共通処理・設定
-====================================== -->
-
-<script src="./00_core.js?v=5.8.6"></script>
-
-
-<script src="./01_task_manager.js?v=6.0.1"></script>
-
-<script src="./01_bootstrap.js?v=5.8.6"></script>
-<script src="./01_function_reference.js?v=5.8.6"></script>
-<script src="./01_project_config.js?v=5.8.6"></script>
-<script src="./01_project_manager.js?v=6.0.2"></script>
-<script src="./01_analyzer_common.js?v=6.0.1"></script>
-<script src="./01_memo_manager.js?v=7.0.1"></script>
-<!-- =====================================
-  PROMPT SYSTEM
-  プロンプト生成・保存・管理
-====================================== -->
-
-<script src="./02_prompt.js?v=5.8.6"></script>
-<script src="./03_data.js?v=6.0.3"></script>
-<script src="./03_development_rule_analyzer.js?v=6.0.3"></script>
-<script src="./03_development_rules.js?v=6.0.3"></script>
-<script src="./04_tools.js?v=5.8.6"></script>
-<script src="./04_repair_quick_buttons.js?v=5.8.7"></script>
-<!-- =====================================
-  REPAIR IDE
-  修復モード
-====================================== -->
-
-<script src="./05_repair_file.js?v=5.8.6"></script>
-<script src="./05_repair_zip_paste_manager.js?v=1.0.0"></script>
-<script src="./05_repair_function.js?v=5.8.6"></script>
-<script src="./05_repair_sort.js?v=5.8.6"></script>
-<script src="./05_repair_diff.js?v=5.8.6"></script>
-<script src="./05_repair_cleanup.js?v=5.8.6"></script>
-<script src="./05_repair.js?v=5.8.6"></script>
-
-<!-- =====================================
-  SEARCH SYSTEM
-  検索・置換
-====================================== -->
-
-<script src="./06_search_core.js?v=6.1.0"></script>
-<script src="./06_search_ui.js?v=6.1.0"></script>
-<script src="./06_search_history.js?v=6.1.2"></script>
-<script src="./06_search_global.js?v=6.1.0"></script>
-<script src="./06_search_suggest.js?v=6.1.0"></script>
-
-<!-- =====================================
-  HEALTH SYSTEM
-  診断・バックアップ・SafeMode
-====================================== -->
-
-<script src="./07_health_dependency.js?v=5.8.6"></script>
-<script src="./07_health_diagnose.js?v=5.8.6"></script>
-<script src="./07_health_unused.js?v=5.8.6"></script>
-<script src="./07_backup_manager.js?v=5.8.6"></script>
-<script src="./07_project_package.js?v=5.8.6"></script>
-<script src="./07_safe_mode.js?v=5.8.6"></script>
-<script src="./07_project_explorer.js?v=5.8.6"></script>
-<script src="./07_backup_health.js?v=5.8.6"></script>
-<script src="./07_project_validation.js?v=6.0.1"></script>
-
-<!-- =====================================
-  AI INTEGRATION
-  AIコード統合・解析
-====================================== -->
-
-<script src="./08_function_relation.js?v=5.8.6"></script>
-<script src="./08_ai_analyzer.js?v=5.8.6"></script>
-<script src="./08_ai_apply.js?v=5.8.6"></script>
-<script src="./08_ai_test.js?v=5.8.6"></script>
-<script src="./08_ai_integrator.js?v=5.8.6"></script>
-
-<!-- =====================================
-  AI INSTRUCTION
-  AI修正指示解析
-====================================== -->
-
-<script src="./09_ai_instruction.js?v=5.8.6"></script>
-
-<!-- =====================================
-  AI ERROR ANALYZER
-  JSエラー解析・AI調査プロンプト生成
-====================================== -->
-
-<script src="./09_ai_error_prompt.js?v=5.8.6"></script>
-
-<!-- =====================================
-  MACRO SYSTEM
-====================================== -->
-
-<script src="./10_macro.js?v=5.8.6"></script>
-
-<script src="./10_macro_favorite.js?v=5.8.6"></script>
-
-<!-- =====================================
-  console
-====================================== -->
-
-<script src="./11_mobile_console.js?v=6.0.2"></script>
-<script src="./11_function_help.js?v=7.0.0"></script>
-<script src="./11_command_palette.js?v=7.0.0"></script>
-<script src="./11_project_search.js?v=7.0.0"></script>
-<script src="./11_error_inspector.js?v=7.0.0"></script>
-<script src="./11_ide_registry.js?v=7.0.1"></script>
-<script src="./11_ide_launcher.js?v=7.0.0"></script>
-<script src="./11_quick_command.js?v=7.0.0"></script>
-<script src="./11_virtual_keyboard.js?v=7.0.0"></script>
-<script src="./11_autocomplete.js?v=7.0.0"></script>
-<script src="./11_ai_development_assistant.js?v=7.0.0"></script>
-<script src="./11_mobile_console_autocomplete.js?v=6.0.2"></script>
-
-<script src="./11_mobile_console_suggest.js?v=6.0.2"></script>
-
-<!-- =====================================
-  memo box
-====================================== -->
-
-<script src="./12_document_parser_v2.js?v=5.8.7"></script>
-<script src="./12_memo_box.js?v=5.8.7"></script>
-<script src="./12_dependency_manager.js?v=7.0.1"></script>
-<script src="./12_retrieval_engine.js?v=7.0.0"></script>
-<script src="./12_ai_package_builder.js?v=7.0.0"></script>
-<script src="./12_repository_order.js?v=7.0.0"></script>
-<script src="./12_knowledge_migration.js?v=7.0.4"></script>
-
-<script src="./13_module_analyzer.js?v=5.8.7"></script>
-<script src="./13_project_analyzer.js?v=6.0.2"></script>
-<script src="./13_project_database.js?v=6.0.1"></script>
-<script src="./13_function_analyzer.js?v=6.0.2"></script>
-<script src="./13_diagnostic_instrumentation.js?v=1.0.0"></script>
-<script src="./13_diagnostic_platform.js?v=1.2.1"></script>
-<script src="./13_diagnostic_validation.js?v=1.0.2"></script>
-<script src="./13_search_strategy_platform.js?v=1.1.3"></script>
-<script src="./13_search_strategy_validation.js?v=1.0.5"></script>
-<script src="./13_development_status_registry.js?v=1.0.0"></script>
-<script src="./13_development_dashboard.js?v=7.0.1"></script>
-<script src="./13_golden_core_memo_bridge.js?v=1.1.0"></script>
-<script src="./13_search_regression_baseline.js?v=1.0.1"></script>
-<script src="./13_validation_result_repository.js?v=1.2.1"></script>
-<script src="./13_investigation_workflow.js?v=1.0.3"></script>
-<script src="./13_investigation_workflow_validation.js?v=1.2.4"></script>
-<script src="./13_development_analytics.js?v=1.2.3"></script>
-<script src="./13_development_analytics_phase2a.js?v=1.0.2"></script>
-<script src="./13_development_analytics_phase2b.js?v=1.0.4"></script>
-<script src="./13_auto_refactoring.js?v=1.2.8"></script>
-<script src="./13_auto_refactoring_phase2.js?v=1.1.1"></script>
-<script src="./13_auto_refactoring_policy_standard.js?v=1.1.2"></script>
-<script src="./13_auto_refactoring_transaction.js?v=1.2.5"></script>
-<script src="./13_auto_refactoring_controlled_application.js?v=1.0.7"></script>
-<script src="./13_auto_refactoring_validation.js?v=1.2.4"></script>
-<script src="./13_ai_development_workflow_core.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_storage.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_state.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_planning.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_adapter.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_execution.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_decision.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_approval.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_monitoring.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_package.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_completion.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_integration.js?v=2.0.0"></script>
-<script src="./13_ai_development_workflow_validation.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_state.js?v=2.0.1"></script>
+<script src="./13_ai_development_workflow_planning.js?v=2.0.1"></script>
+<script src="./13_ai_development_workflow_adapter.js?v=2.0.1"></script>
+<script src="./13_ai_development_workflow_execution.js?v=2.0.1"></script>
+<script src="./13_ai_development_workflow_decision.js?v=2.0.1"></script>
+<script src="./13_ai_development_workflow_approval.js?v=2.0.1"></script>
+<script src="./13_ai_development_workflow_monitoring.js?v=2.0.1"></script>
+<script src="./13_ai_development_workflow_package.js?v=2.0.1"></script>
+<script src="./13_ai_development_workflow_completion.js?v=2.0.1"></script>
+<script src="./13_ai_development_workflow_integration.js?v=2.0.1"></script>
+<script src="./13_ai_development_workflow_validation.js?v=2.0.1"></script>
 <script src="./13_project_report.js?v=6.0.3"></script>
 <script src="./13_project_handoff.js?v=6.0.2"></script>
 <script src="./13_function_relation_v3.js?v=6.0.2"></script>
@@ -480,7 +317,6 @@
 
 
 <script src="./99_init.js?v=5.8.6"></script>
-
 
 
 
