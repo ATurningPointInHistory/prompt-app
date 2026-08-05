@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_ai_development_workflow_core.js
    IDE-160 AI Development Workflow
-   Version: 1.4.0
-   Phase: 4 - Decision Routing / Recovery
+   Version: 2.0.0
+   Phase: Complete - Monitoring / Package / Completion / Integration / Release
    Design Freeze: 2026-08-04
    ============================================================ */
 (function (global) {
@@ -10,11 +10,11 @@
 
   const COMPONENT_ID = "IDE-160";
   const COMPONENT_NAME = "AI Development Workflow";
-  const VERSION = "1.4.0";
+  const VERSION = "2.0.0";
   const SCHEMA_VERSION = 1;
   const ARCHITECTURE_VERSION = "1.0";
   const DESIGN_FREEZE_VERSION = "1.0";
-  const IMPLEMENTATION_PHASE = "Phase 5 - Workflow Approval";
+  const IMPLEMENTATION_PHASE = "Complete - Phase 10 Final Validation / Release Freeze";
   const MAX_ACTIVE_WORKFLOWS = 1;
   const MAX_DEFINITIONS = 50;
   const MAX_WORKFLOW_SUMMARIES = 5;
@@ -561,7 +561,12 @@
       adapter: Boolean(namespace.modules && namespace.modules.adapter),
       execution: Boolean(namespace.modules && namespace.modules.execution),
       decision: Boolean(namespace.modules && namespace.modules.decision),
-      approval: Boolean(namespace.modules && namespace.modules.approval)
+      approval: Boolean(namespace.modules && namespace.modules.approval),
+      monitoring: Boolean(namespace.modules && namespace.modules.monitoring),
+      package: Boolean(namespace.modules && namespace.modules.package),
+      completion: Boolean(namespace.modules && namespace.modules.completion),
+      integration: Boolean(namespace.modules && namespace.modules.integration),
+      validation: Boolean(namespace.modules && namespace.modules.validation)
     };
     const active = state.activeWorkflowId ? state.workflows.get(state.activeWorkflowId) : null;
     const validation = state.lastValidation;
@@ -574,9 +579,9 @@
       architectureVersion: ARCHITECTURE_VERSION,
       designFreezeVersion: DESIGN_FREEZE_VERSION,
       implementationPhase: IMPLEMENTATION_PHASE,
-      implementationStatus: moduleStatus.approval ? "Phase 5 Implemented" : moduleStatus.decision ? "Phase 4 Implemented" : moduleStatus.execution ? "Phase 3 Implemented" : moduleStatus.planning ? "Phase 2 Implemented" : "Phase 1 Implemented",
+      implementationStatus: moduleStatus.validation ? "IDE-160 Complete" : moduleStatus.integration ? "Phase 9 Implemented" : moduleStatus.completion ? "Phase 8 Implemented" : moduleStatus.package ? "Phase 7 Implemented" : moduleStatus.monitoring ? "Phase 6 Implemented" : moduleStatus.approval ? "Phase 5 Implemented" : moduleStatus.decision ? "Phase 4 Implemented" : moduleStatus.execution ? "Phase 3 Implemented" : moduleStatus.planning ? "Phase 2 Implemented" : "Phase 1 Implemented",
       status: state.lastError ? "Degraded" : state.initialized ? "Ready" : "Loaded",
-      ready: Boolean(state.initialized && moduleStatus.core && moduleStatus.storage && moduleStatus.state && moduleStatus.planning && moduleStatus.adapter && moduleStatus.execution && moduleStatus.decision && moduleStatus.approval && !state.lastError),
+      ready: Boolean(state.initialized && moduleStatus.core && moduleStatus.storage && moduleStatus.state && moduleStatus.planning && moduleStatus.adapter && moduleStatus.execution && moduleStatus.decision && moduleStatus.approval && moduleStatus.monitoring && moduleStatus.package && moduleStatus.completion && moduleStatus.integration && moduleStatus.validation && !state.lastError),
       available: true,
       initialized: state.initialized === true,
       modules: moduleStatus,
@@ -595,9 +600,17 @@
       decisionRoute: active && active.decision && active.decision.selectedRoute || null,
       approvalStatus: active && active.approval && active.approval.status || "Not Started",
       approvalType: active && active.approval && active.approval.approvalType || null,
+      monitoringStatus: active && active.monitoring && active.monitoring.status || "Not Started",
+      monitoringHealth: active && active.monitoring && Number.isFinite(active.monitoring.health) ? active.monitoring.health : null,
+      packageStatus: active && active.package && active.package.status || "Not Started",
+      packageId: active && active.package && active.package.packageId || null,
+      completionStatus: active && active.completion && active.completion.status || "Not Started",
+      completionGatePassed: active && active.completion && active.completion.gatePassed === true,
+      baselineId: active && active.baseline && active.baseline.baselineId || null,
+      handoffTarget: active && active.package && active.package.handoffTarget || active && active.definition && active.definition.handoffTarget || "IDE-170",
       currentExecutionSessionId: active && active.execution && active.execution.currentSession && active.execution.currentSession.executionSessionId || null,
       currentTaskId: active && active.execution && active.execution.currentSession && active.execution.currentSession.currentTaskId || null,
-      repositoryIntegrity: active && active.execution && active.execution.executionSummary ? internal.clone(active.execution.executionSummary.repositoryIntegrity) : "Not Evaluated in Phase 5",
+      repositoryIntegrity: active && active.execution && active.execution.executionSummary ? internal.clone(active.execution.executionSummary.repositoryIntegrity) : "Not Evaluated",
       persistentCommitAllowed: false,
       zipFileMutationAllowed: false,
       lastPersistence: clone(state.lastPersistence),
@@ -626,6 +639,21 @@
     }
     if (namespace.api && typeof namespace.api.validateWorkflowApproval === "function") {
       results.push({ name: "Approval", result: namespace.api.validateWorkflowApproval(settings) });
+    }
+    if (namespace.api && typeof namespace.api.validateWorkflowMonitoring === "function") {
+      results.push({ name: "Monitoring", result: namespace.api.validateWorkflowMonitoring(settings) });
+    }
+    if (namespace.api && typeof namespace.api.validateWorkflowPackage === "function") {
+      results.push({ name: "Package", result: namespace.api.validateWorkflowPackage(settings) });
+    }
+    if (namespace.api && typeof namespace.api.validateWorkflowCompletion === "function") {
+      results.push({ name: "Completion", result: namespace.api.validateWorkflowCompletion(settings) });
+    }
+    if (namespace.api && typeof namespace.api.validateWorkflowIntegration === "function") {
+      results.push({ name: "Integration", result: namespace.api.validateWorkflowIntegration(settings) });
+    }
+    if (namespace.api && typeof namespace.api.validateWorkflowFinal === "function") {
+      results.push({ name: "Final", result: namespace.api.validateWorkflowFinal(settings) });
     }
     if (!results.length) {
       const notRun = {
@@ -676,7 +704,7 @@
       id: nextId("IDE-160-VALIDATION"),
       componentId: COMPONENT_ID,
       version: VERSION,
-      mode: text(settings.mode, "Phase 5 Integrated Validation"),
+      mode: text(settings.mode, "IDE-160 Complete Integrated Validation"),
       valid: failed === 0 && total > 0,
       passed: passed,
       failed: failed,
@@ -694,13 +722,16 @@
     return overall;
   }
 
-  function showAIDevelopmentWorkflow() {
-    return buildResult(false, "IDE160_UI_NOT_IMPLEMENTED", "Not Available", {
+  function showAIDevelopmentWorkflow(options) {
+    if (namespace.api && typeof namespace.api.showAIDevelopmentWorkflowDashboard === "function") {
+      return namespace.api.showAIDevelopmentWorkflowDashboard(options || {});
+    }
+    return buildResult(false, "IDE160_UI_NOT_READY", "Not Available", {
       implementationPhase: IMPLEMENTATION_PHASE,
       status: getAIDevelopmentWorkflowStatus()
     }, {
-      warnings: ["IDE-160 Mobile UI is scheduled for Implementation Phase 8."],
-      error: { message: "IDE-160 UI is not implemented in Phase 5.", category: "Dependency Failure", severity: "Low" }
+      warnings: ["IDE-160 Integration Module is not ready."],
+      error: { message: "IDE-160 UI integration is not ready.", category: "Dependency Failure", severity: "Low" }
     });
   }
 
