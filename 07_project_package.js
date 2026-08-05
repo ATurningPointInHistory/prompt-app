@@ -35,8 +35,20 @@ async function saveProjectPackage() {
     const zip = new JSZip();
 
     const html =
-      "<!DOCTYPE html>\n" +
-      document.documentElement.outerHTML;
+      await getCleanProjectIndexHtml();
+
+    if (!html) {
+      alert(
+        "プロジェクト保存を中止しました\n\n" +
+        "Clean index.htmlを取得できません。"
+      );
+
+      return {
+        ok: false,
+        complete: false,
+        reason: "CLEAN_INDEX_UNAVAILABLE"
+      };
+    }
 
     const references =
       getProjectPackageReferences(html);
@@ -129,7 +141,17 @@ async function saveProjectPackage() {
       externalFileCount:
         references.external.length,
       fileCount:
-        savedFiles.length + 1
+        savedFiles.length + 1,
+      cleanIndex: true,
+      scriptManifestVersion:
+        window.AI_PRO_SCRIPT_MANIFEST_VERSION ||
+        "unknown",
+      scriptManifestCount:
+        Array.isArray(
+          window.AI_PRO_SCRIPT_MANIFEST
+        )
+          ? window.AI_PRO_SCRIPT_MANIFEST.length
+          : 0
     };
 
     zip.file(
@@ -203,6 +225,92 @@ async function saveProjectPackage() {
   }
 }
 
+
+function validateCleanProjectIndexHtml(html) {
+
+  const source =
+    String(html || "");
+
+  if (!source.trim()) {
+    return false;
+  }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(
+    source,
+    "text/html"
+  );
+
+  const loader =
+    doc.querySelector(
+      'script[src^="./00_script_loader.js"]'
+    );
+
+  const runtimeOnly = [
+    "repairSearchQuickPanel",
+    "repairQuickFavoritePanel",
+    "repairQuickFavoriteToggle"
+  ].some(id => doc.getElementById(id));
+
+  return Boolean(
+    loader &&
+    !runtimeOnly
+  );
+}
+
+async function getCleanProjectIndexHtml() {
+
+  const cached =
+    window.AI_PRO_CLEAN_INDEX_HTML;
+
+  if (validateCleanProjectIndexHtml(cached)) {
+    return cached;
+  }
+
+  try {
+    const indexUrl = new URL(
+      "./index.html",
+      document.baseURI
+    );
+
+    indexUrl.searchParams.set(
+      "packageSource",
+      Date.now()
+    );
+
+    const response = await fetch(
+      indexUrl.href,
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        "index.html fetch failed: " +
+        response.status
+      );
+    }
+
+    const source =
+      await response.text();
+
+    if (!validateCleanProjectIndexHtml(source)) {
+      throw new Error(
+        "Fetched index.html is not clean"
+      );
+    }
+
+    return source;
+
+  } catch (error) {
+    console.error(
+      "Clean index.html unavailable",
+      error
+    );
+
+    return null;
+  }
+}
+
 function getProjectPackageReferences(html) {
 
   const parser = new DOMParser();
@@ -228,6 +336,21 @@ function getProjectPackageReferences(html) {
     .forEach(el => values.push(
       el.getAttribute("src")
     ));
+
+  const manifestSource =
+    window.AI_PRO_SCRIPT_MANIFEST_SOURCE ||
+    "./00_script_manifest.js";
+
+  values.push(manifestSource);
+
+  if (
+    Array.isArray(
+      window.AI_PRO_SCRIPT_MANIFEST
+    )
+  ) {
+    window.AI_PRO_SCRIPT_MANIFEST
+      .forEach(src => values.push(src));
+  }
 
   const localMap = new Map();
   const external = [];
