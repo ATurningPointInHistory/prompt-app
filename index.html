@@ -4,9 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AIプロンプト生成Pro v6.0.0</title>
 
-<link
-  rel="stylesheet"
-  href="./00_style.css?v=6.0.0">
+<link rel="stylesheet" href="./00_style.css?v=6.0.0">
 
 </head>
 
@@ -31,7 +29,7 @@
 
   <div id="appPage" style="display: block;">
 
-  <div class="small" id="versionLabel">v6.0.0</div>
+  <div class="small" id="versionLabel">v7.0.0</div>
 
   <div class="tab-container">    <div id="tab1" class="tab" onclick="switchTab(1)">マニュアル入力
 
@@ -74,13 +72,49 @@
 
   </div>
 
-  <div id="commandBox" class="command-box"></div>
+  <div id="commandBox" class="command-box"><button type="button" class="command-chip" data-cmd="tldr" onclick="addCommand('tldr')">
+      /tldr
+    </button><button type="button" class="command-chip" data-cmd="eli15" onclick="addCommand('eli15')">
+      /eli15
+    </button><button type="button" class="command-chip" data-cmd="human" onclick="addCommand('human')">
+      /human
+    </button><button type="button" class="command-chip" data-cmd="step" onclick="addCommand('step')">
+      /step
+    </button><button type="button" class="command-chip" data-cmd="enemy" onclick="addCommand('enemy')">
+      /enemy
+    </button><button type="button" class="command-chip" data-cmd="real" onclick="addCommand('real')">
+      /real
+    </button><button type="button" class="command-chip" data-cmd="gap" onclick="addCommand('gap')">
+      /gap
+    </button><button type="button" class="command-chip" data-cmd="sort" onclick="addCommand('sort')">
+      /sort
+    </button><button type="button" class="command-chip" data-cmd="priority" onclick="addCommand('priority')">
+      /priority
+    </button><button type="button" class="command-chip" data-cmd="schema" onclick="addCommand('schema')">
+      /schema
+    </button><button type="button" class="command-chip" data-cmd="code" onclick="addCommand('code')">
+      /code
+    </button><button type="button" class="command-chip" data-cmd="test" onclick="addCommand('test')">
+      /test
+    </button><button type="button" class="command-chip" data-cmd="prompt" onclick="addCommand('prompt')">
+      /prompt
+    </button></div>
 
 </div>
 
 <div class="small">用途別プリセット</div>
 
-<div id="presetBox" class="preset-box"></div>
+<div id="presetBox" class="preset-box"><button type="button" class="preset-chip" onclick="applyPresetByName('要約')">
+      要約
+    </button><button type="button" class="preset-chip" onclick="applyPresetByName('初心者向け')">
+      初心者向け
+    </button><button type="button" class="preset-chip" onclick="applyPresetByName('設計レビュー')">
+      設計レビュー
+    </button><button type="button" class="preset-chip" onclick="applyPresetByName('実装支援')">
+      実装支援
+    </button><button type="button" class="preset-chip" onclick="applyPresetByName('JSON設計')">
+      JSON設計
+    </button></div>
 
     <label for="rough-tone">トーン</label>
     <select id="rough-tone">
@@ -125,7 +159,7 @@
   <div id="template-manager" class="section-box" style="display: none;">
     <h3>テンプレ管理</h3>
     <label for="templateSelect">固定テンプレ / 保存テンプレ</label>
-    <select id="templateSelect" onchange="applyTemplateFromSelect()"><option value="">テンプレを選択</option><option value="0">AIオーケストレーター</option><option value="1">テスト</option></select>
+    <select id="templateSelect" onchange="applyTemplateFromSelect()"><option value="">テンプレを選択</option><option value="0">AIオーケストレーター</option></select>
 
     <div class="small">下の入力欄から新しいテンプレも追加できます。</div>
     <label for="tempName">テンプレ名</label>
@@ -146,7 +180,16 @@
     <button onclick="saveTemplate()" class="btn-full">テンプレ保存</button>
     <h4>保存済みテンプレ一覧</h4>
 
-    <div id="templateList"></div>
+    <div id="templateList">
+    <div class="template-item">
+      <b>AIオーケストレーター</b><br>
+      <div class="small">役割: AIオーケストレーター</div>
+      <div class="item-actions">
+        <button onclick="applyTemplateAll(0)">使う</button>
+        
+      </div>
+    </div>
+  </div>
 
   </div>
 
@@ -162,7 +205,112 @@
     <button onclick="saveDangerWord()" class="btn-full">危険ワード追加</button>
     <h4>固定危険ワード + 追加危険ワード</h4>
 
-    <div id="dangerList"></div>
+    <div id="dangerList">
+    <div class="danger-item">
+      <b>パスワード</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>住所</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>電話番号</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>メールアドレス</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>マイナンバー</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>クレジットカード</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>カード番号</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>暗証番号</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>口座番号</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>銀行口座</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>本人確認書類</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>運転免許証</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>保険証</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>秘密の質問</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  
+    <div class="danger-item">
+      <b>生年月日</b>
+      <div class="item-actions">
+        <span class="small">固定ワード</span>
+      </div>
+    </div>
+  </div>
 
   </div>
 
@@ -187,7 +335,47 @@
     <button onclick="savePattern()" class="btn-full">NGパターン追加</button>
     <h4>固定NGパターン + 追加NGパターン</h4>
 
-    <div id="patternList"></div>
+    <div id="patternList">
+    <div class="pattern-item">
+      <b>メールアドレス</b>
+      <div class="code-like">/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g</div>
+      <div class="item-actions">
+        <span class="small">固定パターン</span>
+      </div>
+    </div>
+  
+    <div class="pattern-item">
+      <b>電話番号</b>
+      <div class="code-like">/(?:\+?\d{1,3}[-\s]?)?(?:\d{2,4}[-\s]?){2,4}\d{3,4}/g</div>
+      <div class="item-actions">
+        <span class="small">固定パターン</span>
+      </div>
+    </div>
+  
+    <div class="pattern-item">
+      <b>郵便番号</b>
+      <div class="code-like">/\b\d{3}-?\d{4}\b/g</div>
+      <div class="item-actions">
+        <span class="small">固定パターン</span>
+      </div>
+    </div>
+  
+    <div class="pattern-item">
+      <b>クレジットカード候補</b>
+      <div class="code-like">/\b(?:\d[ -]*?){13,16}\b/g</div>
+      <div class="item-actions">
+        <span class="small">固定パターン</span>
+      </div>
+    </div>
+  
+    <div class="pattern-item">
+      <b>マイナンバー候補</b>
+      <div class="code-like">/\b\d{12}\b/g</div>
+      <div class="item-actions">
+        <span class="small">固定パターン</span>
+      </div>
+    </div>
+  </div>
 
   </div>
 
@@ -236,23 +424,14 @@
     編集して保存できます。
   </div>
 
-  <div id="repairStatus" class="small" style="margin-top:8px;">
-    状態：待機中
+  <div id="repairStatus" class="small" style="margin-top:8px;">状態：AutoSave OFF</div>
+
+  <div id="cursorStatus" class="small" style="margin-top:6px;">Ln 1 / Col 1</div>
+
+  <div id="repairPreview" class="code-preview" style="display:none;">
   </div>
 
-  <div id="cursorStatus" class="small" style="margin-top:6px;">
-    Ln 1 / Col 1
-  </div>
-
-  <div
-    id="repairPreview"
-    class="code-preview"
-    style="display:none;">
-  </div>
-
-  <div
-    id="functionViewer"
-    style="display:none;">
+  <div id="functionViewer" style="display:none;">
   </div>
 
   <label for="repairEditor">
@@ -261,27 +440,227 @@
 
   <div class="repair-editor-wrap">
 
-    <div id="lineNumbers">1</div>
+    <div id="lineNumbers">
+<div class="line-number active" onmousedown="startRepairLinePress(1, event)" onmouseup="endRepairLinePress(1, event)" onmouseleave="cancelRepairLinePress()" ontouchstart="startRepairLinePress(1, event)" ontouchend="endRepairLinePress(1, event)" ontouchcancel="cancelRepairLinePress()">
+1
+</div>
+</div>
 
-    <textarea
-      id="repairEditor"
-      rows="20"
-      placeholder="ここにHTML全文が表示されます"
-      style="width:100%; max-width:100%;"></textarea>
+    <textarea id="repairEditor" rows="20" placeholder="ここにHTML全文が表示されます" style="width:100%; max-width:100%;"></textarea>
 
   </div>
 
-  <div
-    id="functionListBox"
-    class="diagnose-box"
-    style="display:none;">
+  <div id="functionListBox" class="diagnose-box" style="display:none;">
   </div>
 
 </div> <!-- repairPage -->
 
-<button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">⚙</button>
+<button id="toolsBtn" onclick="toggleToolsMenu()" class="btn-secondary">×</button>
 
-<div id="floatPanel" style="display: none; right: 18px; bottom: 40px;"></div>
+<div id="floatPanel" style="display: block; right: 18px; bottom: 40px;"><div class="float-panel-header">
+
+      <span class="float-panel-title">
+        通常ツール
+      </span>
+
+      <button onclick="moveFloatPanelCorner('tl')">
+      ↖
+      </button>
+
+      <button onclick="moveFloatPanelCorner('tr')">
+      ↗
+      </button>
+
+      <button onclick="moveFloatPanelCorner('bl')">
+      ↙
+      </button>
+
+      <button onclick="moveFloatPanelCorner('br')">
+      ↘
+      </button>
+
+      <button onclick="resetFloatPanelPosition()">
+      □
+      </button>
+
+      <button onclick="backFloatPanel()">
+      ◀
+      </button>
+
+      <button onmousedown="event.preventDefault()" onclick="closeFloatPanelKeepEditorSelection()">
+      ×
+      </button>
+
+    </div>
+
+<div class="small">💚 診断・確認</div>
+
+<button class="float-list-btn" onclick="showMobileConsole()">
+📱 Console
+</button>
+
+<button class="float-list-btn" onclick="showHtmlHealth()">
+💚 HTML HEALTH
+</button>
+
+<button class="float-list-btn" onclick="diagnoseHtml()">
+🩺 HTML簡易診断
+</button>
+
+<button class="float-list-btn" onclick="analyzeProjectJsDependency()">
+🧭 JS読込診断
+</button>
+
+<button class="float-list-btn" onclick="showFunctionRelationMap()">
+🌳 関数関連図
+</button>
+
+<button class="float-list-btn" onclick="previewRepairHtml()">
+🎨 色分けプレビュー
+</button>
+
+<hr>
+
+<div class="small">💾 保存・バックアップ</div>
+
+<button class="float-list-btn" onclick="saveProjectPackage()">
+📦 プロジェクトZIP保存
+</button>
+
+<button class="float-list-btn" onclick="backupProgram()">
+💾 結合HTMLバックアップ
+</button>
+
+<button class="float-list-btn" onclick="saveProgramHtml()">
+💾 本体HTML保存
+</button>
+
+<button class="float-list-btn" onclick="showBackupHistory()">
+📚 バックアップ履歴
+</button>
+
+<button class="float-list-btn" onclick="restoreProgramBackup()">
+♻ 設定復元
+</button>
+
+<button class="float-list-btn" onclick="compareBackupSummary()">
+📊 バックアップ差分
+</button>
+
+<hr>
+
+<div class="small">🧩 設定・管理</div>
+
+<button class="float-list-btn" onclick="toggleTemplateManager()">
+🧩 テンプレ管理
+</button>
+
+<button class="float-list-btn" onclick="toggleDangerManager()">
+⚠ 危険ワード管理
+</button>
+
+<button class="float-list-btn" onclick="togglePatternManager()">
+🚫 NGパターン管理
+</button>
+
+<button class="float-list-btn" onclick="toggleAiPresetManager()">
+🤖 AIプリセット管理
+</button>
+
+<hr>
+
+<div class="small">🛠 通常モード支援</div>
+
+<button class="float-list-btn" onclick="reviewPrompt()">
+🛠 Promptレビュー
+</button>
+
+<button class="float-list-btn" onclick="testPromptObject()">
+🧩 内部JSONテスト
+</button>
+
+<button class="float-list-btn" onclick="testJsonFormat()">
+🧪 JSONテスト
+</button>
+
+<button class="float-list-btn" onclick="formatJsonOutput()">
+📦 JSON整形
+</button>
+
+<button class="float-list-btn" onclick="recheckOutput()">
+🔍 再チェック
+</button>
+
+<hr>
+
+<div class="small">📤 インポート・エクスポート</div>
+
+<button class="float-list-btn" onclick="exportTemplates()">
+📤 テンプレ保存
+</button>
+
+<button class="float-list-btn" onclick="importTemplates()">
+📥 テンプレ復元
+</button>
+
+<button class="float-list-btn" onclick="exportAiPresets()">
+🤖 AI設定バックアップ
+</button>
+
+<button class="float-list-btn" onclick="importAiPresets()">
+🤖 AI設定復元
+</button>
+
+<hr>
+
+<div class="small">📚 開発管理</div>
+
+<button class="float-list-btn" onclick="renderTodoList()">
+☑ 開発TODO
+</button>
+
+<button class="float-list-btn" onclick="renderDevLogList()">
+📚 開発履歴
+</button>
+
+<button class="float-list-btn" onclick="renderDevelopmentRules()">
+📖 開発ルール
+</button>
+
+
+<button class="float-list-btn" onclick="executeProjectValidation()">
+🧭 Validation
+</button>
+
+<hr>
+
+<div class="small">🧹 その他</div>
+
+<button class="float-list-btn" onclick="showMemoBox()">
+📝 Memo
+</button>
+
+<button class="float-list-btn" onclick="generateModuleRulesFromLoadedScripts()">
+📄 Module Rule
+</button>
+
+<button class="float-list-btn" onclick="copyMemoTitleList()">
+📋タイトル一覧
+</button>
+
+<button class="float-list-btn" onclick="clearOutput()">
+🧹 出力クリア
+</button>
+
+<button class="float-list-btn" onclick="clearHistory()">
+🗑 履歴全削除
+</button>
+
+<button class="float-list-btn" onclick="reloadAppPage()">
+🔄 ページ更新
+</button>
+
+</div>
 
 </div> <!-- card -->
 
@@ -324,13 +703,12 @@
 ====================================== -->
 
 <script src="./05_repair_file.js?v=5.8.6"></script>
+<script src="./05_repair_zip_paste_manager.js?v=1.0.0"></script>
 <script src="./05_repair_function.js?v=5.8.6"></script>
 <script src="./05_repair_sort.js?v=5.8.6"></script>
 <script src="./05_repair_diff.js?v=5.8.6"></script>
 <script src="./05_repair_cleanup.js?v=5.8.6"></script>
 <script src="./05_repair.js?v=5.8.6"></script>
-<script src="./05_repair_zip_paste_manager.js?v=1.0.0"></script>
-
 
 <!-- =====================================
   SEARCH SYSTEM
@@ -447,19 +825,19 @@
 <script src="./13_auto_refactoring_transaction.js?v=1.2.5"></script>
 <script src="./13_auto_refactoring_controlled_application.js?v=1.0.7"></script>
 <script src="./13_auto_refactoring_validation.js?v=1.2.4"></script>
-<script src="./13_ai_development_workflow_core.js?v=2.0.1"></script>
-<script src="./13_ai_development_workflow_storage.js?v=2.0.1"></script>
-<script src="./13_ai_development_workflow_state.js?v=2.0.1"></script>
-<script src="./13_ai_development_workflow_planning.js?v=2.0.1"></script>
-<script src="./13_ai_development_workflow_adapter.js?v=2.0.1"></script>
-<script src="./13_ai_development_workflow_execution.js?v=2.0.1"></script>
-<script src="./13_ai_development_workflow_decision.js?v=2.0.1"></script>
-<script src="./13_ai_development_workflow_approval.js?v=2.0.1"></script>
-<script src="./13_ai_development_workflow_monitoring.js?v=2.0.1"></script>
-<script src="./13_ai_development_workflow_package.js?v=2.0.1"></script>
-<script src="./13_ai_development_workflow_completion.js?v=2.0.1"></script>
-<script src="./13_ai_development_workflow_integration.js?v=2.0.1"></script>
-<script src="./13_ai_development_workflow_validation.js?v=2.0.1"></script>
+<script src="./13_ai_development_workflow_core.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_storage.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_state.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_planning.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_adapter.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_execution.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_decision.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_approval.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_monitoring.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_package.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_completion.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_integration.js?v=2.0.0"></script>
+<script src="./13_ai_development_workflow_validation.js?v=2.0.0"></script>
 <script src="./13_project_report.js?v=6.0.3"></script>
 <script src="./13_project_handoff.js?v=6.0.2"></script>
 <script src="./13_function_relation_v3.js?v=6.0.2"></script>
@@ -484,5 +862,184 @@
 
 
 
-</body>
-</html>
+
+<div id="repairSearchQuickPanel" class="repair-search-quick-panel" style="display: none;">
+
+  <button id="repairSearchQuickToggle" class="repair-search-quick-toggle" onclick="toggleRepairSearchQuickPanel()">
+    ▶
+  </button>
+
+  <div class="macro-quick-title">
+    Macro
+  </div>
+
+  <div id="repairQuickMacroButtons">
+<button class="macro-quick-btn" onclick="showMacroList()">
+  <span class="macro-quick-icon">▶</span>
+  <span class="macro-quick-label">Macro</span>
+</button>
+</div>
+
+</div><button id="repairQuickFavoriteToggle" class="repair-quick-favorite-toggle" onclick="toggleRepairQuickFavoritePanel()" style="display: none;">◀</button><div id="repairQuickFavoritePanel" class="repair-quick-favorite-panel" style="display: none;">
+
+  <div class="repair-quick-favorite-title">
+    Quick
+  </div>
+
+  <div id="repairQuickFavoriteList" class="repair-quick-favorite-list">
+
+<button class="repair-quick-favorite-btn" title="HTML HEALTH" onclick="runRepairQuickFavoriteAction('showHtmlHealth')">
+
+  <span class="repair-quick-favorite-icon">
+    💚
+  </span>
+
+  <span class="repair-quick-favorite-label">
+    HTML HEALTH
+  </span>
+
+</button>
+
+
+
+<button class="repair-quick-favorite-btn" title="診断" onclick="runRepairQuickFavoriteAction('diagnoseRepairHtml')">
+
+  <span class="repair-quick-favorite-icon">
+    🩺
+  </span>
+
+  <span class="repair-quick-favorite-label">
+    診断
+  </span>
+
+</button>
+
+
+
+<button class="repair-quick-favorite-btn" title="読込" onclick="runRepairQuickFavoriteAction('loadRepairHtml')">
+
+  <span class="repair-quick-favorite-icon">
+    📖
+  </span>
+
+  <span class="repair-quick-favorite-label">
+    読込
+  </span>
+
+</button>
+
+
+
+<button class="repair-quick-favorite-btn" title="保存" onclick="runRepairQuickFavoriteAction('saveRepairHtml')">
+
+  <span class="repair-quick-favorite-icon">
+    💾
+  </span>
+
+  <span class="repair-quick-favorite-label">
+    保存
+  </span>
+
+</button>
+
+
+
+<button class="repair-quick-favorite-btn" title="Undo" onclick="runRepairQuickFavoriteAction('undoRepairEdit')">
+
+  <span class="repair-quick-favorite-icon">
+    ↩
+  </span>
+
+  <span class="repair-quick-favorite-label">
+    Undo
+  </span>
+
+</button>
+
+
+
+<button class="repair-quick-favorite-btn" title="Redo" onclick="runRepairQuickFavoriteAction('redoRepairEdit')">
+
+  <span class="repair-quick-favorite-icon">
+    ↪
+  </span>
+
+  <span class="repair-quick-favorite-label">
+    Redo
+  </span>
+
+</button>
+
+
+
+<button class="repair-quick-favorite-btn" title="全ファイル検索" onclick="runRepairQuickFavoriteAction('searchAllRepairFiles')">
+
+  <span class="repair-quick-favorite-icon">
+    📚
+  </span>
+
+  <span class="repair-quick-favorite-label">
+    全ファイル検索
+  </span>
+
+</button>
+
+
+
+<button class="repair-quick-favorite-btn" title="インデント" onclick="runRepairQuickFavoriteAction('indentRepairSelection')">
+
+  <span class="repair-quick-favorite-icon">
+    ➡
+  </span>
+
+  <span class="repair-quick-favorite-label">
+    インデント
+  </span>
+
+</button>
+
+
+
+<button class="repair-quick-favorite-btn" title="HTMLコピー" onclick="runRepairQuickFavoriteAction('copyRepairHtml')">
+
+  <span class="repair-quick-favorite-icon">
+    📋
+  </span>
+
+  <span class="repair-quick-favorite-label">
+    HTMLコピー
+  </span>
+
+</button>
+
+
+
+<button class="repair-quick-favorite-btn" title="AutoSave" onclick="runRepairQuickFavoriteAction('toggleRepairAutoSave')">
+
+  <span class="repair-quick-favorite-icon">
+    💾
+  </span>
+
+  <span class="repair-quick-favorite-label">
+    AutoSave
+  </span>
+
+</button>
+
+
+
+<button class="repair-quick-favorite-btn" title="検索" onclick="runRepairQuickFavoriteAction('toggleRepairSearchPopup')">
+
+  <span class="repair-quick-favorite-icon">
+    🔍
+  </span>
+
+  <span class="repair-quick-favorite-label">
+    検索
+  </span>
+
+</button>
+
+</div>
+
+</div></body></html>
