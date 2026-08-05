@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_ai_development_workflow_core.js
    IDE-160 AI Development Workflow
-   Version: 2.0.0
+   Version: 2.0.1
    Phase: Complete - Monitoring / Package / Completion / Integration / Release
    Design Freeze: 2026-08-04
    ============================================================ */
@@ -10,7 +10,7 @@
 
   const COMPONENT_ID = "IDE-160";
   const COMPONENT_NAME = "AI Development Workflow";
-  const VERSION = "2.0.0";
+  const VERSION = "2.0.1";
   const SCHEMA_VERSION = 1;
   const ARCHITECTURE_VERSION = "1.0";
   const DESIGN_FREEZE_VERSION = "1.0";
@@ -570,6 +570,9 @@
     };
     const active = state.activeWorkflowId ? state.workflows.get(state.activeWorkflowId) : null;
     const validation = state.lastValidation;
+    const moduleNames = Object.keys(moduleStatus);
+    const readyModuleCount = moduleNames.filter(function filterReadyModule(name) { return moduleStatus[name] === true; }).length;
+    const implementationProgress = moduleNames.length ? Math.round(readyModuleCount / moduleNames.length * 100) : 0;
     return {
       id: "IDE-160-STATUS",
       componentId: COMPONENT_ID,
@@ -584,6 +587,7 @@
       ready: Boolean(state.initialized && moduleStatus.core && moduleStatus.storage && moduleStatus.state && moduleStatus.planning && moduleStatus.adapter && moduleStatus.execution && moduleStatus.decision && moduleStatus.approval && moduleStatus.monitoring && moduleStatus.package && moduleStatus.completion && moduleStatus.integration && moduleStatus.validation && !state.lastError),
       available: true,
       initialized: state.initialized === true,
+      progress: implementationProgress,
       modules: moduleStatus,
       definitionCount: state.definitions.size,
       workflowCount: state.workflows.size,
