@@ -14,7 +14,7 @@
    - 削除候補の自動削除
 =============================== */
 
-const ZIP_DIFF_MANAGER_VERSION = "1.0.0";
+const ZIP_DIFF_MANAGER_VERSION = "1.0.1";
 const ZIP_DIFF_MANAGER_COMPONENT_ID =
   "IDE-165-PHASE-1";
 const ZIP_DIFF_MANAGER_MAX_ZIP_SIZE =
@@ -43,7 +43,9 @@ const zipDiffManagerState = {
     "基準ZIPと更新ZIPを選択してください",
   progressCurrent: 0,
   progressTotal: 0,
-  lastGenerated: null
+  lastGenerated: null,
+  lastGeneratedBlob: null,
+  lastGeneratedUrl: ""
 };
 
 function getZipDiffManagerOverlay() {
@@ -138,6 +140,24 @@ function buildZipDiffManagerHtml() {
         type="button"
         onclick="generateZipDiffPackage()">
         💾 差分ZIP生成
+      </button>
+
+      <a
+        id="zipDiffReadyDownloadLink"
+        class="btn-secondary"
+        href="#"
+        download
+        style="display:none;align-items:center;justify-content:center;text-decoration:none;color:#fff;padding:8px 10px;border-radius:6px;min-height:38px;font-size:12px;box-sizing:border-box;">
+        ⬇ 生成済みZIPを保存
+      </a>
+
+      <button
+        id="zipDiffShareButton"
+        type="button"
+        class="btn-secondary"
+        onclick="shareZipDiffPackage()"
+        style="display:none;">
+        📤 共有・保存
       </button>
     </div>
 
@@ -428,6 +448,7 @@ async function loadZipDiffArchive(
         collected.entries;
     }
 
+    releaseZipDiffDownload();
     state.results = [];
     state.selectedPaths.clear();
     state.compared = false;
@@ -693,6 +714,7 @@ async function compareZipDiffArchives() {
   }
 
   state.busy = true;
+  releaseZipDiffDownload();
   state.results = [];
   state.selectedPaths.clear();
   state.compared = false;
@@ -1095,6 +1117,48 @@ function renderZipDiffManager() {
       !state.selectedPaths.size;
   }
 
+  const readyDownloadLink =
+    document.getElementById(
+      "zipDiffReadyDownloadLink"
+    );
+
+  if (readyDownloadLink) {
+    const downloadReady =
+      Boolean(
+        state.lastGenerated &&
+        state.lastGeneratedUrl
+      );
+
+    readyDownloadLink.style.display =
+      downloadReady
+        ? "inline-flex"
+        : "none";
+
+    readyDownloadLink.href =
+      downloadReady
+        ? state.lastGeneratedUrl
+        : "#";
+
+    readyDownloadLink.download =
+      downloadReady
+        ? state.lastGenerated.fileName
+        : "";
+  }
+
+  const shareButton =
+    document.getElementById(
+      "zipDiffShareButton"
+    );
+
+  if (shareButton) {
+    shareButton.style.display =
+      state.lastGeneratedBlob &&
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function"
+        ? "inline-flex"
+        : "none";
+  }
+
   const statusFilter =
     document.getElementById(
       "zipDiffStatusFilter"
@@ -1428,46 +1492,56 @@ async function generateZipDiffPackage() {
       "ZIP圧縮中";
     renderZipDiffManager();
 
-    const blob =
+    const zipBytes =
       await outputZip.generateAsync({
-        type: "blob",
+        type: "uint8array",
         compression: "DEFLATE",
         compressionOptions: {
           level: 6
         }
       });
 
+    const blob =
+      new Blob(
+        [zipBytes],
+        {
+          type: "application/zip"
+        }
+      );
+
     const fileName =
       buildZipDiffDownloadName(
         state.currentFile.name
       );
 
-    downloadZipDiffBlob(
+    prepareZipDiffDownload(
       blob,
-      fileName
+      fileName,
+      includedFiles.length,
+      manifest
     );
 
-    state.lastGenerated = {
-      fileName,
-      size: blob.size,
-      includedCount:
-        includedFiles.length,
-      generatedAt:
-        manifest.generatedAt,
-      manifest
-    };
+    renderZipDiffManager();
+
+    const autoDownloadStarted =
+      triggerZipDiffAutoDownload();
 
     state.statusText =
       "差分ZIP生成完了: " +
       includedFiles.length +
       "ファイル / " +
-      formatZipDiffBytes(blob.size);
+      formatZipDiffBytes(blob.size) +
+      (autoDownloadStarted
+        ? "。保存が始まらない場合は「生成済みZIPを保存」を押してください"
+        : "。「生成済みZIPを保存」を押してください");
 
     return {
       passed: true,
       fileName,
       blob,
-      manifest
+      manifest,
+      autoDownloadStarted,
+      manualDownloadReady: true
     };
   } catch (error) {
     console.error(
@@ -1658,26 +1732,196 @@ function buildZipDiffDownloadName(
   );
 }
 
-function downloadZipDiffBlob(
+function releaseZipDiffDownload() {
+  const state =
+    zipDiffManagerState;
+
+  if (state.lastGeneratedUrl) {
+    try {
+      URL.revokeObjectURL(
+        state.lastGeneratedUrl
+      );
+    } catch (error) {
+      console.warn(
+        "IDE-165 Blob URL解放失敗",
+        error
+      );
+    }
+  }
+
+  state.lastGeneratedBlob = null;
+  state.lastGeneratedUrl = "";
+}
+
+function prepareZipDiffDownload(
   blob,
-  fileName
+  fileName,
+  includedCount,
+  manifest
 ) {
+  releaseZipDiffDownload();
+
   const url =
     URL.createObjectURL(blob);
-  const anchor =
-    document.createElement("a");
 
-  anchor.href = url;
-  anchor.download = fileName;
-  anchor.style.display = "none";
+  zipDiffManagerState.lastGeneratedBlob =
+    blob;
+  zipDiffManagerState.lastGeneratedUrl =
+    url;
+  zipDiffManagerState.lastGenerated = {
+    fileName,
+    size: blob.size,
+    includedCount,
+    generatedAt:
+      manifest.generatedAt,
+    manifest
+  };
 
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
+  return url;
+}
 
-  setTimeout(() => {
-    URL.revokeObjectURL(url);
-  }, 1000);
+function triggerZipDiffAutoDownload() {
+  const state =
+    zipDiffManagerState;
+
+  if (
+    !state.lastGenerated ||
+    !state.lastGeneratedUrl
+  ) {
+    return false;
+  }
+
+  try {
+    const anchor =
+      document.createElement("a");
+
+    anchor.href =
+      state.lastGeneratedUrl;
+    anchor.download =
+      state.lastGenerated.fileName;
+    anchor.style.display = "none";
+
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+
+    return true;
+  } catch (error) {
+    console.warn(
+      "IDE-165 自動ダウンロード開始失敗",
+      error
+    );
+    return false;
+  }
+}
+
+function retryZipDiffDownload() {
+  const state =
+    zipDiffManagerState;
+
+  if (
+    !state.lastGenerated ||
+    !state.lastGeneratedUrl
+  ) {
+    state.statusText =
+      "保存可能な差分ZIPがありません";
+    renderZipDiffManager();
+    return false;
+  }
+
+  const link =
+    document.getElementById(
+      "zipDiffReadyDownloadLink"
+    );
+
+  if (link) {
+    link.href =
+      state.lastGeneratedUrl;
+    link.download =
+      state.lastGenerated.fileName;
+  }
+
+  state.statusText =
+    "生成済みZIPを保存します";
+  renderZipDiffManager();
+  return true;
+}
+
+async function shareZipDiffPackage() {
+  const state =
+    zipDiffManagerState;
+
+  if (
+    !state.lastGenerated ||
+    !state.lastGeneratedBlob
+  ) {
+    state.statusText =
+      "共有可能な差分ZIPがありません";
+    renderZipDiffManager();
+    return false;
+  }
+
+  if (
+    typeof navigator === "undefined" ||
+    typeof navigator.share !== "function"
+  ) {
+    state.statusText =
+      "このブラウザは共有保存に対応していません";
+    renderZipDiffManager();
+    return false;
+  }
+
+  try {
+    const file =
+      new File(
+        [state.lastGeneratedBlob],
+        state.lastGenerated.fileName,
+        {
+          type: "application/zip"
+        }
+      );
+
+    if (
+      typeof navigator.canShare === "function" &&
+      !navigator.canShare({ files: [file] })
+    ) {
+      state.statusText =
+        "この端末ではZIPファイルを共有できません";
+      renderZipDiffManager();
+      return false;
+    }
+
+    await navigator.share({
+      files: [file],
+      title: state.lastGenerated.fileName
+    });
+
+    state.statusText =
+      "差分ZIPを共有しました";
+    renderZipDiffManager();
+    return true;
+  } catch (error) {
+    if (
+      error &&
+      error.name === "AbortError"
+    ) {
+      state.statusText =
+        "共有をキャンセルしました";
+    } else {
+      console.warn(
+        "IDE-165 共有保存失敗",
+        error
+      );
+      state.statusText =
+        "共有保存失敗: " +
+        (error && error.message
+          ? error.message
+          : String(error));
+    }
+
+    renderZipDiffManager();
+    return false;
+  }
 }
 
 function formatZipDiffBytes(value) {
@@ -1765,6 +2009,14 @@ function validateZipDiffManager() {
         "function"
     },
     {
+      name: "Android manual download fallback",
+      passed:
+        typeof prepareZipDiffDownload ===
+          "function" &&
+        typeof triggerZipDiffAutoDownload ===
+          "function"
+    },
+    {
       name: "Automatic delete disabled",
       passed: true
     },
@@ -1821,6 +2073,10 @@ window.filterZipDiffFiles =
   filterZipDiffFiles;
 window.generateZipDiffPackage =
   generateZipDiffPackage;
+window.retryZipDiffDownload =
+  retryZipDiffDownload;
+window.shareZipDiffPackage =
+  shareZipDiffPackage;
 window.getZipDiffManagerStatus =
   getZipDiffManagerStatus;
 window.validateZipDiffManager =
