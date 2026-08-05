@@ -549,14 +549,6 @@ function showMemoBox() {
 ＋新規
 </button>
 
-<button onclick="selectAllMemoBoxes()">
-☑全選択
-</button>
-
-<button onclick="clearMemoSelection()">
-☐選択クリア
-</button>
-
 <button onclick="saveMemoBoxes()">
 💾保存
 </button>
@@ -3161,6 +3153,10 @@ function showMemoBox() {
   openFloatPanel("MEMO BOX", `
 <div class="memo-actions">
 <button onclick="openMemoEditor()">＋新規</button>
+
+<button onclick="selectAllMemoBoxes()">☑全選択</button>
+
+<button onclick="clearMemoSelection()">☐選択クリア</button>
 <button onclick="saveMemoBoxes()">💾保存</button>
 <button onclick="selectAllMemoBoxes()">☑All</button>
 <button onclick="clearMemoSelection()">☐Clear</button>
