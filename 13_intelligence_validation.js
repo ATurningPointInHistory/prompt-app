@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_intelligence_validation.js
    IDE-170 Intelligence Platform
-   Version: 1.1.0
-   Phase: 2 Source Intake and Canonical Model - Independent Validation Gate
+   Version: 1.2.0
+   Phase: 3 Repository Snapshot - Independent Validation Gate
    ============================================================ */
 (function (global) {
   "use strict";
@@ -15,7 +15,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.1.0";
+  const VERSION = "1.2.0";
   const VALIDATION_CAPABILITY_ID = "IDE-170-VALIDATION";
 
   function buildCheck(name, passed, detail, group, severity) {
@@ -66,16 +66,17 @@
       type: "Validation",
       status: "Active",
       owner: "IDE-170",
-      description: "Validates Phase 1 Foundation and Phase 2 Source Intake/Canonical Model independently from future Insight output.",
+      description: "Validates Phase 1, Phase 2 and Phase 3 Repository Snapshot independently from future Evidence Graph output.",
       dependencies: [
         { capabilityId: "IDE-170-CORE", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-SCHEMA-REGISTRY", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-SOURCE-ADAPTER-FRAMEWORK", minimumVersion: "1.0.0", optional: false },
-        { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: "1.0.0", optional: false }
+        { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: "1.2.0", optional: false },
+        { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: "1.2.0", optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-VALIDATION-RESULT"],
-      provides: ["Core Validation", "Source Intake Validation", "Canonical Model Validation", "Release Gate", "Regression Validation"],
+      provides: ["Core Validation", "Source Intake Validation", "Canonical Model Validation", "Repository Snapshot Validation", "Snapshot Chain Validation", "Release Gate", "Regression Validation"],
       source: "built-in"
     });
   }
@@ -90,7 +91,8 @@
       sessionIds: [],
       adapterIds: [],
       intakeIds: [],
-      snapshotIds: []
+      snapshotIds: [],
+      repositorySnapshotIds: []
     };
 
     function check(name, passed, detail, group, severity) {
@@ -106,6 +108,11 @@
       validationArtifacts.capabilityIds.forEach(function removeCapability(capabilityId) {
         if (typeof internal.removeCapabilityForValidation === "function") {
           internal.removeCapabilityForValidation(capabilityId);
+        }
+      });
+      validationArtifacts.repositorySnapshotIds.forEach(function removeRepositorySnapshot(snapshotId) {
+        if (typeof internal.removeRepositorySnapshotForValidation === "function") {
+          internal.removeRepositorySnapshotForValidation(snapshotId);
         }
       });
       validationArtifacts.snapshotIds.forEach(function removeSnapshot(snapshotId) {
@@ -156,7 +163,7 @@
 
       const dependencyStatus = namespace.getDependencyStatus();
       check(
-        "Required Phase 2 modules are loaded",
+        "Required Phase 3 modules are loaded",
         dependencyStatus.requiredReady === true,
         JSON.stringify(dependencyStatus.required),
         "Foundation"
@@ -196,12 +203,19 @@
           "buildCanonicalSnapshot",
           "getCanonicalSnapshot",
           "validateCanonicalSnapshot",
+          "buildRepositoryBaseline",
+          "buildRepositoryIncrement",
+          "getRepositorySnapshot",
+          "materializeRepositoryState",
+          "validateRepositorySnapshot",
+          "validateSnapshotChain",
+          "calculateSHA256",
           "runValidation",
           "getReleaseStatus"
         ].every(function hasApi(apiName) {
           return typeof namespace[apiName] === "function";
         }),
-        "Phase 1 and Phase 2 APIs",
+        "Phase 1, Phase 2 and Phase 3 APIs",
         "Foundation"
       );
 
@@ -563,19 +577,19 @@
         "Status and Release"
       );
       check(
-        "Phase 2 is started and implemented",
-        status.phase2Started === true && status.phase2Complete === true && status.progress === 25,
+        "Phase 3 is started and implemented",
+        status.phase3Started === true && status.phase3Complete === true && status.progress === 37.5,
         JSON.stringify({
-          phase2Started: status.phase2Started,
-          phase2Complete: status.phase2Complete,
+          phase3Started: status.phase3Started,
+          phase3Complete: status.phase3Complete,
           progress: status.progress
         }),
         "Status and Release"
       );
       check(
-        "Phase 3 remains not started",
-        status.phase3Started === false,
-        String(status.phase3Started),
+        "Phase 4 remains not started",
+        status.phase4Started === false,
+        String(status.phase4Started),
         "Status and Release"
       );
       check(
@@ -773,24 +787,18 @@
             name: "Validation Project",
             version: "1.0.0"
           },
-          metadata: {
-            fixture: true
-          },
-          quality: {
-            missingFields: [],
-            warnings: [],
-            errors: []
-          }
+          metadata: { fixture: true },
+          quality: { missingFields: [], warnings: [], errors: [] }
         },
         {
           recordType: "file",
           sourceType: "validation-source",
-          sourceId: "src/validation.js",
+          sourceId: "src/unchanged.js",
           sourceVersion: "1.0.0",
           identity: {
-            sourceId: "src/validation.js",
-            name: "validation.js",
-            qualifiedName: "src/validation.js",
+            sourceId: "src/unchanged.js",
+            name: "unchanged.js",
+            qualifiedName: "src/unchanged.js",
             aliases: []
           },
           classification: {
@@ -800,19 +808,65 @@
             lifecycle: "Active"
           },
           payload: {
-            path: "src/validation.js",
-            fileName: "validation.js",
+            path: "src/unchanged.js",
+            fileName: "unchanged.js",
             fileType: "js",
-            content: "function validationFixture() { return true; }"
+            content: "function unchangedFixture() { return true; }"
           },
-          metadata: {
-            fixture: true
+          metadata: { fixture: true },
+          quality: { missingFields: [], warnings: [], errors: [] }
+        },
+        {
+          recordType: "file",
+          sourceType: "validation-source",
+          sourceId: "src/modified.js",
+          sourceVersion: "1.0.0",
+          identity: {
+            sourceId: "src/modified.js",
+            name: "modified.js",
+            qualifiedName: "src/modified.js",
+            aliases: []
           },
-          quality: {
-            missingFields: [],
-            warnings: [],
-            errors: []
-          }
+          classification: {
+            domain: "repository",
+            category: "file",
+            subtype: "js",
+            lifecycle: "Active"
+          },
+          payload: {
+            path: "src/modified.js",
+            fileName: "modified.js",
+            fileType: "js",
+            content: "function modifiedFixture() { return 1; }"
+          },
+          metadata: { fixture: true },
+          quality: { missingFields: [], warnings: [], errors: [] }
+        },
+        {
+          recordType: "file",
+          sourceType: "validation-source",
+          sourceId: "src/rename-old.js",
+          sourceVersion: "1.0.0",
+          identity: {
+            sourceId: "src/rename-old.js",
+            name: "rename-old.js",
+            qualifiedName: "src/rename-old.js",
+            aliases: []
+          },
+          classification: {
+            domain: "repository",
+            category: "file",
+            subtype: "js",
+            lifecycle: "Active"
+          },
+          payload: {
+            path: "src/rename-old.js",
+            fileName: "rename-old.js",
+            fileType: "js",
+            content: "function renameFixture() { return 'same'; }"
+          },
+          metadata: { fixture: true },
+          quality: { missingFields: [], warnings: [], errors: [] }
         }
       ];
       const sourceFixtureBefore = JSON.stringify(sourceFixture);
@@ -1185,6 +1239,352 @@
         "Source Governance"
       );
 
+      const repositorySnapshotModule = namespace.modules.repositorySnapshot;
+      check(
+        "Repository Snapshot module is loaded",
+        Boolean(repositorySnapshotModule && repositorySnapshotModule.status === "Ready"),
+        JSON.stringify(repositorySnapshotModule),
+        "Phase 3 Foundation"
+      );
+      check(
+        "Repository Snapshot Capability is governed",
+        Boolean(namespace.getCapability("IDE-170-REPOSITORY-SNAPSHOT")),
+        "IDE-170-REPOSITORY-SNAPSHOT",
+        "Phase 3 Foundation"
+      );
+      const repositorySnapshotDependencies = namespace.checkCapabilityDependencies(
+        "IDE-170-REPOSITORY-SNAPSHOT"
+      );
+      check(
+        "Repository Snapshot dependencies are ready",
+        repositorySnapshotDependencies.ready === true,
+        JSON.stringify(repositorySnapshotDependencies),
+        "Phase 3 Foundation"
+      );
+      const phase3SchemaIds = [
+        "IDE-170-SCHEMA-REPOSITORY-CHANGE",
+        "IDE-170-SCHEMA-REPOSITORY-SNAPSHOT"
+      ];
+      check(
+        "Phase 3 Schemas are registered",
+        phase3SchemaIds.every(function hasSchema(schemaId) {
+          return Boolean(namespace.getSchema(schemaId));
+        }),
+        phase3SchemaIds.join(", "),
+        "Phase 3 Schema"
+      );
+      check(
+        "SHA-256 implementation matches known vector",
+        namespace.calculateSHA256("abc") ===
+          "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+        namespace.calculateSHA256("abc"),
+        "Repository Hash"
+      );
+
+      const cancelledBaselineResult = sourceSession && snapshot
+        ? namespace.buildRepositoryBaseline(sourceSession.sessionId, {
+            canonicalSnapshotId: snapshot.snapshotId,
+            actor: "IDE-170 Validation",
+            cancelled: true
+          })
+        : { ok: true, code: "SETUP_FAILED" };
+      check(
+        "Repository Snapshot build can be cancelled",
+        cancelledBaselineResult.ok === false &&
+          cancelledBaselineResult.code === "REPOSITORY_BASELINE_CANCELLED" &&
+          cancelledBaselineResult.status === "Cancelled",
+        cancelledBaselineResult.code,
+        "Repository Performance"
+      );
+
+      const baselineResult = sourceSession && snapshot
+        ? namespace.buildRepositoryBaseline(sourceSession.sessionId, {
+            canonicalSnapshotId: snapshot.snapshotId,
+            actor: "IDE-170 Validation"
+          })
+        : { ok: false, code: "CANONICAL_SNAPSHOT_NOT_FOUND" };
+      const baseline = baselineResult.ok && baselineResult.data
+        ? baselineResult.data.snapshot
+        : null;
+      if (baseline) validationArtifacts.repositorySnapshotIds.push(baseline.snapshotId);
+      check(
+        "Repository Baseline can be built and frozen",
+        Boolean(baselineResult.ok && baseline && baseline.snapshotType === "baseline" && baseline.status === "Frozen"),
+        baselineResult.code,
+        "Repository Baseline"
+      );
+      check(
+        "Repository Baseline preserves complete current state",
+        Boolean(baseline && baseline.summary.recordCount === sourceFixture.length && baseline.summary.fileCount === 3),
+        baseline && JSON.stringify(baseline.summary),
+        "Repository Baseline"
+      );
+      check(
+        "Repository Baseline File records use SHA-256 content Hash",
+        Boolean(baseline && baseline.state.files.every(function hashed(file) {
+          return typeof file.hashes.contentHash === "string" && /^[a-f0-9]{64}$/.test(file.hashes.contentHash);
+        })),
+        baseline && baseline.state.files.length,
+        "Repository Hash"
+      );
+      const baselineValidation = baseline
+        ? namespace.validateRepositorySnapshot(baseline.snapshotId)
+        : { valid: false, passed: 0, total: 0 };
+      check(
+        "Repository Baseline passes independent Validation",
+        baselineValidation.valid === true,
+        "passed=" + baselineValidation.passed + "/" + baselineValidation.total,
+        "Repository Baseline"
+      );
+      if (baseline) {
+        const baselineCopy = namespace.getRepositorySnapshot(baseline.snapshotId);
+        baselineCopy.state.files[0].identity.name = "MUTATED";
+        const protectedBaseline = namespace.getRepositorySnapshot(baseline.snapshotId);
+        check(
+          "Frozen Repository Baseline is protected from external mutation",
+          protectedBaseline.state.files[0].identity.name !== "MUTATED",
+          protectedBaseline.state.files[0].identity.name,
+          "Repository Baseline"
+        );
+      } else {
+        check(
+          "Frozen Repository Baseline is protected from external mutation",
+          false,
+          "Baseline not created",
+          "Repository Baseline"
+        );
+      }
+
+      function phase3FileRecord(path, content, sourceVersion) {
+        const fileName = path.split("/").pop();
+        return {
+          recordType: "file",
+          sourceType: "validation-source",
+          sourceId: path,
+          sourceVersion: internal.text(sourceVersion, "1.1.0"),
+          identity: {
+            sourceId: path,
+            name: fileName,
+            qualifiedName: path,
+            aliases: []
+          },
+          classification: {
+            domain: "repository",
+            category: "file",
+            subtype: "js",
+            lifecycle: "Active"
+          },
+          payload: {
+            path: path,
+            fileName: fileName,
+            fileType: "js",
+            content: content
+          },
+          metadata: { fixture: true },
+          quality: { missingFields: [], warnings: [], errors: [] }
+        };
+      }
+
+      const incrementAdapterId = "IDE-170-ADAPTER-VALIDATION-INCREMENT";
+      const incrementFixture = [
+        {
+          recordType: "project",
+          sourceType: "validation-source",
+          sourceId: "project:validation",
+          sourceVersion: "1.1.0",
+          identity: {
+            sourceId: "project:validation",
+            name: "Validation Project",
+            qualifiedName: "Validation Project",
+            aliases: []
+          },
+          classification: {
+            domain: "repository",
+            category: "project",
+            subtype: "test",
+            lifecycle: "Active"
+          },
+          payload: { name: "Validation Project", version: "1.1.0" },
+          metadata: { fixture: true },
+          quality: { missingFields: [], warnings: [], errors: [] }
+        },
+        phase3FileRecord("src/unchanged.js", "function unchangedFixture() { return true; }", "1.0.0"),
+        phase3FileRecord("src/modified.js", "function modifiedFixture() { return 2; }"),
+        phase3FileRecord("src/rename-new.js", "function renameFixture() { return 'same'; }"),
+        phase3FileRecord("src/added.js", "function addedFixture() { return true; }")
+      ];
+      const incrementAdapterRegistration = namespace.registerSourceAdapter({
+        adapterId: incrementAdapterId,
+        capabilityId: incrementAdapterId,
+        name: "Repository Increment Validation Adapter",
+        version: VERSION,
+        status: "Experimental",
+        sourceType: "validation-source",
+        recordTypes: ["project", "file"],
+        domains: ["repository"],
+        owner: "IDE-170 Validation",
+        isAvailable: function incrementSourceAvailable() {
+          return { available: true, status: "Ready" };
+        },
+        read: function readIncrementSource() {
+          return {
+            status: "Ready",
+            sourceVersion: "1.1.0",
+            records: incrementFixture,
+            metadata: { fixture: true }
+          };
+        }
+      });
+      if (incrementAdapterRegistration.ok) {
+        validationArtifacts.adapterIds.push(incrementAdapterId);
+        validationArtifacts.capabilityIds.push(incrementAdapterId);
+      }
+      check(
+        "Incremental Source Adapter can be registered",
+        incrementAdapterRegistration.ok === true,
+        incrementAdapterRegistration.code,
+        "Repository Incremental"
+      );
+
+      const incrementIntakeResult = sourceSession
+        ? namespace.captureSources(sourceSession.sessionId, {
+            adapterIds: [incrementAdapterId],
+            requiredAdapterIds: [incrementAdapterId],
+            actor: "IDE-170 Validation"
+          })
+        : { ok: false, code: "SESSION_NOT_CREATED" };
+      const incrementIntake = incrementIntakeResult.ok && incrementIntakeResult.data
+        ? incrementIntakeResult.data.intake
+        : null;
+      if (incrementIntake) validationArtifacts.intakeIds.push(incrementIntake.intakeId);
+      const incrementCanonicalResult = sourceSession && incrementIntake
+        ? namespace.buildCanonicalSnapshot(sourceSession.sessionId, {
+            intakeId: incrementIntake.intakeId,
+            actor: "IDE-170 Validation"
+          })
+        : { ok: false, code: "INCREMENT_INTAKE_NOT_FOUND" };
+      const incrementCanonical = incrementCanonicalResult.ok && incrementCanonicalResult.data
+        ? incrementCanonicalResult.data.snapshot
+        : null;
+      if (incrementCanonical) validationArtifacts.snapshotIds.push(incrementCanonical.snapshotId);
+      check(
+        "Incremental Canonical Snapshot can be built",
+        Boolean(incrementCanonicalResult.ok && incrementCanonical && incrementCanonical.status === "Frozen"),
+        incrementCanonicalResult.code,
+        "Repository Incremental"
+      );
+
+      const incrementalResult = sourceSession && baseline && incrementCanonical
+        ? namespace.buildRepositoryIncrement(sourceSession.sessionId, baseline.snapshotId, {
+            canonicalSnapshotId: incrementCanonical.snapshotId,
+            actor: "IDE-170 Validation"
+          })
+        : { ok: false, code: "INCREMENT_SETUP_FAILED" };
+      const incremental = incrementalResult.ok && incrementalResult.data
+        ? incrementalResult.data.snapshot
+        : null;
+      if (incremental) validationArtifacts.repositorySnapshotIds.push(incremental.snapshotId);
+      check(
+        "Repository Incremental Snapshot can be built and frozen",
+        Boolean(incrementalResult.ok && incremental && incremental.snapshotType === "incremental" && incremental.status === "Frozen"),
+        incrementalResult.code,
+        "Repository Incremental"
+      );
+      check(
+        "Added, Modified, Removed and Unchanged are classified",
+        Boolean(incremental &&
+          incremental.summary.changeCounts.Added === 2 &&
+          incremental.summary.changeCounts.Modified === 2 &&
+          incremental.summary.changeCounts.Removed === 1 &&
+          incremental.summary.changeCounts.Unchanged === 1),
+        incremental && JSON.stringify(incremental.summary.changeCounts),
+        "Repository Change Detection"
+      );
+      const modifiedFileChange = incremental && incremental.changes.find(function findModified(change) {
+        return change.canonicalId === "file:src/modified.js";
+      });
+      check(
+        "File content and Metadata changes are separated",
+        Boolean(modifiedFileChange && modifiedFileChange.changeType === "Modified" &&
+          modifiedFileChange.contentChange === "Modified" &&
+          modifiedFileChange.metadataChange === "Modified"),
+        modifiedFileChange && JSON.stringify({
+          contentChange: modifiedFileChange.contentChange,
+          metadataChange: modifiedFileChange.metadataChange,
+          detectionMethod: modifiedFileChange.detectionMethod
+        }),
+        "Repository Change Detection"
+      );
+      check(
+        "Rename remains an Insight Candidate and is not promoted to Fact",
+        Boolean(incremental && incremental.renameCandidates.length === 1 &&
+          incremental.renameCandidates[0].layer === "Insight Candidate" &&
+          incremental.renameCandidates[0].factPromotionAllowed === false),
+        incremental && JSON.stringify(incremental.renameCandidates),
+        "Rename Governance"
+      );
+      const chainValidation = incremental
+        ? namespace.validateSnapshotChain(incremental.snapshotId)
+        : { valid: false, passed: 0, total: 0 };
+      check(
+        "Repository Snapshot Chain passes Validation",
+        chainValidation.valid === true,
+        "passed=" + chainValidation.passed + "/" + chainValidation.total,
+        "Snapshot Chain"
+      );
+      const materializedIncremental = incremental
+        ? namespace.materializeRepositoryState(incremental.snapshotId)
+        : null;
+      const materializedFileIds = materializedIncremental
+        ? materializedIncremental.files.map(function fileId(file) { return file.canonicalId; })
+        : [];
+      check(
+        "Incremental Chain materializes the current Repository state",
+        Boolean(materializedIncremental && materializedIncremental.files.length === 4 &&
+          materializedFileIds.includes("file:src/rename-new.js") &&
+          !materializedFileIds.includes("file:src/rename-old.js")),
+        JSON.stringify(materializedFileIds),
+        "Snapshot Chain"
+      );
+      const incrementalValidation = incremental
+        ? namespace.validateRepositorySnapshot(incremental.snapshotId)
+        : { valid: false, passed: 0, total: 0 };
+      check(
+        "Repository Incremental Snapshot passes independent Validation",
+        incrementalValidation.valid === true,
+        "passed=" + incrementalValidation.passed + "/" + incrementalValidation.total,
+        "Repository Incremental"
+      );
+      const missingParentIncrement = sourceSession && incrementCanonical
+        ? namespace.buildRepositoryIncrement(sourceSession.sessionId, "IDE-170-MISSING-PARENT", {
+            canonicalSnapshotId: incrementCanonical.snapshotId
+          })
+        : { ok: true, code: "SETUP_FAILED" };
+      check(
+        "Missing parent Snapshot is blocked",
+        missingParentIncrement.ok === false && missingParentIncrement.code === "PARENT_REPOSITORY_SNAPSHOT_NOT_READY",
+        missingParentIncrement.code,
+        "Snapshot Chain"
+      );
+      if (incremental) {
+        const tamperedSnapshot = internal.clone(incremental);
+        tamperedSnapshot.summary.recordCount += 1;
+        const tamperedValidation = namespace.validateRepositorySnapshot(tamperedSnapshot);
+        check(
+          "Frozen Repository Snapshot tampering is detected",
+          tamperedValidation.valid === false,
+          "failed=" + tamperedValidation.failed,
+          "Repository Integrity"
+        );
+      } else {
+        check(
+          "Frozen Repository Snapshot tampering is detected",
+          false,
+          "Incremental Snapshot not created",
+          "Repository Integrity"
+        );
+      }
+
       cleanupValidationArtifacts();
 
       const cleanedStatus = namespace.getStatus();
@@ -1217,6 +1617,14 @@
         "Temporary Intake and Snapshot removed",
         "Validation Isolation"
       );
+      check(
+        "Validation Repository Snapshots are removed",
+        validationArtifacts.repositorySnapshotIds.every(function repositorySnapshotRemoved(snapshotId) {
+          return namespace.getRepositorySnapshot(snapshotId) === null;
+        }),
+        "Temporary Baseline and Incremental Snapshots removed",
+        "Validation Isolation"
+      );
 
       const provisionalSummary = summarizeChecks(checks);
       const provisionalResult = {
@@ -1245,10 +1653,10 @@
       const result = {
         id: provisionalResult.id,
         componentId: namespace.componentId,
-        name: "IDE-170 Phase 2 Source Intake and Canonical Model Validation",
+        name: "IDE-170 Phase 3 Repository Snapshot Validation",
         version: VERSION,
         designFreezeVersion: namespace.designFreezeVersion,
-        mode: internal.text(settings.mode, "Phase 2 Source Intake and Canonical Model Integrated Validation"),
+        mode: internal.text(settings.mode, "Phase 3 Repository Snapshot Integrated Validation"),
         valid: summary.failed === 0 && summary.total > 0,
         passed: summary.passed,
         failed: summary.failed,
@@ -1259,10 +1667,11 @@
         checks: checks,
         warnings: internal.unique(warnings),
         phase2Gate: "Passed - Phase 1 Release Frozen",
-        phase3Gate: summary.failed === 0 && settings.androidRealDevicePassed === true
+        phase3Gate: "Passed - Phase 2 Release Frozen",
+        phase4Gate: summary.failed === 0 && settings.androidRealDevicePassed === true
           ? "Passed"
           : summary.failed === 0
-            ? "Blocked - Phase 2 Android Validation Pending"
+            ? "Blocked - Phase 3 Android Validation Pending"
             : "Blocked",
         androidRealDeviceValidation: {
           required: true,
@@ -1304,7 +1713,7 @@
       const result = {
         id: internal.nextId("IDE-170-VALIDATION"),
         componentId: namespace.componentId,
-        name: "IDE-170 Phase 2 Source Intake and Canonical Model Validation",
+        name: "IDE-170 Phase 3 Repository Snapshot Validation",
         version: VERSION,
         valid: false,
         passed: summary.passed,
@@ -1328,7 +1737,8 @@
           validatedAt: null
         },
         phase2Gate: "Passed - Phase 1 Release Frozen",
-        phase3Gate: "Blocked",
+        phase3Gate: "Passed - Phase 2 Release Frozen",
+        phase4Gate: "Blocked",
         executedAt: internal.nowIso()
       };
       state.lastValidation = internal.clone(result);
@@ -1374,6 +1784,8 @@
     regressionValidation: true,
     sourceIntakeValidation: true,
     canonicalModelValidation: true,
+    repositorySnapshotValidation: true,
+    snapshotChainValidation: true,
     loadedAt: internal.nowIso()
   };
 
