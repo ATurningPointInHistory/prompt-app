@@ -549,6 +549,14 @@ function showMemoBox() {
 ＋新規
 </button>
 
+<button onclick="selectAllMemoBoxes()">
+☑全選択
+</button>
+
+<button onclick="clearMemoSelection()">
+☐選択クリア
+</button>
+
 <button onclick="saveMemoBoxes()">
 💾保存
 </button>
