@@ -2019,3 +2019,288 @@ mark {
   margin: 6px 4px 8px 0;
 }
 
+
+/* ===============================
+   ZIP Paste Progress Manager
+=============================== */
+
+body.zip-paste-open {
+  overflow: hidden;
+}
+
+.zip-paste-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.58);
+}
+
+.zip-paste-dialog {
+  width: min(1180px, 100%);
+  height: min(88vh, 900px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.36);
+  padding: 12px;
+}
+
+.zip-paste-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.zip-paste-header h3 {
+  margin: 0 0 4px;
+}
+
+.zip-paste-close {
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  padding: 0;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.zip-paste-top-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.zip-paste-top-actions button {
+  min-height: 38px;
+  font-size: 12px;
+}
+
+.zip-paste-top-actions button.active {
+  outline: 2px solid currentColor;
+}
+
+.zip-paste-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zip-paste-progress-text {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+#zipPasteStatusText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.zip-paste-progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(127, 127, 127, 0.22);
+}
+
+.zip-paste-progress-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: currentColor;
+  transition: width 0.2s ease;
+}
+
+.zip-paste-workspace {
+  min-height: 0;
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(250px, 34%) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.zip-paste-sidebar,
+.zip-paste-preview-panel {
+  min-height: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.zip-paste-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+.zip-paste-sidebar input {
+  width: 100%;
+  margin: 0;
+}
+
+.zip-paste-file-list {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.zip-paste-file-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 8px;
+  align-items: center;
+  padding: 9px;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--text);
+}
+
+.zip-paste-file-item.selected {
+  outline: 2px solid currentColor;
+}
+
+.zip-paste-file-item.completed {
+  opacity: 0.7;
+}
+
+.zip-paste-file-status {
+  grid-row: 1 / span 2;
+  min-width: 52px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.zip-paste-file-path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.zip-paste-file-meta {
+  font-size: 10px;
+  opacity: 0.72;
+}
+
+.zip-paste-empty {
+  padding: 18px 10px;
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.zip-paste-preview-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+.zip-paste-selected-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.zip-paste-selected-path {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.zip-paste-selected-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.zip-paste-selected-actions button {
+  min-height: 36px;
+  font-size: 11px;
+}
+
+.zip-paste-preview {
+  min-height: 0;
+  flex: 1;
+  width: 100%;
+  resize: none;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre;
+  overflow: auto;
+}
+
+@media (max-width: 760px) {
+  .zip-paste-overlay {
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .zip-paste-dialog {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+    padding: 10px;
+  }
+
+  .zip-paste-top-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .zip-paste-progress-text {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  #zipPasteStatusText {
+    text-align: left;
+  }
+
+  .zip-paste-workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(150px, 37%) minmax(0, 1fr);
+  }
+
+  .zip-paste-selected-header {
+    flex-direction: column;
+  }
+
+  .zip-paste-selected-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
