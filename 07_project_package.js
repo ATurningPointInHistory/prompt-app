@@ -241,10 +241,29 @@ function validateCleanProjectIndexHtml(html) {
     "text/html"
   );
 
-  const loader =
-    doc.querySelector(
-      'script[src^="./00_script_loader.js"]'
+  const localScripts = [
+    ...doc.querySelectorAll("script[src]")
+  ]
+    .map(el =>
+      cleanProjectPackagePath(
+        el.getAttribute("src")
+      )
+    )
+    .filter(path =>
+      path &&
+      !/^(?:https?:)?\/\//i.test(path)
     );
+
+  const loaderBootstrap =
+    localScripts.includes(
+      "00_script_loader.js"
+    );
+
+  const staticBootstrap = Boolean(
+    localScripts[0] === "00_core.js" &&
+    localScripts[localScripts.length - 1] ===
+      "99_init.js"
+  );
 
   const runtimeOnly = [
     "repairSearchQuickPanel",
@@ -252,9 +271,30 @@ function validateCleanProjectIndexHtml(html) {
     "repairQuickFavoriteToggle"
   ].some(id => doc.getElementById(id));
 
+  const dirtyContainerIds = [
+    "commandBox",
+    "presetBox",
+    "templateList",
+    "dangerList",
+    "patternList",
+    "history",
+    "floatPanel"
+  ];
+
+  const dirtyContainer =
+    dirtyContainerIds.some(id => {
+      const element = doc.getElementById(id);
+
+      return Boolean(
+        element &&
+        element.children.length > 0
+      );
+    });
+
   return Boolean(
-    loader &&
-    !runtimeOnly
+    (loaderBootstrap || staticBootstrap) &&
+    !runtimeOnly &&
+    !dirtyContainer
   );
 }
 
@@ -338,10 +378,11 @@ function getProjectPackageReferences(html) {
     ));
 
   const manifestSource =
-    window.AI_PRO_SCRIPT_MANIFEST_SOURCE ||
-    "./00_script_manifest.js";
+    window.AI_PRO_SCRIPT_MANIFEST_SOURCE;
 
-  values.push(manifestSource);
+  if (manifestSource) {
+    values.push(manifestSource);
+  }
 
   if (
     Array.isArray(
