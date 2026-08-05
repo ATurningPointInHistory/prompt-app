@@ -1,13 +1,13 @@
 {
-  "version": "1.0.1",
+  "version": "1.1.0",
   "mode": "build-time-static-script-generation",
   "description": "ZIP保存時にindex.htmlの静的scriptブロックを生成する一覧。実行時Loaderでは使用しない。",
   "scripts": [
     "./00_core.js?v=5.8.6",
     "./01_task_manager.js?v=6.0.1",
-    "./01_bootstrap.js?v=5.8.6",
+    "./01_bootstrap.js?v=5.8.7",
     "./01_function_reference.js?v=5.8.6",
-    "./01_project_config.js?v=5.8.6",
+    "./01_project_config.js?v=5.8.7",
     "./01_project_manager.js?v=6.0.2",
     "./01_analyzer_common.js?v=6.0.1",
     "./01_memo_manager.js?v=7.0.1",
@@ -24,6 +24,7 @@
     "./05_repair_cleanup.js?v=5.8.6",
     "./05_repair.js?v=5.8.6",
     "./05_repair_zip_paste_manager.js?v=1.0.0",
+    "./05_repair_zip_diff_manager.js?v=1.0.0",
     "./06_search_core.js?v=6.1.0",
     "./06_search_ui.js?v=6.1.0",
     "./06_search_history.js?v=6.1.2",
@@ -122,5 +123,5 @@
     "./99_init.js?v=5.8.6"
   ],
   "updatedAt": "2026-08-05",
-  "change": "Added 05_repair_zip_paste_manager.js to static runtime order."
+  "change": "Added IDE-165 Phase 1 ZIP diff manager after ZIP paste manager."
 }
