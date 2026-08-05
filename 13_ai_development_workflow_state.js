@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_ai_development_workflow_state.js
    IDE-160 AI Development Workflow State / Failure / Recovery
-   Version: 1.4.0
-   Phase: 3 - Component Adapter / Workflow Execution Foundation
+   Version: 2.0.0
+   Phase: Complete - Monitoring / Package / Completion / Integration / Release
    ============================================================ */
 (function (global) {
   "use strict";
@@ -72,7 +72,9 @@
     recoveries: [],
     attempts: [],
     decisions: [],
-    approvals: []
+    approvals: [],
+    monitoring: [],
+    completions: []
   };
 
   const STATUS_TRANSITIONS = Object.freeze({
@@ -105,7 +107,7 @@
 
   function isTransitionAllowed(fromPhase, fromStatus, toPhase, toStatus) {
     if (!isKnownState(fromPhase, fromStatus) || !isKnownState(toPhase, toStatus)) return false;
-    if (fromPhase === "Completed") return false;
+    if (fromPhase === "Completed" && fromStatus === "Succeeded") return false;
 
     if (fromPhase === toPhase) {
       if (fromStatus === "Succeeded") return false;
@@ -136,6 +138,8 @@
       foundationRecordStore.attempts = Array.isArray(records.store.attempts) ? records.store.attempts.slice(-100) : [];
       foundationRecordStore.decisions = Array.isArray(records.store.decisions) ? records.store.decisions.slice(-50) : [];
       foundationRecordStore.approvals = Array.isArray(records.store.approvals) ? records.store.approvals.slice(-50) : [];
+      foundationRecordStore.monitoring = Array.isArray(records.store.monitoring) ? records.store.monitoring.slice(-100) : [];
+      foundationRecordStore.completions = Array.isArray(records.store.completions) ? records.store.completions.slice(-50) : [];
     }
   }
 
@@ -607,6 +611,9 @@
         foundationRecordStore.recoveries = [];
         foundationRecordStore.attempts = [];
         foundationRecordStore.decisions = [];
+        foundationRecordStore.approvals = [];
+        foundationRecordStore.monitoring = [];
+        foundationRecordStore.completions = [];
 
         check("Namespace available", Boolean(global.AIPromptOSIDE160), "window.AIPromptOSIDE160", "Core");
         check("Core module loaded", Boolean(namespace.modules.core), namespace.modules.core && namespace.modules.core.status, "Core");
@@ -740,6 +747,9 @@
         foundationRecordStore.recoveries = originalRecords.recoveries || [];
         foundationRecordStore.attempts = originalRecords.attempts || [];
         foundationRecordStore.decisions = originalRecords.decisions || [];
+        foundationRecordStore.approvals = originalRecords.approvals || [];
+        foundationRecordStore.monitoring = originalRecords.monitoring || [];
+        foundationRecordStore.completions = originalRecords.completions || [];
         state.lastValidation = originalValidation;
         state.lastPersistence = originalPersistence;
         state.lastError = originalError;
