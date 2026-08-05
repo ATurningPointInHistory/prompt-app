@@ -169,6 +169,18 @@ function getProjectModuleRules() {
       ]
     },
     {
+      file: "05_repair_zip_diff_manager.js",
+      priority: 96,
+      words: [
+        "zipdiff",
+        "difference",
+        "baseline",
+        "changed",
+        "deleted",
+        "deployment"
+      ]
+    },
+    {
       file: "06_search.js",
       priority: 95,
       words: [
@@ -401,6 +413,9 @@ function getCriticalFunctionNames() {
     "initRepairIde",
     "loadRepairHtml",
     "openZipPasteManager",
+    "openZipDiffManager",
+    "compareZipDiffArchives",
+    "generateZipDiffPackage",
     "copySelectedZipPasteFile",
     "saveRepairHtml",
     "showHtmlHealth",
@@ -423,6 +438,10 @@ function getProtectedFunctionNames() {
     "openZipPasteManager",
     "loadZipIntoPasteManager",
     "copySelectedZipPasteFile",
+    "openZipDiffManager",
+    "loadZipDiffArchive",
+    "compareZipDiffArchives",
+    "generateZipDiffPackage",
     "saveRepairHtml",
     "copyRepairHtml",
     "showHtmlHealth",
