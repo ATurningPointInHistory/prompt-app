@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_intelligence_platform_core.js
    IDE-170 Intelligence Platform
-   Version: 1.0.0
-   Phase: 1 Foundation
+   Version: 1.1.0
+   Phase: 2 Source Intake and Canonical Model
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
 (function (global) {
@@ -10,10 +10,11 @@
 
   const COMPONENT_ID = "IDE-170";
   const COMPONENT_NAME = "Intelligence Platform";
-  const VERSION = "1.0.0";
+  const VERSION = "1.1.0";
   const SCHEMA_VERSION = "1.0.0";
   const DESIGN_FREEZE_VERSION = "1.0.0";
-  const IMPLEMENTATION_PHASE = "Phase 1 Foundation";
+  const IMPLEMENTATION_PHASE = "Phase 2 Source Intake and Canonical Model";
+  const PHASE1_RELEASE_FROZEN = true;
   const MAX_SESSIONS = 100;
   const MAX_AUDIT_RECORDS = 1000;
 
@@ -47,6 +48,12 @@
         capabilities: new Map(),
         schemas: new Map(),
         sessions: new Map(),
+        sourceAdapters: new Map(),
+        sourceAdapterImplementations: new Map(),
+        sourceIntakes: new Map(),
+        canonicalSnapshots: new Map(),
+        latestSourceIntakeId: null,
+        latestCanonicalSnapshotId: null,
         audits: [],
         sequence: 0,
         initialized: false,
@@ -61,6 +68,17 @@
         },
         updatedAt: null
       };
+
+  if (!(state.capabilities instanceof Map)) state.capabilities = new Map();
+  if (!(state.schemas instanceof Map)) state.schemas = new Map();
+  if (!(state.sessions instanceof Map)) state.sessions = new Map();
+  if (!(state.sourceAdapters instanceof Map)) state.sourceAdapters = new Map();
+  if (!(state.sourceAdapterImplementations instanceof Map)) state.sourceAdapterImplementations = new Map();
+  if (!(state.sourceIntakes instanceof Map)) state.sourceIntakes = new Map();
+  if (!(state.canonicalSnapshots instanceof Map)) state.canonicalSnapshots = new Map();
+  if (!Array.isArray(state.audits)) state.audits = [];
+  if (!Object.prototype.hasOwnProperty.call(state, "latestSourceIntakeId")) state.latestSourceIntakeId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestCanonicalSnapshotId")) state.latestCanonicalSnapshotId = null;
 
   function nowIso() {
     return new Date().toISOString();
@@ -475,11 +493,57 @@
     }));
   }
 
+  function attachSessionSourceReference(sessionId, reference, options) {
+    const settings = isPlainObject(options) ? options : {};
+    const session = getSessionMutable(sessionId);
+    if (!session) {
+      return buildResult(false, "SESSION_NOT_FOUND", "Blocked", null, {
+        error: { message: "Session was not found.", category: "Input Failure" }
+      });
+    }
+    if (session.state === "Frozen" || session.frozen === true || Object.isFrozen(session)) {
+      return buildResult(false, "SESSION_FROZEN", "Blocked", {
+        sessionId: session.sessionId,
+        state: session.state
+      }, {
+        error: { message: "Frozen Session cannot be modified.", category: "Governance Failure" }
+      });
+    }
+    const normalized = isPlainObject(reference) ? clone(reference) : {};
+    const referenceId = text(
+      normalized.intakeId || normalized.snapshotId || normalized.referenceId,
+      ""
+    );
+    const duplicate = referenceId && session.sourceReferences.some(function findReference(item) {
+      return text(item && (item.intakeId || item.snapshotId || item.referenceId), "") === referenceId;
+    });
+    if (!duplicate) session.sourceReferences.push(normalized);
+    session.updatedAt = nowIso();
+    appendAudit({
+      action: duplicate ? "SESSION_SOURCE_REFERENCE_EXISTS" : "SESSION_SOURCE_REFERENCE_ATTACHED",
+      actor: text(settings.actor, "IDE-170"),
+      targetType: "Session",
+      targetId: session.sessionId,
+      sessionId: session.sessionId,
+      outcome: duplicate ? "Unchanged" : "Succeeded",
+      detail: normalized
+    });
+    touch();
+    return buildResult(true,
+      duplicate ? "SESSION_SOURCE_REFERENCE_EXISTS" : "SESSION_SOURCE_REFERENCE_ATTACHED",
+      session.state,
+      { session: getSession(session.sessionId), reference: normalized });
+  }
+
   function getDependencyStatus() {
     const moduleStatus = {
       core: Boolean(namespace.modules && namespace.modules.core),
       capabilityRegistry: Boolean(namespace.modules && namespace.modules.capabilityRegistry),
       schemaRegistry: Boolean(namespace.modules && namespace.modules.schemaRegistry),
+      sourceAdapterFramework: Boolean(namespace.modules && namespace.modules.sourceAdapterFramework),
+      repositorySourceAdapters: Boolean(namespace.modules && namespace.modules.repositorySourceAdapters),
+      platformSourceAdapters: Boolean(namespace.modules && namespace.modules.platformSourceAdapters),
+      canonicalModel: Boolean(namespace.modules && namespace.modules.canonicalModel),
       validation: Boolean(namespace.modules && namespace.modules.validation)
     };
     const requiredReady = Object.keys(moduleStatus).every(function allReady(key) {
@@ -520,12 +584,12 @@
         results.ideRegistry = global.registerIdeComponent({
           id: COMPONENT_ID,
           title: COMPONENT_NAME,
-          summary: "RepositoryとWorkflowをEvidence付きで理解するIntelligence Platform。Phase 1 Foundation。",
+          summary: "公式SourceをAdapter経由で取得し、Immutable Canonical Snapshotへ変換するIntelligence Platform。Phase 2。",
           icon: "🧠",
           version: VERSION,
-          status: "Phase 1",
+          status: "Phase 2",
           ready: state.initialized === true,
-          progress: 12.5,
+          progress: 25,
           health: state.lastValidation && Number(state.lastValidation.health) || 0,
           launcher: "",
           validator: "validateIntelligencePlatform",
@@ -585,12 +649,16 @@
       const dependencyStatus = getDependencyStatus();
       if (!dependencyStatus.required.capabilityRegistry ||
           !dependencyStatus.required.schemaRegistry ||
+          !dependencyStatus.required.sourceAdapterFramework ||
+          !dependencyStatus.required.repositorySourceAdapters ||
+          !dependencyStatus.required.platformSourceAdapters ||
+          !dependencyStatus.required.canonicalModel ||
           !dependencyStatus.required.validation) {
         state.initializing = false;
         return buildResult(false, "IDE170_DEPENDENCY_MISSING", "Blocked", {
           dependencies: dependencyStatus
         }, {
-          error: { message: "IDE-170 Phase 1 modules are not fully loaded.", category: "Dependency Failure" }
+          error: { message: "IDE-170 Phase 2 modules are not fully loaded.", category: "Dependency Failure" }
         });
       }
 
@@ -602,6 +670,26 @@
       if (namespace.api && typeof namespace.api.initializeSchemaRegistry === "function") {
         const schemaResult = namespace.api.initializeSchemaRegistry();
         if (!schemaResult.ok) throw new Error("Schema Registry initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeSourceAdapterFramework === "function") {
+        const sourceFrameworkResult = namespace.api.initializeSourceAdapterFramework();
+        if (!sourceFrameworkResult.ok) throw new Error("Source Adapter Framework initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeRepositorySourceAdapters === "function") {
+        const repositoryAdapterResult = namespace.api.initializeRepositorySourceAdapters();
+        if (!repositoryAdapterResult.ok) throw new Error("Repository Source Adapter initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializePlatformSourceAdapters === "function") {
+        const platformAdapterResult = namespace.api.initializePlatformSourceAdapters();
+        if (!platformAdapterResult.ok) throw new Error("Platform Source Adapter initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeCanonicalModel === "function") {
+        const canonicalModelResult = namespace.api.initializeCanonicalModel();
+        if (!canonicalModelResult.ok) throw new Error("Canonical Model initialization failed.");
       }
 
       state.initialized = true;
@@ -646,7 +734,9 @@
     const dependencyStatus = getDependencyStatus();
     const androidValidation = validation && validation.androidRealDeviceValidation;
     const androidPassed = Boolean(androidValidation && androidValidation.passed === true);
-    const codeValidationPassed = Boolean(validation && validation.valid === true && validation.failed === 0);
+    const codeValidationPassed = Boolean(
+      validation && validation.valid === true && validation.failed === 0
+    );
     const releaseReady = Boolean(
       state.initialized &&
       dependencyStatus.requiredReady &&
@@ -659,9 +749,9 @@
       version: VERSION,
       phase: IMPLEMENTATION_PHASE,
       releaseStatus: releaseReady
-        ? "Phase 1 Ready"
+        ? "Phase 2 Ready"
         : codeValidationPassed && !androidPassed
-          ? "Conditional - Android Validation Pending"
+          ? "Conditional - Phase 2 Android Validation Pending"
           : validation
             ? "Blocked"
             : "Not Validated",
@@ -673,7 +763,9 @@
       independentValidationRequired: true,
       codeValidationPassed: codeValidationPassed,
       androidRealDevicePassed: androidPassed,
-      phase2Allowed: releaseReady,
+      phase1ReleaseFrozen: PHASE1_RELEASE_FROZEN,
+      phase2Allowed: PHASE1_RELEASE_FROZEN,
+      phase3Allowed: releaseReady,
       checkedAt: nowIso()
     };
   }
@@ -691,7 +783,7 @@
       designFreezeVersion: DESIGN_FREEZE_VERSION,
       implementationPhase: IMPLEMENTATION_PHASE,
       implementationStatus: state.initialized
-        ? "Phase 1 Foundation Implemented"
+        ? "Phase 2 Source Intake and Canonical Model Implemented"
         : "Loaded",
       status: state.lastError
         ? "Degraded"
@@ -701,11 +793,16 @@
       ready: Boolean(state.initialized && dependencies.requiredReady && !state.lastError),
       available: true,
       initialized: state.initialized === true,
-      progress: 12.5,
+      progress: 25,
       phaseProgress: state.initialized ? 100 : 25,
       modules: clone(dependencies.required),
       capabilityCount: state.capabilities.size,
       schemaCount: state.schemas.size,
+      sourceAdapterCount: state.sourceAdapters.size,
+      sourceIntakeCount: state.sourceIntakes.size,
+      canonicalSnapshotCount: state.canonicalSnapshots.size,
+      latestSourceIntakeId: state.latestSourceIntakeId,
+      latestCanonicalSnapshotId: state.latestCanonicalSnapshotId,
       sessionCount: state.sessions.size,
       frozenSessionCount: [...state.sessions.values()].filter(function countFrozen(item) {
         return item && item.state === "Frozen";
@@ -717,13 +814,18 @@
         : null,
       releaseStatus: release.releaseStatus,
       releaseAllowed: release.releaseAllowed,
+      phase1ReleaseFrozen: PHASE1_RELEASE_FROZEN,
       dependencyStatus: dependencies,
       integration: clone(state.integration),
       directRepositoryMutationAllowed: false,
+      missingInformationInferenceAllowed: false,
+      canonicalFactInferenceAllowed: false,
       automaticRecommendationApplicationAllowed: false,
       automaticWorkflowExecutionAllowed: false,
       githubAutomaticReflectionAllowed: false,
-      phase2Started: false,
+      phase2Started: true,
+      phase2Complete: state.initialized === true && dependencies.requiredReady,
+      phase3Started: false,
       lastError: clone(state.lastError),
       updatedAt: state.updatedAt || nowIso()
     };
@@ -759,6 +861,7 @@
     SCHEMA_VERSION: SCHEMA_VERSION,
     DESIGN_FREEZE_VERSION: DESIGN_FREEZE_VERSION,
     IMPLEMENTATION_PHASE: IMPLEMENTATION_PHASE,
+    PHASE1_RELEASE_FROZEN: PHASE1_RELEASE_FROZEN,
     SESSION_STATES: SESSION_STATES,
     SESSION_TRANSITIONS: SESSION_TRANSITIONS
   });
@@ -780,6 +883,8 @@
     appendAudit: appendAudit,
     transitionSession: transitionSession,
     isSessionTransitionAllowed: isSessionTransitionAllowed,
+    getSessionMutable: getSessionMutable,
+    attachSessionSourceReference: attachSessionSourceReference,
     removeSessionForValidation: removeSessionForValidation,
     registerExternalIntegration: registerExternalIntegration,
     limits: {
