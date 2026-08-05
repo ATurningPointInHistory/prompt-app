@@ -1,0 +1,64 @@
+{
+  "id": "AI-PRO-BUILD-TIME-STATIC-MANIFEST-VALIDATION",
+  "version": "1.0.0",
+  "createdAt": "2026-08-05T11:35:00Z",
+  "basePatch": "AIPro_Diff_StaticScript_Recovery_v1.0.1.zip",
+  "purpose": "画面部分を維持し、Script読込一覧をJSONへ分離。ZIP保存時のみ静的scriptタグを生成する。",
+  "changedFiles": [
+    "index.html",
+    "07_project_package.js",
+    "00_script_manifest.json",
+    "project_info.json"
+  ],
+  "validation": {
+    "javascriptSyntax": {
+      "status": "PASS",
+      "command": "node --check 07_project_package.js"
+    },
+    "jsonParse": {
+      "status": "PASS",
+      "files": [
+        "00_script_manifest.json",
+        "project_info.json"
+      ]
+    },
+    "uiOutsideScriptBlock": {
+      "status": "PASS",
+      "result": "Static Script Recovery v1.0.1と完全一致"
+    },
+    "manifest": {
+      "status": "PASS",
+      "scriptCount": 116,
+      "duplicates": 0,
+      "first": "00_core.js",
+      "last": "99_init.js",
+      "runtimeLoaderRegistered": false
+    },
+    "generatedIndex": {
+      "status": "PASS",
+      "scriptCount": 116,
+      "orderMatchesManifest": true,
+      "markerStartCount": 1,
+      "markerEndCount": 1,
+      "documentWrite": false,
+      "runtimeLoaderReference": false
+    },
+    "projectPackageIntegration": {
+      "status": "PASS",
+      "generatedFileCount": 120,
+      "expectedFileCount": 120,
+      "missingFiles": 0,
+      "manifestIncluded": true,
+      "zipIntegrity": "PASS"
+    },
+    "cacheBust": {
+      "status": "PASS",
+      "07_project_package.js": "v=5.8.8"
+    },
+    "realBrowserNavigation": {
+      "status": "NOT_RUN",
+      "reason": "実行環境のChromiumがローカルURLをERR_BLOCKED_BY_ADMINISTRATORで遮断したため。Node VM統合テストで保存フローとZIP内容を検証。"
+    }
+  },
+  "result": "PASS_WITH_BROWSER_ENVIRONMENT_LIMITATION"
+}
