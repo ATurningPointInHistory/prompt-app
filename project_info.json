@@ -4,7 +4,7 @@
   "project": "AIプロンプト生成Pro",
   "version": "v6.0",
   "entryFile": "index.html",
-  "savedAt": "2026-08-05T12:43:00.000Z",
+  "savedAt": "2026-08-05T13:30:00.000Z",
   "complete": true,
   "requestedFiles": [
     "index.html",
@@ -262,7 +262,7 @@
   "fileCount": 122,
   "cleanIndex": true,
   "scriptManifestSource": "00_script_manifest.json",
-  "scriptManifestVersion": "1.1.0",
+  "scriptManifestVersion": "1.1.1",
   "scriptManifestCount": 118,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
@@ -271,5 +271,13 @@
     "first": "00_core.js",
     "last": "99_init.js",
     "generatedAtSave": true
+  },
+  "ide165": {
+    "componentId": "IDE-165-PHASE-1",
+    "version": "1.0.1",
+    "status": "Android Download Hotfix",
+    "autoDownload": true,
+    "manualDownloadFallback": true,
+    "zipGenerationType": "uint8array-to-blob"
   }
 }
