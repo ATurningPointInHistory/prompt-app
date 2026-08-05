@@ -157,6 +157,18 @@ function getProjectModuleRules() {
       ]
     },
     {
+      file: "05_repair_zip_paste_manager.js",
+      priority: 95,
+      words: [
+        "zip",
+        "paste",
+        "clipboard",
+        "progress",
+        "github",
+        "copied"
+      ]
+    },
+    {
       file: "06_search.js",
       priority: 95,
       words: [
@@ -388,6 +400,8 @@ function getCriticalFunctionNames() {
     "saveCurrentState",
     "initRepairIde",
     "loadRepairHtml",
+    "openZipPasteManager",
+    "copySelectedZipPasteFile",
     "saveRepairHtml",
     "showHtmlHealth",
     "validateBackupHtml",
@@ -406,6 +420,9 @@ function getProtectedFunctionNames() {
 
   return new Set([
     "loadRepairHtml",
+    "openZipPasteManager",
+    "loadZipIntoPasteManager",
+    "copySelectedZipPasteFile",
     "saveRepairHtml",
     "copyRepairHtml",
     "showHtmlHealth",
