@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_ai_development_workflow_integration.js
    IDE-160 Full Application Integration / Dashboard / Handoff
-   Version: 2.0.0
+   Version: 2.0.1
    Phase: 9 - Full Application Integration
    ============================================================ */
 (function (global) {
@@ -142,7 +142,8 @@
     check("IDE Registry integrated or safely unavailable", status.ideRegistry === true || status.externalIdeRegistryAvailable === false, JSON.stringify(status), "Registry");
     if (typeof global.getDevelopmentStatus === "function") {
       const registered = global.getDevelopmentStatus("IDE-160");
-      check("Development Status Registry resolves IDE-160", Boolean(registered && registered.id === "IDE-160"), JSON.stringify(registered), "Registry");
+      const resolvesIDE160 = Boolean(registered && (registered.id === "IDE-160" || registered.componentId === "IDE-160"));
+      check("Development Status Registry resolves IDE-160", resolvesIDE160, JSON.stringify(registered), "Registry");
     } else check("Development Status Registry optional in standalone", true, "Standalone", "Registry");
     if (typeof global.getIdeComponent === "function") {
       const component = global.getIdeComponent("IDE-160");
