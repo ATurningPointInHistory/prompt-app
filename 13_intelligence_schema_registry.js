@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_intelligence_schema_registry.js
    IDE-170 Intelligence Platform
-   Version: 1.0.0
-   Phase: 1 Foundation - Schema Registry
+   Version: 1.1.0
+   Phase: 2 Schema Registry - Schema Registry
    ============================================================ */
 (function (global) {
   "use strict";
@@ -15,7 +15,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.0.0";
+  const VERSION = "1.1.0";
   const SCHEMA_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
   const SUPPORTED_TYPES = Object.freeze([
     "object",
@@ -54,7 +54,7 @@
       schemaId: "IDE-170-SCHEMA-INTELLIGENCE-SESSION",
       name: "Intelligence Session",
       version: VERSION,
-      description: "Phase 1 Session lifecycle record.",
+      description: "IDE-170 Session lifecycle record.",
       type: "object",
       required: ["sessionId", "componentId", "version", "state", "capabilityBindings", "createdAt"],
       properties: {
@@ -97,7 +97,7 @@
       schemaId: "IDE-170-SCHEMA-VALIDATION-RESULT",
       name: "Intelligence Validation Result",
       version: VERSION,
-      description: "Independent Phase 1 Validation result.",
+      description: "Independent IDE-170 Validation result.",
       type: "object",
       required: ["id", "componentId", "version", "valid", "passed", "failed", "total", "status"],
       properties: {
@@ -496,7 +496,7 @@
       type: "Registry",
       status: "Active",
       owner: "IDE-170",
-      description: "Registers immutable Schemas and validates Phase 1 records.",
+      description: "Registers immutable Schemas and validates IDE-170 records.",
       dependencies: [
         { capabilityId: "IDE-170-CORE", minimumVersion: VERSION, optional: false },
         { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: VERSION, optional: false }
