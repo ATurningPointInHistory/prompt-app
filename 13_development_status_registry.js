@@ -20,7 +20,8 @@ const DEVELOPMENT_STATUS_BUILT_IN_DEFINITIONS = [
   { id: "IDE-115", statusApi: "getDiagnosticValidationStatus", validator: "validateDiagnosticValidationPlatform" },
   { id: "IDE-120", statusApi: "getSearchPipelineStatus", validator: "validateSearchStrategyPlatform" },
   { id: "IDE-125", statusApi: "getSearchValidationStatus", validator: "validateSearchStrategyValidationPlatform" },
-  { id: "IDE-130", statusApi: "getInvestigationWorkflowStatus", validator: "validateInvestigationWorkflow" }
+  { id: "IDE-130", statusApi: "getInvestigationWorkflowStatus", validator: "validateInvestigationWorkflow" },
+  { id: "IDE-160", statusApi: "getAIDevelopmentWorkflowStatus", validator: "validateAIDevelopmentWorkflow" }
 ];
 
 const DEVELOPMENT_STATUS_REGISTRY = [];
