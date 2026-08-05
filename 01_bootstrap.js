@@ -1063,6 +1063,13 @@ ${repairToolButton(
 )}
 
 ${repairToolButton(
+  "🧩 差分ZIP生成",
+  "openZipDiffManager",
+  "🧩",
+  "差分ZIP生成"
+)}
+
+${repairToolButton(
   "📦 JS部分読込",
   "backupPartialScript",
   "📦",
