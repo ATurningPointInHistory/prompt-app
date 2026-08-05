@@ -1056,6 +1056,13 @@ ${repairToolButton(
 )}
 
 ${repairToolButton(
+  "📦 ZIP貼付管理",
+  "openZipPasteManager",
+  "📦",
+  "ZIP貼付管理"
+)}
+
+${repairToolButton(
   "📦 JS部分読込",
   "backupPartialScript",
   "📦",
