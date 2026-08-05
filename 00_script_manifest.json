@@ -106,10 +106,14 @@
     "./13_ai_development_workflow_completion.js?v=2.0.1",
     "./13_ai_development_workflow_integration.js?v=2.0.1",
     "./13_ai_development_workflow_validation.js?v=2.0.1",
-    "./13_intelligence_platform_core.js?v=1.0.0",
-    "./13_intelligence_capability_registry.js?v=1.0.0",
-    "./13_intelligence_schema_registry.js?v=1.0.0",
-    "./13_intelligence_validation.js?v=1.0.0",
+    "./13_intelligence_platform_core.js?v=1.1.0",
+    "./13_intelligence_capability_registry.js?v=1.1.0",
+    "./13_intelligence_schema_registry.js?v=1.1.0",
+    "./13_intelligence_source_adapter.js?v=1.1.0",
+    "./13_intelligence_source_adapters_repository.js?v=1.1.0",
+    "./13_intelligence_source_adapters_platform.js?v=1.1.0",
+    "./13_intelligence_canonical_model.js?v=1.1.0",
+    "./13_intelligence_validation.js?v=1.1.0",
     "./13_project_report.js?v=6.0.3",
     "./13_project_handoff.js?v=6.0.2",
     "./13_function_relation_v3.js?v=6.0.2",
@@ -126,6 +130,6 @@
     "./16_workflow_engine.js?v=1.0.0",
     "./99_init.js?v=5.8.6"
   ],
-  "updatedAt": "2026-08-05",
-  "change": "IDE-165 v1.0.1 Android download fallback: uint8array ZIP build, persistent manual download link, auto-download retry path."
+  "updatedAt": "2026-08-06",
+  "change": "IDE-170 Phase 2 Source Intake and Canonical Model v1.1.0: read-only Source Adapters, frozen Source Intake, Canonical Record and Canonical Snapshot."
 }
