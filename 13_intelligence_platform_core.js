@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_intelligence_platform_core.js
    IDE-170 Intelligence Platform
-   Version: 1.1.0
-   Phase: 2 Source Intake and Canonical Model
+   Version: 1.2.0
+   Phase: 3 Repository Snapshot
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
 (function (global) {
@@ -10,11 +10,12 @@
 
   const COMPONENT_ID = "IDE-170";
   const COMPONENT_NAME = "Intelligence Platform";
-  const VERSION = "1.1.0";
+  const VERSION = "1.2.0";
   const SCHEMA_VERSION = "1.0.0";
   const DESIGN_FREEZE_VERSION = "1.0.0";
-  const IMPLEMENTATION_PHASE = "Phase 2 Source Intake and Canonical Model";
+  const IMPLEMENTATION_PHASE = "Phase 3 Repository Snapshot";
   const PHASE1_RELEASE_FROZEN = true;
+  const PHASE2_RELEASE_FROZEN = true;
   const MAX_SESSIONS = 100;
   const MAX_AUDIT_RECORDS = 1000;
 
@@ -52,8 +53,11 @@
         sourceAdapterImplementations: new Map(),
         sourceIntakes: new Map(),
         canonicalSnapshots: new Map(),
+        repositorySnapshots: new Map(),
         latestSourceIntakeId: null,
         latestCanonicalSnapshotId: null,
+        latestRepositorySnapshotId: null,
+        latestRepositoryBaselineId: null,
         audits: [],
         sequence: 0,
         initialized: false,
@@ -76,9 +80,12 @@
   if (!(state.sourceAdapterImplementations instanceof Map)) state.sourceAdapterImplementations = new Map();
   if (!(state.sourceIntakes instanceof Map)) state.sourceIntakes = new Map();
   if (!(state.canonicalSnapshots instanceof Map)) state.canonicalSnapshots = new Map();
+  if (!(state.repositorySnapshots instanceof Map)) state.repositorySnapshots = new Map();
   if (!Array.isArray(state.audits)) state.audits = [];
   if (!Object.prototype.hasOwnProperty.call(state, "latestSourceIntakeId")) state.latestSourceIntakeId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestCanonicalSnapshotId")) state.latestCanonicalSnapshotId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestRepositorySnapshotId")) state.latestRepositorySnapshotId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestRepositoryBaselineId")) state.latestRepositoryBaselineId = null;
 
   function nowIso() {
     return new Date().toISOString();
@@ -544,6 +551,7 @@
       repositorySourceAdapters: Boolean(namespace.modules && namespace.modules.repositorySourceAdapters),
       platformSourceAdapters: Boolean(namespace.modules && namespace.modules.platformSourceAdapters),
       canonicalModel: Boolean(namespace.modules && namespace.modules.canonicalModel),
+      repositorySnapshot: Boolean(namespace.modules && namespace.modules.repositorySnapshot),
       validation: Boolean(namespace.modules && namespace.modules.validation)
     };
     const requiredReady = Object.keys(moduleStatus).every(function allReady(key) {
@@ -584,12 +592,12 @@
         results.ideRegistry = global.registerIdeComponent({
           id: COMPONENT_ID,
           title: COMPONENT_NAME,
-          summary: "公式SourceをAdapter経由で取得し、Immutable Canonical Snapshotへ変換するIntelligence Platform。Phase 2。",
+          summary: "Canonical SnapshotからBaseline／Incremental Repository Snapshotを生成し、SHA-256とChainで状態変化を追跡するIntelligence Platform。Phase 3。",
           icon: "🧠",
           version: VERSION,
-          status: "Phase 2",
+          status: "Phase 3",
           ready: state.initialized === true,
-          progress: 25,
+          progress: 37.5,
           health: state.lastValidation && Number(state.lastValidation.health) || 0,
           launcher: "",
           validator: "validateIntelligencePlatform",
@@ -653,12 +661,13 @@
           !dependencyStatus.required.repositorySourceAdapters ||
           !dependencyStatus.required.platformSourceAdapters ||
           !dependencyStatus.required.canonicalModel ||
+          !dependencyStatus.required.repositorySnapshot ||
           !dependencyStatus.required.validation) {
         state.initializing = false;
         return buildResult(false, "IDE170_DEPENDENCY_MISSING", "Blocked", {
           dependencies: dependencyStatus
         }, {
-          error: { message: "IDE-170 Phase 2 modules are not fully loaded.", category: "Dependency Failure" }
+          error: { message: "IDE-170 Phase 3 modules are not fully loaded.", category: "Dependency Failure" }
         });
       }
 
@@ -690,6 +699,11 @@
       if (namespace.api && typeof namespace.api.initializeCanonicalModel === "function") {
         const canonicalModelResult = namespace.api.initializeCanonicalModel();
         if (!canonicalModelResult.ok) throw new Error("Canonical Model initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeRepositorySnapshot === "function") {
+        const repositorySnapshotResult = namespace.api.initializeRepositorySnapshot();
+        if (!repositorySnapshotResult.ok) throw new Error("Repository Snapshot initialization failed.");
       }
 
       state.initialized = true;
@@ -749,9 +763,9 @@
       version: VERSION,
       phase: IMPLEMENTATION_PHASE,
       releaseStatus: releaseReady
-        ? "Phase 2 Ready"
+        ? "Phase 3 Ready"
         : codeValidationPassed && !androidPassed
-          ? "Conditional - Phase 2 Android Validation Pending"
+          ? "Conditional - Phase 3 Android Validation Pending"
           : validation
             ? "Blocked"
             : "Not Validated",
@@ -764,8 +778,10 @@
       codeValidationPassed: codeValidationPassed,
       androidRealDevicePassed: androidPassed,
       phase1ReleaseFrozen: PHASE1_RELEASE_FROZEN,
+      phase2ReleaseFrozen: PHASE2_RELEASE_FROZEN,
       phase2Allowed: PHASE1_RELEASE_FROZEN,
-      phase3Allowed: releaseReady,
+      phase3Allowed: PHASE2_RELEASE_FROZEN,
+      phase4Allowed: releaseReady,
       checkedAt: nowIso()
     };
   }
@@ -783,7 +799,7 @@
       designFreezeVersion: DESIGN_FREEZE_VERSION,
       implementationPhase: IMPLEMENTATION_PHASE,
       implementationStatus: state.initialized
-        ? "Phase 2 Source Intake and Canonical Model Implemented"
+        ? "Phase 3 Repository Snapshot Implemented"
         : "Loaded",
       status: state.lastError
         ? "Degraded"
@@ -793,8 +809,8 @@
       ready: Boolean(state.initialized && dependencies.requiredReady && !state.lastError),
       available: true,
       initialized: state.initialized === true,
-      progress: 25,
-      phaseProgress: state.initialized ? 100 : 25,
+      progress: 37.5,
+      phaseProgress: state.initialized ? 100 : 37.5,
       modules: clone(dependencies.required),
       capabilityCount: state.capabilities.size,
       schemaCount: state.schemas.size,
@@ -803,6 +819,9 @@
       canonicalSnapshotCount: state.canonicalSnapshots.size,
       latestSourceIntakeId: state.latestSourceIntakeId,
       latestCanonicalSnapshotId: state.latestCanonicalSnapshotId,
+      repositorySnapshotCount: state.repositorySnapshots.size,
+      latestRepositorySnapshotId: state.latestRepositorySnapshotId,
+      latestRepositoryBaselineId: state.latestRepositoryBaselineId,
       sessionCount: state.sessions.size,
       frozenSessionCount: [...state.sessions.values()].filter(function countFrozen(item) {
         return item && item.state === "Frozen";
@@ -815,6 +834,7 @@
       releaseStatus: release.releaseStatus,
       releaseAllowed: release.releaseAllowed,
       phase1ReleaseFrozen: PHASE1_RELEASE_FROZEN,
+      phase2ReleaseFrozen: PHASE2_RELEASE_FROZEN,
       dependencyStatus: dependencies,
       integration: clone(state.integration),
       directRepositoryMutationAllowed: false,
@@ -824,8 +844,10 @@
       automaticWorkflowExecutionAllowed: false,
       githubAutomaticReflectionAllowed: false,
       phase2Started: true,
-      phase2Complete: state.initialized === true && dependencies.requiredReady,
-      phase3Started: false,
+      phase2Complete: PHASE2_RELEASE_FROZEN,
+      phase3Started: true,
+      phase3Complete: state.initialized === true && dependencies.requiredReady,
+      phase4Started: false,
       lastError: clone(state.lastError),
       updatedAt: state.updatedAt || nowIso()
     };
@@ -862,6 +884,7 @@
     DESIGN_FREEZE_VERSION: DESIGN_FREEZE_VERSION,
     IMPLEMENTATION_PHASE: IMPLEMENTATION_PHASE,
     PHASE1_RELEASE_FROZEN: PHASE1_RELEASE_FROZEN,
+    PHASE2_RELEASE_FROZEN: PHASE2_RELEASE_FROZEN,
     SESSION_STATES: SESSION_STATES,
     SESSION_TRANSITIONS: SESSION_TRANSITIONS
   });
