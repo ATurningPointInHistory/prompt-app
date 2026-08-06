@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_intelligence_platform_core.js
    IDE-170 Intelligence Platform
-   Version: 1.3.0
-   Phase: 3 Repository Snapshot
+   Version: 1.4.0
+   Phase: Test Procedure Intake and Validation Compiler
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
 (function (global) {
@@ -10,10 +10,10 @@
 
   const COMPONENT_ID = "IDE-170";
   const COMPONENT_NAME = "Intelligence Platform";
-  const VERSION = "1.3.0";
+  const VERSION = "1.4.0";
   const SCHEMA_VERSION = "1.0.0";
   const DESIGN_FREEZE_VERSION = "1.0.0";
-  const IMPLEMENTATION_PHASE = "Validation Automation Foundation (Pre-Phase 4)";
+  const IMPLEMENTATION_PHASE = "Test Procedure Intake and Validation Compiler (Pre-Phase 4)";
   const PHASE1_RELEASE_FROZEN = true;
   const PHASE2_RELEASE_FROZEN = true;
   const PHASE3_RELEASE_FROZEN = true;
@@ -59,6 +59,10 @@
         validationTargets: new Map(),
         validationRuns: new Map(),
         validationEvidencePackages: new Map(),
+        validationEvidenceBlobs: new Map(),
+        testProcedures: new Map(),
+        parsedTestProcedures: new Map(),
+        validationDatasetCandidates: new Map(),
         latestSourceIntakeId: null,
         latestCanonicalSnapshotId: null,
         latestRepositorySnapshotId: null,
@@ -66,7 +70,12 @@
         latestTestDatasetId: null,
         latestValidationRunId: null,
         latestValidationEvidencePackageId: null,
+        latestTestProcedureId: null,
+        latestParsedTestProcedureId: null,
+        latestValidationDatasetCandidateId: null,
+        activeImportedProcedureDatasetId: null,
         lastAutomationValidation: null,
+        lastProcedureValidation: null,
         audits: [],
         sequence: 0,
         initialized: false,
@@ -94,6 +103,10 @@
   if (!(state.validationTargets instanceof Map)) state.validationTargets = new Map();
   if (!(state.validationRuns instanceof Map)) state.validationRuns = new Map();
   if (!(state.validationEvidencePackages instanceof Map)) state.validationEvidencePackages = new Map();
+  if (!(state.validationEvidenceBlobs instanceof Map)) state.validationEvidenceBlobs = new Map();
+  if (!(state.testProcedures instanceof Map)) state.testProcedures = new Map();
+  if (!(state.parsedTestProcedures instanceof Map)) state.parsedTestProcedures = new Map();
+  if (!(state.validationDatasetCandidates instanceof Map)) state.validationDatasetCandidates = new Map();
   if (!Array.isArray(state.audits)) state.audits = [];
   if (!Object.prototype.hasOwnProperty.call(state, "latestSourceIntakeId")) state.latestSourceIntakeId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestCanonicalSnapshotId")) state.latestCanonicalSnapshotId = null;
@@ -102,7 +115,12 @@
   if (!Object.prototype.hasOwnProperty.call(state, "latestTestDatasetId")) state.latestTestDatasetId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestValidationRunId")) state.latestValidationRunId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestValidationEvidencePackageId")) state.latestValidationEvidencePackageId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestTestProcedureId")) state.latestTestProcedureId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestParsedTestProcedureId")) state.latestParsedTestProcedureId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestValidationDatasetCandidateId")) state.latestValidationDatasetCandidateId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "activeImportedProcedureDatasetId")) state.activeImportedProcedureDatasetId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastAutomationValidation")) state.lastAutomationValidation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastProcedureValidation")) state.lastProcedureValidation = null;
 
   function nowIso() {
     return new Date().toISOString();
@@ -572,6 +590,10 @@
       testDatasetRegistry: Boolean(namespace.modules && namespace.modules.testDatasetRegistry),
       validationAutomation: Boolean(namespace.modules && namespace.modules.validationAutomation),
       validationEvidence: Boolean(namespace.modules && namespace.modules.validationEvidence),
+      testProcedureIntake: Boolean(namespace.modules && namespace.modules.testProcedureIntake),
+      testProcedureParser: Boolean(namespace.modules && namespace.modules.testProcedureParser),
+      validationCompiler: Boolean(namespace.modules && namespace.modules.validationCompiler),
+      testProcedureUI: Boolean(namespace.modules && namespace.modules.testProcedureUI),
       validation: Boolean(namespace.modules && namespace.modules.validation)
     };
     const requiredReady = Object.keys(moduleStatus).every(function allReady(key) {
@@ -612,15 +634,15 @@
         results.ideRegistry = global.registerIdeComponent({
           id: COMPONENT_ID,
           title: COMPONENT_NAME,
-          summary: "Version管理されたTest Datasetを自動実行し、期待結果比較と改変検出可能なEvidence ZIPを生成するIntelligence Platform。Pre-Phase 4。",
+          summary: "実機検証手順を取込み、解析・警告付き選択実行・期待結果比較・Evidence ZIP保存を行うIntelligence Platform。Pre-Phase 4。",
           icon: "🧠",
           version: VERSION,
           status: "Pre-Phase 4",
           ready: state.initialized === true,
           progress: 37.5,
           health: state.lastValidation && Number(state.lastValidation.health) || 0,
-          launcher: "",
-          validator: "validateIntelligenceAutomationFoundation",
+          launcher: "openIntelligenceTestProcedureConsole",
+          validator: "validateIntelligenceTestProcedureCompiler",
           probe: "getIntelligencePlatformStatus",
           category: "Intelligence"
         }) === true;
@@ -685,12 +707,16 @@
           !dependencyStatus.required.testDatasetRegistry ||
           !dependencyStatus.required.validationAutomation ||
           !dependencyStatus.required.validationEvidence ||
+          !dependencyStatus.required.testProcedureIntake ||
+          !dependencyStatus.required.testProcedureParser ||
+          !dependencyStatus.required.validationCompiler ||
+          !dependencyStatus.required.testProcedureUI ||
           !dependencyStatus.required.validation) {
         state.initializing = false;
         return buildResult(false, "IDE170_DEPENDENCY_MISSING", "Blocked", {
           dependencies: dependencyStatus
         }, {
-          error: { message: "IDE-170 Validation Automation Foundation modules are not fully loaded.", category: "Dependency Failure" }
+          error: { message: "IDE-170 Test Procedure Intake and Validation Compiler modules are not fully loaded.", category: "Dependency Failure" }
         });
       }
 
@@ -744,6 +770,26 @@
         if (!evidenceResult.ok) throw new Error("Validation Evidence initialization failed.");
       }
 
+      if (namespace.api && typeof namespace.api.initializeTestProcedureIntake === "function") {
+        const procedureIntakeResult = namespace.api.initializeTestProcedureIntake();
+        if (!procedureIntakeResult.ok) throw new Error("Test Procedure Intake initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeTestProcedureParser === "function") {
+        const procedureParserResult = namespace.api.initializeTestProcedureParser();
+        if (!procedureParserResult.ok) throw new Error("Test Procedure Parser initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeValidationCompiler === "function") {
+        const compilerResult = namespace.api.initializeValidationCompiler();
+        if (!compilerResult.ok) throw new Error("Validation Compiler initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeTestProcedureUI === "function") {
+        const uiResult = namespace.api.initializeTestProcedureUI();
+        if (!uiResult.ok) throw new Error("Test Procedure UI initialization failed.");
+      }
+
       state.initialized = true;
       state.lastError = null;
       touch();
@@ -784,16 +830,18 @@
   function getReleaseStatus() {
     const phaseValidation = state.lastValidation;
     const automationValidation = state.lastAutomationValidation;
+    const procedureValidation = state.lastProcedureValidation;
     const dependencyStatus = getDependencyStatus();
-    const androidValidation = automationValidation && automationValidation.androidRealDeviceValidation;
+    const androidValidation = procedureValidation && procedureValidation.androidRealDeviceValidation;
     const androidPassed = Boolean(androidValidation && androidValidation.passed === true);
     const phaseCodePassed = Boolean(
       phaseValidation && phaseValidation.valid === true && phaseValidation.failed === 0
     );
     const automationCodePassed = Boolean(
-      automationValidation &&
-      automationValidation.codeValidationPassed === true &&
-      automationValidation.failed === 0
+      automationValidation && automationValidation.valid === true && automationValidation.failed === 0
+    );
+    const procedureCodePassed = Boolean(
+      procedureValidation && procedureValidation.valid === true && procedureValidation.failed === 0
     );
     const releaseReady = Boolean(
       state.initialized &&
@@ -801,8 +849,7 @@
       PHASE3_RELEASE_FROZEN &&
       phaseCodePassed &&
       automationCodePassed &&
-      automationValidation &&
-      automationValidation.valid === true &&
+      procedureCodePassed &&
       androidPassed
     );
 
@@ -811,20 +858,21 @@
       version: VERSION,
       phase: IMPLEMENTATION_PHASE,
       releaseStatus: releaseReady
-        ? "Validation Automation Foundation Ready"
-        : phaseCodePassed && automationCodePassed && !androidPassed
-          ? "Conditional - Validation Automation Android Pending"
-          : automationValidation
+        ? "Test Procedure Intake and Validation Compiler Ready"
+        : procedureCodePassed && !androidPassed
+          ? "Conditional - Test Procedure Compiler Android Pending"
+          : procedureValidation
             ? "Blocked"
-            : "Validation Automation Not Run",
+            : "Test Procedure Compiler Validation Not Run",
       releaseAllowed: releaseReady,
-      validationStatus: automationValidation ? automationValidation.status : "Not Run",
-      health: automationValidation && Number.isFinite(Number(automationValidation.health))
-        ? Number(automationValidation.health)
+      validationStatus: procedureValidation ? procedureValidation.status : "Not Run",
+      health: procedureValidation && Number.isFinite(Number(procedureValidation.health))
+        ? Number(procedureValidation.health)
         : null,
       independentValidationRequired: true,
       phase3CodeValidationPassed: phaseCodePassed,
-      automationCodeValidationPassed: automationCodePassed,
+      automationFoundationFrozen: automationCodePassed,
+      procedureCompilerCodeValidationPassed: procedureCodePassed,
       androidRealDevicePassed: androidPassed,
       phase1ReleaseFrozen: PHASE1_RELEASE_FROZEN,
       phase2ReleaseFrozen: PHASE2_RELEASE_FROZEN,
@@ -849,7 +897,7 @@
       designFreezeVersion: DESIGN_FREEZE_VERSION,
       implementationPhase: IMPLEMENTATION_PHASE,
       implementationStatus: state.initialized
-        ? "Validation Automation Foundation Implemented"
+        ? "Test Procedure Intake and Validation Compiler Implemented"
         : "Loaded",
       status: state.lastError
         ? "Degraded"
@@ -861,7 +909,8 @@
       initialized: state.initialized === true,
       progress: 37.5,
       phaseProgress: state.initialized ? 100 : 37.5,
-      validationAutomationFoundationProgress: state.initialized ? 100 : 0,
+      validationAutomationFoundationProgress: 100,
+      testProcedureCompilerProgress: state.initialized ? 100 : 0,
       modules: clone(dependencies.required),
       capabilityCount: state.capabilities.size,
       schemaCount: state.schemas.size,
@@ -877,9 +926,16 @@
       validationTargetCount: state.validationTargets.size,
       validationRunCount: state.validationRuns.size,
       validationEvidencePackageCount: state.validationEvidencePackages.size,
+      testProcedureCount: state.testProcedures.size,
+      parsedTestProcedureCount: state.parsedTestProcedures.size,
+      validationDatasetCandidateCount: state.validationDatasetCandidates.size,
       latestTestDatasetId: state.latestTestDatasetId,
       latestValidationRunId: state.latestValidationRunId,
       latestValidationEvidencePackageId: state.latestValidationEvidencePackageId,
+      latestTestProcedureId: state.latestTestProcedureId,
+      latestParsedTestProcedureId: state.latestParsedTestProcedureId,
+      latestValidationDatasetCandidateId: state.latestValidationDatasetCandidateId,
+      activeImportedProcedureDatasetId: state.activeImportedProcedureDatasetId,
       automationValidationStatus: state.lastAutomationValidation
         ? state.lastAutomationValidation.status
         : "Not Run",
@@ -910,7 +966,9 @@
       phase3Started: true,
       phase3Complete: PHASE3_RELEASE_FROZEN,
       validationAutomationFoundationStarted: true,
-      validationAutomationFoundationComplete: state.initialized === true && dependencies.requiredReady,
+      validationAutomationFoundationComplete: true,
+      testProcedureCompilerStarted: true,
+      testProcedureCompilerComplete: state.initialized === true && dependencies.requiredReady,
       phase4Started: false,
       lastError: clone(state.lastError),
       updatedAt: state.updatedAt || nowIso()
