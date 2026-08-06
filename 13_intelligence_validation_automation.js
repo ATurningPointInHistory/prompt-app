@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation_automation.js
    IDE-170 Intelligence Platform
-   Version: 1.4.0
+   Version: 1.4.1
    Architecture Decision: 011
    Phase: Validation Automation Foundation (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.4.0";
+  const VERSION = "1.4.1";
   const CAPABILITY_ID = "IDE-170-VALIDATION-AUTOMATION";
   const RUN_STATUSES = Object.freeze([
     "Created", "Preparing", "Running", "Comparing", "Completed",
@@ -484,6 +484,23 @@
     return baseResult;
   }
 
+  function updateOwnerSelectionExecution(run, testCase, result, executed) {
+    if (!run || !Array.isArray(run.ownerSelections) || !testCase || !result) return;
+    const tags = Array.isArray(testCase.tags) ? testCase.tags : [];
+    const selection = run.ownerSelections.find(function findOwnerSelection(item) {
+      return item && tags.includes(item.stepId);
+    });
+    if (!selection) return;
+    selection.executed = executed === true;
+    selection.result = internal.text(result.status, executed === true ? "Completed" : "Not Run");
+    selection.passed = result.passed === true;
+    selection.caseId = result.caseId || testCase.caseId || null;
+    selection.resultId = result.resultId || null;
+    selection.validationRunId = run.validationRunId;
+    selection.executedAt = executed === true ? (result.completedAt || internal.nowIso()) : null;
+    selection.durationMs = executed === true ? Number(result.durationMs) || 0 : 0;
+  }
+
   async function runAutomatedValidation(datasetId, options) {
     const settings = internal.isPlainObject(options) ? options : {};
     const dataset = namespace.getTestDataset(datasetId);
@@ -560,7 +577,7 @@
       if (isCancelled(run, settings)) {
         for (let remaining = index; remaining < selected.length; remaining += 1) {
           const cancelledCase = selected[remaining];
-          run.caseResults.push({
+          const cancelledResult = {
             resultId: internal.nextId("IDE-170-CASE-RESULT"),
             validationRunId: run.validationRunId,
             datasetId: run.datasetId,
@@ -583,13 +600,16 @@
             evidence: {},
             retryHistory: [],
             resultHash: null
-          });
+          };
+          run.caseResults.push(cancelledResult);
+          updateOwnerSelectionExecution(run, cancelledCase, cancelledResult, false);
         }
         run.status = "Cancelled";
         break;
       }
       const result = await executeCase(run, testCase, settings);
       run.caseResults.push(result);
+      updateOwnerSelectionExecution(run, testCase, result, true);
       run.comparisons.push({
         caseId: result.caseId,
         comparator: result.expected.comparator,
@@ -702,6 +722,7 @@
         caseResult.resultHash = internal.hashValidationValue
           ? internal.hashValidationValue(Object.assign({}, caseResult, { resultHash: null }))
           : null;
+        updateOwnerSelectionExecution(run, testCase, caseResult, true);
       }
     }
     recalculateRunSummary(run);
