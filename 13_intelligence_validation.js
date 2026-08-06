@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_intelligence_validation.js
    IDE-170 Intelligence Platform
-   Version: 1.4.1
-   Phase: Test Procedure Intake and Validation Compiler - Independent Validation Gate
+   Version: 1.5.0
+   Phase: 4 Evidence Graph - Independent Validation Gate
    ============================================================ */
 (function (global) {
   "use strict";
@@ -15,7 +15,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.4.1";
+  const VERSION = "1.5.0";
   const VALIDATION_CAPABILITY_ID = "IDE-170-VALIDATION";
 
   function buildCheck(name, passed, detail, group, severity) {
@@ -66,7 +66,7 @@
       type: "Validation",
       status: "Active",
       owner: "IDE-170",
-      description: "Validates Phase 1-3 and the Test Procedure Intake / Validation Compiler foundation independently from future Evidence Graph output.",
+      description: "Validates Phase 1-4, including the Immutable Layered Evidence Graph, independently from future Understanding output.",
       dependencies: [
         { capabilityId: "IDE-170-CORE", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: "1.0.0", optional: false },
@@ -74,9 +74,11 @@
         { capabilityId: "IDE-170-SOURCE-ADAPTER-FRAMEWORK", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: "1.2.0", optional: false },
         { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: "1.2.0", optional: false },
-        { capabilityId: "IDE-170-TEST-PROCEDURE-INTAKE", minimumVersion: "1.4.1", optional: false },
-        { capabilityId: "IDE-170-TEST-PROCEDURE-PARSER", minimumVersion: "1.4.1", optional: false },
-        { capabilityId: "IDE-170-VALIDATION-COMPILER", minimumVersion: "1.4.1", optional: false }
+        { capabilityId: "IDE-170-TEST-PROCEDURE-INTAKE", minimumVersion: "1.5.0", optional: false },
+        { capabilityId: "IDE-170-TEST-PROCEDURE-PARSER", minimumVersion: "1.5.0", optional: false },
+        { capabilityId: "IDE-170-VALIDATION-COMPILER", minimumVersion: "1.5.0", optional: false },
+        { capabilityId: "IDE-170-RELATIONSHIP-TYPE-REGISTRY", minimumVersion: "1.5.0", optional: false },
+        { capabilityId: "IDE-170-EVIDENCE-GRAPH", minimumVersion: "1.5.0", optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-VALIDATION-RESULT"],
       provides: ["Core Validation", "Source Intake Validation", "Canonical Model Validation", "Repository Snapshot Validation", "Snapshot Chain Validation", "Release Gate", "Regression Validation"],
@@ -95,7 +97,8 @@
       adapterIds: [],
       intakeIds: [],
       snapshotIds: [],
-      repositorySnapshotIds: []
+      repositorySnapshotIds: [],
+      evidenceGraphIds: []
     };
 
     function check(name, passed, detail, group, severity) {
@@ -111,6 +114,11 @@
       validationArtifacts.capabilityIds.forEach(function removeCapability(capabilityId) {
         if (typeof internal.removeCapabilityForValidation === "function") {
           internal.removeCapabilityForValidation(capabilityId);
+        }
+      });
+      validationArtifacts.evidenceGraphIds.forEach(function removeEvidenceGraph(graphId) {
+        if (typeof internal.removeEvidenceGraphForValidation === "function") {
+          internal.removeEvidenceGraphForValidation(graphId);
         }
       });
       validationArtifacts.repositorySnapshotIds.forEach(function removeRepositorySnapshot(snapshotId) {
@@ -166,7 +174,7 @@
 
       const dependencyStatus = namespace.getDependencyStatus();
       check(
-        "Required Phase 3 and Decision 011 v1.1.0 modules are loaded",
+        "Required Phase 4 Evidence Graph modules are loaded",
         dependencyStatus.requiredReady === true,
         JSON.stringify(dependencyStatus.required),
         "Foundation"
@@ -213,6 +221,12 @@
           "validateRepositorySnapshot",
           "validateSnapshotChain",
           "calculateSHA256",
+          "getRelationshipTypes",
+          "buildEvidenceGraph",
+          "getEvidenceGraph",
+          "validateEvidenceGraph",
+          "getRelationshipPath",
+          "runEvidenceGraphPhaseValidation",
           "importTestProcedure",
           "parseTestProcedure",
           "compileTestProcedure",
@@ -227,7 +241,7 @@
         ].every(function hasApi(apiName) {
           return typeof namespace[apiName] === "function";
         }),
-        "Phase 1-3 and Decision 011 v1.1.0 APIs",
+        "Phase 1-4 and Decision 011 v1.1.0 APIs",
         "Foundation"
       );
 
@@ -589,25 +603,23 @@
         "Status and Release"
       );
       check(
-        "Phase 3 and Test Procedure Compiler are implemented",
-        status.phase3Started === true &&
-          status.phase3Complete === true &&
-          status.testProcedureCompilerStarted === true &&
-          status.testProcedureCompilerComplete === true &&
-          status.progress === 37.5,
+        "Phase 4 Evidence Graph is implemented",
+        status.phase4Started === true &&
+          status.phase4Complete === true &&
+          status.phase5Started === false &&
+          status.progress === 50,
         JSON.stringify({
-          phase3Started: status.phase3Started,
-          phase3Complete: status.phase3Complete,
-          testProcedureCompilerStarted: status.testProcedureCompilerStarted,
-          testProcedureCompilerComplete: status.testProcedureCompilerComplete,
+          phase4Started: status.phase4Started,
+          phase4Complete: status.phase4Complete,
+          phase5Started: status.phase5Started,
           progress: status.progress
         }),
         "Status and Release"
       );
       check(
-        "Phase 4 remains not started",
-        status.phase4Started === false,
-        String(status.phase4Started),
+        "Phase 5 remains not started",
+        status.phase5Started === false,
+        String(status.phase5Started),
         "Status and Release"
       );
       check(
@@ -763,11 +775,12 @@
         "IDE-170-ADAPTER-FUNCTION",
         "IDE-170-ADAPTER-MODULE",
         "IDE-170-ADAPTER-ARCHITECTURE",
-        "IDE-170-ADAPTER-WORKFLOW"
+        "IDE-170-ADAPTER-WORKFLOW",
+        "IDE-170-ADAPTER-RELATIONSHIP"
       ];
       const builtInAdapters = namespace.getSourceAdapters({});
       check(
-        "Six official Source Adapters are registered",
+        "Seven official Source Adapters are registered",
         builtInAdapterIds.every(function hasAdapter(adapterId) {
           return Boolean(namespace.getSourceAdapter(adapterId));
         }),
@@ -1697,10 +1710,10 @@
       const result = {
         id: provisionalResult.id,
         componentId: namespace.componentId,
-        name: "IDE-170 Phase 3 and Decision 011 v1.1.0 Regression Validation",
+        name: "IDE-170 Phase 4 Evidence Graph Regression Validation",
         version: VERSION,
         designFreezeVersion: namespace.designFreezeVersion,
-        mode: internal.text(settings.mode, "Phase 3 and Decision 011 v1.1.0 Integrated Regression Validation"),
+        mode: internal.text(settings.mode, "Phase 4 Evidence Graph Integrated Regression Validation"),
         valid: summary.failed === 0 && summary.total > 0,
         passed: summary.passed,
         failed: summary.failed,
@@ -1712,10 +1725,11 @@
         warnings: internal.unique(warnings),
         phase2Gate: "Passed - Phase 1 Release Frozen",
         phase3Gate: "Passed - Phase 2 Release Frozen",
-        phase4Gate: summary.failed === 0 && settings.androidRealDevicePassed === true
+        phase4Gate: "Passed - Procedure Compiler Release Frozen",
+        phase5Gate: summary.failed === 0 && settings.androidRealDevicePassed === true
           ? "Passed"
           : summary.failed === 0
-            ? "Blocked - Phase 3 Android Validation Pending"
+            ? "Blocked - Phase 4 Android Validation Pending"
             : "Blocked",
         androidRealDeviceValidation: {
           required: true,
@@ -1757,7 +1771,7 @@
       const result = {
         id: internal.nextId("IDE-170-VALIDATION"),
         componentId: namespace.componentId,
-        name: "IDE-170 Phase 3 and Decision 011 v1.1.0 Regression Validation",
+        name: "IDE-170 Phase 4 Evidence Graph Regression Validation",
         version: VERSION,
         valid: false,
         passed: summary.passed,
@@ -1782,7 +1796,8 @@
         },
         phase2Gate: "Passed - Phase 1 Release Frozen",
         phase3Gate: "Passed - Phase 2 Release Frozen",
-        phase4Gate: "Blocked",
+        phase4Gate: "Passed - Procedure Compiler Release Frozen",
+        phase5Gate: "Blocked",
         executedAt: internal.nowIso()
       };
       state.lastValidation = internal.clone(result);
