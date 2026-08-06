@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_schema_registry.js
    IDE-170 Intelligence Platform
-   Version: 1.4.0
+   Version: 1.4.1
    Phase: 2 Schema Registry - Schema Registry
    ============================================================ */
 (function (global) {
@@ -15,7 +15,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.4.0";
+  const VERSION = "1.4.1";
   const SCHEMA_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
   const SUPPORTED_TYPES = Object.freeze([
     "object",
