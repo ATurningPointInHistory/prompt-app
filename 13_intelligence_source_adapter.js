@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_source_adapter.js
    IDE-170 Intelligence Platform
-   Version: 1.4.1
+   Version: 1.5.0
    Phase: 2 Source Intake - Source Adapter Framework
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.4.1";
+  const VERSION = "1.5.0";
   const FRAMEWORK_CAPABILITY_ID = "IDE-170-SOURCE-ADAPTER-FRAMEWORK";
   const ADAPTER_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
   const ADAPTER_STATUSES = Object.freeze([
@@ -842,11 +842,12 @@
       const result = await global.ensureCurrentProjectAnalyzeSources({
         silent: settings.silent !== false
       });
-      return internal.buildResult(result && result.ready === true,
-        result && result.ready === true ? "REPOSITORY_SOURCES_READY" : "REPOSITORY_SOURCES_UNAVAILABLE",
-        result && result.status || "Unavailable",
+      const prepared = Boolean(result && (result.ready === true || result.ok === true));
+      return internal.buildResult(prepared,
+        prepared ? "REPOSITORY_SOURCES_READY" : "REPOSITORY_SOURCES_UNAVAILABLE",
+        result && result.status || (prepared ? "Ready" : "Unavailable"),
         { preparation: internal.clone(result) },
-        result && result.ready === true ? {} : {
+        prepared ? {} : {
           error: { message: "Current Project Sources could not be prepared.", category: "Source Failure" }
         });
     } catch (error) {
