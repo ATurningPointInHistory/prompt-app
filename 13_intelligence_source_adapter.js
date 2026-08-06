@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_source_adapter.js
    IDE-170 Intelligence Platform
-   Version: 1.3.0
+   Version: 1.4.0
    Phase: 2 Source Intake - Source Adapter Framework
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.3.0";
+  const VERSION = "1.4.0";
   const FRAMEWORK_CAPABILITY_ID = "IDE-170-SOURCE-ADAPTER-FRAMEWORK";
   const ADAPTER_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
   const ADAPTER_STATUSES = Object.freeze([
