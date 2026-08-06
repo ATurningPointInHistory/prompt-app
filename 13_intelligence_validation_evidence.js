@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation_evidence.js
    IDE-170 Intelligence Platform
-   Version: 1.4.0
+   Version: 1.4.1
    Architecture Decision: 011
    Phase: Validation Automation Foundation (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.4.0";
+  const VERSION = "1.4.1";
   const CAPABILITY_ID = "IDE-170-VALIDATION-EVIDENCE-PACKAGE";
   const PACKAGE_TYPE = "Immutable Validation Evidence Package";
 
@@ -41,6 +41,27 @@
 
   function jsonText(value) {
     return JSON.stringify(value, null, 2) + "\n";
+  }
+
+  function characterCount(value) {
+    return String(value == null ? "" : value).length;
+  }
+
+  function utf8ByteSize(value) {
+    const text = String(value == null ? "" : value);
+    if (typeof global.TextEncoder === "function") {
+      return new global.TextEncoder().encode(text).length;
+    }
+    if (typeof global.Blob === "function") {
+      try {
+        return new global.Blob([text]).size;
+      } catch (error) {
+        // Continue to deterministic UTF-8 fallback.
+      }
+    }
+    return encodeURIComponent(text).replace(/%[0-9A-F]{2}|./gi, function count(token) {
+      return token.length === 3 && token.charAt(0) === "%" ? "x" : token;
+    }).length;
   }
 
   function sanitizeFilePart(value) {
@@ -90,12 +111,20 @@
       artifacts["parsed-test-procedure.json"] = jsonText(parsed);
       artifacts["parser-warnings.json"] = jsonText(parsed.parserWarnings || []);
       artifacts["compiled-test-dataset.json"] = jsonText(dataset);
-      artifacts["owner-selections.json"] = jsonText(candidate.ownerSelections || run.ownerSelections || []);
+      artifacts["owner-selections.json"] = jsonText(run.ownerSelections || candidate.ownerSelections || []);
     } else {
       artifacts["test-dataset.json"] = jsonText(dataset);
     }
     const integrity = Object.keys(artifacts).sort().map(function mapArtifact(path) {
-      return { path: path, sha256: sha256(artifacts[path]), size: artifacts[path].length };
+      const content = artifacts[path];
+      const byteSize = utf8ByteSize(content);
+      return {
+        path: path,
+        sha256: sha256(content),
+        size: byteSize,
+        byteSize: byteSize,
+        characterCount: characterCount(content)
+      };
     });
     artifacts["integrity-hashes.json"] = jsonText({
       algorithm: "SHA-256",
@@ -108,11 +137,15 @@
 
   function buildManifest(run, dataset, artifacts) {
     const artifactEntries = Object.keys(artifacts).sort().map(function mapArtifact(path) {
+      const content = artifacts[path];
+      const byteSize = utf8ByteSize(content);
       return {
         path: path,
         mediaType: path.endsWith(".json") ? "application/json" : "text/plain",
-        size: artifacts[path].length,
-        sha256: sha256(artifacts[path]),
+        size: byteSize,
+        byteSize: byteSize,
+        characterCount: characterCount(content),
+        sha256: sha256(content),
         required: true
       };
     });
@@ -341,6 +374,13 @@
         const content = artifacts[entry.path];
         check("Artifact exists: " + entry.path, typeof content === "string", entry.path);
         check("Artifact Hash is valid: " + entry.path, typeof content === "string" && sha256(content) === entry.sha256, entry.sha256);
+        const actualByteSize = typeof content === "string" ? utf8ByteSize(content) : -1;
+        const expectedByteSize = Number.isFinite(Number(entry.byteSize)) ? Number(entry.byteSize) : Number(entry.size);
+        check("Artifact Byte Size is valid: " + entry.path, typeof content === "string" && actualByteSize === expectedByteSize, actualByteSize + "/" + expectedByteSize);
+        if (Object.prototype.hasOwnProperty.call(entry, "characterCount")) {
+          const actualCharacterCount = typeof content === "string" ? characterCount(content) : -1;
+          check("Artifact Character Count is valid: " + entry.path, actualCharacterCount === Number(entry.characterCount), actualCharacterCount + "/" + entry.characterCount);
+        }
       });
       const passed = checks.filter(function count(item) { return item.passed; }).length;
       return {
