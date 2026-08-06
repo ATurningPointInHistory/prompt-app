@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation.js
    IDE-170 Intelligence Platform
-   Version: 1.5.0
+   Version: 1.6.0
    Phase: 4 Evidence Graph - Independent Validation Gate
    ============================================================ */
 (function (global) {
@@ -15,7 +15,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.5.0";
+  const VERSION = "1.6.0";
   const VALIDATION_CAPABILITY_ID = "IDE-170-VALIDATION";
 
   function buildCheck(name, passed, detail, group, severity) {
@@ -74,11 +74,11 @@
         { capabilityId: "IDE-170-SOURCE-ADAPTER-FRAMEWORK", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: "1.2.0", optional: false },
         { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: "1.2.0", optional: false },
-        { capabilityId: "IDE-170-TEST-PROCEDURE-INTAKE", minimumVersion: "1.5.0", optional: false },
-        { capabilityId: "IDE-170-TEST-PROCEDURE-PARSER", minimumVersion: "1.5.0", optional: false },
-        { capabilityId: "IDE-170-VALIDATION-COMPILER", minimumVersion: "1.5.0", optional: false },
-        { capabilityId: "IDE-170-RELATIONSHIP-TYPE-REGISTRY", minimumVersion: "1.5.0", optional: false },
-        { capabilityId: "IDE-170-EVIDENCE-GRAPH", minimumVersion: "1.5.0", optional: false }
+        { capabilityId: "IDE-170-TEST-PROCEDURE-INTAKE", minimumVersion: "1.6.0", optional: false },
+        { capabilityId: "IDE-170-TEST-PROCEDURE-PARSER", minimumVersion: "1.6.0", optional: false },
+        { capabilityId: "IDE-170-VALIDATION-COMPILER", minimumVersion: "1.6.0", optional: false },
+        { capabilityId: "IDE-170-RELATIONSHIP-TYPE-REGISTRY", minimumVersion: "1.6.0", optional: false },
+        { capabilityId: "IDE-170-EVIDENCE-GRAPH", minimumVersion: "1.6.0", optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-VALIDATION-RESULT"],
       provides: ["Core Validation", "Source Intake Validation", "Canonical Model Validation", "Repository Snapshot Validation", "Snapshot Chain Validation", "Release Gate", "Regression Validation"],
@@ -603,23 +603,27 @@
         "Status and Release"
       );
       check(
-        "Phase 4 Evidence Graph is implemented",
+        "Phase 5 Repository and Workflow Understanding is implemented",
         status.phase4Started === true &&
           status.phase4Complete === true &&
-          status.phase5Started === false &&
-          status.progress === 50,
+          status.phase5Started === true &&
+          status.phase5Complete === true &&
+          status.phase6Started === false &&
+          status.progress === 62.5,
         JSON.stringify({
           phase4Started: status.phase4Started,
           phase4Complete: status.phase4Complete,
           phase5Started: status.phase5Started,
+          phase5Complete: status.phase5Complete,
+          phase6Started: status.phase6Started,
           progress: status.progress
         }),
         "Status and Release"
       );
       check(
-        "Phase 5 remains not started",
-        status.phase5Started === false,
-        String(status.phase5Started),
+        "Phase 6 remains not started",
+        status.phase6Started === false,
+        String(status.phase6Started),
         "Status and Release"
       );
       check(
