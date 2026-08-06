@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_capability_registry.js
    IDE-170 Intelligence Platform
-   Version: 1.2.0
+   Version: 1.3.0
    Phase: 2 Governed Capability Registry - Governed Capability Registry
    ============================================================ */
 (function (global) {
@@ -15,7 +15,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.2.0";
+  const VERSION = "1.3.0";
   const CAPABILITY_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
   const SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
   const ALLOWED_STATUSES = Object.freeze([
