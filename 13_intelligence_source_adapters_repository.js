@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_source_adapters_repository.js
    IDE-170 Intelligence Platform
-   Version: 1.4.0
+   Version: 1.4.1
    Phase: 2 Source Intake - Repository Source Adapters
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -15,7 +15,7 @@
   }
 
   const internal = namespace.__internal;
-  const VERSION = "1.4.0";
+  const VERSION = "1.4.1";
   const ADAPTER_IDS = Object.freeze({
     repository: "IDE-170-ADAPTER-REPOSITORY",
     project: "IDE-170-ADAPTER-PROJECT",
