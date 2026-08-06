@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_source_adapters_platform.js
    IDE-170 Intelligence Platform
-   Version: 1.4.1
+   Version: 1.5.0
    Phase: 2 Source Intake - Platform Source Adapters
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -15,7 +15,7 @@
   }
 
   const internal = namespace.__internal;
-  const VERSION = "1.4.1";
+  const VERSION = "1.5.0";
   const ADAPTER_IDS = Object.freeze({
     architecture: "IDE-170-ADAPTER-ARCHITECTURE",
     workflow: "IDE-170-ADAPTER-WORKFLOW"
