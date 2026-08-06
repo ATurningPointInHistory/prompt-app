@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_platform_core.js
    IDE-170 Intelligence Platform
-   Version: 1.4.1
+   Version: 1.5.0
    Phase: Test Procedure Intake and Validation Compiler
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -10,13 +10,14 @@
 
   const COMPONENT_ID = "IDE-170";
   const COMPONENT_NAME = "Intelligence Platform";
-  const VERSION = "1.4.1";
+  const VERSION = "1.5.0";
   const SCHEMA_VERSION = "1.0.0";
   const DESIGN_FREEZE_VERSION = "1.0.0";
-  const IMPLEMENTATION_PHASE = "Test Procedure Intake and Validation Compiler (Pre-Phase 4)";
+  const IMPLEMENTATION_PHASE = "Phase 4 Evidence Graph";
   const PHASE1_RELEASE_FROZEN = true;
   const PHASE2_RELEASE_FROZEN = true;
   const PHASE3_RELEASE_FROZEN = true;
+  const PROCEDURE_COMPILER_RELEASE_FROZEN = true;
   const MAX_SESSIONS = 100;
   const MAX_AUDIT_RECORDS = 1000;
 
@@ -63,6 +64,8 @@
         testProcedures: new Map(),
         parsedTestProcedures: new Map(),
         validationDatasetCandidates: new Map(),
+        relationshipTypes: new Map(),
+        evidenceGraphSnapshots: new Map(),
         latestSourceIntakeId: null,
         latestCanonicalSnapshotId: null,
         latestRepositorySnapshotId: null,
@@ -73,9 +76,11 @@
         latestTestProcedureId: null,
         latestParsedTestProcedureId: null,
         latestValidationDatasetCandidateId: null,
+        latestEvidenceGraphSnapshotId: null,
         activeImportedProcedureDatasetId: null,
         lastAutomationValidation: null,
         lastProcedureValidation: null,
+        lastEvidenceGraphValidation: null,
         audits: [],
         sequence: 0,
         initialized: false,
@@ -107,6 +112,8 @@
   if (!(state.testProcedures instanceof Map)) state.testProcedures = new Map();
   if (!(state.parsedTestProcedures instanceof Map)) state.parsedTestProcedures = new Map();
   if (!(state.validationDatasetCandidates instanceof Map)) state.validationDatasetCandidates = new Map();
+  if (!(state.relationshipTypes instanceof Map)) state.relationshipTypes = new Map();
+  if (!(state.evidenceGraphSnapshots instanceof Map)) state.evidenceGraphSnapshots = new Map();
   if (!Array.isArray(state.audits)) state.audits = [];
   if (!Object.prototype.hasOwnProperty.call(state, "latestSourceIntakeId")) state.latestSourceIntakeId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestCanonicalSnapshotId")) state.latestCanonicalSnapshotId = null;
@@ -118,9 +125,11 @@
   if (!Object.prototype.hasOwnProperty.call(state, "latestTestProcedureId")) state.latestTestProcedureId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestParsedTestProcedureId")) state.latestParsedTestProcedureId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestValidationDatasetCandidateId")) state.latestValidationDatasetCandidateId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestEvidenceGraphSnapshotId")) state.latestEvidenceGraphSnapshotId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "activeImportedProcedureDatasetId")) state.activeImportedProcedureDatasetId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastAutomationValidation")) state.lastAutomationValidation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastProcedureValidation")) state.lastProcedureValidation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastEvidenceGraphValidation")) state.lastEvidenceGraphValidation = null;
 
   function nowIso() {
     return new Date().toISOString();
@@ -585,8 +594,11 @@
       sourceAdapterFramework: Boolean(namespace.modules && namespace.modules.sourceAdapterFramework),
       repositorySourceAdapters: Boolean(namespace.modules && namespace.modules.repositorySourceAdapters),
       platformSourceAdapters: Boolean(namespace.modules && namespace.modules.platformSourceAdapters),
+      relationshipSourceAdapter: Boolean(namespace.modules && namespace.modules.relationshipSourceAdapter),
       canonicalModel: Boolean(namespace.modules && namespace.modules.canonicalModel),
       repositorySnapshot: Boolean(namespace.modules && namespace.modules.repositorySnapshot),
+      relationshipRegistry: Boolean(namespace.modules && namespace.modules.relationshipRegistry),
+      evidenceGraph: Boolean(namespace.modules && namespace.modules.evidenceGraph),
       testDatasetRegistry: Boolean(namespace.modules && namespace.modules.testDatasetRegistry),
       validationAutomation: Boolean(namespace.modules && namespace.modules.validationAutomation),
       validationEvidence: Boolean(namespace.modules && namespace.modules.validationEvidence),
@@ -634,15 +646,15 @@
         results.ideRegistry = global.registerIdeComponent({
           id: COMPONENT_ID,
           title: COMPONENT_NAME,
-          summary: "実機検証手順を取込み、解析・警告付き選択実行・期待結果比較・Evidence ZIP保存を行うIntelligence Platform。Pre-Phase 4。",
+          summary: "Canonical SnapshotからFact Graph・Candidate Graph・Evidence Indexを生成し、Immutable GraphとしてFreezeするIntelligence Platform。Phase 4。",
           icon: "🧠",
           version: VERSION,
-          status: "Pre-Phase 4",
+          status: "Phase 4",
           ready: state.initialized === true,
-          progress: 37.5,
+          progress: 50,
           health: state.lastValidation && Number(state.lastValidation.health) || 0,
           launcher: "openIntelligenceTestProcedureConsole",
-          validator: "validateIntelligenceTestProcedureCompiler",
+          validator: "validateIntelligenceEvidenceGraph",
           probe: "getIntelligencePlatformStatus",
           category: "Intelligence"
         }) === true;
@@ -702,8 +714,11 @@
           !dependencyStatus.required.sourceAdapterFramework ||
           !dependencyStatus.required.repositorySourceAdapters ||
           !dependencyStatus.required.platformSourceAdapters ||
+          !dependencyStatus.required.relationshipSourceAdapter ||
           !dependencyStatus.required.canonicalModel ||
           !dependencyStatus.required.repositorySnapshot ||
+          !dependencyStatus.required.relationshipRegistry ||
+          !dependencyStatus.required.evidenceGraph ||
           !dependencyStatus.required.testDatasetRegistry ||
           !dependencyStatus.required.validationAutomation ||
           !dependencyStatus.required.validationEvidence ||
@@ -716,7 +731,7 @@
         return buildResult(false, "IDE170_DEPENDENCY_MISSING", "Blocked", {
           dependencies: dependencyStatus
         }, {
-          error: { message: "IDE-170 Test Procedure Intake and Validation Compiler modules are not fully loaded.", category: "Dependency Failure" }
+          error: { message: "IDE-170 Phase 4 Evidence Graph modules are not fully loaded.", category: "Dependency Failure" }
         });
       }
 
@@ -745,6 +760,11 @@
         if (!platformAdapterResult.ok) throw new Error("Platform Source Adapter initialization failed.");
       }
 
+      if (namespace.api && typeof namespace.api.initializeRelationshipSourceAdapter === "function") {
+        const relationshipAdapterResult = namespace.api.initializeRelationshipSourceAdapter();
+        if (!relationshipAdapterResult.ok) throw new Error("Relationship Source Adapter initialization failed.");
+      }
+
       if (namespace.api && typeof namespace.api.initializeCanonicalModel === "function") {
         const canonicalModelResult = namespace.api.initializeCanonicalModel();
         if (!canonicalModelResult.ok) throw new Error("Canonical Model initialization failed.");
@@ -753,6 +773,16 @@
       if (namespace.api && typeof namespace.api.initializeRepositorySnapshot === "function") {
         const repositorySnapshotResult = namespace.api.initializeRepositorySnapshot();
         if (!repositorySnapshotResult.ok) throw new Error("Repository Snapshot initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeRelationshipRegistry === "function") {
+        const relationshipRegistryResult = namespace.api.initializeRelationshipRegistry();
+        if (!relationshipRegistryResult.ok) throw new Error("Relationship Registry initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeEvidenceGraph === "function") {
+        const evidenceGraphResult = namespace.api.initializeEvidenceGraph();
+        if (!evidenceGraphResult.ok) throw new Error("Evidence Graph initialization failed.");
       }
 
       if (namespace.api && typeof namespace.api.initializeTestDatasetRegistry === "function") {
@@ -828,28 +858,19 @@
   }
 
   function getReleaseStatus() {
-    const phaseValidation = state.lastValidation;
-    const automationValidation = state.lastAutomationValidation;
-    const procedureValidation = state.lastProcedureValidation;
+    const graphValidation = state.lastEvidenceGraphValidation;
     const dependencyStatus = getDependencyStatus();
-    const androidValidation = procedureValidation && procedureValidation.androidRealDeviceValidation;
+    const androidValidation = graphValidation && graphValidation.androidRealDeviceValidation;
     const androidPassed = Boolean(androidValidation && androidValidation.passed === true);
-    const phaseCodePassed = Boolean(
-      phaseValidation && phaseValidation.valid === true && phaseValidation.failed === 0
-    );
-    const automationCodePassed = Boolean(
-      automationValidation && automationValidation.valid === true && automationValidation.failed === 0
-    );
-    const procedureCodePassed = Boolean(
-      procedureValidation && procedureValidation.valid === true && procedureValidation.failed === 0
+    const graphCodePassed = Boolean(
+      graphValidation && graphValidation.valid === true && graphValidation.failed === 0
     );
     const releaseReady = Boolean(
       state.initialized &&
       dependencyStatus.requiredReady &&
       PHASE3_RELEASE_FROZEN &&
-      phaseCodePassed &&
-      automationCodePassed &&
-      procedureCodePassed &&
+      PROCEDURE_COMPILER_RELEASE_FROZEN &&
+      graphCodePassed &&
       androidPassed
     );
 
@@ -858,28 +879,28 @@
       version: VERSION,
       phase: IMPLEMENTATION_PHASE,
       releaseStatus: releaseReady
-        ? "Test Procedure Intake and Validation Compiler Ready"
-        : procedureCodePassed && !androidPassed
-          ? "Conditional - Test Procedure Compiler Android Pending"
-          : procedureValidation
+        ? "Phase 4 Evidence Graph Ready"
+        : graphCodePassed && !androidPassed
+          ? "Conditional - Phase 4 Android Validation Pending"
+          : graphValidation
             ? "Blocked"
-            : "Test Procedure Compiler Validation Not Run",
+            : "Phase 4 Validation Not Run",
       releaseAllowed: releaseReady,
-      validationStatus: procedureValidation ? procedureValidation.status : "Not Run",
-      health: procedureValidation && Number.isFinite(Number(procedureValidation.health))
-        ? Number(procedureValidation.health)
+      validationStatus: graphValidation ? graphValidation.status : "Not Run",
+      health: graphValidation && Number.isFinite(Number(graphValidation.health))
+        ? Number(graphValidation.health)
         : null,
       independentValidationRequired: true,
-      phase3CodeValidationPassed: phaseCodePassed,
-      automationFoundationFrozen: automationCodePassed,
-      procedureCompilerCodeValidationPassed: procedureCodePassed,
+      graphCodeValidationPassed: graphCodePassed,
       androidRealDevicePassed: androidPassed,
       phase1ReleaseFrozen: PHASE1_RELEASE_FROZEN,
       phase2ReleaseFrozen: PHASE2_RELEASE_FROZEN,
       phase3ReleaseFrozen: PHASE3_RELEASE_FROZEN,
+      procedureCompilerReleaseFrozen: PROCEDURE_COMPILER_RELEASE_FROZEN,
       phase2Allowed: PHASE1_RELEASE_FROZEN,
       phase3Allowed: PHASE2_RELEASE_FROZEN,
-      phase4Allowed: releaseReady,
+      phase4Allowed: PROCEDURE_COMPILER_RELEASE_FROZEN,
+      phase5Allowed: releaseReady,
       checkedAt: nowIso()
     };
   }
@@ -897,7 +918,7 @@
       designFreezeVersion: DESIGN_FREEZE_VERSION,
       implementationPhase: IMPLEMENTATION_PHASE,
       implementationStatus: state.initialized
-        ? "Test Procedure Intake and Validation Compiler Implemented"
+        ? "Phase 4 Evidence Graph Implemented"
         : "Loaded",
       status: state.lastError
         ? "Degraded"
@@ -907,10 +928,11 @@
       ready: Boolean(state.initialized && dependencies.requiredReady && !state.lastError),
       available: true,
       initialized: state.initialized === true,
-      progress: 37.5,
-      phaseProgress: state.initialized ? 100 : 37.5,
+      progress: 50,
+      phaseProgress: state.initialized ? 100 : 50,
       validationAutomationFoundationProgress: 100,
-      testProcedureCompilerProgress: state.initialized ? 100 : 0,
+      testProcedureCompilerProgress: 100,
+      evidenceGraphProgress: state.initialized ? 100 : 0,
       modules: clone(dependencies.required),
       capabilityCount: state.capabilities.size,
       schemaCount: state.schemas.size,
@@ -929,12 +951,15 @@
       testProcedureCount: state.testProcedures.size,
       parsedTestProcedureCount: state.parsedTestProcedures.size,
       validationDatasetCandidateCount: state.validationDatasetCandidates.size,
+      relationshipTypeCount: state.relationshipTypes.size,
+      evidenceGraphCount: state.evidenceGraphSnapshots.size,
       latestTestDatasetId: state.latestTestDatasetId,
       latestValidationRunId: state.latestValidationRunId,
       latestValidationEvidencePackageId: state.latestValidationEvidencePackageId,
       latestTestProcedureId: state.latestTestProcedureId,
       latestParsedTestProcedureId: state.latestParsedTestProcedureId,
       latestValidationDatasetCandidateId: state.latestValidationDatasetCandidateId,
+      latestEvidenceGraphSnapshotId: state.latestEvidenceGraphSnapshotId,
       activeImportedProcedureDatasetId: state.activeImportedProcedureDatasetId,
       automationValidationStatus: state.lastAutomationValidation
         ? state.lastAutomationValidation.status
@@ -968,8 +993,10 @@
       validationAutomationFoundationStarted: true,
       validationAutomationFoundationComplete: true,
       testProcedureCompilerStarted: true,
-      testProcedureCompilerComplete: state.initialized === true && dependencies.requiredReady,
-      phase4Started: false,
+      testProcedureCompilerComplete: true,
+      phase4Started: true,
+      phase4Complete: state.initialized === true && dependencies.requiredReady,
+      phase5Started: false,
       lastError: clone(state.lastError),
       updatedAt: state.updatedAt || nowIso()
     };
@@ -1007,6 +1034,8 @@
     IMPLEMENTATION_PHASE: IMPLEMENTATION_PHASE,
     PHASE1_RELEASE_FROZEN: PHASE1_RELEASE_FROZEN,
     PHASE2_RELEASE_FROZEN: PHASE2_RELEASE_FROZEN,
+    PHASE3_RELEASE_FROZEN: PHASE3_RELEASE_FROZEN,
+    PROCEDURE_COMPILER_RELEASE_FROZEN: PROCEDURE_COMPILER_RELEASE_FROZEN,
     SESSION_STATES: SESSION_STATES,
     SESSION_TRANSITIONS: SESSION_TRANSITIONS
   });
