@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation_compiler.js
    IDE-170 Intelligence Platform
-   Version: 1.4.0
+   Version: 1.4.1
    Architecture Decision: 011 v1.1.0
    Phase: Test Procedure Intake and Validation Compiler (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.4.0";
+  const VERSION = "1.4.1";
   const CAPABILITY_ID = "IDE-170-VALIDATION-COMPILER";
 
   if (!(state.validationDatasetCandidates instanceof Map)) state.validationDatasetCandidates = new Map();
@@ -814,6 +814,55 @@ blocked = true
       check("Original Procedure is stored in Evidence", Boolean(evidenceRecord && Object.keys(evidenceRecord.artifacts).some(function path(name) { return name.indexOf("original-test-procedure.") === 0; })), evidenceRecord && Object.keys(evidenceRecord.artifacts), "Evidence");
       check("Parsed Procedure is stored in Evidence", Boolean(evidenceRecord && evidenceRecord.artifacts["parsed-test-procedure.json"]), "parsed-test-procedure.json", "Evidence");
       check("Owner Selections are stored in Evidence", Boolean(evidenceRecord && evidenceRecord.artifacts["owner-selections.json"]), "owner-selections.json", "Evidence");
+      const ownerSelectionEvidence = evidenceRecord && evidenceRecord.artifacts["owner-selections.json"]
+        ? JSON.parse(evidenceRecord.artifacts["owner-selections.json"])
+        : [];
+      const selectedOwnerSelections = ownerSelectionEvidence.filter(function selected(item) { return item.selected === true; });
+      check(
+        "Owner Selection Evidence reflects execution results",
+        Boolean(selectedOwnerSelections.length && selectedOwnerSelections.every(function executed(item) {
+          return item.executed === true && item.result !== "Not Run" && Boolean(item.caseId) && Boolean(item.executedAt);
+        })),
+        JSON.stringify(selectedOwnerSelections),
+        "Evidence Metadata"
+      );
+      const originalProcedurePath = evidenceRecord && Object.keys(evidenceRecord.artifacts).find(function findOriginal(name) {
+        return name.indexOf("original-test-procedure.") === 0;
+      });
+      const originalProcedureEntry = evidenceRecord && originalProcedurePath
+        ? evidenceRecord.manifest.artifacts.find(function findEntry(item) { return item.path === originalProcedurePath; })
+        : null;
+      const originalProcedureContent = evidenceRecord && originalProcedurePath
+        ? evidenceRecord.artifacts[originalProcedurePath]
+        : null;
+      const originalProcedureByteSize = typeof originalProcedureContent === "string"
+        ? (typeof global.TextEncoder === "function"
+          ? new global.TextEncoder().encode(originalProcedureContent).length
+          : new global.Blob([originalProcedureContent]).size)
+        : -1;
+      check(
+        "Evidence Manifest stores UTF-8 byte size and character count",
+        Boolean(
+          originalProcedureEntry &&
+          originalProcedureEntry.size === originalProcedureByteSize &&
+          originalProcedureEntry.byteSize === originalProcedureByteSize &&
+          originalProcedureEntry.characterCount === originalProcedureContent.length
+        ),
+        JSON.stringify(originalProcedureEntry),
+        "Evidence Metadata"
+      );
+      check(
+        "Test Procedure UI supports non-blocking manual confirmation",
+        Boolean(
+          namespace.modules.testProcedureUI &&
+          namespace.modules.testProcedureUI.nonBlockingMinimize === true &&
+          namespace.modules.testProcedureUI.persistentCloseState === true &&
+          typeof namespace.minimizeTestProcedureValidationConsole === "function" &&
+          typeof namespace.restoreTestProcedureValidationConsole === "function"
+        ),
+        JSON.stringify(namespace.modules.testProcedureUI),
+        "User Interface"
+      );
       check("Automatic Startup execution remains prohibited", namespace.modules.validationAutomation.automaticStartupExecution === false, String(namespace.modules.validationAutomation.automaticStartupExecution), "Safety");
       check("Repository automatic mutation remains prohibited", namespace.getStatus().directRepositoryMutationAllowed === false, String(namespace.getStatus().directRepositoryMutationAllowed), "Safety");
       check("GitHub automatic reflection remains prohibited", namespace.getStatus().githubAutomaticReflectionAllowed === false, String(namespace.getStatus().githubAutomaticReflectionAllowed), "Safety");
