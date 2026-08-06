@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation_automation.js
    IDE-170 Intelligence Platform
-   Version: 1.3.0
+   Version: 1.4.0
    Architecture Decision: 011
    Phase: Validation Automation Foundation (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.3.0";
+  const VERSION = "1.4.0";
   const CAPABILITY_ID = "IDE-170-VALIDATION-AUTOMATION";
   const RUN_STATUSES = Object.freeze([
     "Created", "Preparing", "Running", "Comparing", "Completed",
@@ -156,6 +156,19 @@
       else if (operator === "greaterThan") passed = Number(expressionValue) > Number(expression.value);
       else if (operator === "lessThan") passed = Number(expressionValue) < Number(expression.value);
       if (!passed) differences.push({ path: expression.path || "$", expected: expression, actual: expressionValue });
+    } else if (comparator === "One Of") {
+      const values = Array.isArray(expected.values) ? expected.values : [];
+      passed = values.some(function one(value) { return deepEqual(value, actual); });
+      if (!passed) differences.push({ path: expected.path || "$", expected: { oneOf: values }, actual: actual });
+    } else if (comparator === "All") {
+      const conditions = Array.isArray(expected.conditions) ? expected.conditions : [];
+      const results = conditions.map(function compareCondition(condition) {
+        return compareExpectedResult(condition, actualInput);
+      });
+      passed = conditions.length > 0 && results.every(function all(result) { return result.passed === true; });
+      results.forEach(function collect(result) {
+        if (!result.passed) differences.push.apply(differences, result.differences);
+      });
     }
 
     return {
@@ -497,10 +510,16 @@
       validationRunId: validationRunId,
       componentId: namespace.componentId,
       componentVersion: namespace.version,
-      architectureDecisionVersion: "011-v1.0.0",
+      architectureDecisionVersion: "011-v1.1.0",
       datasetId: dataset.datasetId,
       datasetVersion: dataset.version,
       datasetHash: dataset.datasetHash,
+      sourceProcedureId: dataset.sourceProcedureId || null,
+      sourceProcedureVersion: dataset.sourceProcedureVersion || null,
+      sourceProcedureHash: dataset.sourceProcedureHash || null,
+      parsedProcedureId: dataset.parsedProcedureId || null,
+      candidateId: dataset.candidateId || null,
+      ownerSelections: Array.isArray(dataset.ownerSelections) ? internal.clone(dataset.ownerSelections) : [],
       status: "Preparing",
       frozen: false,
       selectedCaseIds: [],
@@ -838,7 +857,11 @@
           scriptCount: scripts.length,
           includesDatasetRegistry: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_dataset_registry.js"); }),
           includesAutomation: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_automation.js"); }),
-          includesEvidence: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_evidence.js"); })
+          includesEvidence: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_evidence.js"); }),
+          includesProcedureIntake: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_intake.js"); }),
+          includesProcedureParser: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_parser.js"); }),
+          includesValidationCompiler: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_compiler.js"); }),
+          includesProcedureUI: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_ui.js"); })
         };
       }
       const source = typeof global.AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE === "string"
@@ -854,7 +877,11 @@
         scriptCount: scripts.length,
         includesDatasetRegistry: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_dataset_registry.js"); }),
         includesAutomation: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_automation.js"); }),
-        includesEvidence: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_evidence.js"); })
+        includesEvidence: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_evidence.js"); }),
+        includesProcedureIntake: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_intake.js"); }),
+        includesProcedureParser: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_parser.js"); }),
+        includesValidationCompiler: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_compiler.js"); }),
+        includesProcedureUI: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_ui.js"); })
       };
     });
     add({ targetId: "IDE-170-TARGET-ECHO", name: "Echo", executionTypes: ["Function"] }, function echoTarget(input) {
