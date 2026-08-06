@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_test_dataset_registry.js
    IDE-170 Intelligence Platform
-   Version: 1.3.0
+   Version: 1.4.0
    Architecture Decision: 011
    Phase: Validation Automation Foundation (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.3.0";
+  const VERSION = "1.4.0";
   const CAPABILITY_ID = "IDE-170-TEST-DATASET-REGISTRY";
   const DATASET_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
   const CASE_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
@@ -24,13 +24,15 @@
   const EXECUTION_TYPES = Object.freeze([
     "Function", "Async Function", "Status Probe", "Validation API",
     "Schema Validation", "Dataset Validation", "Snapshot Validation",
-    "Integrity Validation", "Regression Probe", "Manual Confirmation"
+    "Integrity Validation", "Regression Probe", "Download Generation",
+    "Owner Approved Code", "Manual Confirmation"
   ]);
   const SEVERITIES = Object.freeze(["Critical", "High", "Medium", "Low"]);
   const COMPARATORS = Object.freeze([
     "Exact", "Partial Object", "Schema", "Boolean Expression", "Numeric Range",
     "Array Ordered", "Array Unordered", "Contains", "Not Contains",
-    "Required Fields", "Forbidden Fields", "Type", "Error Code", "Status"
+    "Required Fields", "Forbidden Fields", "Type", "Error Code", "Status",
+    "All", "One Of"
   ]);
 
   if (!(state.testDatasets instanceof Map)) state.testDatasets = new Map();
@@ -71,6 +73,12 @@
       expression: internal.isPlainObject(source.expression)
         ? internal.clone(source.expression)
         : null,
+      conditions: Array.isArray(source.conditions)
+        ? source.conditions.map(normalizeExpected)
+        : [],
+      values: Array.isArray(source.values)
+        ? internal.clone(source.values)
+        : [],
       options: internal.isPlainObject(source.options)
         ? internal.clone(source.options)
         : {}
@@ -88,6 +96,10 @@
       severity: internal.text(source.severity, "High"),
       target: internal.canonicalId(source.target),
       executionType: internal.text(source.executionType, "Function"),
+      executionPolicy: internal.text(source.executionPolicy, "Auto Executable"),
+      warningLevel: internal.text(source.warningLevel, "") || null,
+      warningReasons: internal.unique(source.warningReasons),
+      selectedByOwner: source.selectedByOwner === true,
       input: internal.isPlainObject(source.input) ? internal.clone(source.input) : {},
       preconditions: Array.isArray(source.preconditions) ? internal.clone(source.preconditions) : [],
       expected: normalizeExpected(source.expected),
@@ -116,6 +128,13 @@
       targetPhase: internal.text(source.targetPhase, "Validation Automation Foundation"),
       status: internal.text(source.status, "Draft"),
       description: internal.text(source.description || source.summary, ""),
+      sourceProcedureId: internal.text(source.sourceProcedureId, "") || null,
+      sourceProcedureVersion: internal.text(source.sourceProcedureVersion, "") || null,
+      sourceProcedureHash: internal.text(source.sourceProcedureHash, "") || null,
+      parsedProcedureId: internal.text(source.parsedProcedureId, "") || null,
+      candidateId: internal.text(source.candidateId, "") || null,
+      ownerSelections: Array.isArray(source.ownerSelections) ? internal.clone(source.ownerSelections) : [],
+      warnings: internal.unique(source.warnings),
       testCases: Array.isArray(source.testCases)
         ? source.testCases.map(normalizeTestCase)
         : [],
@@ -160,6 +179,12 @@
       check(label + " severity is governed", SEVERITIES.includes(testCase.severity), testCase.severity, "testCases.severity");
       check(label + " execution type is governed", EXECUTION_TYPES.includes(testCase.executionType), testCase.executionType, "testCases.executionType");
       check(label + " comparator is governed", COMPARATORS.includes(testCase.expected.comparator), testCase.expected.comparator, "testCases.expected.comparator");
+      check(
+        label + " Warning Selectable requires Owner selection",
+        testCase.executionPolicy !== "Warning Selectable" || testCase.enabled === false || testCase.selectedByOwner === true,
+        testCase.executionPolicy + "/selectedByOwner=" + testCase.selectedByOwner,
+        "testCases.selectedByOwner"
+      );
       check(
         label + " target is present or Manual Confirmation",
         testCase.executionType === "Manual Confirmation" || Boolean(testCase.target),
@@ -420,7 +445,7 @@
       name: "IDE-170 Validation Automation Foundation",
       version: VERSION,
       componentId: "IDE-170",
-      targetPhase: "Validation Automation Foundation (Pre-Phase 4)",
+      targetPhase: "Test Procedure Intake and Validation Compiler (Pre-Phase 4)",
       status: "Ready",
       description: "Deterministic tests for Decision 011 foundation and required regressions.",
       testCases: [
@@ -502,11 +527,15 @@
             comparator: "Partial Object",
             value: {
               valid: true,
-              version: "1.3.0",
-              scriptCount: 130,
+              version: "1.4.0",
+              scriptCount: 134,
               includesDatasetRegistry: true,
               includesAutomation: true,
-              includesEvidence: true
+              includesEvidence: true,
+              includesProcedureIntake: true,
+              includesProcedureParser: true,
+              includesValidationCompiler: true,
+              includesProcedureUI: true
             }
           }
         },
@@ -541,7 +570,7 @@
         }
       ],
       metadata: {
-        architectureDecision: "IDE-170-ARCHITECTURE-DECISION-011",
+        architectureDecision: "IDE-170-ARCHITECTURE-DECISION-011-v1.1.0",
         automaticExecutionOnStartup: false,
         repositoryMutationAllowed: false
       }
