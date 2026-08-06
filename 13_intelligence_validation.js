@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation.js
    IDE-170 Intelligence Platform
-   Version: 1.2.0
+   Version: 1.3.0
    Phase: 3 Repository Snapshot - Independent Validation Gate
    ============================================================ */
 (function (global) {
@@ -15,7 +15,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.2.0";
+  const VERSION = "1.3.0";
   const VALIDATION_CAPABILITY_ID = "IDE-170-VALIDATION";
 
   function buildCheck(name, passed, detail, group, severity) {
@@ -628,6 +628,32 @@
           "Existing Global API Regression"
         );
       });
+
+      if (typeof global.getAIDevelopmentWorkflowStatus === "function") {
+        const ide160Status = global.getAIDevelopmentWorkflowStatus();
+        const requiredIde160Modules = [
+          "core", "storage", "state", "planning", "adapter", "execution",
+          "decision", "approval", "monitoring", "package", "completion",
+          "integration", "validation"
+        ];
+        check(
+          "IDE-160 runtime is fully Ready",
+          Boolean(
+            ide160Status &&
+            ide160Status.available === true &&
+            ide160Status.initialized === true &&
+            ide160Status.ready === true &&
+            ide160Status.status === "Ready" &&
+            Number(ide160Status.progress) === 100 &&
+            ide160Status.modules &&
+            requiredIde160Modules.every(function moduleReady(moduleId) {
+              return ide160Status.modules[moduleId] === true;
+            })
+          ),
+          JSON.stringify(ide160Status),
+          "Existing Global API Regression"
+        );
+      }
 
       if (typeof global.getDevelopmentStatus === "function") {
         const developmentStatus = global.getDevelopmentStatus("IDE-170");
