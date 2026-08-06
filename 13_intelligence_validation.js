@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation.js
    IDE-170 Intelligence Platform
-   Version: 1.4.0
+   Version: 1.4.1
    Phase: Test Procedure Intake and Validation Compiler - Independent Validation Gate
    ============================================================ */
 (function (global) {
@@ -15,7 +15,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.4.0";
+  const VERSION = "1.4.1";
   const VALIDATION_CAPABILITY_ID = "IDE-170-VALIDATION";
 
   function buildCheck(name, passed, detail, group, severity) {
@@ -74,9 +74,9 @@
         { capabilityId: "IDE-170-SOURCE-ADAPTER-FRAMEWORK", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: "1.2.0", optional: false },
         { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: "1.2.0", optional: false },
-        { capabilityId: "IDE-170-TEST-PROCEDURE-INTAKE", minimumVersion: "1.4.0", optional: false },
-        { capabilityId: "IDE-170-TEST-PROCEDURE-PARSER", minimumVersion: "1.4.0", optional: false },
-        { capabilityId: "IDE-170-VALIDATION-COMPILER", minimumVersion: "1.4.0", optional: false }
+        { capabilityId: "IDE-170-TEST-PROCEDURE-INTAKE", minimumVersion: "1.4.1", optional: false },
+        { capabilityId: "IDE-170-TEST-PROCEDURE-PARSER", minimumVersion: "1.4.1", optional: false },
+        { capabilityId: "IDE-170-VALIDATION-COMPILER", minimumVersion: "1.4.1", optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-VALIDATION-RESULT"],
       provides: ["Core Validation", "Source Intake Validation", "Canonical Model Validation", "Repository Snapshot Validation", "Snapshot Chain Validation", "Release Gate", "Regression Validation"],
