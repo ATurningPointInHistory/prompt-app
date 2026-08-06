@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_test_procedure_ui.js
    IDE-170 Intelligence Platform
-   Version: 1.4.0
+   Version: 1.4.1
    Architecture Decision: 011 v1.1.0
    Phase: Test Procedure Intake and Validation Compiler (Pre-Phase 4)
    ============================================================ */
@@ -15,7 +15,7 @@
   }
 
   const internal = namespace.__internal;
-  const VERSION = "1.4.0";
+  const VERSION = "1.4.1";
   const CAPABILITY_ID = "IDE-170-TEST-PROCEDURE-UI";
   const UI_ID = "ide170-test-procedure-console";
 
@@ -26,6 +26,7 @@
     datasetId: null,
     lastRunResult: null,
     manualConfirmationState: {},
+    displayMode: "expanded",
     busy: false
   };
 
@@ -46,7 +47,8 @@
 #${UI_ID}{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.72);display:flex;align-items:stretch;justify-content:center;padding:10px;font-family:system-ui,-apple-system,sans-serif;color:#eef2f7}
 #${UI_ID} .ide170-panel{width:min(980px,100%);height:100%;background:#111827;border:1px solid #374151;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45)}
 #${UI_ID} .ide170-header{display:flex;gap:10px;align-items:center;padding:12px 14px;background:#0b1220;border-bottom:1px solid #374151}
-#${UI_ID} .ide170-title{font-weight:700;flex:1}
+#${UI_ID} .ide170-title{font-weight:700;flex:1;min-width:0}
+#${UI_ID} .ide170-dock-summary{font-size:12px;color:#93c5fd;white-space:nowrap}
 #${UI_ID} .ide170-body{overflow:auto;padding:14px;display:grid;gap:14px}
 #${UI_ID} .ide170-section{border:1px solid #374151;border-radius:10px;padding:12px;background:#182131}
 #${UI_ID} .ide170-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -70,13 +72,84 @@
 #${UI_ID} .ide170-footer{padding:10px 14px;background:#0b1220;border-top:1px solid #374151;display:flex;gap:8px;flex-wrap:wrap}
 #${UI_ID} .ide170-progress{height:8px;background:#263247;border-radius:999px;overflow:hidden;margin-top:8px}
 #${UI_ID} .ide170-progress>span{display:block;height:100%;width:0;background:#3b82f6;transition:width .15s}
-@media(max-width:600px){#${UI_ID}{padding:0}#${UI_ID} .ide170-panel{border-radius:0;border:0}#${UI_ID} .ide170-body{padding:10px}}
+#${UI_ID} [data-role=restore]{display:none}
+#${UI_ID}.ide170-minimized{inset:auto 8px 8px auto;width:min(420px,calc(100vw - 16px));height:auto;background:transparent;padding:0;display:block;pointer-events:none}
+#${UI_ID}.ide170-minimized .ide170-panel{width:100%;height:auto;min-height:0;border-radius:12px;pointer-events:auto;box-shadow:0 12px 36px rgba(0,0,0,.5)}
+#${UI_ID}.ide170-minimized .ide170-header{border-bottom:0;padding:8px 10px}
+#${UI_ID}.ide170-minimized .ide170-body,#${UI_ID}.ide170-minimized .ide170-footer{display:none}
+#${UI_ID}.ide170-minimized [data-role=minimize]{display:none}
+#${UI_ID}.ide170-minimized [data-role=restore]{display:inline-block}
+#${UI_ID}.ide170-minimized .ide170-title{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:600px){#${UI_ID}{padding:0}#${UI_ID} .ide170-panel{border-radius:0;border:0}#${UI_ID} .ide170-body{padding:10px}#${UI_ID}.ide170-minimized{padding:0;right:6px;bottom:6px;width:calc(100vw - 12px)}#${UI_ID}.ide170-minimized .ide170-panel{border:1px solid #374151;border-radius:10px}}
 `;
     global.document.head.appendChild(style);
   }
 
   function root() {
     return global.document && global.document.getElementById(UI_ID);
+  }
+
+  function manualConfirmationProgress() {
+    if (!viewState.candidateId) return { confirmed: 0, total: 0 };
+    const candidate = namespace.getValidationDatasetCandidate(viewState.candidateId);
+    if (!candidate || !Array.isArray(candidate.steps)) return { confirmed: 0, total: 0 };
+    const selectedManualSteps = candidate.steps.filter(function selectedManual(step) {
+      if (step.executionPolicy !== "Manual Confirmation") return false;
+      const selection = Array.isArray(candidate.ownerSelections)
+        ? candidate.ownerSelections.find(function find(item) { return item.stepId === step.stepId; })
+        : null;
+      return Boolean(selection && selection.selected === true);
+    });
+    const confirmed = selectedManualSteps.filter(function confirmedStep(step) {
+      return viewState.manualConfirmationState[step.stepId] === true;
+    }).length;
+    return { confirmed: confirmed, total: selectedManualSteps.length };
+  }
+
+  function updateDockSummary() {
+    const container = root();
+    if (!container) return;
+    const element = container.querySelector("[data-role=dock-summary]");
+    if (!element) return;
+    const progress = manualConfirmationProgress();
+    const evidenceReady = Boolean(
+      viewState.lastRunResult &&
+      viewState.lastRunResult.data &&
+      viewState.lastRunResult.data.evidencePackageId
+    );
+    if (viewState.busy) {
+      element.textContent = "実行中";
+    } else if (evidenceReady) {
+      element.textContent = "Evidence保存可能";
+    } else if (progress.total) {
+      element.textContent = "手動確認 " + progress.confirmed + "/" + progress.total;
+    } else if (viewState.candidateId) {
+      element.textContent = "解析済み";
+    } else {
+      element.textContent = "待機中";
+    }
+  }
+
+  function setDisplayMode(mode) {
+    const container = root();
+    if (!container) return;
+    viewState.displayMode = mode === "minimized" ? "minimized" : "expanded";
+    container.classList.toggle("ide170-minimized", viewState.displayMode === "minimized");
+    updateDockSummary();
+  }
+
+  function minimizeTestProcedureValidationConsole() {
+    setDisplayMode("minimized");
+    return internal.buildResult(true, "TEST_PROCEDURE_UI_MINIMIZED", "Ready", {
+      manualConfirmationProgress: manualConfirmationProgress()
+    });
+  }
+
+  function restoreTestProcedureValidationConsole() {
+    const container = root();
+    if (container) container.style.display = "flex";
+    setDisplayMode("expanded");
+    return internal.buildResult(true, "TEST_PROCEDURE_UI_RESTORED", "Ready", null);
   }
 
   function setMessage(message, type) {
@@ -103,6 +176,7 @@
         viewState.lastRunResult.data.evidencePackageId
       );
     }
+    updateDockSummary();
   }
 
   function setBusy(busy, message) {
@@ -111,7 +185,7 @@
     if (!container) return;
     if (viewState.busy) {
       container.querySelectorAll("button").forEach(function disable(button) {
-        if (button.dataset.role !== "close") button.disabled = true;
+        if (!["close", "minimize", "restore"].includes(button.dataset.role)) button.disabled = true;
       });
     } else {
       syncActionButtons();
@@ -179,6 +253,7 @@
       </div>`;
     }).join("");
     area.innerHTML = summary + steps;
+    updateDockSummary();
 
     area.querySelectorAll("[data-role=select-step]").forEach(function bind(checkbox) {
       checkbox.addEventListener("change", function update() {
@@ -206,6 +281,7 @@
         const stepElement = checkbox.closest("[data-step-id]");
         if (!stepElement) return;
         viewState.manualConfirmationState[stepElement.dataset.stepId] = checkbox.checked === true;
+        updateDockSummary();
       });
     });
   }
@@ -307,6 +383,7 @@
         onEvidenceProgress: setProgress
       });
       viewState.lastRunResult = result;
+      updateDockSummary();
       const evidenceId = result.data && result.data.evidencePackageId;
       const run = result.data && result.data.validationRun;
       const release = namespace.getReleaseStatus();
@@ -348,6 +425,9 @@
     overlay.innerHTML = `<div class="ide170-panel">
       <div class="ide170-header">
         <div class="ide170-title">🧪 IDE-170 実機検証手順コンソール <span class="ide170-badge">v${VERSION}</span></div>
+        <span class="ide170-dock-summary" data-role="dock-summary">待機中</span>
+        <button data-role="minimize" title="パネルを右下へ最小化し、元画面を操作します">元画面を確認</button>
+        <button data-role="restore">検証へ戻る</button>
         <button data-role="close">閉じる</button>
       </div>
       <div class="ide170-body">
@@ -361,6 +441,7 @@
         </section>
         <section class="ide170-section">
           <strong>2. 解析結果と実行対象</strong>
+          <div class="ide170-muted" style="margin-top:6px">手動確認中は上部の「元画面を確認」で右下へ最小化できます。検証状態とチェック内容は保持されます。</div>
           <div data-role="plan" class="ide170-muted" style="margin-top:8px">手順書を取り込むと表示されます。</div>
         </section>
         <section class="ide170-section">
@@ -385,6 +466,8 @@
     </div>`;
     global.document.body.appendChild(overlay);
     overlay.querySelector("[data-role=close]").addEventListener("click", closeTestProcedureValidationConsole);
+    overlay.querySelector("[data-role=minimize]").addEventListener("click", minimizeTestProcedureValidationConsole);
+    overlay.querySelector("[data-role=restore]").addEventListener("click", restoreTestProcedureValidationConsole);
     overlay.querySelector("[data-role=import]").addEventListener("click", importSelectedFile);
     overlay.querySelector("[data-role=approve]").addEventListener("click", approveCandidate);
     overlay.querySelector("[data-role=run]").addEventListener("click", runApprovedDataset);
@@ -400,6 +483,7 @@
     }
     const element = createUI();
     element.style.display = "flex";
+    setDisplayMode("expanded");
     if (viewState.candidateId) {
       renderPlan();
       const approveButton = element.querySelector("[data-role=approve]");
@@ -414,7 +498,8 @@
 
   function closeTestProcedureValidationConsole() {
     const element = root();
-    if (element) element.remove();
+    if (element) element.style.display = "none";
+    viewState.displayMode = "expanded";
   }
 
   function initializeTestProcedureUI() {
@@ -426,10 +511,14 @@
   Object.assign(namespace.api, {
     initializeTestProcedureUI: initializeTestProcedureUI,
     openTestProcedureValidationConsole: openTestProcedureValidationConsole,
+    minimizeTestProcedureValidationConsole: minimizeTestProcedureValidationConsole,
+    restoreTestProcedureValidationConsole: restoreTestProcedureValidationConsole,
     closeTestProcedureValidationConsole: closeTestProcedureValidationConsole
   });
   Object.assign(namespace, {
     openTestProcedureValidationConsole: openTestProcedureValidationConsole,
+    minimizeTestProcedureValidationConsole: minimizeTestProcedureValidationConsole,
+    restoreTestProcedureValidationConsole: restoreTestProcedureValidationConsole,
     closeTestProcedureValidationConsole: closeTestProcedureValidationConsole
   });
 
@@ -442,6 +531,8 @@
     warningSelection: true,
     prohibitedSelectionAllowed: false,
     manualConfirmation: true,
+    nonBlockingMinimize: true,
+    persistentCloseState: true,
     explicitEvidenceDownloadButton: true,
     loadedAt: internal.nowIso()
   };
