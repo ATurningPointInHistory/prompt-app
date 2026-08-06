@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_intelligence_validation.js
    IDE-170 Intelligence Platform
-   Version: 1.3.0
-   Phase: 3 Repository Snapshot - Independent Validation Gate
+   Version: 1.4.0
+   Phase: Test Procedure Intake and Validation Compiler - Independent Validation Gate
    ============================================================ */
 (function (global) {
   "use strict";
@@ -15,7 +15,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.3.0";
+  const VERSION = "1.4.0";
   const VALIDATION_CAPABILITY_ID = "IDE-170-VALIDATION";
 
   function buildCheck(name, passed, detail, group, severity) {
@@ -66,14 +66,17 @@
       type: "Validation",
       status: "Active",
       owner: "IDE-170",
-      description: "Validates Phase 1, Phase 2 and Phase 3 Repository Snapshot independently from future Evidence Graph output.",
+      description: "Validates Phase 1-3 and the Test Procedure Intake / Validation Compiler foundation independently from future Evidence Graph output.",
       dependencies: [
         { capabilityId: "IDE-170-CORE", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-SCHEMA-REGISTRY", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-SOURCE-ADAPTER-FRAMEWORK", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: "1.2.0", optional: false },
-        { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: "1.2.0", optional: false }
+        { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: "1.2.0", optional: false },
+        { capabilityId: "IDE-170-TEST-PROCEDURE-INTAKE", minimumVersion: "1.4.0", optional: false },
+        { capabilityId: "IDE-170-TEST-PROCEDURE-PARSER", minimumVersion: "1.4.0", optional: false },
+        { capabilityId: "IDE-170-VALIDATION-COMPILER", minimumVersion: "1.4.0", optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-VALIDATION-RESULT"],
       provides: ["Core Validation", "Source Intake Validation", "Canonical Model Validation", "Repository Snapshot Validation", "Snapshot Chain Validation", "Release Gate", "Regression Validation"],
@@ -163,7 +166,7 @@
 
       const dependencyStatus = namespace.getDependencyStatus();
       check(
-        "Required Phase 3 modules are loaded",
+        "Required Phase 3 and Decision 011 v1.1.0 modules are loaded",
         dependencyStatus.requiredReady === true,
         JSON.stringify(dependencyStatus.required),
         "Foundation"
@@ -210,12 +213,21 @@
           "validateRepositorySnapshot",
           "validateSnapshotChain",
           "calculateSHA256",
+          "importTestProcedure",
+          "parseTestProcedure",
+          "compileTestProcedure",
+          "updateProcedureStepSelection",
+          "approveValidationDatasetCandidate",
+          "runImportedTestProcedure",
+          "runCurrentPhaseValidation",
+          "runTestProcedureCompilerValidation",
+          "retryEvidenceDownload",
           "runValidation",
           "getReleaseStatus"
         ].every(function hasApi(apiName) {
           return typeof namespace[apiName] === "function";
         }),
-        "Phase 1, Phase 2 and Phase 3 APIs",
+        "Phase 1-3 and Decision 011 v1.1.0 APIs",
         "Foundation"
       );
 
@@ -577,11 +589,17 @@
         "Status and Release"
       );
       check(
-        "Phase 3 is started and implemented",
-        status.phase3Started === true && status.phase3Complete === true && status.progress === 37.5,
+        "Phase 3 and Test Procedure Compiler are implemented",
+        status.phase3Started === true &&
+          status.phase3Complete === true &&
+          status.testProcedureCompilerStarted === true &&
+          status.testProcedureCompilerComplete === true &&
+          status.progress === 37.5,
         JSON.stringify({
           phase3Started: status.phase3Started,
           phase3Complete: status.phase3Complete,
+          testProcedureCompilerStarted: status.testProcedureCompilerStarted,
+          testProcedureCompilerComplete: status.testProcedureCompilerComplete,
           progress: status.progress
         }),
         "Status and Release"
@@ -1679,10 +1697,10 @@
       const result = {
         id: provisionalResult.id,
         componentId: namespace.componentId,
-        name: "IDE-170 Phase 3 Repository Snapshot Validation",
+        name: "IDE-170 Phase 3 and Decision 011 v1.1.0 Regression Validation",
         version: VERSION,
         designFreezeVersion: namespace.designFreezeVersion,
-        mode: internal.text(settings.mode, "Phase 3 Repository Snapshot Integrated Validation"),
+        mode: internal.text(settings.mode, "Phase 3 and Decision 011 v1.1.0 Integrated Regression Validation"),
         valid: summary.failed === 0 && summary.total > 0,
         passed: summary.passed,
         failed: summary.failed,
@@ -1739,7 +1757,7 @@
       const result = {
         id: internal.nextId("IDE-170-VALIDATION"),
         componentId: namespace.componentId,
-        name: "IDE-170 Phase 3 Repository Snapshot Validation",
+        name: "IDE-170 Phase 3 and Decision 011 v1.1.0 Regression Validation",
         version: VERSION,
         valid: false,
         passed: summary.passed,
