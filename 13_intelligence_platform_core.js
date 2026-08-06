@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_platform_core.js
    IDE-170 Intelligence Platform
-   Version: 1.2.0
+   Version: 1.3.0
    Phase: 3 Repository Snapshot
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -10,12 +10,13 @@
 
   const COMPONENT_ID = "IDE-170";
   const COMPONENT_NAME = "Intelligence Platform";
-  const VERSION = "1.2.0";
+  const VERSION = "1.3.0";
   const SCHEMA_VERSION = "1.0.0";
   const DESIGN_FREEZE_VERSION = "1.0.0";
-  const IMPLEMENTATION_PHASE = "Phase 3 Repository Snapshot";
+  const IMPLEMENTATION_PHASE = "Validation Automation Foundation (Pre-Phase 4)";
   const PHASE1_RELEASE_FROZEN = true;
   const PHASE2_RELEASE_FROZEN = true;
+  const PHASE3_RELEASE_FROZEN = true;
   const MAX_SESSIONS = 100;
   const MAX_AUDIT_RECORDS = 1000;
 
@@ -54,10 +55,18 @@
         sourceIntakes: new Map(),
         canonicalSnapshots: new Map(),
         repositorySnapshots: new Map(),
+        testDatasets: new Map(),
+        validationTargets: new Map(),
+        validationRuns: new Map(),
+        validationEvidencePackages: new Map(),
         latestSourceIntakeId: null,
         latestCanonicalSnapshotId: null,
         latestRepositorySnapshotId: null,
         latestRepositoryBaselineId: null,
+        latestTestDatasetId: null,
+        latestValidationRunId: null,
+        latestValidationEvidencePackageId: null,
+        lastAutomationValidation: null,
         audits: [],
         sequence: 0,
         initialized: false,
@@ -81,11 +90,19 @@
   if (!(state.sourceIntakes instanceof Map)) state.sourceIntakes = new Map();
   if (!(state.canonicalSnapshots instanceof Map)) state.canonicalSnapshots = new Map();
   if (!(state.repositorySnapshots instanceof Map)) state.repositorySnapshots = new Map();
+  if (!(state.testDatasets instanceof Map)) state.testDatasets = new Map();
+  if (!(state.validationTargets instanceof Map)) state.validationTargets = new Map();
+  if (!(state.validationRuns instanceof Map)) state.validationRuns = new Map();
+  if (!(state.validationEvidencePackages instanceof Map)) state.validationEvidencePackages = new Map();
   if (!Array.isArray(state.audits)) state.audits = [];
   if (!Object.prototype.hasOwnProperty.call(state, "latestSourceIntakeId")) state.latestSourceIntakeId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestCanonicalSnapshotId")) state.latestCanonicalSnapshotId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestRepositorySnapshotId")) state.latestRepositorySnapshotId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestRepositoryBaselineId")) state.latestRepositoryBaselineId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestTestDatasetId")) state.latestTestDatasetId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestValidationRunId")) state.latestValidationRunId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestValidationEvidencePackageId")) state.latestValidationEvidencePackageId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastAutomationValidation")) state.lastAutomationValidation = null;
 
   function nowIso() {
     return new Date().toISOString();
@@ -552,6 +569,9 @@
       platformSourceAdapters: Boolean(namespace.modules && namespace.modules.platformSourceAdapters),
       canonicalModel: Boolean(namespace.modules && namespace.modules.canonicalModel),
       repositorySnapshot: Boolean(namespace.modules && namespace.modules.repositorySnapshot),
+      testDatasetRegistry: Boolean(namespace.modules && namespace.modules.testDatasetRegistry),
+      validationAutomation: Boolean(namespace.modules && namespace.modules.validationAutomation),
+      validationEvidence: Boolean(namespace.modules && namespace.modules.validationEvidence),
       validation: Boolean(namespace.modules && namespace.modules.validation)
     };
     const requiredReady = Object.keys(moduleStatus).every(function allReady(key) {
@@ -592,15 +612,15 @@
         results.ideRegistry = global.registerIdeComponent({
           id: COMPONENT_ID,
           title: COMPONENT_NAME,
-          summary: "Canonical SnapshotからBaseline／Incremental Repository Snapshotを生成し、SHA-256とChainで状態変化を追跡するIntelligence Platform。Phase 3。",
+          summary: "Version管理されたTest Datasetを自動実行し、期待結果比較と改変検出可能なEvidence ZIPを生成するIntelligence Platform。Pre-Phase 4。",
           icon: "🧠",
           version: VERSION,
-          status: "Phase 3",
+          status: "Pre-Phase 4",
           ready: state.initialized === true,
           progress: 37.5,
           health: state.lastValidation && Number(state.lastValidation.health) || 0,
           launcher: "",
-          validator: "validateIntelligencePlatform",
+          validator: "validateIntelligenceAutomationFoundation",
           probe: "getIntelligencePlatformStatus",
           category: "Intelligence"
         }) === true;
@@ -662,12 +682,15 @@
           !dependencyStatus.required.platformSourceAdapters ||
           !dependencyStatus.required.canonicalModel ||
           !dependencyStatus.required.repositorySnapshot ||
+          !dependencyStatus.required.testDatasetRegistry ||
+          !dependencyStatus.required.validationAutomation ||
+          !dependencyStatus.required.validationEvidence ||
           !dependencyStatus.required.validation) {
         state.initializing = false;
         return buildResult(false, "IDE170_DEPENDENCY_MISSING", "Blocked", {
           dependencies: dependencyStatus
         }, {
-          error: { message: "IDE-170 Phase 3 modules are not fully loaded.", category: "Dependency Failure" }
+          error: { message: "IDE-170 Validation Automation Foundation modules are not fully loaded.", category: "Dependency Failure" }
         });
       }
 
@@ -704,6 +727,21 @@
       if (namespace.api && typeof namespace.api.initializeRepositorySnapshot === "function") {
         const repositorySnapshotResult = namespace.api.initializeRepositorySnapshot();
         if (!repositorySnapshotResult.ok) throw new Error("Repository Snapshot initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeTestDatasetRegistry === "function") {
+        const datasetRegistryResult = namespace.api.initializeTestDatasetRegistry();
+        if (!datasetRegistryResult.ok) throw new Error("Test Dataset Registry initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeValidationAutomation === "function") {
+        const automationResult = namespace.api.initializeValidationAutomation();
+        if (!automationResult.ok) throw new Error("Validation Automation initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeValidationEvidence === "function") {
+        const evidenceResult = namespace.api.initializeValidationEvidence();
+        if (!evidenceResult.ok) throw new Error("Validation Evidence initialization failed.");
       }
 
       state.initialized = true;
@@ -744,17 +782,27 @@
   }
 
   function getReleaseStatus() {
-    const validation = state.lastValidation;
+    const phaseValidation = state.lastValidation;
+    const automationValidation = state.lastAutomationValidation;
     const dependencyStatus = getDependencyStatus();
-    const androidValidation = validation && validation.androidRealDeviceValidation;
+    const androidValidation = automationValidation && automationValidation.androidRealDeviceValidation;
     const androidPassed = Boolean(androidValidation && androidValidation.passed === true);
-    const codeValidationPassed = Boolean(
-      validation && validation.valid === true && validation.failed === 0
+    const phaseCodePassed = Boolean(
+      phaseValidation && phaseValidation.valid === true && phaseValidation.failed === 0
+    );
+    const automationCodePassed = Boolean(
+      automationValidation &&
+      automationValidation.codeValidationPassed === true &&
+      automationValidation.failed === 0
     );
     const releaseReady = Boolean(
       state.initialized &&
       dependencyStatus.requiredReady &&
-      codeValidationPassed &&
+      PHASE3_RELEASE_FROZEN &&
+      phaseCodePassed &&
+      automationCodePassed &&
+      automationValidation &&
+      automationValidation.valid === true &&
       androidPassed
     );
 
@@ -763,22 +811,24 @@
       version: VERSION,
       phase: IMPLEMENTATION_PHASE,
       releaseStatus: releaseReady
-        ? "Phase 3 Ready"
-        : codeValidationPassed && !androidPassed
-          ? "Conditional - Phase 3 Android Validation Pending"
-          : validation
+        ? "Validation Automation Foundation Ready"
+        : phaseCodePassed && automationCodePassed && !androidPassed
+          ? "Conditional - Validation Automation Android Pending"
+          : automationValidation
             ? "Blocked"
-            : "Not Validated",
+            : "Validation Automation Not Run",
       releaseAllowed: releaseReady,
-      validationStatus: validation ? validation.status : "Not Run",
-      health: validation && Number.isFinite(Number(validation.health))
-        ? Number(validation.health)
+      validationStatus: automationValidation ? automationValidation.status : "Not Run",
+      health: automationValidation && Number.isFinite(Number(automationValidation.health))
+        ? Number(automationValidation.health)
         : null,
       independentValidationRequired: true,
-      codeValidationPassed: codeValidationPassed,
+      phase3CodeValidationPassed: phaseCodePassed,
+      automationCodeValidationPassed: automationCodePassed,
       androidRealDevicePassed: androidPassed,
       phase1ReleaseFrozen: PHASE1_RELEASE_FROZEN,
       phase2ReleaseFrozen: PHASE2_RELEASE_FROZEN,
+      phase3ReleaseFrozen: PHASE3_RELEASE_FROZEN,
       phase2Allowed: PHASE1_RELEASE_FROZEN,
       phase3Allowed: PHASE2_RELEASE_FROZEN,
       phase4Allowed: releaseReady,
@@ -799,7 +849,7 @@
       designFreezeVersion: DESIGN_FREEZE_VERSION,
       implementationPhase: IMPLEMENTATION_PHASE,
       implementationStatus: state.initialized
-        ? "Phase 3 Repository Snapshot Implemented"
+        ? "Validation Automation Foundation Implemented"
         : "Loaded",
       status: state.lastError
         ? "Degraded"
@@ -811,6 +861,7 @@
       initialized: state.initialized === true,
       progress: 37.5,
       phaseProgress: state.initialized ? 100 : 37.5,
+      validationAutomationFoundationProgress: state.initialized ? 100 : 0,
       modules: clone(dependencies.required),
       capabilityCount: state.capabilities.size,
       schemaCount: state.schemas.size,
@@ -822,6 +873,16 @@
       repositorySnapshotCount: state.repositorySnapshots.size,
       latestRepositorySnapshotId: state.latestRepositorySnapshotId,
       latestRepositoryBaselineId: state.latestRepositoryBaselineId,
+      testDatasetCount: state.testDatasets.size,
+      validationTargetCount: state.validationTargets.size,
+      validationRunCount: state.validationRuns.size,
+      validationEvidencePackageCount: state.validationEvidencePackages.size,
+      latestTestDatasetId: state.latestTestDatasetId,
+      latestValidationRunId: state.latestValidationRunId,
+      latestValidationEvidencePackageId: state.latestValidationEvidencePackageId,
+      automationValidationStatus: state.lastAutomationValidation
+        ? state.lastAutomationValidation.status
+        : "Not Run",
       sessionCount: state.sessions.size,
       frozenSessionCount: [...state.sessions.values()].filter(function countFrozen(item) {
         return item && item.state === "Frozen";
@@ -835,6 +896,7 @@
       releaseAllowed: release.releaseAllowed,
       phase1ReleaseFrozen: PHASE1_RELEASE_FROZEN,
       phase2ReleaseFrozen: PHASE2_RELEASE_FROZEN,
+      phase3ReleaseFrozen: PHASE3_RELEASE_FROZEN,
       dependencyStatus: dependencies,
       integration: clone(state.integration),
       directRepositoryMutationAllowed: false,
@@ -846,7 +908,9 @@
       phase2Started: true,
       phase2Complete: PHASE2_RELEASE_FROZEN,
       phase3Started: true,
-      phase3Complete: state.initialized === true && dependencies.requiredReady,
+      phase3Complete: PHASE3_RELEASE_FROZEN,
+      validationAutomationFoundationStarted: true,
+      validationAutomationFoundationComplete: state.initialized === true && dependencies.requiredReady,
       phase4Started: false,
       lastError: clone(state.lastError),
       updatedAt: state.updatedAt || nowIso()
