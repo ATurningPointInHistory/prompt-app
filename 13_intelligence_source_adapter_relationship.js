@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_source_adapter_relationship.js
    IDE-170 Intelligence Platform
-   Version: 1.5.0
+   Version: 1.6.0
    Phase: 4 Evidence Graph - Official Relationship Source Adapter
    ============================================================ */
 (function (global) {
@@ -14,7 +14,7 @@
   }
 
   const internal = namespace.__internal;
-  const VERSION = "1.5.0";
+  const VERSION = "1.6.0";
   const ADAPTER_ID = "IDE-170-ADAPTER-RELATIONSHIP";
 
   function normalizeType(value) {
