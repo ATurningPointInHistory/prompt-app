@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_platform_core.js
    IDE-170 Intelligence Platform
-   Version: 1.4.0
+   Version: 1.4.1
    Phase: Test Procedure Intake and Validation Compiler
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -10,7 +10,7 @@
 
   const COMPONENT_ID = "IDE-170";
   const COMPONENT_NAME = "Intelligence Platform";
-  const VERSION = "1.4.0";
+  const VERSION = "1.4.1";
   const SCHEMA_VERSION = "1.0.0";
   const DESIGN_FREEZE_VERSION = "1.0.0";
   const IMPLEMENTATION_PHASE = "Test Procedure Intake and Validation Compiler (Pre-Phase 4)";
