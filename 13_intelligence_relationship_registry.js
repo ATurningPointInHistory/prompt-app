@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_relationship_registry.js
    IDE-170 Intelligence Platform
-   Version: 1.5.0
+   Version: 1.6.0
    Phase: 4 Evidence Graph - Relationship Type Registry
    Design Freeze: v1.0.0 / Decision 005
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.5.0";
+  const VERSION = "1.6.0";
   const CAPABILITY_ID = "IDE-170-RELATIONSHIP-TYPE-REGISTRY";
   const TYPE_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
   const DOMAINS = Object.freeze([
