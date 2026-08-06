@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation_automation.js
    IDE-170 Intelligence Platform
-   Version: 1.5.0
+   Version: 1.6.0
    Architecture Decision: 011
    Phase: Validation Automation Foundation (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.5.0";
+  const VERSION = "1.6.0";
   const CAPABILITY_ID = "IDE-170-VALIDATION-AUTOMATION";
   const RUN_STATUSES = Object.freeze([
     "Created", "Preparing", "Running", "Comparing", "Completed",
