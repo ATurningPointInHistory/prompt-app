@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_repository_snapshot.js
    IDE-170 Intelligence Platform
-   Version: 1.5.0
+   Version: 1.6.0
    Phase: 3 Repository Snapshot
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.5.0";
+  const VERSION = "1.6.0";
   const CAPABILITY_ID = "IDE-170-REPOSITORY-SNAPSHOT";
   const HASH_ALGORITHM = "SHA-256";
   const MAX_CHAIN_DEPTH = 100;
