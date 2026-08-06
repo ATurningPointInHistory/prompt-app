@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation_evidence.js
    IDE-170 Intelligence Platform
-   Version: 1.3.0
+   Version: 1.4.0
    Architecture Decision: 011
    Phase: Validation Automation Foundation (Pre-Phase 4)
    ============================================================ */
@@ -16,11 +16,12 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.3.0";
+  const VERSION = "1.4.0";
   const CAPABILITY_ID = "IDE-170-VALIDATION-EVIDENCE-PACKAGE";
   const PACKAGE_TYPE = "Immutable Validation Evidence Package";
 
   if (!(state.validationEvidencePackages instanceof Map)) state.validationEvidencePackages = new Map();
+  if (!(state.validationEvidenceBlobs instanceof Map)) state.validationEvidenceBlobs = new Map();
   if (!Object.prototype.hasOwnProperty.call(state, "latestValidationEvidencePackageId")) {
     state.latestValidationEvidencePackageId = null;
   }
@@ -55,11 +56,24 @@
     });
   }
 
+  function extensionForProcedure(procedure) {
+    const format = internal.text(procedure && procedure.format, "txt");
+    return format === "markdown" ? "md" : format;
+  }
+
   function buildEvidenceArtifacts(run, dataset) {
     const failed = run.caseResults.filter(function filter(result) { return result.status === "Failed" || result.status === "Error"; });
     const blocked = run.caseResults.filter(function filter(result) { return result.status === "Blocked"; });
+    const procedure = run.sourceProcedureId && typeof namespace.getTestProcedure === "function"
+      ? namespace.getTestProcedure(run.sourceProcedureId)
+      : null;
+    const parsed = run.parsedProcedureId && typeof namespace.getParsedTestProcedure === "function"
+      ? namespace.getParsedTestProcedure(run.parsedProcedureId)
+      : null;
+    const candidate = run.candidateId && typeof namespace.getValidationDatasetCandidate === "function"
+      ? namespace.getValidationDatasetCandidate(run.candidateId)
+      : null;
     const artifacts = {
-      "test-dataset.json": jsonText(dataset),
       "execution-results.json": jsonText(run.caseResults),
       "expectation-comparison.json": jsonText(run.comparisons),
       "validation-summary.json": jsonText(run.summary),
@@ -71,6 +85,15 @@
       "manual-confirmations.json": jsonText(run.manualConfirmations),
       "execution-log.txt": run.executionLog.join("\n") + "\n"
     };
+    if (procedure && parsed && candidate) {
+      artifacts["original-test-procedure." + extensionForProcedure(procedure)] = procedure.originalText;
+      artifacts["parsed-test-procedure.json"] = jsonText(parsed);
+      artifacts["parser-warnings.json"] = jsonText(parsed.parserWarnings || []);
+      artifacts["compiled-test-dataset.json"] = jsonText(dataset);
+      artifacts["owner-selections.json"] = jsonText(candidate.ownerSelections || run.ownerSelections || []);
+    } else {
+      artifacts["test-dataset.json"] = jsonText(dataset);
+    }
     const integrity = Object.keys(artifacts).sort().map(function mapArtifact(path) {
       return { path: path, sha256: sha256(artifacts[path]), size: artifacts[path].length };
     });
@@ -98,9 +121,12 @@
       packageType: PACKAGE_TYPE,
       componentId: namespace.componentId,
       componentVersion: namespace.version,
-      phase: "Validation Automation Foundation (Pre-Phase 4)",
+      phase: namespace.implementationPhase || "Test Procedure Intake and Validation Compiler (Pre-Phase 4)",
       designFreezeVersion: namespace.designFreezeVersion,
-      architectureDecisionVersion: "IDE-170-ARCHITECTURE-DECISION-011-v1.0.0",
+      architectureDecisionVersion: "IDE-170-ARCHITECTURE-DECISION-011-v1.1.0",
+      procedureId: run.sourceProcedureId || null,
+      procedureVersion: run.sourceProcedureVersion || null,
+      procedureHash: run.sourceProcedureHash || null,
       datasetId: dataset.datasetId,
       datasetVersion: dataset.version,
       validationRunId: run.validationRunId,
@@ -112,6 +138,15 @@
         requiredGatePassed: run.summary.requiredGatePassed,
         releaseAllowed: run.summary.releaseAllowed,
         nextPhaseAllowed: run.summary.nextPhaseAllowed
+      },
+      ownerSelectionSummary: {
+        total: Array.isArray(run.ownerSelections) ? run.ownerSelections.length : 0,
+        selected: Array.isArray(run.ownerSelections) ? run.ownerSelections.filter(function selected(item) { return item.selected === true; }).length : 0,
+        warningAcknowledged: Array.isArray(run.ownerSelections) ? run.ownerSelections.filter(function acknowledged(item) { return item.warningAcknowledged === true; }).length : 0
+      },
+      manualConfirmationSummary: {
+        total: Array.isArray(run.manualConfirmations) ? run.manualConfirmations.length : 0,
+        confirmed: Array.isArray(run.manualConfirmations) ? run.manualConfirmations.filter(function confirmed(item) { return item.confirmed === true; }).length : 0
       },
       artifacts: artifactEntries,
       manifestHash: null,
@@ -134,6 +169,48 @@
     return zip.generateAsync({ type: settings.blobType || "blob" });
   }
 
+  function triggerEvidenceDownload(blob, fileName) {
+    if (!blob || !global.document || !global.URL || typeof global.URL.createObjectURL !== "function") {
+      return internal.buildResult(false, "EVIDENCE_DOWNLOAD_UNAVAILABLE", "Blocked", null, {
+        error: { message: "Browser Download API is unavailable.", category: "Environment Failure" }
+      });
+    }
+    const anchor = global.document.createElement("a");
+    const objectUrl = global.URL.createObjectURL(blob);
+    anchor.href = objectUrl;
+    anchor.download = fileName;
+    anchor.style.display = "none";
+    if (global.document.body) global.document.body.appendChild(anchor);
+    anchor.click();
+    if (anchor.parentNode) anchor.parentNode.removeChild(anchor);
+    setTimeout(function revoke() { global.URL.revokeObjectURL(objectUrl); }, 60000);
+    return internal.buildResult(true, "EVIDENCE_DOWNLOAD_STARTED", "Started", { fileName: fileName });
+  }
+
+  async function retryEvidenceDownload(packageId, options) {
+    const settings = internal.isPlainObject(options) ? options : {};
+    const id = internal.text(packageId, "");
+    const record = state.validationEvidencePackages.get(id);
+    if (!record) return internal.buildResult(false, "EVIDENCE_PACKAGE_NOT_FOUND", "Blocked", null, {
+      error: { message: "Evidence Package was not found.", category: "Input Failure" }
+    });
+    let blob = state.validationEvidenceBlobs.get(id);
+    if (!blob) {
+      blob = await createZipBlob(record.manifest, record.artifacts, settings);
+      state.validationEvidenceBlobs.set(id, blob);
+    }
+    const download = triggerEvidenceDownload(blob, record.fileName);
+    internal.appendAudit({
+      action: "VALIDATION_EVIDENCE_DOWNLOAD_RETRIED",
+      actor: internal.text(settings.actor, "Project Owner"),
+      targetType: "Evidence Package",
+      targetId: id,
+      outcome: download.ok ? "Started" : "Blocked",
+      detail: { fileName: record.fileName, cachedBlob: true }
+    });
+    return download;
+  }
+
   async function buildValidationEvidencePackage(validationRunId, options) {
     const settings = internal.isPlainObject(options) ? options : {};
     const run = namespace.getValidationRun(validationRunId);
@@ -153,7 +230,7 @@
     if (typeof settings.onProgress === "function") settings.onProgress({ stage: "Integrity Hashing", progress: 25, timestamp: internal.nowIso() });
     const artifacts = buildEvidenceArtifacts(run, dataset);
     const manifest = buildManifest(run, dataset, artifacts);
-    const fileName = "IDE-170_Validation_Evidence_Pre-Phase-4_" + sanitizeFilePart(namespace.version) + "_" +
+    const fileName = "IDE-170_Validation_Evidence_" + sanitizeFilePart(namespace.implementationPhase || "Pre-Phase-4") + "_" + sanitizeFilePart(namespace.version) + "_" +
       new Date().toISOString().replace(/[:.]/g, "-") + ".zip";
     if (settings.cancelled === true || (settings.signal && settings.signal.aborted)) {
       return internal.buildResult(false, "EVIDENCE_PACKAGE_CANCELLED", "Cancelled", null, {
@@ -172,6 +249,7 @@
       generatedAt: internal.nowIso()
     });
     state.validationEvidencePackages.set(record.packageId, record);
+    state.validationEvidenceBlobs.set(record.packageId, blob);
     state.latestValidationEvidencePackageId = record.packageId;
     internal.touch();
     internal.appendAudit({
@@ -183,12 +261,8 @@
       detail: { validationRunId: run.validationRunId, artifactCount: Object.keys(artifacts).length, manifestHash: manifest.manifestHash }
     });
 
-    if (settings.download === true && global.document && global.URL && typeof global.URL.createObjectURL === "function") {
-      const anchor = global.document.createElement("a");
-      anchor.href = global.URL.createObjectURL(blob);
-      anchor.download = fileName;
-      anchor.click();
-      setTimeout(function revoke() { global.URL.revokeObjectURL(anchor.href); }, 1000);
+    if (settings.download === true) {
+      triggerEvidenceDownload(blob, fileName);
     }
     if (typeof settings.onProgress === "function") settings.onProgress({ stage: "Complete", progress: 100, timestamp: internal.nowIso() });
     return {
@@ -558,6 +632,7 @@
     initializeValidationEvidence: initializeValidationEvidence,
     buildValidationEvidencePackage: buildValidationEvidencePackage,
     validateValidationEvidencePackage: validateValidationEvidencePackage,
+    retryEvidenceDownload: retryEvidenceDownload,
     getValidationEvidencePackage: getValidationEvidencePackage,
     listValidationEvidencePackages: listValidationEvidencePackages,
     runValidationAutomationFoundationValidation: runValidationAutomationFoundationValidation,
@@ -566,6 +641,7 @@
   Object.assign(namespace, {
     buildValidationEvidencePackage: buildValidationEvidencePackage,
     validateValidationEvidencePackage: validateValidationEvidencePackage,
+    retryEvidenceDownload: retryEvidenceDownload,
     getValidationEvidencePackage: getValidationEvidencePackage,
     listValidationEvidencePackages: listValidationEvidencePackages,
     runValidationAutomationFoundationValidation: runValidationAutomationFoundationValidation,
@@ -579,6 +655,9 @@
     immutablePackage: true,
     zipExport: true,
     artifactHash: true,
+    originalProcedureArtifact: true,
+    ownerSelectionArtifact: true,
+    cachedBlobRetryDownload: true,
     manifestValidation: true,
     tamperDetection: true,
     sourceCodePackageSeparated: true,
