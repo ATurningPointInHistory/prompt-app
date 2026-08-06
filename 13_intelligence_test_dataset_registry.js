@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_test_dataset_registry.js
    IDE-170 Intelligence Platform
-   Version: 1.4.0
+   Version: 1.4.1
    Architecture Decision: 011
    Phase: Validation Automation Foundation (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.4.0";
+  const VERSION = "1.4.1";
   const CAPABILITY_ID = "IDE-170-TEST-DATASET-REGISTRY";
   const DATASET_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
   const CASE_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
@@ -527,7 +527,7 @@
             comparator: "Partial Object",
             value: {
               valid: true,
-              version: "1.4.0",
+              version: "1.4.1",
               scriptCount: 134,
               includesDatasetRegistry: true,
               includesAutomation: true,
