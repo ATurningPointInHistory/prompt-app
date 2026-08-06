@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation_compiler.js
    IDE-170 Intelligence Platform
-   Version: 1.4.1
+   Version: 1.5.0
    Architecture Decision: 011 v1.1.0
    Phase: Test Procedure Intake and Validation Compiler (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,7 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.4.1";
+  const VERSION = "1.5.0";
   const CAPABILITY_ID = "IDE-170-VALIDATION-COMPILER";
 
   if (!(state.validationDatasetCandidates instanceof Map)) state.validationDatasetCandidates = new Map();
