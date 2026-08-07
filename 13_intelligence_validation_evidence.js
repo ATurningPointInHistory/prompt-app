@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation_evidence.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Architecture Decision: 011
    Phase: Validation Automation Foundation (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 validationEvidence blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("validationEvidence");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-VALIDATION-EVIDENCE-PACKAGE";
   const PACKAGE_TYPE = "Immutable Validation Evidence Package";
 
@@ -154,6 +165,12 @@
       packageType: PACKAGE_TYPE,
       componentId: namespace.componentId,
       componentVersion: namespace.version,
+      versionArchitecture: VERSION_MANIFEST.versionArchitecture,
+      moduleVersions: internal.clone(VERSION_MANIFEST.moduleVersions),
+      schemaVersions: internal.clone(VERSION_MANIFEST.schemaVersions),
+      staticScriptManifest: state.lastVersionArchitectureValidation && state.lastVersionArchitectureValidation.staticManifest
+        ? internal.clone(state.lastVersionArchitectureValidation.staticManifest)
+        : null,
       phase: namespace.implementationPhase || "Test Procedure Intake and Validation Compiler (Pre-Phase 4)",
       designFreezeVersion: namespace.designFreezeVersion,
       architectureDecisionVersion: "IDE-170-ARCHITECTURE-DECISION-011-v1.1.0",
@@ -515,7 +532,7 @@
         id: internal.nextId("IDE-170-AUTOMATION-FOUNDATION-VALIDATION"),
         componentId: namespace.componentId,
         name: "IDE-170 Validation Automation Foundation Validation",
-        version: VERSION,
+        version: RELEASE_VERSION,
         architectureDecision: "IDE-170-ARCHITECTURE-DECISION-011",
         valid: summary.failed === 0 && requiredRunGatePassed && androidPassed,
         codeValidationPassed: summary.failed === 0 || (summary.failed === 1 && !androidPassed),
@@ -557,7 +574,7 @@
         id: internal.nextId("IDE-170-AUTOMATION-FOUNDATION-VALIDATION"),
         componentId: namespace.componentId,
         name: "IDE-170 Validation Automation Foundation Validation",
-        version: VERSION,
+        version: RELEASE_VERSION,
         valid: false,
         codeValidationPassed: false,
         passed: summary.passed,
@@ -584,7 +601,7 @@
       : {
           id: "IDE-170-AUTOMATION-FOUNDATION-VALIDATION-STATUS",
           componentId: namespace.componentId,
-          version: VERSION,
+          version: RELEASE_VERSION,
           valid: false,
           status: "Not Run",
           passed: 0,
@@ -601,7 +618,7 @@
       {
         schemaId: "IDE-170-SCHEMA-VALIDATION-EVIDENCE-MANIFEST",
         name: "Validation Evidence Manifest",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-VALIDATION-EVIDENCE-MANIFEST"),
         type: "object",
         required: ["packageId", "packageType", "componentId", "componentVersion", "datasetId", "datasetVersion", "validationRunId", "artifacts", "manifestHash"],
         properties: {
@@ -633,12 +650,12 @@
     return namespace.registerCapability({
       capabilityId: CAPABILITY_ID,
       name: "Immutable Validation Evidence Package",
-      version: VERSION,
+      version: capabilityVersion(CAPABILITY_ID),
       type: "Package",
       status: "Active",
       owner: "IDE-170",
       dependencies: [
-        { capabilityId: "IDE-170-VALIDATION-AUTOMATION", minimumVersion: VERSION, optional: false }
+        { capabilityId: "IDE-170-VALIDATION-AUTOMATION", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-VALIDATION-EVIDENCE-MANIFEST"],
       provides: ["Evidence ZIP", "Manifest", "Artifact Hash", "Tamper Detection"],
@@ -690,7 +707,7 @@
 
   namespace.modules.validationEvidence = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     immutablePackage: true,
     zipExport: true,
