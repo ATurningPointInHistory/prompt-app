@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_workflow_understanding.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 5 Repository and Workflow Understanding
    Design Freeze: v1.0.0 / Decision 006
    ============================================================ */
@@ -15,7 +15,18 @@
   }
 
   const internal = namespace.__internal;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 workflowUnderstanding blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("workflowUnderstanding");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-WORKFLOW-UNDERSTANDING";
   const RULES = Object.freeze({
     workflowTrace: "IDE-170-RULE-WORKFLOW-TRACE",
@@ -163,7 +174,7 @@
         limitations: internal.asArray(limitations).map(String),
         missingEvidence: internal.asArray(evidence).length ? [] : ["Required supporting record was not available."]
       },
-      generatedBy: { pipelineVersion: VERSION, ruleIds: [ruleId], engineIds: [] },
+      generatedBy: { pipelineVersion: capabilityVersion(CAPABILITY_ID), ruleIds: [ruleId], engineIds: [] },
       detail: clone(detail || {}),
       review: { required: true, status: "Not Reviewed" },
       factPromotionAllowed: false,
@@ -456,13 +467,13 @@
       {
         capabilityId: CAPABILITY_ID,
         name: "Workflow Understanding",
-        version: VERSION,
+        version: capabilityVersion(CAPABILITY_ID),
         type: "Pipeline",
         status: "Active",
         owner: "IDE-170",
         dependencies: [
-          { capabilityId: "IDE-170-EVIDENCE-GRAPH", minimumVersion: "1.6.0", optional: false },
-          { capabilityId: "IDE-170-ADAPTER-WORKFLOW", minimumVersion: "1.1.0", optional: true }
+          { capabilityId: "IDE-170-EVIDENCE-GRAPH", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+          { capabilityId: "IDE-170-ADAPTER-WORKFLOW", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: true }
         ],
         schemas: [],
         provides: ["Workflow Trace", "Workflow Repository Mapping", "Cross-Domain Understanding", "Workflow Insight Candidate"],
@@ -472,11 +483,11 @@
       return {
         capabilityId: RULES[key],
         name: RULES[key].replace(/^IDE-170-RULE-/, "").replace(/-/g, " "),
-        version: VERSION,
+        version: capabilityVersion(RULES[key]),
         type: "Service",
         status: "Active",
         owner: "IDE-170",
-        dependencies: [{ capabilityId: CAPABILITY_ID, minimumVersion: VERSION, optional: false }],
+        dependencies: [{ capabilityId: CAPABILITY_ID, minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }],
         schemas: [],
         provides: ["Deterministic Understanding Rule"],
         source: "Architecture Decision 006"
@@ -509,7 +520,7 @@
 
   namespace.modules.workflowUnderstanding = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     workflowTrace: true,
     workflowRepositoryMapping: true,
