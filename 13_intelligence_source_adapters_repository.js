@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_source_adapters_repository.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 2 Source Intake - Repository Source Adapters
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -15,7 +15,18 @@
   }
 
   const internal = namespace.__internal;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 sourceAdaptersRepository blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("sourceAdaptersRepository");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const ADAPTER_IDS = Object.freeze({
     repository: "IDE-170-ADAPTER-REPOSITORY",
     project: "IDE-170-ADAPTER-PROJECT",
@@ -318,7 +329,7 @@
         adapterId: ADAPTER_IDS.repository,
         capabilityId: ADAPTER_IDS.repository,
         name: "Repository File Source Adapter",
-        version: VERSION,
+        version: capabilityVersion(ADAPTER_IDS.repository),
         status: "Official",
         sourceType: "repository-file-data",
         recordTypes: ["file"],
@@ -334,7 +345,7 @@
         adapterId: ADAPTER_IDS.project,
         capabilityId: ADAPTER_IDS.project,
         name: "Project Source Adapter",
-        version: VERSION,
+        version: capabilityVersion(ADAPTER_IDS.project),
         status: "Official",
         sourceType: "project-database",
         recordTypes: ["project"],
@@ -349,7 +360,7 @@
         adapterId: ADAPTER_IDS.functions,
         capabilityId: ADAPTER_IDS.functions,
         name: "Function Database Source Adapter",
-        version: VERSION,
+        version: capabilityVersion(ADAPTER_IDS.functions),
         status: "Official",
         sourceType: "function-database",
         recordTypes: ["function"],
@@ -365,7 +376,7 @@
         adapterId: ADAPTER_IDS.modules,
         capabilityId: ADAPTER_IDS.modules,
         name: "Module Database Source Adapter",
-        version: VERSION,
+        version: capabilityVersion(ADAPTER_IDS.modules),
         status: "Official",
         sourceType: "module-database",
         recordTypes: ["module"],
@@ -402,7 +413,7 @@
 
   namespace.modules.repositorySourceAdapters = {
     id: "IDE-170-REPOSITORY-SOURCE-ADAPTERS",
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     adapterIds: Object.values(ADAPTER_IDS),
     directRepositoryMutationAllowed: false,
