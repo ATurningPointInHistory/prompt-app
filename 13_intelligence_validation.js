@@ -7,6 +7,7 @@
 (function (global) {
   "use strict";
 
+
   const namespace = global.IDE170Intelligence;
   if (!namespace || !namespace.__internal) {
     console.warn("IDE-170 Validation blocked: Core is not loaded.");
