@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_schema_registry.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 2 Schema Registry - Schema Registry
    ============================================================ */
 (function (global) {
@@ -15,7 +15,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 schemaRegistry blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("schemaRegistry");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const SCHEMA_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
   const SUPPORTED_TYPES = Object.freeze([
     "object",
@@ -31,7 +42,7 @@
     Object.freeze({
       schemaId: "IDE-170-SCHEMA-CAPABILITY-DEFINITION",
       name: "Capability Definition",
-      version: VERSION,
+      version: schemaVersion("IDE-170-SCHEMA-CAPABILITY-DEFINITION"),
       description: "Governed Capability registration contract.",
       type: "object",
       required: ["capabilityId", "name", "version", "type", "status", "owner"],
@@ -53,7 +64,7 @@
     Object.freeze({
       schemaId: "IDE-170-SCHEMA-INTELLIGENCE-SESSION",
       name: "Intelligence Session",
-      version: VERSION,
+      version: schemaVersion("IDE-170-SCHEMA-INTELLIGENCE-SESSION"),
       description: "IDE-170 Session lifecycle record.",
       type: "object",
       required: ["sessionId", "componentId", "version", "state", "capabilityBindings", "createdAt"],
@@ -75,7 +86,7 @@
     Object.freeze({
       schemaId: "IDE-170-SCHEMA-AUDIT-RECORD",
       name: "Intelligence Audit Record",
-      version: VERSION,
+      version: schemaVersion("IDE-170-SCHEMA-AUDIT-RECORD"),
       description: "Immutable basic Audit record.",
       type: "object",
       required: ["auditId", "componentId", "action", "targetType", "targetId", "outcome", "immutable", "createdAt"],
@@ -96,7 +107,7 @@
     Object.freeze({
       schemaId: "IDE-170-SCHEMA-VALIDATION-RESULT",
       name: "Intelligence Validation Result",
-      version: VERSION,
+      version: schemaVersion("IDE-170-SCHEMA-VALIDATION-RESULT"),
       description: "Independent IDE-170 Validation result.",
       type: "object",
       required: ["id", "componentId", "version", "valid", "passed", "failed", "total", "status"],
@@ -492,14 +503,14 @@
     const schemaCapability = {
       capabilityId: "IDE-170-SCHEMA-REGISTRY",
       name: "Intelligence Schema Registry",
-      version: VERSION,
+      version: capabilityVersion("IDE-170-SCHEMA-REGISTRY"),
       type: "Registry",
       status: "Active",
       owner: "IDE-170",
       description: "Registers immutable Schemas and validates IDE-170 records.",
       dependencies: [
-        { capabilityId: "IDE-170-CORE", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: VERSION, optional: false }
+        { capabilityId: "IDE-170-CORE", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-VALIDATION-RESULT"],
       provides: ["Schema Registration", "Record Validation"],
@@ -565,7 +576,7 @@
 
   namespace.modules.schemaRegistry = {
     id: "IDE-170-SCHEMA-REGISTRY",
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     duplicateProtection: true,
     immutableSchemas: true,
