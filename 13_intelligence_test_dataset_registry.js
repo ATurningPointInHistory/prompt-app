@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_test_dataset_registry.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Architecture Decision: 011
    Phase: Validation Automation Foundation (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 testDatasetRegistry blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("testDatasetRegistry");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-TEST-DATASET-REGISTRY";
   const DATASET_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
   const CASE_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
@@ -370,7 +381,7 @@
       {
         schemaId: "IDE-170-SCHEMA-TEST-DATASET",
         name: "Versioned Test Dataset",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-TEST-DATASET"),
         type: "object",
         required: ["datasetId", "name", "version", "componentId", "targetPhase", "status", "testCases", "datasetHash"],
         properties: {
@@ -389,7 +400,7 @@
       {
         schemaId: "IDE-170-SCHEMA-TEST-CASE",
         name: "Automated Validation Test Case",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-TEST-CASE"),
         type: "object",
         required: ["caseId", "name", "severity", "executionType", "expected"],
         properties: {
@@ -422,16 +433,16 @@
     return namespace.registerCapability({
       capabilityId: CAPABILITY_ID,
       name: "Versioned Test Dataset Registry",
-      version: VERSION,
+      version: capabilityVersion(CAPABILITY_ID),
       type: "Registry",
       status: "Active",
       owner: "IDE-170",
       description: "Architecture Decision 011 versioned Test Dataset registry.",
       dependencies: [
-        { capabilityId: "IDE-170-CORE", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-SCHEMA-REGISTRY", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: VERSION, optional: false }
+        { capabilityId: "IDE-170-CORE", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-SCHEMA-REGISTRY", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-TEST-DATASET", "IDE-170-SCHEMA-TEST-CASE"],
       provides: ["Versioned Test Dataset", "Frozen Dataset", "Dataset Hash"],
@@ -443,7 +454,7 @@
     return {
       datasetId: "IDE-170-DATASET-VALIDATION-AUTOMATION-FOUNDATION",
       name: "IDE-170 Validation Automation Foundation",
-      version: VERSION,
+      version: datasetVersion("validationAutomationFoundation"),
       componentId: "IDE-170",
       targetPhase: "Test Procedure Intake and Validation Compiler (Pre-Phase 4)",
       status: "Ready",
@@ -527,8 +538,8 @@
             comparator: "Partial Object",
             value: {
               valid: true,
-              version: "1.6.0",
-              scriptCount: 134,
+              version: RELEASE_VERSION,
+              scriptCount: 142,
               includesDatasetRegistry: true,
               includesAutomation: true,
               includesEvidence: true,
@@ -631,7 +642,7 @@
 
   namespace.modules.testDatasetRegistry = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     versionedDataset: true,
     frozenDataset: true,
