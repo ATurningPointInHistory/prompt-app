@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_understanding_pipeline.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 5 Repository and Workflow Understanding
    Design Freeze: v1.0.0 / Decision 006
    ============================================================ */
@@ -16,7 +16,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 understandingPipeline blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("understandingPipeline");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-UNDERSTANDING-PIPELINE";
   const HASH_ALGORITHM = "SHA-256";
   const STAGE_ORDER = Object.freeze([
@@ -339,8 +350,8 @@
       understandingId: understandingId,
       understandingType: "repository-workflow",
       componentId: namespace.componentId,
-      version: VERSION,
-      schemaVersion: VERSION,
+      version: artifactVersion("understandingResult"),
+      schemaVersion: schemaVersion("IDE-170-SCHEMA-UNDERSTANDING-RESULT"),
       sessionId: sessionId,
       status: "Frozen",
       scope: {
@@ -518,7 +529,7 @@
       {
         schemaId: "IDE-170-SCHEMA-UNDERSTANDING-RESULT",
         name: "Repository and Workflow Understanding Result",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-UNDERSTANDING-RESULT"),
         type: "object",
         required: ["understandingId", "understandingType", "sessionId", "scope", "facts", "derivedResults", "insights", "evidence", "stages", "quality", "summary", "integrity", "status", "frozen", "immutable"],
         properties: {
@@ -554,14 +565,14 @@
     return namespace.registerCapability({
       capabilityId: CAPABILITY_ID,
       name: "Evidence-Grounded Understanding Pipeline",
-      version: VERSION,
+      version: capabilityVersion(CAPABILITY_ID),
       type: "Pipeline",
       status: "Active",
       owner: "IDE-170",
       dependencies: [
-        { capabilityId: "IDE-170-REPOSITORY-UNDERSTANDING", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-WORKFLOW-UNDERSTANDING", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-EVIDENCE-GRAPH", minimumVersion: "1.6.0", optional: false }
+        { capabilityId: "IDE-170-REPOSITORY-UNDERSTANDING", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-WORKFLOW-UNDERSTANDING", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-EVIDENCE-GRAPH", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-UNDERSTANDING-RESULT"],
       provides: ["Stage Lifecycle", "Fact Derived Insight Separation", "Source Coverage", "Understanding Freeze", "Understanding Validation"],
@@ -604,7 +615,7 @@
       const unique = Date.now().toString(36).toUpperCase();
       const adapterId = "IDE-170-ADAPTER-UNDERSTANDING-VALIDATION-" + unique;
       const fixtureRecords = [
-        { recordType: "project", sourceType: "validation", sourceId: "project:phase5", identity: { sourceId: "project:phase5", name: "Phase 5 Fixture", qualifiedName: "Phase 5 Fixture", aliases: [] }, classification: { domain: "repository", category: "project", subtype: "application", lifecycle: "Active" }, payload: { version: VERSION }, metadata: {}, quality: { missingFields: [], warnings: [], errors: [] } },
+        { recordType: "project", sourceType: "validation", sourceId: "project:phase5", identity: { sourceId: "project:phase5", name: "Phase 5 Fixture", qualifiedName: "Phase 5 Fixture", aliases: [] }, classification: { domain: "repository", category: "project", subtype: "application", lifecycle: "Active" }, payload: { version: datasetVersion("phase5Understanding") }, metadata: {}, quality: { missingFields: [], warnings: [], errors: [] } },
         { recordType: "file", sourceType: "validation", sourceId: "src/a.js", identity: { sourceId: "src/a.js", name: "a.js", qualifiedName: "src/a.js", aliases: [] }, classification: { domain: "repository", category: "file", subtype: "js", lifecycle: "Active" }, payload: { path: "src/a.js", fileName: "a.js", content: "function alpha(){}" }, metadata: {}, quality: { missingFields: [], warnings: [], errors: [] } },
         { recordType: "file", sourceType: "validation", sourceId: "src/b.js", identity: { sourceId: "src/b.js", name: "b.js", qualifiedName: "src/b.js", aliases: [] }, classification: { domain: "repository", category: "file", subtype: "js", lifecycle: "Active" }, payload: { path: "src/b.js", fileName: "b.js", content: "function beta(){}" }, metadata: {}, quality: { missingFields: [], warnings: [], errors: [] } },
         { recordType: "file", sourceType: "validation", sourceId: "src/c.js", identity: { sourceId: "src/c.js", name: "c.js", qualifiedName: "src/c.js", aliases: [] }, classification: { domain: "repository", category: "file", subtype: "js", lifecycle: "Active" }, payload: { path: "src/c.js", fileName: "c.js", content: "function gamma(){}" }, metadata: {}, quality: { missingFields: [], warnings: [], errors: [] } },
@@ -617,9 +628,9 @@
         { recordType: "workflow-baseline", sourceType: "validation", sourceId: "workflow-baseline:phase5", identity: { sourceId: "workflow-baseline:phase5", name: "Phase 5 Baseline", qualifiedName: "workflow-baseline:phase5", aliases: [] }, classification: { domain: "workflow", category: "workflow-baseline", subtype: "IDE-160 Baseline", lifecycle: "Frozen" }, payload: { status: "Frozen" }, metadata: {}, quality: { missingFields: [], warnings: [], errors: [] } }
       ];
       const adapterResult = namespace.registerSourceAdapter({
-        adapterId: adapterId, capabilityId: adapterId, name: "Phase 5 Understanding Fixture", version: VERSION, status: "Experimental", sourceType: "validation", recordTypes: ["project", "file", "function", "module", "workflow-package", "workflow-baseline"], domains: ["repository", "architecture", "workflow"], required: true, priority: 1,
+        adapterId: adapterId, capabilityId: adapterId, name: "Phase 5 Understanding Fixture", version: datasetVersion("phase5Understanding"), status: "Experimental", sourceType: "validation", recordTypes: ["project", "file", "function", "module", "workflow-package", "workflow-baseline"], domains: ["repository", "architecture", "workflow"], required: true, priority: 1,
         isAvailable: function available() { return { available: true, status: "Ready" }; },
-        read: function read() { return { status: "Ready", sourceVersion: VERSION, records: internal.clone(fixtureRecords), warnings: [] }; }
+        read: function read() { return { status: "Ready", sourceVersion: datasetVersion("phase5Understanding"), records: internal.clone(fixtureRecords), warnings: [] }; }
       });
       if (adapterResult.ok) artifacts.adapterIds.push(adapterId);
       check("Phase 5 fixture Adapter can be registered", adapterResult.ok === true, adapterResult.code, "Fixture");
@@ -704,7 +715,7 @@
         id: internal.nextId("IDE-170-PHASE5-VALIDATION"),
         componentId: namespace.componentId,
         name: "IDE-170 Phase 5 Repository and Workflow Understanding Validation",
-        version: VERSION,
+        version: RELEASE_VERSION,
         valid: passed === total && total > 0,
         passed: passed,
         failed: total - passed,
@@ -736,7 +747,7 @@
       const passed = checks.filter(function item(value) { return value.passed; }).length;
       const result = {
         id: internal.nextId("IDE-170-PHASE5-VALIDATION"), componentId: namespace.componentId,
-        name: "IDE-170 Phase 5 Repository and Workflow Understanding Validation", version: VERSION,
+        name: "IDE-170 Phase 5 Repository and Workflow Understanding Validation", version: RELEASE_VERSION,
         valid: false, passed: passed, failed: checks.length - passed + 1, total: checks.length + 1,
         health: 0, status: "Failed",
         checks: checks.concat([{ name: "Validation completed without exception", passed: false, detail: error && error.message || String(error), group: "Runtime", severity: "Critical" }]),
@@ -755,7 +766,7 @@
     return {
       id: "IDE-170-UNDERSTANDING-STATUS",
       componentId: namespace.componentId,
-      version: VERSION,
+      version: MODULE_VERSION,
       status: namespace.getCapability(CAPABILITY_ID) ? "Ready" : "Loaded",
       ready: Boolean(namespace.getCapability(CAPABILITY_ID)),
       resultCount: state.understandingResults.size,
@@ -815,7 +826,7 @@
 
   namespace.modules.understandingPipeline = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     stageCount: STAGE_ORDER.length,
     structuralUnderstanding: true,
