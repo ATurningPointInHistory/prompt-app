@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation_compiler.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Architecture Decision: 011 v1.1.0
    Phase: Test Procedure Intake and Validation Compiler (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 validationCompiler blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("validationCompiler");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-VALIDATION-COMPILER";
 
   if (!(state.validationDatasetCandidates instanceof Map)) state.validationDatasetCandidates = new Map();
@@ -663,7 +674,7 @@ IDE170Intelligence.getStatus()
 
 期待結果:
 
-version = "${VERSION}"
+version = "${RELEASE_VERSION}"
 ready = true
 modules.testProcedureIntake = true
 modules.testProcedureParser = true
@@ -894,7 +905,7 @@ blocked = true
         id: internal.nextId("IDE-170-PROCEDURE-FOUNDATION-VALIDATION"),
         componentId: namespace.componentId,
         name: "IDE-170 Test Procedure Intake and Validation Compiler Validation",
-        version: VERSION,
+        version: RELEASE_VERSION,
         architectureDecisionVersion: "011-v1.1.0",
         valid: valid,
         passed: passed,
@@ -928,7 +939,7 @@ blocked = true
         id: internal.nextId("IDE-170-PROCEDURE-FOUNDATION-VALIDATION"),
         componentId: namespace.componentId,
         name: "IDE-170 Test Procedure Intake and Validation Compiler Validation",
-        version: VERSION,
+        version: RELEASE_VERSION,
         valid: false,
         passed: passed,
         failed: checks.length - passed + 1,
@@ -953,7 +964,7 @@ blocked = true
       {
         schemaId: "IDE-170-SCHEMA-VALIDATION-DATASET-CANDIDATE",
         name: "Validation Dataset Candidate",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-VALIDATION-DATASET-CANDIDATE"),
         type: "object",
         required: ["candidateId", "procedureId", "parsedProcedureId", "steps", "ownerSelections", "status", "candidateHash"],
         properties: {
@@ -971,7 +982,7 @@ blocked = true
       {
         schemaId: "IDE-170-SCHEMA-OWNER-SELECTION",
         name: "Procedure Owner Selection",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-OWNER-SELECTION"),
         type: "object",
         required: ["stepId", "originalPolicy", "finalPolicy", "selected", "warningAcknowledged"],
         properties: {
@@ -999,14 +1010,14 @@ blocked = true
     return namespace.registerCapability({
       capabilityId: CAPABILITY_ID,
       name: "Validation Compiler and Selectable Execution Policy",
-      version: VERSION,
+      version: capabilityVersion(CAPABILITY_ID),
       type: "Validation",
       status: "Active",
       owner: "IDE-170",
       dependencies: [
-        { capabilityId: "IDE-170-TEST-PROCEDURE-PARSER", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-VALIDATION-AUTOMATION", minimumVersion: "1.3.0", optional: false },
-        { capabilityId: "IDE-170-VALIDATION-EVIDENCE-PACKAGE", minimumVersion: "1.3.0", optional: false }
+        { capabilityId: "IDE-170-TEST-PROCEDURE-PARSER", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-VALIDATION-AUTOMATION", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-VALIDATION-EVIDENCE-PACKAGE", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-VALIDATION-DATASET-CANDIDATE", "IDE-170-SCHEMA-OWNER-SELECTION"],
       provides: ["Validation Compiler", "Warning Selectable", "Owner Selection", "Common Validation Launcher", "Imported Procedure Runner"],
@@ -1069,7 +1080,7 @@ blocked = true
 
   namespace.modules.validationCompiler = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     datasetCandidate: true,
     ownerSelection: true,
