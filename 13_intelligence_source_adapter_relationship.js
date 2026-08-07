@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_source_adapter_relationship.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 4 Evidence Graph - Official Relationship Source Adapter
    ============================================================ */
 (function (global) {
@@ -14,7 +14,18 @@
   }
 
   const internal = namespace.__internal;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 sourceAdapterRelationship blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("sourceAdapterRelationship");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const ADAPTER_ID = "IDE-170-ADAPTER-RELATIONSHIP";
 
   function normalizeType(value) {
@@ -118,7 +129,7 @@
 
   function initializeRelationshipSourceAdapter() {
     const existing = namespace.getSourceAdapter(ADAPTER_ID);
-    if (existing && existing.version === VERSION) {
+    if (existing && existing.version === capabilityVersion(ADAPTER_ID)) {
       return internal.buildResult(true, "RELATIONSHIP_SOURCE_ADAPTER_EXISTS", "Ready", { adapter: existing });
     }
     if (existing && typeof internal.removeSourceAdapterForValidation === "function") {
@@ -129,7 +140,7 @@
       adapterId: ADAPTER_ID,
       capabilityId: ADAPTER_ID,
       name: "Official Relationship Source Adapter",
-      version: VERSION,
+      version: capabilityVersion(ADAPTER_ID),
       status: "Official",
       sourceType: "relationship-data",
       recordTypes: ["relationship"],
@@ -146,7 +157,7 @@
   Object.assign(namespace.api, { initializeRelationshipSourceAdapter: initializeRelationshipSourceAdapter });
   namespace.modules.relationshipSourceAdapter = {
     id: ADAPTER_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     readOnly: true,
     factPromotionAutomatic: false,
