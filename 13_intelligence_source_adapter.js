@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_source_adapter.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 2 Source Intake - Source Adapter Framework
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -16,7 +16,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 sourceAdapter blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("sourceAdapter");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const FRAMEWORK_CAPABILITY_ID = "IDE-170-SOURCE-ADAPTER-FRAMEWORK";
   const ADAPTER_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
   const ADAPTER_STATUSES = Object.freeze([
@@ -155,7 +166,7 @@
       {
         schemaId: "IDE-170-SCHEMA-SOURCE-ADAPTER-DEFINITION",
         name: "Source Adapter Definition",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-SOURCE-ADAPTER-DEFINITION"),
         description: "Read-only official Source Adapter metadata contract.",
         type: "object",
         required: ["adapterId", "capabilityId", "name", "version", "status", "sourceType", "recordTypes"],
@@ -177,7 +188,7 @@
       {
         schemaId: "IDE-170-SCHEMA-SOURCE-RECORD",
         name: "Source Intake Record",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-SOURCE-RECORD"),
         description: "Source-derived immutable input record before Canonical conversion.",
         type: "object",
         required: [
@@ -207,7 +218,7 @@
       {
         schemaId: "IDE-170-SCHEMA-SOURCE-INTAKE",
         name: "Source Intake Result",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-SOURCE-INTAKE"),
         description: "Frozen Source Intake result for one Intelligence Session.",
         type: "object",
         required: [
@@ -253,7 +264,7 @@
     return namespace.registerCapability({
       capabilityId: FRAMEWORK_CAPABILITY_ID,
       name: "Official Source Adapter Framework",
-      version: VERSION,
+      version: capabilityVersion(FRAMEWORK_CAPABILITY_ID),
       type: "Adapter",
       status: "Official",
       owner: "IDE-170",
@@ -709,8 +720,8 @@
     const intake = {
       intakeId: intakeId,
       componentId: namespace.componentId,
-      version: VERSION,
-      schemaVersion: VERSION,
+      version: artifactVersion("sourceIntake"),
+      schemaVersion: schemaVersion("IDE-170-SCHEMA-SOURCE-INTAKE"),
       sessionId: sessionId,
       status: intakeStatus,
       adapterResults: adapterResults,
@@ -865,7 +876,7 @@
     return {
       id: "IDE-170-SOURCE-ADAPTER-STATUS",
       componentId: namespace.componentId,
-      version: VERSION,
+      version: MODULE_VERSION,
       status: namespace.getCapability(FRAMEWORK_CAPABILITY_ID) ? "Ready" : "Loaded",
       ready: Boolean(namespace.getCapability(FRAMEWORK_CAPABILITY_ID)),
       adapterCount: adapters.length,
@@ -950,7 +961,7 @@
 
   namespace.modules.sourceAdapterFramework = {
     id: FRAMEWORK_CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     readOnly: true,
     immutableIntake: true,
