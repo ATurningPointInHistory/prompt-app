@@ -1,7 +1,7 @@
 /* ===============================
    FILE: 07_project_package.js
    Project Package Builder
-   Static Manifest Build v1.0.0
+   Static Manifest Build v2.0.0
 =============================== */
 
 const AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE =
@@ -128,6 +128,41 @@ async function saveProjectPackage() {
 
         const data = await res.arrayBuffer();
 
+        const expectedScriptIntegrity =
+          manifestBuild.manifest.hashes &&
+          manifestBuild.manifest.hashes[item.path];
+
+        if (expectedScriptIntegrity) {
+          const actualHash =
+            await calculateProjectPackageSHA256(data);
+
+          if (
+            actualHash !==
+            expectedScriptIntegrity.sha256
+          ) {
+            missingFiles.push({
+              path: item.path,
+              status: 0,
+              reason:
+                "SHA-256 mismatch"
+            });
+            continue;
+          }
+
+          if (
+            data.byteLength !==
+            expectedScriptIntegrity.byteSize
+          ) {
+            missingFiles.push({
+              path: item.path,
+              status: 0,
+              reason:
+                "byteSize mismatch"
+            });
+            continue;
+          }
+        }
+
         zip.file(item.path, data);
         savedFiles.push(item.path);
 
@@ -197,6 +232,16 @@ async function saveProjectPackage() {
         manifestBuild.manifestPath,
       scriptManifestVersion:
         manifestBuild.manifest.version,
+      scriptManifestSchemaVersion:
+        manifestBuild.manifest.manifestSchemaVersion,
+      applicationReleaseVersion:
+        manifestBuild.manifest.applicationReleaseVersion,
+      versionArchitecture:
+        manifestBuild.manifest.versionArchitecture,
+      scriptManifestHash:
+        manifestBuild.manifest.manifestHash,
+      scriptSetHash:
+        manifestBuild.manifest.scriptSetHash,
       scriptManifestCount:
         manifestBuild.manifest.scripts.length,
       scriptLoading: {
@@ -297,6 +342,220 @@ async function saveProjectPackage() {
 }
 
 
+
+function stableProjectPackageValue(value) {
+  if (Array.isArray(value)) {
+    return value.map(stableProjectPackageValue);
+  }
+
+  if (!value || typeof value !== "object") {
+    return value;
+  }
+
+  const output = {};
+
+  Object.keys(value)
+    .sort()
+    .forEach(key => {
+      output[key] = stableProjectPackageValue(value[key]);
+    });
+
+  return output;
+}
+
+
+function stableProjectPackageStringify(value) {
+  return JSON.stringify(
+    stableProjectPackageValue(value)
+  );
+}
+
+
+async function calculateProjectPackageSHA256(input) {
+  if (
+    !window.crypto ||
+    !window.crypto.subtle ||
+    typeof TextEncoder === "undefined"
+  ) {
+    throw new Error(
+      "SHA-256検証に必要なWeb Crypto APIが利用できません"
+    );
+  }
+
+  let buffer;
+
+  if (input instanceof ArrayBuffer) {
+    buffer = input;
+  } else if (ArrayBuffer.isView(input)) {
+    buffer = input.buffer.slice(
+      input.byteOffset,
+      input.byteOffset + input.byteLength
+    );
+  } else {
+    buffer = new TextEncoder().encode(
+      String(input == null ? "" : input)
+    ).buffer;
+  }
+
+  const digest = await window.crypto.subtle.digest(
+    "SHA-256",
+    buffer
+  );
+
+  return [...new Uint8Array(digest)]
+    .map(value => value.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+
+function getStaticManifestHashPayload(manifest) {
+  const value = JSON.parse(
+    JSON.stringify(manifest || {})
+  );
+
+  delete value.manifestHash;
+  delete value.updatedAt;
+
+  return value;
+}
+
+
+function getStaticManifestScriptSetPayload(manifest) {
+  const hashes =
+    manifest &&
+    manifest.hashes &&
+    typeof manifest.hashes === "object"
+      ? manifest.hashes
+      : {};
+
+  return (
+    manifest && Array.isArray(manifest.scripts)
+      ? manifest.scripts
+      : []
+  ).map(src => {
+    const path = normalizeStaticScriptPath(src);
+    const item = hashes[path] || {};
+
+    return path + ":" + String(item.sha256 || "");
+  }).join("\n");
+}
+
+
+function getStaticScriptHashQuery(src) {
+  try {
+    const url = new URL(
+      String(src || ""),
+      document.baseURI
+    );
+
+    return url.searchParams.get("h") || "";
+  } catch (_) {
+    const match = String(src || "")
+      .match(/[?&]h=([a-f0-9]+)/i);
+
+    return match ? match[1] : "";
+  }
+}
+
+
+async function validateStaticScriptManifestIntegrity(manifest) {
+  const errors = [];
+
+  if (!manifest || typeof manifest !== "object") {
+    return {
+      ok: false,
+      errors: ["Manifestがありません"]
+    };
+  }
+
+  const scripts = Array.isArray(manifest.scripts)
+    ? manifest.scripts
+    : [];
+
+  const hashes =
+    manifest.hashes && typeof manifest.hashes === "object"
+      ? manifest.hashes
+      : {};
+
+  scripts.forEach(src => {
+    const path = normalizeStaticScriptPath(src);
+    const item = hashes[path];
+
+    if (!item) {
+      errors.push(
+        "Script Hash情報がありません: " + path
+      );
+      return;
+    }
+
+    if (!/^[a-f0-9]{64}$/.test(String(item.sha256 || ""))) {
+      errors.push(
+        "Script SHA-256形式が不正です: " + path
+      );
+    }
+
+    if (
+      !Number.isInteger(item.byteSize) ||
+      item.byteSize < 0
+    ) {
+      errors.push(
+        "Script byteSizeが不正です: " + path
+      );
+    }
+
+    const expectedCacheKey =
+      String(item.sha256 || "").slice(0, 12);
+
+    if (item.cacheKey !== expectedCacheKey) {
+      errors.push(
+        "Script cacheKeyがSHA-256と一致しません: " + path
+      );
+    }
+
+    if (getStaticScriptHashQuery(src) !== item.cacheKey) {
+      errors.push(
+        "Script URLのHashがManifestと一致しません: " + path
+      );
+    }
+  });
+
+  if (!errors.length) {
+    const scriptSetHash =
+      await calculateProjectPackageSHA256(
+        getStaticManifestScriptSetPayload(manifest)
+      );
+
+    if (manifest.scriptSetHash !== scriptSetHash) {
+      errors.push(
+        "Script Set Hashが一致しません"
+      );
+    }
+
+    const manifestHash =
+      await calculateProjectPackageSHA256(
+        stableProjectPackageStringify(
+          getStaticManifestHashPayload(manifest)
+        )
+      );
+
+    if (manifest.manifestHash !== manifestHash) {
+      errors.push(
+        "Manifest Hashが一致しません"
+      );
+    }
+  }
+
+  return {
+    ok: errors.length === 0,
+    errors,
+    scriptSetHash:
+      manifest.scriptSetHash || "",
+    manifestHash:
+      manifest.manifestHash || ""
+  };
+}
+
+
 function normalizeStaticScriptPath(src) {
   return String(src || "")
     .trim()
@@ -328,6 +587,33 @@ function validateStaticScriptManifest(manifest) {
   if (!version) {
     errors.push(
       "Manifest versionがありません"
+    );
+  }
+
+  if (
+    !manifest ||
+    manifest.manifestSchemaVersion !== "2.0.0"
+  ) {
+    errors.push(
+      "Manifest Schema Version 2.0.0が必要です"
+    );
+  }
+
+  if (
+    !manifest ||
+    manifest.versionArchitecture !== "independent-version-v1"
+  ) {
+    errors.push(
+      "Version Architectureがindependent-version-v1ではありません"
+    );
+  }
+
+  if (
+    !manifest ||
+    manifest.hashAlgorithm !== "SHA-256"
+  ) {
+    errors.push(
+      "Manifest Hash AlgorithmはSHA-256が必要です"
     );
   }
 
@@ -427,6 +713,12 @@ function validateStaticScriptManifest(manifest) {
     ok: errors.length === 0,
     errors,
     version: version || "unknown",
+    manifestSchemaVersion:
+      manifest && manifest.manifestSchemaVersion || "unknown",
+    applicationReleaseVersion:
+      manifest && manifest.applicationReleaseVersion || version || "unknown",
+    versionArchitecture:
+      manifest && manifest.versionArchitecture || "unknown",
     scriptCount: scripts.length,
     first,
     last,
@@ -644,8 +936,28 @@ async function loadStaticScriptManifest() {
       );
     }
 
-    const validation =
+    const structureValidation =
       validateStaticScriptManifest(manifest);
+
+    const integrityValidation =
+      structureValidation.ok
+        ? await validateStaticScriptManifestIntegrity(manifest)
+        : {
+            ok: false,
+            errors: []
+          };
+
+    const validation = {
+      ...structureValidation,
+      integrity: integrityValidation,
+      ok:
+        structureValidation.ok &&
+        integrityValidation.ok,
+      errors: [
+        ...structureValidation.errors,
+        ...integrityValidation.errors
+      ]
+    };
 
     return {
       ok: validation.ok,
