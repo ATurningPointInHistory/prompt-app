@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation_automation.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Architecture Decision: 011
    Phase: Validation Automation Foundation (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 validationAutomation blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("validationAutomation");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-VALIDATION-AUTOMATION";
   const RUN_STATUSES = Object.freeze([
     "Created", "Preparing", "Running", "Comparing", "Completed",
@@ -780,7 +791,7 @@
       {
         schemaId: "IDE-170-SCHEMA-VALIDATION-RUN",
         name: "Automated Validation Run",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-VALIDATION-RUN"),
         type: "object",
         required: ["validationRunId", "componentId", "componentVersion", "datasetId", "datasetVersion", "status", "caseResults", "summary"],
         properties: {
@@ -799,7 +810,7 @@
       {
         schemaId: "IDE-170-SCHEMA-CASE-RESULT",
         name: "Automated Validation Case Result",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-CASE-RESULT"),
         type: "object",
         required: ["resultId", "validationRunId", "caseId", "status", "passed", "severity", "category"],
         properties: {
@@ -829,12 +840,12 @@
     return namespace.registerCapability({
       capabilityId: CAPABILITY_ID,
       name: "Deterministic Automated Validation Runner",
-      version: VERSION,
+      version: capabilityVersion(CAPABILITY_ID),
       type: "Validation",
       status: "Active",
       owner: "IDE-170",
       dependencies: [
-        { capabilityId: "IDE-170-TEST-DATASET-REGISTRY", minimumVersion: VERSION, optional: false }
+        { capabilityId: "IDE-170-TEST-DATASET-REGISTRY", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-VALIDATION-RUN", "IDE-170-SCHEMA-CASE-RESULT"],
       provides: ["Automated Test Runner", "Expected Result Comparator", "Manual Confirmation", "Progress", "Cancellation"],
@@ -975,7 +986,7 @@
 
   namespace.modules.validationAutomation = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     deterministicRunner: true,
     expectedResultComparator: true,
