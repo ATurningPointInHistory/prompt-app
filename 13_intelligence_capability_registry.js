@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_capability_registry.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 2 Governed Capability Registry - Governed Capability Registry
    ============================================================ */
 (function (global) {
@@ -15,7 +15,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 capabilityRegistry blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("capabilityRegistry");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID_PATTERN = /^[A-Z][A-Z0-9]*(?:[.:-][A-Z0-9]+)*$/;
   const SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
   const ALLOWED_STATUSES = Object.freeze([
@@ -47,7 +58,7 @@
     Object.freeze({
       capabilityId: "IDE-170-CORE",
       name: "Intelligence Platform Core",
-      version: VERSION,
+      version: capabilityVersion("IDE-170-CORE"),
       type: "Core",
       status: "Active",
       owner: "IDE-170",
@@ -60,13 +71,13 @@
     Object.freeze({
       capabilityId: "IDE-170-CAPABILITY-REGISTRY",
       name: "Governed Capability Registry",
-      version: VERSION,
+      version: capabilityVersion("IDE-170-CAPABILITY-REGISTRY"),
       type: "Registry",
       status: "Active",
       owner: "IDE-170",
       description: "Registers governed Capabilities and validates versions and dependencies.",
       dependencies: [
-        { capabilityId: "IDE-170-CORE", minimumVersion: VERSION, optional: false }
+        { capabilityId: "IDE-170-CORE", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-CAPABILITY-DEFINITION"],
       provides: ["Capability Registration", "Dependency Validation", "Version Resolution"],
@@ -492,7 +503,7 @@
 
   namespace.modules.capabilityRegistry = {
     id: "IDE-170-CAPABILITY-REGISTRY",
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     duplicateProtection: true,
     dependencyValidation: true,
