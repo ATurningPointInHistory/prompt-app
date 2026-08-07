@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_platform_core.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: Repository and Workflow Understanding
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -10,10 +10,21 @@
 
   const COMPONENT_ID = "IDE-170";
   const COMPONENT_NAME = "Intelligence Platform";
-  const VERSION = "1.6.0";
-  const SCHEMA_VERSION = "1.0.0";
-  const DESIGN_FREEZE_VERSION = "1.0.0";
-  const IMPLEMENTATION_PHASE = "Phase 5 Repository and Workflow Understanding";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 platformCore blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("platformCore");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
+  const SCHEMA_VERSION = VERSION_MANIFEST.contractVersions.coreApi;
+  const DESIGN_FREEZE_VERSION = VERSION_MANIFEST.release.designFreezeVersion;
+  const IMPLEMENTATION_PHASE = VERSION_MANIFEST.release.implementationPhase;
   const PHASE1_RELEASE_FROZEN = true;
   const PHASE2_RELEASE_FROZEN = true;
   const PHASE3_RELEASE_FROZEN = true;
@@ -490,7 +501,7 @@
     const session = {
       sessionId: sessionId,
       componentId: COMPONENT_ID,
-      version: VERSION,
+      version: RELEASE_VERSION,
       sessionType: text(settings.sessionType || settings.type, "Intelligence"),
       purpose: text(settings.purpose || settings.goal, "IDE-170 Intelligence Session"),
       state: "Created",
@@ -616,6 +627,7 @@
       testProcedureParser: Boolean(namespace.modules && namespace.modules.testProcedureParser),
       validationCompiler: Boolean(namespace.modules && namespace.modules.validationCompiler),
       testProcedureUI: Boolean(namespace.modules && namespace.modules.testProcedureUI),
+      versionValidation: Boolean(namespace.modules && namespace.modules.versionValidation),
       validation: Boolean(namespace.modules && namespace.modules.validation)
     };
     const requiredReady = Object.keys(moduleStatus).every(function allReady(key) {
@@ -656,10 +668,10 @@
         results.ideRegistry = global.registerIdeComponent({
           id: COMPONENT_ID,
           title: COMPONENT_NAME,
-          summary: "Evidence Graphを根拠にRepository構造、Dependency、Change、Workflow Trace、Cross-Domain Mapping、Insight Candidateを分離生成するIntelligence Platform。Phase 5。",
+          summary: "IDE-170 Intelligence Platform。Phase 5 Understanding完了後、v1.6.1で独立Version ArchitectureとContent Hash Integrityへ移行。",
           icon: "🧠",
-          version: VERSION,
-          status: "Phase 5",
+          version: RELEASE_VERSION,
+          status: "v1.6.1 Version Architecture",
           ready: state.initialized === true,
           progress: 62.5,
           health: state.lastUnderstandingValidation && Number(state.lastUnderstandingValidation.health) || state.lastValidation && Number(state.lastValidation.health) || 0,
@@ -739,12 +751,13 @@
           !dependencyStatus.required.testProcedureParser ||
           !dependencyStatus.required.validationCompiler ||
           !dependencyStatus.required.testProcedureUI ||
+          !dependencyStatus.required.versionValidation ||
           !dependencyStatus.required.validation) {
         state.initializing = false;
         return buildResult(false, "IDE170_DEPENDENCY_MISSING", "Blocked", {
           dependencies: dependencyStatus
         }, {
-          error: { message: "IDE-170 Phase 5 Repository and Workflow Understanding modules are not fully loaded.", category: "Dependency Failure" }
+          error: { message: "IDE-170 v1.6.1 required modules are not fully loaded.", category: "Dependency Failure" }
         });
       }
 
@@ -756,6 +769,11 @@
       if (namespace.api && typeof namespace.api.initializeSchemaRegistry === "function") {
         const schemaResult = namespace.api.initializeSchemaRegistry();
         if (!schemaResult.ok) throw new Error("Schema Registry initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeVersionValidation === "function") {
+        const versionValidationResult = namespace.api.initializeVersionValidation();
+        if (!versionValidationResult.ok) throw new Error("Version Validation initialization failed.");
       }
 
       if (namespace.api && typeof namespace.api.initializeSourceAdapterFramework === "function") {
@@ -863,7 +881,7 @@
         targetId: COMPONENT_ID,
         outcome: "Succeeded",
         detail: {
-          version: VERSION,
+          version: RELEASE_VERSION,
           phase: IMPLEMENTATION_PHASE,
           duplicateProtection: true
         }
@@ -893,6 +911,15 @@
     const codePassed = Boolean(
       understandingValidation && understandingValidation.valid === true && understandingValidation.failed === 0
     );
+    const versionValidation = state.lastVersionArchitectureValidation;
+    const versionArchitecturePassed = Boolean(
+      versionValidation &&
+      versionValidation.valid === true &&
+      versionValidation.failed === 0 &&
+      versionValidation.staticManifestValidated === true &&
+      versionValidation.fullScriptHashValidated === true &&
+      versionValidation.releaseGateAllowed === true
+    );
     const releaseReady = Boolean(
       state.initialized &&
       dependencyStatus.requiredReady &&
@@ -900,20 +927,23 @@
       PROCEDURE_COMPILER_RELEASE_FROZEN &&
       PHASE4_RELEASE_FROZEN &&
       codePassed &&
-      androidPassed
+      androidPassed &&
+      versionArchitecturePassed
     );
 
     return {
       componentId: COMPONENT_ID,
-      version: VERSION,
+      version: RELEASE_VERSION,
       phase: IMPLEMENTATION_PHASE,
       releaseStatus: releaseReady
-        ? "Phase 5 Repository and Workflow Understanding Ready"
-        : codePassed && !androidPassed
-          ? "Conditional - Phase 5 Android Validation Pending"
-          : understandingValidation
-            ? "Blocked"
-            : "Phase 5 Validation Not Run",
+        ? "v1.6.1 Version Architecture Ready"
+        : codePassed && androidPassed && !versionArchitecturePassed
+          ? "Conditional - v1.6.1 Version Architecture Validation Pending"
+          : codePassed && !androidPassed
+            ? "Conditional - Phase 5 Android Validation Pending"
+            : understandingValidation
+              ? "Blocked"
+              : "Phase 5 Validation Not Run",
       releaseAllowed: releaseReady,
       validationStatus: understandingValidation ? understandingValidation.status : "Not Run",
       health: understandingValidation && Number.isFinite(Number(understandingValidation.health))
@@ -922,6 +952,10 @@
       independentValidationRequired: true,
       understandingCodeValidationPassed: codePassed,
       androidRealDevicePassed: androidPassed,
+      versionArchitecture: VERSION_MANIFEST.versionArchitecture,
+      versionArchitectureValidationStatus: versionValidation ? versionValidation.status : "Not Run",
+      versionArchitectureHealth: versionValidation ? versionValidation.health : null,
+      versionArchitecturePassed: versionArchitecturePassed,
       phase1ReleaseFrozen: PHASE1_RELEASE_FROZEN,
       phase2ReleaseFrozen: PHASE2_RELEASE_FROZEN,
       phase3ReleaseFrozen: PHASE3_RELEASE_FROZEN,
@@ -944,12 +978,15 @@
       id: "IDE-170-STATUS",
       componentId: COMPONENT_ID,
       name: COMPONENT_NAME,
-      version: VERSION,
+      version: RELEASE_VERSION,
+      moduleVersion: MODULE_VERSION,
+      versionArchitecture: VERSION_MANIFEST.versionArchitecture,
+      versionManifestContractVersion: VERSION_MANIFEST.manifestContractVersion,
       schemaVersion: SCHEMA_VERSION,
       designFreezeVersion: DESIGN_FREEZE_VERSION,
       implementationPhase: IMPLEMENTATION_PHASE,
       implementationStatus: state.initialized
-        ? "Phase 5 Repository and Workflow Understanding Implemented"
+        ? "v1.6.1 Version Architecture Refactoring Implemented"
         : "Loaded",
       status: state.lastError
         ? "Degraded"
@@ -998,6 +1035,12 @@
       automationValidationStatus: state.lastAutomationValidation
         ? state.lastAutomationValidation.status
         : "Not Run",
+      versionArchitectureValidationStatus: state.lastVersionArchitectureValidation
+        ? state.lastVersionArchitectureValidation.status
+        : "Not Run",
+      versionArchitectureHealth: state.lastVersionArchitectureValidation
+        ? state.lastVersionArchitectureValidation.health
+        : null,
       sessionCount: state.sessions.size,
       frozenSessionCount: [...state.sessions.values()].filter(function countFrozen(item) {
         return item && item.state === "Frozen";
@@ -1044,7 +1087,7 @@
 
   namespace.componentId = COMPONENT_ID;
   namespace.name = COMPONENT_NAME;
-  namespace.version = VERSION;
+  namespace.version = RELEASE_VERSION;
   namespace.schemaVersion = SCHEMA_VERSION;
   namespace.designFreezeVersion = DESIGN_FREEZE_VERSION;
   namespace.implementationPhase = IMPLEMENTATION_PHASE;
@@ -1064,7 +1107,10 @@
   Object.assign(namespace.constants, {
     COMPONENT_ID: COMPONENT_ID,
     COMPONENT_NAME: COMPONENT_NAME,
-    VERSION: VERSION,
+    VERSION: RELEASE_VERSION,
+    RELEASE_VERSION: RELEASE_VERSION,
+    MODULE_VERSION: MODULE_VERSION,
+    VERSION_ARCHITECTURE: VERSION_MANIFEST.versionArchitecture,
     SCHEMA_VERSION: SCHEMA_VERSION,
     DESIGN_FREEZE_VERSION: DESIGN_FREEZE_VERSION,
     IMPLEMENTATION_PHASE: IMPLEMENTATION_PHASE,
@@ -1130,7 +1176,7 @@
 
   namespace.modules.core = {
     id: "IDE-170-CORE",
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     sessionLifecycle: true,
     audit: true,
