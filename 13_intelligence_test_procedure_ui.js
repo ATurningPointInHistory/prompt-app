@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_test_procedure_ui.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Architecture Decision: 011 v1.1.0
    Phase: Test Procedure Intake and Validation Compiler (Pre-Phase 4)
    ============================================================ */
@@ -15,7 +15,18 @@
   }
 
   const internal = namespace.__internal;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 testProcedureUI blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("testProcedureUI");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-TEST-PROCEDURE-UI";
   const UI_ID = "ide170-test-procedure-console";
 
@@ -424,7 +435,7 @@
     overlay.id = UI_ID;
     overlay.innerHTML = `<div class="ide170-panel">
       <div class="ide170-header">
-        <div class="ide170-title">🧪 IDE-170 実機検証手順コンソール <span class="ide170-badge">v${VERSION}</span></div>
+        <div class="ide170-title">🧪 IDE-170 実機検証手順コンソール <span class="ide170-badge">v${RELEASE_VERSION}</span></div>
         <span class="ide170-dock-summary" data-role="dock-summary">待機中</span>
         <button data-role="minimize" title="パネルを右下へ最小化し、元画面を操作します">元画面を確認</button>
         <button data-role="restore">検証へ戻る</button>
@@ -524,7 +535,7 @@
 
   namespace.modules.testProcedureUI = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     fileSelection: true,
     parseReview: true,
