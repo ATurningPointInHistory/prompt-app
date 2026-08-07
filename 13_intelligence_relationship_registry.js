@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_relationship_registry.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 4 Evidence Graph - Relationship Type Registry
    Design Freeze: v1.0.0 / Decision 005
    ============================================================ */
@@ -16,7 +16,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 relationshipRegistry blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("relationshipRegistry");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-RELATIONSHIP-TYPE-REGISTRY";
   const TYPE_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
   const DOMAINS = Object.freeze([
@@ -47,7 +58,7 @@
       relationshipType: item[0],
       domain: item[1],
       name: item[0],
-      version: VERSION,
+      version: VERSION_MANIFEST.definitionVersions.relationshipType,
       status: "Official",
       direction: "directed",
       factAllowed: true,
@@ -64,7 +75,7 @@
       relationshipType: internal.text(source.relationshipType || source.type || source.id, "").toLowerCase(),
       domain: internal.text(source.domain, "repository").toLowerCase(),
       name: internal.text(source.name || source.title, source.relationshipType || source.type || ""),
-      version: internal.text(source.version, VERSION),
+      version: internal.text(source.version, VERSION_MANIFEST.definitionVersions.relationshipType),
       status: internal.text(source.status, "Official"),
       direction: internal.text(source.direction, "directed").toLowerCase(),
       factAllowed: source.factAllowed !== false,
@@ -158,7 +169,7 @@
       {
         schemaId: "IDE-170-SCHEMA-RELATIONSHIP-TYPE",
         name: "Relationship Type Definition",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-RELATIONSHIP-TYPE"),
         type: "object",
         required: ["relationshipType", "domain", "version", "status", "direction", "factAllowed", "candidateAllowed"],
         properties: {
@@ -177,7 +188,7 @@
     ];
     return schemas.map(function register(schema) {
       const existing = namespace.getSchema(schema.schemaId);
-      if (existing && existing.version === VERSION) return { schemaId: schema.schemaId, registered: true, existing: true };
+      if (existing && existing.version === schema.version) return { schemaId: schema.schemaId, registered: true, existing: true };
       if (existing && typeof internal.removeSchemaForValidation === "function") internal.removeSchemaForValidation(schema.schemaId);
       const result = namespace.registerSchema(schema);
       return { schemaId: schema.schemaId, registered: result.ok === true, code: result.code };
@@ -186,20 +197,20 @@
 
   function registerCapability() {
     const existing = namespace.getCapability(CAPABILITY_ID);
-    if (existing && existing.version === VERSION) return internal.buildResult(true, "CAPABILITY_EXISTS", "Ready", { capability: existing });
+    if (existing && existing.version === capabilityVersion(CAPABILITY_ID)) return internal.buildResult(true, "CAPABILITY_EXISTS", "Ready", { capability: existing });
     if (existing && typeof internal.removeCapabilityForValidation === "function") internal.removeCapabilityForValidation(CAPABILITY_ID);
     return namespace.registerCapability({
       capabilityId: CAPABILITY_ID,
       name: "Relationship Type Registry",
-      version: VERSION,
+      version: capabilityVersion(CAPABILITY_ID),
       type: "Registry",
       status: "Active",
       owner: "IDE-170",
       description: "Governs official Relationship Types, Domains, Directions, and Layer eligibility.",
       dependencies: [
-        { capabilityId: "IDE-170-CORE", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-SCHEMA-REGISTRY", minimumVersion: VERSION, optional: false }
+        { capabilityId: "IDE-170-CORE", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-SCHEMA-REGISTRY", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-RELATIONSHIP-TYPE"],
       provides: ["Relationship Type Registration", "Direction Governance", "Fact and Candidate Layer Policy"],
@@ -212,7 +223,7 @@
     const capability = registerCapability();
     const typeResults = OFFICIAL_TYPES.map(function register(definition) {
       const existing = state.relationshipTypes.get(definition.relationshipType);
-      if (existing && existing.version === VERSION && existing.domain === definition.domain) {
+      if (existing && existing.version === definition.version && existing.domain === definition.domain) {
         return { relationshipType: definition.relationshipType, registered: true, existing: true };
       }
       if (existing) state.relationshipTypes.delete(definition.relationshipType);
@@ -250,7 +261,7 @@
 
   namespace.modules.relationshipRegistry = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     officialTypeCount: OFFICIAL_TYPES.length,
     layeredGraphPolicy: true,
