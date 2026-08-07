@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 4 Evidence Graph - Independent Validation Gate
    ============================================================ */
 (function (global) {
@@ -16,7 +16,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 validation blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("validation");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const VALIDATION_CAPABILITY_ID = "IDE-170-VALIDATION";
 
   function buildCheck(name, passed, detail, group, severity) {
@@ -63,7 +74,7 @@
     return namespace.registerCapability({
       capabilityId: VALIDATION_CAPABILITY_ID,
       name: "Independent Intelligence Validation Gate",
-      version: VERSION,
+      version: capabilityVersion(VALIDATION_CAPABILITY_ID),
       type: "Validation",
       status: "Active",
       owner: "IDE-170",
@@ -73,13 +84,13 @@
         { capabilityId: "IDE-170-CAPABILITY-REGISTRY", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-SCHEMA-REGISTRY", minimumVersion: "1.0.0", optional: false },
         { capabilityId: "IDE-170-SOURCE-ADAPTER-FRAMEWORK", minimumVersion: "1.0.0", optional: false },
-        { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: "1.2.0", optional: false },
-        { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: "1.2.0", optional: false },
-        { capabilityId: "IDE-170-TEST-PROCEDURE-INTAKE", minimumVersion: "1.6.0", optional: false },
-        { capabilityId: "IDE-170-TEST-PROCEDURE-PARSER", minimumVersion: "1.6.0", optional: false },
-        { capabilityId: "IDE-170-VALIDATION-COMPILER", minimumVersion: "1.6.0", optional: false },
-        { capabilityId: "IDE-170-RELATIONSHIP-TYPE-REGISTRY", minimumVersion: "1.6.0", optional: false },
-        { capabilityId: "IDE-170-EVIDENCE-GRAPH", minimumVersion: "1.6.0", optional: false }
+        { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-TEST-PROCEDURE-INTAKE", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-TEST-PROCEDURE-PARSER", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-VALIDATION-COMPILER", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-RELATIONSHIP-TYPE-REGISTRY", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-EVIDENCE-GRAPH", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-VALIDATION-RESULT"],
       provides: ["Core Validation", "Source Intake Validation", "Canonical Model Validation", "Repository Snapshot Validation", "Snapshot Chain Validation", "Release Gate", "Regression Validation"],
@@ -182,7 +193,7 @@
       );
       check(
         "Core version can be retrieved",
-        namespace.getStatus().version === VERSION,
+        namespace.getStatus().version === RELEASE_VERSION,
         namespace.getStatus().version,
         "Foundation"
       );
@@ -582,7 +593,7 @@
       check(
         "Status API is consistent",
         status.componentId === "IDE-170" &&
-          status.version === VERSION &&
+          status.version === RELEASE_VERSION &&
           status.initialized === true &&
           status.ready === true &&
           status.capabilityCount === state.capabilities.size &&
@@ -936,7 +947,7 @@
         adapterId: testAdapterId,
         capabilityId: testAdapterId,
         name: "Validation Source Adapter",
-        version: VERSION,
+        version: MODULE_VERSION,
         status: "Experimental",
         sourceType: "validation-source",
         recordTypes: ["project", "file"],
@@ -1042,7 +1053,7 @@
         "Source Intake records retain provenance",
         Boolean(intake && intake.adapterResults[0].records.every(function provenance(record) {
           return record.adapterId === testAdapterId &&
-            record.adapterVersion === VERSION &&
+            record.adapterVersion === MODULE_VERSION &&
             record.sourceId && record.sourceType;
         })),
         intake && intake.adapterResults[0].recordCount,
@@ -1179,7 +1190,7 @@
         adapterId: duplicateAdapterId,
         capabilityId: duplicateAdapterId,
         name: "Duplicate Canonical ID Validation Adapter",
-        version: VERSION,
+        version: MODULE_VERSION,
         status: "Experimental",
         sourceType: "validation-duplicate-source",
         recordTypes: ["file"],
@@ -1253,7 +1264,7 @@
         adapterId: unavailableAdapterId,
         capabilityId: unavailableAdapterId,
         name: "Unavailable Source Validation Adapter",
-        version: VERSION,
+        version: MODULE_VERSION,
         status: "Experimental",
         sourceType: "validation-unavailable-source",
         recordTypes: ["project"],
@@ -1479,7 +1490,7 @@
         adapterId: incrementAdapterId,
         capabilityId: incrementAdapterId,
         name: "Repository Increment Validation Adapter",
-        version: VERSION,
+        version: MODULE_VERSION,
         status: "Experimental",
         sourceType: "validation-source",
         recordTypes: ["project", "file"],
@@ -1692,7 +1703,7 @@
       const provisionalResult = {
         id: internal.nextId("IDE-170-VALIDATION"),
         componentId: namespace.componentId,
-        version: VERSION,
+        version: RELEASE_VERSION,
         valid: provisionalSummary.failed === 0 && provisionalSummary.total > 0,
         passed: provisionalSummary.passed,
         failed: provisionalSummary.failed,
@@ -1716,7 +1727,7 @@
         id: provisionalResult.id,
         componentId: namespace.componentId,
         name: "IDE-170 Phase 4 Evidence Graph Regression Validation",
-        version: VERSION,
+        version: RELEASE_VERSION,
         designFreezeVersion: namespace.designFreezeVersion,
         mode: internal.text(settings.mode, "Phase 4 Evidence Graph Integrated Regression Validation"),
         valid: summary.failed === 0 && summary.total > 0,
@@ -1777,7 +1788,7 @@
         id: internal.nextId("IDE-170-VALIDATION"),
         componentId: namespace.componentId,
         name: "IDE-170 Phase 4 Evidence Graph Regression Validation",
-        version: VERSION,
+        version: RELEASE_VERSION,
         valid: false,
         passed: summary.passed,
         failed: summary.failed + 1,
@@ -1817,7 +1828,7 @@
       : {
           id: "IDE-170-VALIDATION-STATUS",
           componentId: namespace.componentId,
-          version: VERSION,
+          version: RELEASE_VERSION,
           valid: false,
           passed: 0,
           failed: 0,
@@ -1841,7 +1852,7 @@
 
   namespace.modules.validation = {
     id: VALIDATION_CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     independentGate: true,
     validationIsolation: true,
