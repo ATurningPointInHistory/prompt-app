@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_repository_snapshot.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 3 Repository Snapshot
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -16,7 +16,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 repositorySnapshot blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("repositorySnapshot");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-REPOSITORY-SNAPSHOT";
   const HASH_ALGORITHM = "SHA-256";
   const MAX_CHAIN_DEPTH = 100;
@@ -568,7 +579,7 @@
       {
         schemaId: "IDE-170-SCHEMA-REPOSITORY-CHANGE",
         name: "Repository Snapshot Change",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-REPOSITORY-CHANGE"),
         description: "Typed Added, Modified, Removed or Unchanged Repository record comparison.",
         type: "object",
         required: ["changeId", "canonicalId", "recordType", "changeType", "detectionMethod", "detectedAt"],
@@ -588,7 +599,7 @@
       {
         schemaId: "IDE-170-SCHEMA-REPOSITORY-SNAPSHOT",
         name: "Repository Snapshot",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-REPOSITORY-SNAPSHOT"),
         description: "Immutable Baseline or Incremental Repository state Snapshot.",
         type: "object",
         required: [
@@ -633,14 +644,14 @@
     return namespace.registerCapability({
       capabilityId: CAPABILITY_ID,
       name: "Repository Snapshot and State Model",
-      version: VERSION,
+      version: capabilityVersion(CAPABILITY_ID),
       type: "Service",
       status: "Active",
       owner: "IDE-170",
       description: "Builds immutable Baseline and Incremental Repository Snapshots with SHA-256 integrity and chain validation.",
       dependencies: [
-        { capabilityId: "IDE-170-CORE", minimumVersion: "1.2.0", optional: false },
-        { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: "1.2.0", optional: false }
+        { capabilityId: "IDE-170-CORE", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
       schemas: [
         "IDE-170-SCHEMA-REPOSITORY-CHANGE",
@@ -739,8 +750,8 @@
       snapshotId: snapshotId,
       snapshotType: "baseline",
       componentId: namespace.componentId,
-      version: VERSION,
-      schemaVersion: VERSION,
+      version: artifactVersion("repositorySnapshot"),
+      schemaVersion: schemaVersion("IDE-170-SCHEMA-REPOSITORY-SNAPSHOT"),
       projectId: projectIdFromState(built.state),
       sessionId: sessionId,
       parentSnapshotId: null,
@@ -954,8 +965,8 @@
       snapshotId: snapshotId,
       snapshotType: "incremental",
       componentId: namespace.componentId,
-      version: VERSION,
-      schemaVersion: VERSION,
+      version: artifactVersion("repositorySnapshot"),
+      schemaVersion: schemaVersion("IDE-170-SCHEMA-REPOSITORY-SNAPSHOT"),
       projectId: projectIdFromState(currentBuilt.state),
       sessionId: sessionId,
       parentSnapshotId: parent.snapshotId,
@@ -1220,7 +1231,7 @@
     return {
       id: "IDE-170-REPOSITORY-SNAPSHOT-STATUS",
       componentId: namespace.componentId,
-      version: VERSION,
+      version: MODULE_VERSION,
       status: namespace.getCapability(CAPABILITY_ID) ? "Ready" : "Loaded",
       ready: Boolean(namespace.getCapability(CAPABILITY_ID)),
       snapshotCount: state.repositorySnapshots.size,
@@ -1307,7 +1318,7 @@
 
   namespace.modules.repositorySnapshot = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     baselineSnapshot: true,
     incrementalSnapshot: true,
