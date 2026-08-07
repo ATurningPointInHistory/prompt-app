@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_test_procedure_parser.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Architecture Decision: 011 v1.1.0
    Phase: Test Procedure Intake and Validation Compiler (Pre-Phase 4)
    ============================================================ */
@@ -16,7 +16,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 testProcedureParser blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("testProcedureParser");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-TEST-PROCEDURE-PARSER";
   const POLICIES = Object.freeze([
     "Auto Executable",
@@ -610,7 +621,7 @@
         procedureId: procedure.procedureId,
         procedureVersion: procedure.version,
         procedureHash: procedure.procedureHash,
-        parserVersion: VERSION,
+        parserVersion: capabilityVersion(CAPABILITY_ID),
         status: "Frozen",
         immutable: true,
         sectionCount: sections.length,
@@ -673,7 +684,7 @@
     const result = namespace.registerSchema({
       schemaId: "IDE-170-SCHEMA-PARSED-TEST-PROCEDURE",
       name: "Parsed Test Procedure",
-      version: VERSION,
+      version: schemaVersion("IDE-170-SCHEMA-PARSED-TEST-PROCEDURE"),
       type: "object",
       required: ["parsedProcedureId", "procedureId", "parserVersion", "steps", "policySummary", "parseHash"],
       properties: {
@@ -697,12 +708,12 @@
     return namespace.registerCapability({
       capabilityId: CAPABILITY_ID,
       name: "Deterministic Test Procedure Parser",
-      version: VERSION,
+      version: capabilityVersion(CAPABILITY_ID),
       type: "Validation",
       status: "Active",
       owner: "IDE-170",
       dependencies: [
-        { capabilityId: "IDE-170-TEST-PROCEDURE-INTAKE", minimumVersion: VERSION, optional: false }
+        { capabilityId: "IDE-170-TEST-PROCEDURE-INTAKE", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-PARSED-TEST-PROCEDURE"],
       provides: ["Heading Parser", "Code Parser", "Expected Result Parser", "Execution Policy Classification", "Parser Warning"],
@@ -750,7 +761,7 @@
 
   namespace.modules.testProcedureParser = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     deterministic: true,
     recognizedLanguages: ["ja", "en"],
