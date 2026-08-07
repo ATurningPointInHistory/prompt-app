@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_evidence_graph.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 4 Evidence Graph
    Design Freeze: v1.0.0 / Decision 005
    ============================================================ */
@@ -16,7 +16,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 evidenceGraph blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("evidenceGraph");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-EVIDENCE-GRAPH";
   const HASH_ALGORITHM = "SHA-256";
   const LAYERS = Object.freeze(["fact", "candidate"]);
@@ -110,7 +121,7 @@
     return {
       edgeId: internal.text(source.edgeId, "IDE-170-EDGE-" + hash(edgeKey).slice(0, 24).toUpperCase()),
       edgeKey: edgeKey,
-      schemaVersion: VERSION,
+      schemaVersion: schemaVersion("IDE-170-SCHEMA-RELATIONSHIP-EDGE"),
       relationshipType: relationshipType,
       layer: layer,
       direction: direction,
@@ -221,7 +232,7 @@
       sourceId: record.source && record.source.sourceId || record.identity && record.identity.sourceId || record.recordId,
       sourceVersion: record.source && record.source.sourceVersion || "",
       adapterId: record.source && record.source.adapterId || "IDE-170-CANONICAL-MODEL",
-      adapterVersion: record.source && record.source.adapterVersion || VERSION,
+      adapterVersion: record.source && record.source.adapterVersion || capabilityVersion("IDE-170-CANONICAL-MODEL"),
       capturedAt: record.source && record.source.capturedAt || snapshot.capturedAt || internal.nowIso()
     };
   }
@@ -438,9 +449,9 @@
         provenance: {
           sourceType: "repository-snapshot",
           sourceId: repositorySnapshot.snapshotId,
-          sourceVersion: repositorySnapshot.version || VERSION,
+          sourceVersion: repositorySnapshot.version || artifactVersion("repositorySnapshot"),
           adapterId: "IDE-170-REPOSITORY-SNAPSHOT",
-          adapterVersion: repositorySnapshot.version || VERSION,
+          adapterVersion: capabilityVersion("IDE-170-REPOSITORY-SNAPSHOT"),
           capturedAt: repositorySnapshot.capturedAt || internal.nowIso()
         },
         evidence: [normalizeEvidence({
@@ -511,7 +522,7 @@
       {
         schemaId: "IDE-170-SCHEMA-RELATIONSHIP-EDGE",
         name: "Typed Relationship Edge",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-RELATIONSHIP-EDGE"),
         type: "object",
         required: ["edgeId", "relationshipType", "layer", "direction", "sourceNode", "targetNode", "provenance", "evidence", "quality", "lifecycle"],
         properties: {
@@ -534,7 +545,7 @@
       {
         schemaId: "IDE-170-SCHEMA-EVIDENCE-GRAPH-SNAPSHOT",
         name: "Immutable Evidence Graph Snapshot",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-EVIDENCE-GRAPH-SNAPSHOT"),
         type: "object",
         required: ["graphId", "componentId", "version", "status", "canonicalSnapshotId", "nodes", "factEdges", "candidateEdges", "evidenceIndex", "summary", "integrity", "frozen", "immutable"],
         properties: {
@@ -559,7 +570,7 @@
     ];
     return schemas.map(function register(schema) {
       const existing = namespace.getSchema(schema.schemaId);
-      if (existing && existing.version === VERSION) return { schemaId: schema.schemaId, registered: true, existing: true };
+      if (existing && existing.version === schema.version) return { schemaId: schema.schemaId, registered: true, existing: true };
       if (existing && typeof internal.removeSchemaForValidation === "function") internal.removeSchemaForValidation(schema.schemaId);
       const result = namespace.registerSchema(schema);
       return { schemaId: schema.schemaId, registered: result.ok === true, code: result.code };
@@ -568,22 +579,22 @@
 
   function registerCapability() {
     const existing = namespace.getCapability(CAPABILITY_ID);
-    if (existing && existing.version === VERSION) return internal.buildResult(true, "CAPABILITY_EXISTS", "Ready", { capability: existing });
+    if (existing && existing.version === capabilityVersion(CAPABILITY_ID)) return internal.buildResult(true, "CAPABILITY_EXISTS", "Ready", { capability: existing });
     if (existing && typeof internal.removeCapabilityForValidation === "function") internal.removeCapabilityForValidation(CAPABILITY_ID);
     return namespace.registerCapability({
       capabilityId: CAPABILITY_ID,
       name: "Immutable Layered Evidence Graph",
-      version: VERSION,
+      version: capabilityVersion(CAPABILITY_ID),
       type: "Pipeline",
       status: "Active",
       owner: "IDE-170",
       description: "Builds immutable Fact and Candidate Graph layers with Evidence Index and path traversal.",
       dependencies: [
-        { capabilityId: "IDE-170-CORE", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-SCHEMA-REGISTRY", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: VERSION, optional: false },
-        { capabilityId: "IDE-170-RELATIONSHIP-TYPE-REGISTRY", minimumVersion: VERSION, optional: false }
+        { capabilityId: "IDE-170-CORE", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-SCHEMA-REGISTRY", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-CANONICAL-MODEL", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-RELATIONSHIP-TYPE-REGISTRY", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
       schemas: ["IDE-170-SCHEMA-RELATIONSHIP-EDGE", "IDE-170-SCHEMA-EVIDENCE-GRAPH-SNAPSHOT"],
       provides: ["Fact Graph", "Candidate Graph", "Evidence Index", "Relationship Path", "Duplicate Edge Control", "Graph Freeze"],
@@ -656,8 +667,8 @@
     const graph = {
       graphId: graphId,
       componentId: namespace.componentId,
-      version: VERSION,
-      schemaVersion: VERSION,
+      version: artifactVersion("evidenceGraph"),
+      schemaVersion: schemaVersion("IDE-170-SCHEMA-EVIDENCE-GRAPH-SNAPSHOT"),
       graphType: "Immutable Layered Evidence Graph",
       status: "Frozen",
       sessionId: sessionId,
@@ -857,7 +868,7 @@
     return {
       id: "IDE-170-EVIDENCE-GRAPH-STATUS",
       componentId: namespace.componentId,
-      version: VERSION,
+      version: MODULE_VERSION,
       status: namespace.getCapability(CAPABILITY_ID) ? "Ready" : "Loaded",
       ready: Boolean(namespace.getCapability(CAPABILITY_ID)),
       graphCount: state.evidenceGraphSnapshots.size,
@@ -928,9 +939,9 @@
         { recordType: "workflow-package", sourceType: "graph-validation", sourceId: "workflow:graph", identity: { sourceId: "workflow:graph", name: "Graph Workflow", qualifiedName: "workflow:graph", aliases: [] }, classification: { domain: "workflow", category: "workflow-package", subtype: "validation", lifecycle: "Frozen" }, payload: { changedFiles: ["src/a.js"] }, metadata: {}, quality: {} }
       ];
       const adapter = namespace.registerSourceAdapter({
-        adapterId: adapterId, capabilityId: adapterId, name: "Graph Validation Source", version: VERSION, status: "Experimental", sourceType: "graph-validation", recordTypes: ["project", "file", "function", "module", "workflow-package"], domains: ["repository", "workflow"], required: true, priority: 1,
+        adapterId: adapterId, capabilityId: adapterId, name: "Graph Validation Source", version: datasetVersion("phase4EvidenceGraph"), status: "Experimental", sourceType: "graph-validation", recordTypes: ["project", "file", "function", "module", "workflow-package"], domains: ["repository", "workflow"], required: true, priority: 1,
         isAvailable: function available() { return { available: true, status: "Ready" }; },
-        read: function read() { return { status: "Ready", sourceVersion: VERSION, records: internal.clone(fixtureRecords) }; }
+        read: function read() { return { status: "Ready", sourceVersion: datasetVersion("phase4EvidenceGraph"), records: internal.clone(fixtureRecords) }; }
       });
       if (adapter.ok) artifacts.adapterIds.push(adapterId);
       check("Graph validation Source Adapter can be registered", adapter.ok === true, adapter.code, "Integration");
@@ -957,8 +968,8 @@
         relationshipType: "replaces", layer: "candidate", direction: "directed",
         sourceNode: { canonicalId: fileA.identity.canonicalId, recordType: "file" },
         targetNode: { canonicalId: fileB.identity.canonicalId, recordType: "file" },
-        provenance: { sourceType: "validation-rule", sourceId: "GRAPH-CANDIDATE", sourceVersion: VERSION, adapterId: "IDE-170-EVIDENCE-GRAPH", adapterVersion: VERSION, capturedAt: internal.nowIso() },
-        evidence: [{ evidenceType: "validation-candidate", sourceId: "GRAPH-CANDIDATE", sourceType: "validation-rule", adapterId: "IDE-170-EVIDENCE-GRAPH", adapterVersion: VERSION, strength: "inferred" }],
+        provenance: { sourceType: "validation-rule", sourceId: "GRAPH-CANDIDATE", sourceVersion: datasetVersion("phase4EvidenceGraph"), adapterId: "IDE-170-EVIDENCE-GRAPH", adapterVersion: capabilityVersion(CAPABILITY_ID), capturedAt: internal.nowIso() },
+        evidence: [{ evidenceType: "validation-candidate", sourceId: "GRAPH-CANDIDATE", sourceType: "validation-rule", adapterId: "IDE-170-EVIDENCE-GRAPH", adapterVersion: MODULE_VERSION, strength: "inferred" }],
         candidate: { candidateType: "Rename Candidate", confidence: 0.8, explanation: "Validation fixture", generatedBy: "IDE-170", reviewStatus: "Not Reviewed" }
       };
       const relationshipAdapterId = "IDE-170-ADAPTER-GRAPH-RELATIONSHIP-VALIDATION-" + unique;
@@ -969,9 +980,9 @@
         { recordType: "relationship", sourceType: "architecture-relationship-database", sourceId: "REL-UNKNOWN-001", identity: { sourceId: "REL-UNKNOWN-001", name: "mystery-link", qualifiedName: "a mystery b", aliases: [] }, classification: { domain: "architecture", category: "relationship", subtype: "mystery-link", lifecycle: "Active" }, payload: { sourceId: "src/a.js", targetId: "src/b.js", relationshipType: "mystery-link", direction: "directed" }, metadata: {}, quality: {} }
       ];
       const relationshipAdapter = namespace.registerSourceAdapter({
-        adapterId: relationshipAdapterId, capabilityId: relationshipAdapterId, name: "Official Relationship Validation Source", version: VERSION, status: "Experimental", sourceType: "architecture-relationship-database", recordTypes: ["relationship"], domains: ["architecture"], required: false, priority: 1,
+        adapterId: relationshipAdapterId, capabilityId: relationshipAdapterId, name: "Official Relationship Validation Source", version: datasetVersion("phase4EvidenceGraph"), status: "Experimental", sourceType: "architecture-relationship-database", recordTypes: ["relationship"], domains: ["architecture"], required: false, priority: 1,
         isAvailable: function available() { return { available: true, status: "Ready" }; },
-        read: function read() { return { status: "Ready", sourceVersion: VERSION, records: internal.clone(relationshipFixture) }; }
+        read: function read() { return { status: "Ready", sourceVersion: datasetVersion("phase4EvidenceGraph"), records: internal.clone(relationshipFixture) }; }
       });
       if (relationshipAdapter.ok) artifacts.adapterIds.push(relationshipAdapterId);
       check("Official Relationship validation Adapter can be registered", relationshipAdapter.ok === true, relationshipAdapter.code, "Official Relationship Source");
@@ -1014,8 +1025,8 @@
         relationshipType: "related-to", layer: "fact", direction: "directed",
         sourceNode: { canonicalId: fileA.identity.canonicalId, recordType: "file" },
         targetNode: { canonicalId: fileB.identity.canonicalId, recordType: "file" },
-        provenance: { sourceType: "analysis-rule", sourceId: "UNOFFICIAL-RELATED", sourceVersion: VERSION, adapterId: "IDE-170-EVIDENCE-GRAPH", adapterVersion: VERSION, capturedAt: internal.nowIso() },
-        evidence: [{ evidenceType: "analysis-rule", sourceId: "UNOFFICIAL-RELATED", sourceType: "analysis-rule", adapterId: "IDE-170-EVIDENCE-GRAPH", adapterVersion: VERSION, strength: "direct" }]
+        provenance: { sourceType: "analysis-rule", sourceId: "UNOFFICIAL-RELATED", sourceVersion: datasetVersion("phase4EvidenceGraph"), adapterId: "IDE-170-EVIDENCE-GRAPH", adapterVersion: capabilityVersion(CAPABILITY_ID), capturedAt: internal.nowIso() },
+        evidence: [{ evidenceType: "analysis-rule", sourceId: "UNOFFICIAL-RELATED", sourceType: "analysis-rule", adapterId: "IDE-170-EVIDENCE-GRAPH", adapterVersion: MODULE_VERSION, strength: "direct" }]
       }, { nodeMap: new Map(canonical.records.map(function map(record) { return [record.identity.canonicalId, record]; })) });
       check("Generic related-to without official Relationship Evidence is blocked", ungovernedRelatedFact.valid === false, ungovernedRelatedFact.checks.filter(function item(value) { return !value.passed; }), "Layer Governance");
       const sessionFreeze = namespace.freezeSession(sessionId, { actor: "IDE-170 Phase 4 Validation", reason: "Fixture Complete" });
@@ -1061,7 +1072,7 @@
         id: internal.nextId("IDE-170-PHASE4-VALIDATION"),
         componentId: namespace.componentId,
         name: "IDE-170 Phase 4 Evidence Graph Validation",
-        version: VERSION,
+        version: RELEASE_VERSION,
         designFreezeVersion: namespace.designFreezeVersion,
         valid: passed === total && total > 0,
         passed: passed,
@@ -1094,7 +1105,7 @@
       const passed = checks.filter(function item(value) { return value.passed; }).length;
       const result = {
         id: internal.nextId("IDE-170-PHASE4-VALIDATION"), componentId: namespace.componentId,
-        name: "IDE-170 Phase 4 Evidence Graph Validation", version: VERSION,
+        name: "IDE-170 Phase 4 Evidence Graph Validation", version: RELEASE_VERSION,
         valid: false, passed: passed, failed: checks.length - passed + 1, total: checks.length + 1,
         health: checks.length + 1 ? Number(((passed / (checks.length + 1)) * 100).toFixed(2)) : 0,
         status: "Failed", checks: checks.concat([{ name: "Validation completed without exception", passed: false, detail: error && error.message || String(error), group: "Runtime", severity: "Critical" }]),
@@ -1150,7 +1161,7 @@
 
   namespace.modules.evidenceGraph = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     factGraph: true,
     candidateGraph: true,
