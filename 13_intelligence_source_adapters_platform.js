@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_source_adapters_platform.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 2 Source Intake - Platform Source Adapters
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -15,7 +15,18 @@
   }
 
   const internal = namespace.__internal;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 sourceAdaptersPlatform blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("sourceAdaptersPlatform");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const ADAPTER_IDS = Object.freeze({
     architecture: "IDE-170-ADAPTER-ARCHITECTURE",
     workflow: "IDE-170-ADAPTER-WORKFLOW"
@@ -190,7 +201,7 @@
         adapterId: ADAPTER_IDS.architecture,
         capabilityId: ADAPTER_IDS.architecture,
         name: "Architecture Database Source Adapter",
-        version: VERSION,
+        version: capabilityVersion(ADAPTER_IDS.architecture),
         status: "Official",
         sourceType: "architecture-database",
         recordTypes: ["architecture-object"],
@@ -206,7 +217,7 @@
         adapterId: ADAPTER_IDS.workflow,
         capabilityId: ADAPTER_IDS.workflow,
         name: "IDE-160 Workflow Source Adapter",
-        version: VERSION,
+        version: capabilityVersion(ADAPTER_IDS.workflow),
         status: "Official",
         sourceType: "ide-160-workflow",
         recordTypes: ["workflow-package", "workflow-baseline"],
@@ -244,7 +255,7 @@
 
   namespace.modules.platformSourceAdapters = {
     id: "IDE-170-PLATFORM-SOURCE-ADAPTERS",
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     adapterIds: Object.values(ADAPTER_IDS),
     workflowExecutionAllowed: false,
