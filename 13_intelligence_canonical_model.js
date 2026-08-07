@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_canonical_model.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 2 Source Intake and Canonical Model
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
@@ -16,7 +16,18 @@
 
   const internal = namespace.__internal;
   const state = internal.state;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 canonicalModel blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("canonicalModel");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-CANONICAL-MODEL";
   const SUPPORTED_RECORD_TYPES = Object.freeze([
     "project",
@@ -100,7 +111,7 @@
       {
         schemaId: "IDE-170-SCHEMA-CANONICAL-RECORD",
         name: "Canonical Intelligence Record",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-CANONICAL-RECORD"),
         description: "Common Core plus Typed Payload for Source-derived Facts.",
         type: "object",
         required: [
@@ -125,7 +136,7 @@
       {
         schemaId: "IDE-170-SCHEMA-CANONICAL-SNAPSHOT",
         name: "Canonical Intelligence Snapshot",
-        version: VERSION,
+        version: schemaVersion("IDE-170-SCHEMA-CANONICAL-SNAPSHOT"),
         description: "Frozen read-only analysis projection of one Source Intake.",
         type: "object",
         required: [
@@ -171,7 +182,7 @@
     return namespace.registerCapability({
       capabilityId: CAPABILITY_ID,
       name: "Canonical Intelligence Model",
-      version: VERSION,
+      version: capabilityVersion(CAPABILITY_ID),
       type: "Service",
       status: "Official",
       owner: "IDE-170",
@@ -231,7 +242,7 @@
     const record = {
       recordId: internal.text(settings.recordId, internal.nextId("IDE-170-CANONICAL-RECORD")),
       recordType: source.recordType,
-      schemaVersion: VERSION,
+      schemaVersion: schemaVersion("IDE-170-SCHEMA-CANONICAL-RECORD"),
       identity: {
         canonicalId: canonicalId,
         sourceId: source.sourceId,
@@ -389,8 +400,8 @@
       snapshotId: snapshotId,
       snapshotType: "canonical",
       componentId: namespace.componentId,
-      version: VERSION,
-      schemaVersion: VERSION,
+      version: artifactVersion("canonicalSnapshot"),
+      schemaVersion: schemaVersion("IDE-170-SCHEMA-CANONICAL-SNAPSHOT"),
       sessionId: sessionId,
       sourceIntakeId: intake.intakeId,
       status: "Frozen",
@@ -569,7 +580,7 @@
     return {
       id: "IDE-170-CANONICAL-MODEL-STATUS",
       componentId: namespace.componentId,
-      version: VERSION,
+      version: MODULE_VERSION,
       status: namespace.getCapability(CAPABILITY_ID) ? "Ready" : "Loaded",
       ready: Boolean(namespace.getCapability(CAPABILITY_ID)),
       supportedRecordTypeCount: SUPPORTED_RECORD_TYPES.length,
@@ -638,7 +649,7 @@
 
   namespace.modules.canonicalModel = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     sourceDerivedFactOnly: true,
     typedPayload: true,
