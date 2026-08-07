@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_repository_understanding.js
    IDE-170 Intelligence Platform
-   Version: 1.6.0
+   Release: 1.6.1 / Module: 1.0.0
    Phase: 5 Repository and Workflow Understanding
    Design Freeze: v1.0.0 / Decision 006
    ============================================================ */
@@ -15,7 +15,18 @@
   }
 
   const internal = namespace.__internal;
-  const VERSION = "1.6.0";
+  const VERSION_MANIFEST = global.IDE170VersionManifest;
+  if (!VERSION_MANIFEST) {
+    console.warn("IDE-170 repositoryUnderstanding blocked: Version Manifest is not loaded.");
+    return;
+  }
+  const RELEASE_VERSION = VERSION_MANIFEST.release.version;
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("repositoryUnderstanding");
+  const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
+  const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
+  const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
+  const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
+  const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
   const CAPABILITY_ID = "IDE-170-REPOSITORY-UNDERSTANDING";
   const RULES = Object.freeze({
     structure: "IDE-170-RULE-REPOSITORY-STRUCTURE",
@@ -141,7 +152,7 @@
         missingEvidence: evidence.length ? [] : ["No direct Edge Evidence was available."]
       },
       generatedBy: {
-        pipelineVersion: VERSION,
+        pipelineVersion: capabilityVersion(CAPABILITY_ID),
         ruleIds: [ruleId],
         engineIds: []
       },
@@ -505,13 +516,13 @@
       {
         capabilityId: CAPABILITY_ID,
         name: "Repository Understanding",
-        version: VERSION,
+        version: capabilityVersion(CAPABILITY_ID),
         type: "Pipeline",
         status: "Active",
         owner: "IDE-170",
         dependencies: [
-          { capabilityId: "IDE-170-EVIDENCE-GRAPH", minimumVersion: "1.6.0", optional: false },
-          { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: "1.2.0", optional: false }
+          { capabilityId: "IDE-170-EVIDENCE-GRAPH", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+          { capabilityId: "IDE-170-REPOSITORY-SNAPSHOT", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
         ],
         schemas: [],
         provides: ["Structural Understanding", "Relationship Understanding", "Change Understanding", "Repository Insight Candidate"],
@@ -521,11 +532,11 @@
       return {
         capabilityId: RULES[key],
         name: RULES[key].replace(/^IDE-170-RULE-/, "").replace(/-/g, " "),
-        version: VERSION,
+        version: capabilityVersion(RULES[key]),
         type: "Service",
         status: "Active",
         owner: "IDE-170",
-        dependencies: [{ capabilityId: CAPABILITY_ID, minimumVersion: VERSION, optional: false }],
+        dependencies: [{ capabilityId: CAPABILITY_ID, minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }],
         schemas: [],
         provides: ["Deterministic Understanding Rule"],
         source: "Architecture Decision 006"
@@ -565,7 +576,7 @@
 
   namespace.modules.repositoryUnderstanding = {
     id: CAPABILITY_ID,
-    version: VERSION,
+    version: MODULE_VERSION,
     status: "Ready",
     structuralUnderstanding: true,
     relationshipUnderstanding: true,
