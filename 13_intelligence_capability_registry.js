@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_capability_registry.js
    IDE-170 Intelligence Platform
-   Release: 1.6.1 / Module: 1.0.0
+   Release: Version Manifest / Module: 1.0.0
    Phase: 2 Governed Capability Registry - Governed Capability Registry
    ============================================================ */
 (function (global) {
