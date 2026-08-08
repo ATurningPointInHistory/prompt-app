@@ -1,16 +1,16 @@
 /* ============================================================
-   FILE: 13_intelligence_validation_automation.js
+   FILE: 13_intelligence_validation_compiler.js
    IDE-170 Intelligence Platform
    Release: Version Manifest / Module: 1.0.0
-   Architecture Decision: 011
-   Phase: Validation Automation Foundation (Pre-Phase 4)
+   Architecture Decision: 011 v1.1.0
+   Phase: Test Procedure Intake and Validation Compiler (Pre-Phase 4)
    ============================================================ */
 (function (global) {
   "use strict";
 
   const namespace = global.IDE170Intelligence;
   if (!namespace || !namespace.__internal) {
-    console.warn("IDE-170 Validation Automation blocked: Core is not loaded.");
+    console.warn("IDE-170 Validation Compiler blocked: Core is not loaded.");
     return;
   }
 
@@ -18,812 +18,982 @@
   const state = internal.state;
   const VERSION_MANIFEST = global.IDE170VersionManifest;
   if (!VERSION_MANIFEST) {
-    console.warn("IDE-170 validationAutomation blocked: Version Manifest is not loaded.");
+    console.warn("IDE-170 validationCompiler blocked: Version Manifest is not loaded.");
     return;
   }
   const RELEASE_VERSION = VERSION_MANIFEST.release.version;
-  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("validationAutomation");
+  const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("validationCompiler");
   const INTERNAL_MINIMUM_VERSION = VERSION_MANIFEST.compatibility.minimumInternalCapabilityVersion;
   const capabilityVersion = VERSION_MANIFEST.getCapabilityVersion;
   const schemaVersion = VERSION_MANIFEST.getSchemaVersion;
   const artifactVersion = VERSION_MANIFEST.getArtifactVersion;
   const datasetVersion = VERSION_MANIFEST.getDatasetVersion;
-  const CAPABILITY_ID = "IDE-170-VALIDATION-AUTOMATION";
-  const RUN_STATUSES = Object.freeze([
-    "Created", "Preparing", "Running", "Comparing", "Completed",
-    "Failed", "Blocked", "Cancelled", "Frozen"
-  ]);
-  const CASE_STATUSES = Object.freeze([
-    "Pending", "Running", "Passed", "Failed", "Blocked", "Skipped", "Error", "Cancelled"
-  ]);
-  const HIGH_GATE_SEVERITIES = Object.freeze(["Critical", "High"]);
+  const CAPABILITY_ID = "IDE-170-VALIDATION-COMPILER";
 
-  if (!(state.validationTargets instanceof Map)) state.validationTargets = new Map();
-  if (!(state.validationRuns instanceof Map)) state.validationRuns = new Map();
-  if (!Object.prototype.hasOwnProperty.call(state, "latestValidationRunId")) {
-    state.latestValidationRunId = null;
+  if (!(state.validationDatasetCandidates instanceof Map)) state.validationDatasetCandidates = new Map();
+  if (!Object.prototype.hasOwnProperty.call(state, "latestValidationDatasetCandidateId")) {
+    state.latestValidationDatasetCandidateId = null;
+  }
+  if (!Object.prototype.hasOwnProperty.call(state, "activeImportedProcedureDatasetId")) {
+    state.activeImportedProcedureDatasetId = null;
+  }
+  if (!Object.prototype.hasOwnProperty.call(state, "lastProcedureValidation")) {
+    state.lastProcedureValidation = null;
   }
 
-  function stableStringify(value) {
-    return typeof internal.stableStringify === "function"
-      ? internal.stableStringify(value)
-      : JSON.stringify(value);
+  function sha256(value) {
+    return namespace.calculateSHA256(typeof value === "string" ? value : internal.stableStringify(value));
   }
 
-  function valueAtPath(value, path) {
-    if (!path) return value;
-    return String(path).split(".").reduce(function resolve(current, key) {
-      if (current == null) return undefined;
-      return current[key];
-    }, value);
+  function candidateIdFor(parsed) {
+    return internal.canonicalId("IDE-170-DATASET-CANDIDATE-" + parsed.procedureId.replace(/^IDE-170-PROCEDURE-/, ""));
   }
 
-  function deepEqual(left, right) {
-    return stableStringify(left) === stableStringify(right);
+  function datasetIdFor(parsed, candidate) {
+    const suffix = parsed.procedureId.replace(/^IDE-170-PROCEDURE-/, "");
+    const revision = String(candidate.revision || 1).padStart(2, "0");
+    return internal.canonicalId("IDE-170-DATASET-PROCEDURE-" + suffix + "-R" + revision);
   }
 
-  function comparePartial(expected, actual, path, differences) {
-    const currentPath = path || "";
-    if (expected && typeof expected === "object" && !Array.isArray(expected)) {
-      if (!actual || typeof actual !== "object" || Array.isArray(actual)) {
-        differences.push({ path: currentPath || "$", expected: expected, actual: actual });
-        return false;
-      }
-      let passed = true;
-      Object.keys(expected).forEach(function compareKey(key) {
-        const childPath = currentPath ? currentPath + "." + key : key;
-        if (!comparePartial(expected[key], actual[key], childPath, differences)) passed = false;
-      });
-      return passed;
+  function conditionToExpected(condition) {
+    const source = internal.isPlainObject(condition) ? condition : {};
+    if (source.comparator === "Numeric Range") {
+      return {
+        comparator: "Numeric Range",
+        path: source.path || null,
+        minimum: source.minimum,
+        maximum: source.maximum
+      };
     }
-    if (Array.isArray(expected)) {
-      const equal = deepEqual(expected, actual);
-      if (!equal) differences.push({ path: currentPath || "$", expected: expected, actual: actual });
-      return equal;
+    if (source.comparator === "One Of") {
+      return {
+        comparator: "One Of",
+        path: source.path || null,
+        values: internal.clone(source.values || [])
+      };
     }
-    const equal = Object.is(expected, actual);
-    if (!equal) differences.push({ path: currentPath || "$", expected: expected, actual: actual });
-    return equal;
-  }
-
-  function compareExpectedResult(expectedInput, actualInput) {
-    const expected = internal.isPlainObject(expectedInput) ? expectedInput : { comparator: "Exact", value: expectedInput };
-    const comparator = internal.text(expected.comparator, "Exact");
-    const actual = expected.path ? valueAtPath(actualInput, expected.path) : actualInput;
-    const differences = [];
-    let passed = false;
-
-    if (comparator === "Exact") {
-      passed = deepEqual(expected.value, actual);
-      if (!passed) differences.push({ path: expected.path || "$", expected: expected.value, actual: actual });
-    } else if (comparator === "Partial Object") {
-      passed = comparePartial(expected.value, actual, expected.path || "", differences);
-    } else if (comparator === "Numeric Range") {
-      const numberValue = Number(actual);
-      const minimum = Number(expected.minimum);
-      const maximum = Number(expected.maximum);
-      passed = Number.isFinite(numberValue) &&
-        (!Number.isFinite(minimum) || numberValue >= minimum) &&
-        (!Number.isFinite(maximum) || numberValue <= maximum);
-      if (!passed) differences.push({ path: expected.path || "$", expected: { minimum: expected.minimum, maximum: expected.maximum }, actual: actual });
-    } else if (comparator === "Array Ordered") {
-      passed = Array.isArray(actual) && deepEqual(expected.value, actual);
-      if (!passed) differences.push({ path: expected.path || "$", expected: expected.value, actual: actual });
-    } else if (comparator === "Array Unordered") {
-      const left = Array.isArray(expected.value) ? expected.value.map(stableStringify).sort() : [];
-      const right = Array.isArray(actual) ? actual.map(stableStringify).sort() : [];
-      passed = deepEqual(left, right);
-      if (!passed) differences.push({ path: expected.path || "$", expected: expected.value, actual: actual });
-    } else if (comparator === "Contains") {
-      passed = typeof actual === "string"
-        ? actual.includes(String(expected.value))
-        : Array.isArray(actual)
-          ? actual.some(function contains(item) { return deepEqual(item, expected.value); })
-          : false;
-      if (!passed) differences.push({ path: expected.path || "$", expected: { contains: expected.value }, actual: actual });
-    } else if (comparator === "Not Contains") {
-      passed = typeof actual === "string"
-        ? !actual.includes(String(expected.value))
-        : Array.isArray(actual)
-          ? !actual.some(function contains(item) { return deepEqual(item, expected.value); })
-          : true;
-      if (!passed) differences.push({ path: expected.path || "$", expected: { notContains: expected.value }, actual: actual });
-    } else if (comparator === "Required Fields") {
-      const fields = Array.isArray(expected.fields) ? expected.fields : [];
-      passed = fields.every(function requiredField(path) { return valueAtPath(actual, path) !== undefined; });
-      fields.forEach(function requiredDifference(path) {
-        if (valueAtPath(actual, path) === undefined) differences.push({ path: path, expected: "Required", actual: undefined });
-      });
-    } else if (comparator === "Forbidden Fields") {
-      const fields = Array.isArray(expected.fields) ? expected.fields : [];
-      passed = fields.every(function forbiddenField(path) { return valueAtPath(actual, path) === undefined; });
-      fields.forEach(function forbiddenDifference(path) {
-        if (valueAtPath(actual, path) !== undefined) differences.push({ path: path, expected: "Forbidden", actual: valueAtPath(actual, path) });
-      });
-    } else if (comparator === "Type") {
-      const expectedType = String(expected.value || "");
-      const actualType = Array.isArray(actual) ? "array" : actual === null ? "null" : typeof actual;
-      passed = actualType === expectedType;
-      if (!passed) differences.push({ path: expected.path || "$", expected: expectedType, actual: actualType });
-    } else if (comparator === "Error Code") {
-      const actualCode = actual && (actual.code || (actual.error && actual.error.code));
-      passed = actualCode === expected.value;
-      if (!passed) differences.push({ path: "code", expected: expected.value, actual: actualCode });
-    } else if (comparator === "Status") {
-      const actualStatus = actual && actual.status;
-      passed = actualStatus === expected.value;
-      if (!passed) differences.push({ path: "status", expected: expected.value, actual: actualStatus });
-    } else if (comparator === "Schema") {
-      const schemaValidation = namespace.validateAgainstSchema(expected.schemaId, actual);
-      passed = Boolean(schemaValidation && schemaValidation.valid === true);
-      if (!passed) differences.push({ path: "$", expected: { schemaId: expected.schemaId }, actual: schemaValidation });
-    } else if (comparator === "Boolean Expression") {
-      const expression = internal.isPlainObject(expected.expression) ? expected.expression : {};
-      const expressionValue = valueAtPath(actual, expression.path);
-      const operator = internal.text(expression.operator, "equals");
-      if (operator === "equals") passed = deepEqual(expressionValue, expression.value);
-      else if (operator === "truthy") passed = Boolean(expressionValue);
-      else if (operator === "falsy") passed = !expressionValue;
-      else if (operator === "greaterThan") passed = Number(expressionValue) > Number(expression.value);
-      else if (operator === "lessThan") passed = Number(expressionValue) < Number(expression.value);
-      if (!passed) differences.push({ path: expression.path || "$", expected: expression, actual: expressionValue });
-    } else if (comparator === "One Of") {
-      const values = Array.isArray(expected.values) ? expected.values : [];
-      passed = values.some(function one(value) { return deepEqual(value, actual); });
-      if (!passed) differences.push({ path: expected.path || "$", expected: { oneOf: values }, actual: actual });
-    } else if (comparator === "All") {
-      const conditions = Array.isArray(expected.conditions) ? expected.conditions : [];
-      const results = conditions.map(function compareCondition(condition) {
-        return compareExpectedResult(condition, actualInput);
-      });
-      passed = conditions.length > 0 && results.every(function all(result) { return result.passed === true; });
-      results.forEach(function collect(result) {
-        if (!result.passed) differences.push.apply(differences, result.differences);
-      });
+    if (source.comparator === "Partial Object") {
+      return {
+        comparator: "Partial Object",
+        path: source.path || null,
+        value: internal.clone(source.expected)
+      };
     }
-
     return {
-      comparator: comparator,
-      passed: passed,
-      expected: internal.clone(expected),
-      actual: internal.clone(actualInput),
-      differences: internal.clone(differences),
-      comparedAt: internal.nowIso()
+      comparator: source.comparator === "Unrecognized" ? "Exact" : internal.text(source.comparator, "Exact"),
+      path: source.path || null,
+      value: internal.clone(source.expected)
     };
   }
 
-  function registerValidationTarget(definition, implementation, options) {
-    const settings = internal.isPlainObject(options) ? options : {};
-    const source = internal.isPlainObject(definition) ? definition : {};
-    const targetId = internal.canonicalId(source.targetId || source.id);
-    if (!targetId || typeof implementation !== "function") {
-      return internal.buildResult(false, "VALIDATION_TARGET_INVALID", "Blocked", null, {
-        error: { message: "Validation Target requires an ID and function implementation.", category: "Validation Failure" }
-      });
-    }
-    if (state.validationTargets.has(targetId) && settings.replace !== true) {
-      return internal.buildResult(false, "VALIDATION_TARGET_DUPLICATE", "Blocked", { targetId: targetId }, {
-        error: { message: "Validation Target already exists.", category: "Identity Failure" }
-      });
-    }
-    const record = internal.deepFreeze({
-      targetId: targetId,
-      name: internal.text(source.name, targetId),
-      executionTypes: internal.unique(source.executionTypes || ["Function"]),
-      description: internal.text(source.description, ""),
-      owner: internal.text(source.owner, "IDE-170"),
-      status: "Ready",
-      registeredAt: internal.nowIso()
+  function buildExpected(step) {
+    const recognized = step.expectedConditions.filter(function recognized(condition) {
+      return condition && condition.comparator !== "Unrecognized";
     });
-    state.validationTargets.set(targetId, { definition: record, implementation: implementation });
-    return internal.buildResult(true, "VALIDATION_TARGET_REGISTERED", "Ready", { target: record });
-  }
-
-  function getValidationTarget(targetId) {
-    const record = state.validationTargets.get(internal.canonicalId(targetId));
-    return record ? internal.clone(record.definition) : null;
-  }
-
-  function listValidationTargets() {
-    return [...state.validationTargets.values()]
-      .map(function mapTarget(record) { return internal.clone(record.definition); })
-      .sort(function sortTarget(left, right) { return left.targetId.localeCompare(right.targetId); });
-  }
-
-  function delay(milliseconds) {
-    return new Promise(function resolveDelay(resolve) {
-      setTimeout(resolve, Math.max(0, Number(milliseconds) || 0));
-    });
-  }
-
-  function withTimeout(promise, timeoutMs) {
-    return Promise.race([
-      promise,
-      new Promise(function timeoutPromise(_, reject) {
-        setTimeout(function timeoutReject() {
-          const error = new Error("Test Case timed out.");
-          error.code = "TEST_CASE_TIMEOUT";
-          reject(error);
-        }, Math.max(100, Number(timeoutMs) || 10000));
-      })
-    ]);
-  }
-
-  function isCancelled(run, options) {
-    const settings = internal.isPlainObject(options) ? options : {};
-    if (run.cancelRequested === true || settings.cancelled === true) return true;
-    if (settings.signal && (settings.signal.aborted || settings.signal.cancelled)) return true;
-    if (typeof settings.shouldCancel === "function") {
-      try { return settings.shouldCancel() === true; } catch (_) { return true; }
+    if (!recognized.length) {
+      return { comparator: "Type", value: "object" };
     }
-    return false;
-  }
-
-  function shouldRetryCase(testCase, actual, executionError) {
-    const retryOn = testCase && testCase.retry && Array.isArray(testCase.retry.retryOn)
-      ? testCase.retry.retryOn
-      : [];
-    if (!retryOn.length) return false;
-    if (executionError && executionError.code !== "EXPECTED_RESULT_MISMATCH") {
-      return retryOn.includes(executionError.code) || retryOn.includes(executionError.message);
-    }
-    if (retryOn.includes("Not Ready") && actual && actual.ready === false) return true;
-    if (retryOn.includes("Initialization Pending") && actual && actual.initialized === false) return true;
-    if (retryOn.includes("Module Loading") && actual) {
-      if (["Loading", "Loaded", "Initializing"].includes(actual.status)) return true;
-      if (actual.modules && Object.keys(actual.modules).some(function modulePending(key) {
-        return actual.modules[key] !== true;
-      })) return true;
-    }
-    return false;
-  }
-
-  function notifyProgress(options, run, stage, current, total, caseId, message) {
-    const settings = internal.isPlainObject(options) ? options : {};
-    if (typeof settings.onProgress !== "function") return;
-    try {
-      settings.onProgress({
-        componentId: namespace.componentId,
-        validationRunId: run.validationRunId,
-        stage: stage,
-        current: current,
-        total: total,
-        progress: total > 0 ? Number(((current / total) * 100).toFixed(2)) : 100,
-        caseId: caseId || null,
-        message: internal.text(message, ""),
-        timestamp: internal.nowIso()
-      });
-    } catch (_) {}
-  }
-
-  function buildEnvironmentEvidence() {
-    const navigatorObject = global.navigator || {};
-    const locationObject = global.location || {};
+    if (recognized.length === 1) return conditionToExpected(recognized[0]);
     return {
-      userAgent: internal.text(navigatorObject.userAgent, ""),
-      platform: internal.text(navigatorObject.platform, ""),
-      language: internal.text(navigatorObject.language, ""),
-      viewport: {
-        width: Number(global.innerWidth) || null,
-        height: Number(global.innerHeight) || null
-      },
-      devicePixelRatio: Number(global.devicePixelRatio) || null,
-      maxTouchPoints: Number(navigatorObject.maxTouchPoints) || 0,
-      localStorageAvailability: Boolean(global.localStorage),
-      cryptoAvailability: Boolean(global.crypto),
-      currentURL: internal.text(locationObject.href, ""),
-      applicationVersion: namespace.version,
-      scriptManifestVersion: null,
-      scriptCount: null,
-      executionStartedAt: internal.nowIso(),
-      executionCompletedAt: null
+      comparator: "All",
+      conditions: recognized.map(conditionToExpected)
     };
   }
 
-  function recalculateRunSummary(run) {
-    const statuses = { Passed: 0, Failed: 0, Blocked: 0, Skipped: 0, Error: 0, Cancelled: 0, Pending: 0, Running: 0 };
-    const severitySummary = {};
-    const categorySummary = {};
-    run.caseResults.forEach(function summarize(result) {
-      statuses[result.status] = (statuses[result.status] || 0) + 1;
-      severitySummary[result.severity] = severitySummary[result.severity] || { total: 0, passed: 0, failed: 0 };
-      categorySummary[result.category] = categorySummary[result.category] || { total: 0, passed: 0, failed: 0 };
-      severitySummary[result.severity].total += 1;
-      categorySummary[result.category].total += 1;
-      if (result.status === "Passed") {
-        severitySummary[result.severity].passed += 1;
-        categorySummary[result.category].passed += 1;
-      } else if (["Failed", "Blocked", "Error", "Cancelled"].includes(result.status)) {
-        severitySummary[result.severity].failed += 1;
-        categorySummary[result.category].failed += 1;
-      }
-    });
-    const total = run.caseResults.length;
-    const passed = statuses.Passed || 0;
-    const requiredGatePassed = run.caseResults.every(function requiredGate(result) {
-      if (!result.required) return true;
-      if (!HIGH_GATE_SEVERITIES.includes(result.severity)) return result.status !== "Error";
-      return result.status === "Passed";
-    });
-    run.summary = {
-      total: total,
-      passed: passed,
-      failed: statuses.Failed || 0,
-      blocked: statuses.Blocked || 0,
-      skipped: statuses.Skipped || 0,
-      error: statuses.Error || 0,
-      cancelled: statuses.Cancelled || 0,
-      health: total > 0 ? Number(((passed / total) * 100).toFixed(2)) : 0,
-      severitySummary: severitySummary,
-      categorySummary: categorySummary,
-      requiredGatePassed: requiredGatePassed,
-      releaseAllowed: requiredGatePassed,
-      nextPhaseAllowed: requiredGatePassed
+  function buildOwnerSelection(step) {
+    const selected = step.defaultSelected === true && step.executionPolicy !== "Prohibited" && step.executionPolicy !== "Unrecognized";
+    return {
+      stepId: step.stepId,
+      originalPolicy: step.executionPolicy,
+      finalPolicy: step.executionPolicy,
+      defaultSelected: step.defaultSelected === true,
+      selected: selected,
+      selectedBy: selected ? "System Default" : null,
+      selectedAt: selected ? internal.nowIso() : null,
+      warningAcknowledged: false,
+      warningReasons: internal.clone(step.warningReasons || []),
+      executed: false,
+      result: "Not Run"
     };
-    return run.summary;
   }
 
-  async function executeCase(run, testCase, options) {
-    const startedAt = internal.nowIso();
-    const startedTime = Date.now();
-    const baseResult = {
-      resultId: internal.nextId("IDE-170-CASE-RESULT"),
-      validationRunId: run.validationRunId,
-      datasetId: run.datasetId,
-      datasetVersion: run.datasetVersion,
-      caseId: testCase.caseId,
-      status: "Running",
-      passed: false,
-      required: testCase.required !== false,
-      severity: testCase.severity,
-      category: testCase.category,
-      startedAt: startedAt,
-      completedAt: null,
-      durationMs: null,
-      input: internal.clone(testCase.input),
-      expected: internal.clone(testCase.expected),
-      actual: null,
-      differences: [],
-      error: null,
-      warnings: [],
-      evidence: {},
-      retryHistory: [],
-      resultHash: null
-    };
-
-    if (testCase.enabled === false) {
-      baseResult.status = "Skipped";
-      baseResult.completedAt = internal.nowIso();
-      baseResult.durationMs = Date.now() - startedTime;
-      return baseResult;
-    }
-
-    const failedDependency = testCase.dependencies.find(function dependencyFailed(dependencyId) {
-      const dependencyResult = run.caseResults.find(function findResult(item) { return item.caseId === dependencyId; });
-      return !dependencyResult || dependencyResult.status !== "Passed";
-    });
-    if (failedDependency) {
-      baseResult.status = "Blocked";
-      baseResult.error = { code: "TEST_CASE_DEPENDENCY_BLOCKED", message: "Dependency did not pass: " + failedDependency };
-      baseResult.completedAt = internal.nowIso();
-      baseResult.durationMs = Date.now() - startedTime;
-      return baseResult;
-    }
-
-    if (testCase.executionType === "Manual Confirmation") {
-      const confirmation = run.manualConfirmations.find(function findConfirmation(item) {
-        return item.caseId === testCase.caseId && item.confirmed === true;
-      });
-      baseResult.actual = Boolean(confirmation && confirmation.confirmed);
-      const comparison = compareExpectedResult(testCase.expected, baseResult.actual);
-      baseResult.status = comparison.passed ? "Passed" : "Blocked";
-      baseResult.passed = comparison.passed;
-      baseResult.differences = comparison.differences;
-      if (!comparison.passed) {
-        baseResult.error = { code: "MANUAL_CONFIRMATION_REQUIRED", message: "Required Manual Confirmation is not complete." };
-      }
-      baseResult.completedAt = internal.nowIso();
-      baseResult.durationMs = Date.now() - startedTime;
-      baseResult.resultHash = internal.hashValidationValue
-        ? internal.hashValidationValue(Object.assign({}, baseResult, { resultHash: null }))
+  function compileTestProcedure(parsedProcedureInput, options) {
+    const settings = internal.isPlainObject(options) ? options : {};
+    const parsed = typeof parsedProcedureInput === "string"
+      ? namespace.getParsedTestProcedure(parsedProcedureInput)
+      : internal.isPlainObject(parsedProcedureInput)
+        ? internal.clone(parsedProcedureInput)
         : null;
-      return baseResult;
+    if (!parsed) {
+      return internal.buildResult(false, "PARSED_TEST_PROCEDURE_NOT_FOUND", "Blocked", null, {
+        error: { message: "Parsed Test Procedure was not found.", category: "Input Failure" }
+      });
     }
 
-    const target = state.validationTargets.get(testCase.target);
-    if (!target) {
-      baseResult.status = "Blocked";
-      baseResult.error = { code: "VALIDATION_TARGET_NOT_FOUND", message: "Validation Target is not registered: " + testCase.target };
-      baseResult.completedAt = internal.nowIso();
-      baseResult.durationMs = Date.now() - startedTime;
-      return baseResult;
+    const candidateId = internal.canonicalId(settings.candidateId || candidateIdFor(parsed));
+    if (state.validationDatasetCandidates.has(candidateId) && settings.replace !== true) {
+      return internal.buildResult(false, "VALIDATION_DATASET_CANDIDATE_DUPLICATE", "Blocked", {
+        candidateId: candidateId
+      }, {
+        error: { message: "Validation Dataset Candidate already exists.", category: "Identity Failure" }
+      });
     }
 
-    const maximumAttempts = Math.max(1, Number(testCase.retry.maximumAttempts) || 1);
-    let actual = null;
-    let executionError = null;
-    for (let attempt = 1; attempt <= maximumAttempts; attempt += 1) {
-      if (isCancelled(run, options)) {
-        baseResult.status = "Cancelled";
-        baseResult.error = { code: "VALIDATION_RUN_CANCELLED", message: "Validation Run cancellation was requested." };
-        break;
+    const selections = parsed.steps.map(buildOwnerSelection);
+    const warnings = parsed.parserWarnings.slice();
+    parsed.steps.forEach(function collect(step) {
+      if (!step.expectedConditions.length && step.executionPolicy !== "Manual Confirmation") {
+        warnings.push(step.stepId + ": Expected Result was not recognized; Type comparator will be used until reviewed.");
       }
-      const attemptStartedAt = internal.nowIso();
-      try {
-        const execution = Promise.resolve(target.implementation(internal.clone(testCase.input), {
-          testCase: internal.clone(testCase),
-          validationRunId: run.validationRunId,
-          attempt: attempt
-        }));
-        actual = await withTimeout(execution, testCase.timeout);
-        const comparison = compareExpectedResult(testCase.expected, actual);
-        baseResult.retryHistory.push({ attempt: attempt, status: comparison.passed ? "Passed" : "Mismatch", startedAt: attemptStartedAt, completedAt: internal.nowIso() });
-        if (comparison.passed) {
-          executionError = null;
-          baseResult.actual = internal.clone(actual);
-          baseResult.differences = comparison.differences;
-          baseResult.status = "Passed";
-          baseResult.passed = true;
-          break;
-        }
-        baseResult.actual = internal.clone(actual);
-        baseResult.differences = comparison.differences;
-        executionError = { code: "EXPECTED_RESULT_MISMATCH", message: "Actual Result did not match Expected Result." };
-      } catch (error) {
-        executionError = {
-          code: internal.text(error && error.code, "TEST_CASE_EXECUTION_ERROR"),
-          message: internal.text(error && error.message, String(error))
-        };
-        baseResult.retryHistory.push({ attempt: attempt, status: "Error", error: internal.clone(executionError), startedAt: attemptStartedAt, completedAt: internal.nowIso() });
-      }
-      if (attempt < maximumAttempts && shouldRetryCase(testCase, actual, executionError)) {
-        await delay(testCase.retry.intervalMs);
-      } else if (attempt < maximumAttempts) {
-        break;
-      }
-    }
-
-    if (baseResult.status === "Running") {
-      baseResult.status = executionError && executionError.code === "EXPECTED_RESULT_MISMATCH" ? "Failed" : "Error";
-      baseResult.error = executionError;
-    }
-    baseResult.completedAt = internal.nowIso();
-    baseResult.durationMs = Date.now() - startedTime;
-    baseResult.resultHash = internal.hashValidationValue
-      ? internal.hashValidationValue(Object.assign({}, baseResult, { resultHash: null }))
-      : null;
-    return baseResult;
-  }
-
-  function updateOwnerSelectionExecution(run, testCase, result, executed) {
-    if (!run || !Array.isArray(run.ownerSelections) || !testCase || !result) return;
-    const tags = Array.isArray(testCase.tags) ? testCase.tags : [];
-    const selection = run.ownerSelections.find(function findOwnerSelection(item) {
-      return item && tags.includes(item.stepId);
     });
-    if (!selection) return;
-    selection.executed = executed === true;
-    selection.result = internal.text(result.status, executed === true ? "Completed" : "Not Run");
-    selection.passed = result.passed === true;
-    selection.caseId = result.caseId || testCase.caseId || null;
-    selection.resultId = result.resultId || null;
-    selection.validationRunId = run.validationRunId;
-    selection.executedAt = executed === true ? (result.completedAt || internal.nowIso()) : null;
-    selection.durationMs = executed === true ? Number(result.durationMs) || 0 : 0;
-  }
 
-  async function runAutomatedValidation(datasetId, options) {
-    const settings = internal.isPlainObject(options) ? options : {};
-    const dataset = namespace.getTestDataset(datasetId);
-    if (!dataset) {
-      return internal.buildResult(false, "TEST_DATASET_NOT_FOUND", "Blocked", null, {
-        error: { message: "Test Dataset was not found.", category: "Input Failure" }
-      });
-    }
-    const datasetValidation = namespace.validateTestDataset(dataset);
-    if (!datasetValidation.valid) {
-      return internal.buildResult(false, "TEST_DATASET_INVALID", "Blocked", { validation: datasetValidation }, {
-        error: { message: "Test Dataset is invalid.", category: "Validation Failure" }
-      });
-    }
-
-    const validationRunId = internal.text(settings.validationRunId, "") || internal.nextId("IDE-170-VALIDATION-RUN");
-    if (state.validationRuns.has(validationRunId)) {
-      return internal.buildResult(false, "VALIDATION_RUN_DUPLICATE", "Blocked", { validationRunId: validationRunId }, {
-        error: { message: "Validation Run ID already exists.", category: "Identity Failure" }
-      });
-    }
-
-    const run = {
-      validationRunId: validationRunId,
+    const now = internal.nowIso();
+    const candidate = {
+      candidateId: candidateId,
       componentId: namespace.componentId,
-      componentVersion: namespace.version,
-      architectureDecisionVersion: "011-v1.1.0",
-      datasetId: dataset.datasetId,
-      datasetVersion: dataset.version,
-      datasetHash: dataset.datasetHash,
-      sourceProcedureId: dataset.sourceProcedureId || null,
-      sourceProcedureVersion: dataset.sourceProcedureVersion || null,
-      sourceProcedureHash: dataset.sourceProcedureHash || null,
-      parsedProcedureId: dataset.parsedProcedureId || null,
-      candidateId: dataset.candidateId || null,
-      ownerSelections: Array.isArray(dataset.ownerSelections) ? internal.clone(dataset.ownerSelections) : [],
-      status: "Preparing",
-      frozen: false,
-      selectedCaseIds: [],
-      caseResults: [],
-      comparisons: [],
-      summary: null,
-      environment: buildEnvironmentEvidence(),
-      capabilityVersions: namespace.getCapabilities ? namespace.getCapabilities().map(function mapCapability(item) {
-        return { capabilityId: item.capabilityId, version: item.version, status: item.status };
-      }) : [],
-      manualConfirmations: [],
-      executionLog: [],
-      cancelRequested: false,
+      version: internal.text(settings.version, parsed.procedureVersion || "1.0.0"),
+      status: "Candidate",
+      revision: 1,
+      procedureId: parsed.procedureId,
+      procedureVersion: parsed.procedureVersion,
+      procedureHash: parsed.procedureHash,
+      parsedProcedureId: parsed.parsedProcedureId,
+      parseHash: parsed.parseHash,
+      parserVersion: parsed.parserVersion,
+      steps: internal.clone(parsed.steps),
+      ownerSelections: selections,
+      warnings: internal.unique(warnings),
+      policySummary: internal.clone(parsed.policySummary),
+      approvedDatasetId: null,
+      approvedBy: null,
+      approvedAt: null,
       createdBy: internal.text(settings.actor, "Project Owner"),
-      createdAt: internal.nowIso(),
-      startedAt: internal.nowIso(),
-      completedAt: null,
-      frozenAt: null,
-      runHash: null
+      createdAt: now,
+      updatedAt: now,
+      candidateHash: null
     };
-    state.validationRuns.set(validationRunId, run);
-    state.latestValidationRunId = validationRunId;
-    notifyProgress(settings, run, "Dataset Validation", 1, 1, null, "Dataset valid");
-
-    const selected = dataset.testCases.filter(function selectCase(testCase) {
-      if (testCase.enabled === false && settings.includeDisabled !== true) return false;
-      if (Array.isArray(settings.caseIds) && settings.caseIds.length) {
-        return settings.caseIds.map(internal.canonicalId).includes(testCase.caseId);
-      }
-      return true;
-    });
-    run.selectedCaseIds = selected.map(function caseId(testCase) { return testCase.caseId; });
-    run.status = "Running";
-    notifyProgress(settings, run, "Test Execution", 0, selected.length, null, "Starting");
-
-    for (let index = 0; index < selected.length; index += 1) {
-      const testCase = selected[index];
-      if (isCancelled(run, settings)) {
-        for (let remaining = index; remaining < selected.length; remaining += 1) {
-          const cancelledCase = selected[remaining];
-          const cancelledResult = {
-            resultId: internal.nextId("IDE-170-CASE-RESULT"),
-            validationRunId: run.validationRunId,
-            datasetId: run.datasetId,
-            datasetVersion: run.datasetVersion,
-            caseId: cancelledCase.caseId,
-            status: "Cancelled",
-            passed: false,
-            required: cancelledCase.required !== false,
-            severity: cancelledCase.severity,
-            category: cancelledCase.category,
-            startedAt: null,
-            completedAt: internal.nowIso(),
-            durationMs: 0,
-            input: internal.clone(cancelledCase.input),
-            expected: internal.clone(cancelledCase.expected),
-            actual: null,
-            differences: [],
-            error: { code: "VALIDATION_RUN_CANCELLED", message: "Validation Run cancellation was requested." },
-            warnings: [],
-            evidence: {},
-            retryHistory: [],
-            resultHash: null
-          };
-          run.caseResults.push(cancelledResult);
-          updateOwnerSelectionExecution(run, cancelledCase, cancelledResult, false);
-        }
-        run.status = "Cancelled";
-        break;
-      }
-      const result = await executeCase(run, testCase, settings);
-      run.caseResults.push(result);
-      updateOwnerSelectionExecution(run, testCase, result, true);
-      run.comparisons.push({
-        caseId: result.caseId,
-        comparator: result.expected.comparator,
-        passed: result.passed,
-        expected: internal.clone(result.expected),
-        actual: internal.clone(result.actual),
-        differences: internal.clone(result.differences),
-        comparedAt: result.completedAt
-      });
-      run.executionLog.push("[" + result.completedAt + "] " + result.caseId + " = " + result.status);
-      notifyProgress(settings, run, "Test Execution", index + 1, selected.length, testCase.caseId, result.status);
-      await Promise.resolve();
-    }
-
-    run.status = run.status === "Cancelled" ? "Cancelled" : "Completed";
-    run.completedAt = internal.nowIso();
-    run.environment.executionCompletedAt = run.completedAt;
-    recalculateRunSummary(run);
-    run.runHash = internal.hashValidationValue
-      ? internal.hashValidationValue(Object.assign({}, run, { runHash: null }))
-      : null;
-    state.validationRuns.set(validationRunId, run);
+    candidate.candidateHash = sha256(Object.assign({}, candidate, { candidateHash: null }));
+    state.validationDatasetCandidates.set(candidateId, candidate);
+    state.latestValidationDatasetCandidateId = candidateId;
     internal.touch();
     internal.appendAudit({
-      action: "AUTOMATED_VALIDATION_COMPLETED",
-      actor: run.createdBy,
-      targetType: "Validation Run",
-      targetId: validationRunId,
-      outcome: run.summary.requiredGatePassed ? "Passed" : "Blocked",
-      detail: internal.clone(run.summary)
+      action: "VALIDATION_DATASET_CANDIDATE_COMPILED",
+      actor: candidate.createdBy,
+      targetType: "Validation Dataset Candidate",
+      targetId: candidateId,
+      outcome: "Succeeded",
+      detail: { stepCount: candidate.steps.length, policySummary: candidate.policySummary }
     });
-    notifyProgress(settings, run, "Complete", selected.length, selected.length, null, run.status);
-    return internal.buildResult(true, "AUTOMATED_VALIDATION_COMPLETED", run.status, {
-      validationRun: getValidationRun(validationRunId)
+    return internal.buildResult(true, "VALIDATION_DATASET_CANDIDATE_COMPILED", "Candidate", {
+      candidate: getValidationDatasetCandidate(candidateId),
+      executionPlan: getProcedureExecutionPlan(candidateId)
     });
   }
 
-  function getValidationRun(validationRunId) {
-    const run = state.validationRuns.get(internal.text(validationRunId, ""));
-    return run ? internal.clone(run) : null;
+  function getValidationDatasetCandidate(candidateId) {
+    const record = state.validationDatasetCandidates.get(internal.canonicalId(candidateId));
+    return record ? internal.clone(record) : null;
   }
 
-  function listValidationRuns(options) {
-    const settings = internal.isPlainObject(options) ? options : {};
-    return [...state.validationRuns.values()]
-      .filter(function filterRun(run) { return !settings.status || run.status === settings.status; })
-      .sort(function sortRun(left, right) { return left.createdAt.localeCompare(right.createdAt); })
+  function listValidationDatasetCandidates() {
+    return [...state.validationDatasetCandidates.values()]
+      .sort(function sort(left, right) { return left.createdAt.localeCompare(right.createdAt); })
       .map(internal.clone);
   }
 
-  function cancelAutomatedValidation(validationRunId, options) {
-    const run = state.validationRuns.get(internal.text(validationRunId, ""));
-    if (!run) return internal.buildResult(false, "VALIDATION_RUN_NOT_FOUND", "Blocked", null, {
-      error: { message: "Validation Run was not found.", category: "Input Failure" }
-    });
-    if (run.frozen || run.status === "Frozen" || Object.isFrozen(run)) {
-      return internal.buildResult(false, "VALIDATION_RUN_FROZEN", "Blocked", null, {
-        error: { message: "Frozen Validation Run cannot be cancelled.", category: "Governance Failure" }
+  function updateProcedureStepSelection(candidateId, stepId, update, options) {
+    const settings = internal.isPlainObject(options) ? options : {};
+    const current = state.validationDatasetCandidates.get(internal.canonicalId(candidateId));
+    if (!current) {
+      return internal.buildResult(false, "VALIDATION_DATASET_CANDIDATE_NOT_FOUND", "Blocked", null, {
+        error: { message: "Validation Dataset Candidate was not found.", category: "Input Failure" }
       });
     }
-    run.cancelRequested = true;
-    run.executionLog.push("[" + internal.nowIso() + "] Cancellation requested by " + internal.text(options && options.actor, "Project Owner"));
-    return internal.buildResult(true, "VALIDATION_CANCELLATION_REQUESTED", "Cancelling", {
-      validationRunId: validationRunId
+    if (current.status === "Approved" || Object.isFrozen(current)) {
+      return internal.buildResult(false, "VALIDATION_DATASET_CANDIDATE_FROZEN", "Blocked", null, {
+        error: { message: "Approved Candidate cannot be changed.", category: "Governance Failure" }
+      });
+    }
+    const step = current.steps.find(function find(item) { return item.stepId === stepId; });
+    const selection = current.ownerSelections.find(function find(item) { return item.stepId === stepId; });
+    if (!step || !selection) {
+      return internal.buildResult(false, "PROCEDURE_STEP_NOT_FOUND", "Blocked", null, {
+        error: { message: "Procedure Step was not found.", category: "Input Failure" }
+      });
+    }
+    const source = internal.isPlainObject(update) ? update : { selected: update === true };
+    let finalPolicy = internal.text(source.finalPolicy, selection.finalPolicy);
+    if (selection.originalPolicy === "Prohibited" || finalPolicy === "Prohibited") {
+      return internal.buildResult(false, "PROHIBITED_PROCEDURE_STEP", "Blocked", {
+        stepId: stepId,
+        prohibitedReasons: internal.clone(step.prohibitedReasons)
+      }, {
+        error: { message: "Prohibited Step cannot be selected.", category: "Safety Boundary" }
+      });
+    }
+    if (selection.originalPolicy === "Unrecognized" && source.convertToWarningSelectable === true) {
+      finalPolicy = "Warning Selectable";
+    }
+    if (selection.originalPolicy === "Unrecognized" && finalPolicy !== "Warning Selectable") {
+      return internal.buildResult(false, "UNRECOGNIZED_STEP_REVIEW_REQUIRED", "Blocked", {
+        stepId: stepId
+      }, {
+        error: { message: "Unrecognized Step must be explicitly changed to Warning Selectable.", category: "Review Required" }
+      });
+    }
+    const selected = source.selected === true;
+    const warningAcknowledged = source.warningAcknowledged === true;
+    if (selected && finalPolicy === "Warning Selectable" && !warningAcknowledged) {
+      return internal.buildResult(false, "WARNING_ACKNOWLEDGEMENT_REQUIRED", "Blocked", {
+        stepId: stepId,
+        warningReasons: internal.clone(step.warningReasons)
+      }, {
+        error: { message: "Warning must be acknowledged before selecting this Step.", category: "Owner Approval Required" }
+      });
+    }
+    selection.finalPolicy = finalPolicy;
+    selection.selected = selected;
+    selection.selectedBy = internal.text(source.selectedBy || settings.actor, "Project Owner");
+    selection.selectedAt = internal.nowIso();
+    selection.warningAcknowledged = warningAcknowledged;
+    current.updatedAt = selection.selectedAt;
+    current.revision += 1;
+    current.candidateHash = sha256(Object.assign({}, current, { candidateHash: null }));
+    internal.touch();
+    internal.appendAudit({
+      action: "PROCEDURE_STEP_SELECTION_UPDATED",
+      actor: selection.selectedBy,
+      targetType: "Validation Dataset Candidate",
+      targetId: current.candidateId,
+      outcome: selected ? "Selected" : "Not Selected",
+      detail: internal.clone(selection)
+    });
+    return internal.buildResult(true, "PROCEDURE_STEP_SELECTION_UPDATED", selected ? "Selected" : "Not Selected", {
+      selection: internal.clone(selection),
+      executionPlan: getProcedureExecutionPlan(current.candidateId)
     });
   }
 
-  function addManualConfirmation(validationRunId, confirmationInput, options) {
-    const run = state.validationRuns.get(internal.text(validationRunId, ""));
-    if (!run) return internal.buildResult(false, "VALIDATION_RUN_NOT_FOUND", "Blocked", null, {
-      error: { message: "Validation Run was not found.", category: "Input Failure" }
+  function getProcedureExecutionPlan(candidateId) {
+    const candidate = getValidationDatasetCandidate(candidateId);
+    if (!candidate) return null;
+    const plan = candidate.steps.map(function map(step) {
+      const selection = candidate.ownerSelections.find(function find(item) { return item.stepId === step.stepId; });
+      return {
+        stepId: step.stepId,
+        order: step.order,
+        title: step.title,
+        executionPolicy: selection ? selection.finalPolicy : step.executionPolicy,
+        defaultSelected: step.defaultSelected,
+        selected: Boolean(selection && selection.selected),
+        warningAcknowledged: Boolean(selection && selection.warningAcknowledged),
+        warningLevel: step.warningLevel,
+        warningReasons: internal.clone(step.warningReasons),
+        prohibitedReasons: internal.clone(step.prohibitedReasons),
+        executionCode: step.executionCode,
+        expectedConditions: internal.clone(step.expectedConditions),
+        manualConfirmation: step.manualConfirmation,
+        finalGate: step.finalGate
+      };
     });
-    if (run.frozen || run.status === "Frozen" || Object.isFrozen(run)) {
-      return internal.buildResult(false, "VALIDATION_RUN_FROZEN", "Blocked", null, {
-        error: { message: "Frozen Validation Run cannot be changed.", category: "Governance Failure" }
-      });
-    }
-    const source = internal.isPlainObject(confirmationInput) ? confirmationInput : {};
-    const confirmation = {
-      confirmationId: internal.text(source.confirmationId, "") || internal.nextId("IDE-170-MANUAL-CONFIRMATION"),
-      validationRunId: run.validationRunId,
-      caseId: internal.canonicalId(source.caseId),
-      testType: internal.text(source.testType, "Real Device Confirmation"),
-      description: internal.text(source.description, ""),
-      required: source.required !== false,
-      confirmed: source.confirmed === true,
-      confirmedBy: internal.text(source.confirmedBy || (options && options.actor), "Project Owner"),
-      device: internal.text(source.device, ""),
-      evidence: internal.text(source.evidence, ""),
-      confirmedAt: source.confirmed === true ? internal.text(source.confirmedAt, internal.nowIso()) : null
+    return {
+      candidateId: candidate.candidateId,
+      procedureId: candidate.procedureId,
+      status: candidate.status,
+      total: plan.length,
+      selected: plan.filter(function count(item) { return item.selected; }).length,
+      autoExecutable: plan.filter(function count(item) { return item.executionPolicy === "Auto Executable"; }).length,
+      warningSelectable: plan.filter(function count(item) { return item.executionPolicy === "Warning Selectable"; }).length,
+      manualConfirmation: plan.filter(function count(item) { return item.executionPolicy === "Manual Confirmation"; }).length,
+      prohibited: plan.filter(function count(item) { return item.executionPolicy === "Prohibited"; }).length,
+      unrecognized: plan.filter(function count(item) { return item.executionPolicy === "Unrecognized"; }).length,
+      steps: plan
     };
-    const existingIndex = run.manualConfirmations.findIndex(function findConfirmation(item) {
-      return item.caseId === confirmation.caseId;
-    });
-    if (existingIndex >= 0) run.manualConfirmations[existingIndex] = confirmation;
-    else run.manualConfirmations.push(confirmation);
-
-    const caseResult = run.caseResults.find(function findCase(item) { return item.caseId === confirmation.caseId; });
-    if (caseResult) {
-      const dataset = namespace.getTestDataset(run.datasetId);
-      const testCase = dataset && dataset.testCases.find(function findTestCase(item) { return item.caseId === confirmation.caseId; });
-      if (testCase && testCase.executionType === "Manual Confirmation") {
-        const comparison = compareExpectedResult(testCase.expected, confirmation.confirmed);
-        caseResult.actual = confirmation.confirmed;
-        caseResult.passed = comparison.passed;
-        caseResult.status = comparison.passed ? "Passed" : "Blocked";
-        caseResult.differences = comparison.differences;
-        caseResult.error = comparison.passed ? null : { code: "MANUAL_CONFIRMATION_REQUIRED", message: "Required Manual Confirmation is not complete." };
-        caseResult.completedAt = internal.nowIso();
-        caseResult.resultHash = internal.hashValidationValue
-          ? internal.hashValidationValue(Object.assign({}, caseResult, { resultHash: null }))
-          : null;
-        updateOwnerSelectionExecution(run, testCase, caseResult, true);
-      }
-    }
-    recalculateRunSummary(run);
-    run.runHash = internal.hashValidationValue
-      ? internal.hashValidationValue(Object.assign({}, run, { runHash: null }))
-      : null;
-    internal.appendAudit({
-      action: "MANUAL_CONFIRMATION_RECORDED",
-      actor: confirmation.confirmedBy,
-      targetType: "Validation Run",
-      targetId: run.validationRunId,
-      outcome: confirmation.confirmed ? "Confirmed" : "Not Confirmed",
-      detail: internal.clone(confirmation)
-    });
-    return internal.buildResult(true, "MANUAL_CONFIRMATION_RECORDED", confirmation.confirmed ? "Confirmed" : "Pending", {
-      confirmation: confirmation,
-      validationRun: getValidationRun(run.validationRunId)
-    });
   }
 
-  function freezeValidationRun(validationRunId, options) {
-    const id = internal.text(validationRunId, "");
-    const current = state.validationRuns.get(id);
-    if (!current) return internal.buildResult(false, "VALIDATION_RUN_NOT_FOUND", "Blocked", null, {
-      error: { message: "Validation Run was not found.", category: "Input Failure" }
-    });
-    if (current.frozen || current.status === "Frozen" || Object.isFrozen(current)) {
-      return internal.buildResult(true, "VALIDATION_RUN_ALREADY_FROZEN", "Frozen", {
-        validationRun: getValidationRun(id)
+  function createTestCase(step, selection, candidate) {
+    const expected = buildExpected(step);
+    const caseId = internal.canonicalId(
+      "IDE-170-PROCEDURE-TEST-" + candidate.procedureId.replace(/^IDE-170-PROCEDURE-/, "") + "-" + step.stepId
+    );
+    const warningSelectable = selection.finalPolicy === "Warning Selectable";
+    const input = internal.clone(step.input || {});
+    if (warningSelectable && step.targetId === "IDE-170-TARGET-OWNER-APPROVED-CODE") {
+      input.code = step.executionCode;
+      input.ownerApproved = true;
+      input.approvedBy = selection.selectedBy;
+      input.warningAcknowledged = selection.warningAcknowledged;
+    }
+    return {
+      caseId: caseId,
+      name: step.title,
+      description: step.description,
+      category: step.finalGate ? "Final Gate" : "Imported Test Procedure",
+      severity: step.finalGate ? "High" : "High",
+      target: step.executionType === "Manual Confirmation" ? "" : step.targetId,
+      executionType: step.executionType,
+      executionPolicy: selection.finalPolicy,
+      warningLevel: step.warningLevel,
+      warningReasons: internal.clone(step.warningReasons),
+      selectedByOwner: warningSelectable ? selection.selected === true : null,
+      input: input,
+      preconditions: [],
+      expected: expected,
+      timeout: warningSelectable ? 60000 : 15000,
+      dependencies: [],
+      tags: ["Imported Procedure", step.stepId, step.finalGate ? "Final Gate" : "Step"],
+      enabled: selection.selected === true,
+      required: step.required !== false,
+      retry: {
+        maximumAttempts: /Not Ready|Loading|Pending/i.test(step.expectedText || "") ? 3 : 1,
+        intervalMs: 500,
+        retryOn: ["Not Ready", "Module Loading", "Initialization Pending"]
+      },
+      createdAt: internal.nowIso(),
+      updatedAt: internal.nowIso()
+    };
+  }
+
+  function approveValidationDatasetCandidate(candidateId, options) {
+    const settings = internal.isPlainObject(options) ? options : {};
+    const current = state.validationDatasetCandidates.get(internal.canonicalId(candidateId));
+    if (!current) {
+      return internal.buildResult(false, "VALIDATION_DATASET_CANDIDATE_NOT_FOUND", "Blocked", null, {
+        error: { message: "Validation Dataset Candidate was not found.", category: "Input Failure" }
       });
     }
-    const frozen = internal.clone(current);
-    frozen.status = "Frozen";
-    frozen.frozen = true;
-    frozen.frozenAt = internal.nowIso();
-    frozen.runHash = internal.hashValidationValue
-      ? internal.hashValidationValue(Object.assign({}, frozen, { runHash: null }))
-      : null;
-    state.validationRuns.set(id, internal.deepFreeze(frozen));
-    internal.appendAudit({
-      action: "VALIDATION_RUN_FROZEN",
-      actor: internal.text(options && options.actor, "Project Owner"),
-      targetType: "Validation Run",
-      targetId: id,
-      outcome: "Succeeded",
-      detail: { runHash: frozen.runHash, requiredGatePassed: frozen.summary.requiredGatePassed }
+    if (current.status === "Approved") {
+      return internal.buildResult(true, "VALIDATION_DATASET_CANDIDATE_ALREADY_APPROVED", "Frozen", {
+        candidate: getValidationDatasetCandidate(current.candidateId),
+        dataset: namespace.getTestDataset(current.approvedDatasetId)
+      });
+    }
+    const selectedSteps = current.steps.filter(function select(step) {
+      const selection = current.ownerSelections.find(function find(item) { return item.stepId === step.stepId; });
+      return selection && selection.selected === true;
     });
-    return internal.buildResult(true, "VALIDATION_RUN_FROZEN", "Frozen", {
-      validationRun: getValidationRun(id)
+    if (!selectedSteps.length) {
+      return internal.buildResult(false, "NO_PROCEDURE_STEPS_SELECTED", "Blocked", null, {
+        error: { message: "At least one Step must be selected.", category: "Owner Selection Failure" }
+      });
+    }
+    const unacknowledged = selectedSteps.find(function find(step) {
+      const selection = current.ownerSelections.find(function item(value) { return value.stepId === step.stepId; });
+      return selection.finalPolicy === "Warning Selectable" && selection.warningAcknowledged !== true;
+    });
+    if (unacknowledged) {
+      return internal.buildResult(false, "WARNING_ACKNOWLEDGEMENT_REQUIRED", "Blocked", { stepId: unacknowledged.stepId }, {
+        error: { message: "All selected Warning Steps must be acknowledged.", category: "Owner Approval Required" }
+      });
+    }
+    const prohibited = selectedSteps.find(function find(step) {
+      const selection = current.ownerSelections.find(function item(value) { return value.stepId === step.stepId; });
+      return selection.finalPolicy === "Prohibited";
+    });
+    if (prohibited) {
+      return internal.buildResult(false, "PROHIBITED_PROCEDURE_STEP", "Blocked", { stepId: prohibited.stepId }, {
+        error: { message: "Prohibited Step cannot be compiled.", category: "Safety Boundary" }
+      });
+    }
+
+    const datasetId = internal.canonicalId(settings.datasetId || datasetIdFor(current, current));
+    const dataset = {
+      datasetId: datasetId,
+      name: "Imported Procedure - " + current.procedureId,
+      version: internal.text(settings.version, current.version || "1.0.0"),
+      componentId: namespace.componentId,
+      targetPhase: namespace.implementationPhase,
+      status: "Frozen",
+      description: "Compiled from an imported Test Procedure after Project Owner review.",
+      sourceProcedureId: current.procedureId,
+      sourceProcedureVersion: current.procedureVersion,
+      sourceProcedureHash: current.procedureHash,
+      parsedProcedureId: current.parsedProcedureId,
+      candidateId: current.candidateId,
+      ownerSelections: internal.clone(current.ownerSelections),
+      warnings: internal.clone(current.warnings),
+      testCases: selectedSteps.map(function map(step) {
+        const selection = current.ownerSelections.find(function find(item) { return item.stepId === step.stepId; });
+        return createTestCase(step, selection, current);
+      }),
+      metadata: {
+        architectureDecision: "IDE-170-ARCHITECTURE-DECISION-011-v1.1.0",
+        parserVersion: current.parserVersion,
+        parseHash: current.parseHash,
+        candidateHash: current.candidateHash,
+        automaticExecutionOnStartup: false,
+        repositoryMutationAllowed: false
+      },
+      createdAt: internal.nowIso(),
+      updatedAt: internal.nowIso(),
+      frozenAt: internal.nowIso()
+    };
+    const registration = namespace.registerTestDataset(dataset, { actor: internal.text(settings.actor, "Project Owner") });
+    if (!registration.ok) return registration;
+
+    current.status = "Approved";
+    current.approvedDatasetId = datasetId;
+    current.approvedBy = internal.text(settings.actor, "Project Owner");
+    current.approvedAt = internal.nowIso();
+    current.updatedAt = current.approvedAt;
+    current.candidateHash = sha256(Object.assign({}, current, { candidateHash: null }));
+    state.validationDatasetCandidates.set(current.candidateId, internal.deepFreeze(internal.clone(current)));
+    state.activeImportedProcedureDatasetId = datasetId;
+    internal.touch();
+    internal.appendAudit({
+      action: "VALIDATION_DATASET_CANDIDATE_APPROVED",
+      actor: current.approvedBy,
+      targetType: "Validation Dataset Candidate",
+      targetId: current.candidateId,
+      outcome: "Succeeded",
+      detail: { datasetId: datasetId, testCaseCount: dataset.testCases.length }
+    });
+    return internal.buildResult(true, "VALIDATION_DATASET_CANDIDATE_APPROVED", "Frozen", {
+      candidate: getValidationDatasetCandidate(current.candidateId),
+      dataset: namespace.getTestDataset(datasetId)
     });
   }
 
-  function registerAutomationSchemas() {
+  function createSameOriginFetch() {
+    return async function sameOriginFetch(input, init) {
+      if (typeof global.fetch !== "function") throw Object.assign(new Error("fetch is unavailable."), { code: "FETCH_UNAVAILABLE" });
+      const base = global.location && global.location.href ? global.location.href : "https://local.invalid/";
+      const url = new URL(typeof input === "string" ? input : input.url, base);
+      const baseOrigin = new URL(base).origin;
+      if (url.origin !== baseOrigin) {
+        throw Object.assign(new Error("Owner Approved Code is limited to same-origin Network access."), { code: "EXTERNAL_NETWORK_PROHIBITED" });
+      }
+      return global.fetch(input, init);
+    };
+  }
+
+  function validateOwnerApprovedCode(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const code = internal.text(source.code, "");
+    const classification = internal.classifyTestProcedureCode
+      ? internal.classifyTestProcedureCode(code, { manual: false })
+      : { policy: "Warning Selectable", prohibitedReasons: [] };
+    if (!code || source.ownerApproved !== true || source.warningAcknowledged !== true) {
+      throw Object.assign(new Error("Owner Approved Code requires explicit approval and warning acknowledgement."), {
+        code: "OWNER_APPROVAL_REQUIRED"
+      });
+    }
+    if (classification.policy === "Prohibited") {
+      throw Object.assign(new Error("Owner Approved Code contains a prohibited operation."), {
+        code: "OWNER_APPROVED_CODE_PROHIBITED",
+        detail: classification.prohibitedReasons
+      });
+    }
+    return code;
+  }
+
+  async function executeOwnerApprovedCode(input) {
+    const code = validateOwnerApprovedCode(input);
+    const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+    const parameters = [
+      "IDE170Intelligence",
+      "getAIDevelopmentWorkflowStatus",
+      "getIntelligencePlatformStatus",
+      "getIntelligencePlatformReleaseStatus",
+      "navigator",
+      "document",
+      "URL",
+      "performance",
+      "console",
+      "fetch",
+      "window",
+      "globalThis",
+      "self",
+      "localStorage",
+      "sessionStorage",
+      "location",
+      "XMLHttpRequest",
+      "WebSocket",
+      "Function"
+    ];
+    const values = [
+      namespace,
+      typeof global.getAIDevelopmentWorkflowStatus === "function" ? global.getAIDevelopmentWorkflowStatus : undefined,
+      typeof global.getIntelligencePlatformStatus === "function" ? global.getIntelligencePlatformStatus : undefined,
+      typeof global.getIntelligencePlatformReleaseStatus === "function" ? global.getIntelligencePlatformReleaseStatus : undefined,
+      global.navigator || {},
+      global.document,
+      global.URL,
+      global.performance,
+      global.console,
+      createSameOriginFetch(),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined
+    ];
+    let implementation;
+    try {
+      implementation = new AsyncFunction(...parameters, '"use strict"; return await (' + code + ');');
+    } catch (expressionError) {
+      implementation = new AsyncFunction(...parameters, '"use strict"; ' + code);
+    }
+    return implementation(...values);
+  }
+
+  function registerCompilerTargets() {
+    const results = [];
+    function add(definition, implementation) {
+      if (namespace.getValidationTarget(definition.targetId)) {
+        results.push({ targetId: definition.targetId, registered: true, existing: true });
+        return;
+      }
+      const result = namespace.registerValidationTarget(definition, implementation);
+      results.push({ targetId: definition.targetId, registered: result.ok === true, code: result.code });
+    }
+    add({ targetId: "IDE-170-TARGET-CURRENT-STATUS", name: "IDE-170 Current Status", executionTypes: ["Status Probe", "Regression Probe"] }, function statusTarget() {
+      return namespace.getStatus();
+    });
+    add({ targetId: "IDE-170-TARGET-CURRENT-RELEASE", name: "IDE-170 Current Release", executionTypes: ["Status Probe", "Regression Probe"] }, function releaseTarget() {
+      return namespace.getReleaseStatus();
+    });
+    add({ targetId: "IDE-170-TARGET-OWNER-APPROVED-CODE", name: "Owner Approved Procedure Code", executionTypes: ["Function", "Async Function", "Download Generation", "Owner Approved Code"] }, executeOwnerApprovedCode);
+    return results;
+  }
+
+  async function runImportedTestProcedure(options) {
+    const settings = internal.isPlainObject(options) ? options : {};
+    let datasetId = internal.canonicalId(settings.datasetId || state.activeImportedProcedureDatasetId || "");
+    if (!datasetId && settings.candidateId) {
+      const candidate = getValidationDatasetCandidate(settings.candidateId);
+      datasetId = candidate && candidate.approvedDatasetId;
+    }
+    if (!datasetId) {
+      return internal.buildResult(false, "IMPORTED_TEST_DATASET_NOT_APPROVED", "Blocked", {
+        executionPlan: state.latestValidationDatasetCandidateId
+          ? getProcedureExecutionPlan(state.latestValidationDatasetCandidateId)
+          : null
+      }, {
+        error: { message: "Import, review, and approve a Test Procedure before execution.", category: "Owner Review Required" }
+      });
+    }
+
+    const runResult = await namespace.runAutomatedValidation(datasetId, {
+      actor: internal.text(settings.actor, "Project Owner"),
+      onProgress: settings.onProgress,
+      signal: settings.signal,
+      cancelled: settings.cancelled
+    });
+    if (!runResult.ok) return runResult;
+    const runId = runResult.data.validationRun.validationRunId;
+    const dataset = namespace.getTestDataset(datasetId);
+    const confirmations = Array.isArray(settings.manualConfirmations) ? settings.manualConfirmations : [];
+    confirmations.forEach(function confirm(item) {
+      namespace.addManualConfirmation(runId, item, { actor: internal.text(settings.confirmedBy || settings.actor, "Project Owner") });
+    });
+
+    const runBeforeFreeze = namespace.getValidationRun(runId);
+    const freeze = namespace.freezeValidationRun(runId, { actor: internal.text(settings.actor, "Project Owner") });
+    if (!freeze.ok) return freeze;
+    const evidence = await namespace.buildValidationEvidencePackage(runId, {
+      actor: internal.text(settings.actor, "Project Owner"),
+      download: settings.downloadEvidence === true,
+      onProgress: settings.onEvidenceProgress
+    });
+    const evidenceValidation = evidence.ok
+      ? await namespace.validateValidationEvidencePackage(evidence.data.packageId)
+      : null;
+    const finalRun = namespace.getValidationRun(runId);
+    return {
+      ok: Boolean(evidence.ok && evidenceValidation && evidenceValidation.valid),
+      code: evidence.ok ? "IMPORTED_TEST_PROCEDURE_COMPLETED" : evidence.code,
+      status: finalRun && finalRun.summary.requiredGatePassed ? "Passed" : "Blocked",
+      data: {
+        dataset: dataset,
+        validationRun: finalRun,
+        validationRunBeforeFreeze: runBeforeFreeze,
+        evidencePackageId: evidence.ok ? evidence.data.packageId : null,
+        evidenceFileName: evidence.ok ? evidence.data.fileName : null,
+        evidenceValidation: evidenceValidation
+      },
+      warnings: evidence.warnings || [],
+      error: evidence.error || null,
+      createdAt: internal.nowIso()
+    };
+  }
+
+  async function runCurrentPhaseValidation(options) {
+    const settings = internal.isPlainObject(options) ? options : {};
+    if (settings.file || settings.procedure || settings.content) {
+      const source = settings.file || settings.procedure || {
+        content: settings.content,
+        fileName: settings.fileName || "test-procedure.txt"
+      };
+      const imported = await namespace.importTestProcedure(source, settings);
+      if (!imported.ok) return imported;
+      const parsed = namespace.parseTestProcedure(imported.data.procedure.procedureId, settings);
+      if (!parsed.ok) return parsed;
+      const compiled = namespace.compileTestProcedure(parsed.data.parsedProcedure.parsedProcedureId, settings);
+      if (!compiled.ok) return compiled;
+      return internal.buildResult(true, "TEST_PROCEDURE_REVIEW_REQUIRED", "Review Required", {
+        procedure: imported.data.procedure,
+        parsedProcedure: parsed.data.parsedProcedure,
+        candidate: compiled.data.candidate,
+        executionPlan: compiled.data.executionPlan
+      });
+    }
+    if (state.activeImportedProcedureDatasetId && settings.executeApproved === true) {
+      return runImportedTestProcedure(settings);
+    }
+    if (settings.openUI !== false && typeof namespace.openTestProcedureValidationConsole === "function") {
+      namespace.openTestProcedureValidationConsole();
+      return internal.buildResult(true, "TEST_PROCEDURE_UI_OPENED", "Review Required", {
+        activeDatasetId: state.activeImportedProcedureDatasetId || null
+      });
+    }
+    return internal.buildResult(false, "TEST_PROCEDURE_IMPORT_REQUIRED", "Blocked", null, {
+      error: { message: "Import and approve a Test Procedure first.", category: "Input Required" }
+    });
+  }
+
+  async function runTestProcedureCompilerValidation(options) {
+    const settings = internal.isPlainObject(options) ? options : {};
+    const checks = [];
+    function check(name, passed, detail, group) {
+      checks.push({ name: name, passed: passed === true, detail: internal.text(detail, ""), group: group || "Foundation", severity: "High" });
+    }
+    const unique = Date.now().toString(36).toUpperCase();
+    const procedureText = `============================================================
+1. Status確認
+============================================================
+
+実行:
+
+IDE170Intelligence.getStatus()
+
+期待結果:
+
+version = "${RELEASE_VERSION}"
+ready = true
+modules.testProcedureIntake = true
+modules.testProcedureParser = true
+modules.validationCompiler = true
+
+============================================================
+2. 警告付き状態確認
+============================================================
+
+実行:
+
+(async () => IDE170Intelligence.getReleaseStatus())()
+
+期待結果:
+
+componentId = "IDE-170"
+
+警告:
+
+状態取得用の複合コードとしてOwner確認後に実行する。
+
+============================================================
+3. Android確認
+============================================================
+
+手動確認:
+
+- Android Chromeで画面とDownloadを確認した
+
+============================================================
+4. 実行禁止確認
+============================================================
+
+実行:
+
+github push --force
+
+期待結果:
+
+blocked = true
+
+============================================================
+5. 認識不能確認
+============================================================
+
+このSectionには実行コードがありません。
+`;
+    try {
+      const foundationValidation = await namespace.runValidationAutomationFoundationValidation({
+        actor: internal.text(settings.actor, "IDE-170 Validation"),
+        confirmedBy: internal.text(settings.confirmedBy || settings.actor, "Project Owner"),
+        androidRealDevicePassed: settings.androidRealDevicePassed === true,
+        device: internal.text(settings.device, ""),
+        androidEvidence: internal.text(settings.androidEvidence, ""),
+        downloadEvidence: false
+      });
+      check(
+        "Validation Automation Foundation remains Passed",
+        Boolean(foundationValidation && foundationValidation.valid === true && foundationValidation.failed === 0),
+        foundationValidation ? "passed=" + foundationValidation.passed + "/" + foundationValidation.total : "Unavailable",
+        "Foundation Regression"
+      );
+      check("Test Procedure Intake module is Ready", namespace.modules.testProcedureIntake && namespace.modules.testProcedureIntake.status === "Ready", JSON.stringify(namespace.modules.testProcedureIntake), "Module");
+      check("Test Procedure Parser module is Ready", namespace.modules.testProcedureParser && namespace.modules.testProcedureParser.status === "Ready", JSON.stringify(namespace.modules.testProcedureParser), "Module");
+      check("Validation Compiler module is Ready", namespace.modules.validationCompiler && namespace.modules.validationCompiler.status === "Ready", JSON.stringify(namespace.modules.validationCompiler), "Module");
+      check("Test Procedure UI module is Ready", namespace.modules.testProcedureUI && namespace.modules.testProcedureUI.status === "Ready", JSON.stringify(namespace.modules.testProcedureUI), "Module");
+
+      const imported = await namespace.importTestProcedure({
+        content: procedureText,
+        fileName: "IDE-170_Validation_Procedure_" + unique + ".txt"
+      }, {
+        procedureId: "IDE-170-PROCEDURE-VALIDATION-" + unique,
+        name: "Procedure Compiler Validation",
+        version: "1.0.0",
+        actor: "IDE-170 Validation"
+      });
+      check("TXT Test Procedure can be imported", imported.ok === true, imported.code, "Intake");
+      check("Imported Procedure is Frozen", imported.ok && imported.data.procedure.status === "Frozen", imported.ok && imported.data.procedure.status, "Intake");
+      check("Imported Procedure has SHA-256", imported.ok && imported.data.procedure.procedureHash.length === 64, imported.ok && imported.data.procedure.procedureHash, "Integrity");
+
+      const markdownImport = await namespace.importTestProcedure({ content: "# Test\n\n実行:\n\nIDE170Intelligence.getStatus()\n\n期待結果:\n\nready = true\n", fileName: "validation.md" }, { procedureId: "IDE-170-PROCEDURE-MD-" + unique, version: "1.0.0", actor: "IDE-170 Validation" });
+      check("Markdown Test Procedure can be imported", markdownImport.ok === true, markdownImport.code, "Intake");
+      const jsonImport = await namespace.importTestProcedure({ content: JSON.stringify({ steps: [{ stepId: "STEP-001", title: "JSON", executionCode: "IDE170Intelligence.getStatus()", expected: { path: "ready", comparator: "Exact", value: true } }] }), fileName: "validation.json" }, { procedureId: "IDE-170-PROCEDURE-JSON-" + unique, version: "1.0.0", actor: "IDE-170 Validation" });
+      check("JSON Test Procedure can be imported", jsonImport.ok === true, jsonImport.code, "Intake");
+
+      const parsed = namespace.parseTestProcedure(imported.data.procedure.procedureId, { actor: "IDE-170 Validation" });
+      const parsedRecord = parsed.ok ? parsed.data.parsedProcedure : null;
+      check("Test Procedure can be parsed", parsed.ok === true, parsed.code, "Parser");
+      check("Executable Steps are recognized", parsedRecord && parsedRecord.stepCount >= 4, parsedRecord && parsedRecord.stepCount, "Parser");
+      check("Expected Results are recognized", parsedRecord && parsedRecord.steps.some(function item(step) { return step.expectedConditions.length >= 3; }), "Expected Conditions", "Parser");
+      check("Auto Executable is classified", parsedRecord && parsedRecord.policySummary["Auto Executable"] >= 1, JSON.stringify(parsedRecord && parsedRecord.policySummary), "Policy");
+      check("Warning Selectable is classified", parsedRecord && parsedRecord.policySummary["Warning Selectable"] >= 1, JSON.stringify(parsedRecord && parsedRecord.policySummary), "Policy");
+      check("Manual Confirmation is classified", parsedRecord && parsedRecord.policySummary["Manual Confirmation"] >= 1, JSON.stringify(parsedRecord && parsedRecord.policySummary), "Policy");
+      check("Prohibited is classified", parsedRecord && parsedRecord.policySummary.Prohibited >= 1, JSON.stringify(parsedRecord && parsedRecord.policySummary), "Policy");
+
+      const compiled = namespace.compileTestProcedure(parsedRecord.parsedProcedureId, { actor: "IDE-170 Validation" });
+      const candidate = compiled.ok ? compiled.data.candidate : null;
+      check("Validation Dataset Candidate can be compiled", compiled.ok === true, compiled.code, "Compiler");
+      check("Execution Plan can be generated", compiled.ok && compiled.data.executionPlan.total >= 4, JSON.stringify(compiled.ok && compiled.data.executionPlan), "Compiler");
+
+      const prohibitedStep = candidate.steps.find(function find(step) { return step.executionPolicy === "Prohibited"; });
+      const prohibitedSelection = namespace.updateProcedureStepSelection(candidate.candidateId, prohibitedStep.stepId, { selected: true, warningAcknowledged: true }, { actor: "IDE-170 Validation" });
+      check("Prohibited Step selection is blocked", prohibitedSelection.ok === false && prohibitedSelection.code === "PROHIBITED_PROCEDURE_STEP", prohibitedSelection.code, "Safety");
+
+      const warningStep = candidate.steps.find(function find(step) { return step.executionPolicy === "Warning Selectable"; });
+      const warningWithoutAck = namespace.updateProcedureStepSelection(candidate.candidateId, warningStep.stepId, { selected: true }, { actor: "IDE-170 Validation" });
+      check("Warning Step requires acknowledgement", warningWithoutAck.ok === false && warningWithoutAck.code === "WARNING_ACKNOWLEDGEMENT_REQUIRED", warningWithoutAck.code, "Owner Selection");
+      const warningSelection = namespace.updateProcedureStepSelection(candidate.candidateId, warningStep.stepId, { selected: true, warningAcknowledged: true, selectedBy: "Project Owner" }, { actor: "Project Owner" });
+      check("Warning Step can be selected after acknowledgement", warningSelection.ok === true, warningSelection.code, "Owner Selection");
+
+      const approved = namespace.approveValidationDatasetCandidate(candidate.candidateId, { actor: "Project Owner", version: "1.0.0" });
+      check("Validation Dataset Candidate can be approved", approved.ok === true, approved.code, "Compiler");
+      check("Compiled Dataset is Frozen", approved.ok && approved.data.dataset.status === "Frozen", approved.ok && approved.data.dataset.status, "Compiler");
+      check("Compiled Dataset preserves Procedure reference", approved.ok && approved.data.dataset.sourceProcedureId === imported.data.procedure.procedureId, approved.ok && approved.data.dataset.sourceProcedureId, "Evidence");
+
+      const manualCase = approved.data.dataset.testCases.find(function find(testCase) { return testCase.executionType === "Manual Confirmation"; });
+      const confirmations = settings.androidRealDevicePassed === true && manualCase ? [{
+        caseId: manualCase.caseId,
+        testType: "Android Real Device Confirmation",
+        description: "Imported Procedure Android real-device checks completed.",
+        required: true,
+        confirmed: true,
+        confirmedBy: internal.text(settings.confirmedBy || settings.actor, "Project Owner"),
+        device: internal.text(settings.device, "Android Chrome"),
+        evidence: internal.text(settings.androidEvidence, "Android Test Procedure Intake and Compiler checks passed.")
+      }] : [];
+
+      const execution = await namespace.runImportedTestProcedure({
+        datasetId: approved.data.dataset.datasetId,
+        actor: internal.text(settings.actor, "IDE-170 Validation"),
+        confirmedBy: internal.text(settings.confirmedBy, "Project Owner"),
+        manualConfirmations: confirmations,
+        downloadEvidence: settings.downloadEvidence === true
+      });
+      const run = execution.data && execution.data.validationRun;
+      check("Imported Test Procedure can be executed", Boolean(execution.data && run), execution.code, "Runner");
+      check("Expected Result comparison is generated", Boolean(run && run.comparisons.length === run.caseResults.length), run && run.comparisons.length, "Comparator");
+      check("Warning-selected Code executes", Boolean(run && run.caseResults.some(function item(result) { return result.caseId.includes(warningStep.stepId) && result.status === "Passed"; })), "Warning Case", "Runner");
+      if (settings.androidRealDevicePassed === true) {
+        check("Required Manual Confirmation passes", Boolean(run && run.summary.requiredGatePassed === true), JSON.stringify(run && run.summary), "Manual Confirmation");
+      } else {
+        check("Required Manual Confirmation remains explicit", Boolean(run && run.summary.blocked >= 1), JSON.stringify(run && run.summary), "Manual Confirmation");
+      }
+      const evidenceValidation = execution.data && execution.data.evidenceValidation;
+      check("Extended Evidence Package can be generated", Boolean(execution.data && execution.data.evidencePackageId), execution.data && execution.data.evidencePackageId, "Evidence");
+      check("Extended Evidence Package passes re-validation", Boolean(evidenceValidation && evidenceValidation.valid === true), JSON.stringify(evidenceValidation), "Evidence");
+      const evidenceRecord = execution.data && namespace.getValidationEvidencePackage(execution.data.evidencePackageId);
+      check("Original Procedure is stored in Evidence", Boolean(evidenceRecord && Object.keys(evidenceRecord.artifacts).some(function path(name) { return name.indexOf("original-test-procedure.") === 0; })), evidenceRecord && Object.keys(evidenceRecord.artifacts), "Evidence");
+      check("Parsed Procedure is stored in Evidence", Boolean(evidenceRecord && evidenceRecord.artifacts["parsed-test-procedure.json"]), "parsed-test-procedure.json", "Evidence");
+      check("Owner Selections are stored in Evidence", Boolean(evidenceRecord && evidenceRecord.artifacts["owner-selections.json"]), "owner-selections.json", "Evidence");
+      const ownerSelectionEvidence = evidenceRecord && evidenceRecord.artifacts["owner-selections.json"]
+        ? JSON.parse(evidenceRecord.artifacts["owner-selections.json"])
+        : [];
+      const selectedOwnerSelections = ownerSelectionEvidence.filter(function selected(item) { return item.selected === true; });
+      check(
+        "Owner Selection Evidence reflects execution results",
+        Boolean(selectedOwnerSelections.length && selectedOwnerSelections.every(function executed(item) {
+          return item.executed === true && item.result !== "Not Run" && Boolean(item.caseId) && Boolean(item.executedAt);
+        })),
+        JSON.stringify(selectedOwnerSelections),
+        "Evidence Metadata"
+      );
+      const originalProcedurePath = evidenceRecord && Object.keys(evidenceRecord.artifacts).find(function findOriginal(name) {
+        return name.indexOf("original-test-procedure.") === 0;
+      });
+      const originalProcedureEntry = evidenceRecord && originalProcedurePath
+        ? evidenceRecord.manifest.artifacts.find(function findEntry(item) { return item.path === originalProcedurePath; })
+        : null;
+      const originalProcedureContent = evidenceRecord && originalProcedurePath
+        ? evidenceRecord.artifacts[originalProcedurePath]
+        : null;
+      const originalProcedureByteSize = typeof originalProcedureContent === "string"
+        ? (typeof global.TextEncoder === "function"
+          ? new global.TextEncoder().encode(originalProcedureContent).length
+          : new global.Blob([originalProcedureContent]).size)
+        : -1;
+      check(
+        "Evidence Manifest stores UTF-8 byte size and character count",
+        Boolean(
+          originalProcedureEntry &&
+          originalProcedureEntry.size === originalProcedureByteSize &&
+          originalProcedureEntry.byteSize === originalProcedureByteSize &&
+          originalProcedureEntry.characterCount === originalProcedureContent.length
+        ),
+        JSON.stringify(originalProcedureEntry),
+        "Evidence Metadata"
+      );
+      check(
+        "Test Procedure UI supports non-blocking manual confirmation",
+        Boolean(
+          namespace.modules.testProcedureUI &&
+          namespace.modules.testProcedureUI.nonBlockingMinimize === true &&
+          namespace.modules.testProcedureUI.persistentCloseState === true &&
+          typeof namespace.minimizeTestProcedureValidationConsole === "function" &&
+          typeof namespace.restoreTestProcedureValidationConsole === "function"
+        ),
+        JSON.stringify(namespace.modules.testProcedureUI),
+        "User Interface"
+      );
+      check("Automatic Startup execution remains prohibited", namespace.modules.validationAutomation.automaticStartupExecution === false, String(namespace.modules.validationAutomation.automaticStartupExecution), "Safety");
+      check("Repository automatic mutation remains prohibited", namespace.getStatus().directRepositoryMutationAllowed === false, String(namespace.getStatus().directRepositoryMutationAllowed), "Safety");
+      check("GitHub automatic reflection remains prohibited", namespace.getStatus().githubAutomaticReflectionAllowed === false, String(namespace.getStatus().githubAutomaticReflectionAllowed), "Safety");
+
+      const approvedDatasetId = approved.ok && approved.data.dataset.datasetId;
+      const candidateRemoved = internal.removeValidationDatasetCandidateForValidation
+        ? internal.removeValidationDatasetCandidateForValidation(candidate.candidateId)
+        : false;
+      const parsedRemoved = internal.removeParsedTestProcedureForValidation
+        ? internal.removeParsedTestProcedureForValidation(parsedRecord.parsedProcedureId)
+        : false;
+      const procedureRemoved = internal.removeTestProcedureForValidation
+        ? internal.removeTestProcedureForValidation(imported.data.procedure.procedureId)
+        : false;
+      const markdownRemoved = internal.removeTestProcedureForValidation
+        ? internal.removeTestProcedureForValidation(markdownImport.data.procedure.procedureId)
+        : false;
+      const jsonRemoved = internal.removeTestProcedureForValidation
+        ? internal.removeTestProcedureForValidation(jsonImport.data.procedure.procedureId)
+        : false;
+      if (state.activeImportedProcedureDatasetId === approvedDatasetId) state.activeImportedProcedureDatasetId = null;
+      check("Validation Candidate and compiled Dataset are isolated", candidateRemoved === true && !namespace.getTestDataset(approvedDatasetId), approvedDatasetId, "Validation Isolation");
+      check("Validation Parsed Procedure is isolated", parsedRemoved === true && !namespace.getParsedTestProcedure(parsedRecord.parsedProcedureId), parsedRecord.parsedProcedureId, "Validation Isolation");
+      check("Validation original Procedures are isolated", procedureRemoved === true && markdownRemoved === true && jsonRemoved === true, imported.data.procedure.procedureId, "Validation Isolation");
+
+      const passed = checks.filter(function count(item) { return item.passed; }).length;
+      const valid = checks.length > 0 && passed === checks.length;
+      const result = {
+        id: internal.nextId("IDE-170-PROCEDURE-FOUNDATION-VALIDATION"),
+        componentId: namespace.componentId,
+        name: "IDE-170 Test Procedure Intake and Validation Compiler Validation",
+        version: RELEASE_VERSION,
+        architectureDecisionVersion: "011-v1.1.0",
+        valid: valid,
+        passed: passed,
+        failed: checks.length - passed,
+        total: checks.length,
+        health: checks.length ? Number(((passed / checks.length) * 100).toFixed(2)) : 0,
+        status: valid ? "Passed" : "Failed",
+        checks: checks,
+        androidRealDeviceValidation: {
+          required: true,
+          passed: settings.androidRealDevicePassed === true,
+          device: internal.text(settings.device, ""),
+          evidence: internal.text(settings.androidEvidence, ""),
+          validatedAt: settings.androidRealDevicePassed === true ? internal.nowIso() : null
+        },
+        codeValidationPassed: valid,
+        phase4Gate: valid && settings.androidRealDevicePassed === true ? "Passed" : "Blocked",
+        validationRunId: run && run.validationRunId,
+        evidencePackageId: execution.data && execution.data.evidencePackageId,
+        evidenceFileName: execution.data && execution.data.evidenceFileName,
+        evidencePackageValidation: evidenceValidation ? internal.clone(evidenceValidation) : null,
+        executedAt: internal.nowIso()
+      };
+      state.lastProcedureValidation = internal.deepFreeze(internal.clone(result));
+      internal.touch();
+      result.releaseStatus = namespace.getReleaseStatus();
+      return result;
+    } catch (error) {
+      const passed = checks.filter(function count(item) { return item.passed; }).length;
+      const result = {
+        id: internal.nextId("IDE-170-PROCEDURE-FOUNDATION-VALIDATION"),
+        componentId: namespace.componentId,
+        name: "IDE-170 Test Procedure Intake and Validation Compiler Validation",
+        version: RELEASE_VERSION,
+        valid: false,
+        passed: passed,
+        failed: checks.length - passed + 1,
+        total: checks.length + 1,
+        health: 0,
+        status: "Failed",
+        checks: checks.concat([{ name: "Validation completed without unexpected Error", passed: false, detail: internal.text(error && error.message, String(error)), group: "Unexpected Error", severity: "High" }]),
+        error: { code: internal.text(error && error.code, "PROCEDURE_FOUNDATION_VALIDATION_FAILED"), message: internal.text(error && error.message, String(error)) },
+        androidRealDeviceValidation: { required: true, passed: false },
+        codeValidationPassed: false,
+        phase4Gate: "Blocked",
+        executedAt: internal.nowIso()
+      };
+      state.lastProcedureValidation = internal.deepFreeze(internal.clone(result));
+      internal.touch();
+      return result;
+    }
+  }
+
+  function registerSchemas() {
     const definitions = [
       {
-        schemaId: "IDE-170-SCHEMA-VALIDATION-RUN",
-        name: "Automated Validation Run",
-        version: schemaVersion("IDE-170-SCHEMA-VALIDATION-RUN"),
+        schemaId: "IDE-170-SCHEMA-VALIDATION-DATASET-CANDIDATE",
+        name: "Validation Dataset Candidate",
+        version: schemaVersion("IDE-170-SCHEMA-VALIDATION-DATASET-CANDIDATE"),
         type: "object",
-        required: ["validationRunId", "componentId", "componentVersion", "datasetId", "datasetVersion", "status", "caseResults", "summary"],
+        required: ["candidateId", "procedureId", "parsedProcedureId", "steps", "ownerSelections", "status", "candidateHash"],
         properties: {
-          validationRunId: { type: "string", minLength: 1 },
-          componentId: { type: "string", enum: ["IDE-170"] },
-          componentVersion: { type: "string", format: "semver" },
-          datasetId: { type: "string", minLength: 1 },
-          datasetVersion: { type: "string", format: "semver" },
-          status: { type: "string", enum: RUN_STATUSES.slice() },
-          caseResults: { type: "array" },
-          summary: { type: "object" }
+          candidateId: { type: "string", minLength: 1 },
+          procedureId: { type: "string", minLength: 1 },
+          parsedProcedureId: { type: "string", minLength: 1 },
+          steps: { type: "array" },
+          ownerSelections: { type: "array" },
+          status: { type: "string", enum: ["Candidate", "Approved"] },
+          candidateHash: { type: "string", minLength: 64, maxLength: 64 }
         },
         owner: "IDE-170",
-        source: "Architecture Decision 011"
+        source: "Architecture Decision 011 v1.1.0"
       },
       {
-        schemaId: "IDE-170-SCHEMA-CASE-RESULT",
-        name: "Automated Validation Case Result",
-        version: schemaVersion("IDE-170-SCHEMA-CASE-RESULT"),
+        schemaId: "IDE-170-SCHEMA-OWNER-SELECTION",
+        name: "Procedure Owner Selection",
+        version: schemaVersion("IDE-170-SCHEMA-OWNER-SELECTION"),
         type: "object",
-        required: ["resultId", "validationRunId", "caseId", "status", "passed", "severity", "category"],
+        required: ["stepId", "originalPolicy", "finalPolicy", "selected", "warningAcknowledged"],
         properties: {
-          resultId: { type: "string", minLength: 1 },
-          validationRunId: { type: "string", minLength: 1 },
-          caseId: { type: "string", minLength: 1 },
-          status: { type: "string", enum: CASE_STATUSES.slice() },
-          passed: { type: "boolean" },
-          severity: { type: "string" },
-          category: { type: "string" }
+          stepId: { type: "string", minLength: 1 },
+          originalPolicy: { type: "string" },
+          finalPolicy: { type: "string" },
+          selected: { type: "boolean" },
+          warningAcknowledged: { type: "boolean" }
         },
         owner: "IDE-170",
-        source: "Architecture Decision 011"
+        source: "Architecture Decision 011 v1.1.0"
       }
     ];
     return definitions.map(function register(definition) {
@@ -833,175 +1003,94 @@
     });
   }
 
-  function registerAutomationCapability() {
+  function registerCapability() {
     if (namespace.getCapability && namespace.getCapability(CAPABILITY_ID)) {
       return internal.buildResult(true, "CAPABILITY_EXISTS", "Ready", { capability: namespace.getCapability(CAPABILITY_ID) });
     }
     return namespace.registerCapability({
       capabilityId: CAPABILITY_ID,
-      name: "Deterministic Automated Validation Runner",
+      name: "Validation Compiler and Selectable Execution Policy",
       version: capabilityVersion(CAPABILITY_ID),
       type: "Validation",
       status: "Active",
       owner: "IDE-170",
       dependencies: [
-        { capabilityId: "IDE-170-TEST-DATASET-REGISTRY", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
+        { capabilityId: "IDE-170-TEST-PROCEDURE-PARSER", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-VALIDATION-AUTOMATION", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false },
+        { capabilityId: "IDE-170-VALIDATION-EVIDENCE-PACKAGE", minimumVersion: INTERNAL_MINIMUM_VERSION, optional: false }
       ],
-      schemas: ["IDE-170-SCHEMA-VALIDATION-RUN", "IDE-170-SCHEMA-CASE-RESULT"],
-      provides: ["Automated Test Runner", "Expected Result Comparator", "Manual Confirmation", "Progress", "Cancellation"],
-      source: "Architecture Decision 011"
+      schemas: ["IDE-170-SCHEMA-VALIDATION-DATASET-CANDIDATE", "IDE-170-SCHEMA-OWNER-SELECTION"],
+      provides: ["Validation Compiler", "Warning Selectable", "Owner Selection", "Common Validation Launcher", "Imported Procedure Runner"],
+      source: "Architecture Decision 011 v1.1.0"
     });
   }
 
-  function registerBuiltInTargets() {
-    const results = [];
-    function add(definition, implementation) {
-      if (state.validationTargets.has(definition.targetId)) {
-        results.push({ targetId: definition.targetId, registered: true, existing: true });
-        return;
-      }
-      const result = registerValidationTarget(definition, implementation);
-      results.push({ targetId: definition.targetId, registered: result.ok === true, code: result.code });
-    }
-    add({ targetId: "IDE-170-TARGET-SHA256", name: "SHA-256", executionTypes: ["Function"] }, function sha256Target(input) {
-      const args = Array.isArray(input.arguments) ? input.arguments : [input.value];
-      return namespace.calculateSHA256(args[0]);
-    });
-    add({ targetId: "IDE-170-TARGET-IDE160-STATUS", name: "IDE-160 Status", executionTypes: ["Status Probe", "Regression Probe"] }, function ide160Target() {
-      if (typeof global.getAIDevelopmentWorkflowStatus !== "function") {
-        return { available: false, ready: false, status: "Unavailable" };
-      }
-      return global.getAIDevelopmentWorkflowStatus();
-    });
-    add({ targetId: "IDE-170-TARGET-PROJECT-ZIP-API", name: "Project ZIP API", executionTypes: ["Regression Probe"] }, function projectZipApiTarget() {
-      return {
-        saveProjectPackage: typeof global.saveProjectPackage,
-        buildProjectIndexFromStaticManifest: typeof global.buildProjectIndexFromStaticManifest
-      };
-    });
-    add({ targetId: "IDE-170-TARGET-STATIC-MANIFEST", name: "Static Script Manifest", executionTypes: ["Async Function", "Regression Probe"] }, async function staticManifestTarget() {
-      if (typeof global.__IDE170_STATIC_MANIFEST_FIXTURE__ === "object") {
-        const fixture = global.__IDE170_STATIC_MANIFEST_FIXTURE__;
-        const scripts = Array.isArray(fixture.scripts) ? fixture.scripts : [];
-        return {
-          valid: true,
-          version: fixture.version,
-          scriptCount: scripts.length,
-          includesDatasetRegistry: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_dataset_registry.js"); }),
-          includesAutomation: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_automation.js"); }),
-          includesEvidence: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_evidence.js"); }),
-          includesProcedureIntake: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_intake.js"); }),
-          includesProcedureParser: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_parser.js"); }),
-          includesValidationCompiler: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_compiler.js"); }),
-          includesProcedureUI: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_ui.js"); }),
-          includesTerminologyRegistry: scripts.some(function has(item) { return String(item).includes("13_intelligence_terminology_registry.js"); }),
-          includesQueryInterpreter: scripts.some(function has(item) { return String(item).includes("13_intelligence_query_interpreter.js"); }),
-          includesQueryEngine: scripts.some(function has(item) { return String(item).includes("13_intelligence_query_engine.js"); })
-        };
-      }
-      const source = typeof global.AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE === "string"
-        ? global.AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE
-        : "./00_script_manifest.json";
-      const response = await global.fetch(source, { cache: "no-store" });
-      if (!response.ok) throw Object.assign(new Error("Static Script Manifest fetch failed."), { code: "STATIC_MANIFEST_FETCH_FAILED" });
-      const manifest = await response.json();
-      const scripts = Array.isArray(manifest.scripts) ? manifest.scripts : [];
-      return {
-        valid: Boolean(manifest && manifest.version && scripts.length),
-        version: manifest.version,
-        scriptCount: scripts.length,
-        includesDatasetRegistry: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_dataset_registry.js"); }),
-        includesAutomation: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_automation.js"); }),
-        includesEvidence: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_evidence.js"); }),
-        includesProcedureIntake: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_intake.js"); }),
-        includesProcedureParser: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_parser.js"); }),
-        includesValidationCompiler: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_compiler.js"); }),
-        includesProcedureUI: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_ui.js"); })
-      };
-    });
-    add({ targetId: "IDE-170-TARGET-ECHO", name: "Echo", executionTypes: ["Function"] }, function echoTarget(input) {
-      return Object.prototype.hasOwnProperty.call(input, "value") ? internal.clone(input.value) : internal.clone(input);
-    });
-    add({ targetId: "IDE-170-TARGET-ASYNC-ECHO", name: "Async Echo", executionTypes: ["Async Function"] }, async function asyncEchoTarget(input) {
-      await Promise.resolve();
-      return Object.prototype.hasOwnProperty.call(input, "value") ? internal.clone(input.value) : internal.clone(input);
-    });
-    return results;
-  }
-
-  function initializeValidationAutomation() {
-    const schemaResults = registerAutomationSchemas();
-    const capabilityResult = registerAutomationCapability();
-    const targetResults = registerBuiltInTargets();
-    const ready = schemaResults.every(function readySchema(item) { return item.registered; }) &&
-      capabilityResult.ok === true && targetResults.every(function readyTarget(item) { return item.registered; });
+  function initializeValidationCompiler() {
+    const schemaResults = registerSchemas();
+    const capabilityResult = registerCapability();
+    const targetResults = registerCompilerTargets();
+    const ready = schemaResults.every(function item(result) { return result.registered; }) &&
+      capabilityResult.ok === true && targetResults.every(function item(result) { return result.registered; });
     return internal.buildResult(ready,
-      ready ? "VALIDATION_AUTOMATION_INITIALIZED" : "VALIDATION_AUTOMATION_INITIALIZATION_FAILED",
+      ready ? "VALIDATION_COMPILER_INITIALIZED" : "VALIDATION_COMPILER_INITIALIZATION_FAILED",
       ready ? "Ready" : "Blocked",
-      { schemaResults: schemaResults, capabilityResult: capabilityResult, targetResults: targetResults },
-      ready ? {} : { error: { message: "Validation Automation initialization failed.", category: "Initialization Failure" } }
+      { schemaResults: schemaResults, capabilityResult: capabilityResult, targetResults: targetResults }
     );
   }
 
-  function removeValidationRunForValidation(validationRunId) {
-    const id = internal.text(validationRunId, "");
-    const removed = state.validationRuns.delete(id);
-    if (state.latestValidationRunId === id) state.latestValidationRunId = null;
+  function removeValidationDatasetCandidateForValidation(candidateId) {
+    const id = internal.canonicalId(candidateId);
+    const record = state.validationDatasetCandidates.get(id);
+    if (record && record.approvedDatasetId && internal.removeTestDatasetForValidation) {
+      internal.removeTestDatasetForValidation(record.approvedDatasetId);
+    }
+    const removed = state.validationDatasetCandidates.delete(id);
+    if (state.latestValidationDatasetCandidateId === id) state.latestValidationDatasetCandidateId = null;
     return removed;
   }
 
-  function removeValidationTargetForValidation(targetId) {
-    return state.validationTargets.delete(internal.canonicalId(targetId));
-  }
-
   Object.assign(internal, {
-    validationRunStatuses: RUN_STATUSES,
-    validationCaseStatuses: CASE_STATUSES,
-    recalculateValidationRunSummary: recalculateRunSummary,
-    removeValidationRunForValidation: removeValidationRunForValidation,
-    removeValidationTargetForValidation: removeValidationTargetForValidation
+    executeOwnerApprovedProcedureCode: executeOwnerApprovedCode,
+    removeValidationDatasetCandidateForValidation: removeValidationDatasetCandidateForValidation
   });
+
   Object.assign(namespace.api, {
-    initializeValidationAutomation: initializeValidationAutomation,
-    registerValidationTarget: registerValidationTarget,
-    getValidationTarget: getValidationTarget,
-    listValidationTargets: listValidationTargets,
-    compareExpectedResult: compareExpectedResult,
-    runAutomatedValidation: runAutomatedValidation,
-    cancelAutomatedValidation: cancelAutomatedValidation,
-    getValidationRun: getValidationRun,
-    listValidationRuns: listValidationRuns,
-    addManualConfirmation: addManualConfirmation,
-    freezeValidationRun: freezeValidationRun
+    initializeValidationCompiler: initializeValidationCompiler,
+    compileTestProcedure: compileTestProcedure,
+    getValidationDatasetCandidate: getValidationDatasetCandidate,
+    listValidationDatasetCandidates: listValidationDatasetCandidates,
+    updateProcedureStepSelection: updateProcedureStepSelection,
+    approveValidationDatasetCandidate: approveValidationDatasetCandidate,
+    getProcedureExecutionPlan: getProcedureExecutionPlan,
+    runImportedTestProcedure: runImportedTestProcedure,
+    runCurrentPhaseValidation: runCurrentPhaseValidation,
+    runTestProcedureCompilerValidation: runTestProcedureCompilerValidation
   });
   Object.assign(namespace, {
-    registerValidationTarget: registerValidationTarget,
-    getValidationTarget: getValidationTarget,
-    listValidationTargets: listValidationTargets,
-    compareExpectedResult: compareExpectedResult,
-    runAutomatedValidation: runAutomatedValidation,
-    cancelAutomatedValidation: cancelAutomatedValidation,
-    getValidationRun: getValidationRun,
-    listValidationRuns: listValidationRuns,
-    addManualConfirmation: addManualConfirmation,
-    freezeValidationRun: freezeValidationRun
+    compileTestProcedure: compileTestProcedure,
+    getValidationDatasetCandidate: getValidationDatasetCandidate,
+    listValidationDatasetCandidates: listValidationDatasetCandidates,
+    updateProcedureStepSelection: updateProcedureStepSelection,
+    approveValidationDatasetCandidate: approveValidationDatasetCandidate,
+    getProcedureExecutionPlan: getProcedureExecutionPlan,
+    runImportedTestProcedure: runImportedTestProcedure,
+    runCurrentPhaseValidation: runCurrentPhaseValidation,
+    runTestProcedureCompilerValidation: runTestProcedureCompilerValidation
   });
 
-  namespace.modules.validationAutomation = {
+  namespace.modules.validationCompiler = {
     id: CAPABILITY_ID,
     version: MODULE_VERSION,
     status: "Ready",
-    deterministicRunner: true,
-    expectedResultComparator: true,
-    caseIsolation: true,
-    retry: true,
-    timeout: true,
-    progress: true,
-    cancellation: true,
+    datasetCandidate: true,
+    ownerSelection: true,
+    warningSelectable: true,
+    prohibitedSelectionAllowed: false,
+    commonValidationLauncher: true,
     automaticStartupExecution: false,
     loadedAt: internal.nowIso()
   };
 
-  global.runIntelligenceAutomatedValidation = runAutomatedValidation;
-  global.compareIntelligenceExpectedResult = compareExpectedResult;
+  global.runIntelligenceCurrentPhaseValidation = runCurrentPhaseValidation;
+  global.validateIntelligenceTestProcedureCompiler = runTestProcedureCompilerValidation;
 })(typeof window !== "undefined" ? window : globalThis);
