@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_version_validation.js
    IDE-170 Intelligence Platform
-   Release: 1.6.1 / Module: 1.0.0
+   Release: Version Manifest / Module: 1.0.0
    Purpose: Independent Version Architecture and Static Manifest Integrity Validation
    Architecture Decision: IDE-170-012
    ============================================================ */
@@ -115,12 +115,12 @@
   function validateRuntimeVersionContract(checks) {
     addCheck(checks, "Version Manifest exists", Boolean(VERSION_MANIFEST), VERSION_MANIFEST.versionArchitecture, "Contract", "Critical");
     addCheck(checks, "Version Architecture is independent-version-v1", VERSION_MANIFEST.versionArchitecture === "independent-version-v1", VERSION_MANIFEST.versionArchitecture, "Contract", "Critical");
-    addCheck(checks, "Release Version is v1.6.1", RELEASE_VERSION === "1.6.1", RELEASE_VERSION, "Contract", "High");
+    addCheck(checks, "Release Version is valid SemVer", /^\d+\.\d+\.\d+$/.test(RELEASE_VERSION) && VERSION_MANIFEST.release.version === RELEASE_VERSION, RELEASE_VERSION, "Contract", "High");
     addCheck(checks, "Public IDE-170 version exposes Release Version", namespace.version === RELEASE_VERSION, namespace.version, "Release", "Critical");
     addCheck(checks, "Core status exposes Release Version", namespace.getStatus && namespace.getStatus().version === RELEASE_VERSION, namespace.getStatus && namespace.getStatus().version, "Release", "Critical");
 
     const moduleEntries = Object.entries(VERSION_MANIFEST.moduleVersions || {});
-    addCheck(checks, "Module Version baseline is populated", moduleEntries.length >= 23, moduleEntries.length, "Module", "High");
+    addCheck(checks, "Module Version contract covers all file modules", moduleEntries.length === Object.keys(VERSION_MANIFEST.fileModules || {}).length, moduleEntries.length + "/" + Object.keys(VERSION_MANIFEST.fileModules || {}).length, "Module", "High");
     moduleEntries.forEach(function checkModule(entry) {
       addCheck(checks, "Module Version valid: " + entry[0], /^\d+\.\d+\.\d+$/.test(String(entry[1] || "")), entry[1], "Module", "High");
     });
