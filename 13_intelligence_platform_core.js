@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_intelligence_platform_core.js
    IDE-170 Intelligence Platform
-   Release: 1.6.1 / Module: 1.0.0
-   Phase: Repository and Workflow Understanding
+   Release: Version Manifest / Module: 1.0.0
+   Phase: Insight, Query and Explanation
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
 (function (global) {
@@ -30,6 +30,7 @@
   const PHASE3_RELEASE_FROZEN = true;
   const PROCEDURE_COMPILER_RELEASE_FROZEN = true;
   const PHASE4_RELEASE_FROZEN = true;
+  const PHASE5_RELEASE_FROZEN = true;
   const MAX_SESSIONS = 100;
   const MAX_AUDIT_RECORDS = 1000;
 
@@ -79,6 +80,10 @@
         relationshipTypes: new Map(),
         evidenceGraphSnapshots: new Map(),
         understandingResults: new Map(),
+        terminologyRecords: new Map(),
+        typedQueries: new Map(),
+        queryResults: new Map(),
+        explainableEnvelopes: new Map(),
         latestSourceIntakeId: null,
         latestCanonicalSnapshotId: null,
         latestRepositorySnapshotId: null,
@@ -91,11 +96,15 @@
         latestValidationDatasetCandidateId: null,
         latestEvidenceGraphSnapshotId: null,
         latestUnderstandingResultId: null,
+        latestTypedQueryId: null,
+        latestQueryResultId: null,
+        latestExplainableEnvelopeId: null,
         activeImportedProcedureDatasetId: null,
         lastAutomationValidation: null,
         lastProcedureValidation: null,
         lastEvidenceGraphValidation: null,
         lastUnderstandingValidation: null,
+        lastQueryValidation: null,
         audits: [],
         sequence: 0,
         initialized: false,
@@ -130,6 +139,10 @@
   if (!(state.relationshipTypes instanceof Map)) state.relationshipTypes = new Map();
   if (!(state.evidenceGraphSnapshots instanceof Map)) state.evidenceGraphSnapshots = new Map();
   if (!(state.understandingResults instanceof Map)) state.understandingResults = new Map();
+  if (!(state.terminologyRecords instanceof Map)) state.terminologyRecords = new Map();
+  if (!(state.typedQueries instanceof Map)) state.typedQueries = new Map();
+  if (!(state.queryResults instanceof Map)) state.queryResults = new Map();
+  if (!(state.explainableEnvelopes instanceof Map)) state.explainableEnvelopes = new Map();
   if (!Array.isArray(state.audits)) state.audits = [];
   if (!Object.prototype.hasOwnProperty.call(state, "latestSourceIntakeId")) state.latestSourceIntakeId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestCanonicalSnapshotId")) state.latestCanonicalSnapshotId = null;
@@ -143,11 +156,15 @@
   if (!Object.prototype.hasOwnProperty.call(state, "latestValidationDatasetCandidateId")) state.latestValidationDatasetCandidateId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestEvidenceGraphSnapshotId")) state.latestEvidenceGraphSnapshotId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestUnderstandingResultId")) state.latestUnderstandingResultId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestTypedQueryId")) state.latestTypedQueryId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestQueryResultId")) state.latestQueryResultId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestExplainableEnvelopeId")) state.latestExplainableEnvelopeId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "activeImportedProcedureDatasetId")) state.activeImportedProcedureDatasetId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastAutomationValidation")) state.lastAutomationValidation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastProcedureValidation")) state.lastProcedureValidation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastEvidenceGraphValidation")) state.lastEvidenceGraphValidation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastUnderstandingValidation")) state.lastUnderstandingValidation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastQueryValidation")) state.lastQueryValidation = null;
 
   function nowIso() {
     return new Date().toISOString();
@@ -620,6 +637,9 @@
       repositoryUnderstanding: Boolean(namespace.modules && namespace.modules.repositoryUnderstanding),
       workflowUnderstanding: Boolean(namespace.modules && namespace.modules.workflowUnderstanding),
       understandingPipeline: Boolean(namespace.modules && namespace.modules.understandingPipeline),
+      terminologyRegistry: Boolean(namespace.modules && namespace.modules.terminologyRegistry),
+      queryInterpreter: Boolean(namespace.modules && namespace.modules.queryInterpreter),
+      queryEngine: Boolean(namespace.modules && namespace.modules.queryEngine),
       testDatasetRegistry: Boolean(namespace.modules && namespace.modules.testDatasetRegistry),
       validationAutomation: Boolean(namespace.modules && namespace.modules.validationAutomation),
       validationEvidence: Boolean(namespace.modules && namespace.modules.validationEvidence),
@@ -668,15 +688,15 @@
         results.ideRegistry = global.registerIdeComponent({
           id: COMPONENT_ID,
           title: COMPONENT_NAME,
-          summary: "IDE-170 Intelligence Platform。Phase 5 Understanding完了後、v1.6.1で独立Version ArchitectureとContent Hash Integrityへ移行。",
+          summary: "IDE-170 Intelligence Platform。Phase 6で日本語Typed QueryとEvidence付きExplanationを提供。",
           icon: "🧠",
           version: RELEASE_VERSION,
-          status: "v1.6.1 Version Architecture",
+          status: "Phase 6 Query and Explanation",
           ready: state.initialized === true,
-          progress: 62.5,
-          health: state.lastUnderstandingValidation && Number(state.lastUnderstandingValidation.health) || state.lastValidation && Number(state.lastValidation.health) || 0,
+          progress: 75,
+          health: state.lastQueryValidation && Number(state.lastQueryValidation.health) || state.lastUnderstandingValidation && Number(state.lastUnderstandingValidation.health) || state.lastValidation && Number(state.lastValidation.health) || 0,
           launcher: "openIntelligenceTestProcedureConsole",
-          validator: "validateIntelligenceUnderstanding",
+          validator: "validateIntelligenceQueryExplanation",
           probe: "getIntelligencePlatformStatus",
           category: "Intelligence"
         }) === true;
@@ -744,6 +764,9 @@
           !dependencyStatus.required.repositoryUnderstanding ||
           !dependencyStatus.required.workflowUnderstanding ||
           !dependencyStatus.required.understandingPipeline ||
+          !dependencyStatus.required.terminologyRegistry ||
+          !dependencyStatus.required.queryInterpreter ||
+          !dependencyStatus.required.queryEngine ||
           !dependencyStatus.required.testDatasetRegistry ||
           !dependencyStatus.required.validationAutomation ||
           !dependencyStatus.required.validationEvidence ||
@@ -757,7 +780,7 @@
         return buildResult(false, "IDE170_DEPENDENCY_MISSING", "Blocked", {
           dependencies: dependencyStatus
         }, {
-          error: { message: "IDE-170 v1.6.1 required modules are not fully loaded.", category: "Dependency Failure" }
+          error: { message: "IDE-170 Phase 6 required modules are not fully loaded.", category: "Dependency Failure" }
         });
       }
 
@@ -831,6 +854,16 @@
         if (!understandingPipelineResult.ok) throw new Error("Understanding Pipeline initialization failed.");
       }
 
+      if (namespace.api && typeof namespace.api.initializeTerminologyRegistry === "function") {
+        const terminologyResult = namespace.api.initializeTerminologyRegistry();
+        if (!terminologyResult.ok) throw new Error("Terminology Registry initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeQueryInterpreter === "function") {
+        const queryInterpreterResult = namespace.api.initializeQueryInterpreter();
+        if (!queryInterpreterResult.ok) throw new Error("Query Interpreter initialization failed.");
+      }
+
       if (namespace.api && typeof namespace.api.initializeTestDatasetRegistry === "function") {
         const datasetRegistryResult = namespace.api.initializeTestDatasetRegistry();
         if (!datasetRegistryResult.ok) throw new Error("Test Dataset Registry initialization failed.");
@@ -839,6 +872,11 @@
       if (namespace.api && typeof namespace.api.initializeValidationAutomation === "function") {
         const automationResult = namespace.api.initializeValidationAutomation();
         if (!automationResult.ok) throw new Error("Validation Automation initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeQueryEngine === "function") {
+        const queryEngineResult = namespace.api.initializeQueryEngine();
+        if (!queryEngineResult.ok) throw new Error("Query Engine initialization failed.");
       }
 
       if (namespace.api && typeof namespace.api.initializeValidationEvidence === "function") {
@@ -904,69 +942,43 @@
   }
 
   function getReleaseStatus() {
-    const understandingValidation = state.lastUnderstandingValidation;
     const dependencyStatus = getDependencyStatus();
-    const androidValidation = understandingValidation && understandingValidation.androidRealDeviceValidation;
+    const queryValidation = state.lastQueryValidation;
+    const androidValidation = queryValidation && queryValidation.androidRealDeviceValidation;
     const androidPassed = Boolean(androidValidation && androidValidation.passed === true);
-    const codePassed = Boolean(
-      understandingValidation && understandingValidation.valid === true && understandingValidation.failed === 0
-    );
+    const queryCodePassed = Boolean(queryValidation && queryValidation.valid === true && queryValidation.failed === 0);
     const versionValidation = state.lastVersionArchitectureValidation;
     const versionArchitecturePassed = Boolean(
-      versionValidation &&
-      versionValidation.valid === true &&
-      versionValidation.failed === 0 &&
-      versionValidation.staticManifestValidated === true &&
-      versionValidation.fullScriptHashValidated === true &&
+      versionValidation && versionValidation.valid === true && versionValidation.failed === 0 &&
+      versionValidation.staticManifestValidated === true && versionValidation.fullScriptHashValidated === true &&
       versionValidation.releaseGateAllowed === true
     );
     const releaseReady = Boolean(
-      state.initialized &&
-      dependencyStatus.requiredReady &&
-      PHASE3_RELEASE_FROZEN &&
-      PROCEDURE_COMPILER_RELEASE_FROZEN &&
-      PHASE4_RELEASE_FROZEN &&
-      codePassed &&
-      androidPassed &&
-      versionArchitecturePassed
+      state.initialized && dependencyStatus.requiredReady && PHASE5_RELEASE_FROZEN &&
+      queryCodePassed && androidPassed && versionArchitecturePassed
     );
-
     return {
-      componentId: COMPONENT_ID,
-      version: RELEASE_VERSION,
-      phase: IMPLEMENTATION_PHASE,
-      releaseStatus: releaseReady
-        ? "v1.6.1 Version Architecture Ready"
-        : codePassed && androidPassed && !versionArchitecturePassed
-          ? "Conditional - v1.6.1 Version Architecture Validation Pending"
-          : codePassed && !androidPassed
-            ? "Conditional - Phase 5 Android Validation Pending"
-            : understandingValidation
-              ? "Blocked"
-              : "Phase 5 Validation Not Run",
+      componentId: COMPONENT_ID, version: RELEASE_VERSION, phase: IMPLEMENTATION_PHASE,
+      releaseStatus: releaseReady ? "Phase 6 Query and Explanation Ready"
+        : queryCodePassed && androidPassed && !versionArchitecturePassed ? "Conditional - Phase 6 Static Integrity Validation Pending"
+        : queryCodePassed && !androidPassed ? "Conditional - Phase 6 Android Validation Pending"
+        : queryValidation ? "Blocked" : "Phase 6 Validation Not Run",
       releaseAllowed: releaseReady,
-      validationStatus: understandingValidation ? understandingValidation.status : "Not Run",
-      health: understandingValidation && Number.isFinite(Number(understandingValidation.health))
-        ? Number(understandingValidation.health)
-        : null,
+      validationStatus: queryValidation ? queryValidation.status : "Not Run",
+      health: queryValidation && Number.isFinite(Number(queryValidation.health)) ? Number(queryValidation.health) : null,
       independentValidationRequired: true,
-      understandingCodeValidationPassed: codePassed,
+      queryCodeValidationPassed: queryCodePassed,
       androidRealDevicePassed: androidPassed,
       versionArchitecture: VERSION_MANIFEST.versionArchitecture,
       versionArchitectureValidationStatus: versionValidation ? versionValidation.status : "Not Run",
       versionArchitectureHealth: versionValidation ? versionValidation.health : null,
       versionArchitecturePassed: versionArchitecturePassed,
-      phase1ReleaseFrozen: PHASE1_RELEASE_FROZEN,
-      phase2ReleaseFrozen: PHASE2_RELEASE_FROZEN,
-      phase3ReleaseFrozen: PHASE3_RELEASE_FROZEN,
-      procedureCompilerReleaseFrozen: PROCEDURE_COMPILER_RELEASE_FROZEN,
-      phase4ReleaseFrozen: PHASE4_RELEASE_FROZEN,
-      phase2Allowed: PHASE1_RELEASE_FROZEN,
-      phase3Allowed: PHASE2_RELEASE_FROZEN,
-      phase4Allowed: PROCEDURE_COMPILER_RELEASE_FROZEN,
-      phase5Allowed: PHASE4_RELEASE_FROZEN,
-      phase6Allowed: releaseReady,
-      checkedAt: nowIso()
+      phase1ReleaseFrozen: PHASE1_RELEASE_FROZEN, phase2ReleaseFrozen: PHASE2_RELEASE_FROZEN,
+      phase3ReleaseFrozen: PHASE3_RELEASE_FROZEN, procedureCompilerReleaseFrozen: PROCEDURE_COMPILER_RELEASE_FROZEN,
+      phase4ReleaseFrozen: PHASE4_RELEASE_FROZEN, phase5ReleaseFrozen: PHASE5_RELEASE_FROZEN,
+      phase2Allowed: PHASE1_RELEASE_FROZEN, phase3Allowed: PHASE2_RELEASE_FROZEN,
+      phase4Allowed: PROCEDURE_COMPILER_RELEASE_FROZEN, phase5Allowed: PHASE4_RELEASE_FROZEN,
+      phase6Allowed: PHASE5_RELEASE_FROZEN, phase7Allowed: releaseReady, checkedAt: nowIso()
     };
   }
 
@@ -986,7 +998,7 @@
       designFreezeVersion: DESIGN_FREEZE_VERSION,
       implementationPhase: IMPLEMENTATION_PHASE,
       implementationStatus: state.initialized
-        ? "v1.6.1 Version Architecture Refactoring Implemented"
+        ? "Phase 6 Insight, Query and Explanation Implemented"
         : "Loaded",
       status: state.lastError
         ? "Degraded"
@@ -996,12 +1008,13 @@
       ready: Boolean(state.initialized && dependencies.requiredReady && !state.lastError),
       available: true,
       initialized: state.initialized === true,
-      progress: 62.5,
+      progress: 75,
       phaseProgress: state.initialized ? 100 : 50,
       validationAutomationFoundationProgress: 100,
       testProcedureCompilerProgress: 100,
       evidenceGraphProgress: 100,
-      understandingProgress: state.initialized ? 100 : 0,
+      understandingProgress: 100,
+      queryExplanationProgress: state.initialized ? 100 : 0,
       modules: clone(dependencies.required),
       capabilityCount: state.capabilities.size,
       schemaCount: state.schemas.size,
@@ -1023,6 +1036,10 @@
       relationshipTypeCount: state.relationshipTypes.size,
       evidenceGraphCount: state.evidenceGraphSnapshots.size,
       understandingResultCount: state.understandingResults.size,
+      terminologyCount: state.terminologyRecords.size,
+      typedQueryCount: state.typedQueries.size,
+      queryResultCount: state.queryResults.size,
+      explainableEnvelopeCount: state.explainableEnvelopes.size,
       latestTestDatasetId: state.latestTestDatasetId,
       latestValidationRunId: state.latestValidationRunId,
       latestValidationEvidencePackageId: state.latestValidationEvidencePackageId,
@@ -1031,6 +1048,9 @@
       latestValidationDatasetCandidateId: state.latestValidationDatasetCandidateId,
       latestEvidenceGraphSnapshotId: state.latestEvidenceGraphSnapshotId,
       latestUnderstandingResultId: state.latestUnderstandingResultId,
+      latestTypedQueryId: state.latestTypedQueryId,
+      latestQueryResultId: state.latestQueryResultId,
+      latestExplainableEnvelopeId: state.latestExplainableEnvelopeId,
       activeImportedProcedureDatasetId: state.activeImportedProcedureDatasetId,
       automationValidationStatus: state.lastAutomationValidation
         ? state.lastAutomationValidation.status
@@ -1074,8 +1094,10 @@
       phase4Started: true,
       phase4Complete: PHASE4_RELEASE_FROZEN,
       phase5Started: true,
-      phase5Complete: state.initialized === true && dependencies.requiredReady,
-      phase6Started: false,
+      phase5Complete: PHASE5_RELEASE_FROZEN,
+      phase6Started: true,
+      phase6Complete: state.initialized === true && dependencies.required.terminologyRegistry && dependencies.required.queryInterpreter && dependencies.required.queryEngine,
+      phase7Started: false,
       lastError: clone(state.lastError),
       updatedAt: state.updatedAt || nowIso()
     };
@@ -1119,6 +1141,7 @@
     PHASE3_RELEASE_FROZEN: PHASE3_RELEASE_FROZEN,
     PROCEDURE_COMPILER_RELEASE_FROZEN: PROCEDURE_COMPILER_RELEASE_FROZEN,
     PHASE4_RELEASE_FROZEN: PHASE4_RELEASE_FROZEN,
+    PHASE5_RELEASE_FROZEN: PHASE5_RELEASE_FROZEN,
     SESSION_STATES: SESSION_STATES,
     SESSION_TRANSITIONS: SESSION_TRANSITIONS
   });
