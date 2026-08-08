@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_source_adapters_repository.js
    IDE-170 Intelligence Platform
-   Release: 1.6.1 / Module: 1.0.0
+   Release: Version Manifest / Module: 1.0.0
    Phase: 2 Source Intake - Repository Source Adapters
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
