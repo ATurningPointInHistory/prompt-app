@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation.js
    IDE-170 Intelligence Platform
-   Release: 1.6.1 / Module: 1.0.0
+   Release: Version Manifest / Module: 1.0.0
    Phase: 4 Evidence Graph - Independent Validation Gate
    ============================================================ */
 (function (global) {
@@ -186,7 +186,7 @@
 
       const dependencyStatus = namespace.getDependencyStatus();
       check(
-        "Required Phase 4 Evidence Graph modules are loaded",
+        "Required Phase 6 Query and Explanation modules are loaded",
         dependencyStatus.requiredReady === true,
         JSON.stringify(dependencyStatus.required),
         "Foundation"
@@ -239,6 +239,14 @@
           "validateEvidenceGraph",
           "getRelationshipPath",
           "runEvidenceGraphPhaseValidation",
+          "normalizeJapaneseQuery",
+          "resolveTerminology",
+          "interpretQuery",
+          "executeQuery",
+          "getTypedQuery",
+          "getQueryResult",
+          "getExplainableEnvelope",
+          "runQueryPhaseValidation",
           "importTestProcedure",
           "parseTestProcedure",
           "compileTestProcedure",
@@ -253,7 +261,7 @@
         ].every(function hasApi(apiName) {
           return typeof namespace[apiName] === "function";
         }),
-        "Phase 1-4 and Decision 011 v1.1.0 APIs",
+        "Phase 1-6 and Decision 011 APIs",
         "Foundation"
       );
 
@@ -615,27 +623,28 @@
         "Status and Release"
       );
       check(
-        "Phase 5 Repository and Workflow Understanding is implemented",
+        "Phase 6 Insight, Query and Explanation is implemented",
         status.phase4Started === true &&
           status.phase4Complete === true &&
           status.phase5Started === true &&
           status.phase5Complete === true &&
-          status.phase6Started === false &&
-          status.progress === 62.5,
+          status.phase6Started === true &&
+          status.phase6Complete === true &&
+          status.progress === 75 &&
+          status.queryExplanationProgress === 100,
         JSON.stringify({
-          phase4Started: status.phase4Started,
-          phase4Complete: status.phase4Complete,
-          phase5Started: status.phase5Started,
           phase5Complete: status.phase5Complete,
           phase6Started: status.phase6Started,
+          phase6Complete: status.phase6Complete,
+          queryExplanationProgress: status.queryExplanationProgress,
           progress: status.progress
         }),
         "Status and Release"
       );
       check(
-        "Phase 6 remains not started",
-        status.phase6Started === false,
-        String(status.phase6Started),
+        "Phase 7 remains not started",
+        status.phase7Started === false,
+        String(status.phase7Started),
         "Status and Release"
       );
       check(
