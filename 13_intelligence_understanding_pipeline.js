@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_understanding_pipeline.js
    IDE-170 Intelligence Platform
-   Release: 1.6.1 / Module: 1.0.0
+   Release: Version Manifest / Module: 1.0.0
    Phase: 5 Repository and Workflow Understanding
    Design Freeze: v1.0.0 / Decision 006
    ============================================================ */
