@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_test_dataset_registry.js
    IDE-170 Intelligence Platform
-   Release: 1.6.1 / Module: 1.0.0
+   Release: Version Manifest / Module: 1.0.0
    Architecture Decision: 011
    Phase: Validation Automation Foundation (Pre-Phase 4)
    ============================================================ */
@@ -539,14 +539,16 @@
             value: {
               valid: true,
               version: RELEASE_VERSION,
-              scriptCount: 142,
               includesDatasetRegistry: true,
               includesAutomation: true,
               includesEvidence: true,
               includesProcedureIntake: true,
               includesProcedureParser: true,
               includesValidationCompiler: true,
-              includesProcedureUI: true
+              includesProcedureUI: true,
+              includesTerminologyRegistry: true,
+              includesQueryInterpreter: true,
+              includesQueryEngine: true
             }
           }
         },
