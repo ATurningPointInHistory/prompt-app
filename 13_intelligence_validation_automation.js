@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_validation_automation.js
    IDE-170 Intelligence Platform
-   Release: 1.6.1 / Module: 1.0.0
+   Release: Version Manifest / Module: 1.0.0
    Architecture Decision: 011
    Phase: Validation Automation Foundation (Pre-Phase 4)
    ============================================================ */
@@ -893,7 +893,10 @@
           includesProcedureIntake: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_intake.js"); }),
           includesProcedureParser: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_parser.js"); }),
           includesValidationCompiler: scripts.some(function has(item) { return String(item).includes("13_intelligence_validation_compiler.js"); }),
-          includesProcedureUI: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_ui.js"); })
+          includesProcedureUI: scripts.some(function has(item) { return String(item).includes("13_intelligence_test_procedure_ui.js"); }),
+          includesTerminologyRegistry: scripts.some(function has(item) { return String(item).includes("13_intelligence_terminology_registry.js"); }),
+          includesQueryInterpreter: scripts.some(function has(item) { return String(item).includes("13_intelligence_query_interpreter.js"); }),
+          includesQueryEngine: scripts.some(function has(item) { return String(item).includes("13_intelligence_query_engine.js"); })
         };
       }
       const source = typeof global.AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE === "string"
