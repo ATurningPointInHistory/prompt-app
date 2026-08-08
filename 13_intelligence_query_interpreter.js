@@ -119,6 +119,16 @@
     return internal.unique([id.canonicalId,id.name,id.qualifiedName].concat(id.aliases||[]));
   }
 
+  function preferredRecordTypes(input, queryType) {
+    const normalized=normalizeInput(input);
+    const preferred=[];
+    const hasFileExtension=/(?:^|[\s\/\\])[^\s]+\.(?:js|mjs|cjs|html?|css|json|md|txt|csv|tsv)(?:$|[\sのはをがと?？])/i.test(normalized) || /\.(?:js|mjs|cjs|html?|css|json|md|txt|csv|tsv)/i.test(normalized);
+    if(queryType==="member-list" || hasFileExtension || /ファイル/.test(normalized)) preferred.push("file");
+    if(/モジュール/.test(normalized)) preferred.push("module");
+    if(queryType!=="member-list" && !hasFileExtension && /関数/.test(normalized)) preferred.push("function");
+    return internal.unique(preferred);
+  }
+
   function resolveEntity(input, queryType, settings) {
     const normalized=normalizeInput(input);
     const pronoun=/(この関数|このファイル|この結果|これ|それ|対象)/.test(normalized);
@@ -149,8 +159,19 @@
       return {status:"Not Required",target:null,candidates:[],ambiguities:[],usedContext:false};
     }
     const top=matches[0];
-    const tied=matches.filter(function(x){return x.score===top.score && x.matchedTerm.toLowerCase()===top.matchedTerm.toLowerCase();});
-    if(tied.length>1){ return {status:"Ambiguous",target:null,candidates:tied,ambiguities:["Multiple Canonical Records match the same Entity expression."],usedContext:false}; }
+    let tied=matches.filter(function(x){return x.score===top.score && x.matchedTerm.toLowerCase()===top.matchedTerm.toLowerCase();});
+    if(tied.length>1){
+      const preferred=preferredRecordTypes(normalized,queryType);
+      for(let i=0;i<preferred.length;i+=1){
+        const typed=tied.filter(function(x){return x.recordType===preferred[i];});
+        if(typed.length===1){
+          const resolved=Object.assign({},typed[0],{resolutionSource:"canonical-snapshot-type-preference"});
+          return {status:"Resolved",target:resolved,candidates:matches.slice(0,10),ambiguities:[],usedContext:false};
+        }
+        if(typed.length>1){tied=typed;break;}
+      }
+      return {status:"Ambiguous",target:null,candidates:tied,ambiguities:["Multiple Canonical Records match the same Entity expression."],usedContext:false};
+    }
     return {status:"Resolved",target:top,candidates:matches.slice(0,10),ambiguities:[],usedContext:false};
   }
 
