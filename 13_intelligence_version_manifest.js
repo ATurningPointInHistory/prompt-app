@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_version_manifest.js
    IDE-170 Intelligence Platform
-   Release: 1.6.1
+   Release: 1.7.0
    Module: 1.0.0
    Purpose: Independent Version Architecture Contract
    Architecture Decision: IDE-170-012
@@ -9,7 +9,7 @@
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.6.1";
+  const RELEASE_VERSION = "1.7.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -35,6 +35,9 @@
     repositoryUnderstanding: BASELINE_VERSION,
     workflowUnderstanding: BASELINE_VERSION,
     understandingPipeline: BASELINE_VERSION,
+    terminologyRegistry: BASELINE_VERSION,
+    queryInterpreter: BASELINE_VERSION,
+    queryEngine: BASELINE_VERSION,
     testDatasetRegistry: BASELINE_VERSION,
     validationAutomation: BASELINE_VERSION,
     validationEvidence: BASELINE_VERSION,
@@ -61,6 +64,9 @@
     "13_intelligence_repository_understanding.js": "repositoryUnderstanding",
     "13_intelligence_workflow_understanding.js": "workflowUnderstanding",
     "13_intelligence_understanding_pipeline.js": "understandingPipeline",
+    "13_intelligence_terminology_registry.js": "terminologyRegistry",
+    "13_intelligence_query_interpreter.js": "queryInterpreter",
+    "13_intelligence_query_engine.js": "queryEngine",
     "13_intelligence_test_dataset_registry.js": "testDatasetRegistry",
     "13_intelligence_validation_automation.js": "validationAutomation",
     "13_intelligence_validation_evidence.js": "validationEvidence",
@@ -88,6 +94,9 @@
     repositoryUnderstanding: "repositoryUnderstanding",
     workflowUnderstanding: "workflowUnderstanding",
     understandingPipeline: "understandingPipeline",
+    terminologyRegistry: "terminologyRegistry",
+    queryInterpreter: "queryInterpreter",
+    queryEngine: "queryEngine",
     testDatasetRegistry: "testDatasetRegistry",
     validationAutomation: "validationAutomation",
     validationEvidence: "validationEvidence",
@@ -118,6 +127,9 @@
     "IDE-170-REPOSITORY-UNDERSTANDING",
     "IDE-170-WORKFLOW-UNDERSTANDING",
     "IDE-170-UNDERSTANDING-PIPELINE",
+    "IDE-170-TERMINOLOGY-REGISTRY",
+    "IDE-170-QUERY-INTERPRETER",
+    "IDE-170-QUERY-ENGINE",
     "IDE-170-TEST-DATASET-REGISTRY",
     "IDE-170-VALIDATION-AUTOMATION",
     "IDE-170-VALIDATION-EVIDENCE-PACKAGE",
@@ -174,7 +186,11 @@
     "IDE-170-SCHEMA-VALIDATION-RUN",
     "IDE-170-SCHEMA-CASE-RESULT",
     "IDE-170-SCHEMA-VALIDATION-EVIDENCE-MANIFEST",
-    "IDE-170-SCHEMA-UNDERSTANDING-RESULT"
+    "IDE-170-SCHEMA-UNDERSTANDING-RESULT",
+    "IDE-170-SCHEMA-TERMINOLOGY-RECORD",
+    "IDE-170-SCHEMA-TYPED-QUERY",
+    "IDE-170-SCHEMA-QUERY-RESULT",
+    "IDE-170-SCHEMA-EXPLAINABLE-INSIGHT-ENVELOPE"
   ];
 
   const schemaVersions = schemaIds.reduce(function buildSchemaMap(out, id) {
@@ -191,6 +207,9 @@
     relationshipEdge: BASELINE_VERSION,
     evidenceGraph: BASELINE_VERSION,
     understandingResult: BASELINE_VERSION,
+    typedQuery: BASELINE_VERSION,
+    queryResult: BASELINE_VERSION,
+    explainableInsightEnvelope: BASELINE_VERSION,
     validationRun: BASELINE_VERSION,
     caseResult: BASELINE_VERSION,
     validationEvidenceManifest: BASELINE_VERSION
@@ -203,6 +222,7 @@
     validationAutomationFoundation: BASELINE_VERSION,
     phase4EvidenceGraph: BASELINE_VERSION,
     phase5Understanding: BASELINE_VERSION,
+    phase6QueryExplanation: BASELINE_VERSION,
     versionArchitecture: BASELINE_VERSION
   };
 
@@ -212,10 +232,10 @@
     manifestContractVersion: BASELINE_VERSION,
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "v1.6.1 Version Architecture Refactoring",
+      implementationPhase: "Phase 6 Insight, Query and Explanation",
       designFreezeVersion: "1.0.0",
       architectureDecisionVersion: "1.0.0",
-      architectureDecisionId: "IDE-170-012"
+      architectureDecisionId: "IDE-170-007"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -235,7 +255,7 @@
       internalBaselineVersion: BASELINE_VERSION,
       minimumInternalCapabilityVersion: BASELINE_VERSION,
       legacyVersionArchitecture: "release-coupled-version",
-      migrationBoundaryRelease: RELEASE_VERSION
+      migrationBoundaryRelease: "1.6.1"
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
       const key = fileModules[moduleOrFile] || moduleOrFile;
