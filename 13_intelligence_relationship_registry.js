@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_relationship_registry.js
    IDE-170 Intelligence Platform
-   Release: 1.6.1 / Module: 1.0.0
+   Release: Version Manifest / Module: 1.0.0
    Phase: 4 Evidence Graph - Relationship Type Registry
    Design Freeze: v1.0.0 / Decision 005
    ============================================================ */
