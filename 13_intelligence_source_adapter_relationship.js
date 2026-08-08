@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_source_adapter_relationship.js
    IDE-170 Intelligence Platform
-   Release: 1.6.1 / Module: 1.0.0
+   Release: Version Manifest / Module: 1.0.0
    Phase: 4 Evidence Graph - Official Relationship Source Adapter
    ============================================================ */
 (function (global) {
