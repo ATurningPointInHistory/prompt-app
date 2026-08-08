@@ -1,11 +1,11 @@
 {
-  "version": "1.7.0",
+  "version": "1.7.1",
   "manifestSchemaVersion": "2.0.0",
-  "applicationReleaseVersion": "1.7.0",
+  "applicationReleaseVersion": "1.7.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "build-time-static-script-generation",
-  "description": "Static Script Manifest v2 for IDE-170 Phase 6 Insight, Query and Explanation with SHA-256 content integrity.",
-  "updatedAt": "2026-08-07T17:50:11Z",
+  "description": "Static Script Manifest v2 for IDE-170 Phase 6 Query Resolution and Missing-Information Hotfix with SHA-256 content integrity.",
+  "updatedAt": "2026-08-08T11:46:44Z",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
   "scripts": [
@@ -112,7 +112,7 @@
     "./13_ai_development_workflow_completion.js?h=2e9d1940c392",
     "./13_ai_development_workflow_integration.js?h=25c2843b9c2e",
     "./13_ai_development_workflow_validation.js?h=2d2f92af8a73",
-    "./13_intelligence_version_manifest.js?h=90a8f28603cf",
+    "./13_intelligence_version_manifest.js?h=85437d295451",
     "./13_intelligence_platform_core.js?h=de34a25a3439",
     "./13_intelligence_capability_registry.js?h=dc96c1b9eec1",
     "./13_intelligence_schema_registry.js?h=aad032898ce7",
@@ -128,8 +128,8 @@
     "./13_intelligence_workflow_understanding.js?h=257090ec83fb",
     "./13_intelligence_understanding_pipeline.js?h=85f5f963b509",
     "./13_intelligence_terminology_registry.js?h=bf45777bbc83",
-    "./13_intelligence_query_interpreter.js?h=e5217e5e4f02",
-    "./13_intelligence_query_engine.js?h=f7db5b3f9b0a",
+    "./13_intelligence_query_interpreter.js?h=5a2018ed5bbb",
+    "./13_intelligence_query_engine.js?h=82e06590f328",
     "./13_intelligence_test_dataset_registry.js?h=e8fb0d096646",
     "./13_intelligence_validation_automation.js?h=41198930fa60",
     "./13_intelligence_validation_evidence.js?h=f5c98466c3dc",
@@ -672,9 +672,9 @@
       "cacheKey": "2d2f92af8a73"
     },
     "13_intelligence_version_manifest.js": {
-      "sha256": "90a8f28603cf2f9a719d5d0b32748f2f6ae7c96efc2794fe3025b39c1666a799",
-      "byteSize": 10976,
-      "cacheKey": "90a8f28603cf"
+      "sha256": "85437d295451051deda65d6ea8f8d4b3c1ce15f806f3518ae3c4367c6a7034f5",
+      "byteSize": 11066,
+      "cacheKey": "85437d295451"
     },
     "13_intelligence_platform_core.js": {
       "sha256": "de34a25a3439a71103eac2b2ca4aedc4d8a3e8c8bef3d2ee206b0530be3368ed",
@@ -752,14 +752,14 @@
       "cacheKey": "bf45777bbc83"
     },
     "13_intelligence_query_interpreter.js": {
-      "sha256": "e5217e5e4f0217a1bf70dd631ba8e8d3bb9f8cf676fdf0f5668f580039be1032",
-      "byteSize": 19014,
-      "cacheKey": "e5217e5e4f02"
+      "sha256": "5a2018ed5bbb43a8362decd1455a74356dafd3288d9fa380993f017180289fc7",
+      "byteSize": 20208,
+      "cacheKey": "5a2018ed5bbb"
     },
     "13_intelligence_query_engine.js": {
-      "sha256": "f7db5b3f9b0a8720eaafe5d743d898a97cb25c8a966eda036084216f2ea66ec4",
-      "byteSize": 43918,
-      "cacheKey": "f7db5b3f9b0a"
+      "sha256": "82e06590f328f695467287e778c81dec484c625783376e509b60a32b09d03176",
+      "byteSize": 46454,
+      "cacheKey": "82e06590f328"
     },
     "13_intelligence_test_dataset_registry.js": {
       "sha256": "e8fb0d096646ba84de92534a26bdc046524dd6864658bc09099b685bf77c2e34",
@@ -882,6 +882,6 @@
       "cacheKey": "138e34ded106"
     }
   },
-  "scriptSetHash": "15908be39f928308ba348d3604e8a12760b7460543bf0ee0d28de2754b6228f6",
-  "manifestHash": "5b71f547ed1b4c738017d5a2fdaa0a4450e7b863d0497553ffa14bb4660910e7"
+  "scriptSetHash": "9907390daeb306f4ab61b54cd1f5ae482425452e6d24231784fcd648f3faed1c",
+  "manifestHash": "88ae4f39396597a03603ae9b984a6fe18273e12991d3d271b4c386ba86a3daa4"
 }
