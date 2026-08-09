@@ -9,7 +9,7 @@
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.8.0";
+  const RELEASE_VERSION = "1.9.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -21,7 +21,7 @@
   }
 
   const moduleVersions = {
-    platformCore: "1.1.0",
+    platformCore: "1.2.0",
     capabilityRegistry: BASELINE_VERSION,
     schemaRegistry: BASELINE_VERSION,
     sourceAdapter: BASELINE_VERSION,
@@ -49,7 +49,11 @@
     validationCompiler: BASELINE_VERSION,
     testProcedureUI: BASELINE_VERSION,
     versionValidation: "1.1.0",
-    validation: "1.1.0"
+    validation: "1.1.0",
+    packageModel: BASELINE_VERSION,
+    packageValidation: BASELINE_VERSION,
+    ide180Handoff: BASELINE_VERSION,
+    packageExport: BASELINE_VERSION
   };
 
   const fileModules = {
@@ -81,7 +85,11 @@
     "13_intelligence_validation_compiler.js": "validationCompiler",
     "13_intelligence_test_procedure_ui.js": "testProcedureUI",
     "13_intelligence_version_validation.js": "versionValidation",
-    "13_intelligence_validation.js": "validation"
+    "13_intelligence_validation.js": "validation",
+    "13_intelligence_package_model.js": "packageModel",
+    "13_intelligence_package_validation.js": "packageValidation",
+    "13_intelligence_ide180_handoff.js": "ide180Handoff",
+    "13_intelligence_package_export.js": "packageExport"
   };
 
 
@@ -114,7 +122,11 @@
     validationCompiler: "validationCompiler",
     testProcedureUI: "testProcedureUI",
     versionValidation: "versionValidation",
-    validation: "validation"
+    validation: "validation",
+    packageModel: "packageModel",
+    packageValidation: "packageValidation",
+    ide180Handoff: "ide180Handoff",
+    packageExport: "packageExport"
   };
 
   const capabilityIds = [
@@ -152,6 +164,11 @@
     "IDE-170-TEST-PROCEDURE-UI",
     "IDE-170-VERSION-VALIDATION",
     "IDE-170-VALIDATION",
+    "IDE-170-INTELLIGENCE-PACKAGE",
+    "IDE-170-PACKAGE-VALIDATION",
+    "IDE-170-IDE180-HANDOFF",
+    "IDE-170-PACKAGE-EXPORT",
+    "IDE-170-PACKAGE-STORAGE",
     "IDE-170-RULE-REPOSITORY-STRUCTURE",
     "IDE-170-RULE-DIRECT-DEPENDENCY",
     "IDE-170-RULE-REVERSE-DEPENDENCY",
@@ -176,7 +193,7 @@
   }, {});
   capabilityVersions["IDE-170-QUERY-INTERPRETER"] = "1.1.0";
   capabilityVersions["IDE-170-QUERY-ENGINE"] = "1.1.0";
-  capabilityVersions["IDE-170-CORE"] = "1.1.0";
+  capabilityVersions["IDE-170-CORE"] = "1.2.0";
   capabilityVersions["IDE-170-VERSION-VALIDATION"] = "1.1.0";
   capabilityVersions["IDE-170-VALIDATION"] = "1.1.0";
 
@@ -213,7 +230,12 @@
     "IDE-170-SCHEMA-CONFIDENCE-RESULT",
     "IDE-170-SCHEMA-QUALITY-RESULT",
     "IDE-170-SCHEMA-INDEPENDENT-VALIDATION-RESULT",
-    "IDE-170-SCHEMA-VALIDATION-GATE-RECEIPT"
+    "IDE-170-SCHEMA-VALIDATION-GATE-RECEIPT",
+    "IDE-170-SCHEMA-TYPED-ARTIFACT",
+    "IDE-170-SCHEMA-INTELLIGENCE-PACKAGE-MANIFEST",
+    "IDE-170-SCHEMA-INTELLIGENCE-PACKAGE",
+    "IDE-170-SCHEMA-IDE180-HANDOFF",
+    "IDE-170-SCHEMA-PACKAGE-RELEASE-RECEIPT"
   ];
 
   const schemaVersions = schemaIds.reduce(function buildSchemaMap(out, id) {
@@ -240,7 +262,46 @@
     validationGateReceipt: BASELINE_VERSION,
     validationRun: BASELINE_VERSION,
     caseResult: BASELINE_VERSION,
-    validationEvidenceManifest: BASELINE_VERSION
+    validationEvidenceManifest: BASELINE_VERSION,
+    "source-intake-summary": BASELINE_VERSION,
+    "source-status": BASELINE_VERSION,
+    "adapter-result": BASELINE_VERSION,
+    "canonical-snapshot": BASELINE_VERSION,
+    "repository-baseline": BASELINE_VERSION,
+    "repository-incremental": BASELINE_VERSION,
+    "snapshot-diff": BASELINE_VERSION,
+    "fact-relationship-graph": BASELINE_VERSION,
+    "candidate-relationship-graph": BASELINE_VERSION,
+    "evidence-index": BASELINE_VERSION,
+    "relationship-path": BASELINE_VERSION,
+    "repository-understanding": BASELINE_VERSION,
+    "workflow-understanding": BASELINE_VERSION,
+    "change-understanding": BASELINE_VERSION,
+    "relationship-understanding": BASELINE_VERSION,
+    "cross-domain-understanding": BASELINE_VERSION,
+    "repository-insight": BASELINE_VERSION,
+    "architecture-insight": BASELINE_VERSION,
+    "workflow-insight": BASELINE_VERSION,
+    "change-insight": BASELINE_VERSION,
+    "knowledge-insight": BASELINE_VERSION,
+    "typed-query": BASELINE_VERSION,
+    "query-result": BASELINE_VERSION,
+    "explainable-insight-envelope": BASELINE_VERSION,
+    "evidence-record": BASELINE_VERSION,
+    "source-reference": BASELINE_VERSION,
+    "rule-reference": BASELINE_VERSION,
+    "engine-reference": BASELINE_VERSION,
+    "confidence-result": BASELINE_VERSION,
+    "quality-result": BASELINE_VERSION,
+    "limitation-record": BASELINE_VERSION,
+    "artifact-validation": BASELINE_VERSION,
+    "package-validation": BASELINE_VERSION,
+    "completion-gate-result": BASELINE_VERSION,
+    "explanation-record": BASELINE_VERSION,
+    "confidence-explanation": BASELINE_VERSION,
+    "evidence-explanation": BASELINE_VERSION,
+    "limitation-explanation": BASELINE_VERSION,
+    "ide180-handoff-contract": BASELINE_VERSION
   };
 
   const datasetVersions = {
@@ -252,6 +313,7 @@
     phase5Understanding: BASELINE_VERSION,
     phase6QueryExplanation: "1.0.1",
     phase7ConfidenceValidation: BASELINE_VERSION,
+    phase8IntelligencePackage: BASELINE_VERSION,
     versionArchitecture: BASELINE_VERSION
   };
 
@@ -261,10 +323,10 @@
     manifestContractVersion: BASELINE_VERSION,
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 7 Confidence and Validation",
+      implementationPhase: "Phase 8 Intelligence Package",
       designFreezeVersion: "1.0.0",
       architectureDecisionVersion: "1.0.0",
-      architectureDecisionId: "IDE-170-008"
+      architectureDecisionId: "IDE-170-009"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -275,7 +337,11 @@
     datasetVersions: datasetVersions,
     contractVersions: {
       coreApi: BASELINE_VERSION,
-      staticScriptManifest: "2.0.0"
+      staticScriptManifest: "2.0.0",
+      intelligencePackage: BASELINE_VERSION,
+      intelligencePackageManifest: BASELINE_VERSION,
+      ide180Handoff: BASELINE_VERSION,
+      packageHash: BASELINE_VERSION
     },
     definitionVersions: {
       relationshipType: BASELINE_VERSION
@@ -284,7 +350,8 @@
       internalBaselineVersion: BASELINE_VERSION,
       minimumInternalCapabilityVersion: BASELINE_VERSION,
       legacyVersionArchitecture: "release-coupled-version",
-      migrationBoundaryRelease: "1.6.1"
+      migrationBoundaryRelease: "1.6.1",
+      minimumIDE180Version: "1.0.0"
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
       const key = fileModules[moduleOrFile] || moduleOrFile;
