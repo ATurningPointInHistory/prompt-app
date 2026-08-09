@@ -321,8 +321,12 @@
     const graphs = typeof namespace.getEvidenceGraphs === "function" ? namespace.getEvidenceGraphs({ sessionId: sessionId, limit: 100 }) : [];
     const understandings = typeof namespace.getUnderstandingResults === "function" ? namespace.getUnderstandingResults({ sessionId: sessionId, limit: 100 }) : [];
 
-    const sourceIntake = settings.sourceIntake || latestBySession(intakes, sessionId);
     const canonicalSnapshot = settings.canonicalSnapshot || latestBySession(canonicalSnapshots, sessionId);
+    const canonicalSourceIntakeId = canonicalSnapshot && internal.text(canonicalSnapshot.sourceIntakeId, "");
+    const canonicalSourceIntake = canonicalSourceIntakeId
+      ? intakes.find(function findCanonicalIntake(item) { return item && item.intakeId === canonicalSourceIntakeId; }) || null
+      : null;
+    const sourceIntake = settings.sourceIntake || canonicalSourceIntake || latestBySession(intakes, sessionId);
     const repositorySnapshot = settings.repositorySnapshot || latestBySession(repositorySnapshots, sessionId);
     const graph = settings.graph || latestBySession(graphs, sessionId);
     const understanding = settings.understanding || latestBySession(understandings, sessionId);
@@ -333,6 +337,14 @@
         code: "PACKAGE_REQUIRED_SOURCE_ARTIFACT_MISSING",
         status: "Blocked",
         error: "Source Intake, Canonical Snapshot, Repository Snapshot, Fact Graph and Understanding Result are required."
+      };
+    }
+    if (canonicalSourceIntakeId && sourceIntake.intakeId !== canonicalSourceIntakeId) {
+      return {
+        ok: false,
+        code: "PACKAGE_SOURCE_INTAKE_LINEAGE_MISMATCH",
+        status: "Blocked",
+        error: "Package Source Intake must match the Canonical Snapshot sourceIntakeId."
       };
     }
 
@@ -727,6 +739,16 @@
   function buildPackageFromResolvedContext(context, options) {
     const settings = internal.isPlainObject(options) ? options : {};
     if (!context || context.ok === false) return internal.buildResult(false, context && context.code || "PACKAGE_CONTEXT_INVALID", context && context.status || "Blocked", null, { error: { message: context && context.error || "Package context is invalid.", category: "Dependency Failure" } });
+    const expectedSourceIntakeId = context.canonicalSnapshot && internal.text(context.canonicalSnapshot.sourceIntakeId, "");
+    const actualSourceIntakeId = context.sourceIntake && internal.text(context.sourceIntake.intakeId, "");
+    if (expectedSourceIntakeId && expectedSourceIntakeId !== actualSourceIntakeId) {
+      return internal.buildResult(false, "PACKAGE_SOURCE_INTAKE_LINEAGE_MISMATCH", "Blocked", {
+        expectedSourceIntakeId: expectedSourceIntakeId,
+        actualSourceIntakeId: actualSourceIntakeId || null
+      }, {
+        error: { message: "Package Source Intake must match the Canonical Snapshot sourceIntakeId.", category: "Traceability Failure" }
+      });
+    }
     try {
       const draft = buildDraftFromContext(context, settings);
       if (typeof namespace.buildIDE180HandoffContract !== "function" || typeof namespace.evaluateIntelligencePackageCompletionGate !== "function" || typeof namespace.validateIntelligencePackageDraft !== "function" || typeof namespace.validateIntelligencePackage !== "function") {
