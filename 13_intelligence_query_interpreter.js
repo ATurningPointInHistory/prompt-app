@@ -1,9 +1,9 @@
 /* ============================================================
    FILE: 13_intelligence_query_interpreter.js
    IDE-170 Intelligence Platform
-   Release: Version Manifest / Module: 1.0.0
-   Phase 6: Domain-Specific Japanese Query Interpreter
-   Architecture Decision: IDE-170-007
+   Release: Version Manifest / Module: Version Manifest
+   Phase 7: Domain-Specific Japanese Query Interpreter with Interpretation Confidence Contract
+   Architecture Decision: IDE-170-007 / IDE-170-008
    ============================================================ */
 (function (global) {
   "use strict";
@@ -222,7 +222,7 @@
       originalInput:original, normalizedInput:normalized, language:"ja",
       target:entity.target,
       scope:buildScope(intent.queryType,settings),
-      requirements:{evidenceRequired:settings.evidenceRequired!==false,explanationRequired:settings.explanationRequired!==false,minimumConfidence:null,confidencePhase:"Deferred to Phase 7"},
+      requirements:{evidenceRequired:settings.evidenceRequired!==false,explanationRequired:settings.explanationRequired!==false,minimumConfidence:null,confidencePhase:"Phase 7 Active",interpretationConfidenceRequired:true},
       interpretation:{intent:intent.queryType,status:"Resolved",ambiguities:entity.ambiguities||[],intentCandidates:intent.candidates||[],alternativeIntents:intent.alternatives||[],aliasesUsed:terminology.matches||[],usedConversationContext:entity.usedContext===true},
       validation:null,status:"Validating",createdAt:now,frozenAt:null,immutable:false
     };
@@ -257,7 +257,7 @@
     namespace.modules.queryInterpreter.status=ready?"Ready":"Blocked";
     return internal.buildResult(ready,ready?"QUERY_INTERPRETER_INITIALIZED":"QUERY_INTERPRETER_INITIALIZATION_FAILED",ready?"Ready":"Blocked",{schemaResult:sr,capabilityResult:cr,queryTypeCount:Object.keys(QUERY_TYPES).length});
   }
-  function getQueryInterpreterStatus(){return{id:"IDE-170-QUERY-INTERPRETER-STATUS",version:MODULE_VERSION,capabilityVersion:CAPABILITY_VERSION,status:namespace.getCapability&&namespace.getCapability(CAPABILITY_ID)?"Ready":"Loaded",ready:Boolean(namespace.getCapability&&namespace.getCapability(CAPABILITY_ID)),queryTypeCount:Object.keys(QUERY_TYPES).length,typedQueryCount:state.typedQueries.size,latestTypedQueryId:state.latestTypedQueryId,naturalLanguageDirectReasoningAllowed:false};}
+  function getQueryInterpreterStatus(){return{id:"IDE-170-QUERY-INTERPRETER-STATUS",version:MODULE_VERSION,capabilityVersion:CAPABILITY_VERSION,status:namespace.getCapability&&namespace.getCapability(CAPABILITY_ID)?"Ready":"Loaded",ready:Boolean(namespace.getCapability&&namespace.getCapability(CAPABILITY_ID)),queryTypeCount:Object.keys(QUERY_TYPES).length,typedQueryCount:state.typedQueries.size,latestTypedQueryId:state.latestTypedQueryId,naturalLanguageDirectReasoningAllowed:false,confidencePhase:"Phase 7 Active"};}
 
   Object.assign(namespace.api,{initializeQueryInterpreter,interpretQuery,getTypedQuery,listTypedQueries,getQueryTypes,validateTypedQuery,getQueryInterpreterStatus});
   Object.assign(namespace,namespace.api);
