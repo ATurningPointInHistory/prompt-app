@@ -220,6 +220,9 @@
     });
 
     checks.push(checkRecord("Source Intake is allowed", !["Blocked", "Invalid"].includes(sourceStatus), sourceStatus, "Source Gate", "Critical"));
+    const expectedSourceIntakeId = context.canonicalSnapshot && internal.text(context.canonicalSnapshot.sourceIntakeId, "");
+    const actualSourceIntakeId = context.sourceIntake && internal.text(context.sourceIntake.intakeId, "");
+    checks.push(checkRecord("Source Intake lineage matches Canonical Snapshot", !expectedSourceIntakeId || expectedSourceIntakeId === actualSourceIntakeId, (actualSourceIntakeId || "Missing") + "/" + (expectedSourceIntakeId || "Not Declared"), "Traceability Gate", "Critical"));
     checks.push(checkRecord("Canonical Snapshot is Valid or allowed Partial", ["Ready", "Partial", "Valid"].includes(canonicalQuality), canonicalQuality, "Snapshot Gate", "Critical"));
     checks.push(checkRecord("Fact Graph is valid", graphStatus === "Frozen" || graphStatus === "Valid" || graphStatus === "Ready", graphStatus, "Graph Gate", "Critical"));
     checks.push(checkRecord("Understanding Result exists and is valid or allowed Partial", Boolean(context.understanding) && ["Ready", "Partial", "Valid"].includes(understandingQuality), understandingQuality, "Understanding Gate", "Critical"));
@@ -554,6 +557,11 @@
       if (!built || !built.ok) throw new Error(built && built.error && built.error.message || "Fixture Package build failed.");
       const pkg = built.data.package;
       fixturePackageId = pkg.packageId;
+      const mismatchContext = internal.clone(fixture);
+      mismatchContext.sourceIntake = internal.clone(fixture.sourceIntake);
+      mismatchContext.sourceIntake.intakeId = "IDE-170-P8-FIXTURE-UNRELATED-INTAKE";
+      const mismatchBuild = internal.buildPackageFromResolvedContext(mismatchContext, { packageId: internal.nextId("IDE-170-P8-LINEAGE-NEGATIVE"), actor: "IDE-170 Phase 8 Validation" });
+      check("Mismatched Source Intake lineage is blocked", Boolean(mismatchBuild && mismatchBuild.ok === false && mismatchBuild.code === "PACKAGE_SOURCE_INTAKE_LINEAGE_MISMATCH"), mismatchBuild && mismatchBuild.code, "Traceability", "Critical");
       check("Package is Frozen", pkg.frozen === true && pkg.immutable === true && pkg.status === "Frozen", pkg.status, "Freeze", "Critical");
       check("Package Version is independent", pkg.packageVersion === VERSION_MANIFEST.contractVersions.intelligencePackage, pkg.packageVersion, "Version", "Critical");
       check("Manifest Version is independent", pkg.manifest.manifestVersion === VERSION_MANIFEST.contractVersions.intelligencePackageManifest, pkg.manifest.manifestVersion, "Version", "Critical");
