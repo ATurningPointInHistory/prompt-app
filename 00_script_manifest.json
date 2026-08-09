@@ -1,11 +1,11 @@
 {
-  "version": "1.7.1",
+  "version": "1.8.0",
   "manifestSchemaVersion": "2.0.0",
-  "applicationReleaseVersion": "1.7.1",
+  "applicationReleaseVersion": "1.8.0",
   "versionArchitecture": "independent-version-v1",
-  "mode": "build-time-static-script-generation",
-  "description": "Static Script Manifest v2 for IDE-170 Phase 6 Query Resolution and Missing-Information Hotfix with SHA-256 content integrity.",
-  "updatedAt": "2026-08-08T11:46:44Z",
+  "mode": "static-script-manifest",
+  "description": "Static Script Manifest v2 for IDE-170 Phase 7 Confidence and Validation with SHA-256 content integrity.",
+  "updatedAt": "2026-08-08T16:05:01.438941Z",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
   "scripts": [
@@ -112,8 +112,8 @@
     "./13_ai_development_workflow_completion.js?h=2e9d1940c392",
     "./13_ai_development_workflow_integration.js?h=25c2843b9c2e",
     "./13_ai_development_workflow_validation.js?h=2d2f92af8a73",
-    "./13_intelligence_version_manifest.js?h=85437d295451",
-    "./13_intelligence_platform_core.js?h=de34a25a3439",
+    "./13_intelligence_version_manifest.js?h=d921f7d856f6",
+    "./13_intelligence_platform_core.js?h=4f383406fd99",
     "./13_intelligence_capability_registry.js?h=dc96c1b9eec1",
     "./13_intelligence_schema_registry.js?h=aad032898ce7",
     "./13_intelligence_source_adapter.js?h=c9c5143d454c",
@@ -128,8 +128,10 @@
     "./13_intelligence_workflow_understanding.js?h=257090ec83fb",
     "./13_intelligence_understanding_pipeline.js?h=85f5f963b509",
     "./13_intelligence_terminology_registry.js?h=bf45777bbc83",
-    "./13_intelligence_query_interpreter.js?h=5a2018ed5bbb",
-    "./13_intelligence_query_engine.js?h=82e06590f328",
+    "./13_intelligence_query_interpreter.js?h=b836cc6640b7",
+    "./13_intelligence_query_engine.js?h=bf2ceded441c",
+    "./13_intelligence_confidence.js?h=71a4eed1d7e7",
+    "./13_intelligence_independent_validation.js?h=1207db9079ba",
     "./13_intelligence_test_dataset_registry.js?h=e8fb0d096646",
     "./13_intelligence_validation_automation.js?h=41198930fa60",
     "./13_intelligence_validation_evidence.js?h=f5c98466c3dc",
@@ -137,8 +139,9 @@
     "./13_intelligence_test_procedure_parser.js?h=53f80473926c",
     "./13_intelligence_validation_compiler.js?h=2bee052e6795",
     "./13_intelligence_test_procedure_ui.js?h=fd88433ed4cd",
-    "./13_intelligence_version_validation.js?h=88d73d4c7ae2",
-    "./13_intelligence_validation.js?h=69090a6a4f89",
+    "./13_intelligence_version_validation.js?h=9be1552b9a12",
+    "./13_intelligence_validation_persistence.js?h=b08080da0274",
+    "./13_intelligence_validation.js?h=4aa98a978cfb",
     "./13_project_report.js?h=d636cb6a6766",
     "./13_project_handoff.js?h=a073ff86a1eb",
     "./13_function_relation_v3.js?h=0857a784aa30",
@@ -672,14 +675,14 @@
       "cacheKey": "2d2f92af8a73"
     },
     "13_intelligence_version_manifest.js": {
-      "sha256": "85437d295451051deda65d6ea8f8d4b3c1ce15f806f3518ae3c4367c6a7034f5",
-      "byteSize": 11066,
-      "cacheKey": "85437d295451"
+      "sha256": "d921f7d856f637518e1a8187b2b2a7d16e4ae7b7a19a5da81df34ceb648f3e58",
+      "byteSize": 12312,
+      "cacheKey": "d921f7d856f6"
     },
     "13_intelligence_platform_core.js": {
-      "sha256": "de34a25a3439a71103eac2b2ca4aedc4d8a3e8c8bef3d2ee206b0530be3368ed",
-      "byteSize": 52998,
-      "cacheKey": "de34a25a3439"
+      "sha256": "4f383406fd9928d7fd6ddc34c63293e44217a6259da92b8ab21c42fb3beae415",
+      "byteSize": 56458,
+      "cacheKey": "4f383406fd99"
     },
     "13_intelligence_capability_registry.js": {
       "sha256": "dc96c1b9eec1f7dd60beda1b8afc4923f9fbf488c53915afb5e1be2d6d69edf8",
@@ -752,14 +755,24 @@
       "cacheKey": "bf45777bbc83"
     },
     "13_intelligence_query_interpreter.js": {
-      "sha256": "5a2018ed5bbb43a8362decd1455a74356dafd3288d9fa380993f017180289fc7",
-      "byteSize": 20208,
-      "cacheKey": "5a2018ed5bbb"
+      "sha256": "b836cc6640b72340f444a17f322a52540f1061efea2cc2ebc029f337dc3bef6c",
+      "byteSize": 20339,
+      "cacheKey": "b836cc6640b7"
     },
     "13_intelligence_query_engine.js": {
-      "sha256": "82e06590f328f695467287e778c81dec484c625783376e509b60a32b09d03176",
-      "byteSize": 46454,
-      "cacheKey": "82e06590f328"
+      "sha256": "bf2ceded441cbbf91c957eb5e2d6902ab0f0eb3b4ec96443f5e1641b569922b6",
+      "byteSize": 51363,
+      "cacheKey": "bf2ceded441c"
+    },
+    "13_intelligence_confidence.js": {
+      "sha256": "71a4eed1d7e712ea4fe0ff23263823990b2f9d49eb4a7ecc095aaec7da07e4c4",
+      "byteSize": 43446,
+      "cacheKey": "71a4eed1d7e7"
+    },
+    "13_intelligence_independent_validation.js": {
+      "sha256": "1207db9079bae912114ccd793f9a7bb727bf0f740c373215204723fc7d623326",
+      "byteSize": 53387,
+      "cacheKey": "1207db9079ba"
     },
     "13_intelligence_test_dataset_registry.js": {
       "sha256": "e8fb0d096646ba84de92534a26bdc046524dd6864658bc09099b685bf77c2e34",
@@ -797,14 +810,19 @@
       "cacheKey": "fd88433ed4cd"
     },
     "13_intelligence_version_validation.js": {
-      "sha256": "88d73d4c7ae23c4eb9ce54bff43576463c47c345d0dd628c4f553df48c806fc0",
-      "byteSize": 20106,
-      "cacheKey": "88d73d4c7ae2"
+      "sha256": "9be1552b9a1249e2e1b0b43be26e7303de5cca2d87461d9add4bf4565e67ba1a",
+      "byteSize": 20395,
+      "cacheKey": "9be1552b9a12"
+    },
+    "13_intelligence_validation_persistence.js": {
+      "sha256": "b08080da0274af28922e789a94054e4f0f170ddb531740bd18ecaa38aa2f01ec",
+      "byteSize": 22996,
+      "cacheKey": "b08080da0274"
     },
     "13_intelligence_validation.js": {
-      "sha256": "69090a6a4f8941e6d383d6c9ae1e71896dec0c325dc332c7a6f6cdffd2d27984",
-      "byteSize": 73637,
-      "cacheKey": "69090a6a4f89"
+      "sha256": "4aa98a978cfb21a49900dcc5c34b564d80f77daffc7001d8e7d809282767e41f",
+      "byteSize": 74194,
+      "cacheKey": "4aa98a978cfb"
     },
     "13_project_report.js": {
       "sha256": "d636cb6a67665a6a26975934e81c9ffe2e1aca43b7f1303d0b9dae1a221c813b",
@@ -882,6 +900,6 @@
       "cacheKey": "138e34ded106"
     }
   },
-  "scriptSetHash": "9907390daeb306f4ab61b54cd1f5ae482425452e6d24231784fcd648f3faed1c",
-  "manifestHash": "88ae4f39396597a03603ae9b984a6fe18273e12991d3d271b4c386ba86a3daa4"
+  "scriptSetHash": "9d7c65265cdb42211d722bd0bb2cabd74f8e533e1fcd8796db94a1f3ba2f7669",
+  "manifestHash": "b67e5bc67dee81a70a42fbda2504a8047109a768307f2ca755418e6a0e00f1ca"
 }
