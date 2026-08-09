@@ -365,6 +365,12 @@
     return copy;
   }
 
+  function resolveStaticManifestScriptCount(manifest) {
+    const explicit = Number(manifest && manifest.scriptCount);
+    if (Number.isInteger(explicit) && explicit >= 0) return explicit;
+    return internal.asArray(manifest && manifest.scripts).length;
+  }
+
   function persistPackageReleaseReceipt(options) {
     const settings = internal.isPlainObject(options) ? options : {};
     const phase = state.lastPackagePhaseValidation;
@@ -382,7 +388,7 @@
       implementationPhase: VERSION_MANIFEST.release.implementationPhase,
       manifestHash: staticManifest.manifestHash,
       scriptSetHash: staticManifest.scriptSetHash,
-      scriptCount: internal.asArray(staticManifest.scripts).length,
+      scriptCount: resolveStaticManifestScriptCount(staticManifest),
       packageValidation: compactPackagePhaseValidation(phase),
       versionArchitectureValidation: {
         id: version.id,
@@ -452,7 +458,7 @@
       const releaseMatches = receipt.releaseVersion === VERSION_MANIFEST.release.version && manifest.applicationReleaseVersion === VERSION_MANIFEST.release.version;
       const manifestMatches = receipt.manifestHash === manifest.manifestHash;
       const scriptSetMatches = receipt.scriptSetHash === manifest.scriptSetHash;
-      const scriptCountMatches = Number(receipt.scriptCount) === internal.asArray(manifest.scripts).length;
+      const scriptCountMatches = Number(receipt.scriptCount) === resolveStaticManifestScriptCount(manifest);
       if (!(releaseMatches && manifestMatches && scriptSetMatches && scriptCountMatches)) {
         const result = { ok: false, code: "PACKAGE_RELEASE_RECEIPT_STALE", status: "Stale - Revalidation Required", restored: false, stale: true, checks: { releaseMatches: releaseMatches, manifestMatches: manifestMatches, scriptSetMatches: scriptSetMatches, scriptCountMatches: scriptCountMatches }, checkedAt: internal.nowIso() };
         state.lastPackageReleaseRestore = result;
@@ -550,6 +556,13 @@
       check("Official Artifact Type Registry is populated", status && status.artifactTypeCount >= 30, status && status.artifactTypeCount, "Artifact Model", "Critical");
       check("Required Artifact Types are governed", status && status.requiredArtifactTypeCount === 7, status && status.requiredArtifactTypeCount, "Artifact Model", "Critical");
       check("Single giant JSON export is prohibited", status && status.singleGiantJsonExportAllowed === false, status && status.singleGiantJsonExportAllowed, "Governance", "Critical");
+      const summaryManifestProbe = { scriptCount: 3 };
+      const fullManifestProbe = { scripts: ["a.js", "b.js", "c.js"] };
+      check("Release Receipt resolves Script Count from Static Manifest summary or full manifest",
+        resolveStaticManifestScriptCount(summaryManifestProbe) === 3 && resolveStaticManifestScriptCount(fullManifestProbe) === 3,
+        resolveStaticManifestScriptCount(summaryManifestProbe) + "/" + resolveStaticManifestScriptCount(fullManifestProbe),
+        "Persistence Contract",
+        "Critical");
 
       const fixture = buildFixtureContext();
       const built = internal.buildPackageFromResolvedContext(fixture, { packageId: internal.nextId("IDE-170-P8-VALIDATION-PACKAGE"), actor: "IDE-170 Phase 8 Validation" });
