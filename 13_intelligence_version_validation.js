@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_version_validation.js
    IDE-170 Intelligence Platform
-   Release: Version Manifest / Module: 1.0.0
+   Release: Version Manifest / Module: Version Manifest
    Purpose: Independent Version Architecture and Static Manifest Integrity Validation
    Architecture Decision: IDE-170-012
    ============================================================ */
@@ -262,6 +262,9 @@
       };
       internal.state.lastVersionArchitectureValidation = internal.deepFreeze(clone(result));
       internal.touch();
+      if (result.valid === true && result.releaseGateAllowed === true && typeof namespace.tryPersistValidationGateReceipt === "function") {
+        try { namespace.tryPersistValidationGateReceipt({ actor: "IDE-170 Version Validation", automatic: true }); } catch (_) {}
+      }
       return result;
     } catch (error) {
       addCheck(checks, "Version Architecture Validation completed without exception", false, error && error.message || String(error), "Runtime", "Critical");
