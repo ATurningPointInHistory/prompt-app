@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_version_manifest.js
    IDE-170 Intelligence Platform
-   Release: 1.7.1
+   Release: 1.8.0
    Module: 1.0.0
    Purpose: Independent Version Architecture Contract
    Architecture Decision: IDE-170-012
@@ -9,7 +9,7 @@
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.7.1";
+  const RELEASE_VERSION = "1.8.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -21,7 +21,7 @@
   }
 
   const moduleVersions = {
-    platformCore: BASELINE_VERSION,
+    platformCore: "1.1.0",
     capabilityRegistry: BASELINE_VERSION,
     schemaRegistry: BASELINE_VERSION,
     sourceAdapter: BASELINE_VERSION,
@@ -36,8 +36,11 @@
     workflowUnderstanding: BASELINE_VERSION,
     understandingPipeline: BASELINE_VERSION,
     terminologyRegistry: BASELINE_VERSION,
-    queryInterpreter: "1.0.1",
-    queryEngine: "1.0.1",
+    queryInterpreter: "1.1.0",
+    queryEngine: "1.1.0",
+    confidence: BASELINE_VERSION,
+    independentValidation: BASELINE_VERSION,
+    validationPersistence: BASELINE_VERSION,
     testDatasetRegistry: BASELINE_VERSION,
     validationAutomation: BASELINE_VERSION,
     validationEvidence: BASELINE_VERSION,
@@ -45,8 +48,8 @@
     testProcedureParser: BASELINE_VERSION,
     validationCompiler: BASELINE_VERSION,
     testProcedureUI: BASELINE_VERSION,
-    versionValidation: BASELINE_VERSION,
-    validation: BASELINE_VERSION
+    versionValidation: "1.1.0",
+    validation: "1.1.0"
   };
 
   const fileModules = {
@@ -67,6 +70,9 @@
     "13_intelligence_terminology_registry.js": "terminologyRegistry",
     "13_intelligence_query_interpreter.js": "queryInterpreter",
     "13_intelligence_query_engine.js": "queryEngine",
+    "13_intelligence_confidence.js": "confidence",
+    "13_intelligence_independent_validation.js": "independentValidation",
+    "13_intelligence_validation_persistence.js": "validationPersistence",
     "13_intelligence_test_dataset_registry.js": "testDatasetRegistry",
     "13_intelligence_validation_automation.js": "validationAutomation",
     "13_intelligence_validation_evidence.js": "validationEvidence",
@@ -97,6 +103,9 @@
     terminologyRegistry: "terminologyRegistry",
     queryInterpreter: "queryInterpreter",
     queryEngine: "queryEngine",
+    confidence: "confidence",
+    independentValidation: "independentValidation",
+    validationPersistence: "validationPersistence",
     testDatasetRegistry: "testDatasetRegistry",
     validationAutomation: "validationAutomation",
     validationEvidence: "validationEvidence",
@@ -130,6 +139,10 @@
     "IDE-170-TERMINOLOGY-REGISTRY",
     "IDE-170-QUERY-INTERPRETER",
     "IDE-170-QUERY-ENGINE",
+    "IDE-170-CONFIDENCE-MODEL-REGISTRY",
+    "IDE-170-CONFIDENCE-ASSESSMENT",
+    "IDE-170-INDEPENDENT-VALIDATION",
+    "IDE-170-VALIDATION-PERSISTENCE",
     "IDE-170-TEST-DATASET-REGISTRY",
     "IDE-170-VALIDATION-AUTOMATION",
     "IDE-170-VALIDATION-EVIDENCE-PACKAGE",
@@ -161,8 +174,11 @@
     out[id] = BASELINE_VERSION;
     return out;
   }, {});
-  capabilityVersions["IDE-170-QUERY-INTERPRETER"] = "1.0.1";
-  capabilityVersions["IDE-170-QUERY-ENGINE"] = "1.0.1";
+  capabilityVersions["IDE-170-QUERY-INTERPRETER"] = "1.1.0";
+  capabilityVersions["IDE-170-QUERY-ENGINE"] = "1.1.0";
+  capabilityVersions["IDE-170-CORE"] = "1.1.0";
+  capabilityVersions["IDE-170-VERSION-VALIDATION"] = "1.1.0";
+  capabilityVersions["IDE-170-VALIDATION"] = "1.1.0";
 
   const schemaIds = [
     "IDE-170-SCHEMA-CAPABILITY-DEFINITION",
@@ -192,13 +208,19 @@
     "IDE-170-SCHEMA-TERMINOLOGY-RECORD",
     "IDE-170-SCHEMA-TYPED-QUERY",
     "IDE-170-SCHEMA-QUERY-RESULT",
-    "IDE-170-SCHEMA-EXPLAINABLE-INSIGHT-ENVELOPE"
+    "IDE-170-SCHEMA-EXPLAINABLE-INSIGHT-ENVELOPE",
+    "IDE-170-SCHEMA-CONFIDENCE-MODEL",
+    "IDE-170-SCHEMA-CONFIDENCE-RESULT",
+    "IDE-170-SCHEMA-QUALITY-RESULT",
+    "IDE-170-SCHEMA-INDEPENDENT-VALIDATION-RESULT",
+    "IDE-170-SCHEMA-VALIDATION-GATE-RECEIPT"
   ];
 
   const schemaVersions = schemaIds.reduce(function buildSchemaMap(out, id) {
     out[id] = BASELINE_VERSION;
     return out;
   }, {});
+  schemaVersions["IDE-170-SCHEMA-EXPLAINABLE-INSIGHT-ENVELOPE"] = "1.1.0";
 
   const artifactVersions = {
     sourceIntake: BASELINE_VERSION,
@@ -211,7 +233,11 @@
     understandingResult: BASELINE_VERSION,
     typedQuery: BASELINE_VERSION,
     queryResult: BASELINE_VERSION,
-    explainableInsightEnvelope: BASELINE_VERSION,
+    explainableInsightEnvelope: "1.1.0",
+    confidenceResult: BASELINE_VERSION,
+    qualityResult: BASELINE_VERSION,
+    independentValidationResult: BASELINE_VERSION,
+    validationGateReceipt: BASELINE_VERSION,
     validationRun: BASELINE_VERSION,
     caseResult: BASELINE_VERSION,
     validationEvidenceManifest: BASELINE_VERSION
@@ -225,6 +251,7 @@
     phase4EvidenceGraph: BASELINE_VERSION,
     phase5Understanding: BASELINE_VERSION,
     phase6QueryExplanation: "1.0.1",
+    phase7ConfidenceValidation: BASELINE_VERSION,
     versionArchitecture: BASELINE_VERSION
   };
 
@@ -234,10 +261,10 @@
     manifestContractVersion: BASELINE_VERSION,
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 6 Insight, Query and Explanation",
+      implementationPhase: "Phase 7 Confidence and Validation",
       designFreezeVersion: "1.0.0",
       architectureDecisionVersion: "1.0.0",
-      architectureDecisionId: "IDE-170-007"
+      architectureDecisionId: "IDE-170-008"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
