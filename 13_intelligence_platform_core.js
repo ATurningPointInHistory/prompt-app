@@ -2,7 +2,7 @@
    FILE: 13_intelligence_platform_core.js
    IDE-170 Intelligence Platform
    Release: Version Manifest / Module: Version Manifest
-   Phase 7: Confidence and Validation
+   Phase 8: Intelligence Package
    Design Freeze: v1.0.0 / 2026-08-06
    ============================================================ */
 (function (global) {
@@ -32,6 +32,7 @@
   const PHASE4_RELEASE_FROZEN = true;
   const PHASE5_RELEASE_FROZEN = true;
   const PHASE6_RELEASE_FROZEN = true;
+  const PHASE7_RELEASE_FROZEN = true;
   const MAX_SESSIONS = 100;
   const MAX_AUDIT_RECORDS = 1000;
 
@@ -85,6 +86,11 @@
         typedQueries: new Map(),
         queryResults: new Map(),
         explainableEnvelopes: new Map(),
+        intelligenceArtifacts: new Map(),
+        intelligencePackages: new Map(),
+        packageValidations: new Map(),
+        ide180Handoffs: new Map(),
+        intelligencePackageExports: new Map(),
         latestSourceIntakeId: null,
         latestCanonicalSnapshotId: null,
         latestRepositorySnapshotId: null,
@@ -100,6 +106,8 @@
         latestTypedQueryId: null,
         latestQueryResultId: null,
         latestExplainableEnvelopeId: null,
+        latestIntelligencePackageId: null,
+        latestIDE180HandoffId: null,
         activeImportedProcedureDatasetId: null,
         lastAutomationValidation: null,
         lastProcedureValidation: null,
@@ -107,6 +115,11 @@
         lastUnderstandingValidation: null,
         lastQueryValidation: null,
         lastConfidenceValidation: null,
+        lastPackageValidation: null,
+        lastPackagePhaseValidation: null,
+        lastPackageReleaseReceipt: null,
+        lastPackageReleaseRestore: null,
+        packageReleasePersistenceStatus: "Not Initialized",
         validationPersistenceStatus: "Not Initialized",
         lastValidationGateReceipt: null,
         lastValidationGateRestore: null,
@@ -148,6 +161,11 @@
   if (!(state.typedQueries instanceof Map)) state.typedQueries = new Map();
   if (!(state.queryResults instanceof Map)) state.queryResults = new Map();
   if (!(state.explainableEnvelopes instanceof Map)) state.explainableEnvelopes = new Map();
+  if (!(state.intelligenceArtifacts instanceof Map)) state.intelligenceArtifacts = new Map();
+  if (!(state.intelligencePackages instanceof Map)) state.intelligencePackages = new Map();
+  if (!(state.packageValidations instanceof Map)) state.packageValidations = new Map();
+  if (!(state.ide180Handoffs instanceof Map)) state.ide180Handoffs = new Map();
+  if (!(state.intelligencePackageExports instanceof Map)) state.intelligencePackageExports = new Map();
   if (!Array.isArray(state.audits)) state.audits = [];
   if (!Object.prototype.hasOwnProperty.call(state, "latestSourceIntakeId")) state.latestSourceIntakeId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestCanonicalSnapshotId")) state.latestCanonicalSnapshotId = null;
@@ -164,6 +182,8 @@
   if (!Object.prototype.hasOwnProperty.call(state, "latestTypedQueryId")) state.latestTypedQueryId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestQueryResultId")) state.latestQueryResultId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestExplainableEnvelopeId")) state.latestExplainableEnvelopeId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestIntelligencePackageId")) state.latestIntelligencePackageId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestIDE180HandoffId")) state.latestIDE180HandoffId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "activeImportedProcedureDatasetId")) state.activeImportedProcedureDatasetId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastAutomationValidation")) state.lastAutomationValidation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastProcedureValidation")) state.lastProcedureValidation = null;
@@ -171,6 +191,11 @@
   if (!Object.prototype.hasOwnProperty.call(state, "lastUnderstandingValidation")) state.lastUnderstandingValidation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastQueryValidation")) state.lastQueryValidation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastConfidenceValidation")) state.lastConfidenceValidation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPackageValidation")) state.lastPackageValidation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPackagePhaseValidation")) state.lastPackagePhaseValidation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPackageReleaseReceipt")) state.lastPackageReleaseReceipt = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPackageReleaseRestore")) state.lastPackageReleaseRestore = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "packageReleasePersistenceStatus")) state.packageReleasePersistenceStatus = "Not Initialized";
   if (!Object.prototype.hasOwnProperty.call(state, "validationPersistenceStatus")) state.validationPersistenceStatus = "Not Initialized";
   if (!Object.prototype.hasOwnProperty.call(state, "lastValidationGateReceipt")) state.lastValidationGateReceipt = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastValidationGateRestore")) state.lastValidationGateRestore = null;
@@ -652,6 +677,10 @@
       confidence: Boolean(namespace.modules && namespace.modules.confidence),
       independentValidation: Boolean(namespace.modules && namespace.modules.independentValidation),
       validationPersistence: Boolean(namespace.modules && namespace.modules.validationPersistence),
+      packageModel: Boolean(namespace.modules && namespace.modules.packageModel),
+      packageValidation: Boolean(namespace.modules && namespace.modules.packageValidation),
+      ide180Handoff: Boolean(namespace.modules && namespace.modules.ide180Handoff),
+      packageExport: Boolean(namespace.modules && namespace.modules.packageExport),
       testDatasetRegistry: Boolean(namespace.modules && namespace.modules.testDatasetRegistry),
       validationAutomation: Boolean(namespace.modules && namespace.modules.validationAutomation),
       validationEvidence: Boolean(namespace.modules && namespace.modules.validationEvidence),
@@ -700,15 +729,15 @@
         results.ideRegistry = global.registerIdeComponent({
           id: COMPONENT_ID,
           title: COMPONENT_NAME,
-          summary: "IDE-170 Intelligence Platform。Phase 7でMulti-Factor Confidence、Independent Validation Gate、Validation Persistenceを提供。",
+          summary: "IDE-170 Intelligence Platform。Phase 8でImmutable Intelligence Package、Package Validation、ZIP/IndexedDB Export、IDE-180 Handoffを提供。",
           icon: "🧠",
           version: RELEASE_VERSION,
-          status: "Phase 7 Confidence and Validation",
+          status: "Phase 8 Intelligence Package",
           ready: state.initialized === true,
-          progress: 87.5,
-          health: state.lastConfidenceValidation && Number(state.lastConfidenceValidation.health) || state.lastQueryValidation && Number(state.lastQueryValidation.health) || state.lastUnderstandingValidation && Number(state.lastUnderstandingValidation.health) || state.lastValidation && Number(state.lastValidation.health) || 0,
+          progress: 100,
+          health: state.lastPackagePhaseValidation && Number(state.lastPackagePhaseValidation.health) || state.lastConfidenceValidation && Number(state.lastConfidenceValidation.health) || state.lastQueryValidation && Number(state.lastQueryValidation.health) || state.lastUnderstandingValidation && Number(state.lastUnderstandingValidation.health) || state.lastValidation && Number(state.lastValidation.health) || 0,
           launcher: "openIntelligenceTestProcedureConsole",
-          validator: "validateIntelligenceConfidenceAndValidation",
+          validator: "validateIntelligencePackagePhase",
           probe: "getIntelligencePlatformStatus",
           category: "Intelligence"
         }) === true;
@@ -782,6 +811,10 @@
           !dependencyStatus.required.confidence ||
           !dependencyStatus.required.independentValidation ||
           !dependencyStatus.required.validationPersistence ||
+          !dependencyStatus.required.packageModel ||
+          !dependencyStatus.required.packageValidation ||
+          !dependencyStatus.required.ide180Handoff ||
+          !dependencyStatus.required.packageExport ||
           !dependencyStatus.required.testDatasetRegistry ||
           !dependencyStatus.required.validationAutomation ||
           !dependencyStatus.required.validationEvidence ||
@@ -795,7 +828,7 @@
         return buildResult(false, "IDE170_DEPENDENCY_MISSING", "Blocked", {
           dependencies: dependencyStatus
         }, {
-          error: { message: "IDE-170 Phase 7 required modules are not fully loaded.", category: "Dependency Failure" }
+          error: { message: "IDE-170 Phase 8 required modules are not fully loaded.", category: "Dependency Failure" }
         });
       }
 
@@ -909,6 +942,26 @@
         if (!persistenceResult.ok) throw new Error("Validation Persistence initialization failed.");
       }
 
+      if (namespace.api && typeof namespace.api.initializePackageModel === "function") {
+        const packageModelResult = namespace.api.initializePackageModel();
+        if (!packageModelResult.ok) throw new Error("Package Model initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializeIDE180Handoff === "function") {
+        const handoffResult = namespace.api.initializeIDE180Handoff();
+        if (!handoffResult.ok) throw new Error("IDE-180 Handoff initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializePackageValidation === "function") {
+        const packageValidationResult = namespace.api.initializePackageValidation();
+        if (!packageValidationResult.ok) throw new Error("Package Validation initialization failed.");
+      }
+
+      if (namespace.api && typeof namespace.api.initializePackageExport === "function") {
+        const packageExportResult = namespace.api.initializePackageExport();
+        if (!packageExportResult.ok) throw new Error("Package Export initialization failed.");
+      }
+
       if (namespace.api && typeof namespace.api.initializeValidationEvidence === "function") {
         const evidenceResult = namespace.api.initializeValidationEvidence();
         if (!evidenceResult.ok) throw new Error("Validation Evidence initialization failed.");
@@ -940,6 +993,9 @@
 
       if (namespace.api && typeof namespace.api.restoreValidationGateReceipt === "function" && settings.restoreValidationReceipt !== false) {
         Promise.resolve(namespace.api.restoreValidationGateReceipt({ automatic: true })).catch(function ignoreRestoreError() {});
+      }
+      if (namespace.api && typeof namespace.api.restorePackageReleaseReceipt === "function" && settings.restorePackageReleaseReceipt !== false) {
+        Promise.resolve(namespace.api.restorePackageReleaseReceipt({ automatic: true })).catch(function ignorePackageRestoreError() {});
       }
 
       if (settings.registerIntegration !== false) {
@@ -977,10 +1033,12 @@
 
   function getReleaseStatus() {
     const dependencyStatus = getDependencyStatus();
-    const confidenceValidation = state.lastConfidenceValidation;
-    const androidValidation = confidenceValidation && confidenceValidation.androidRealDeviceValidation;
+    const packageValidation = state.lastPackagePhaseValidation;
+    const androidValidation = packageValidation && packageValidation.androidRealDeviceValidation;
     const androidPassed = Boolean(androidValidation && androidValidation.passed === true);
-    const confidenceCodePassed = Boolean(confidenceValidation && confidenceValidation.valid === true && confidenceValidation.failed === 0);
+    const packageCodePassed = Boolean(packageValidation && packageValidation.valid === true && packageValidation.failed === 0);
+    const completionGateAllowed = Boolean(packageValidation && packageValidation.completionGate === "Allowed");
+    const handoffReady = Boolean(packageValidation && packageValidation.handoffId);
     const versionValidation = state.lastVersionArchitectureValidation;
     const versionArchitecturePassed = Boolean(
       versionValidation && versionValidation.valid === true && versionValidation.failed === 0 &&
@@ -988,20 +1046,24 @@
       versionValidation.releaseGateAllowed === true
     );
     const releaseReady = Boolean(
-      state.initialized && dependencyStatus.requiredReady && PHASE6_RELEASE_FROZEN &&
-      confidenceCodePassed && androidPassed && versionArchitecturePassed
+      state.initialized && dependencyStatus.requiredReady && PHASE7_RELEASE_FROZEN &&
+      packageCodePassed && androidPassed && completionGateAllowed && handoffReady && versionArchitecturePassed
     );
     return {
       componentId: COMPONENT_ID, version: RELEASE_VERSION, phase: IMPLEMENTATION_PHASE,
-      releaseStatus: releaseReady ? "Phase 7 Confidence and Validation Ready"
-        : confidenceCodePassed && androidPassed && !versionArchitecturePassed ? "Conditional - Phase 7 Static Integrity Validation Pending"
-        : confidenceCodePassed && !androidPassed ? "Conditional - Phase 7 Android Validation Pending"
-        : confidenceValidation ? "Blocked" : "Phase 7 Validation Not Run",
+      releaseStatus: releaseReady ? "Phase 8 Intelligence Package Ready"
+        : packageCodePassed && androidPassed && !versionArchitecturePassed ? "Conditional - Phase 8 Static Integrity Validation Pending"
+        : packageCodePassed && !androidPassed ? "Conditional - Phase 8 Android Validation Pending"
+        : packageValidation ? "Blocked" : "Phase 8 Validation Not Run",
       releaseAllowed: releaseReady,
-      validationStatus: confidenceValidation ? confidenceValidation.status : "Not Run",
-      health: confidenceValidation && Number.isFinite(Number(confidenceValidation.health)) ? Number(confidenceValidation.health) : null,
-      independentValidationRequired: true,
-      confidenceValidationPassed: confidenceCodePassed,
+      validationStatus: packageValidation ? packageValidation.status : "Not Run",
+      health: packageValidation && Number.isFinite(Number(packageValidation.health)) ? Number(packageValidation.health) : null,
+      packageValidationPassed: packageCodePassed,
+      packageCompletionGateAllowed: completionGateAllowed,
+      ide180HandoffReady: handoffReady,
+      packageId: packageValidation && packageValidation.packageId || null,
+      packageHash: packageValidation && packageValidation.packageHash || null,
+      handoffId: packageValidation && packageValidation.handoffId || null,
       androidRealDevicePassed: androidPassed,
       versionArchitecture: VERSION_MANIFEST.versionArchitecture,
       versionArchitectureValidationStatus: versionValidation ? versionValidation.status : "Not Run",
@@ -1009,12 +1071,15 @@
       versionArchitecturePassed: versionArchitecturePassed,
       validationPersistenceStatus: state.validationPersistenceStatus || "Not Initialized",
       validationGateReceiptPresent: Boolean(state.lastValidationGateReceipt),
+      packageReleasePersistenceStatus: state.packageReleasePersistenceStatus || "Not Initialized",
+      packageReleaseReceiptPresent: Boolean(state.lastPackageReleaseReceipt),
       phase1ReleaseFrozen: PHASE1_RELEASE_FROZEN, phase2ReleaseFrozen: PHASE2_RELEASE_FROZEN,
       phase3ReleaseFrozen: PHASE3_RELEASE_FROZEN, procedureCompilerReleaseFrozen: PROCEDURE_COMPILER_RELEASE_FROZEN,
-      phase4ReleaseFrozen: PHASE4_RELEASE_FROZEN, phase5ReleaseFrozen: PHASE5_RELEASE_FROZEN, phase6ReleaseFrozen: PHASE6_RELEASE_FROZEN,
+      phase4ReleaseFrozen: PHASE4_RELEASE_FROZEN, phase5ReleaseFrozen: PHASE5_RELEASE_FROZEN, phase6ReleaseFrozen: PHASE6_RELEASE_FROZEN, phase7ReleaseFrozen: PHASE7_RELEASE_FROZEN,
       phase2Allowed: PHASE1_RELEASE_FROZEN, phase3Allowed: PHASE2_RELEASE_FROZEN,
       phase4Allowed: PROCEDURE_COMPILER_RELEASE_FROZEN, phase5Allowed: PHASE4_RELEASE_FROZEN,
-      phase6Allowed: PHASE5_RELEASE_FROZEN, phase7Allowed: PHASE6_RELEASE_FROZEN, phase8Allowed: releaseReady, checkedAt: nowIso()
+      phase6Allowed: PHASE5_RELEASE_FROZEN, phase7Allowed: PHASE6_RELEASE_FROZEN, phase8Allowed: PHASE7_RELEASE_FROZEN,
+      ide180Allowed: releaseReady, checkedAt: nowIso()
     };
   }
 
@@ -1034,7 +1099,7 @@
       designFreezeVersion: DESIGN_FREEZE_VERSION,
       implementationPhase: IMPLEMENTATION_PHASE,
       implementationStatus: state.initialized
-        ? "Phase 7 Confidence and Validation Implemented"
+        ? "Phase 8 Intelligence Package Implemented"
         : "Loaded",
       status: state.lastError
         ? "Degraded"
@@ -1044,14 +1109,15 @@
       ready: Boolean(state.initialized && dependencies.requiredReady && !state.lastError),
       available: true,
       initialized: state.initialized === true,
-      progress: 87.5,
+      progress: 100,
       phaseProgress: state.initialized ? 100 : 50,
       validationAutomationFoundationProgress: 100,
       testProcedureCompilerProgress: 100,
       evidenceGraphProgress: 100,
       understandingProgress: 100,
       queryExplanationProgress: 100,
-      confidenceValidationProgress: state.initialized ? 100 : 0,
+      confidenceValidationProgress: 100,
+      intelligencePackageProgress: state.initialized ? 100 : 0,
       modules: clone(dependencies.required),
       capabilityCount: state.capabilities.size,
       schemaCount: state.schemas.size,
@@ -1080,6 +1146,13 @@
       confidenceModelCount: state.confidenceModels instanceof Map ? state.confidenceModels.size : 0,
       confidenceResultCount: state.confidenceResults instanceof Map ? state.confidenceResults.size : 0,
       independentValidationResultCount: state.independentValidationResults instanceof Map ? state.independentValidationResults.size : 0,
+      intelligencePackageCount: state.intelligencePackages instanceof Map ? state.intelligencePackages.size : 0,
+      intelligenceArtifactCount: state.intelligenceArtifacts instanceof Map ? state.intelligenceArtifacts.size : 0,
+      packageValidationCount: state.packageValidations instanceof Map ? state.packageValidations.size : 0,
+      ide180HandoffCount: state.ide180Handoffs instanceof Map ? state.ide180Handoffs.size : 0,
+      packageExportCount: state.intelligencePackageExports instanceof Map ? state.intelligencePackageExports.size : 0,
+      latestIntelligencePackageId: state.latestIntelligencePackageId || null,
+      latestIDE180HandoffId: state.latestIDE180HandoffId || null,
       latestTestDatasetId: state.latestTestDatasetId,
       latestValidationRunId: state.latestValidationRunId,
       latestValidationEvidencePackageId: state.latestValidationEvidencePackageId,
@@ -1140,8 +1213,9 @@
       phase6Started: true,
       phase6Complete: PHASE6_RELEASE_FROZEN,
       phase7Started: true,
-      phase7Complete: state.initialized === true && dependencies.required.confidence && dependencies.required.independentValidation && dependencies.required.validationPersistence,
-      phase8Started: false,
+      phase7Complete: PHASE7_RELEASE_FROZEN,
+      phase8Started: true,
+      phase8Complete: state.initialized === true && dependencies.required.packageModel && dependencies.required.packageValidation && dependencies.required.ide180Handoff && dependencies.required.packageExport,
       lastError: clone(state.lastError),
       updatedAt: state.updatedAt || nowIso()
     };
@@ -1187,6 +1261,7 @@
     PHASE4_RELEASE_FROZEN: PHASE4_RELEASE_FROZEN,
     PHASE5_RELEASE_FROZEN: PHASE5_RELEASE_FROZEN,
     PHASE6_RELEASE_FROZEN: PHASE6_RELEASE_FROZEN,
+    PHASE7_RELEASE_FROZEN: PHASE7_RELEASE_FROZEN,
     SESSION_STATES: SESSION_STATES,
     SESSION_TRANSITIONS: SESSION_TRANSITIONS
   });
