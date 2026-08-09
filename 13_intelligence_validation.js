@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_intelligence_validation.js
    IDE-170 Intelligence Platform
-   Release: Version Manifest / Module: 1.0.0
-   Phase: 4 Evidence Graph - Independent Validation Gate
+   Release: Version Manifest / Module: Version Manifest
+   Phase 7: Confidence and Independent Validation Gate
    ============================================================ */
 (function (global) {
   "use strict";
@@ -186,7 +186,7 @@
 
       const dependencyStatus = namespace.getDependencyStatus();
       check(
-        "Required Phase 6 Query and Explanation modules are loaded",
+        "Required Phase 7 Confidence and Validation modules are loaded",
         dependencyStatus.requiredReady === true,
         JSON.stringify(dependencyStatus.required),
         "Foundation"
@@ -247,6 +247,16 @@
           "getQueryResult",
           "getExplainableEnvelope",
           "runQueryPhaseValidation",
+          "assessInterpretationConfidence",
+          "assessConfidence",
+          "assessQuality",
+          "validateConfidenceResult",
+          "validateIntelligenceResult",
+          "validateFrozenIntelligenceResult",
+          "runConfidencePhaseValidation",
+          "persistValidationGateReceipt",
+          "restoreValidationGateReceipt",
+          "getValidationPersistenceStatus",
           "importTestProcedure",
           "parseTestProcedure",
           "compileTestProcedure",
@@ -261,7 +271,7 @@
         ].every(function hasApi(apiName) {
           return typeof namespace[apiName] === "function";
         }),
-        "Phase 1-6 and Decision 011 APIs",
+        "Phase 1-7 and Decision 011 APIs",
         "Foundation"
       );
 
@@ -623,28 +633,31 @@
         "Status and Release"
       );
       check(
-        "Phase 6 Insight, Query and Explanation is implemented",
+        "Phase 7 Confidence and Validation is implemented",
         status.phase4Started === true &&
           status.phase4Complete === true &&
           status.phase5Started === true &&
           status.phase5Complete === true &&
           status.phase6Started === true &&
           status.phase6Complete === true &&
-          status.progress === 75 &&
-          status.queryExplanationProgress === 100,
+          status.phase7Started === true &&
+          status.phase7Complete === true &&
+          status.progress === 87.5 &&
+          status.queryExplanationProgress === 100 &&
+          status.confidenceValidationProgress === 100,
         JSON.stringify({
-          phase5Complete: status.phase5Complete,
-          phase6Started: status.phase6Started,
           phase6Complete: status.phase6Complete,
-          queryExplanationProgress: status.queryExplanationProgress,
+          phase7Started: status.phase7Started,
+          phase7Complete: status.phase7Complete,
+          confidenceValidationProgress: status.confidenceValidationProgress,
           progress: status.progress
         }),
         "Status and Release"
       );
       check(
-        "Phase 7 remains not started",
-        status.phase7Started === false,
-        String(status.phase7Started),
+        "Phase 8 remains not started",
+        status.phase8Started === false,
+        String(status.phase8Started),
         "Status and Release"
       );
       check(
