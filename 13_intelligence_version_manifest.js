@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_intelligence_version_manifest.js
    IDE-170 Intelligence Platform
-   Release: 1.9.1
+   Release: 1.9.2
    Module: 1.0.0
    Purpose: Independent Version Architecture Contract
    Architecture Decision: IDE-170-012
@@ -9,7 +9,7 @@
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.9.1";
+  const RELEASE_VERSION = "1.9.2";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -51,7 +51,7 @@
     versionValidation: "1.1.0",
     validation: "1.1.0",
     packageModel: "1.0.1",
-    packageValidation: "1.0.1",
+    packageValidation: "1.0.2",
     ide180Handoff: BASELINE_VERSION,
     packageExport: BASELINE_VERSION
   };
@@ -197,7 +197,7 @@
   capabilityVersions["IDE-170-VERSION-VALIDATION"] = "1.1.0";
   capabilityVersions["IDE-170-VALIDATION"] = "1.1.0";
   capabilityVersions["IDE-170-INTELLIGENCE-PACKAGE"] = "1.0.1";
-  capabilityVersions["IDE-170-PACKAGE-VALIDATION"] = "1.0.1";
+  capabilityVersions["IDE-170-PACKAGE-VALIDATION"] = "1.0.2";
 
   const schemaIds = [
     "IDE-170-SCHEMA-CAPABILITY-DEFINITION",
@@ -315,7 +315,7 @@
     phase5Understanding: BASELINE_VERSION,
     phase6QueryExplanation: "1.0.1",
     phase7ConfidenceValidation: BASELINE_VERSION,
-    phase8IntelligencePackage: "1.0.1",
+    phase8IntelligencePackage: "1.0.2",
     versionArchitecture: BASELINE_VERSION
   };
 
