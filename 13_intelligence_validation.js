@@ -2,7 +2,7 @@
    FILE: 13_intelligence_validation.js
    IDE-170 Intelligence Platform
    Release: Version Manifest / Module: Version Manifest
-   Phase 7: Confidence and Independent Validation Gate
+   Phase 8: Intelligence Package Regression Gate
    ============================================================ */
 (function (global) {
   "use strict";
@@ -186,7 +186,7 @@
 
       const dependencyStatus = namespace.getDependencyStatus();
       check(
-        "Required Phase 7 Confidence and Validation modules are loaded",
+        "Required Phase 8 Intelligence Package modules are loaded",
         dependencyStatus.requiredReady === true,
         JSON.stringify(dependencyStatus.required),
         "Foundation"
@@ -254,6 +254,16 @@
           "validateIntelligenceResult",
           "validateFrozenIntelligenceResult",
           "runConfidencePhaseValidation",
+          "buildIntelligencePackage",
+          "getIntelligencePackage",
+          "validateIntelligencePackage",
+          "buildIDE180HandoffContract",
+          "validateIDE180HandoffContract",
+          "buildIntelligencePackageZip",
+          "exportIntelligencePackage",
+          "validateIntelligencePackageZip",
+          "saveIntelligencePackageToIndexedDB",
+          "runPackagePhaseValidation",
           "persistValidationGateReceipt",
           "restoreValidationGateReceipt",
           "getValidationPersistenceStatus",
@@ -633,7 +643,7 @@
         "Status and Release"
       );
       check(
-        "Phase 7 Confidence and Validation is implemented",
+        "Phase 8 Intelligence Package is implemented",
         status.phase4Started === true &&
           status.phase4Complete === true &&
           status.phase5Started === true &&
@@ -642,22 +652,26 @@
           status.phase6Complete === true &&
           status.phase7Started === true &&
           status.phase7Complete === true &&
-          status.progress === 87.5 &&
+          status.phase8Started === true &&
+          status.phase8Complete === true &&
+          status.progress === 100 &&
           status.queryExplanationProgress === 100 &&
-          status.confidenceValidationProgress === 100,
+          status.confidenceValidationProgress === 100 &&
+          status.intelligencePackageProgress === 100,
         JSON.stringify({
-          phase6Complete: status.phase6Complete,
-          phase7Started: status.phase7Started,
           phase7Complete: status.phase7Complete,
-          confidenceValidationProgress: status.confidenceValidationProgress,
+          phase8Started: status.phase8Started,
+          phase8Complete: status.phase8Complete,
+          intelligencePackageProgress: status.intelligencePackageProgress,
           progress: status.progress
         }),
         "Status and Release"
       );
+      const phase8ReleaseStatus = namespace.getReleaseStatus();
       check(
-        "Phase 8 remains not started",
-        status.phase8Started === false,
-        String(status.phase8Started),
+        "Phase 8 execution gate is allowed from frozen Phase 7",
+        phase8ReleaseStatus.phase8Allowed === true,
+        String(phase8ReleaseStatus.phase8Allowed),
         "Status and Release"
       );
       check(
@@ -1748,10 +1762,10 @@
       const result = {
         id: provisionalResult.id,
         componentId: namespace.componentId,
-        name: "IDE-170 Phase 4 Evidence Graph Regression Validation",
+        name: "IDE-170 Phase 8 Intelligence Package Regression Validation",
         version: RELEASE_VERSION,
         designFreezeVersion: namespace.designFreezeVersion,
-        mode: internal.text(settings.mode, "Phase 4 Evidence Graph Integrated Regression Validation"),
+        mode: internal.text(settings.mode, "Phase 8 Intelligence Package Integrated Regression Validation"),
         valid: summary.failed === 0 && summary.total > 0,
         passed: summary.passed,
         failed: summary.failed,
@@ -1809,7 +1823,7 @@
       const result = {
         id: internal.nextId("IDE-170-VALIDATION"),
         componentId: namespace.componentId,
-        name: "IDE-170 Phase 4 Evidence Graph Regression Validation",
+        name: "IDE-170 Phase 8 Intelligence Package Regression Validation",
         version: RELEASE_VERSION,
         valid: false,
         passed: summary.passed,
