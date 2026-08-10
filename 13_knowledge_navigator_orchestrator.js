@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_orchestrator.js
    IDE-180 Knowledge Navigator
-   Release: Version Manifest / Module: Orchestrator 1.1.0
-   Phase 4: Relationship / Traversal
+   Release: Version Manifest / Module: Orchestrator 1.2.0
+   Phase 5: Authority / Evidence / Lineage
    ============================================================ */
 (function (global) {
   "use strict";
@@ -67,17 +67,18 @@
         recordType: data.target.recordType || null
       }] : [],
       relationships: internal.clone(data.relationships || []),
-      authority: { status: "not-applicable", reason: "Authority Resolution begins in Phase 5." },
-      evidence: [],
-      lineage: [],
-      version: data.target && data.target.source && data.target.source.sourceVersion || null,
-      validation: { status: "not-evaluated", reason: "Validation Resolver begins in Phase 5." },
+      authority: internal.clone(data.authority || { status: "not-applicable", reason: "No Authority evaluation is applicable for this resolver output." }),
+      evidence: internal.clone(data.evidence || []),
+      lineage: internal.clone(data.lineage || []),
+      version: data.version != null ? internal.clone(data.version) : (data.target && data.target.source && data.target.source.sourceVersion || null),
+      validation: internal.clone(data.validation || { status: "not-evaluated", reason: "No Validation artifact was resolved for this navigation result." }),
       conflicts: [],
       missingSources: missing,
       partialReason: status === "partial" ? (data.partialReason || (ambiguity.status === "ambiguous" ? "ambiguous-target" : "partial-source")) : null,
       explanation: {},
       metadata: {
         navigationType: request.navigationType,
+        scope: internal.clone(request.scope || null),
         resolverId: resolution && resolution.resolverId || "IDE-180-RESOLVER-BASIC-NAVIGATION",
         sourceSnapshot: providerSnapshot(),
         candidates: internal.clone(data.candidates || []),
@@ -94,9 +95,49 @@
         createdAt: internal.nowIso()
       }
     };
+    enrichPhase5Result(result, request);
+    if (typeof namespace.evaluateNavigationResultAuthority === "function") {
+      result.authority = internal.clone(namespace.evaluateNavigationResultAuthority(result, request));
+    }
     result.explanation = typeof namespace.buildKnowledgeNavigationExplanation === "function"
       ? namespace.buildKnowledgeNavigationExplanation(result, request, data)
       : namespace.buildBasicNavigationExplanation(result, request, data);
+    return result;
+  }
+
+  function enrichPhase5Result(result, request) {
+    if (!result || !["complete", "partial"].includes(result.status)) return result;
+
+    if ((!Array.isArray(result.evidence) || result.evidence.length === 0) && typeof namespace.resolveKnowledgeEvidenceReferences === "function") {
+      const evidenceIds = [];
+      (Array.isArray(result.relationships) ? result.relationships : []).forEach(function relationship(item) {
+        (Array.isArray(item && item.evidenceReferenceIds) ? item.evidenceReferenceIds : []).forEach(function id(value) { if (value && !evidenceIds.includes(value)) evidenceIds.push(value); });
+      });
+      if (evidenceIds.length) {
+        const resolvedEvidence = namespace.resolveKnowledgeEvidenceReferences(evidenceIds);
+        if (resolvedEvidence && resolvedEvidence.ok === true && resolvedEvidence.data) {
+          result.evidence = internal.clone(resolvedEvidence.data.evidence || []);
+          if (resolvedEvidence.data.unresolvedEvidenceIds && resolvedEvidence.data.unresolvedEvidenceIds.length) {
+            result.metadata.warnings = internal.unique((result.metadata.warnings || []).concat(["Some Evidence references could not be resolved from the current evidence-index."]));
+          }
+        }
+      }
+      if ((!Array.isArray(result.evidence) || result.evidence.length === 0) && result.target && result.target.canonicalId && typeof namespace.resolveKnowledgeEvidenceForCanonicalId === "function") {
+        const entityEvidence = namespace.resolveKnowledgeEvidenceForCanonicalId(result.target.canonicalId);
+        if (entityEvidence && entityEvidence.ok === true && entityEvidence.data) result.evidence = internal.clone(entityEvidence.data.evidence || []);
+      }
+    }
+
+    if ((!Array.isArray(result.lineage) || result.lineage.length === 0) && result.target && result.target.canonicalId && typeof namespace.resolveKnowledgeLineage === "function") {
+      const lineage = namespace.resolveKnowledgeLineage(result.target.canonicalId);
+      if (lineage && lineage.ok === true && lineage.data) result.lineage = internal.clone(lineage.data.lineage || []);
+    }
+
+    if ((!result.validation || result.validation.status === "not-evaluated") && typeof namespace.getKnowledgeNavigatorValidationState === "function") {
+      const validation = namespace.getKnowledgeNavigatorValidationState();
+      if (validation && validation.ok === true && validation.data && validation.data.validation) result.validation = internal.clone(validation.data.validation);
+    }
+
     return result;
   }
 
@@ -186,7 +227,7 @@
     id: "IDE-180-ORCHESTRATOR",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 4,
+    phase: 5,
     verticalSlice: true,
     readOnly: true,
     loadedAt: internal.nowIso()
