@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_version_manifest.js
    IDE-180 Knowledge Navigator
-   Release: 1.5.0
-   Phase 6: Federation / Conflict
+   Release: 1.6.0
+   Phase 7: Session / Persistence / Reload
    Design Freeze: v1.0.0 / 2026-08-10
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.5.0";
+  const RELEASE_VERSION = "1.6.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,7 +20,7 @@
   }
 
   const moduleVersions = {
-    core: "1.5.0",
+    core: "1.6.0",
     contracts: BASELINE_VERSION,
     registry: "1.3.0",
     intelligenceProvider: BASELINE_VERSION,
@@ -48,7 +48,10 @@
     phase3Validation: BASELINE_VERSION,
     phase4Validation: BASELINE_VERSION,
     phase5Validation: BASELINE_VERSION,
-    phase6Validation: BASELINE_VERSION
+    phase6Validation: BASELINE_VERSION,
+    session: BASELINE_VERSION,
+    persistence: BASELINE_VERSION,
+    phase7Validation: BASELINE_VERSION
   };
 
   const fileModules = {
@@ -80,7 +83,10 @@
     "13_knowledge_navigator_phase3_validation.js": "phase3Validation",
     "13_knowledge_navigator_phase4_validation.js": "phase4Validation",
     "13_knowledge_navigator_phase5_validation.js": "phase5Validation",
-    "13_knowledge_navigator_phase6_validation.js": "phase6Validation"
+    "13_knowledge_navigator_phase6_validation.js": "phase6Validation",
+    "13_knowledge_navigator_session.js": "session",
+    "13_knowledge_navigator_persistence.js": "persistence",
+    "13_knowledge_navigator_phase7_validation.js": "phase7Validation"
   };
 
   const contractVersions = {
@@ -149,7 +155,7 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 6 Federation / Conflict",
+      implementationPhase: "Phase 7 Session / Persistence / Reload",
       designFreezeVersion: "1.0.0",
       architectureSpecificationVersion: "1.0.0",
       decisionRange: "IDE-180-DECISION-001..029",
@@ -169,13 +175,13 @@
       resolverContractVersion: BASELINE_VERSION
     },
     implementation: {
-      phase: 6,
-      phaseName: "Federation / Conflict",
+      phase: 7,
+      phaseName: "Session / Persistence / Reload",
       phaseCount: 10,
       contractFirst: true,
       incrementalVerticalSlice: true,
-      completedPhases: [1, 2, 3, 4, 5],
-      activePhase: 6,
+      completedPhases: [1, 2, 3, 4, 5, 6],
+      activePhase: 7,
       readOnly: true
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
