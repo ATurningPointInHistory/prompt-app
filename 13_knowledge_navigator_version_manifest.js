@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_version_manifest.js
    IDE-180 Knowledge Navigator
-   Release: 1.6.0
+   Release: 1.6.1
    Phase 7: Session / Persistence / Reload
    Design Freeze: v1.0.0 / 2026-08-10
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.6.0";
+  const RELEASE_VERSION = "1.6.1";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -51,7 +51,7 @@
     phase6Validation: BASELINE_VERSION,
     session: BASELINE_VERSION,
     persistence: BASELINE_VERSION,
-    phase7Validation: BASELINE_VERSION
+    phase7Validation: "1.0.1"
   };
 
   const fileModules = {
