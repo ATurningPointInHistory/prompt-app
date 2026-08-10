@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_phase7_validation.js
    IDE-180 Knowledge Navigator
-   Release: Version Manifest / Module: Phase 7 Validation 1.0.0
+   Release: Version Manifest / Module: Phase 7 Validation 1.0.1
    Phase 7: Session / Persistence / Reload
    ============================================================ */
 (function (global) {
@@ -83,8 +83,10 @@
     const check = checkFactory(checks);
 
     const initialized = namespace.initialize({ requireIDE170: true });
+    const sessionInitialized = typeof namespace.initializeSession === "function" ? namespace.initializeSession() : null;
+    const persistenceInitialized = typeof namespace.initializePersistence === "function" ? namespace.initializePersistence() : null;
     check("IDE-180 initialization succeeds", initialized && initialized.ok === true, initialized && initialized.code, "Initialization", "Critical");
-    check("Release Version is 1.6.0", VERSION_MANIFEST.release.version === "1.6.0", VERSION_MANIFEST.release.version, "Manifest", "Critical");
+    check("Release Version is 1.6.1", VERSION_MANIFEST.release.version === "1.6.1", VERSION_MANIFEST.release.version, "Manifest", "Critical");
     check("Implementation Phase is Phase 7", VERSION_MANIFEST.implementation.phase === 7 && /Phase 7/.test(VERSION_MANIFEST.release.implementationPhase), VERSION_MANIFEST.release.implementationPhase, "Manifest", "Critical");
     check("Design Freeze remains 1.0.0", VERSION_MANIFEST.release.designFreezeVersion === "1.0.0", VERSION_MANIFEST.release.designFreezeVersion, "Manifest", "High");
     check("Completed phases include 1 through 6", JSON.stringify(VERSION_MANIFEST.implementation.completedPhases) === JSON.stringify([1,2,3,4,5,6]), VERSION_MANIFEST.implementation.completedPhases, "Manifest", "High");
@@ -254,8 +256,8 @@
     check("Restored Receipt is not incompatible", restored && restored.data && restored.data.incompatible === false, restored && restored.data && restored.data.incompatible, "Full Reload", "Critical");
     check("Restored Receipt is not corrupted", restored && restored.data && restored.data.corrupted === false, restored && restored.data && restored.data.corrupted, "Full Reload", "Critical");
     check("Restored Receipt is not missing-source", restored && restored.data && restored.data.missingSource === false, restored && restored.data && restored.data.missingSource, "Full Reload", "Critical");
-    check("Restored Receipt keeps Source Snapshot", restored && restored.data && restored.data.receipt && restored.data.receipt.sourceSnapshot, restored && restored.data && restored.data.receipt && restored.data.receipt.sourceSnapshot && restored.data.receipt.sourceSnapshot.snapshotVersion, "Traceability", "Critical");
-    check("Restored Receipt keeps Authority summary", restored && restored.data && restored.data.receipt && restored.data.receipt.authoritySummary, restored && restored.data && restored.data.receipt && restored.data.receipt.authoritySummary && restored.data.receipt.authoritySummary.status, "Traceability", "High");
+    check("Restored Receipt keeps Source Snapshot", Boolean(restored && restored.data && restored.data.receipt && restored.data.receipt.sourceSnapshot), restored && restored.data && restored.data.receipt && restored.data.receipt.sourceSnapshot && restored.data.receipt.sourceSnapshot.snapshotVersion, "Traceability", "Critical");
+    check("Restored Receipt keeps Authority summary", Boolean(restored && restored.data && restored.data.receipt && restored.data.receipt.authoritySummary), restored && restored.data && restored.data.receipt && restored.data.receipt.authoritySummary && restored.data.receipt.authoritySummary.status, "Traceability", "High");
     check("Restored Receipt keeps Evidence references", restored && restored.data && restored.data.receipt && Array.isArray(restored.data.receipt.evidenceRefs), restored && restored.data && restored.data.receipt && arr(restored.data.receipt.evidenceRefs).length, "Traceability", "High");
     check("No active Runtime Session is recreated by Receipt restore", namespace.getKnowledgeNavigatorSessionStatus().sessionCount === 0, namespace.getKnowledgeNavigatorSessionStatus().sessionCount, "Selective Persistence", "Critical");
     check("Persistence remains Source read-only boundary", namespace.getKnowledgeNavigatorPersistenceStatus().readOnlySourceBoundary === true, namespace.getKnowledgeNavigatorPersistenceStatus().readOnlySourceBoundary, "Safety", "Critical");
