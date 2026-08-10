@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_orchestrator.js
    IDE-180 Knowledge Navigator
-   Release: Version Manifest / Module: Orchestrator 1.0.0
-   Phase 3: Basic Navigation
+   Release: Version Manifest / Module: Orchestrator 1.1.0
+   Phase 4: Relationship / Traversal
    ============================================================ */
 (function (global) {
   "use strict";
@@ -66,7 +66,7 @@
         recordId: data.target.recordId || null,
         recordType: data.target.recordType || null
       }] : [],
-      relationships: [],
+      relationships: internal.clone(data.relationships || []),
       authority: { status: "not-applicable", reason: "Authority Resolution begins in Phase 5." },
       evidence: [],
       lineage: [],
@@ -74,7 +74,7 @@
       validation: { status: "not-evaluated", reason: "Validation Resolver begins in Phase 5." },
       conflicts: [],
       missingSources: missing,
-      partialReason: status === "partial" ? (ambiguity.status === "ambiguous" ? "ambiguous-target" : "partial-source") : null,
+      partialReason: status === "partial" ? (data.partialReason || (ambiguity.status === "ambiguous" ? "ambiguous-target" : "partial-source")) : null,
       explanation: {},
       metadata: {
         navigationType: request.navigationType,
@@ -86,12 +86,17 @@
         limitations: internal.unique(provider && provider.limitations || []),
         warnings: internal.unique(provider && provider.warnings || []),
         ambiguity: ambiguity,
-        truncation: { truncated: false, reason: null },
+        traversal: internal.clone(data.traversal || null),
+        budget: internal.clone(data.budget || null),
+        graph: internal.clone(data.graph || null),
+        truncation: internal.clone(data.truncation || { truncated: false, reason: null }),
         readOnly: true,
         createdAt: internal.nowIso()
       }
     };
-    result.explanation = namespace.buildBasicNavigationExplanation(result, request, data);
+    result.explanation = typeof namespace.buildKnowledgeNavigationExplanation === "function"
+      ? namespace.buildKnowledgeNavigationExplanation(result, request, data)
+      : namespace.buildBasicNavigationExplanation(result, request, data);
     return result;
   }
 
@@ -181,7 +186,7 @@
     id: "IDE-180-ORCHESTRATOR",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 3,
+    phase: 4,
     verticalSlice: true,
     readOnly: true,
     loadedAt: internal.nowIso()
