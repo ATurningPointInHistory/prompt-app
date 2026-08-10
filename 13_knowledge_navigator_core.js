@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_core.js
    IDE-180 Knowledge Navigator
-   Release: 1.1.0 / Module: Core 1.1.0
-   Phase 2: IDE-170 Package Intake / Provider Foundation
+   Release: 1.2.0 / Module: Core 1.2.0
+   Phase 3: Basic Navigation
    ============================================================ */
 (function (global) {
   "use strict";
@@ -262,6 +262,21 @@
       }
       if (typeof namespace.initializeIntelligenceProvider === "function") {
         results.push(namespace.initializeIntelligenceProvider());
+      }
+      if (typeof namespace.initializeIdentity === "function") {
+        results.push(namespace.initializeIdentity());
+      }
+      if (typeof namespace.initializeQueryResolution === "function") {
+        results.push(namespace.initializeQueryResolution());
+      }
+      if (typeof namespace.initializeBasicResolver === "function") {
+        results.push(namespace.initializeBasicResolver());
+      }
+      if (typeof namespace.initializeExplanation === "function") {
+        results.push(namespace.initializeExplanation());
+      }
+      if (typeof namespace.initializeOrchestrator === "function") {
+        results.push(namespace.initializeOrchestrator());
       }
 
       const failed = results.filter(function failedResult(result) {
