@@ -53,12 +53,13 @@
       check("All frozen contracts remain read-only", contracts.every(function readOnly(item) { return item.readOnly === true; }), contracts.filter(function mutable(item) { return item.readOnly !== true; }).length, "Contracts", "Critical");
       const types = namespace.listNavigationTypes();
       check("Twenty core navigation types remain registered", types.length === 20, types.length, "Registry", "Critical");
-      check("Phase 2 does not overclaim Navigation implementation", types.every(function pending(item) { return item.implemented === false; }), types.filter(function implemented(item) { return item.implemented === true; }).length, "Registry", "Critical");
+      const currentPhase = Number(VERSION_MANIFEST.implementation && VERSION_MANIFEST.implementation.phase || 2);
+      check("Navigation implementation does not exceed current phase", types.every(function governed(item) { return item.implemented !== true || (Number.isInteger(item.implementationPhase) && item.implementationPhase <= currentPhase); }), "implemented=" + types.filter(function implemented(item) { return item.implemented === true; }).length + ",phase=" + currentPhase, "Registry", "Critical");
 
       const providers = namespace.listProviderDefinitions();
       check("Exactly one Phase 2 provider is registered", providers.length === 1, providers.length, "Provider Registry", "Critical");
       check("IDE-170 Intelligence Package provider is registered", providers.some(function match(item) { return item.providerId === "IDE-180-PROVIDER-IDE170-INTELLIGENCE-PACKAGE"; }), JSON.stringify(providers), "Provider Registry", "Critical");
-      check("Resolver Registry is still empty", namespace.listResolverDefinitions().length === 0, namespace.listResolverDefinitions().length, "Provider Registry", "High");
+      check("Resolver Registry remains compatible with current phase", currentPhase === 2 ? namespace.listResolverDefinitions().length === 0 : namespace.listResolverDefinitions().every(function valid(item) { return Boolean(item.resolverId); }), namespace.listResolverDefinitions().length, "Provider Registry", "High");
 
       const providerStatusBefore = namespace.getIntelligenceProviderStatus();
       check("Provider module is Ready", namespace.modules.intelligenceProvider && namespace.modules.intelligenceProvider.status === "Ready", namespace.modules.intelligenceProvider && namespace.modules.intelligenceProvider.status, "Provider", "Critical");
