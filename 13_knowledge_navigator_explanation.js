@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_explanation.js
    IDE-180 Knowledge Navigator
-   Release: Version Manifest / Module: Explanation 1.2.0
-   Phase 5: Authority / Evidence / Lineage
+   Release: Version Manifest / Module: Explanation 1.3.0
+   Phase 6: Federation / Conflict
    ============================================================ */
 (function (global) {
   "use strict";
@@ -23,6 +23,7 @@
     const type = internal.text(request && request.navigationType, "");
     const relationshipType = ["relationship", "dependency", "reverse-dependency", "workflow"].includes(type);
     if (status === "complete" && relationshipType) return "「" + label + "」について、現在のFact Relationship GraphをRead-OnlyでTraversalし、Phase 5のAuthorityを非スコア方式で評価しました。Evidence参照は解決可能な範囲で保持します。";
+    if (status === "complete" && ["architecture", "knowledge", "decision", "insight", "explanation"].includes(type)) return "「" + label + "」をCanonical Entity + Source Facetsとして非破壊Federationし、AuthorityとConflict状態を明示しました。Source Recordは物理統合していません。";
     if (status === "complete") return "「" + label + "」へのNavigationを現在の正式Sourceから解決し、Authority・Evidence・Lineage・Validationの利用可能範囲を明示しました。";
     if (status === "not-found") return "「" + label + "」は現在の利用可能Sourceから見つかりませんでした。存在しないとは断定せず、現在Sourceでは未検出として扱います。";
     if (status === "missing-source") return "Navigationに必要なSourceが現在利用できません。不足情報は推測して補完していません。";
@@ -56,8 +57,10 @@
       validation: internal.clone(result.validation || { status: "not-evaluated" }),
       missingSources: internal.clone(result.missingSources || []),
       limitations: internal.unique((result.metadata && result.metadata.limitations || []).concat([
-        "Phase 5 Authority uses deterministic rules and never uses a numeric score.",
-        "Evidence and Lineage are limited to explicit records available in the current IDE-170 Intelligence Package.",
+        "Phase 6 Authority uses deterministic rules and never uses a numeric score.",
+        "Federation is non-destructive: Source Records are grouped as facets and are not physically merged.",
+        "Conflict Candidate is never promoted to Confirmed without explicit conflict evidence.",
+        "Evidence and Lineage are limited to explicit records available from current Providers.",
         "Missing Source information is not inferred."
       ])),
       truncation: internal.clone(result.metadata && result.metadata.truncation || { truncated: false, reason: null }),
@@ -95,7 +98,7 @@
     id: "IDE-180-EXPLANATION",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 5,
+    phase: 6,
     structured: true,
     humanReadable: true,
     readOnly: true,
