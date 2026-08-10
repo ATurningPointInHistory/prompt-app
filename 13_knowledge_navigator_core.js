@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_core.js
    IDE-180 Knowledge Navigator
-   Release: 1.3.0 / Module: Core 1.3.0
-   Phase 4: Relationship / Traversal
+   Release: 1.4.0 / Module: Core 1.4.0
+   Phase 5: Authority / Evidence / Lineage
    ============================================================ */
 (function (global) {
   "use strict";
@@ -280,6 +280,18 @@
       }
       if (typeof namespace.initializeRelationshipResolver === "function") {
         results.push(namespace.initializeRelationshipResolver());
+      }
+      if (typeof namespace.initializeAuthority === "function") {
+        results.push(namespace.initializeAuthority());
+      }
+      if (typeof namespace.initializeEvidence === "function") {
+        results.push(namespace.initializeEvidence());
+      }
+      if (typeof namespace.initializeLineage === "function") {
+        results.push(namespace.initializeLineage());
+      }
+      if (typeof namespace.initializeValidationResolver === "function") {
+        results.push(namespace.initializeValidationResolver());
       }
       if (typeof namespace.initializeExplanation === "function") {
         results.push(namespace.initializeExplanation());
