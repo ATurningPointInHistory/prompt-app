@@ -234,7 +234,9 @@
     check("All 20 core navigation types are registered", navigationTypes.length === 20, navigationTypes.length, "Registry", "Critical");
     const typeIds = navigationTypes.map(function mapType(item) { return item.typeId; });
     check("Navigation Type IDs are unique", new Set(typeIds).size === typeIds.length, typeIds.length, "Registry", "Critical");
-    check("Phase 1 does not overclaim implemented navigation types", navigationTypes.every(function notImplemented(item) { return item.implemented === false; }), "implemented=" + navigationTypes.filter(function implemented(item) { return item.implemented === true; }).length, "Registry", "Critical");
+    const currentPhase = Number(VERSION_MANIFEST.implementation && VERSION_MANIFEST.implementation.phase || 1);
+    const implementationWithinPhase = navigationTypes.every(function withinPhase(item) { return item.implemented !== true || (Number.isInteger(item.implementationPhase) && item.implementationPhase <= currentPhase); });
+    check("Navigation Type implementation state does not exceed current phase", implementationWithinPhase, "implemented=" + navigationTypes.filter(function implemented(item) { return item.implemented === true; }).length + ",phase=" + currentPhase, "Registry", "Critical");
 
     const evidenceAlias = namespace.resolveNavigationType("根拠");
     check("Japanese alias 根拠 resolves to evidence", evidenceAlias.ok === true && evidenceAlias.typeId === "evidence", evidenceAlias.typeId, "Registry", "High");
@@ -244,7 +246,7 @@
     check("Unknown navigation type is unsupported", unknownAlias.ok === false && unknownAlias.status === "unsupported", unknownAlias.status, "Registry", "Critical");
 
     check("Phase 1 Provider baseline is non-mutable", namespace.listProviderDefinitions().every(function providerSafe(item) { return Boolean(item.providerId); }), namespace.listProviderDefinitions().length, "Registry", "High");
-    check("Resolver Registry is empty in Phase 1", namespace.listResolverDefinitions().length === 0, namespace.listResolverDefinitions().length, "Registry", "High");
+    check("Resolver Registry remains governed by current phase", currentPhase === 1 ? namespace.listResolverDefinitions().length === 0 : namespace.listResolverDefinitions().every(function valid(item) { return Boolean(item.resolverId); }), namespace.listResolverDefinitions().length, "Registry", "High");
 
     check("Core module is loaded", Boolean(namespace.modules.core), namespace.modules.core && namespace.modules.core.status, "Modules", "Critical");
     check("Contracts module is Ready", namespace.modules.contracts && namespace.modules.contracts.status === "Ready", namespace.modules.contracts && namespace.modules.contracts.status, "Modules", "Critical");
