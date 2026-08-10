@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_registry.js
    IDE-180 Knowledge Navigator
-   Release: Version Manifest / Module: Registry 1.1.0
-   Phase 4: Relationship / Traversal
+   Release: Version Manifest / Module: Registry 1.3.0
+   Phase 6: Federation / Conflict
    ============================================================ */
 (function (global) {
   "use strict";
@@ -25,20 +25,20 @@
     { typeId: "file", aliases: ["file", "ファイル"], phase: 3, implemented: true, resolverId: "IDE-180-RESOLVER-BASIC-NAVIGATION" },
     { typeId: "module", aliases: ["module", "モジュール"], phase: 3, implemented: true, resolverId: "IDE-180-RESOLVER-BASIC-NAVIGATION" },
     { typeId: "function", aliases: ["function", "関数"], phase: 3, implemented: true, resolverId: "IDE-180-RESOLVER-BASIC-NAVIGATION" },
-    { typeId: "architecture", aliases: ["architecture", "アーキテクチャ", "構造"], phase: 5 },
-    { typeId: "knowledge", aliases: ["knowledge", "ナレッジ", "知識"], phase: 5 },
+    { typeId: "architecture", aliases: ["architecture", "アーキテクチャ", "構造"], phase: 6, implemented: true, resolverId: "IDE-180-RESOLVER-FEDERATED-SOURCE" },
+    { typeId: "knowledge", aliases: ["knowledge", "ナレッジ", "知識"], phase: 6, implemented: true, resolverId: "IDE-180-RESOLVER-FEDERATED-SOURCE" },
     { typeId: "relationship", aliases: ["relationship", "relation", "関係", "関連"], phase: 4, implemented: true, resolverId: "IDE-180-RESOLVER-RELATIONSHIP-TRAVERSAL" },
     { typeId: "dependency", aliases: ["dependency", "依存", "依存関係"], phase: 4, implemented: true, resolverId: "IDE-180-RESOLVER-RELATIONSHIP-TRAVERSAL" },
     { typeId: "reverse-dependency", aliases: ["reverse dependency", "逆依存", "何が依存している"], phase: 4, implemented: true, resolverId: "IDE-180-RESOLVER-RELATIONSHIP-TRAVERSAL" },
     { typeId: "workflow", aliases: ["workflow", "ワークフロー"], phase: 4, implemented: true, resolverId: "IDE-180-RESOLVER-RELATIONSHIP-TRAVERSAL" },
-    { typeId: "decision", aliases: ["decision", "決定", "Decision"], phase: 5 },
+    { typeId: "decision", aliases: ["decision", "決定", "Decision"], phase: 6, implemented: true, resolverId: "IDE-180-RESOLVER-FEDERATED-SOURCE" },
     { typeId: "evidence", aliases: ["evidence", "根拠", "証拠"], phase: 5, implemented: true, resolverId: "IDE-180-RESOLVER-EVIDENCE-TRACE" },
     { typeId: "lineage", aliases: ["lineage", "来歴", "系譜", "どこから来た"], phase: 5, implemented: true, resolverId: "IDE-180-RESOLVER-LINEAGE-VERSION-TIMELINE" },
     { typeId: "version", aliases: ["version", "バージョン"], phase: 5, implemented: true, resolverId: "IDE-180-RESOLVER-LINEAGE-VERSION-TIMELINE" },
     { typeId: "timeline", aliases: ["timeline", "時系列", "履歴"], phase: 5, implemented: true, resolverId: "IDE-180-RESOLVER-LINEAGE-VERSION-TIMELINE" },
     { typeId: "validation", aliases: ["validation", "検証", "バリデーション"], phase: 5, implemented: true, resolverId: "IDE-180-RESOLVER-VALIDATION-TRACE" },
-    { typeId: "insight", aliases: ["insight", "洞察", "Insight"], phase: 5 },
-    { typeId: "explanation", aliases: ["explanation", "説明", "理由"], phase: 5 }
+    { typeId: "insight", aliases: ["insight", "洞察", "Insight"], phase: 6, implemented: true, resolverId: "IDE-180-RESOLVER-FEDERATED-SOURCE" },
+    { typeId: "explanation", aliases: ["explanation", "説明", "理由"], phase: 6, implemented: true, resolverId: "IDE-180-RESOLVER-FEDERATED-SOURCE" }
   ];
 
   function normalizeAlias(value) {
