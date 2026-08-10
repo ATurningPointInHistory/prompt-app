@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_core.js
    IDE-180 Knowledge Navigator
-   Release: 1.4.0 / Module: Core 1.4.0
-   Phase 5: Authority / Evidence / Lineage
+   Release: 1.5.0 / Module: Core 1.5.0
+   Phase 6: Federation / Conflict
    ============================================================ */
 (function (global) {
   "use strict";
@@ -292,6 +292,27 @@
       }
       if (typeof namespace.initializeValidationResolver === "function") {
         results.push(namespace.initializeValidationResolver());
+      }
+      if (typeof namespace.initializeMemoProvider === "function") {
+        results.push(namespace.initializeMemoProvider());
+      }
+      if (typeof namespace.initializeKnowledgeProvider === "function") {
+        results.push(namespace.initializeKnowledgeProvider());
+      }
+      if (typeof namespace.initializeArchitectureProvider === "function") {
+        results.push(namespace.initializeArchitectureProvider());
+      }
+      if (typeof namespace.initializeValidationProvider === "function") {
+        results.push(namespace.initializeValidationProvider());
+      }
+      if (typeof namespace.initializeConflict === "function") {
+        results.push(namespace.initializeConflict());
+      }
+      if (typeof namespace.initializeFederation === "function") {
+        results.push(namespace.initializeFederation());
+      }
+      if (typeof namespace.initializeFederatedResolver === "function") {
+        results.push(namespace.initializeFederatedResolver());
       }
       if (typeof namespace.initializeExplanation === "function") {
         results.push(namespace.initializeExplanation());
