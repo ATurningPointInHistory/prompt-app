@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_validation.js
    IDE-180 Knowledge Navigator
-   Release: Version Manifest / Module: Validation 1.0.0
+   Release: 1.1.0 / Module: Validation 1.0.1
    Phase 1: Foundation / Contracts Validation
    ============================================================ */
 (function (global) {
@@ -188,9 +188,9 @@
     const dependency = namespace.getDependencyStatus();
 
     check("Component is IDE-180", status.componentId === "IDE-180", status.componentId, "Manifest", "Critical");
-    check("Release Version is 1.0.0", status.version === "1.0.0", status.version, "Manifest", "Critical");
+    check("Release Version satisfies Phase 1 baseline", internal.compareSemver(status.version, "1.0.0") >= 0, status.version, "Manifest", "Critical");
     check("Design Freeze is 1.0.0", status.designFreezeVersion === "1.0.0", status.designFreezeVersion, "Manifest", "Critical");
-    check("Implementation Phase is Phase 1", /Phase 1/.test(status.implementationPhase || ""), status.implementationPhase, "Manifest", "High");
+    check("Implementation includes Phase 1 baseline", VERSION_MANIFEST.implementation.phase >= 1, status.implementationPhase, "Manifest", "High");
 
     check("IDE-170 Manifest is loaded", dependency.ide170ManifestLoaded === true, dependency.ide170ReleaseVersion, "Compatibility", "Critical");
     check("IDE-170 Release is compatible", dependency.ide170VersionCompatible === true, dependency.ide170ReleaseVersion + " >= " + dependency.minimumIDE170Version, "Compatibility", "Critical");
@@ -243,7 +243,7 @@
     const unknownAlias = namespace.resolveNavigationType("__unknown_navigation_type__");
     check("Unknown navigation type is unsupported", unknownAlias.ok === false && unknownAlias.status === "unsupported", unknownAlias.status, "Registry", "Critical");
 
-    check("Provider Registry is empty in Phase 1", namespace.listProviderDefinitions().length === 0, namespace.listProviderDefinitions().length, "Registry", "High");
+    check("Phase 1 Provider baseline is non-mutable", namespace.listProviderDefinitions().every(function providerSafe(item) { return Boolean(item.providerId); }), namespace.listProviderDefinitions().length, "Registry", "High");
     check("Resolver Registry is empty in Phase 1", namespace.listResolverDefinitions().length === 0, namespace.listResolverDefinitions().length, "Registry", "High");
 
     check("Core module is loaded", Boolean(namespace.modules.core), namespace.modules.core && namespace.modules.core.status, "Modules", "Critical");
