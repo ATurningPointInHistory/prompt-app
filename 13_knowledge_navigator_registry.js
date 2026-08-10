@@ -19,12 +19,12 @@
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("registry");
 
   const BUILT_IN_TYPES = [
-    { typeId: "search", aliases: ["検索", "探す"], phase: 3 },
-    { typeId: "entity", aliases: ["entity", "エンティティ", "対象"], phase: 3 },
-    { typeId: "repository", aliases: ["repository", "リポジトリ"], phase: 3 },
-    { typeId: "file", aliases: ["file", "ファイル"], phase: 3 },
-    { typeId: "module", aliases: ["module", "モジュール"], phase: 3 },
-    { typeId: "function", aliases: ["function", "関数"], phase: 3 },
+    { typeId: "search", aliases: ["検索", "探す"], phase: 3, implemented: true, resolverId: "IDE-180-RESOLVER-BASIC-NAVIGATION" },
+    { typeId: "entity", aliases: ["entity", "エンティティ", "対象"], phase: 3, implemented: true, resolverId: "IDE-180-RESOLVER-BASIC-NAVIGATION" },
+    { typeId: "repository", aliases: ["repository", "リポジトリ"], phase: 3, implemented: true, resolverId: "IDE-180-RESOLVER-BASIC-NAVIGATION" },
+    { typeId: "file", aliases: ["file", "ファイル"], phase: 3, implemented: true, resolverId: "IDE-180-RESOLVER-BASIC-NAVIGATION" },
+    { typeId: "module", aliases: ["module", "モジュール"], phase: 3, implemented: true, resolverId: "IDE-180-RESOLVER-BASIC-NAVIGATION" },
+    { typeId: "function", aliases: ["function", "関数"], phase: 3, implemented: true, resolverId: "IDE-180-RESOLVER-BASIC-NAVIGATION" },
     { typeId: "architecture", aliases: ["architecture", "アーキテクチャ", "構造"], phase: 5 },
     { typeId: "knowledge", aliases: ["knowledge", "ナレッジ", "知識"], phase: 5 },
     { typeId: "relationship", aliases: ["relationship", "relation", "関係", "関連"], phase: 4 },
@@ -173,6 +173,19 @@
     return internal.buildResult(true, "IDE180_PROVIDER_REGISTERED", "Ready", { providerId: providerId });
   }
 
+
+  function getResolverDefinition(resolverId) {
+    const id = internal.text(resolverId, "");
+    const definition = state.resolverDefinitions.get(id);
+    return definition || null;
+  }
+
+  function getProviderDefinition(providerId) {
+    const id = internal.text(providerId, "");
+    const definition = state.providerDefinitions.get(id);
+    return definition || null;
+  }
+
   function listResolverDefinitions() {
     return Array.from(state.resolverDefinitions.keys()).map(function mapId(id) { return { resolverId: id }; });
   }
@@ -207,6 +220,8 @@
     resolveNavigationType: resolveNavigationType,
     registerResolverDefinition: registerResolverDefinition,
     registerProviderDefinition: registerProviderDefinition,
+    getResolverDefinition: getResolverDefinition,
+    getProviderDefinition: getProviderDefinition,
     listResolverDefinitions: listResolverDefinitions,
     listProviderDefinitions: listProviderDefinitions
   });
