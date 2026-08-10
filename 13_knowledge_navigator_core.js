@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_core.js
    IDE-180 Knowledge Navigator
-   Release: Version Manifest / Module: Core 1.0.0
-   Phase 1: Foundation / Contracts
+   Release: 1.1.0 / Module: Core 1.1.0
+   Phase 2: IDE-170 Package Intake / Provider Foundation
    ============================================================ */
 (function (global) {
   "use strict";
@@ -259,6 +259,9 @@
       }
       if (typeof namespace.initializeRegistry === "function") {
         results.push(namespace.initializeRegistry());
+      }
+      if (typeof namespace.initializeIntelligenceProvider === "function") {
+        results.push(namespace.initializeIntelligenceProvider());
       }
 
       const failed = results.filter(function failedResult(result) {
