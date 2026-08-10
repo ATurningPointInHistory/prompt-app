@@ -5,7 +5,7 @@
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
   "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Phase 7 Session / Persistence / Reload extension.",
-  "updatedAt": "2026-08-10T17:20:41.539707Z",
+  "updatedAt": "2026-08-10T18:11:54.151Z",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
   "scripts": [
@@ -146,7 +146,7 @@
     "./13_intelligence_package_validation.js?h=c31e04201315",
     "./13_intelligence_package_export.js?h=3b0a01705f11",
     "./13_intelligence_validation.js?h=db0c62a52276",
-    "./13_knowledge_navigator_version_manifest.js?h=cf0eb38436df",
+    "./13_knowledge_navigator_version_manifest.js?h=1c9d13e21d69",
     "./13_knowledge_navigator_core.js?h=c6afbbca6cf1",
     "./13_knowledge_navigator_contracts.js?h=4682342e4a57",
     "./13_knowledge_navigator_registry.js?h=bdabc846156a",
@@ -178,7 +178,7 @@
     "./13_knowledge_navigator_phase4_validation.js?h=4c2b0e9102de",
     "./13_knowledge_navigator_phase5_validation.js?h=f48f56cccdea",
     "./13_knowledge_navigator_phase6_validation.js?h=c9358b8799a5",
-    "./13_knowledge_navigator_phase7_validation.js?h=dfeb3838f026",
+    "./13_knowledge_navigator_phase7_validation.js?h=4f038972a055",
     "./13_project_report.js?h=d636cb6a6766",
     "./13_project_handoff.js?h=a073ff86a1eb",
     "./13_function_relation_v3.js?h=0857a784aa30",
@@ -882,9 +882,9 @@
       "cacheKey": "db0c62a52276"
     },
     "13_knowledge_navigator_version_manifest.js": {
-      "sha256": "cf0eb38436df229e63d10bbb45796e15913be2a59ac83cd50f2053bec223efb8",
-      "byteSize": 7591,
-      "cacheKey": "cf0eb38436df"
+      "sha256": "1c9d13e21d693ceb89df6c7a781bb69ebb1e38cd58108d466b24c7ae42804cce",
+      "byteSize": 7582,
+      "cacheKey": "1c9d13e21d69"
     },
     "13_knowledge_navigator_core.js": {
       "sha256": "c6afbbca6cf129c323374988d1b8df3d6e15ea289b5974aa131699f3d846b9da",
@@ -1042,9 +1042,9 @@
       "cacheKey": "c9358b8799a5"
     },
     "13_knowledge_navigator_phase7_validation.js": {
-      "sha256": "dfeb3838f0261a09a7d832b5e63745ee469940d4a59bafed505544c1794b3dbf",
-      "byteSize": 26408,
-      "cacheKey": "dfeb3838f026"
+      "sha256": "4f038972a055941643fe446a2f5705c84e972745174b054f7c922a040a4b7295",
+      "byteSize": 26680,
+      "cacheKey": "4f038972a055"
     },
     "13_project_report.js": {
       "sha256": "d636cb6a67665a6a26975934e81c9ffe2e1aca43b7f1303d0b9dae1a221c813b",
@@ -1122,6 +1122,6 @@
       "cacheKey": "138e34ded106"
     }
   },
-  "scriptSetHash": "cdf115003a50e98c549a4f93dee585d64427c47a208c38367cd9b90e8a025627",
-  "manifestHash": "55acc69435c8dd6257bb6f8b6dcf02408970f324040d30ee4759c58002d5a0d3"
+  "scriptSetHash": "c0691b492595b572de3d8dde2eb520d36c93e968a582068994c5172ddfb1ba58",
+  "manifestHash": "1298b2d237494df86f8de03c25e69c17168155d7728753f30d791880639095f6"
 }
