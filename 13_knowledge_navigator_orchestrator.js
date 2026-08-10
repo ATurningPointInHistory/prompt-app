@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_orchestrator.js
    IDE-180 Knowledge Navigator
-   Release: Version Manifest / Module: Orchestrator 1.2.0
-   Phase 5: Authority / Evidence / Lineage
+   Release: Version Manifest / Module: Orchestrator 1.3.0
+   Phase 6: Federation / Conflict
    ============================================================ */
 (function (global) {
   "use strict";
@@ -21,6 +21,7 @@
   function providerSnapshot() {
     const status = typeof namespace.getIntelligenceProviderStatus === "function" ? namespace.getIntelligenceProviderStatus() : null;
     const active = status && status.activePackage || null;
+    const federation = typeof namespace.getKnowledgeNavigatorFederationSnapshot === "function" ? namespace.getKnowledgeNavigatorFederationSnapshot() : null;
     return {
       providerId: status && status.providerId || null,
       providerVersion: status && status.providerVersion || null,
@@ -28,17 +29,25 @@
       availability: status && status.availability || "unavailable",
       packageId: active && active.packageId || null,
       packageHash: active && active.packageHash || null,
-      sourceOrigin: active && active.sourceOrigin || null
+      sourceOrigin: active && active.sourceOrigin || null,
+      federation: federation ? internal.clone(federation) : null
     };
   }
 
-  async function ensureSource() {
+  async function ensureSource(request) {
+    const federatedType = request && ["architecture", "knowledge", "decision", "insight", "explanation"].includes(request.navigationType);
     const status = typeof namespace.getIntelligenceProviderStatus === "function" ? namespace.getIntelligenceProviderStatus() : null;
-    if (status && status.activePackage) return internal.buildResult(true, "IDE180_NAVIGATION_SOURCE_READY", status.availability || "available", { provider: status });
-    if (typeof namespace.openLatestIntelligencePackageSource !== "function") {
+    if (status && status.activePackage) return internal.buildResult(true, "IDE180_NAVIGATION_SOURCE_READY", status.availability || "available", { provider: status, federation: federatedType });
+    if (typeof namespace.openLatestIntelligencePackageSource === "function") {
+      const opened = await namespace.openLatestIntelligencePackageSource({ allowIndexedDB: true });
+      if (opened && opened.ok === true) return opened;
+      if (!federatedType) return opened;
+    } else if (!federatedType) {
       return internal.buildResult(false, "IDE180_NAVIGATION_SOURCE_PROVIDER_UNAVAILABLE", "missing-source", null);
     }
-    return namespace.openLatestIntelligencePackageSource({ allowIndexedDB: true });
+    const snapshot = typeof namespace.getKnowledgeNavigatorFederationSnapshot === "function" ? namespace.getKnowledgeNavigatorFederationSnapshot() : null;
+    const available = snapshot && Array.isArray(snapshot.providers) && snapshot.providers.some(function provider(item) { return ["available", "partial"].includes(item.availability); });
+    return internal.buildResult(available === true, available === true ? "IDE180_FEDERATED_SOURCE_READY" : "IDE180_FEDERATED_SOURCE_UNAVAILABLE", available === true ? "partial" : "missing-source", { provider: status || null, federation: snapshot || null });
   }
 
   function basicResult(request, status, resolution, sourceStatus) {
@@ -58,21 +67,21 @@
       status: status,
       target: data.target || null,
       navigationPath: internal.clone(data.navigationPath || []),
-      sources: data.target ? [{
+      sources: Array.isArray(data.sources) ? internal.clone(data.sources) : (data.target ? [{
         providerId: provider && provider.providerId || null,
         sourceType: provider && provider.sourceType || null,
         packageId: provider && provider.activePackage && provider.activePackage.packageId || null,
         canonicalId: data.target.canonicalId || null,
         recordId: data.target.recordId || null,
         recordType: data.target.recordType || null
-      }] : [],
+      }] : []),
       relationships: internal.clone(data.relationships || []),
       authority: internal.clone(data.authority || { status: "not-applicable", reason: "No Authority evaluation is applicable for this resolver output." }),
       evidence: internal.clone(data.evidence || []),
       lineage: internal.clone(data.lineage || []),
       version: data.version != null ? internal.clone(data.version) : (data.target && data.target.source && data.target.source.sourceVersion || null),
       validation: internal.clone(data.validation || { status: "not-evaluated", reason: "No Validation artifact was resolved for this navigation result." }),
-      conflicts: [],
+      conflicts: internal.clone(data.conflicts || []),
       missingSources: missing,
       partialReason: status === "partial" ? (data.partialReason || (ambiguity.status === "ambiguous" ? "ambiguous-target" : "partial-source")) : null,
       explanation: {},
@@ -80,7 +89,7 @@
         navigationType: request.navigationType,
         scope: internal.clone(request.scope || null),
         resolverId: resolution && resolution.resolverId || "IDE-180-RESOLVER-BASIC-NAVIGATION",
-        sourceSnapshot: providerSnapshot(),
+        sourceSnapshot: data.sourceSnapshot ? internal.clone(data.sourceSnapshot) : providerSnapshot(),
         candidates: internal.clone(data.candidates || []),
         totalMatches: data.totalMatches == null ? null : data.totalMatches,
         matchKind: data.matchKind || null,
@@ -90,13 +99,15 @@
         traversal: internal.clone(data.traversal || null),
         budget: internal.clone(data.budget || null),
         graph: internal.clone(data.graph || null),
+        sourceFacets: internal.clone(data.sourceFacets || []),
+        federation: internal.clone(data.federation || null),
         truncation: internal.clone(data.truncation || { truncated: false, reason: null }),
         readOnly: true,
         createdAt: internal.nowIso()
       }
     };
     enrichPhase5Result(result, request);
-    if (typeof namespace.evaluateNavigationResultAuthority === "function") {
+    if (!data.authority && typeof namespace.evaluateNavigationResultAuthority === "function") {
       result.authority = internal.clone(namespace.evaluateNavigationResultAuthority(result, request));
     }
     result.explanation = typeof namespace.buildKnowledgeNavigationExplanation === "function"
@@ -171,7 +182,7 @@
       return failureResult(request, internal.buildResult(false, "IDE180_NAVIGATION_TYPE_NOT_IMPLEMENTED", "unsupported", { navigationType: request.navigationType }), null);
     }
 
-    const sourceStatus = await ensureSource();
+    const sourceStatus = await ensureSource(request);
     if (!sourceStatus || sourceStatus.ok !== true) return failureResult(request, sourceStatus, sourceStatus);
 
     const resolver = resolverFor(request.navigationType);
@@ -227,7 +238,7 @@
     id: "IDE-180-ORCHESTRATOR",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 5,
+    phase: 6,
     verticalSlice: true,
     readOnly: true,
     loadedAt: internal.nowIso()
