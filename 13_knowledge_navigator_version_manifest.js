@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_version_manifest.js
    IDE-180 Knowledge Navigator
-   Release: 1.1.0
-   Phase 2: IDE-170 Package Intake / Provider Foundation
+   Release: 1.2.0
+   Phase 3: Basic Navigation
    Design Freeze: v1.0.0 / 2026-08-10
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.1.0";
+  const RELEASE_VERSION = "1.2.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,12 +20,18 @@
   }
 
   const moduleVersions = {
-    core: "1.1.0",
+    core: "1.2.0",
     contracts: BASELINE_VERSION,
     registry: BASELINE_VERSION,
     intelligenceProvider: BASELINE_VERSION,
-    validation: "1.0.1",
-    phase2Validation: BASELINE_VERSION
+    identity: BASELINE_VERSION,
+    queryResolution: BASELINE_VERSION,
+    basicResolver: BASELINE_VERSION,
+    explanation: BASELINE_VERSION,
+    orchestrator: BASELINE_VERSION,
+    validation: "1.0.2",
+    phase2Validation: BASELINE_VERSION,
+    phase3Validation: BASELINE_VERSION
   };
 
   const fileModules = {
@@ -33,8 +39,14 @@
     "13_knowledge_navigator_contracts.js": "contracts",
     "13_knowledge_navigator_registry.js": "registry",
     "13_knowledge_navigator_intelligence_provider.js": "intelligenceProvider",
+    "13_knowledge_navigator_identity.js": "identity",
+    "13_knowledge_navigator_query_resolution.js": "queryResolution",
+    "13_knowledge_navigator_basic_resolver.js": "basicResolver",
+    "13_knowledge_navigator_explanation.js": "explanation",
+    "13_knowledge_navigator_orchestrator.js": "orchestrator",
     "13_knowledge_navigator_validation.js": "validation",
-    "13_knowledge_navigator_phase2_validation.js": "phase2Validation"
+    "13_knowledge_navigator_phase2_validation.js": "phase2Validation",
+    "13_knowledge_navigator_phase3_validation.js": "phase3Validation"
   };
 
   const contractVersions = {
@@ -103,7 +115,7 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 2 IDE-170 Package Intake / Provider Foundation",
+      implementationPhase: "Phase 3 Basic Navigation",
       designFreezeVersion: "1.0.0",
       architectureSpecificationVersion: "1.0.0",
       decisionRange: "IDE-180-DECISION-001..029",
@@ -123,13 +135,13 @@
       resolverContractVersion: BASELINE_VERSION
     },
     implementation: {
-      phase: 2,
-      phaseName: "IDE-170 Package Intake / Provider Foundation",
+      phase: 3,
+      phaseName: "Basic Navigation",
       phaseCount: 10,
       contractFirst: true,
       incrementalVerticalSlice: true,
-      completedPhases: [1],
-      activePhase: 2,
+      completedPhases: [1, 2],
+      activePhase: 3,
       readOnly: true
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
