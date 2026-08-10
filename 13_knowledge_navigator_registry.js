@@ -32,11 +32,11 @@
     { typeId: "reverse-dependency", aliases: ["reverse dependency", "逆依存", "何が依存している"], phase: 4, implemented: true, resolverId: "IDE-180-RESOLVER-RELATIONSHIP-TRAVERSAL" },
     { typeId: "workflow", aliases: ["workflow", "ワークフロー"], phase: 4, implemented: true, resolverId: "IDE-180-RESOLVER-RELATIONSHIP-TRAVERSAL" },
     { typeId: "decision", aliases: ["decision", "決定", "Decision"], phase: 5 },
-    { typeId: "evidence", aliases: ["evidence", "根拠", "証拠"], phase: 5 },
-    { typeId: "lineage", aliases: ["lineage", "来歴", "系譜", "どこから来た"], phase: 5 },
-    { typeId: "version", aliases: ["version", "バージョン"], phase: 5 },
-    { typeId: "timeline", aliases: ["timeline", "時系列", "履歴"], phase: 5 },
-    { typeId: "validation", aliases: ["validation", "検証", "バリデーション"], phase: 5 },
+    { typeId: "evidence", aliases: ["evidence", "根拠", "証拠"], phase: 5, implemented: true, resolverId: "IDE-180-RESOLVER-EVIDENCE-TRACE" },
+    { typeId: "lineage", aliases: ["lineage", "来歴", "系譜", "どこから来た"], phase: 5, implemented: true, resolverId: "IDE-180-RESOLVER-LINEAGE-VERSION-TIMELINE" },
+    { typeId: "version", aliases: ["version", "バージョン"], phase: 5, implemented: true, resolverId: "IDE-180-RESOLVER-LINEAGE-VERSION-TIMELINE" },
+    { typeId: "timeline", aliases: ["timeline", "時系列", "履歴"], phase: 5, implemented: true, resolverId: "IDE-180-RESOLVER-LINEAGE-VERSION-TIMELINE" },
+    { typeId: "validation", aliases: ["validation", "検証", "バリデーション"], phase: 5, implemented: true, resolverId: "IDE-180-RESOLVER-VALIDATION-TRACE" },
     { typeId: "insight", aliases: ["insight", "洞察", "Insight"], phase: 5 },
     { typeId: "explanation", aliases: ["explanation", "説明", "理由"], phase: 5 }
   ];
