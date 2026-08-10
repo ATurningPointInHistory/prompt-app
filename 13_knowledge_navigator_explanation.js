@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_explanation.js
    IDE-180 Knowledge Navigator
-   Release: Version Manifest / Module: Explanation 1.1.0
-   Phase 4: Relationship / Traversal
+   Release: Version Manifest / Module: Explanation 1.2.0
+   Phase 5: Authority / Evidence / Lineage
    ============================================================ */
 (function (global) {
   "use strict";
@@ -22,8 +22,8 @@
     const label = target && (target.name || target.qualifiedName || target.canonicalId) || internal.text(request && request.query, internal.text(request && request.navigationType, "対象"));
     const type = internal.text(request && request.navigationType, "");
     const relationshipType = ["relationship", "dependency", "reverse-dependency", "workflow"].includes(type);
-    if (status === "complete" && relationshipType) return "「" + label + "」について、現在のFact Relationship GraphをRead-OnlyでTraversalしました。Phase 4ではAuthority・Evidence・Lineageの評価はまだ行いません。";
-    if (status === "complete") return "「" + label + "」への基本NavigationをCanonical Snapshotから解決しました。Phase 4でもAuthority・Evidence・Lineageの判定はまだ行いません。";
+    if (status === "complete" && relationshipType) return "「" + label + "」について、現在のFact Relationship GraphをRead-OnlyでTraversalし、Phase 5のAuthorityを非スコア方式で評価しました。Evidence参照は解決可能な範囲で保持します。";
+    if (status === "complete") return "「" + label + "」へのNavigationを現在の正式Sourceから解決し、Authority・Evidence・Lineage・Validationの利用可能範囲を明示しました。";
     if (status === "not-found") return "「" + label + "」は現在の利用可能Sourceから見つかりませんでした。存在しないとは断定せず、現在Sourceでは未検出として扱います。";
     if (status === "missing-source") return "Navigationに必要なSourceが現在利用できません。不足情報は推測して補完していません。";
     if (status === "partial" && relationshipType) return "Relationship Traversalは実行しましたが、BudgetまたはSource境界により結果がPartialです。取得済みPathは保持しています。";
@@ -56,9 +56,9 @@
       validation: internal.clone(result.validation || { status: "not-evaluated" }),
       missingSources: internal.clone(result.missingSources || []),
       limitations: internal.unique((result.metadata && result.metadata.limitations || []).concat([
-        "Phase 4 does not resolve authority.",
-        "Phase 4 preserves Relationship evidence references but does not resolve Evidence records.",
-        "Phase 4 does not resolve lineage."
+        "Phase 5 Authority uses deterministic rules and never uses a numeric score.",
+        "Evidence and Lineage are limited to explicit records available in the current IDE-170 Intelligence Package.",
+        "Missing Source information is not inferred."
       ])),
       truncation: internal.clone(result.metadata && result.metadata.truncation || { truncated: false, reason: null }),
       ambiguity: internal.clone(result.metadata && result.metadata.ambiguity || { status: "none", candidates: [] }),
@@ -95,7 +95,7 @@
     id: "IDE-180-EXPLANATION",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 4,
+    phase: 5,
     structured: true,
     humanReadable: true,
     readOnly: true,
