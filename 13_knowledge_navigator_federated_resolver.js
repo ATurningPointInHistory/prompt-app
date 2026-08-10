@@ -1,0 +1,52 @@
+/* ============================================================
+   FILE: 13_knowledge_navigator_federated_resolver.js
+   IDE-180 Knowledge Navigator
+   Release: Version Manifest / Module: Federated Resolver 1.0.0
+   Phase 6: Federation / Conflict
+   ============================================================ */
+(function (global) {
+  "use strict";
+  const namespace=global.IDE180KnowledgeNavigator; const VERSION_MANIFEST=global.IDE180VersionManifest;
+  if(!namespace||!namespace.__internal||!VERSION_MANIFEST){console.warn("IDE-180 Federated Resolver blocked.");return;}
+  const internal=namespace.__internal; const MODULE_VERSION=VERSION_MANIFEST.getModuleVersion("federatedResolver"); const RESOLVER_ID="IDE-180-RESOLVER-FEDERATED-SOURCE"; const TYPES=["architecture","knowledge","decision","insight","explanation"];
+  function text(v,f){return internal.text(v,f);} function lower(v){return text(v,"").normalize("NFKC").toLowerCase();} function arr(v){return Array.isArray(v)?v:[];}
+  function queryText(request){if(request&&request.target&&typeof request.target==="object")return text(request.target.canonicalId||request.target.id||request.target.title||request.target.name,request.query); return text(request&&request.target,request&&request.query);}
+  function exactOrFirst(records,q){const query=lower(q); if(!records.length)return[]; const exact=records.filter(function(r){return [r.recordId,r.canonicalEntityId,r.sourceId,r.title].some(function(v){return lower(v)===query;});}); return exact.length?exact:records;}
+  function recordsForCanonicalIds(ids){
+    const out=[]; const providers=namespace.listProviderDefinitions?namespace.listProviderDefinitions():[];
+    providers.forEach(function(ref){const p=namespace.getProviderDefinition(ref.providerId); if(!p||typeof p.list!=="function")return; let list=[];try{list=p.list({limit:500});}catch(_){list=[];} arr(list).forEach(function(r){if(ids.includes(r.canonicalEntityId))out.push(r);});}); return out;
+  }
+  function primaryRecords(type,q){
+    if(type==="architecture"&&typeof namespace.searchArchitectureSourceRecords==="function")return namespace.searchArchitectureSourceRecords(q);
+    if(type==="knowledge"&&typeof namespace.searchKnowledgeSourceRecords==="function")return namespace.searchKnowledgeSourceRecords(q);
+    if(type==="decision"&&typeof namespace.searchMemoSourceRecords==="function")return namespace.searchMemoSourceRecords(q,{kind:"decision"});
+    return [];
+  }
+  function packageArtifactRecords(type,q){
+    if(typeof namespace.listIntelligencePackageArtifacts!=="function"||typeof namespace.getIntelligencePackageArtifact!=="function")return[];
+    const artifactTypes=type==="insight"?["repository-insight","architecture-insight","workflow-insight","change-insight","knowledge-insight"]:["explanation-record","explainable-insight-envelope"];
+    const out=[];
+    artifactTypes.forEach(function(artifactType){const descriptors=namespace.listIntelligencePackageArtifacts({artifactType:artifactType,limit:50}); arr(descriptors).forEach(function(descriptor){const loaded=namespace.getIntelligencePackageArtifact({artifactId:descriptor.contentReference&&descriptor.contentReference.artifactId}); if(!loaded||loaded.ok!==true||!loaded.data||!loaded.data.artifact)return; const payload=loaded.data.artifact.payload||{}; let items=[]; if(type==="insight")items=arr(payload.insights); else items=arr(payload.explanations).concat(arr(payload.envelopes)); if(!items.length)items=[payload]; items.forEach(function(item,index){const label=text(item&& (item.id||item.insightId||item.explanationId||item.title||item.statement||item.summary),artifactType+"-"+index); const bag=lower(label+" "+text(item&&item.statement,"")+" "+text(item&&item.summary,"")); if(q&&bag&&!bag.includes(lower(q)))return; out.push(internal.deepFreeze({recordId:"IDE180-INTEL-ITEM:"+(descriptor.contentReference&&descriptor.contentReference.artifactId)+":"+index,canonicalEntityId:text(item&&item.canonicalEntityId,null),providerId:"IDE-180-PROVIDER-IDE170-INTELLIGENCE-PACKAGE",sourceId:text(item&& (item.id||item.insightId||item.explanationId),descriptor.contentReference&&descriptor.contentReference.artifactId),sourceType:"ide170-intelligence-package",recordType:type,title:label,summary:text(item&& (item.statement||item.summary||item.explanation),""),contentReference:{artifactId:descriptor.contentReference&&descriptor.contentReference.artifactId,itemIndex:index,artifactType:artifactType,readOnly:true},version:text(loaded.data.artifact.artifactVersion,""),lifecycle:"frozen",officialState:"unknown",validationState:"validated",scope:item&&item.scope!=null?internal.clone(item.scope):null,relationships:[],lineage:[],evidenceReferences:arr(item&&item.evidenceReferences||item&&item.evidence).map(function(e){return typeof e==="string"?{evidenceId:e}:internal.clone(e);}),trust:"not-applicable",timestamps:{createdAt:loaded.data.artifact.createdAt||null,frozenAt:loaded.data.artifact.frozenAt||null},sourceMetadata:{artifactId:descriptor.contentReference&&descriptor.contentReference.artifactId,artifactType:artifactType,itemIndex:index,comparable:{}},immutable:true}));});});}); return out;
+  }
+  function sourcesSummary(records){return records.map(function(r){return {providerId:r.providerId,sourceType:r.sourceType,sourceId:r.sourceId,recordId:r.recordId,canonicalId:r.canonicalEntityId,recordType:r.recordType,version:r.version,lifecycle:r.lifecycle,officialState:r.officialState,validationState:r.validationState,immutable:true};});}
+  function resolve(request){
+    const type=request&&request.navigationType; if(!TYPES.includes(type))return internal.buildResult(false,"IDE180_FEDERATED_TYPE_UNSUPPORTED","unsupported",null);
+    const q=queryText(request); let primary=type==="insight"||type==="explanation"?packageArtifactRecords(type,q):primaryRecords(type,q); primary=exactOrFirst(arr(primary),q);
+    if(!primary.length){return internal.buildResult(false,"IDE180_FEDERATED_SOURCE_MISSING","missing-source",null,{missingSource:{sourceType:type==="architecture"?"architecture-database":type==="knowledge"||type==="decision"?"memo-current":"ide170-intelligence-package",requiredCapability:type+"-navigation",reason:"no-applicable-source-record"}});}
+    const canonicalIds=Array.from(new Set(primary.map(function(r){return r.canonicalEntityId;}).filter(Boolean)));
+    let related=canonicalIds.length?recordsForCanonicalIds(canonicalIds):[];
+    const primaryMemoSources=new Set(primary.filter(function(r){return ["memo-current","knowledge-current"].includes(r.sourceType);}).map(function(r){return r.sourceId;}));
+    related=related.filter(function(r){return !(["memo-current","knowledge-current"].includes(r.sourceType)&&primaryMemoSources.has(r.sourceId));});
+    const all=primary.concat(related);
+    const federation=namespace.federateKnowledgeSourceRecords(all,{scope:request.scope,evidenceRequired:Boolean(request.evidenceRequirement)}); const entities=federation.entities||[];
+    if(!entities.length)return internal.buildResult(false,"IDE180_FEDERATION_EMPTY","not-found",null);
+    let entity=entities[0]; if(q){const exact=entities.find(function(e){return lower(e.canonicalEntityId)===lower(q)||arr(e.relatedSources).some(function(r){return [r.sourceId,r.recordId,r.title].some(function(v){return lower(v)===lower(q);});});}); if(exact)entity=exact;}
+    const ambiguous=entities.length>1&&!entity.canonicalResult&&entities.filter(function(e){return e.authority&&e.authority.status==="ambiguous";}).length>0;
+    const target=entity.canonicalResult?internal.clone(entity.canonicalResult):internal.clone(entity.relatedSources[0]);
+    const evidence=[]; entity.relatedSources.forEach(function(r){arr(r.evidenceReferences).forEach(function(e){evidence.push(internal.clone(e));});});
+    return internal.buildResult(true,"IDE180_FEDERATED_NAVIGATION_RESOLVED",ambiguous?"partial":"complete",{target:{canonicalId:entity.canonicalEntityId,recordId:target&&target.recordId||null,recordType:target&&target.recordType||type,name:target&&target.title||entity.canonicalEntityId,qualifiedName:target&&target.title||entity.canonicalEntityId,source:{sourceType:target&&target.sourceType||null,sourceVersion:target&&target.version||""},immutable:true},navigationPath:[{step:0,kind:"canonical-entity",canonicalId:entity.canonicalEntityId},{step:1,kind:"source-facets",count:entity.sourceFacets.length}],sources:sourcesSummary(entity.relatedSources),authority:internal.clone(entity.authority),evidence:evidence,lineage:target?internal.clone(target.lineage||[]):[],validation:{status:target&&target.validationState||"unknown",reason:"Validation state is preserved from normalized Source Records."},conflicts:internal.clone(entity.conflicts||[]),sourceFacets:internal.clone(entity.sourceFacets||[]),federation:internal.clone(entity),candidates:entities.map(function(e){return {canonicalId:e.canonicalEntityId,sourceRecordCount:e.sourceRecordCount,authorityStatus:e.authority&&e.authority.status};}),resolutionStatus:ambiguous?"ambiguous":"resolved",partialReason:ambiguous?"ambiguous-federated-entity":null,sourceSnapshot:namespace.getKnowledgeNavigatorFederationSnapshot?namespace.getKnowledgeNavigatorFederationSnapshot():null},{resolverId:RESOLVER_ID});
+  }
+  const resolver={resolverId:RESOLVER_ID,version:MODULE_VERSION,navigationTypes:TYPES.slice(),readOnly:true,resolve:resolve};
+  function initializeFederatedResolver(){const existing=namespace.getResolverDefinition&&namespace.getResolverDefinition(RESOLVER_ID); const registration=existing?internal.buildResult(true,"IDE180_RESOLVER_EXISTS","Ready",{resolverId:RESOLVER_ID}):namespace.registerResolverDefinition(resolver); namespace.modules.federatedResolver.status=registration&&registration.ok===true?"Ready":"Blocked"; return internal.buildResult(registration&&registration.ok===true,registration&&registration.ok===true?"IDE180_FEDERATED_RESOLVER_INITIALIZED":"IDE180_FEDERATED_RESOLVER_INITIALIZATION_FAILED",registration&&registration.ok===true?"Ready":"Blocked",{registration:registration,navigationTypes:TYPES,readOnly:true});}
+  Object.assign(namespace.api,{initializeFederatedResolver:initializeFederatedResolver,resolveFederatedKnowledgeNavigation:resolve}); Object.assign(namespace,namespace.api); namespace.modules.federatedResolver={id:"IDE-180-FEDERATED-RESOLVER",version:MODULE_VERSION,status:"Loaded",phase:6,resolverId:RESOLVER_ID,navigationTypes:TYPES.slice(),readOnly:true,loadedAt:internal.nowIso()};
+})(typeof window!=="undefined"?window:globalThis);
