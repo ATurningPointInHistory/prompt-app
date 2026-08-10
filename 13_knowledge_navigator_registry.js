@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_registry.js
    IDE-180 Knowledge Navigator
-   Release: Version Manifest / Module: Registry 1.0.0
-   Phase 1: Foundation / Contracts
+   Release: Version Manifest / Module: Registry 1.1.0
+   Phase 4: Relationship / Traversal
    ============================================================ */
 (function (global) {
   "use strict";
@@ -27,10 +27,10 @@
     { typeId: "function", aliases: ["function", "関数"], phase: 3, implemented: true, resolverId: "IDE-180-RESOLVER-BASIC-NAVIGATION" },
     { typeId: "architecture", aliases: ["architecture", "アーキテクチャ", "構造"], phase: 5 },
     { typeId: "knowledge", aliases: ["knowledge", "ナレッジ", "知識"], phase: 5 },
-    { typeId: "relationship", aliases: ["relationship", "relation", "関係", "関連"], phase: 4 },
-    { typeId: "dependency", aliases: ["dependency", "依存", "依存関係"], phase: 4 },
-    { typeId: "reverse-dependency", aliases: ["reverse dependency", "逆依存", "何が依存している"], phase: 4 },
-    { typeId: "workflow", aliases: ["workflow", "ワークフロー"], phase: 4 },
+    { typeId: "relationship", aliases: ["relationship", "relation", "関係", "関連"], phase: 4, implemented: true, resolverId: "IDE-180-RESOLVER-RELATIONSHIP-TRAVERSAL" },
+    { typeId: "dependency", aliases: ["dependency", "依存", "依存関係"], phase: 4, implemented: true, resolverId: "IDE-180-RESOLVER-RELATIONSHIP-TRAVERSAL" },
+    { typeId: "reverse-dependency", aliases: ["reverse dependency", "逆依存", "何が依存している"], phase: 4, implemented: true, resolverId: "IDE-180-RESOLVER-RELATIONSHIP-TRAVERSAL" },
+    { typeId: "workflow", aliases: ["workflow", "ワークフロー"], phase: 4, implemented: true, resolverId: "IDE-180-RESOLVER-RELATIONSHIP-TRAVERSAL" },
     { typeId: "decision", aliases: ["decision", "決定", "Decision"], phase: 5 },
     { typeId: "evidence", aliases: ["evidence", "根拠", "証拠"], phase: 5 },
     { typeId: "lineage", aliases: ["lineage", "来歴", "系譜", "どこから来た"], phase: 5 },
