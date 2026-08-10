@@ -4,8 +4,8 @@
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Phase 2 Package Intake / Provider Foundation extension.",
-  "updatedAt": "2026-08-10T02:17:58.801139Z",
+  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Phase 3 Basic Navigation extension.",
+  "updatedAt": "2026-08-10T05:29:30.623742Z",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
   "scripts": [
@@ -146,13 +146,19 @@
     "./13_intelligence_package_validation.js?h=c31e04201315",
     "./13_intelligence_package_export.js?h=3b0a01705f11",
     "./13_intelligence_validation.js?h=db0c62a52276",
-    "./13_knowledge_navigator_version_manifest.js?h=29da0562b99e",
-    "./13_knowledge_navigator_core.js?h=76c7f61e9c55",
+    "./13_knowledge_navigator_version_manifest.js?h=fcbb1f6d15d3",
+    "./13_knowledge_navigator_core.js?h=574e77e59ceb",
     "./13_knowledge_navigator_contracts.js?h=4682342e4a57",
-    "./13_knowledge_navigator_registry.js?h=d340d47bce6d",
+    "./13_knowledge_navigator_registry.js?h=af779f475498",
     "./13_knowledge_navigator_intelligence_provider.js?h=99b5ddac1ef0",
-    "./13_knowledge_navigator_validation.js?h=6a091f3b6e7c",
-    "./13_knowledge_navigator_phase2_validation.js?h=8a36cc988a20",
+    "./13_knowledge_navigator_identity.js?h=7c481969ec06",
+    "./13_knowledge_navigator_query_resolution.js?h=79d28f5953aa",
+    "./13_knowledge_navigator_basic_resolver.js?h=b322dc697ab9",
+    "./13_knowledge_navigator_explanation.js?h=bd9be099c465",
+    "./13_knowledge_navigator_orchestrator.js?h=37679fb9f143",
+    "./13_knowledge_navigator_validation.js?h=8f1d9dd59862",
+    "./13_knowledge_navigator_phase2_validation.js?h=910a68259947",
+    "./13_knowledge_navigator_phase3_validation.js?h=911f86f6ff7b",
     "./13_project_report.js?h=d636cb6a6766",
     "./13_project_handoff.js?h=a073ff86a1eb",
     "./13_function_relation_v3.js?h=0857a784aa30",
@@ -856,14 +862,14 @@
       "cacheKey": "db0c62a52276"
     },
     "13_knowledge_navigator_version_manifest.js": {
-      "sha256": "29da0562b99e56540bc10c059a3c7ea82e7ed52366fd37a493f7e5700693ef48",
-      "byteSize": 5011,
-      "cacheKey": "29da0562b99e"
+      "sha256": "fcbb1f6d15d383cbee0df80b31988fb89310b6ef7cbca95047e5f05b6dd38691",
+      "byteSize": 5530,
+      "cacheKey": "fcbb1f6d15d3"
     },
     "13_knowledge_navigator_core.js": {
-      "sha256": "76c7f61e9c556a126174fe3a99dfcbba9059efcd972fe2427dc734791f4f2d67",
-      "byteSize": 11902,
-      "cacheKey": "76c7f61e9c55"
+      "sha256": "574e77e59ceb043cc9c342343c18dde2c434301cba7427dfed43f2a1521102c6",
+      "byteSize": 12542,
+      "cacheKey": "574e77e59ceb"
     },
     "13_knowledge_navigator_contracts.js": {
       "sha256": "4682342e4a5766758e9de06546ec66d5c0724e930850b03ced2e7f919f39ac30",
@@ -871,24 +877,54 @@
       "cacheKey": "4682342e4a57"
     },
     "13_knowledge_navigator_registry.js": {
-      "sha256": "d340d47bce6d23bbee1637a9a5bf1079710292ee74cc638da44bb305a3f7feb2",
-      "byteSize": 10177,
-      "cacheKey": "d340d47bce6d"
+      "sha256": "af779f475498cb919538e74f2f8d4300c00a593cf24d0a68b15922040643a34a",
+      "byteSize": 11060,
+      "cacheKey": "af779f475498"
     },
     "13_knowledge_navigator_intelligence_provider.js": {
       "sha256": "99b5ddac1ef0dd42c27ad4c4cbfef49f3ded3c07ab6d8fb6658aad01da6154a6",
       "byteSize": 28367,
       "cacheKey": "99b5ddac1ef0"
     },
+    "13_knowledge_navigator_identity.js": {
+      "sha256": "7c481969ec065faf6091f831c8337f98a619ffd4a7c5f99891b4e83ef7194996",
+      "byteSize": 8449,
+      "cacheKey": "7c481969ec06"
+    },
+    "13_knowledge_navigator_query_resolution.js": {
+      "sha256": "79d28f5953aa0867c4067bbfb72573c042a3fe3af5d58c30ac38d2133a1219a9",
+      "byteSize": 8052,
+      "cacheKey": "79d28f5953aa"
+    },
+    "13_knowledge_navigator_basic_resolver.js": {
+      "sha256": "b322dc697ab9a8d5d0a5de33d32fcef51b5358e104772af41db91e911dbecc20",
+      "byteSize": 8388,
+      "cacheKey": "b322dc697ab9"
+    },
+    "13_knowledge_navigator_explanation.js": {
+      "sha256": "bd9be099c4659b8258d92a8390367fffc0429d095b9316b7aadfb0890016b1d4",
+      "byteSize": 4764,
+      "cacheKey": "bd9be099c465"
+    },
+    "13_knowledge_navigator_orchestrator.js": {
+      "sha256": "37679fb9f1439567d63749ca91ebb0dfcc247d8a86f2815d823d9c4c4692f879",
+      "byteSize": 9912,
+      "cacheKey": "37679fb9f143"
+    },
     "13_knowledge_navigator_validation.js": {
-      "sha256": "6a091f3b6e7ca913c421bf4e6e3b7bd4db622fcd31a70522b9691a586ad28dca",
-      "byteSize": 14516,
-      "cacheKey": "6a091f3b6e7c"
+      "sha256": "8f1d9dd5986290562ca32598576b4e191e027cd9f764d7788ce47a480b46385f",
+      "byteSize": 14957,
+      "cacheKey": "8f1d9dd59862"
     },
     "13_knowledge_navigator_phase2_validation.js": {
-      "sha256": "8a36cc988a208ce431b833be2bfd064a9668bceb912bccff19d25dc80a214756",
-      "byteSize": 20292,
-      "cacheKey": "8a36cc988a20"
+      "sha256": "910a68259947bb8d9260cfd054e592efff503634acfbd2539b10b782dfaa1f37",
+      "byteSize": 20692,
+      "cacheKey": "910a68259947"
+    },
+    "13_knowledge_navigator_phase3_validation.js": {
+      "sha256": "911f86f6ff7b3d53122f06ec9a47025ba85bf7596b424e514075342a242acdb3",
+      "byteSize": 22589,
+      "cacheKey": "911f86f6ff7b"
     },
     "13_project_report.js": {
       "sha256": "d636cb6a67665a6a26975934e81c9ffe2e1aca43b7f1303d0b9dae1a221c813b",
@@ -966,6 +1002,6 @@
       "cacheKey": "138e34ded106"
     }
   },
-  "scriptSetHash": "0e067e0c1821673cdbe4855f9afff17ea8f2fa9d71a1ae98f4d60b4c472d1b3a",
-  "manifestHash": "3cfe4b8e7b5856eb9e3510caf7e1d19e3075196f1b5e71c8356b971cd9b2ba5f"
+  "scriptSetHash": "cade2dd475b8ea1b5a0967b8a5324e97721e6380bc02c3b47a5259a8dcfe88f8",
+  "manifestHash": "426d407dba7cc6346a9ab29ddc61e5c5e42b6cf2eeb028eb1e2b76bb353daa80"
 }
