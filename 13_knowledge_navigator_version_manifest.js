@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_version_manifest.js
    IDE-180 Knowledge Navigator
-   Release: 1.4.0
-   Phase 5: Authority / Evidence / Lineage
+   Release: 1.5.0
+   Phase 6: Federation / Conflict
    Design Freeze: v1.0.0 / 2026-08-10
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.4.0";
+  const RELEASE_VERSION = "1.5.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,9 +20,9 @@
   }
 
   const moduleVersions = {
-    core: "1.4.0",
+    core: "1.5.0",
     contracts: BASELINE_VERSION,
-    registry: "1.2.0",
+    registry: "1.3.0",
     intelligenceProvider: BASELINE_VERSION,
     identity: BASELINE_VERSION,
     queryResolution: BASELINE_VERSION,
@@ -34,13 +34,21 @@
     evidence: BASELINE_VERSION,
     lineage: BASELINE_VERSION,
     validationResolver: BASELINE_VERSION,
-    explanation: "1.2.0",
-    orchestrator: "1.2.0",
+    memoProvider: BASELINE_VERSION,
+    knowledgeProvider: BASELINE_VERSION,
+    architectureProvider: BASELINE_VERSION,
+    validationProvider: BASELINE_VERSION,
+    federation: BASELINE_VERSION,
+    conflict: BASELINE_VERSION,
+    federatedResolver: BASELINE_VERSION,
+    explanation: "1.3.0",
+    orchestrator: "1.3.0",
     validation: "1.0.4",
     phase2Validation: BASELINE_VERSION,
     phase3Validation: BASELINE_VERSION,
     phase4Validation: BASELINE_VERSION,
-    phase5Validation: BASELINE_VERSION
+    phase5Validation: BASELINE_VERSION,
+    phase6Validation: BASELINE_VERSION
   };
 
   const fileModules = {
@@ -58,13 +66,21 @@
     "13_knowledge_navigator_evidence.js": "evidence",
     "13_knowledge_navigator_lineage.js": "lineage",
     "13_knowledge_navigator_validation_resolver.js": "validationResolver",
+    "13_knowledge_navigator_memo_provider.js": "memoProvider",
+    "13_knowledge_navigator_knowledge_provider.js": "knowledgeProvider",
+    "13_knowledge_navigator_architecture_provider.js": "architectureProvider",
+    "13_knowledge_navigator_validation_provider.js": "validationProvider",
+    "13_knowledge_navigator_conflict.js": "conflict",
+    "13_knowledge_navigator_federation.js": "federation",
+    "13_knowledge_navigator_federated_resolver.js": "federatedResolver",
     "13_knowledge_navigator_explanation.js": "explanation",
     "13_knowledge_navigator_orchestrator.js": "orchestrator",
     "13_knowledge_navigator_validation.js": "validation",
     "13_knowledge_navigator_phase2_validation.js": "phase2Validation",
     "13_knowledge_navigator_phase3_validation.js": "phase3Validation",
     "13_knowledge_navigator_phase4_validation.js": "phase4Validation",
-    "13_knowledge_navigator_phase5_validation.js": "phase5Validation"
+    "13_knowledge_navigator_phase5_validation.js": "phase5Validation",
+    "13_knowledge_navigator_phase6_validation.js": "phase6Validation"
   };
 
   const contractVersions = {
@@ -133,7 +149,7 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 5 Authority / Evidence / Lineage",
+      implementationPhase: "Phase 6 Federation / Conflict",
       designFreezeVersion: "1.0.0",
       architectureSpecificationVersion: "1.0.0",
       decisionRange: "IDE-180-DECISION-001..029",
@@ -153,13 +169,13 @@
       resolverContractVersion: BASELINE_VERSION
     },
     implementation: {
-      phase: 5,
-      phaseName: "Authority / Evidence / Lineage",
+      phase: 6,
+      phaseName: "Federation / Conflict",
       phaseCount: 10,
       contractFirst: true,
       incrementalVerticalSlice: true,
-      completedPhases: [1, 2, 3, 4],
-      activePhase: 5,
+      completedPhases: [1, 2, 3, 4, 5],
+      activePhase: 6,
       readOnly: true
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
