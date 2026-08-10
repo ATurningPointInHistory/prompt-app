@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_version_manifest.js
    IDE-180 Knowledge Navigator
-   Release: 1.2.0
-   Phase 3: Basic Navigation
+   Release: 1.3.0
+   Phase 4: Relationship / Traversal
    Design Freeze: v1.0.0 / 2026-08-10
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.2.0";
+  const RELEASE_VERSION = "1.3.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,18 +20,22 @@
   }
 
   const moduleVersions = {
-    core: "1.2.0",
+    core: "1.3.0",
     contracts: BASELINE_VERSION,
-    registry: BASELINE_VERSION,
+    registry: "1.1.0",
     intelligenceProvider: BASELINE_VERSION,
     identity: BASELINE_VERSION,
     queryResolution: BASELINE_VERSION,
     basicResolver: BASELINE_VERSION,
-    explanation: BASELINE_VERSION,
-    orchestrator: BASELINE_VERSION,
-    validation: "1.0.2",
+    budget: BASELINE_VERSION,
+    traversal: BASELINE_VERSION,
+    relationshipResolver: BASELINE_VERSION,
+    explanation: "1.1.0",
+    orchestrator: "1.1.0",
+    validation: "1.0.3",
     phase2Validation: BASELINE_VERSION,
-    phase3Validation: BASELINE_VERSION
+    phase3Validation: BASELINE_VERSION,
+    phase4Validation: BASELINE_VERSION
   };
 
   const fileModules = {
@@ -42,11 +46,15 @@
     "13_knowledge_navigator_identity.js": "identity",
     "13_knowledge_navigator_query_resolution.js": "queryResolution",
     "13_knowledge_navigator_basic_resolver.js": "basicResolver",
+    "13_knowledge_navigator_budget.js": "budget",
+    "13_knowledge_navigator_traversal.js": "traversal",
+    "13_knowledge_navigator_relationship_resolver.js": "relationshipResolver",
     "13_knowledge_navigator_explanation.js": "explanation",
     "13_knowledge_navigator_orchestrator.js": "orchestrator",
     "13_knowledge_navigator_validation.js": "validation",
     "13_knowledge_navigator_phase2_validation.js": "phase2Validation",
-    "13_knowledge_navigator_phase3_validation.js": "phase3Validation"
+    "13_knowledge_navigator_phase3_validation.js": "phase3Validation",
+    "13_knowledge_navigator_phase4_validation.js": "phase4Validation"
   };
 
   const contractVersions = {
@@ -115,7 +123,7 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 3 Basic Navigation",
+      implementationPhase: "Phase 4 Relationship / Traversal",
       designFreezeVersion: "1.0.0",
       architectureSpecificationVersion: "1.0.0",
       decisionRange: "IDE-180-DECISION-001..029",
@@ -135,13 +143,13 @@
       resolverContractVersion: BASELINE_VERSION
     },
     implementation: {
-      phase: 3,
-      phaseName: "Basic Navigation",
+      phase: 4,
+      phaseName: "Relationship / Traversal",
       phaseCount: 10,
       contractFirst: true,
       incrementalVerticalSlice: true,
-      completedPhases: [1, 2],
-      activePhase: 3,
+      completedPhases: [1, 2, 3],
+      activePhase: 4,
       readOnly: true
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
