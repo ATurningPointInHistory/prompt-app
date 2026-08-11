@@ -329,6 +329,12 @@
       if (typeof namespace.initializeRecovery === "function") {
         results.push(namespace.initializeRecovery());
       }
+      if (typeof namespace.initializeNavigationPackage === "function") {
+        results.push(namespace.initializeNavigationPackage());
+      }
+      if (typeof namespace.initializeIDE190Handoff === "function") {
+        results.push(namespace.initializeIDE190Handoff());
+      }
       if (typeof namespace.initializeOrchestrator === "function") {
         results.push(namespace.initializeOrchestrator());
       }
