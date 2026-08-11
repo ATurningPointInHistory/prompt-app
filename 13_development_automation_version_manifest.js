@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_development_automation_version_manifest.js
    IDE-190 Development Automation
-   Release: 1.1.0
-   Phase 2: IDE-180 Intake / Grounding
+   Release: 1.2.0
+   Phase 3: Plan / Propose / Dry Run / Preflight
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.1.0";
+  const RELEASE_VERSION = "1.2.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,12 +20,17 @@
   }
 
   const moduleVersions = {
-    core: "1.1.0",
-    contracts: "1.1.0",
+    core: "1.2.0",
+    contracts: "1.2.0",
     validation: BASELINE_VERSION,
     intake: BASELINE_VERSION,
     grounding: BASELINE_VERSION,
-    phase2Validation: BASELINE_VERSION
+    phase2Validation: BASELINE_VERSION,
+    planning: BASELINE_VERSION,
+    proposal: BASELINE_VERSION,
+    dryRun: BASELINE_VERSION,
+    preflight: BASELINE_VERSION,
+    phase3Validation: BASELINE_VERSION
   };
 
   const fileModules = {
@@ -34,16 +39,25 @@
     "13_development_automation_validation.js": "validation",
     "13_development_automation_intake.js": "intake",
     "13_development_automation_grounding.js": "grounding",
-    "13_development_automation_phase2_validation.js": "phase2Validation"
+    "13_development_automation_phase2_validation.js": "phase2Validation",
+    "13_development_automation_planning.js": "planning",
+    "13_development_automation_proposal.js": "proposal",
+    "13_development_automation_dry_run.js": "dryRun",
+    "13_development_automation_preflight.js": "preflight",
+    "13_development_automation_phase3_validation.js": "phase3Validation"
   };
 
   const contractVersions = {
     foundation: BASELINE_VERSION,
-    foundationState: "1.1.0",
+    foundationState: "1.2.0",
     capabilityDescriptor: BASELINE_VERSION,
     platformProfile: BASELINE_VERSION,
     navigationIntake: BASELINE_VERSION,
-    groundingContext: BASELINE_VERSION
+    groundingContext: BASELINE_VERSION,
+    automationPlan: BASELINE_VERSION,
+    automationProposal: BASELINE_VERSION,
+    dryRunRecord: BASELINE_VERSION,
+    preflightRecord: BASELINE_VERSION
   };
 
   const contractIds = {
@@ -52,7 +66,11 @@
     capabilityDescriptor: "IDE-190-CONTRACT-CAPABILITY-DESCRIPTOR",
     platformProfile: "IDE-190-CONTRACT-PLATFORM-PROFILE",
     navigationIntake: "IDE-190-CONTRACT-NAVIGATION-INTAKE",
-    groundingContext: "IDE-190-CONTRACT-GROUNDING-CONTEXT"
+    groundingContext: "IDE-190-CONTRACT-GROUNDING-CONTEXT",
+    automationPlan: "IDE-190-CONTRACT-AUTOMATION-PLAN",
+    automationProposal: "IDE-190-CONTRACT-AUTOMATION-PROPOSAL",
+    dryRunRecord: "IDE-190-CONTRACT-DRY-RUN-RECORD",
+    preflightRecord: "IDE-190-CONTRACT-PREFLIGHT-RECORD"
   };
 
   const lifecycle = [
@@ -197,14 +215,14 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 2 IDE-180 Intake / Grounding",
-      phase: 2,
+      implementationPhase: "Phase 3 Plan / Propose / Dry Run / Preflight",
+      phase: 3,
       phaseCount: 10,
       designFreezeId: "IDE-190-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
       decisionRange: "IDE-190-DECISION-001..012",
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Implementation - Phase 2"
+      status: "Implementation - Phase 3"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -229,16 +247,17 @@
       minimumIDE160Version: "2.0.1"
     },
     implementation: {
-      phase: 2,
-      phaseName: "IDE-180 Intake / Grounding",
-      completedPhases: [1],
+      phase: 3,
+      phaseName: "Plan / Propose / Dry Run / Preflight",
+      completedPhases: [1, 2],
       contractFirst: true,
       inspectBeforeImplement: true,
       ide190Complete: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       phase2Allowed: true,
-      phase3AllowedBeforeAndroidGate: false
+      phase3Allowed: true,
+      phase4AllowedBeforeAndroidGate: false
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
       const key = fileModules[moduleOrFile] || moduleOrFile;
