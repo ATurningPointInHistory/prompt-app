@@ -4,7 +4,7 @@
   "project": "AIプロンプト生成Pro",
   "version": "v6.0",
   "entryFile": "index.html",
-  "savedAt": "2026-08-11T03:08:26.930Z",
+  "savedAt": "2026-08-11T03:35:59.000Z",
   "complete": true,
   "requestedFiles": [
     "index.html",
@@ -413,8 +413,8 @@
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "fa9b2dafae1afc4586c7b0378cd785ef0c580d5fd698be804cf9d175cd65e0ab",
-  "scriptSetHash": "dbde50df0ec7075130d0b2a7c45e7a3ab3fd80fda6e70ca1c1c744022130198e",
+  "scriptManifestHash": "07d5b1e5a2ee2c548c07d796fe76fd00ac7cdd630f0bf6247c32137177d0fbd3",
+  "scriptSetHash": "a5b862e8820a8b20e973b2b4942cb534e8be133337fd57a0baf4c7524514ada6",
   "scriptManifestCount": 192,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
