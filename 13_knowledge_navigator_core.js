@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_core.js
    IDE-180 Knowledge Navigator
-   Release: 1.5.0 / Module: Core 1.5.0
-   Phase 6: Federation / Conflict
+   Release: 1.6.0 / Module: Core 1.6.0
+   Phase 7: Session / Persistence / Reload
    ============================================================ */
 (function (global) {
   "use strict";
@@ -305,6 +305,9 @@
       if (typeof namespace.initializeValidationProvider === "function") {
         results.push(namespace.initializeValidationProvider());
       }
+      if (typeof namespace.initializeMemoArchiveProvider === "function") {
+        results.push(namespace.initializeMemoArchiveProvider());
+      }
       if (typeof namespace.initializeConflict === "function") {
         results.push(namespace.initializeConflict());
       }
@@ -316,6 +319,15 @@
       }
       if (typeof namespace.initializeExplanation === "function") {
         results.push(namespace.initializeExplanation());
+      }
+      if (typeof namespace.initializeSession === "function") {
+        results.push(namespace.initializeSession());
+      }
+      if (typeof namespace.initializePersistence === "function") {
+        results.push(namespace.initializePersistence());
+      }
+      if (typeof namespace.initializeRecovery === "function") {
+        results.push(namespace.initializeRecovery());
       }
       if (typeof namespace.initializeOrchestrator === "function") {
         results.push(namespace.initializeOrchestrator());
