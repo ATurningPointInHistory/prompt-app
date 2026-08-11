@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_phase10_validation.js
    IDE-180 Knowledge Navigator
-   Release: 1.9.0 / Module: Phase 10 Final Validation 1.0.0
+   Release: 1.9.1 / Module: Phase 10 Final Validation 1.0.1
    Phase 10: Integrated / Android Final Validation
    ============================================================ */
 (function (global) {
@@ -17,7 +17,7 @@
   const internal = namespace.__internal;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("phase10Validation");
   const state = internal.state;
-  const EXPECTED_RELEASE = "1.9.0";
+  const EXPECTED_RELEASE = "1.9.1";
   const EXPECTED_PHASE = "Phase 10 Integrated / Android Final Validation";
   const EXPECTED_SCRIPT_COUNT = 192;
 
@@ -222,7 +222,7 @@
 
     const initialized = namespace.initialize({ requireIDE170: true });
     check("IDE-180 initialization succeeds", initialized && initialized.ok === true, initialized && initialized.code, "Initialization", "Critical");
-    check("Release Version is 1.9.0", VERSION_MANIFEST.release.version === EXPECTED_RELEASE, VERSION_MANIFEST.release.version, "Manifest", "Critical");
+    check("Release Version is 1.9.1", VERSION_MANIFEST.release.version === EXPECTED_RELEASE, VERSION_MANIFEST.release.version, "Manifest", "Critical");
     check("Implementation Phase is Phase 10", VERSION_MANIFEST.implementation.phase === 10 && VERSION_MANIFEST.release.implementationPhase === EXPECTED_PHASE, VERSION_MANIFEST.release.implementationPhase, "Manifest", "Critical");
     check("Design Freeze remains 1.0.0", VERSION_MANIFEST.release.designFreezeVersion === "1.0.0", VERSION_MANIFEST.release.designFreezeVersion, "Manifest", "High");
     check("Completed phases include 1 through 9", JSON.stringify(VERSION_MANIFEST.implementation.completedPhases) === JSON.stringify([1,2,3,4,5,6,7,8,9]), VERSION_MANIFEST.implementation.completedPhases, "Manifest", "Critical");
@@ -241,8 +241,10 @@
 
     const contracts = namespace.listContractDefinitions();
     const types = namespace.listNavigationTypes();
-    const providers = namespace.listProviderDefinitions();
-    const resolvers = namespace.listResolverDefinitions();
+    const providerRefs = namespace.listProviderDefinitions();
+    const resolverRefs = namespace.listResolverDefinitions();
+    const providers = providerRefs.map(function mapProvider(ref) { return namespace.getProviderDefinition(ref.providerId); }).filter(Boolean);
+    const resolvers = resolverRefs.map(function mapResolver(ref) { return namespace.getResolverDefinition(ref.resolverId); }).filter(Boolean);
     check("Nine frozen Contracts are registered", contracts.length === 9, contracts.length, "Contracts", "Critical");
     check("All Contracts are read-only", contracts.every(function item(contract) { return contract.readOnly === true; }), contracts.filter(function item(contract) { return contract.readOnly !== true; }).map(function map(contract) { return contract.contractId; }), "Contracts", "Critical");
     check("All twenty Navigation Types are implemented", types.length === 20 && types.every(function item(type) { return type.implemented === true; }), types.filter(function item(type) { return type.implemented === true; }).length, "Registry", "Critical");
@@ -277,7 +279,7 @@
     check("Canonical Snapshot loads from IDE-170 Package", canonicalSnapshot && canonicalSnapshot.ok === true, canonicalSnapshot && canonicalSnapshot.code, "Canonical", "Critical");
     const canonicalRecords = canonicalSnapshot && canonicalSnapshot.data && canonicalSnapshot.data.records || [];
     check("Canonical Snapshot contains records", canonicalRecords.length > 0, canonicalRecords.length, "Canonical", "Critical");
-    check("Canonical Snapshot contains file:00_core.js", canonicalRecords.some(function item(record) { return record.canonicalId === "file:00_core.js"; }), canonicalRecords.length, "Canonical", "Critical");
+    check("Canonical Snapshot contains file:00_core.js", canonicalRecords.some(function item(record) { return record && record.identity && record.identity.canonicalId === "file:00_core.js"; }), canonicalRecords.length, "Canonical", "Critical");
 
     const fileResult = await namespace.navigate({ navigationType: "file", target: { canonicalId: "file:00_core.js" }, evidenceRequirement: "available" });
     check("End-to-End File Navigation completes", fileResult && fileResult.status === "complete", fileResult && fileResult.status, "E2E Navigation", "Critical");
@@ -376,7 +378,7 @@
     const packageValidation = finalPackage ? await namespace.validateKnowledgeNavigatorPackage(finalPackage) : null;
     check("Final Navigation Package builds", packageBuilt && packageBuilt.ok === true, packageBuilt && packageBuilt.code, "IDE-190 Handoff", "Critical");
     check("Final Navigation Package validates", packageValidation && packageValidation.valid === true, packageValidation && packageValidation.status, "IDE-190 Handoff", "Critical");
-    check("Final Navigation Package producer is IDE-180 1.9.0", finalPackage && finalPackage.manifest && finalPackage.manifest.producer && finalPackage.manifest.producer.componentId === "IDE-180" && finalPackage.manifest.producer.version === EXPECTED_RELEASE, finalPackage && finalPackage.manifest && finalPackage.manifest.producer, "IDE-190 Handoff", "Critical");
+    check("Final Navigation Package producer is IDE-180 1.9.1", finalPackage && finalPackage.manifest && finalPackage.manifest.producer && finalPackage.manifest.producer.componentId === "IDE-180" && finalPackage.manifest.producer.version === EXPECTED_RELEASE, finalPackage && finalPackage.manifest && finalPackage.manifest.producer, "IDE-190 Handoff", "Critical");
     check("Final Navigation Package excludes Runtime state", finalPackage && finalPackage.manifest.runtimeStateIncluded === false && hasForbiddenRuntimeKeys(finalPackage) === false, finalPackage && finalPackage.manifest && finalPackage.manifest.excludedRuntimeState, "IDE-190 Handoff", "Critical");
     check("Final Navigation Package is immutable", Boolean(finalPackage && finalPackage.immutable === true), finalPackage && finalPackage.immutable, "IDE-190 Handoff", "Critical");
     check("Final Navigation Package Integrity is SHA-256", Boolean(finalPackage && finalPackage.integrity && finalPackage.integrity.algorithm === "SHA-256" && /^[a-f0-9]{64}$/.test(finalPackage.integrity.hash)), finalPackage && finalPackage.integrity, "IDE-190 Handoff", "Critical");
@@ -387,7 +389,7 @@
     check("Final IDE-190 Handoff builds", handoffBuilt && handoffBuilt.ok === true, handoffBuilt && handoffBuilt.code, "IDE-190 Handoff", "Critical");
     check("Final IDE-190 Handoff validates", handoffValidation && handoffValidation.valid === true, handoffValidation && handoffValidation.status, "IDE-190 Handoff", "Critical");
     check("Final IDE-190 Handoff consumer is IDE-190", finalHandoff && finalHandoff.consumer && finalHandoff.consumer.componentId === "IDE-190", finalHandoff && finalHandoff.consumer, "IDE-190 Handoff", "Critical");
-    check("Final IDE-190 Handoff producer is IDE-180 1.9.0", finalHandoff && finalHandoff.producer && finalHandoff.producer.componentId === "IDE-180" && finalHandoff.producer.version === EXPECTED_RELEASE, finalHandoff && finalHandoff.producer, "IDE-190 Handoff", "Critical");
+    check("Final IDE-190 Handoff producer is IDE-180 1.9.1", finalHandoff && finalHandoff.producer && finalHandoff.producer.componentId === "IDE-180" && finalHandoff.producer.version === EXPECTED_RELEASE, finalHandoff && finalHandoff.producer, "IDE-190 Handoff", "Critical");
     check("Final IDE-190 Handoff is frozen and immutable", finalHandoff && finalHandoff.frozen === true && finalHandoff.immutable === true, finalHandoff && finalHandoff.frozenAt, "IDE-190 Handoff", "Critical");
     check("Final IDE-190 Handoff Integrity is SHA-256", Boolean(finalHandoff && finalHandoff.integrity && finalHandoff.integrity.algorithm === "SHA-256" && /^[a-f0-9]{64}$/.test(finalHandoff.integrity.hash)), finalHandoff && finalHandoff.integrity, "IDE-190 Handoff", "Critical");
     check("IDE-190 Handoff grants no Package mutation", finalHandoff && finalHandoff.policy.packageMutationAllowed === false, finalHandoff && finalHandoff.policy, "Safety", "Critical");
