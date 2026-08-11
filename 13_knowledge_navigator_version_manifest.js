@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_version_manifest.js
    IDE-180 Knowledge Navigator
-   Release: 1.7.0
-   Phase 8: Recovery / Archive Boundary
+   Release: 1.8.0
+   Phase 9: IDE-190 Navigation Package / Handoff
    Design Freeze: v1.0.0 / 2026-08-10
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.7.0";
+  const RELEASE_VERSION = "1.8.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,7 +20,7 @@
   }
 
   const moduleVersions = {
-    core: "1.7.0",
+    core: "1.8.0",
     contracts: BASELINE_VERSION,
     registry: "1.3.0",
     intelligenceProvider: BASELINE_VERSION,
@@ -54,7 +54,10 @@
     phase7Validation: "1.0.1",
     memoArchiveProvider: BASELINE_VERSION,
     recovery: BASELINE_VERSION,
-    phase8Validation: BASELINE_VERSION
+    phase8Validation: BASELINE_VERSION,
+    navigationPackage: BASELINE_VERSION,
+    ide190Handoff: BASELINE_VERSION,
+    phase9Validation: BASELINE_VERSION
   };
 
   const fileModules = {
@@ -92,7 +95,10 @@
     "13_knowledge_navigator_phase7_validation.js": "phase7Validation",
     "13_knowledge_navigator_memo_archive_provider.js": "memoArchiveProvider",
     "13_knowledge_navigator_recovery.js": "recovery",
-    "13_knowledge_navigator_phase8_validation.js": "phase8Validation"
+    "13_knowledge_navigator_phase8_validation.js": "phase8Validation",
+    "13_knowledge_navigator_package.js": "navigationPackage",
+    "13_knowledge_navigator_ide190_handoff.js": "ide190Handoff",
+    "13_knowledge_navigator_phase9_validation.js": "phase9Validation"
   };
 
   const contractVersions = {
@@ -161,7 +167,7 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 8 Recovery / Archive Boundary",
+      implementationPhase: "Phase 9 IDE-190 Navigation Package / Handoff",
       designFreezeVersion: "1.0.0",
       architectureSpecificationVersion: "1.0.0",
       decisionRange: "IDE-180-DECISION-001..029",
@@ -181,13 +187,13 @@
       resolverContractVersion: BASELINE_VERSION
     },
     implementation: {
-      phase: 8,
-      phaseName: "Recovery / Archive Boundary",
+      phase: 9,
+      phaseName: "IDE-190 Navigation Package / Handoff",
       phaseCount: 10,
       contractFirst: true,
       incrementalVerticalSlice: true,
-      completedPhases: [1, 2, 3, 4, 5, 6, 7],
-      activePhase: 8,
+      completedPhases: [1, 2, 3, 4, 5, 6, 7, 8],
+      activePhase: 9,
       readOnly: true
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
