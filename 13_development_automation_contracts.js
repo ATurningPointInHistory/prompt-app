@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_contracts.js
    IDE-190 Development Automation
-   Release: 1.0.0 / Module: Contracts 1.0.0
-   Phase 1: Foundation / Contracts / Version
+   Release: 1.1.0 / Module: Contracts 1.1.0
+   Phase 2: IDE-180 Intake / Grounding
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -57,12 +57,15 @@
       description: "Phase 1 component state only. No automation session, approval, dispatch or mutation state is synthesized here.",
       fields: [
         field("initialized", { required: true, type: "boolean" }),
-        field("currentPhase", { required: true, type: "integer", enum: [1] }),
+        field("currentPhase", { required: true, type: "integer", enum: [1, 2] }),
         field("releaseAllowed", { required: true, type: "boolean", enum: [false] }),
         field("ide190Complete", { required: true, type: "boolean", enum: [false] }),
         field("phase2Allowed", { required: true, type: "boolean" }),
+        field("phase3Allowed", { required: true, type: "boolean" }),
         field("lastPreDeviceValidation", { required: true, type: "object|null" }),
-        field("lastAndroidValidation", { required: true, type: "object|null" })
+        field("lastAndroidValidation", { required: true, type: "object|null" }),
+        field("lastPhase2Validation", { required: true, type: "object|null" }),
+        field("lastPhase2AndroidValidation", { required: true, type: "object|null" })
       ]
     },
     {
@@ -101,6 +104,60 @@
         field("persistentCommitPermission", { required: true, type: "boolean", enum: [false] }),
         field("githubAutomaticReflectionPermission", { required: true, type: "boolean", enum: [false] }),
         field("approvalBypassAllowed", { required: true, type: "boolean", enum: [false] })
+      ]
+    }    ,
+    {
+      key: "navigationIntake",
+      name: "IDE-190 Validated Navigation Intake Contract",
+      description: "Accepts only a validated immutable IDE-180 Navigation Package plus a validated IDE-180 to IDE-190 Handoff without provider bypass or inferred source completion.",
+      fields: [
+        field("intakeId", { required: true, type: "string" }),
+        field("sourceComponentId", { required: true, type: "string", enum: ["IDE-180"] }),
+        field("groundingInputType", { required: true, type: "string", enum: ["validated-ide180-package-plus-handoff"] }),
+        field("packageId", { required: true, type: "string" }),
+        field("packageHash", { required: true, type: "string" }),
+        field("handoffId", { required: true, type: "string" }),
+        field("handoffHash", { required: true, type: "string" }),
+        field("navigationStatus", { required: true, type: "string" }),
+        field("packageValidationValid", { required: true, type: "boolean", enum: [true] }),
+        field("handoffValidationValid", { required: true, type: "boolean", enum: [true] }),
+        field("linkageValid", { required: true, type: "boolean", enum: [true] }),
+        field("providerBypassUsed", { required: true, type: "boolean", enum: [false] }),
+        field("missingSourceInferenceUsed", { required: true, type: "boolean", enum: [false] }),
+        field("readOnly", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "groundingContext",
+      name: "IDE-190 Grounding Context Contract",
+      description: "Source-bounded V0 Grounding derived only from a validated IDE-180 intake. Missing Source remains explicit and recovery is delegated to IDE-180.",
+      fields: [
+        field("groundingId", { required: true, type: "string" }),
+        field("intakeId", { required: true, type: "string" }),
+        field("packageId", { required: true, type: "string" }),
+        field("handoffId", { required: true, type: "string" }),
+        field("canonicalTarget", { required: true, type: "object" }),
+        field("navigationStatus", { required: true, type: "string" }),
+        field("groundingStatus", { required: true, type: "string", enum: ["Grounded", "Partial", "Recovery-Required"] }),
+        field("authority", { required: true, type: "object" }),
+        field("evidence", { required: true, type: "array" }),
+        field("lineage", { required: true, type: "array" }),
+        field("validation", { required: true, type: "object" }),
+        field("conflicts", { required: true, type: "array" }),
+        field("missingSources", { required: true, type: "array" }),
+        field("sourceSnapshot", { required: true, type: "object" }),
+        field("structuredExplanation", { required: true, type: "object" }),
+        field("inferenceUsed", { required: true, type: "boolean", enum: [false] }),
+        field("authorityRecomputed", { required: true, type: "boolean", enum: [false] }),
+        field("providerCompositionUsed", { required: true, type: "boolean", enum: [false] }),
+        field("planEligible", { required: true, type: "boolean" }),
+        field("dispatchEligible", { required: true, type: "boolean", enum: [false] }),
+        field("recoveryDelegation", { required: true, type: "object" }),
+        field("readOnly", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
       ]
     }
   ];
@@ -179,7 +236,28 @@
 
     check("Payload is an object", internal.isPlainObject(payload), typeof payload);
     if (!internal.isPlainObject(payload)) {
-      const passed = checks.filter(function count(item) { return item.passed; }).length;
+  
+    if (definition.key === "navigationIntake") {
+      check("Formal input uses validated IDE-180 package and handoff", payload.groundingInputType === "validated-ide180-package-plus-handoff", payload.groundingInputType, "groundingInputType");
+      check("IDE-180 Provider bypass is not used", payload.providerBypassUsed === false, payload.providerBypassUsed, "providerBypassUsed");
+      check("Missing Source inference is not used", payload.missingSourceInferenceUsed === false, payload.missingSourceInferenceUsed, "missingSourceInferenceUsed");
+      check("Package and Handoff linkage is valid", payload.linkageValid === true, payload.linkageValid, "linkageValid");
+    }
+
+    if (definition.key === "groundingContext") {
+      const hasMissing = Array.isArray(payload.missingSources) && payload.missingSources.length > 0;
+      check("Grounding never uses inference", payload.inferenceUsed === false, payload.inferenceUsed, "inferenceUsed");
+      check("Grounding never recomputes IDE-180 Authority", payload.authorityRecomputed === false, payload.authorityRecomputed, "authorityRecomputed");
+      check("Grounding never composes IDE-180 Providers", payload.providerCompositionUsed === false, payload.providerCompositionUsed, "providerCompositionUsed");
+      check("Phase 2 never becomes Dispatch eligible", payload.dispatchEligible === false, payload.dispatchEligible, "dispatchEligible");
+      if (hasMissing) {
+        check("Missing Source requires Recovery-Required", payload.groundingStatus === "Recovery-Required", payload.groundingStatus, "groundingStatus");
+        check("Missing Source cannot become Plan eligible", payload.planEligible === false, payload.planEligible, "planEligible");
+        check("Missing Source Recovery is delegated to IDE-180", payload.recoveryDelegation && payload.recoveryDelegation.ownerComponentId === "IDE-180", payload.recoveryDelegation && payload.recoveryDelegation.ownerComponentId, "recoveryDelegation.ownerComponentId");
+      }
+    }
+
+    const passed = checks.filter(function count(item) { return item.passed; }).length;
       return { valid: false, status: "Invalid", contractId: definition.contractId, contractVersion: definition.version, passed: passed, failed: checks.length - passed, total: checks.length, health: Number(((passed / checks.length) * 100).toFixed(2)), checks: checks };
     }
 
@@ -253,7 +331,7 @@
     id: "IDE-190-CONTRACTS",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 1,
+    phase: 2,
     contractCount: BUILT_IN_CONTRACTS.length,
     readOnly: true,
     loadedAt: internal.nowIso()
