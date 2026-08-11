@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_core.js
    IDE-190 Development Automation
-   Release: 1.0.0 / Module: Core 1.0.0
-   Phase 1: Foundation / Contracts / Version
+   Release: 1.1.0 / Module: Core 1.1.0
+   Phase 2: IDE-180 Intake / Grounding
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -120,11 +120,27 @@
         lastPreDeviceValidation: null,
         lastAndroidValidation: null,
         androidPhase1ValidationPassed: false,
+        intakes: new Map(),
+        intakeSources: new Map(),
+        latestIntakeId: null,
+        groundings: new Map(),
+        latestGroundingId: null,
+        lastPhase2Validation: null,
+        lastPhase2AndroidValidation: null,
+        androidPhase2ValidationPassed: false,
         lastError: null,
         updatedAt: null
       };
 
   if (!(state.contracts instanceof Map)) state.contracts = new Map();
+  if (!(state.intakes instanceof Map)) state.intakes = new Map();
+  if (!(state.intakeSources instanceof Map)) state.intakeSources = new Map();
+  if (!(state.groundings instanceof Map)) state.groundings = new Map();
+  if (!Object.prototype.hasOwnProperty.call(state, "latestIntakeId")) state.latestIntakeId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestGroundingId")) state.latestGroundingId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPhase2Validation")) state.lastPhase2Validation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPhase2AndroidValidation")) state.lastPhase2AndroidValidation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "androidPhase2ValidationPassed")) state.androidPhase2ValidationPassed = false;
 
   function touch() {
     state.updatedAt = nowIso();
@@ -201,6 +217,7 @@
       ide180HandoffContractCompatible: ide180HandoffContractVersion === requiredIDE180HandoffContractVersion,
       ide180HandoffValidationApiAvailable: Boolean(ide180Api && typeof ide180Api.validateIDE190HandoffContract === "function"),
       ide180LatestHandoffApiAvailable: Boolean(ide180Api && typeof ide180Api.getLatestIDE190Handoff === "function"),
+      ide180LatestPackageApiAvailable: Boolean(ide180Api && typeof ide180Api.getLatestKnowledgeNavigatorPackage === "function"),
       ide180PackageValidationApiAvailable: Boolean(ide180Api && typeof ide180Api.validateKnowledgeNavigatorPackage === "function"),
       ide160RuntimeLoaded: Boolean(ide160),
       ide160ReleaseVersion: ide160Version,
@@ -288,9 +305,12 @@
       currentPhase: VERSION_MANIFEST.implementation.phase,
       releaseAllowed: false,
       ide190Complete: false,
-      phase2Allowed: state.androidPhase1ValidationPassed === true,
+      phase2Allowed: VERSION_MANIFEST.implementation.phase >= 2,
+      phase3Allowed: state.androidPhase2ValidationPassed === true,
       lastPreDeviceValidation: clone(state.lastPreDeviceValidation),
-      lastAndroidValidation: clone(state.lastAndroidValidation)
+      lastAndroidValidation: clone(state.lastAndroidValidation),
+      lastPhase2Validation: clone(state.lastPhase2Validation),
+      lastPhase2AndroidValidation: clone(state.lastPhase2AndroidValidation)
     };
   }
 
@@ -317,10 +337,16 @@
       modules: modules,
       ide190Complete: false,
       releaseAllowed: false,
-      phase2Allowed: state.androidPhase1ValidationPassed === true,
+      phase2Allowed: VERSION_MANIFEST.implementation.phase >= 2,
+      phase3Allowed: state.androidPhase2ValidationPassed === true,
       androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true,
+      androidPhase2ValidationPassed: state.androidPhase2ValidationPassed === true,
+      latestIntakeId: state.latestIntakeId,
+      latestGroundingId: state.latestGroundingId,
       lastPreDeviceValidation: clone(state.lastPreDeviceValidation),
       lastAndroidValidation: clone(state.lastAndroidValidation),
+      lastPhase2Validation: clone(state.lastPhase2Validation),
+      lastPhase2AndroidValidation: clone(state.lastPhase2AndroidValidation),
       lastError: clone(state.lastError),
       updatedAt: state.updatedAt
     };
@@ -341,6 +367,7 @@
           dependency.ide180HandoffContractCompatible &&
           dependency.ide180HandoffValidationApiAvailable &&
           dependency.ide180LatestHandoffApiAvailable &&
+          dependency.ide180LatestPackageApiAvailable &&
           dependency.ide180PackageValidationApiAvailable
         )) &&
         (settings.requireIDE160 === false || (
@@ -366,6 +393,8 @@
 
       const results = [];
       if (typeof namespace.initializeContracts === "function") results.push(namespace.initializeContracts());
+      if (typeof namespace.initializeIntake === "function") results.push(namespace.initializeIntake());
+      if (typeof namespace.initializeGrounding === "function") results.push(namespace.initializeGrounding());
       const failed = results.filter(function failedResult(result) { return !result || result.ok !== true; });
       if (typeof namespace.initializeContracts !== "function") {
         failed.push({ ok: false, code: "IDE190_CONTRACTS_NOT_READY" });
@@ -403,13 +432,27 @@
     touch();
   }
 
+
+  function markPhase2Validation(result) {
+    state.lastPhase2Validation = clone(result);
+    touch();
+  }
+
+  function markPhase2AndroidValidation(result) {
+    state.lastPhase2AndroidValidation = clone(result);
+    state.androidPhase2ValidationPassed = Boolean(result && result.passed === result.total && result.criticalFailed === 0);
+    touch();
+  }
+
   function getPublicApiDescription() {
     return {
       componentId: COMPONENT_ID,
       version: RELEASE_VERSION,
       namespace: "window.IDE190DevelopmentAutomation",
-      phase: 1,
+      phase: VERSION_MANIFEST.implementation.phase,
       namespaceFunctions: Object.keys(namespace.api || {}).sort(),
+      intakeImplemented: typeof namespace.intakeIDE180Navigation === "function",
+      groundingImplemented: typeof namespace.groundIDE180Navigation === "function",
       dispatchImplemented: false,
       mutationImplemented: false,
       persistenceImplemented: false
@@ -434,7 +477,9 @@
     touch: touch,
     buildResult: buildResult,
     markPhase1PreDeviceValidation: markPhase1PreDeviceValidation,
-    markPhase1AndroidValidation: markPhase1AndroidValidation
+    markPhase1AndroidValidation: markPhase1AndroidValidation,
+    markPhase2Validation: markPhase2Validation,
+    markPhase2AndroidValidation: markPhase2AndroidValidation
   });
   namespace.__internal = internal;
 
@@ -462,8 +507,8 @@
     id: "IDE-190-CORE",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 1,
-    phaseName: "Foundation / Contracts / Version",
+    phase: 2,
+    phaseName: "IDE-180 Intake / Grounding",
     designFreezeId: VERSION_MANIFEST.release.designFreezeId,
     safeAutomationOrchestrator: true,
     directMutation: false,
