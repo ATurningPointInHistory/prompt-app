@@ -4,8 +4,8 @@
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Phase 9 IDE-190 Navigation Package / Handoff extension.",
-  "updatedAt": "2026-08-11T02:20:00.000Z",
+  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Phase 10 Integrated / Android Final Validation extension.",
+  "updatedAt": "2026-08-11T03:08:26.930Z",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
   "scripts": [
@@ -146,7 +146,7 @@
     "./13_intelligence_package_validation.js?h=c31e04201315",
     "./13_intelligence_package_export.js?h=3b0a01705f11",
     "./13_intelligence_validation.js?h=db0c62a52276",
-    "./13_knowledge_navigator_version_manifest.js?h=39890d0fafde",
+    "./13_knowledge_navigator_version_manifest.js?h=3f9b3e20e321",
     "./13_knowledge_navigator_core.js?h=b123e660a337",
     "./13_knowledge_navigator_contracts.js?h=4682342e4a57",
     "./13_knowledge_navigator_registry.js?h=bdabc846156a",
@@ -185,6 +185,7 @@
     "./13_knowledge_navigator_phase7_validation.js?h=4f038972a055",
     "./13_knowledge_navigator_phase8_validation.js?h=2e5f6c6326ab",
     "./13_knowledge_navigator_phase9_validation.js?h=b3f5bb6d7634",
+    "./13_knowledge_navigator_phase10_validation.js?h=3bc6385b77b0",
     "./13_project_report.js?h=d636cb6a6766",
     "./13_project_handoff.js?h=a073ff86a1eb",
     "./13_function_relation_v3.js?h=0857a784aa30",
@@ -888,9 +889,9 @@
       "cacheKey": "db0c62a52276"
     },
     "13_knowledge_navigator_version_manifest.js": {
-      "sha256": "39890d0fafdecba26a3f0bb37f9b6a59049a300f03feb8073135af25ad149c5a",
-      "byteSize": 8240,
-      "cacheKey": "39890d0fafde"
+      "sha256": "3f9b3e20e321223b6106dd991e7276b5dc88e499ff541d86546f6fbce14a6170",
+      "byteSize": 8366,
+      "cacheKey": "3f9b3e20e321"
     },
     "13_knowledge_navigator_core.js": {
       "sha256": "b123e660a337ec9da01f68684904bc07da118933991e5698ba28fe7de64d9a01",
@@ -1156,8 +1157,13 @@
       "sha256": "138e34ded10617cf57899215d4c79704b86c8b127c9bdec59ad31f3e08f1f728",
       "byteSize": 4460,
       "cacheKey": "138e34ded106"
+    },
+    "13_knowledge_navigator_phase10_validation.js": {
+      "sha256": "3bc6385b77b0047dabdfbf8aec323888d2f98ae8d1fae8e00338a7b696002296",
+      "byteSize": 41928,
+      "cacheKey": "3bc6385b77b0"
     }
   },
-  "scriptSetHash": "da0ff52dd08a7ddf7b1c23632491c8f731223ce416d76cac0b1e6fa545fd1026",
-  "manifestHash": "eed1638407d926a1bce155edf0813e979778df86ff73d0866df91a4bc06f3580"
+  "scriptSetHash": "dbde50df0ec7075130d0b2a7c45e7a3ab3fd80fda6e70ca1c1c744022130198e",
+  "manifestHash": "fa9b2dafae1afc4586c7b0378cd785ef0c580d5fd698be804cf9d175cd65e0ab"
 }
