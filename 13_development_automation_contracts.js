@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_contracts.js
    IDE-190 Development Automation
-   Release: 1.1.0 / Module: Contracts 1.1.0
-   Phase 2: IDE-180 Intake / Grounding
+   Release: 1.2.0 / Module: Contracts 1.2.0
+   Phase 3: Plan / Propose / Dry Run / Preflight
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -57,15 +57,18 @@
       description: "Phase 1 component state only. No automation session, approval, dispatch or mutation state is synthesized here.",
       fields: [
         field("initialized", { required: true, type: "boolean" }),
-        field("currentPhase", { required: true, type: "integer", enum: [1, 2] }),
+        field("currentPhase", { required: true, type: "integer", enum: [1, 2, 3] }),
         field("releaseAllowed", { required: true, type: "boolean", enum: [false] }),
         field("ide190Complete", { required: true, type: "boolean", enum: [false] }),
         field("phase2Allowed", { required: true, type: "boolean" }),
         field("phase3Allowed", { required: true, type: "boolean" }),
+        field("phase4Allowed", { required: true, type: "boolean" }),
         field("lastPreDeviceValidation", { required: true, type: "object|null" }),
         field("lastAndroidValidation", { required: true, type: "object|null" }),
         field("lastPhase2Validation", { required: true, type: "object|null" }),
-        field("lastPhase2AndroidValidation", { required: true, type: "object|null" })
+        field("lastPhase2AndroidValidation", { required: true, type: "object|null" }),
+        field("lastPhase3Validation", { required: true, type: "object|null" }),
+        field("lastPhase3AndroidValidation", { required: true, type: "object|null" })
       ]
     },
     {
@@ -155,6 +158,108 @@
         field("planEligible", { required: true, type: "boolean" }),
         field("dispatchEligible", { required: true, type: "boolean", enum: [false] }),
         field("recoveryDelegation", { required: true, type: "object" }),
+        field("readOnly", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "automationPlan",
+      name: "IDE-190 Automation Plan Contract",
+      description: "V1 immutable Plan bound to a Grounded IDE-180 evidence context. Planning never grants dispatch, approval, mutation, or persistent commit permission.",
+      fields: [
+        field("planId", { required: true, type: "string" }),
+        field("planVersion", { required: true, type: "string", enum: ["1.0.0"] }),
+        field("planHash", { required: true, type: "string" }),
+        field("groundingId", { required: true, type: "string" }),
+        field("packageId", { required: true, type: "string" }),
+        field("packageHash", { required: true, type: "string" }),
+        field("handoffId", { required: true, type: "string" }),
+        field("handoffHash", { required: true, type: "string" }),
+        field("validationLayer", { required: true, type: "string", enum: ["V1"] }),
+        field("objective", { required: true, type: "string" }),
+        field("operation", { required: true, type: "object" }),
+        field("automationLevel", { required: true, type: "string", enum: AUTOMATION_LEVEL_IDS }),
+        field("mutationLevel", { required: true, type: "string", enum: MUTATION_LEVEL_IDS }),
+        field("requestedExecutionMode", { required: true, type: "string", enum: EXECUTION_MODE_IDS }),
+        field("externalEffectLevel", { required: true, type: "string", enum: EXTERNAL_EFFECT_LEVEL_IDS }),
+        field("repositoryBaseline", { required: true, type: "object|null" }),
+        field("evidenceBinding", { required: true, type: "object" }),
+        field("approvalRequested", { required: true, type: "boolean", enum: [false] }),
+        field("autoApply", { required: true, type: "boolean", enum: [false] }),
+        field("dispatchEligible", { required: true, type: "boolean", enum: [false] }),
+        field("readOnly", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "automationProposal",
+      name: "IDE-190 Automation Proposal Contract",
+      description: "L2 advisory Proposal bound to one immutable Plan. Proposal is never execution permission or mutation approval.",
+      fields: [
+        field("proposalId", { required: true, type: "string" }),
+        field("planId", { required: true, type: "string" }),
+        field("planHash", { required: true, type: "string" }),
+        field("groundingId", { required: true, type: "string" }),
+        field("proposalStatus", { required: true, type: "string", enum: ["Proposed"] }),
+        field("summary", { required: true, type: "string" }),
+        field("expectedEffects", { required: true, type: "array" }),
+        field("executionPermissionGranted", { required: true, type: "boolean", enum: [false] }),
+        field("mutationApprovalGranted", { required: true, type: "boolean", enum: [false] }),
+        field("approvalRequested", { required: true, type: "boolean", enum: [false] }),
+        field("autoApply", { required: true, type: "boolean", enum: [false] }),
+        field("dispatchEligible", { required: true, type: "boolean", enum: [false] }),
+        field("readOnly", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "dryRunRecord",
+      name: "IDE-190 E0 Dry Run Record Contract",
+      description: "V2 read-only simulation that proves no Repository mutation, write, application, approval request, or auto-apply occurred.",
+      fields: [
+        field("dryRunId", { required: true, type: "string" }),
+        field("proposalId", { required: true, type: "string" }),
+        field("planId", { required: true, type: "string" }),
+        field("planHash", { required: true, type: "string" }),
+        field("validationLayer", { required: true, type: "string", enum: ["V2"] }),
+        field("executionMode", { required: true, type: "string", enum: ["E0"] }),
+        field("dryRunStatus", { required: true, type: "string", enum: ["Passed", "Blocked"] }),
+        field("repositoryMutation", { required: true, type: "boolean", enum: [false] }),
+        field("repositoryWriteCount", { required: true, type: "integer", enum: [0] }),
+        field("sourceUnchanged", { required: true, type: "boolean", enum: [true] }),
+        field("applicationAttempted", { required: true, type: "boolean", enum: [false] }),
+        field("approvalRequested", { required: true, type: "boolean", enum: [false] }),
+        field("autoApply", { required: true, type: "boolean", enum: [false] }),
+        field("dispatchEligible", { required: true, type: "boolean", enum: [false] }),
+        field("checks", { required: true, type: "array" }),
+        field("readOnly", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "preflightRecord",
+      name: "IDE-190 Execution Preflight Contract",
+      description: "V3 fail-closed Preflight. A PASS only permits later Gate evaluation; it never permits direct Dispatch.",
+      fields: [
+        field("preflightId", { required: true, type: "string" }),
+        field("dryRunId", { required: true, type: "string" }),
+        field("proposalId", { required: true, type: "string" }),
+        field("planId", { required: true, type: "string" }),
+        field("planHash", { required: true, type: "string" }),
+        field("validationLayer", { required: true, type: "string", enum: ["V3"] }),
+        field("preflightStatus", { required: true, type: "string", enum: ["Passed", "Blocked"] }),
+        field("approvalClassRequired", { required: true, type: "string", enum: ["P0", "P1", "P2"] }),
+        field("approvalRequested", { required: true, type: "boolean", enum: [false] }),
+        field("gateRequired", { required: true, type: "boolean", enum: [true] }),
+        field("gatePassed", { required: true, type: "boolean", enum: [false] }),
+        field("dispatchEligible", { required: true, type: "boolean", enum: [false] }),
+        field("repositoryMutation", { required: true, type: "boolean", enum: [false] }),
+        field("repositoryWriteCount", { required: true, type: "integer", enum: [0] }),
+        field("checks", { required: true, type: "array" }),
         field("readOnly", { required: true, type: "boolean", enum: [true] }),
         field("immutable", { required: true, type: "boolean", enum: [true] }),
         field("createdAt", { required: true, type: "string" })
@@ -257,6 +362,37 @@
       }
     }
 
+    if (definition.key === "automationPlan") {
+      const hardDenied = payload.automationLevel === "L5" || payload.mutationLevel === "M3" || payload.requestedExecutionMode === "E2" || payload.externalEffectLevel === "X2" || payload.externalEffectLevel === "X3";
+      check("Plan cannot contain Initial hard-deny capability", hardDenied === false, hardDenied, "permissionBoundary");
+      check("Plan never requests Approval in Phase 3", payload.approvalRequested === false, payload.approvalRequested, "approvalRequested");
+      check("Plan never auto-applies", payload.autoApply === false, payload.autoApply, "autoApply");
+      check("Plan never becomes Dispatch eligible", payload.dispatchEligible === false, payload.dispatchEligible, "dispatchEligible");
+    }
+
+    if (definition.key === "automationProposal") {
+      check("Proposal is not execution permission", payload.executionPermissionGranted === false, payload.executionPermissionGranted, "executionPermissionGranted");
+      check("Proposal is not mutation approval", payload.mutationApprovalGranted === false, payload.mutationApprovalGranted, "mutationApprovalGranted");
+      check("Proposal never becomes Dispatch eligible", payload.dispatchEligible === false, payload.dispatchEligible, "dispatchEligible");
+    }
+
+    if (definition.key === "dryRunRecord") {
+      check("E0 Dry Run never mutates Repository", payload.repositoryMutation === false && payload.repositoryWriteCount === 0, payload.repositoryWriteCount, "repositoryWriteCount");
+      check("E0 Dry Run leaves Source unchanged", payload.sourceUnchanged === true, payload.sourceUnchanged, "sourceUnchanged");
+      check("E0 Dry Run never attempts application", payload.applicationAttempted === false, payload.applicationAttempted, "applicationAttempted");
+      check("E0 Dry Run never requests Approval", payload.approvalRequested === false, payload.approvalRequested, "approvalRequested");
+      check("E0 Dry Run never auto-applies", payload.autoApply === false, payload.autoApply, "autoApply");
+      check("E0 Dry Run never Dispatches", payload.dispatchEligible === false, payload.dispatchEligible, "dispatchEligible");
+    }
+
+    if (definition.key === "preflightRecord") {
+      check("Preflight requires Gate", payload.gateRequired === true, payload.gateRequired, "gateRequired");
+      check("Phase 3 Preflight never passes Gate", payload.gatePassed === false, payload.gatePassed, "gatePassed");
+      check("Preflight never Dispatches directly", payload.dispatchEligible === false, payload.dispatchEligible, "dispatchEligible");
+      check("Preflight never mutates Repository", payload.repositoryMutation === false && payload.repositoryWriteCount === 0, payload.repositoryWriteCount, "repositoryWriteCount");
+      check("Preflight never requests Approval in Phase 3", payload.approvalRequested === false, payload.approvalRequested, "approvalRequested");
+    }
+
     const passed = checks.filter(function count(item) { return item.passed; }).length;
       return { valid: false, status: "Invalid", contractId: definition.contractId, contractVersion: definition.version, passed: passed, failed: checks.length - passed, total: checks.length, health: Number(((passed / checks.length) * 100).toFixed(2)), checks: checks };
     }
@@ -331,7 +467,7 @@
     id: "IDE-190-CONTRACTS",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 2,
+    phase: 3,
     contractCount: BUILT_IN_CONTRACTS.length,
     readOnly: true,
     loadedAt: internal.nowIso()
