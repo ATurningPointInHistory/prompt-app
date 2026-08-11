@@ -4,8 +4,8 @@
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Phase 8 Recovery / Archive Boundary extension.",
-  "updatedAt": "2026-08-11T00:13:35.000Z",
+  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Phase 9 IDE-190 Navigation Package / Handoff extension.",
+  "updatedAt": "2026-08-11T02:20:00.000Z",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
   "scripts": [
@@ -146,8 +146,8 @@
     "./13_intelligence_package_validation.js?h=c31e04201315",
     "./13_intelligence_package_export.js?h=3b0a01705f11",
     "./13_intelligence_validation.js?h=db0c62a52276",
-    "./13_knowledge_navigator_version_manifest.js?h=fa061ce02592",
-    "./13_knowledge_navigator_core.js?h=d4381f54af34",
+    "./13_knowledge_navigator_version_manifest.js?h=39890d0fafde",
+    "./13_knowledge_navigator_core.js?h=b123e660a337",
     "./13_knowledge_navigator_contracts.js?h=4682342e4a57",
     "./13_knowledge_navigator_registry.js?h=bdabc846156a",
     "./13_knowledge_navigator_intelligence_provider.js?h=99b5ddac1ef0",
@@ -173,6 +173,8 @@
     "./13_knowledge_navigator_persistence.js?h=2920ca07415c",
     "./13_knowledge_navigator_memo_archive_provider.js?h=b4be372a2d38",
     "./13_knowledge_navigator_recovery.js?h=14fb2926e0c9",
+    "./13_knowledge_navigator_package.js?h=8a69cf49871e",
+    "./13_knowledge_navigator_ide190_handoff.js?h=3391aa23d92a",
     "./13_knowledge_navigator_orchestrator.js?h=860a705fe933",
     "./13_knowledge_navigator_validation.js?h=8f1d9dd59862",
     "./13_knowledge_navigator_phase2_validation.js?h=910a68259947",
@@ -182,6 +184,7 @@
     "./13_knowledge_navigator_phase6_validation.js?h=c9358b8799a5",
     "./13_knowledge_navigator_phase7_validation.js?h=4f038972a055",
     "./13_knowledge_navigator_phase8_validation.js?h=2e5f6c6326ab",
+    "./13_knowledge_navigator_phase9_validation.js?h=b3f5bb6d7634",
     "./13_project_report.js?h=d636cb6a6766",
     "./13_project_handoff.js?h=a073ff86a1eb",
     "./13_function_relation_v3.js?h=0857a784aa30",
@@ -885,14 +888,14 @@
       "cacheKey": "db0c62a52276"
     },
     "13_knowledge_navigator_version_manifest.js": {
-      "sha256": "fa061ce02592ff2aeddf80b93e96a00899a6fcc66b6f93f33af34ec94e71085b",
-      "byteSize": 7894,
-      "cacheKey": "fa061ce02592"
+      "sha256": "39890d0fafdecba26a3f0bb37f9b6a59049a300f03feb8073135af25ad149c5a",
+      "byteSize": 8240,
+      "cacheKey": "39890d0fafde"
     },
     "13_knowledge_navigator_core.js": {
-      "sha256": "d4381f54af34ffbb1fe491de9672db063856e9bf50d2612a597f6b9eb3242a26",
-      "byteSize": 14984,
-      "cacheKey": "d4381f54af34"
+      "sha256": "b123e660a337ec9da01f68684904bc07da118933991e5698ba28fe7de64d9a01",
+      "byteSize": 15264,
+      "cacheKey": "b123e660a337"
     },
     "13_knowledge_navigator_contracts.js": {
       "sha256": "4682342e4a5766758e9de06546ec66d5c0724e930850b03ced2e7f919f39ac30",
@@ -1019,6 +1022,16 @@
       "byteSize": 11708,
       "cacheKey": "14fb2926e0c9"
     },
+    "13_knowledge_navigator_package.js": {
+      "sha256": "8a69cf49871e1ffbac2b792f5bfd3224f01fa6d58d33bfd03d37afd70bb4ee7c",
+      "byteSize": 12335,
+      "cacheKey": "8a69cf49871e"
+    },
+    "13_knowledge_navigator_ide190_handoff.js": {
+      "sha256": "3391aa23d92a576955db5ca30ba7dcc765ae1d58ab9c5f2654af8732c8a07595",
+      "byteSize": 9946,
+      "cacheKey": "3391aa23d92a"
+    },
     "13_knowledge_navigator_orchestrator.js": {
       "sha256": "860a705fe9333cc77bf8cab90e4f2b149d2bbf9d3617461f823e7cfa850ae468",
       "byteSize": 14992,
@@ -1063,6 +1076,11 @@
       "sha256": "2e5f6c6326ab46f63e8e66c379b3c687238d56eb2e5563e8213a341445ad1b67",
       "byteSize": 21873,
       "cacheKey": "2e5f6c6326ab"
+    },
+    "13_knowledge_navigator_phase9_validation.js": {
+      "sha256": "b3f5bb6d7634d062ae9f02d2fe156fe785cbc666d1cd0a02257823f05826eff8",
+      "byteSize": 21605,
+      "cacheKey": "b3f5bb6d7634"
     },
     "13_project_report.js": {
       "sha256": "d636cb6a67665a6a26975934e81c9ffe2e1aca43b7f1303d0b9dae1a221c813b",
@@ -1140,6 +1158,6 @@
       "cacheKey": "138e34ded106"
     }
   },
-  "scriptSetHash": "d6796faa31882cf9ea9f1f0c9efd2ffb509821ee4cb4dcb5967594afd9937a9a",
-  "manifestHash": "127f8665fcf6da2365eccaa523d23a0c22c89dd40ca9e7d0f0c986891f80221d"
+  "scriptSetHash": "da0ff52dd08a7ddf7b1c23632491c8f731223ce416d76cac0b1e6fa545fd1026",
+  "manifestHash": "eed1638407d926a1bce155edf0813e979778df86ff73d0866df91a4bc06f3580"
 }
