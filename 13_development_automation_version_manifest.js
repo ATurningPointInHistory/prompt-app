@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_development_automation_version_manifest.js
    IDE-190 Development Automation
-   Release: 1.0.0
-   Phase 1: Foundation / Contracts / Version
+   Release: 1.1.0
+   Phase 2: IDE-180 Intake / Grounding
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.0.0";
+  const RELEASE_VERSION = "1.1.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,29 +20,39 @@
   }
 
   const moduleVersions = {
-    core: BASELINE_VERSION,
-    contracts: BASELINE_VERSION,
-    validation: BASELINE_VERSION
+    core: "1.1.0",
+    contracts: "1.1.0",
+    validation: BASELINE_VERSION,
+    intake: BASELINE_VERSION,
+    grounding: BASELINE_VERSION,
+    phase2Validation: BASELINE_VERSION
   };
 
   const fileModules = {
     "13_development_automation_core.js": "core",
     "13_development_automation_contracts.js": "contracts",
-    "13_development_automation_validation.js": "validation"
+    "13_development_automation_validation.js": "validation",
+    "13_development_automation_intake.js": "intake",
+    "13_development_automation_grounding.js": "grounding",
+    "13_development_automation_phase2_validation.js": "phase2Validation"
   };
 
   const contractVersions = {
     foundation: BASELINE_VERSION,
-    foundationState: BASELINE_VERSION,
+    foundationState: "1.1.0",
     capabilityDescriptor: BASELINE_VERSION,
-    platformProfile: BASELINE_VERSION
+    platformProfile: BASELINE_VERSION,
+    navigationIntake: BASELINE_VERSION,
+    groundingContext: BASELINE_VERSION
   };
 
   const contractIds = {
     foundation: "IDE-190-CONTRACT-FOUNDATION",
     foundationState: "IDE-190-CONTRACT-FOUNDATION-STATE",
     capabilityDescriptor: "IDE-190-CONTRACT-CAPABILITY-DESCRIPTOR",
-    platformProfile: "IDE-190-CONTRACT-PLATFORM-PROFILE"
+    platformProfile: "IDE-190-CONTRACT-PLATFORM-PROFILE",
+    navigationIntake: "IDE-190-CONTRACT-NAVIGATION-INTAKE",
+    groundingContext: "IDE-190-CONTRACT-GROUNDING-CONTEXT"
   };
 
   const lifecycle = [
@@ -187,14 +197,14 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 1 Foundation / Contracts / Version",
-      phase: 1,
+      implementationPhase: "Phase 2 IDE-180 Intake / Grounding",
+      phase: 2,
       phaseCount: 10,
       designFreezeId: "IDE-190-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
       decisionRange: "IDE-190-DECISION-001..012",
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Implementation - Phase 1"
+      status: "Implementation - Phase 2"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -219,14 +229,16 @@
       minimumIDE160Version: "2.0.1"
     },
     implementation: {
-      phase: 1,
-      phaseName: "Foundation / Contracts / Version",
+      phase: 2,
+      phaseName: "IDE-180 Intake / Grounding",
+      completedPhases: [1],
       contractFirst: true,
       inspectBeforeImplement: true,
       ide190Complete: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
-      phase2AllowedBeforeAndroidGate: false
+      phase2Allowed: true,
+      phase3AllowedBeforeAndroidGate: false
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
       const key = fileModules[moduleOrFile] || moduleOrFile;
