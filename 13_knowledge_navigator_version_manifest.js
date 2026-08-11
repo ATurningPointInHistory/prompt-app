@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_version_manifest.js
    IDE-180 Knowledge Navigator
-   Release: 1.9.0
+   Release: 1.9.1
    Phase 10: Integrated / Android Final Validation
    Design Freeze: v1.0.0 / 2026-08-10
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.9.0";
+  const RELEASE_VERSION = "1.9.1";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,7 +20,7 @@
   }
 
   const moduleVersions = {
-    core: "1.9.0",
+    core: "1.9.1",
     contracts: BASELINE_VERSION,
     registry: "1.3.0",
     intelligenceProvider: BASELINE_VERSION,
@@ -58,7 +58,7 @@
     navigationPackage: BASELINE_VERSION,
     ide190Handoff: BASELINE_VERSION,
     phase9Validation: BASELINE_VERSION,
-    phase10Validation: BASELINE_VERSION
+    phase10Validation: "1.0.1"
   };
 
   const fileModules = {
