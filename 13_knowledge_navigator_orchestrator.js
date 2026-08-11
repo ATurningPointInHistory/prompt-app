@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_knowledge_navigator_orchestrator.js
    IDE-180 Knowledge Navigator
-   Release: Version Manifest / Module: Orchestrator 1.3.0
-   Phase 6: Federation / Conflict
+   Release: Version Manifest / Module: Orchestrator 1.4.0
+   Phase 8: Recovery / Archive Boundary
    ============================================================ */
 (function (global) {
   "use strict";
@@ -113,6 +113,9 @@
     result.explanation = typeof namespace.buildKnowledgeNavigationExplanation === "function"
       ? namespace.buildKnowledgeNavigationExplanation(result, request, data)
       : namespace.buildBasicNavigationExplanation(result, request, data);
+    if (typeof namespace.getRecoverySuggestion === "function") {
+      result.metadata.recovery = internal.clone(namespace.getRecoverySuggestion(result));
+    }
     return result;
   }
 
@@ -238,7 +241,7 @@
     id: "IDE-180-ORCHESTRATOR",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 6,
+    phase: 8,
     verticalSlice: true,
     readOnly: true,
     loadedAt: internal.nowIso()
