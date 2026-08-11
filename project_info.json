@@ -4,7 +4,7 @@
   "project": "AIプロンプト生成Pro",
   "version": "v6.0",
   "entryFile": "index.html",
-  "savedAt": "2026-08-10T18:10:59.333Z",
+  "savedAt": "2026-08-11T00:13:35.000Z",
   "complete": true,
   "requestedFiles": [
     "index.html",
@@ -194,7 +194,10 @@
     "16_workflow_engine.js",
     "99_init.js",
     "00_style.css",
-    "00_script_manifest.json"
+    "00_script_manifest.json",
+    "13_knowledge_navigator_memo_archive_provider.js",
+    "13_knowledge_navigator_recovery.js",
+    "13_knowledge_navigator_phase8_validation.js"
   ],
   "savedFiles": [
     "index.html",
@@ -385,24 +388,27 @@
     "99_init.js",
     "00_style.css",
     "00_script_manifest.json",
+    "13_knowledge_navigator_memo_archive_provider.js",
+    "13_knowledge_navigator_recovery.js",
+    "13_knowledge_navigator_phase8_validation.js",
     "project_info.json"
   ],
   "missingFiles": [],
   "externalFiles": [
     "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
   ],
-  "localFileCount": 189,
+  "localFileCount": 192,
   "externalFileCount": 1,
-  "fileCount": 189,
+  "fileCount": 192,
   "cleanIndex": true,
   "scriptManifestSource": "00_script_manifest.json",
   "scriptManifestVersion": "1.9.2",
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "55acc69435c8dd6257bb6f8b6dcf02408970f324040d30ee4759c58002d5a0d3",
-  "scriptSetHash": "cdf115003a50e98c549a4f93dee585d64427c47a208c38367cd9b90e8a025627",
-  "scriptManifestCount": 185,
+  "scriptManifestHash": "127f8665fcf6da2365eccaa523d23a0c22c89dd40ca9e7d0f0c986891f80221d",
+  "scriptSetHash": "d6796faa31882cf9ea9f1f0c9efd2ffb509821ee4cb4dcb5967594afd9937a9a",
+  "scriptManifestCount": 188,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
     "runtimeLoader": false,
