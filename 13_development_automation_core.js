@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_core.js
    IDE-190 Development Automation
-   Release: 1.3.0 / Module: Core 1.3.0
-   Phase 4: Gate / Approval / Consent
+   Release: 1.4.0 / Module: Core 1.4.0
+   Phase 5: IDE-160 Controlled Dispatch
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -189,6 +189,14 @@
   if (!Object.prototype.hasOwnProperty.call(state, "lastPhase4Validation")) state.lastPhase4Validation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastPhase4AndroidValidation")) state.lastPhase4AndroidValidation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "androidPhase4ValidationPassed")) state.androidPhase4ValidationPassed = false;
+  if (!(state.dispatchRequests instanceof Map)) state.dispatchRequests = new Map();
+  if (!(state.executionResults instanceof Map)) state.executionResults = new Map();
+  if (!(state.gateDispatchStates instanceof Map)) state.gateDispatchStates = new Map();
+  if (!Object.prototype.hasOwnProperty.call(state, "latestDispatchRequestId")) state.latestDispatchRequestId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestExecutionResultId")) state.latestExecutionResultId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPhase5Validation")) state.lastPhase5Validation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPhase5AndroidValidation")) state.lastPhase5AndroidValidation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "androidPhase5ValidationPassed")) state.androidPhase5ValidationPassed = false;
 
   function touch() {
     state.updatedAt = nowIso();
@@ -357,6 +365,7 @@
       phase3Allowed: true,
       phase4Allowed: VERSION_MANIFEST.implementation.phase >= 4,
       phase5Allowed: state.androidPhase4ValidationPassed === true,
+      phase6Allowed: state.androidPhase5ValidationPassed === true,
       lastPreDeviceValidation: clone(state.lastPreDeviceValidation),
       lastAndroidValidation: clone(state.lastAndroidValidation),
       lastPhase2Validation: clone(state.lastPhase2Validation),
@@ -364,7 +373,9 @@
       lastPhase3Validation: clone(state.lastPhase3Validation),
       lastPhase3AndroidValidation: clone(state.lastPhase3AndroidValidation),
       lastPhase4Validation: clone(state.lastPhase4Validation),
-      lastPhase4AndroidValidation: clone(state.lastPhase4AndroidValidation)
+      lastPhase4AndroidValidation: clone(state.lastPhase4AndroidValidation),
+      lastPhase5Validation: clone(state.lastPhase5Validation),
+      lastPhase5AndroidValidation: clone(state.lastPhase5AndroidValidation)
     };
   }
 
@@ -395,10 +406,12 @@
       phase3Allowed: true,
       phase4Allowed: VERSION_MANIFEST.implementation.phase >= 4,
       phase5Allowed: state.androidPhase4ValidationPassed === true,
+      phase6Allowed: state.androidPhase5ValidationPassed === true,
       androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true,
       androidPhase2ValidationPassed: state.androidPhase2ValidationPassed === true,
       androidPhase3ValidationPassed: state.androidPhase3ValidationPassed === true,
       androidPhase4ValidationPassed: state.androidPhase4ValidationPassed === true,
+      androidPhase5ValidationPassed: state.androidPhase5ValidationPassed === true,
       latestIntakeId: state.latestIntakeId,
       latestGroundingId: state.latestGroundingId,
       latestPlanId: state.latestPlanId,
@@ -409,6 +422,8 @@
       latestApprovalRequestId: state.latestApprovalRequestId,
       latestApprovalId: state.latestApprovalId,
       latestConsentId: state.latestConsentId,
+      latestDispatchRequestId: state.latestDispatchRequestId,
+      latestExecutionResultId: state.latestExecutionResultId,
       lastPreDeviceValidation: clone(state.lastPreDeviceValidation),
       lastAndroidValidation: clone(state.lastAndroidValidation),
       lastPhase2Validation: clone(state.lastPhase2Validation),
@@ -417,6 +432,8 @@
       lastPhase3AndroidValidation: clone(state.lastPhase3AndroidValidation),
       lastPhase4Validation: clone(state.lastPhase4Validation),
       lastPhase4AndroidValidation: clone(state.lastPhase4AndroidValidation),
+      lastPhase5Validation: clone(state.lastPhase5Validation),
+      lastPhase5AndroidValidation: clone(state.lastPhase5AndroidValidation),
       lastError: clone(state.lastError),
       updatedAt: state.updatedAt
     };
@@ -472,6 +489,7 @@
       if (typeof namespace.initializeApproval === "function") results.push(namespace.initializeApproval());
       if (typeof namespace.initializeConsent === "function") results.push(namespace.initializeConsent());
       if (typeof namespace.initializeAuthorizationGate === "function") results.push(namespace.initializeAuthorizationGate());
+      if (typeof namespace.initializeDispatch === "function") results.push(namespace.initializeDispatch());
       const failed = results.filter(function failedResult(result) { return !result || result.ok !== true; });
       if (typeof namespace.initializeContracts !== "function") {
         failed.push({ ok: false, code: "IDE190_CONTRACTS_NOT_READY" });
@@ -544,6 +562,17 @@
     touch();
   }
 
+  function markPhase5Validation(result) {
+    state.lastPhase5Validation = clone(result);
+    touch();
+  }
+
+  function markPhase5AndroidValidation(result) {
+    state.lastPhase5AndroidValidation = clone(result);
+    state.androidPhase5ValidationPassed = Boolean(result && result.passed === result.total && result.criticalFailed === 0);
+    touch();
+  }
+
   function getPublicApiDescription() {
     return {
       componentId: COMPONENT_ID,
@@ -560,7 +589,7 @@
       gateImplemented: typeof namespace.evaluateAuthorizationGate === "function",
       approvalImplemented: typeof namespace.requestAutomationApproval === "function" && typeof namespace.grantAutomationApproval === "function",
       consentImplemented: typeof namespace.recordAutomationConsent === "function",
-      dispatchImplemented: false,
+      dispatchImplemented: typeof namespace.dispatchAutomationFromGate === "function",
       mutationImplemented: false,
       persistenceImplemented: false
     };
@@ -590,7 +619,9 @@
     markPhase3Validation: markPhase3Validation,
     markPhase3AndroidValidation: markPhase3AndroidValidation,
     markPhase4Validation: markPhase4Validation,
-    markPhase4AndroidValidation: markPhase4AndroidValidation
+    markPhase4AndroidValidation: markPhase4AndroidValidation,
+    markPhase5Validation: markPhase5Validation,
+    markPhase5AndroidValidation: markPhase5AndroidValidation
   });
   namespace.__internal = internal;
 
@@ -618,12 +649,12 @@
     id: "IDE-190-CORE",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 4,
-    phaseName: "Gate / Approval / Consent",
+    phase: 5,
+    phaseName: "IDE-160 Controlled Dispatch",
     designFreezeId: VERSION_MANIFEST.release.designFreezeId,
     safeAutomationOrchestrator: true,
     directMutation: false,
-    dispatchImplemented: false,
+    dispatchImplemented: true,
     loadedAt: nowIso()
   };
 
