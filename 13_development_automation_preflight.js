@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_development_automation_preflight.js
    IDE-190 Development Automation
-   Release: 1.2.0 / Module: Preflight 1.0.0
+   Release: 1.3.0 / Module: Preflight 1.0.1
    Phase 3: Plan / Propose / Dry Run / Preflight
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
@@ -16,6 +16,8 @@
 
   function requiredApprovalClass(plan) {
     if (!plan) return "P0";
+    const operation = plan.operation && typeof plan.operation === "object" ? plan.operation : {};
+    if (operation.operationType === "IDE-160 Workflow Continuation" || operation.capabilityId === "IDE-160-WORKFLOW-CONTINUATION") return "P3";
     if (plan.mutationLevel === "M2" || plan.automationLevel === "L4") return "P2";
     if (plan.mutationLevel === "M1" || plan.automationLevel === "L3" || plan.requestedExecutionMode === "E1") return "P1";
     return "P0";
