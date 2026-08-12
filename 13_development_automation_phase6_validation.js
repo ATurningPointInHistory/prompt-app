@@ -194,9 +194,18 @@
     const targetFunctionName=ide190Phase6AndroidTrialTarget.name;
     const beforeFunctionSource=Function.prototype.toString.call(ide190Phase6AndroidTrialTarget);
     const afterFunctionSource=beforeFunctionSource.replace("return value + 190;","const result = value + 190;\n    return result;");
-    const fileBefore=global.getProjectFile(fileName);
-    const sourceBefore=fileBefore?String(fileBefore.code||fileBefore.text||fileBefore.content||fileBefore.value||""):"";
-    check("Current Phase 6 validation source is available in Runtime File Store",Boolean(sourceBefore&&sourceBefore.includes(beforeFunctionSource)),sourceBefore.length,"Android Repository Trial","Critical");
+    let fileBefore=global.getProjectFile(fileName);
+    let sourceBefore=fileBefore?String(fileBefore.code||fileBefore.text||fileBefore.content||fileBefore.value||""):"";
+    let runtimeSourceRefresh="Not Required";
+    if((!sourceBefore||!sourceBefore.includes(beforeFunctionSource))&&typeof global.loadCurrentProjectFileByFetch==="function"){
+      const scriptElement=global.document?Array.from(global.document.querySelectorAll("script[src]")).find(function(script){const src=String(script&&script.getAttribute("src")||"");return src.split("?")[0].split("#")[0].replace(/^\.\//,"").split("/").pop()===fileName;}):null;
+      const runtimeSourcePath=scriptElement?scriptElement.getAttribute("src"):fileName;
+      const loaded=await global.loadCurrentProjectFileByFetch(runtimeSourcePath);
+      runtimeSourceRefresh=loaded===true?"Refreshed: "+runtimeSourcePath:"Refresh Failed: "+runtimeSourcePath;
+      fileBefore=global.getProjectFile(fileName);
+      sourceBefore=fileBefore?String(fileBefore.code||fileBefore.text||fileBefore.content||fileBefore.value||""):"";
+    }
+    check("Current Phase 6 validation source is available in Runtime File Store",Boolean(sourceBefore&&sourceBefore.includes(beforeFunctionSource)),sourceBefore.length+" | "+runtimeSourceRefresh,"Android Repository Trial","Critical");
     if(!sourceBefore||!sourceBefore.includes(beforeFunctionSource)) return null;
 
     const grounded=await namespace.intakeAndGroundLatestIDE180Navigation();
