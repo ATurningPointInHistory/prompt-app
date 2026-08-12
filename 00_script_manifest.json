@@ -4,8 +4,8 @@
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1 and IDE-190 Phase 4 Gate / Approval / Consent 1.3.0 extension.",
-  "updatedAt": "2026-08-11T16:31:21Z",
+  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1 and IDE-190 Phase 5 IDE-160 Controlled Dispatch 1.4.0 extension.",
+  "updatedAt": "2026-08-12T01:30:00Z",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
   "scripts": [
@@ -185,10 +185,10 @@
     "./13_knowledge_navigator_phase7_validation.js?h=4f038972a055",
     "./13_knowledge_navigator_phase8_validation.js?h=2e5f6c6326ab",
     "./13_knowledge_navigator_phase9_validation.js?h=b3f5bb6d7634",
-    "./13_knowledge_navigator_phase10_validation.js?h=38501173bd4f",
-    "./13_development_automation_version_manifest.js?h=ca3a78338293",
-    "./13_development_automation_core.js?h=8ff17ae653db",
-    "./13_development_automation_contracts.js?h=46e482ede245",
+    "./13_knowledge_navigator_phase10_validation.js?h=0b5dae1ac10e",
+    "./13_development_automation_version_manifest.js?h=5bb57f5dfdd4",
+    "./13_development_automation_core.js?h=3c940c084d1a",
+    "./13_development_automation_contracts.js?h=a5d280c27cef",
     "./13_development_automation_validation.js?h=51409704ba48",
     "./13_development_automation_intake.js?h=6572a38c1718",
     "./13_development_automation_grounding.js?h=da925ef2bf64",
@@ -202,6 +202,8 @@
     "./13_development_automation_consent.js?h=c1aa61a91125",
     "./13_development_automation_gate.js?h=2da1c4aa4e3f",
     "./13_development_automation_phase4_validation.js?h=a2e6e01c8490",
+    "./13_development_automation_dispatch.js?h=775a855847c6",
+    "./13_development_automation_phase5_validation.js?h=ba16595ff464",
     "./13_project_report.js?h=d636cb6a6766",
     "./13_project_handoff.js?h=a073ff86a1eb",
     "./13_function_relation_v3.js?h=0857a784aa30",
@@ -1100,24 +1102,24 @@
       "cacheKey": "b3f5bb6d7634"
     },
     "13_knowledge_navigator_phase10_validation.js": {
-      "sha256": "38501173bd4f9c00e046aba7150dddf58dd122b38ba95bfb6edda44356f2f7de",
+      "sha256": "0b5dae1ac10ec5aa34c09ed7902c9a9034e179b8add47d7ee89bef9a54d741e6",
       "byteSize": 42258,
-      "cacheKey": "38501173bd4f"
+      "cacheKey": "0b5dae1ac10e"
     },
     "13_development_automation_version_manifest.js": {
-      "sha256": "ca3a7833829309fa9c23eec673dc1e968e4555d09ba11689d4369926b31eee6d",
-      "byteSize": 10992,
-      "cacheKey": "ca3a78338293"
+      "sha256": "5bb57f5dfdd4656d1ca5ce2153af2db006254a152b84b4247bd06f926eb26d82",
+      "byteSize": 11442,
+      "cacheKey": "5bb57f5dfdd4"
     },
     "13_development_automation_core.js": {
-      "sha256": "8ff17ae653dba195700ed71ea33a1d4dca15437dfbadf10f3da22343230aabac",
-      "byteSize": 28750,
-      "cacheKey": "8ff17ae653db"
+      "sha256": "3c940c084d1a5f487bd6d5c0a46a5c53552419d0406fec6243610c58e3797719",
+      "byteSize": 30855,
+      "cacheKey": "3c940c084d1a"
     },
     "13_development_automation_contracts.js": {
-      "sha256": "46e482ede24541eab278489f8b0e7dc9dfcf568c82aaba45e152469e1a079634",
-      "byteSize": 40258,
-      "cacheKey": "46e482ede245"
+      "sha256": "a5d280c27cef476005b4815ab30eebed9bfc8cc09b518b56cc29ff9df206f66c",
+      "byteSize": 47040,
+      "cacheKey": "a5d280c27cef"
     },
     "13_development_automation_validation.js": {
       "sha256": "51409704ba48fd871995a0cc040e13e942f64425d54ea93925f03f4725bca29e",
@@ -1183,6 +1185,16 @@
       "sha256": "a2e6e01c84900a9a3f8b835a623a90c98454e843993f341512fc01d884933fe3",
       "byteSize": 30274,
       "cacheKey": "a2e6e01c8490"
+    },
+    "13_development_automation_dispatch.js": {
+      "sha256": "775a855847c6b34718d00798f697fa826bc4a2bdfafbd52f7a8aa4ec09aae814",
+      "byteSize": 16388,
+      "cacheKey": "775a855847c6"
+    },
+    "13_development_automation_phase5_validation.js": {
+      "sha256": "ba16595ff4641ef494ecbf3646813eec9839d2bd828e16f54ac18764653db0bf",
+      "byteSize": 23145,
+      "cacheKey": "ba16595ff464"
     },
     "13_project_report.js": {
       "sha256": "d636cb6a67665a6a26975934e81c9ffe2e1aca43b7f1303d0b9dae1a221c813b",
@@ -1260,6 +1272,6 @@
       "cacheKey": "138e34ded106"
     }
   },
-  "scriptSetHash": "527f398ab9e6d4960a58dbd1087f13f684cc0a9b7ae4fbc68ae3256e6570be4c",
-  "manifestHash": "07caa9f54d7cef89ee3139a981e4c5b98d383171406c9795dce7f5752cc02a05"
+  "scriptSetHash": "338c522eed958abb53296b535cb58f01f8eca77396ebee3c1f707f3e06d4ac57",
+  "manifestHash": "04093e17c019ff727a068d55a14fdac71868772c7f60a318b9ef64fb4e27697f"
 }
