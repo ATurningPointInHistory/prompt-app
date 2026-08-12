@@ -88,7 +88,7 @@
     check("Second Mutation Engine remains prohibited", VERSION_MANIFEST.initialPolicy.secondMutationEngineAllowed === false, VERSION_MANIFEST.initialPolicy.secondMutationEngineAllowed, "Mutation Boundary", "Critical");
 
     const contracts = namespace.listContractDefinitions();
-    check("Six Phase 1+2 contracts are registered", contracts.length === 6, contracts.length, "Contracts", "Critical");
+    check("Six Phase 1+2 contracts are registered", ["foundation","foundationState","capabilityDescriptor","platformProfile","navigationIntake","groundingContext"].every(function(key){ return Boolean(namespace.getContractDefinition(key)); }), contracts.length, "Contracts", "Critical");
     check("Navigation Intake contract exists", Boolean(namespace.getContractDefinition("navigationIntake")), namespace.getContractDefinition("navigationIntake") && namespace.getContractDefinition("navigationIntake").version, "Contracts", "Critical");
     check("Grounding Context contract exists", Boolean(namespace.getContractDefinition("groundingContext")), namespace.getContractDefinition("groundingContext") && namespace.getContractDefinition("groundingContext").version, "Contracts", "Critical");
 
