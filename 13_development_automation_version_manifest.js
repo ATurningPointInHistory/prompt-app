@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_development_automation_version_manifest.js
    IDE-190 Development Automation
-   Release: 1.3.0
-   Phase 4: Gate / Approval / Consent
+   Release: 1.4.0
+   Phase 5: IDE-160 Controlled Dispatch
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.3.0";
+  const RELEASE_VERSION = "1.4.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,8 +20,8 @@
   }
 
   const moduleVersions = {
-    core: "1.3.0",
-    contracts: "1.3.0",
+    core: "1.4.0",
+    contracts: "1.4.0",
     validation: BASELINE_VERSION,
     intake: BASELINE_VERSION,
     grounding: BASELINE_VERSION,
@@ -34,7 +34,9 @@
     gate: BASELINE_VERSION,
     approval: BASELINE_VERSION,
     consent: BASELINE_VERSION,
-    phase4Validation: BASELINE_VERSION
+    phase4Validation: BASELINE_VERSION,
+    dispatch: BASELINE_VERSION,
+    phase5Validation: BASELINE_VERSION
   };
 
   const fileModules = {
@@ -52,12 +54,14 @@
     "13_development_automation_gate.js": "gate",
     "13_development_automation_approval.js": "approval",
     "13_development_automation_consent.js": "consent",
-    "13_development_automation_phase4_validation.js": "phase4Validation"
+    "13_development_automation_phase4_validation.js": "phase4Validation",
+    "13_development_automation_dispatch.js": "dispatch",
+    "13_development_automation_phase5_validation.js": "phase5Validation"
   };
 
   const contractVersions = {
     foundation: BASELINE_VERSION,
-    foundationState: "1.3.0",
+    foundationState: "1.4.0",
     capabilityDescriptor: BASELINE_VERSION,
     platformProfile: BASELINE_VERSION,
     navigationIntake: BASELINE_VERSION,
@@ -69,7 +73,9 @@
     authorizationGate: BASELINE_VERSION,
     approvalRequest: BASELINE_VERSION,
     approvalRecord: BASELINE_VERSION,
-    consentRecord: BASELINE_VERSION
+    consentRecord: BASELINE_VERSION,
+    dispatchRequest: BASELINE_VERSION,
+    executionResult: BASELINE_VERSION
   };
 
   const contractIds = {
@@ -86,7 +92,9 @@
     authorizationGate: "IDE-190-CONTRACT-AUTHORIZATION-GATE",
     approvalRequest: "IDE-190-CONTRACT-APPROVAL-REQUEST",
     approvalRecord: "IDE-190-CONTRACT-APPROVAL-RECORD",
-    consentRecord: "IDE-190-CONTRACT-CONSENT-RECORD"
+    consentRecord: "IDE-190-CONTRACT-CONSENT-RECORD",
+    dispatchRequest: "IDE-190-CONTRACT-DISPATCH-REQUEST",
+    executionResult: "IDE-190-CONTRACT-EXECUTION-RESULT"
   };
 
   const lifecycle = [
@@ -231,14 +239,14 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 4 Gate / Approval / Consent",
-      phase: 4,
+      implementationPhase: "Phase 5 IDE-160 Controlled Dispatch",
+      phase: 5,
       phaseCount: 10,
       designFreezeId: "IDE-190-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
       decisionRange: "IDE-190-DECISION-001..012",
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Implementation - Phase 4"
+      status: "Implementation - Phase 5"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -263,9 +271,9 @@
       minimumIDE160Version: "2.0.1"
     },
     implementation: {
-      phase: 4,
-      phaseName: "Gate / Approval / Consent",
-      completedPhases: [1, 2, 3],
+      phase: 5,
+      phaseName: "IDE-160 Controlled Dispatch",
+      completedPhases: [1, 2, 3, 4],
       contractFirst: true,
       inspectBeforeImplement: true,
       ide190Complete: false,
@@ -274,7 +282,8 @@
       phase2Allowed: true,
       phase3Allowed: true,
       phase4Allowed: true,
-      phase5AllowedBeforeAndroidGate: false
+      phase5AllowedBeforeAndroidGate: true,
+      phase6AllowedBeforeAndroidGate: false
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
       const key = fileModules[moduleOrFile] || moduleOrFile;
