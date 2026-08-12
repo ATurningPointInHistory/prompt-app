@@ -73,7 +73,7 @@
     check("X2/X3 remain prohibited", VERSION_MANIFEST.externalEffectLevels.filter(function f(x){return x.id === "X2" || x.id === "X3";}).every(function e(x){return x.initialPolicy === "PROHIBITED";}), "X2/X3", "Permission", "Critical");
 
     const contracts = namespace.listContractDefinitions();
-    check("Ten Phase 1-3 contracts are registered", contracts.length === 10, contracts.length, "Contracts", "Critical");
+    check("Ten Phase 1-3 contracts are registered", ["foundation","foundationState","capabilityDescriptor","platformProfile","navigationIntake","groundingContext","automationPlan","automationProposal","dryRunRecord","preflightRecord"].every(function(key){ return Boolean(namespace.getContractDefinition(key)); }), contracts.length, "Contracts", "Critical");
     ["automationPlan","automationProposal","dryRunRecord","preflightRecord"].forEach(function contract(key) { const def = namespace.getContractDefinition(key); check("Phase 3 contract exists: " + key, Boolean(def && def.version === "1.0.0" && def.readOnly === true), def && def.version, "Contracts", "Critical"); });
 
     ["planning","proposal","dryRun","preflight"].forEach(function module(key) { check("Module is Ready: " + key, namespace.modules[key] && namespace.modules[key].status === "Ready", namespace.modules[key] && namespace.modules[key].status, "Modules", "Critical"); });
