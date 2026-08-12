@@ -905,11 +905,6 @@ async function loadStaticScriptManifest() {
       document.baseURI
     );
 
-    manifestUrl.searchParams.set(
-      "packageSource",
-      Date.now()
-    );
-
     const response = await fetch(
       manifestUrl.href,
       { cache: "no-store" }
