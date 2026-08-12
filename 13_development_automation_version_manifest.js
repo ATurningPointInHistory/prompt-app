@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_development_automation_version_manifest.js
    IDE-190 Development Automation
-   Release: 1.4.0
-   Phase 5: IDE-160 Controlled Dispatch
+   Release: 1.5.0
+   Phase 6: IDE-150 Controlled Mutation Trial
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.4.0";
+  const RELEASE_VERSION = "1.5.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,8 +20,8 @@
   }
 
   const moduleVersions = {
-    core: "1.4.0",
-    contracts: "1.4.0",
+    core: "1.5.0",
+    contracts: "1.5.0",
     validation: BASELINE_VERSION,
     intake: BASELINE_VERSION,
     grounding: BASELINE_VERSION,
@@ -36,7 +36,9 @@
     consent: BASELINE_VERSION,
     phase4Validation: BASELINE_VERSION,
     dispatch: BASELINE_VERSION,
-    phase5Validation: BASELINE_VERSION
+    phase5Validation: BASELINE_VERSION,
+    mutationTrial: BASELINE_VERSION,
+    phase6Validation: BASELINE_VERSION
   };
 
   const fileModules = {
@@ -56,7 +58,9 @@
     "13_development_automation_consent.js": "consent",
     "13_development_automation_phase4_validation.js": "phase4Validation",
     "13_development_automation_dispatch.js": "dispatch",
-    "13_development_automation_phase5_validation.js": "phase5Validation"
+    "13_development_automation_phase5_validation.js": "phase5Validation",
+    "13_development_automation_mutation_trial.js": "mutationTrial",
+    "13_development_automation_phase6_validation.js": "phase6Validation"
   };
 
   const contractVersions = {
@@ -75,7 +79,10 @@
     approvalRecord: BASELINE_VERSION,
     consentRecord: BASELINE_VERSION,
     dispatchRequest: BASELINE_VERSION,
-    executionResult: BASELINE_VERSION
+    executionResult: BASELINE_VERSION,
+    mutationTrialRecord: BASELINE_VERSION,
+    repositoryIntegrityRecord: BASELINE_VERSION,
+    rollbackRestorationRecord: BASELINE_VERSION
   };
 
   const contractIds = {
@@ -94,7 +101,10 @@
     approvalRecord: "IDE-190-CONTRACT-APPROVAL-RECORD",
     consentRecord: "IDE-190-CONTRACT-CONSENT-RECORD",
     dispatchRequest: "IDE-190-CONTRACT-DISPATCH-REQUEST",
-    executionResult: "IDE-190-CONTRACT-EXECUTION-RESULT"
+    executionResult: "IDE-190-CONTRACT-EXECUTION-RESULT",
+    mutationTrialRecord: "IDE-190-CONTRACT-MUTATION-TRIAL-RECORD",
+    repositoryIntegrityRecord: "IDE-190-CONTRACT-REPOSITORY-INTEGRITY-RECORD",
+    rollbackRestorationRecord: "IDE-190-CONTRACT-ROLLBACK-RESTORATION-RECORD"
   };
 
   const lifecycle = [
@@ -239,14 +249,14 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 5 IDE-160 Controlled Dispatch",
-      phase: 5,
+      implementationPhase: "Phase 6 IDE-150 Controlled Mutation Trial",
+      phase: 6,
       phaseCount: 10,
       designFreezeId: "IDE-190-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
       decisionRange: "IDE-190-DECISION-001..012",
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Implementation - Phase 5"
+      status: "Implementation - Phase 6"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -271,9 +281,9 @@
       minimumIDE160Version: "2.0.1"
     },
     implementation: {
-      phase: 5,
-      phaseName: "IDE-160 Controlled Dispatch",
-      completedPhases: [1, 2, 3, 4],
+      phase: 6,
+      phaseName: "IDE-150 Controlled Mutation Trial",
+      completedPhases: [1, 2, 3, 4, 5],
       contractFirst: true,
       inspectBeforeImplement: true,
       ide190Complete: false,
@@ -283,7 +293,8 @@
       phase3Allowed: true,
       phase4Allowed: true,
       phase5AllowedBeforeAndroidGate: true,
-      phase6AllowedBeforeAndroidGate: false
+      phase6AllowedBeforeAndroidGate: true,
+      phase7AllowedBeforeAndroidGate: false
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
       const key = fileModules[moduleOrFile] || moduleOrFile;
