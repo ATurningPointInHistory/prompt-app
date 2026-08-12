@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_contracts.js
    IDE-190 Development Automation
-   Release: 1.4.0 / Module: Contracts 1.4.0
-   Phase 5: IDE-160 Controlled Dispatch
+   Release: 1.5.0 / Module: Contracts 1.5.0
+   Phase 6: IDE-150 Controlled Mutation Trial
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -431,6 +431,96 @@
         field("immutable", { required: true, type: "boolean", enum: [true] }),
         field("completedAt", { required: true, type: "string" })
       ]
+    },
+    {
+      key: "mutationTrialRecord",
+      name: "IDE-190 Controlled Mutation Trial Record Contract",
+      description: "L4/M2/E1 trial record bound to a P2 Project Owner approval, Phase 5 IDE-150 Prepare result, IDE-160 invocation, mandatory rollback, and no persistent commit.",
+      fields: [
+        field("mutationTrialId", { required: true, type: "string" }),
+        field("executionResultId", { required: true, type: "string" }),
+        field("dispatchRequestId", { required: true, type: "string" }),
+        field("gateId", { required: true, type: "string" }),
+        field("planId", { required: true, type: "string" }),
+        field("planHash", { required: true, type: "string" }),
+        field("contextHash", { required: true, type: "string" }),
+        field("approvalId", { required: true, type: "string" }),
+        field("approvalClass", { required: true, type: "string", enum: ["P2"] }),
+        field("projectOwnerApproval", { required: true, type: "boolean", enum: [true] }),
+        field("componentSessionId", { required: true, type: "string" }),
+        field("componentApprovalSucceeded", { required: true, type: "boolean" }),
+        field("ide160InvocationUsed", { required: true, type: "boolean", enum: [true] }),
+        field("directIDE150Call", { required: true, type: "boolean", enum: [false] }),
+        field("automationLevel", { required: true, type: "string", enum: ["L4"] }),
+        field("mutationLevel", { required: true, type: "string", enum: ["M2"] }),
+        field("executionMode", { required: true, type: "string", enum: ["E1"] }),
+        field("temporaryMutationApplied", { required: true, type: "boolean" }),
+        field("postValidationPassed", { required: true, type: "boolean" }),
+        field("repositoryIntegrityRecordId", { required: true, type: "string" }),
+        field("rollbackRestorationRecordId", { required: true, type: "string" }),
+        field("rollbackVerified", { required: true, type: "boolean" }),
+        field("sourceRestored", { required: true, type: "boolean" }),
+        field("repositoryTrustStatus", { required: true, type: "string", enum: ["Trusted", "Untrusted"] }),
+        field("persistentCommit", { required: true, type: "boolean", enum: [false] }),
+        field("status", { required: true, type: "string", enum: ["Trial Completed and Rolled Back", "Failed", "Recovery-Required"] }),
+        field("singleUse", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("completedAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "repositoryIntegrityRecord",
+      name: "IDE-190 V6 Repository Integrity Record Contract",
+      description: "V6 record proving the controlled trial used only temporary runtime Repository writes and never persistent or ZIP mutation.",
+      fields: [
+        field("repositoryIntegrityRecordId", { required: true, type: "string" }),
+        field("mutationTrialId", { required: true, type: "string" }),
+        field("executionResultId", { required: true, type: "string" }),
+        field("gateId", { required: true, type: "string" }),
+        field("planId", { required: true, type: "string" }),
+        field("contextHash", { required: true, type: "string" }),
+        field("validationLayer", { required: true, type: "string", enum: ["V6"] }),
+        field("targetFile", { required: true, type: "string" }),
+        field("targetFunction", { required: true, type: "string" }),
+        field("temporaryMutationApplied", { required: true, type: "boolean" }),
+        field("repositoryWriteCount", { required: true, type: "integer" }),
+        field("targetOnlyWritesVerified", { required: true, type: "boolean" }),
+        field("originalHash", { required: true, type: "string" }),
+        field("restoredHash", { required: true, type: "string" }),
+        field("sourceRestored", { required: true, type: "boolean" }),
+        field("persistentCommit", { required: true, type: "boolean", enum: [false] }),
+        field("zipFileMutation", { required: true, type: "boolean", enum: [false] }),
+        field("integrityStatus", { required: true, type: "string", enum: ["Verified", "Failed"] }),
+        field("directIDE150Call", { required: true, type: "boolean", enum: [false] }),
+        field("ide160InvocationUsed", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "rollbackRestorationRecord",
+      name: "IDE-190 V7 Rollback / Restoration Record Contract",
+      description: "V7 mandatory rollback and exact source restoration proof. Recovery-Required marks Repository Untrusted and blocks later mutation.",
+      fields: [
+        field("rollbackRestorationRecordId", { required: true, type: "string" }),
+        field("mutationTrialId", { required: true, type: "string" }),
+        field("executionResultId", { required: true, type: "string" }),
+        field("gateId", { required: true, type: "string" }),
+        field("validationLayer", { required: true, type: "string", enum: ["V7"] }),
+        field("rollbackId", { required: true, type: "string|null" }),
+        field("mandatoryRollback", { required: true, type: "boolean", enum: [true] }),
+        field("rollbackExecuted", { required: true, type: "boolean" }),
+        field("rollbackVerified", { required: true, type: "boolean" }),
+        field("restorationVerificationRequired", { required: true, type: "boolean", enum: [true] }),
+        field("sourceRestored", { required: true, type: "boolean" }),
+        field("originalHash", { required: true, type: "string" }),
+        field("restoredHash", { required: true, type: "string" }),
+        field("restorationStatus", { required: true, type: "string", enum: ["Verified", "Recovery-Required"] }),
+        field("repositoryTrustStatus", { required: true, type: "string", enum: ["Trusted", "Untrusted"] }),
+        field("persistentCommit", { required: true, type: "boolean", enum: [false] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
     }
   ];
 
@@ -645,6 +735,29 @@
       check("V5 has no Repository mutation", payload.repositoryMutation === false && payload.repositoryWriteCount === 0, payload.repositoryWriteCount, "repositoryWriteCount");
       check("V5 never Persistent Commits", payload.persistentCommit === false, payload.persistentCommit, "persistentCommit");
       check("V5 requires later verification", payload.verificationRequired === true, payload.verificationRequired, "verificationRequired");
+    }
+
+    if (definition.key === "mutationTrialRecord") {
+      check("Mutation Trial is exact L4/M2/E1", payload.automationLevel === "L4" && payload.mutationLevel === "M2" && payload.executionMode === "E1", payload.automationLevel + "/" + payload.mutationLevel + "/" + payload.executionMode, "mutationLevel");
+      check("Mutation Trial requires Project Owner P2 Approval", payload.approvalClass === "P2" && payload.projectOwnerApproval === true, payload.approvalClass, "approvalClass");
+      check("Mutation Trial uses IDE-160 and never direct IDE-150", payload.ide160InvocationUsed === true && payload.directIDE150Call === false, payload.directIDE150Call, "directIDE150Call");
+      check("Mutation Trial never Persistent Commits", payload.persistentCommit === false, payload.persistentCommit, "persistentCommit");
+      if (payload.status === "Trial Completed and Rolled Back") {
+        check("Completed Trial proves Rollback and Restoration", payload.temporaryMutationApplied === true && payload.postValidationPassed === true && payload.rollbackVerified === true && payload.sourceRestored === true && payload.repositoryTrustStatus === "Trusted", payload.repositoryTrustStatus, "sourceRestored");
+      }
+    }
+
+    if (definition.key === "repositoryIntegrityRecord") {
+      check("V6 never Persistent Commits", payload.persistentCommit === false && payload.zipFileMutation === false, payload.persistentCommit, "persistentCommit");
+      check("V6 uses IDE-160 and no direct IDE-150 call", payload.ide160InvocationUsed === true && payload.directIDE150Call === false, payload.directIDE150Call, "directIDE150Call");
+      if (payload.integrityStatus === "Verified") check("V6 Verified means exact source restored", payload.sourceRestored === true && payload.originalHash && payload.originalHash === payload.restoredHash && payload.targetOnlyWritesVerified === true, payload.restoredHash, "restoredHash");
+    }
+
+    if (definition.key === "rollbackRestorationRecord") {
+      check("V7 Mandatory Rollback remains required", payload.mandatoryRollback === true && payload.restorationVerificationRequired === true, payload.mandatoryRollback, "mandatoryRollback");
+      check("V7 never Persistent Commits", payload.persistentCommit === false, payload.persistentCommit, "persistentCommit");
+      if (payload.restorationStatus === "Verified") check("V7 Verified means Rollback and exact Restoration", payload.rollbackExecuted === true && payload.rollbackVerified === true && payload.sourceRestored === true && payload.originalHash && payload.originalHash === payload.restoredHash && payload.repositoryTrustStatus === "Trusted", payload.repositoryTrustStatus, "repositoryTrustStatus");
+      if (payload.restorationStatus === "Recovery-Required") check("V7 Recovery-Required marks Repository Untrusted", payload.repositoryTrustStatus === "Untrusted", payload.repositoryTrustStatus, "repositoryTrustStatus");
     }
 
     const passed = checks.filter(function count(item) { return item.passed; }).length;
