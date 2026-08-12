@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_core.js
    IDE-190 Development Automation
-   Release: 1.2.0 / Module: Core 1.2.0
-   Phase 3: Plan / Propose / Dry Run / Preflight
+   Release: 1.3.0 / Module: Core 1.3.0
+   Phase 4: Gate / Approval / Consent
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -133,12 +133,25 @@
         latestDryRunId: null,
         preflights: new Map(),
         latestPreflightId: null,
+        authorizationGates: new Map(),
+        latestAuthorizationGateId: null,
+        approvalRequests: new Map(),
+        approvals: new Map(),
+        approvalStates: new Map(),
+        latestApprovalRequestId: null,
+        latestApprovalId: null,
+        consents: new Map(),
+        consentStates: new Map(),
+        latestConsentId: null,
         lastPhase2Validation: null,
         lastPhase2AndroidValidation: null,
         androidPhase2ValidationPassed: false,
         lastPhase3Validation: null,
         lastPhase3AndroidValidation: null,
         androidPhase3ValidationPassed: false,
+        lastPhase4Validation: null,
+        lastPhase4AndroidValidation: null,
+        androidPhase4ValidationPassed: false,
         lastError: null,
         updatedAt: null
       };
@@ -151,6 +164,12 @@
   if (!(state.proposals instanceof Map)) state.proposals = new Map();
   if (!(state.dryRuns instanceof Map)) state.dryRuns = new Map();
   if (!(state.preflights instanceof Map)) state.preflights = new Map();
+  if (!(state.authorizationGates instanceof Map)) state.authorizationGates = new Map();
+  if (!(state.approvalRequests instanceof Map)) state.approvalRequests = new Map();
+  if (!(state.approvals instanceof Map)) state.approvals = new Map();
+  if (!(state.approvalStates instanceof Map)) state.approvalStates = new Map();
+  if (!(state.consents instanceof Map)) state.consents = new Map();
+  if (!(state.consentStates instanceof Map)) state.consentStates = new Map();
   if (!Object.prototype.hasOwnProperty.call(state, "latestIntakeId")) state.latestIntakeId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestGroundingId")) state.latestGroundingId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastPhase2Validation")) state.lastPhase2Validation = null;
@@ -160,9 +179,16 @@
   if (!Object.prototype.hasOwnProperty.call(state, "latestProposalId")) state.latestProposalId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestDryRunId")) state.latestDryRunId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "latestPreflightId")) state.latestPreflightId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestAuthorizationGateId")) state.latestAuthorizationGateId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestApprovalRequestId")) state.latestApprovalRequestId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestApprovalId")) state.latestApprovalId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestConsentId")) state.latestConsentId = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastPhase3Validation")) state.lastPhase3Validation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastPhase3AndroidValidation")) state.lastPhase3AndroidValidation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "androidPhase3ValidationPassed")) state.androidPhase3ValidationPassed = false;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPhase4Validation")) state.lastPhase4Validation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPhase4AndroidValidation")) state.lastPhase4AndroidValidation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "androidPhase4ValidationPassed")) state.androidPhase4ValidationPassed = false;
 
   function touch() {
     state.updatedAt = nowIso();
@@ -328,14 +354,17 @@
       releaseAllowed: false,
       ide190Complete: false,
       phase2Allowed: true,
-      phase3Allowed: VERSION_MANIFEST.implementation.phase >= 3,
-      phase4Allowed: state.androidPhase3ValidationPassed === true,
+      phase3Allowed: true,
+      phase4Allowed: VERSION_MANIFEST.implementation.phase >= 4,
+      phase5Allowed: state.androidPhase4ValidationPassed === true,
       lastPreDeviceValidation: clone(state.lastPreDeviceValidation),
       lastAndroidValidation: clone(state.lastAndroidValidation),
       lastPhase2Validation: clone(state.lastPhase2Validation),
       lastPhase2AndroidValidation: clone(state.lastPhase2AndroidValidation),
       lastPhase3Validation: clone(state.lastPhase3Validation),
-      lastPhase3AndroidValidation: clone(state.lastPhase3AndroidValidation)
+      lastPhase3AndroidValidation: clone(state.lastPhase3AndroidValidation),
+      lastPhase4Validation: clone(state.lastPhase4Validation),
+      lastPhase4AndroidValidation: clone(state.lastPhase4AndroidValidation)
     };
   }
 
@@ -363,23 +392,31 @@
       ide190Complete: false,
       releaseAllowed: false,
       phase2Allowed: true,
-      phase3Allowed: VERSION_MANIFEST.implementation.phase >= 3,
-      phase4Allowed: state.androidPhase3ValidationPassed === true,
+      phase3Allowed: true,
+      phase4Allowed: VERSION_MANIFEST.implementation.phase >= 4,
+      phase5Allowed: state.androidPhase4ValidationPassed === true,
       androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true,
       androidPhase2ValidationPassed: state.androidPhase2ValidationPassed === true,
       androidPhase3ValidationPassed: state.androidPhase3ValidationPassed === true,
+      androidPhase4ValidationPassed: state.androidPhase4ValidationPassed === true,
       latestIntakeId: state.latestIntakeId,
       latestGroundingId: state.latestGroundingId,
       latestPlanId: state.latestPlanId,
       latestProposalId: state.latestProposalId,
       latestDryRunId: state.latestDryRunId,
       latestPreflightId: state.latestPreflightId,
+      latestAuthorizationGateId: state.latestAuthorizationGateId,
+      latestApprovalRequestId: state.latestApprovalRequestId,
+      latestApprovalId: state.latestApprovalId,
+      latestConsentId: state.latestConsentId,
       lastPreDeviceValidation: clone(state.lastPreDeviceValidation),
       lastAndroidValidation: clone(state.lastAndroidValidation),
       lastPhase2Validation: clone(state.lastPhase2Validation),
       lastPhase2AndroidValidation: clone(state.lastPhase2AndroidValidation),
       lastPhase3Validation: clone(state.lastPhase3Validation),
       lastPhase3AndroidValidation: clone(state.lastPhase3AndroidValidation),
+      lastPhase4Validation: clone(state.lastPhase4Validation),
+      lastPhase4AndroidValidation: clone(state.lastPhase4AndroidValidation),
       lastError: clone(state.lastError),
       updatedAt: state.updatedAt
     };
@@ -432,6 +469,9 @@
       if (typeof namespace.initializeProposal === "function") results.push(namespace.initializeProposal());
       if (typeof namespace.initializeDryRun === "function") results.push(namespace.initializeDryRun());
       if (typeof namespace.initializePreflight === "function") results.push(namespace.initializePreflight());
+      if (typeof namespace.initializeApproval === "function") results.push(namespace.initializeApproval());
+      if (typeof namespace.initializeConsent === "function") results.push(namespace.initializeConsent());
+      if (typeof namespace.initializeAuthorizationGate === "function") results.push(namespace.initializeAuthorizationGate());
       const failed = results.filter(function failedResult(result) { return !result || result.ok !== true; });
       if (typeof namespace.initializeContracts !== "function") {
         failed.push({ ok: false, code: "IDE190_CONTRACTS_NOT_READY" });
@@ -492,6 +532,18 @@
     touch();
   }
 
+
+  function markPhase4Validation(result) {
+    state.lastPhase4Validation = clone(result);
+    touch();
+  }
+
+  function markPhase4AndroidValidation(result) {
+    state.lastPhase4AndroidValidation = clone(result);
+    state.androidPhase4ValidationPassed = Boolean(result && result.passed === result.total && result.criticalFailed === 0);
+    touch();
+  }
+
   function getPublicApiDescription() {
     return {
       componentId: COMPONENT_ID,
@@ -505,7 +557,9 @@
       proposalImplemented: typeof namespace.createAutomationProposal === "function",
       dryRunImplemented: typeof namespace.runAutomationDryRun === "function",
       preflightImplemented: typeof namespace.runAutomationPreflight === "function",
-      gateImplemented: false,
+      gateImplemented: typeof namespace.evaluateAuthorizationGate === "function",
+      approvalImplemented: typeof namespace.requestAutomationApproval === "function" && typeof namespace.grantAutomationApproval === "function",
+      consentImplemented: typeof namespace.recordAutomationConsent === "function",
       dispatchImplemented: false,
       mutationImplemented: false,
       persistenceImplemented: false
@@ -534,7 +588,9 @@
     markPhase2Validation: markPhase2Validation,
     markPhase2AndroidValidation: markPhase2AndroidValidation,
     markPhase3Validation: markPhase3Validation,
-    markPhase3AndroidValidation: markPhase3AndroidValidation
+    markPhase3AndroidValidation: markPhase3AndroidValidation,
+    markPhase4Validation: markPhase4Validation,
+    markPhase4AndroidValidation: markPhase4AndroidValidation
   });
   namespace.__internal = internal;
 
@@ -562,8 +618,8 @@
     id: "IDE-190-CORE",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 3,
-    phaseName: "Plan / Propose / Dry Run / Preflight",
+    phase: 4,
+    phaseName: "Gate / Approval / Consent",
     designFreezeId: VERSION_MANIFEST.release.designFreezeId,
     safeAutomationOrchestrator: true,
     directMutation: false,
