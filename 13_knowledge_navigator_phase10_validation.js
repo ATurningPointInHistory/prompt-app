@@ -19,7 +19,7 @@
   const state = internal.state;
   const EXPECTED_RELEASE = "1.9.1";
   const EXPECTED_PHASE = "Phase 10 Integrated / Android Final Validation";
-  const EXPECTED_SCRIPT_COUNT = 204;
+  const EXPECTED_SCRIPT_COUNT = 208;
 
   function checkFactory(checks) {
     return function check(name, passed, detail, group, severity) {
@@ -260,8 +260,8 @@
     const staticRuntime = await verifyStaticRuntime();
     check("Static Script Manifest structure is valid", staticRuntime.manifestStructureValid === true, staticRuntime.error || staticRuntime.scriptCount, "Static Integrity", "Critical");
     check("Static Script Manifest internal integrity is valid", staticRuntime.manifestIntegrityValid === true, { manifestHash: staticRuntime.computedManifestHash, scriptSetHash: staticRuntime.computedScriptSetHash }, "Static Integrity", "Critical");
-    check("Static Script Manifest contains exactly 204 scripts", staticRuntime.scriptCount === EXPECTED_SCRIPT_COUNT, staticRuntime.scriptCount, "Static Integrity", "Critical");
-    check("All 204 scripts are fetched on Android", staticRuntime.fetchedScriptCount === EXPECTED_SCRIPT_COUNT && staticRuntime.fetchFailureCount === 0, { fetched: staticRuntime.fetchedScriptCount, failures: staticRuntime.fetchFailureCount }, "Static Integrity", "Critical");
+    check("Static Script Manifest contains exactly 208 scripts", staticRuntime.scriptCount === EXPECTED_SCRIPT_COUNT, staticRuntime.scriptCount, "Static Integrity", "Critical");
+    check("All 208 scripts are fetched on Android", staticRuntime.fetchedScriptCount === EXPECTED_SCRIPT_COUNT && staticRuntime.fetchFailureCount === 0, { fetched: staticRuntime.fetchedScriptCount, failures: staticRuntime.fetchFailureCount }, "Static Integrity", "Critical");
     check("All script SHA-256 hashes match", staticRuntime.scriptHashMismatchCount === 0, staticRuntime.mismatches.filter(function item(x) { return x.type === "sha256"; }).slice(0, 5), "Static Integrity", "Critical");
     check("All script byte sizes match", staticRuntime.scriptByteSizeMismatchCount === 0, staticRuntime.mismatches.filter(function item(x) { return x.type === "byteSize"; }).slice(0, 5), "Static Integrity", "Critical");
     check("All script cache keys match SHA-256", staticRuntime.scriptCacheKeyMismatchCount === 0, staticRuntime.mismatches.filter(function item(x) { return x.type === "cacheKey"; }).slice(0, 5), "Static Integrity", "Critical");
