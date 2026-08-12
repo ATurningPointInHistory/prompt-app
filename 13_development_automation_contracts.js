@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_contracts.js
    IDE-190 Development Automation
-   Release: 1.3.0 / Module: Contracts 1.3.0
-   Phase 4: Gate / Approval / Consent
+   Release: 1.4.0 / Module: Contracts 1.4.0
+   Phase 5: IDE-160 Controlled Dispatch
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -57,13 +57,14 @@
       description: "Phase 1 component state only. No automation session, approval, dispatch or mutation state is synthesized here.",
       fields: [
         field("initialized", { required: true, type: "boolean" }),
-        field("currentPhase", { required: true, type: "integer", enum: [1, 2, 3, 4] }),
+        field("currentPhase", { required: true, type: "integer", enum: [1, 2, 3, 4, 5] }),
         field("releaseAllowed", { required: true, type: "boolean", enum: [false] }),
         field("ide190Complete", { required: true, type: "boolean", enum: [false] }),
         field("phase2Allowed", { required: true, type: "boolean" }),
         field("phase3Allowed", { required: true, type: "boolean" }),
         field("phase4Allowed", { required: true, type: "boolean" }),
         field("phase5Allowed", { required: true, type: "boolean" }),
+        field("phase6Allowed", { required: true, type: "boolean" }),
         field("lastPreDeviceValidation", { required: true, type: "object|null" }),
         field("lastAndroidValidation", { required: true, type: "object|null" }),
         field("lastPhase2Validation", { required: true, type: "object|null" }),
@@ -71,7 +72,9 @@
         field("lastPhase3Validation", { required: true, type: "object|null" }),
         field("lastPhase3AndroidValidation", { required: true, type: "object|null" }),
         field("lastPhase4Validation", { required: true, type: "object|null" }),
-        field("lastPhase4AndroidValidation", { required: true, type: "object|null" })
+        field("lastPhase4AndroidValidation", { required: true, type: "object|null" }),
+        field("lastPhase5Validation", { required: true, type: "object|null" }),
+        field("lastPhase5AndroidValidation", { required: true, type: "object|null" })
       ]
     },
     {
@@ -363,6 +366,71 @@
         field("immutable", { required: true, type: "boolean", enum: [true] }),
         field("createdAt", { required: true, type: "string" })
       ]
+    }    ,
+    {
+      key: "dispatchRequest",
+      name: "IDE-190 Controlled Dispatch Request Contract",
+      description: "V5 dispatch request bound to one passed V4 Gate and one explicit registered IDE-160 Component Adapter operation. It cannot call IDE-150 directly or execute Phase 6 mutation trial.",
+      fields: [
+        field("dispatchRequestId", { required: true, type: "string" }),
+        field("gateId", { required: true, type: "string" }),
+        field("preflightId", { required: true, type: "string" }),
+        field("planId", { required: true, type: "string" }),
+        field("planHash", { required: true, type: "string" }),
+        field("contextHash", { required: true, type: "string" }),
+        field("validationLayer", { required: true, type: "string", enum: ["V5"] }),
+        field("gateStatus", { required: true, type: "string", enum: ["Passed"] }),
+        field("gateDispatchEligible", { required: true, type: "boolean", enum: [true] }),
+        field("approvalClass", { required: true, type: "string", enum: ["P0", "P1", "P2", "P3"] }),
+        field("approvalId", { required: true, type: "string|null" }),
+        field("dispatchMode", { required: true, type: "string", enum: ["IDE-160-Adapter-Registry"] }),
+        field("targetComponentId", { required: true, type: "string" }),
+        field("adapterId", { required: true, type: "string" }),
+        field("adapterOperation", { required: true, type: "string" }),
+        field("adapterInput", { required: true, type: "object" }),
+        field("directIDE150Call", { required: true, type: "boolean", enum: [false] }),
+        field("phase6MutationTrialExecutionAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("repositoryMutation", { required: true, type: "boolean", enum: [false] }),
+        field("repositoryWriteCount", { required: true, type: "integer", enum: [0] }),
+        field("singleUse", { required: true, type: "boolean", enum: [true] }),
+        field("readOnly", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "executionResult",
+      name: "IDE-190 V5 Execution Result Contract",
+      description: "V5 result proving controlled dispatch occurred through IDE-160 without direct IDE-150 invocation, repository mutation, persistent commit, or Phase 6 mutation execution.",
+      fields: [
+        field("executionResultId", { required: true, type: "string" }),
+        field("dispatchRequestId", { required: true, type: "string" }),
+        field("gateId", { required: true, type: "string" }),
+        field("planId", { required: true, type: "string" }),
+        field("planHash", { required: true, type: "string" }),
+        field("contextHash", { required: true, type: "string" }),
+        field("validationLayer", { required: true, type: "string", enum: ["V5"] }),
+        field("dispatchStatus", { required: true, type: "string", enum: ["Succeeded", "Failed"] }),
+        field("executionSucceeded", { required: true, type: "boolean" }),
+        field("ide160InvocationUsed", { required: true, type: "boolean", enum: [true] }),
+        field("dispatchMode", { required: true, type: "string", enum: ["IDE-160-Adapter-Registry"] }),
+        field("targetComponentId", { required: true, type: "string" }),
+        field("adapterId", { required: true, type: "string" }),
+        field("adapterOperation", { required: true, type: "string" }),
+        field("adapterInvocationCode", { required: true, type: "string" }),
+        field("adapterInvocationStatus", { required: true, type: "string" }),
+        field("adapterOutput", { required: true, type: "object|null" }),
+        field("directIDE150Call", { required: true, type: "boolean", enum: [false] }),
+        field("phase6Required", { required: true, type: "boolean" }),
+        field("phase6MutationTrialExecuted", { required: true, type: "boolean", enum: [false] }),
+        field("repositoryMutation", { required: true, type: "boolean", enum: [false] }),
+        field("repositoryWriteCount", { required: true, type: "integer", enum: [0] }),
+        field("persistentCommit", { required: true, type: "boolean", enum: [false] }),
+        field("verificationRequired", { required: true, type: "boolean", enum: [true] }),
+        field("readOnly", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("completedAt", { required: true, type: "string" })
+      ]
     }
   ];
 
@@ -561,6 +629,24 @@
       check("Consent never enables automatic Import", payload.automaticImportAllowed === false, payload.automaticImportAllowed, "automaticImportAllowed");
     }
 
+    if (definition.key === "dispatchRequest") {
+      check("Dispatch is bound to a Passed Gate", payload.gateStatus === "Passed" && payload.gateDispatchEligible === true, payload.gateStatus, "gateStatus");
+      check("Dispatch uses IDE-160 Adapter Registry", payload.dispatchMode === "IDE-160-Adapter-Registry", payload.dispatchMode, "dispatchMode");
+      check("Dispatch never calls IDE-150 directly", payload.directIDE150Call === false, payload.directIDE150Call, "directIDE150Call");
+      check("Phase 5 never executes Phase 6 Mutation Trial", payload.phase6MutationTrialExecutionAllowed === false, payload.phase6MutationTrialExecutionAllowed, "phase6MutationTrialExecutionAllowed");
+      check("Dispatch Request never mutates Repository", payload.repositoryMutation === false && payload.repositoryWriteCount === 0, payload.repositoryWriteCount, "repositoryWriteCount");
+      check("Dispatch Request is single-use", payload.singleUse === true, payload.singleUse, "singleUse");
+    }
+
+    if (definition.key === "executionResult") {
+      check("V5 uses IDE-160 invocation", payload.ide160InvocationUsed === true, payload.ide160InvocationUsed, "ide160InvocationUsed");
+      check("V5 has no direct IDE-150 call", payload.directIDE150Call === false, payload.directIDE150Call, "directIDE150Call");
+      check("V5 has no Phase 6 Mutation Trial execution", payload.phase6MutationTrialExecuted === false, payload.phase6MutationTrialExecuted, "phase6MutationTrialExecuted");
+      check("V5 has no Repository mutation", payload.repositoryMutation === false && payload.repositoryWriteCount === 0, payload.repositoryWriteCount, "repositoryWriteCount");
+      check("V5 never Persistent Commits", payload.persistentCommit === false, payload.persistentCommit, "persistentCommit");
+      check("V5 requires later verification", payload.verificationRequired === true, payload.verificationRequired, "verificationRequired");
+    }
+
     const passed = checks.filter(function count(item) { return item.passed; }).length;
     const failed = checks.length - passed;
     return {
@@ -602,7 +688,7 @@
     id: "IDE-190-CONTRACTS",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 4,
+    phase: 5,
     contractCount: BUILT_IN_CONTRACTS.length,
     readOnly: true,
     loadedAt: internal.nowIso()
