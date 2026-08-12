@@ -1,465 +1,1277 @@
 {
-  "manifestSchemaVersion": 1,
-  "manifestType": "Project Package Build Manifest",
-  "project": "AIプロンプト生成Pro",
-  "version": "v6.0",
-  "entryFile": "index.html",
-  "savedAt": "2026-08-12T01:30:00Z",
-  "complete": true,
-  "requestedFiles": [
-    "index.html",
-    "00_core.js",
-    "01_task_manager.js",
-    "01_bootstrap.js",
-    "01_function_reference.js",
-    "01_project_config.js",
-    "01_project_manager.js",
-    "01_analyzer_common.js",
-    "01_memo_manager.js",
-    "02_prompt.js",
-    "03_data.js",
-    "03_development_rule_analyzer.js",
-    "03_development_rules.js",
-    "04_tools.js",
-    "04_repair_quick_buttons.js",
-    "05_repair_file.js",
-    "05_repair_function.js",
-    "05_repair_sort.js",
-    "05_repair_diff.js",
-    "05_repair_cleanup.js",
-    "05_repair.js",
-    "05_repair_zip_paste_manager.js",
-    "05_repair_zip_diff_manager.js",
-    "06_search_core.js",
-    "06_search_ui.js",
-    "06_search_history.js",
-    "06_search_global.js",
-    "06_search_suggest.js",
-    "07_health_dependency.js",
-    "07_health_diagnose.js",
-    "07_health_unused.js",
-    "07_backup_manager.js",
-    "07_project_package.js",
-    "07_safe_mode.js",
-    "07_project_explorer.js",
-    "07_backup_health.js",
-    "07_project_validation.js",
-    "08_function_relation.js",
-    "08_ai_analyzer.js",
-    "08_ai_apply.js",
-    "08_ai_test.js",
-    "08_ai_integrator.js",
-    "09_ai_instruction.js",
-    "09_ai_error_prompt.js",
-    "10_macro.js",
-    "10_macro_favorite.js",
-    "11_mobile_console.js",
-    "11_function_help.js",
-    "11_command_palette.js",
-    "11_project_search.js",
-    "11_error_inspector.js",
-    "11_ide_registry.js",
-    "11_ide_launcher.js",
-    "11_quick_command.js",
-    "11_virtual_keyboard.js",
-    "11_autocomplete.js",
-    "11_ai_development_assistant.js",
-    "11_mobile_console_autocomplete.js",
-    "11_mobile_console_suggest.js",
-    "12_document_parser_v2.js",
-    "12_memo_box.js",
-    "12_dependency_manager.js",
-    "12_retrieval_engine.js",
-    "12_ai_package_builder.js",
-    "12_repository_order.js",
-    "12_knowledge_migration.js",
-    "13_module_analyzer.js",
-    "13_project_analyzer.js",
-    "13_project_database.js",
-    "13_function_analyzer.js",
-    "13_diagnostic_instrumentation.js",
-    "13_diagnostic_platform.js",
-    "13_diagnostic_validation.js",
-    "13_search_strategy_platform.js",
-    "13_search_strategy_validation.js",
-    "13_development_status_registry.js",
-    "13_development_dashboard.js",
-    "13_golden_core_memo_bridge.js",
-    "13_search_regression_baseline.js",
-    "13_validation_result_repository.js",
-    "13_investigation_workflow.js",
-    "13_investigation_workflow_validation.js",
-    "13_development_analytics.js",
-    "13_development_analytics_phase2a.js",
-    "13_development_analytics_phase2b.js",
-    "13_auto_refactoring.js",
-    "13_auto_refactoring_phase2.js",
-    "13_auto_refactoring_policy_standard.js",
-    "13_auto_refactoring_transaction.js",
-    "13_auto_refactoring_controlled_application.js",
-    "13_auto_refactoring_validation.js",
-    "13_ai_development_workflow_core.js",
-    "13_ai_development_workflow_storage.js",
-    "13_ai_development_workflow_state.js",
-    "13_ai_development_workflow_planning.js",
-    "13_ai_development_workflow_adapter.js",
-    "13_ai_development_workflow_execution.js",
-    "13_ai_development_workflow_decision.js",
-    "13_ai_development_workflow_approval.js",
-    "13_ai_development_workflow_monitoring.js",
-    "13_ai_development_workflow_package.js",
-    "13_ai_development_workflow_completion.js",
-    "13_ai_development_workflow_integration.js",
-    "13_ai_development_workflow_validation.js",
-    "13_intelligence_version_manifest.js",
-    "13_intelligence_platform_core.js",
-    "13_intelligence_capability_registry.js",
-    "13_intelligence_schema_registry.js",
-    "13_intelligence_source_adapter.js",
-    "13_intelligence_source_adapters_repository.js",
-    "13_intelligence_source_adapters_platform.js",
-    "13_intelligence_source_adapter_relationship.js",
-    "13_intelligence_canonical_model.js",
-    "13_intelligence_repository_snapshot.js",
-    "13_intelligence_relationship_registry.js",
-    "13_intelligence_evidence_graph.js",
-    "13_intelligence_repository_understanding.js",
-    "13_intelligence_workflow_understanding.js",
-    "13_intelligence_understanding_pipeline.js",
-    "13_intelligence_terminology_registry.js",
-    "13_intelligence_query_interpreter.js",
-    "13_intelligence_query_engine.js",
-    "13_intelligence_confidence.js",
-    "13_intelligence_independent_validation.js",
-    "13_intelligence_test_dataset_registry.js",
-    "13_intelligence_validation_automation.js",
-    "13_intelligence_validation_evidence.js",
-    "13_intelligence_test_procedure_intake.js",
-    "13_intelligence_test_procedure_parser.js",
-    "13_intelligence_validation_compiler.js",
-    "13_intelligence_test_procedure_ui.js",
-    "13_intelligence_version_validation.js",
-    "13_intelligence_validation_persistence.js",
-    "13_intelligence_package_model.js",
-    "13_intelligence_ide180_handoff.js",
-    "13_intelligence_package_validation.js",
-    "13_intelligence_package_export.js",
-    "13_intelligence_validation.js",
-    "13_knowledge_navigator_version_manifest.js",
-    "13_knowledge_navigator_core.js",
-    "13_knowledge_navigator_contracts.js",
-    "13_knowledge_navigator_registry.js",
-    "13_knowledge_navigator_intelligence_provider.js",
-    "13_knowledge_navigator_identity.js",
-    "13_knowledge_navigator_query_resolution.js",
-    "13_knowledge_navigator_basic_resolver.js",
-    "13_knowledge_navigator_budget.js",
-    "13_knowledge_navigator_traversal.js",
-    "13_knowledge_navigator_relationship_resolver.js",
-    "13_knowledge_navigator_authority.js",
-    "13_knowledge_navigator_evidence.js",
-    "13_knowledge_navigator_lineage.js",
-    "13_knowledge_navigator_validation_resolver.js",
-    "13_knowledge_navigator_memo_provider.js",
-    "13_knowledge_navigator_knowledge_provider.js",
-    "13_knowledge_navigator_architecture_provider.js",
-    "13_knowledge_navigator_validation_provider.js",
-    "13_knowledge_navigator_conflict.js",
-    "13_knowledge_navigator_federation.js",
-    "13_knowledge_navigator_federated_resolver.js",
-    "13_knowledge_navigator_explanation.js",
-    "13_knowledge_navigator_session.js",
-    "13_knowledge_navigator_persistence.js",
-    "13_knowledge_navigator_memo_archive_provider.js",
-    "13_knowledge_navigator_recovery.js",
-    "13_knowledge_navigator_package.js",
-    "13_knowledge_navigator_ide190_handoff.js",
-    "13_knowledge_navigator_orchestrator.js",
-    "13_knowledge_navigator_validation.js",
-    "13_knowledge_navigator_phase2_validation.js",
-    "13_knowledge_navigator_phase3_validation.js",
-    "13_knowledge_navigator_phase4_validation.js",
-    "13_knowledge_navigator_phase5_validation.js",
-    "13_knowledge_navigator_phase6_validation.js",
-    "13_knowledge_navigator_phase7_validation.js",
-    "13_knowledge_navigator_phase8_validation.js",
-    "13_knowledge_navigator_phase9_validation.js",
-    "13_knowledge_navigator_phase10_validation.js",
-    "13_development_automation_version_manifest.js",
-    "13_development_automation_core.js",
-    "13_development_automation_contracts.js",
-    "13_development_automation_validation.js",
-    "13_development_automation_intake.js",
-    "13_development_automation_grounding.js",
-    "13_development_automation_phase2_validation.js",
-    "13_development_automation_planning.js",
-    "13_development_automation_proposal.js",
-    "13_development_automation_dry_run.js",
-    "13_development_automation_preflight.js",
-    "13_development_automation_phase3_validation.js",
-    "13_development_automation_approval.js",
-    "13_development_automation_consent.js",
-    "13_development_automation_gate.js",
-    "13_development_automation_phase4_validation.js",
-    "13_development_automation_dispatch.js",
-    "13_development_automation_phase5_validation.js",
-    "13_project_report.js",
-    "13_project_handoff.js",
-    "13_function_relation_v3.js",
-    "13_project_governance.js",
-    "14_architecture_database.js",
-    "14_architecture_builder.js",
-    "14_architecture_repository.js",
-    "15_engine_core.js",
-    "16_search_engine.js",
-    "16_context_engine.js",
-    "16_perception_engine.js",
-    "16_validation_engine.js",
-    "15_reasoning_engine.js",
-    "16_workflow_engine.js",
-    "99_init.js",
-    "00_style.css",
-    "00_script_manifest.json",
-    "project_info.json"
-  ],
-  "savedFiles": [
-    "index.html",
-    "00_core.js",
-    "01_task_manager.js",
-    "01_bootstrap.js",
-    "01_function_reference.js",
-    "01_project_config.js",
-    "01_project_manager.js",
-    "01_analyzer_common.js",
-    "01_memo_manager.js",
-    "02_prompt.js",
-    "03_data.js",
-    "03_development_rule_analyzer.js",
-    "03_development_rules.js",
-    "04_tools.js",
-    "04_repair_quick_buttons.js",
-    "05_repair_file.js",
-    "05_repair_function.js",
-    "05_repair_sort.js",
-    "05_repair_diff.js",
-    "05_repair_cleanup.js",
-    "05_repair.js",
-    "05_repair_zip_paste_manager.js",
-    "05_repair_zip_diff_manager.js",
-    "06_search_core.js",
-    "06_search_ui.js",
-    "06_search_history.js",
-    "06_search_global.js",
-    "06_search_suggest.js",
-    "07_health_dependency.js",
-    "07_health_diagnose.js",
-    "07_health_unused.js",
-    "07_backup_manager.js",
-    "07_project_package.js",
-    "07_safe_mode.js",
-    "07_project_explorer.js",
-    "07_backup_health.js",
-    "07_project_validation.js",
-    "08_function_relation.js",
-    "08_ai_analyzer.js",
-    "08_ai_apply.js",
-    "08_ai_test.js",
-    "08_ai_integrator.js",
-    "09_ai_instruction.js",
-    "09_ai_error_prompt.js",
-    "10_macro.js",
-    "10_macro_favorite.js",
-    "11_mobile_console.js",
-    "11_function_help.js",
-    "11_command_palette.js",
-    "11_project_search.js",
-    "11_error_inspector.js",
-    "11_ide_registry.js",
-    "11_ide_launcher.js",
-    "11_quick_command.js",
-    "11_virtual_keyboard.js",
-    "11_autocomplete.js",
-    "11_ai_development_assistant.js",
-    "11_mobile_console_autocomplete.js",
-    "11_mobile_console_suggest.js",
-    "12_document_parser_v2.js",
-    "12_memo_box.js",
-    "12_dependency_manager.js",
-    "12_retrieval_engine.js",
-    "12_ai_package_builder.js",
-    "12_repository_order.js",
-    "12_knowledge_migration.js",
-    "13_module_analyzer.js",
-    "13_project_analyzer.js",
-    "13_project_database.js",
-    "13_function_analyzer.js",
-    "13_diagnostic_instrumentation.js",
-    "13_diagnostic_platform.js",
-    "13_diagnostic_validation.js",
-    "13_search_strategy_platform.js",
-    "13_search_strategy_validation.js",
-    "13_development_status_registry.js",
-    "13_development_dashboard.js",
-    "13_golden_core_memo_bridge.js",
-    "13_search_regression_baseline.js",
-    "13_validation_result_repository.js",
-    "13_investigation_workflow.js",
-    "13_investigation_workflow_validation.js",
-    "13_development_analytics.js",
-    "13_development_analytics_phase2a.js",
-    "13_development_analytics_phase2b.js",
-    "13_auto_refactoring.js",
-    "13_auto_refactoring_phase2.js",
-    "13_auto_refactoring_policy_standard.js",
-    "13_auto_refactoring_transaction.js",
-    "13_auto_refactoring_controlled_application.js",
-    "13_auto_refactoring_validation.js",
-    "13_ai_development_workflow_core.js",
-    "13_ai_development_workflow_storage.js",
-    "13_ai_development_workflow_state.js",
-    "13_ai_development_workflow_planning.js",
-    "13_ai_development_workflow_adapter.js",
-    "13_ai_development_workflow_execution.js",
-    "13_ai_development_workflow_decision.js",
-    "13_ai_development_workflow_approval.js",
-    "13_ai_development_workflow_monitoring.js",
-    "13_ai_development_workflow_package.js",
-    "13_ai_development_workflow_completion.js",
-    "13_ai_development_workflow_integration.js",
-    "13_ai_development_workflow_validation.js",
-    "13_intelligence_version_manifest.js",
-    "13_intelligence_platform_core.js",
-    "13_intelligence_capability_registry.js",
-    "13_intelligence_schema_registry.js",
-    "13_intelligence_source_adapter.js",
-    "13_intelligence_source_adapters_repository.js",
-    "13_intelligence_source_adapters_platform.js",
-    "13_intelligence_source_adapter_relationship.js",
-    "13_intelligence_canonical_model.js",
-    "13_intelligence_repository_snapshot.js",
-    "13_intelligence_relationship_registry.js",
-    "13_intelligence_evidence_graph.js",
-    "13_intelligence_repository_understanding.js",
-    "13_intelligence_workflow_understanding.js",
-    "13_intelligence_understanding_pipeline.js",
-    "13_intelligence_terminology_registry.js",
-    "13_intelligence_query_interpreter.js",
-    "13_intelligence_query_engine.js",
-    "13_intelligence_confidence.js",
-    "13_intelligence_independent_validation.js",
-    "13_intelligence_test_dataset_registry.js",
-    "13_intelligence_validation_automation.js",
-    "13_intelligence_validation_evidence.js",
-    "13_intelligence_test_procedure_intake.js",
-    "13_intelligence_test_procedure_parser.js",
-    "13_intelligence_validation_compiler.js",
-    "13_intelligence_test_procedure_ui.js",
-    "13_intelligence_version_validation.js",
-    "13_intelligence_validation_persistence.js",
-    "13_intelligence_package_model.js",
-    "13_intelligence_ide180_handoff.js",
-    "13_intelligence_package_validation.js",
-    "13_intelligence_package_export.js",
-    "13_intelligence_validation.js",
-    "13_knowledge_navigator_version_manifest.js",
-    "13_knowledge_navigator_core.js",
-    "13_knowledge_navigator_contracts.js",
-    "13_knowledge_navigator_registry.js",
-    "13_knowledge_navigator_intelligence_provider.js",
-    "13_knowledge_navigator_identity.js",
-    "13_knowledge_navigator_query_resolution.js",
-    "13_knowledge_navigator_basic_resolver.js",
-    "13_knowledge_navigator_budget.js",
-    "13_knowledge_navigator_traversal.js",
-    "13_knowledge_navigator_relationship_resolver.js",
-    "13_knowledge_navigator_authority.js",
-    "13_knowledge_navigator_evidence.js",
-    "13_knowledge_navigator_lineage.js",
-    "13_knowledge_navigator_validation_resolver.js",
-    "13_knowledge_navigator_memo_provider.js",
-    "13_knowledge_navigator_knowledge_provider.js",
-    "13_knowledge_navigator_architecture_provider.js",
-    "13_knowledge_navigator_validation_provider.js",
-    "13_knowledge_navigator_conflict.js",
-    "13_knowledge_navigator_federation.js",
-    "13_knowledge_navigator_federated_resolver.js",
-    "13_knowledge_navigator_explanation.js",
-    "13_knowledge_navigator_session.js",
-    "13_knowledge_navigator_persistence.js",
-    "13_knowledge_navigator_memo_archive_provider.js",
-    "13_knowledge_navigator_recovery.js",
-    "13_knowledge_navigator_package.js",
-    "13_knowledge_navigator_ide190_handoff.js",
-    "13_knowledge_navigator_orchestrator.js",
-    "13_knowledge_navigator_validation.js",
-    "13_knowledge_navigator_phase2_validation.js",
-    "13_knowledge_navigator_phase3_validation.js",
-    "13_knowledge_navigator_phase4_validation.js",
-    "13_knowledge_navigator_phase5_validation.js",
-    "13_knowledge_navigator_phase6_validation.js",
-    "13_knowledge_navigator_phase7_validation.js",
-    "13_knowledge_navigator_phase8_validation.js",
-    "13_knowledge_navigator_phase9_validation.js",
-    "13_knowledge_navigator_phase10_validation.js",
-    "13_development_automation_version_manifest.js",
-    "13_development_automation_core.js",
-    "13_development_automation_contracts.js",
-    "13_development_automation_validation.js",
-    "13_development_automation_intake.js",
-    "13_development_automation_grounding.js",
-    "13_development_automation_phase2_validation.js",
-    "13_development_automation_planning.js",
-    "13_development_automation_proposal.js",
-    "13_development_automation_dry_run.js",
-    "13_development_automation_preflight.js",
-    "13_development_automation_phase3_validation.js",
-    "13_development_automation_approval.js",
-    "13_development_automation_consent.js",
-    "13_development_automation_gate.js",
-    "13_development_automation_phase4_validation.js",
-    "13_development_automation_dispatch.js",
-    "13_development_automation_phase5_validation.js",
-    "13_project_report.js",
-    "13_project_handoff.js",
-    "13_function_relation_v3.js",
-    "13_project_governance.js",
-    "14_architecture_database.js",
-    "14_architecture_builder.js",
-    "14_architecture_repository.js",
-    "15_engine_core.js",
-    "16_search_engine.js",
-    "16_context_engine.js",
-    "16_perception_engine.js",
-    "16_validation_engine.js",
-    "15_reasoning_engine.js",
-    "16_workflow_engine.js",
-    "99_init.js",
-    "00_style.css",
-    "00_script_manifest.json",
-    "project_info.json"
-  ],
-  "missingFiles": [],
-  "externalFiles": [
-    "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
-  ],
-  "localFileCount": 214,
-  "externalFileCount": 1,
-  "fileCount": 214,
-  "cleanIndex": true,
-  "scriptManifestSource": "00_script_manifest.json",
-  "scriptManifestVersion": "1.9.2",
-  "scriptManifestSchemaVersion": "2.0.0",
+  "version": "1.9.2",
+  "manifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "04093e17c019ff727a068d55a14fdac71868772c7f60a318b9ef64fb4e27697f",
-  "scriptSetHash": "338c522eed958abb53296b535cb58f01f8eca77396ebee3c1f707f3e06d4ac57",
-  "scriptManifestCount": 210,
-  "scriptLoading": {
-    "mode": "Build-time Manifest to Static Scripts",
-    "runtimeLoader": false,
-    "documentWrite": false,
-    "first": "00_core.js",
-    "last": "99_init.js",
-    "generatedAtSave": true
-  }
+  "mode": "static-script-manifest",
+  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1 and IDE-190 Phase 5 IDE-160 Controlled Dispatch 1.4.0 extension.",
+  "updatedAt": "2026-08-12T01:30:00Z",
+  "hashAlgorithm": "SHA-256",
+  "cacheKeyLength": 12,
+  "scripts": [
+    "./00_core.js?h=03cdc50b3874",
+    "./01_task_manager.js?h=a4795193df6c",
+    "./01_bootstrap.js?h=60f166e32009",
+    "./01_function_reference.js?h=43e96f62f83a",
+    "./01_project_config.js?h=e642ef557371",
+    "./01_project_manager.js?h=ecac07839bb6",
+    "./01_analyzer_common.js?h=a58ed23c7db2",
+    "./01_memo_manager.js?h=375fd1eaf7a0",
+    "./02_prompt.js?h=035edaf91950",
+    "./03_data.js?h=26cdcbb27e54",
+    "./03_development_rule_analyzer.js?h=0a76fee29471",
+    "./03_development_rules.js?h=9c7ae17ea596",
+    "./04_tools.js?h=e1db86daafd5",
+    "./04_repair_quick_buttons.js?h=211b72e9984e",
+    "./05_repair_file.js?h=1d287bcfa823",
+    "./05_repair_function.js?h=402317190428",
+    "./05_repair_sort.js?h=471796754e36",
+    "./05_repair_diff.js?h=e310a01978f4",
+    "./05_repair_cleanup.js?h=2b10512f2688",
+    "./05_repair.js?h=ebf76180e1ff",
+    "./05_repair_zip_paste_manager.js?h=c151fe8ff1f9",
+    "./05_repair_zip_diff_manager.js?h=33e761f58b89",
+    "./06_search_core.js?h=85d2a641d8e7",
+    "./06_search_ui.js?h=e09cb18256d1",
+    "./06_search_history.js?h=a51240ee23d6",
+    "./06_search_global.js?h=8d958fa05ed1",
+    "./06_search_suggest.js?h=9855cbeeb549",
+    "./07_health_dependency.js?h=5aaf9655cdee",
+    "./07_health_diagnose.js?h=6cfb32a71d4a",
+    "./07_health_unused.js?h=7fa65234ac06",
+    "./07_backup_manager.js?h=c3ea2011ff94",
+    "./07_project_package.js?h=d471662b4aff",
+    "./07_safe_mode.js?h=29a7bdc4685d",
+    "./07_project_explorer.js?h=8a31a68897ff",
+    "./07_backup_health.js?h=2fc43427c3e7",
+    "./07_project_validation.js?h=878645d3ef2a",
+    "./08_function_relation.js?h=b482cb61c67d",
+    "./08_ai_analyzer.js?h=0c4127b96dca",
+    "./08_ai_apply.js?h=0efa765be237",
+    "./08_ai_test.js?h=0c8f1cea1351",
+    "./08_ai_integrator.js?h=34977d5d4487",
+    "./09_ai_instruction.js?h=b4ebb3d125a7",
+    "./09_ai_error_prompt.js?h=3c6304129c04",
+    "./10_macro.js?h=3b01bccfd08a",
+    "./10_macro_favorite.js?h=e03dd2905dea",
+    "./11_mobile_console.js?h=017cd8c3c8a8",
+    "./11_function_help.js?h=e2d1e3eeb8ef",
+    "./11_command_palette.js?h=70ff7be4f724",
+    "./11_project_search.js?h=2319fa760384",
+    "./11_error_inspector.js?h=9a9cdc9c2d63",
+    "./11_ide_registry.js?h=208dde688d2d",
+    "./11_ide_launcher.js?h=c9d27b3d2ce0",
+    "./11_quick_command.js?h=774831f059fb",
+    "./11_virtual_keyboard.js?h=2298708f0215",
+    "./11_autocomplete.js?h=332dee06bde2",
+    "./11_ai_development_assistant.js?h=72382f6c3937",
+    "./11_mobile_console_autocomplete.js?h=84339a172183",
+    "./11_mobile_console_suggest.js?h=cc5aa76fe663",
+    "./12_document_parser_v2.js?h=8d1b6148e9ef",
+    "./12_memo_box.js?h=2309cc3612c8",
+    "./12_dependency_manager.js?h=78d347c50c95",
+    "./12_retrieval_engine.js?h=82fe7c28abd4",
+    "./12_ai_package_builder.js?h=a6a4cc0e5ca6",
+    "./12_repository_order.js?h=92c77def98ac",
+    "./12_knowledge_migration.js?h=74c5ab93e9df",
+    "./13_module_analyzer.js?h=8770867b05c3",
+    "./13_project_analyzer.js?h=235f723c8d96",
+    "./13_project_database.js?h=7cf6448a54b0",
+    "./13_function_analyzer.js?h=492606be94d5",
+    "./13_diagnostic_instrumentation.js?h=d14dc5a491aa",
+    "./13_diagnostic_platform.js?h=2683438b96ea",
+    "./13_diagnostic_validation.js?h=9b74f347ec12",
+    "./13_search_strategy_platform.js?h=cbcd8f56313b",
+    "./13_search_strategy_validation.js?h=00dbd2d4b97a",
+    "./13_development_status_registry.js?h=1aeb8d1f35aa",
+    "./13_development_dashboard.js?h=7442f5cad920",
+    "./13_golden_core_memo_bridge.js?h=5045afc7a72a",
+    "./13_search_regression_baseline.js?h=356715c49e90",
+    "./13_validation_result_repository.js?h=a77a2f33cd54",
+    "./13_investigation_workflow.js?h=96fd008c6b00",
+    "./13_investigation_workflow_validation.js?h=7b1bf90c202d",
+    "./13_development_analytics.js?h=c456bc794778",
+    "./13_development_analytics_phase2a.js?h=1a30cbb1047b",
+    "./13_development_analytics_phase2b.js?h=4b20a4f4c924",
+    "./13_auto_refactoring.js?h=f3e611809b0a",
+    "./13_auto_refactoring_phase2.js?h=73e43d33ece0",
+    "./13_auto_refactoring_policy_standard.js?h=09b1b3ce3351",
+    "./13_auto_refactoring_transaction.js?h=1c0147712f2a",
+    "./13_auto_refactoring_controlled_application.js?h=8bd9f408360f",
+    "./13_auto_refactoring_validation.js?h=a9d8bbfc6a41",
+    "./13_ai_development_workflow_core.js?h=4517be14389a",
+    "./13_ai_development_workflow_storage.js?h=7f25b8f94b6b",
+    "./13_ai_development_workflow_state.js?h=868a4e97c04f",
+    "./13_ai_development_workflow_planning.js?h=66ff73104b74",
+    "./13_ai_development_workflow_adapter.js?h=dea344a4828b",
+    "./13_ai_development_workflow_execution.js?h=26a0dd11db4d",
+    "./13_ai_development_workflow_decision.js?h=6dbc3d6d19c5",
+    "./13_ai_development_workflow_approval.js?h=6c20cffd2657",
+    "./13_ai_development_workflow_monitoring.js?h=e030e5b5c33e",
+    "./13_ai_development_workflow_package.js?h=cf6981f2dd95",
+    "./13_ai_development_workflow_completion.js?h=2e9d1940c392",
+    "./13_ai_development_workflow_integration.js?h=25c2843b9c2e",
+    "./13_ai_development_workflow_validation.js?h=2d2f92af8a73",
+    "./13_intelligence_version_manifest.js?h=4c1851787cb3",
+    "./13_intelligence_platform_core.js?h=00e8e334a919",
+    "./13_intelligence_capability_registry.js?h=dc96c1b9eec1",
+    "./13_intelligence_schema_registry.js?h=aad032898ce7",
+    "./13_intelligence_source_adapter.js?h=c9c5143d454c",
+    "./13_intelligence_source_adapters_repository.js?h=bdd25fee9759",
+    "./13_intelligence_source_adapters_platform.js?h=912595516fd7",
+    "./13_intelligence_source_adapter_relationship.js?h=3f5be7445256",
+    "./13_intelligence_canonical_model.js?h=51b79a121d35",
+    "./13_intelligence_repository_snapshot.js?h=702c9c66158e",
+    "./13_intelligence_relationship_registry.js?h=2e457a03dbda",
+    "./13_intelligence_evidence_graph.js?h=9a5d701e983a",
+    "./13_intelligence_repository_understanding.js?h=441b1a9b4c08",
+    "./13_intelligence_workflow_understanding.js?h=257090ec83fb",
+    "./13_intelligence_understanding_pipeline.js?h=85f5f963b509",
+    "./13_intelligence_terminology_registry.js?h=bf45777bbc83",
+    "./13_intelligence_query_interpreter.js?h=b836cc6640b7",
+    "./13_intelligence_query_engine.js?h=bf2ceded441c",
+    "./13_intelligence_confidence.js?h=71a4eed1d7e7",
+    "./13_intelligence_independent_validation.js?h=1207db9079ba",
+    "./13_intelligence_test_dataset_registry.js?h=e8fb0d096646",
+    "./13_intelligence_validation_automation.js?h=41198930fa60",
+    "./13_intelligence_validation_evidence.js?h=f5c98466c3dc",
+    "./13_intelligence_test_procedure_intake.js?h=f4c80469cdd8",
+    "./13_intelligence_test_procedure_parser.js?h=53f80473926c",
+    "./13_intelligence_validation_compiler.js?h=2bee052e6795",
+    "./13_intelligence_test_procedure_ui.js?h=fd88433ed4cd",
+    "./13_intelligence_version_validation.js?h=9be1552b9a12",
+    "./13_intelligence_validation_persistence.js?h=b08080da0274",
+    "./13_intelligence_package_model.js?h=39ddf1316dae",
+    "./13_intelligence_ide180_handoff.js?h=75029934d247",
+    "./13_intelligence_package_validation.js?h=c31e04201315",
+    "./13_intelligence_package_export.js?h=3b0a01705f11",
+    "./13_intelligence_validation.js?h=db0c62a52276",
+    "./13_knowledge_navigator_version_manifest.js?h=0b63d26f30a1",
+    "./13_knowledge_navigator_core.js?h=b123e660a337",
+    "./13_knowledge_navigator_contracts.js?h=4682342e4a57",
+    "./13_knowledge_navigator_registry.js?h=bdabc846156a",
+    "./13_knowledge_navigator_intelligence_provider.js?h=99b5ddac1ef0",
+    "./13_knowledge_navigator_identity.js?h=7c481969ec06",
+    "./13_knowledge_navigator_query_resolution.js?h=79d28f5953aa",
+    "./13_knowledge_navigator_basic_resolver.js?h=b322dc697ab9",
+    "./13_knowledge_navigator_budget.js?h=cac78bfffd04",
+    "./13_knowledge_navigator_traversal.js?h=4fd213709067",
+    "./13_knowledge_navigator_relationship_resolver.js?h=ccf3ba7ac7cc",
+    "./13_knowledge_navigator_authority.js?h=d5085a3991c7",
+    "./13_knowledge_navigator_evidence.js?h=4d65ca49df7b",
+    "./13_knowledge_navigator_lineage.js?h=5866dd0f9f5c",
+    "./13_knowledge_navigator_validation_resolver.js?h=fdc85a7d60ce",
+    "./13_knowledge_navigator_memo_provider.js?h=ea58d1a0616b",
+    "./13_knowledge_navigator_knowledge_provider.js?h=1366bc317ee1",
+    "./13_knowledge_navigator_architecture_provider.js?h=37d927164a1d",
+    "./13_knowledge_navigator_validation_provider.js?h=4d8ca400a8f1",
+    "./13_knowledge_navigator_conflict.js?h=cb9fb7367cf8",
+    "./13_knowledge_navigator_federation.js?h=b4e4546a6039",
+    "./13_knowledge_navigator_federated_resolver.js?h=e48226ba0caa",
+    "./13_knowledge_navigator_explanation.js?h=167fcb0e0d1e",
+    "./13_knowledge_navigator_session.js?h=7c440e788ace",
+    "./13_knowledge_navigator_persistence.js?h=2920ca07415c",
+    "./13_knowledge_navigator_memo_archive_provider.js?h=b4be372a2d38",
+    "./13_knowledge_navigator_recovery.js?h=14fb2926e0c9",
+    "./13_knowledge_navigator_package.js?h=8a69cf49871e",
+    "./13_knowledge_navigator_ide190_handoff.js?h=3391aa23d92a",
+    "./13_knowledge_navigator_orchestrator.js?h=860a705fe933",
+    "./13_knowledge_navigator_validation.js?h=8f1d9dd59862",
+    "./13_knowledge_navigator_phase2_validation.js?h=910a68259947",
+    "./13_knowledge_navigator_phase3_validation.js?h=911f86f6ff7b",
+    "./13_knowledge_navigator_phase4_validation.js?h=4c2b0e9102de",
+    "./13_knowledge_navigator_phase5_validation.js?h=f48f56cccdea",
+    "./13_knowledge_navigator_phase6_validation.js?h=c9358b8799a5",
+    "./13_knowledge_navigator_phase7_validation.js?h=4f038972a055",
+    "./13_knowledge_navigator_phase8_validation.js?h=2e5f6c6326ab",
+    "./13_knowledge_navigator_phase9_validation.js?h=b3f5bb6d7634",
+    "./13_knowledge_navigator_phase10_validation.js?h=0b5dae1ac10e",
+    "./13_development_automation_version_manifest.js?h=5bb57f5dfdd4",
+    "./13_development_automation_core.js?h=3c940c084d1a",
+    "./13_development_automation_contracts.js?h=a5d280c27cef",
+    "./13_development_automation_validation.js?h=51409704ba48",
+    "./13_development_automation_intake.js?h=6572a38c1718",
+    "./13_development_automation_grounding.js?h=da925ef2bf64",
+    "./13_development_automation_phase2_validation.js?h=0269992eeb94",
+    "./13_development_automation_planning.js?h=6be35ba491d0",
+    "./13_development_automation_proposal.js?h=a4e3b4d90d94",
+    "./13_development_automation_dry_run.js?h=799e6ce01279",
+    "./13_development_automation_preflight.js?h=7284c9b03f1c",
+    "./13_development_automation_phase3_validation.js?h=c29ad9cb40d0",
+    "./13_development_automation_approval.js?h=15cb9e5a048c",
+    "./13_development_automation_consent.js?h=c1aa61a91125",
+    "./13_development_automation_gate.js?h=2da1c4aa4e3f",
+    "./13_development_automation_phase4_validation.js?h=a2e6e01c8490",
+    "./13_development_automation_dispatch.js?h=775a855847c6",
+    "./13_development_automation_phase5_validation.js?h=ba16595ff464",
+    "./13_project_report.js?h=d636cb6a6766",
+    "./13_project_handoff.js?h=a073ff86a1eb",
+    "./13_function_relation_v3.js?h=0857a784aa30",
+    "./13_project_governance.js?h=1ab620d32aa0",
+    "./14_architecture_database.js?h=f26a5f8b954a",
+    "./14_architecture_builder.js?h=39fcc2c27e96",
+    "./14_architecture_repository.js?h=8190caaf34d8",
+    "./15_engine_core.js?h=45f168edea69",
+    "./16_search_engine.js?h=8b7c786e40c7",
+    "./16_context_engine.js?h=51d8af09d9a8",
+    "./16_perception_engine.js?h=245799f98fd9",
+    "./16_validation_engine.js?h=105c13151958",
+    "./15_reasoning_engine.js?h=cf1ed1305563",
+    "./16_workflow_engine.js?h=17dedd927e7f",
+    "./99_init.js?h=138e34ded106"
+  ],
+  "hashes": {
+    "00_core.js": {
+      "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
+      "byteSize": 9961,
+      "cacheKey": "03cdc50b3874"
+    },
+    "01_task_manager.js": {
+      "sha256": "a4795193df6c659c6f22ceddf62f8bfb0edec2e64039b98fa23e9bca028067e1",
+      "byteSize": 5904,
+      "cacheKey": "a4795193df6c"
+    },
+    "01_bootstrap.js": {
+      "sha256": "60f166e32009c99b43075339695913fbd46303db34b3326478d3f67d1e8e9ae6",
+      "byteSize": 24763,
+      "cacheKey": "60f166e32009"
+    },
+    "01_function_reference.js": {
+      "sha256": "43e96f62f83a1e8a1af8ff0ea5ddf5cedf0567c578b3b7c28a7c790ae5ee9476",
+      "byteSize": 2628,
+      "cacheKey": "43e96f62f83a"
+    },
+    "01_project_config.js": {
+      "sha256": "e642ef55737125743a6261926265f91e1889c489f04bf4b11dcbbb7771b8a2b2",
+      "byteSize": 11182,
+      "cacheKey": "e642ef557371"
+    },
+    "01_project_manager.js": {
+      "sha256": "ecac07839bb69eee31c19508dda384e2edebb0967bc71e440ffe14f983da22da",
+      "byteSize": 26888,
+      "cacheKey": "ecac07839bb6"
+    },
+    "01_analyzer_common.js": {
+      "sha256": "a58ed23c7db2e7a728115c4f9036df027b633fc75dc05d87eae69dd5cfeebddf",
+      "byteSize": 9122,
+      "cacheKey": "a58ed23c7db2"
+    },
+    "01_memo_manager.js": {
+      "sha256": "375fd1eaf7a0b9b9cd7431292ba765f1b39e52a356509f08a594d034fd99550f",
+      "byteSize": 1799,
+      "cacheKey": "375fd1eaf7a0"
+    },
+    "02_prompt.js": {
+      "sha256": "035edaf91950fd3d6a3776cb8aad8ad7382fa92c624c557114047d57c17d37c2",
+      "byteSize": 23589,
+      "cacheKey": "035edaf91950"
+    },
+    "03_data.js": {
+      "sha256": "26cdcbb27e545e6598985dc58d466b355629af849a9a6535d451bd728834242f",
+      "byteSize": 19030,
+      "cacheKey": "26cdcbb27e54"
+    },
+    "03_development_rule_analyzer.js": {
+      "sha256": "0a76fee2947165063f947e29839542fbe606550a20f180d773a982c0b28f7817",
+      "byteSize": 2200,
+      "cacheKey": "0a76fee29471"
+    },
+    "03_development_rules.js": {
+      "sha256": "9c7ae17ea596d9bd563aaf53c03c2eb86633fe2888d819eb78c33b4079cf4c90",
+      "byteSize": 22410,
+      "cacheKey": "9c7ae17ea596"
+    },
+    "04_tools.js": {
+      "sha256": "e1db86daafd5be6fd8dad39e5d08d724713016dbc87cf3d9017622168cfa1981",
+      "byteSize": 28028,
+      "cacheKey": "e1db86daafd5"
+    },
+    "04_repair_quick_buttons.js": {
+      "sha256": "211b72e9984e6385b79a8a51982ac8496d780932cdda23fc37333dd98491a336",
+      "byteSize": 13933,
+      "cacheKey": "211b72e9984e"
+    },
+    "05_repair_file.js": {
+      "sha256": "1d287bcfa823a7d95ac069a878437e5a3f6a7f36d5996452690faf81cf63e847",
+      "byteSize": 6433,
+      "cacheKey": "1d287bcfa823"
+    },
+    "05_repair_function.js": {
+      "sha256": "402317190428d550a7874437ac339fd941def33541dda138b30229e8c4159f8b",
+      "byteSize": 11039,
+      "cacheKey": "402317190428"
+    },
+    "05_repair_sort.js": {
+      "sha256": "471796754e364d266246a52f4fe0f20721680da5500c0fb02ff0afce66ffe287",
+      "byteSize": 7894,
+      "cacheKey": "471796754e36"
+    },
+    "05_repair_diff.js": {
+      "sha256": "e310a01978f42965dd9ca9a7120e023e7097c9396695e0320a9aa2e05854e6de",
+      "byteSize": 15380,
+      "cacheKey": "e310a01978f4"
+    },
+    "05_repair_cleanup.js": {
+      "sha256": "2b10512f2688f07f442d4a28d5cd121793d8a22a0d8ea9a3c64b279b20c2c378",
+      "byteSize": 8362,
+      "cacheKey": "2b10512f2688"
+    },
+    "05_repair.js": {
+      "sha256": "ebf76180e1ffa42ee8970f2321cb5043fd4278d011a28bc55b78fad927356154",
+      "byteSize": 14039,
+      "cacheKey": "ebf76180e1ff"
+    },
+    "05_repair_zip_paste_manager.js": {
+      "sha256": "c151fe8ff1f9f2fed8093acf26a85ba8c36cf7294a6f84b2a6113855cd25d075",
+      "byteSize": 27202,
+      "cacheKey": "c151fe8ff1f9"
+    },
+    "05_repair_zip_diff_manager.js": {
+      "sha256": "33e761f58b89ed3da5f2021109ace876adcb270705eb4db79cbbc1952ea02d41",
+      "byteSize": 42163,
+      "cacheKey": "33e761f58b89"
+    },
+    "06_search_core.js": {
+      "sha256": "85d2a641d8e75e1464b51ee005207dcf1bde399912b93850dde08669c113dfa4",
+      "byteSize": 3811,
+      "cacheKey": "85d2a641d8e7"
+    },
+    "06_search_ui.js": {
+      "sha256": "e09cb18256d137c310091d8b5d2cb287e6652bbb340fae426982663717e2bb9b",
+      "byteSize": 6630,
+      "cacheKey": "e09cb18256d1"
+    },
+    "06_search_history.js": {
+      "sha256": "a51240ee23d6c1d5f66bbea9d3f7bb78e849289c48aa17cbda5b3ff03907dc69",
+      "byteSize": 1769,
+      "cacheKey": "a51240ee23d6"
+    },
+    "06_search_global.js": {
+      "sha256": "8d958fa05ed14b18cfc9529ec8bbf8bc5279cdab4a57e5096aadf9bc26adb822",
+      "byteSize": 8928,
+      "cacheKey": "8d958fa05ed1"
+    },
+    "06_search_suggest.js": {
+      "sha256": "9855cbeeb549e0a71278e2a3aa8d86053372e05bec951b10543f3f0c6372b5f8",
+      "byteSize": 3643,
+      "cacheKey": "9855cbeeb549"
+    },
+    "07_health_dependency.js": {
+      "sha256": "5aaf9655cdeef2ad2b1578cf91799b5a3ef68bc0678b56bd47d2a699bfae97bf",
+      "byteSize": 8467,
+      "cacheKey": "5aaf9655cdee"
+    },
+    "07_health_diagnose.js": {
+      "sha256": "6cfb32a71d4aa0f54cd35511447d1ebd894a4f6fea182ece2f5238110b92b2e6",
+      "byteSize": 10665,
+      "cacheKey": "6cfb32a71d4a"
+    },
+    "07_health_unused.js": {
+      "sha256": "7fa65234ac06d98e2bc60a13796dd74b2aba6b09b30f592468d39cc389c8780e",
+      "byteSize": 11231,
+      "cacheKey": "7fa65234ac06"
+    },
+    "07_backup_manager.js": {
+      "sha256": "c3ea2011ff941855ed117bcb51d2f78e27030f778732ddbdcd9c6af573bceb97",
+      "byteSize": 18968,
+      "cacheKey": "c3ea2011ff94"
+    },
+    "07_project_package.js": {
+      "sha256": "d471662b4aff4bd62429d48b89f9df36cef6adf786bcefb327daf67b3f6d1f52",
+      "byteSize": 33716,
+      "cacheKey": "d471662b4aff"
+    },
+    "07_safe_mode.js": {
+      "sha256": "29a7bdc4685dbf67fa06f881174a0d02e9992e922b317b8db60cd51f15bb281f",
+      "byteSize": 1737,
+      "cacheKey": "29a7bdc4685d"
+    },
+    "07_project_explorer.js": {
+      "sha256": "8a31a68897ff362388cbccdc80c2ef656aa8fe229c1df4e4df738cc397d8fd08",
+      "byteSize": 3179,
+      "cacheKey": "8a31a68897ff"
+    },
+    "07_backup_health.js": {
+      "sha256": "2fc43427c3e708e1c1d2d9e3364764b094eee542c6ebaf76f79e98014064d48f",
+      "byteSize": 12867,
+      "cacheKey": "2fc43427c3e7"
+    },
+    "07_project_validation.js": {
+      "sha256": "878645d3ef2a1ff4f0116676a444a5760b5752e64e8f0961cb19518a5cdd9e6d",
+      "byteSize": 7570,
+      "cacheKey": "878645d3ef2a"
+    },
+    "08_function_relation.js": {
+      "sha256": "b482cb61c67df49f85149df9f7c57fb8a006fffa665fc055f8860dc6873ba52c",
+      "byteSize": 5005,
+      "cacheKey": "b482cb61c67d"
+    },
+    "08_ai_analyzer.js": {
+      "sha256": "0c4127b96dca73af39f4830f0b453071528a96f466c3172bf447ab1ff7cd11d0",
+      "byteSize": 21667,
+      "cacheKey": "0c4127b96dca"
+    },
+    "08_ai_apply.js": {
+      "sha256": "0efa765be2375dfd846d3bdbf583fec89c3a4027d57ee737516ec6c31e9db75b",
+      "byteSize": 4823,
+      "cacheKey": "0efa765be237"
+    },
+    "08_ai_test.js": {
+      "sha256": "0c8f1cea13511c0d44e79502098c029007a4186cf5446d547d48db76c6c2bc33",
+      "byteSize": 5344,
+      "cacheKey": "0c8f1cea1351"
+    },
+    "08_ai_integrator.js": {
+      "sha256": "34977d5d44871a6d062de8a6810cf82a6c5cca5430b5a64372824df4fd95124b",
+      "byteSize": 5858,
+      "cacheKey": "34977d5d4487"
+    },
+    "09_ai_instruction.js": {
+      "sha256": "b4ebb3d125a782c75ccdc7e5ad1fa3d72230679722bf437e67804fc1066f27b7",
+      "byteSize": 11386,
+      "cacheKey": "b4ebb3d125a7"
+    },
+    "09_ai_error_prompt.js": {
+      "sha256": "3c6304129c04fc0097d2dfb93d7d13cede3aadf879f3fd6beb51b59ffc02a99a",
+      "byteSize": 11244,
+      "cacheKey": "3c6304129c04"
+    },
+    "10_macro.js": {
+      "sha256": "3b01bccfd08a03f12072b7d99df36e9ee5503a4adf3e16b7fbfca63b51f6a8c7",
+      "byteSize": 12075,
+      "cacheKey": "3b01bccfd08a"
+    },
+    "10_macro_favorite.js": {
+      "sha256": "e03dd2905dea78952f8b8fa64fa2d3ac54883c112af974e9f75b7d1aadc61d48",
+      "byteSize": 6040,
+      "cacheKey": "e03dd2905dea"
+    },
+    "11_mobile_console.js": {
+      "sha256": "017cd8c3c8a8a75f6fe2a41ea5d3bdec668a8d4e144951bf3f38af1ff15ef490",
+      "byteSize": 27108,
+      "cacheKey": "017cd8c3c8a8"
+    },
+    "11_function_help.js": {
+      "sha256": "e2d1e3eeb8ef49873dd4c701c23ddf0a60b178ef25ecd78c625e3c6aed33f5a2",
+      "byteSize": 8567,
+      "cacheKey": "e2d1e3eeb8ef"
+    },
+    "11_command_palette.js": {
+      "sha256": "70ff7be4f7240122beadd04734df2aae378c273804f132abb9f4a619f5e0be51",
+      "byteSize": 32672,
+      "cacheKey": "70ff7be4f724"
+    },
+    "11_project_search.js": {
+      "sha256": "2319fa76038482c994e32740e9d17506ac2faeb73c2662a349b3e0afdde19af7",
+      "byteSize": 21195,
+      "cacheKey": "2319fa760384"
+    },
+    "11_error_inspector.js": {
+      "sha256": "9a9cdc9c2d6336d421a471f853e36ec5fb69458c6d00fcc8c09af8b554590326",
+      "byteSize": 30921,
+      "cacheKey": "9a9cdc9c2d63"
+    },
+    "11_ide_registry.js": {
+      "sha256": "208dde688d2d63c94510e02085708cfa2ce7d9aae8164da8b6a72825fee701c0",
+      "byteSize": 18560,
+      "cacheKey": "208dde688d2d"
+    },
+    "11_ide_launcher.js": {
+      "sha256": "c9d27b3d2ce0d2e52473bc9eac5a48caea75ccc21be61a9254c805935a0647c8",
+      "byteSize": 10017,
+      "cacheKey": "c9d27b3d2ce0"
+    },
+    "11_quick_command.js": {
+      "sha256": "774831f059fb05a40e6cceaf000bcf6055fe879f037cc16f3d03f51869e53341",
+      "byteSize": 14976,
+      "cacheKey": "774831f059fb"
+    },
+    "11_virtual_keyboard.js": {
+      "sha256": "2298708f02156d68d4313871f5d86a461cc36a82415433f0333813034984ff4b",
+      "byteSize": 13885,
+      "cacheKey": "2298708f0215"
+    },
+    "11_autocomplete.js": {
+      "sha256": "332dee06bde22656500a671249e75e6c14a3cbaf2ed5ab37b69ff693361e9358",
+      "byteSize": 10201,
+      "cacheKey": "332dee06bde2"
+    },
+    "11_ai_development_assistant.js": {
+      "sha256": "72382f6c39374aa6a4a21884c14612e9647f185fd90a86de22b81483efbbe400",
+      "byteSize": 26993,
+      "cacheKey": "72382f6c3937"
+    },
+    "11_mobile_console_autocomplete.js": {
+      "sha256": "84339a17218388ae1c67c1c5cd9a43246e298d84a90efcacb5ae6a5098922c3f",
+      "byteSize": 6493,
+      "cacheKey": "84339a172183"
+    },
+    "11_mobile_console_suggest.js": {
+      "sha256": "cc5aa76fe663ec4b310505849f889d86b41915dcd88a024f44985215cb99a6ac",
+      "byteSize": 7011,
+      "cacheKey": "cc5aa76fe663"
+    },
+    "12_document_parser_v2.js": {
+      "sha256": "8d1b6148e9efa363c0d3db8791964f3d91472a37389b0f82338f6e5a4571f524",
+      "byteSize": 7297,
+      "cacheKey": "8d1b6148e9ef"
+    },
+    "12_memo_box.js": {
+      "sha256": "2309cc3612c8309591714a801be585f6111dfa120520420aafde0df792a6a598",
+      "byteSize": 80530,
+      "cacheKey": "2309cc3612c8"
+    },
+    "12_dependency_manager.js": {
+      "sha256": "78d347c50c952f0f148138087ed8ad91c8caea58cf8b4b4924736e58d581a6c0",
+      "byteSize": 10710,
+      "cacheKey": "78d347c50c95"
+    },
+    "12_retrieval_engine.js": {
+      "sha256": "82fe7c28abd413cd5651856e33cdab3f31f1bd0ada312daa9ec632863c94511a",
+      "byteSize": 4515,
+      "cacheKey": "82fe7c28abd4"
+    },
+    "12_ai_package_builder.js": {
+      "sha256": "a6a4cc0e5ca605ba9812e44b1ef5aae2f2d0cccea918f4402ae2df9ff73edb09",
+      "byteSize": 2827,
+      "cacheKey": "a6a4cc0e5ca6"
+    },
+    "12_repository_order.js": {
+      "sha256": "92c77def98ac55af27b7732a8101de4506dc71d188abd6cdb1321fb0f6af58bc",
+      "byteSize": 2567,
+      "cacheKey": "92c77def98ac"
+    },
+    "12_knowledge_migration.js": {
+      "sha256": "74c5ab93e9df8acb1ee6a117135b7da969868c85400d08a95819344ff815be57",
+      "byteSize": 8781,
+      "cacheKey": "74c5ab93e9df"
+    },
+    "13_module_analyzer.js": {
+      "sha256": "8770867b05c36c4a2ff15888e7f6606189a3d40bcf0c057770f9aa0155544988",
+      "byteSize": 2302,
+      "cacheKey": "8770867b05c3"
+    },
+    "13_project_analyzer.js": {
+      "sha256": "235f723c8d96302c2b5e1fe5cab30ac4d56a8afa2018f81af9bc1673190b4679",
+      "byteSize": 9419,
+      "cacheKey": "235f723c8d96"
+    },
+    "13_project_database.js": {
+      "sha256": "7cf6448a54b005933bf1b259037f57c5d6281e087c0802c017f0fc10c0fb929f",
+      "byteSize": 10238,
+      "cacheKey": "7cf6448a54b0"
+    },
+    "13_function_analyzer.js": {
+      "sha256": "492606be94d5b682d2cbea680cf27a6ac6c751fade71ec2f4a33032ac59d6fc2",
+      "byteSize": 6396,
+      "cacheKey": "492606be94d5"
+    },
+    "13_diagnostic_instrumentation.js": {
+      "sha256": "d14dc5a491aaea41565927ce6fcbabc6774358a61ec5f7b939715c670251c784",
+      "byteSize": 22184,
+      "cacheKey": "d14dc5a491aa"
+    },
+    "13_diagnostic_platform.js": {
+      "sha256": "2683438b96eaba2f55f1f3791c0a8f82201ccdb4a6441c372d38e955bccb3658",
+      "byteSize": 21975,
+      "cacheKey": "2683438b96ea"
+    },
+    "13_diagnostic_validation.js": {
+      "sha256": "9b74f347ec12cd7592a3c861882433ef78774102013ba0da288d3255d041d03c",
+      "byteSize": 15216,
+      "cacheKey": "9b74f347ec12"
+    },
+    "13_search_strategy_platform.js": {
+      "sha256": "cbcd8f56313b5d9e66cb8776a00361efda0cac95da82a3a5b61b90fa3dd9ebf4",
+      "byteSize": 36315,
+      "cacheKey": "cbcd8f56313b"
+    },
+    "13_search_strategy_validation.js": {
+      "sha256": "00dbd2d4b97ae45c7ac93521c9c9283c3607f40ba24be83627dd4c42aaad53a8",
+      "byteSize": 43598,
+      "cacheKey": "00dbd2d4b97a"
+    },
+    "13_development_status_registry.js": {
+      "sha256": "1aeb8d1f35aad8f8469a450c1239487492cb3b38a7b92f2739d72dd3c92e4440",
+      "byteSize": 15230,
+      "cacheKey": "1aeb8d1f35aa"
+    },
+    "13_development_dashboard.js": {
+      "sha256": "7442f5cad920f7c8397f48229481ca7128d7831869b80370c0c898c50e167491",
+      "byteSize": 77953,
+      "cacheKey": "7442f5cad920"
+    },
+    "13_golden_core_memo_bridge.js": {
+      "sha256": "5045afc7a72adaa4bca3282fc52eac8f660479d075a9b21ebfe6a25838d477a7",
+      "byteSize": 10817,
+      "cacheKey": "5045afc7a72a"
+    },
+    "13_search_regression_baseline.js": {
+      "sha256": "356715c49e908a7d8ec6f8237efc268ceca00e564e8a6bf17bf32f87f3816b9b",
+      "byteSize": 11700,
+      "cacheKey": "356715c49e90"
+    },
+    "13_validation_result_repository.js": {
+      "sha256": "a77a2f33cd54ae0765fa4972a8c1abd82956aed7c15e7a03bf00ed01945f3eac",
+      "byteSize": 34908,
+      "cacheKey": "a77a2f33cd54"
+    },
+    "13_investigation_workflow.js": {
+      "sha256": "96fd008c6b00253d43c6d3b6db170098ee6df333123fdbd4f43f0967894392ee",
+      "byteSize": 68920,
+      "cacheKey": "96fd008c6b00"
+    },
+    "13_investigation_workflow_validation.js": {
+      "sha256": "7b1bf90c202d03df7180253157ad0c7bd77b9cbf8e088f9850e2896866c9230d",
+      "byteSize": 112327,
+      "cacheKey": "7b1bf90c202d"
+    },
+    "13_development_analytics.js": {
+      "sha256": "c456bc794778a7c92afe31e59c93b97505295e767dd57105ea5bce04a05d1907",
+      "byteSize": 48133,
+      "cacheKey": "c456bc794778"
+    },
+    "13_development_analytics_phase2a.js": {
+      "sha256": "1a30cbb1047b7f2985963f16e43fe6e1fc7a3b0753f2c4bf2998d19227551b2d",
+      "byteSize": 64960,
+      "cacheKey": "1a30cbb1047b"
+    },
+    "13_development_analytics_phase2b.js": {
+      "sha256": "4b20a4f4c924e694824987dc4d4366d02e6a01790ab463cda51d940be01787f4",
+      "byteSize": 81250,
+      "cacheKey": "4b20a4f4c924"
+    },
+    "13_auto_refactoring.js": {
+      "sha256": "f3e611809b0a559916c9c2765177de98154add2c435a294d1ee4c7aea47ddbd4",
+      "byteSize": 61596,
+      "cacheKey": "f3e611809b0a"
+    },
+    "13_auto_refactoring_phase2.js": {
+      "sha256": "73e43d33ece028b076a6a328e83f86ad32f0a70e0e9ee72f124e3875e1c28a4b",
+      "byteSize": 32365,
+      "cacheKey": "73e43d33ece0"
+    },
+    "13_auto_refactoring_policy_standard.js": {
+      "sha256": "09b1b3ce3351b52d597fad755e463c0d7cd6a8d9b3ef97de018e45e809603fb0",
+      "byteSize": 39491,
+      "cacheKey": "09b1b3ce3351"
+    },
+    "13_auto_refactoring_transaction.js": {
+      "sha256": "1c0147712f2aee1412875990ee0ab79e8cf0644a025eafddcce2c9471259554d",
+      "byteSize": 52590,
+      "cacheKey": "1c0147712f2a"
+    },
+    "13_auto_refactoring_controlled_application.js": {
+      "sha256": "8bd9f408360f381253ddde6309fa7eb15cf04bc3ddd0754119851959b23ae450",
+      "byteSize": 68668,
+      "cacheKey": "8bd9f408360f"
+    },
+    "13_auto_refactoring_validation.js": {
+      "sha256": "a9d8bbfc6a410709e754b5587a23c88568192fae3e546025a44a5dba8806a20a",
+      "byteSize": 41597,
+      "cacheKey": "a9d8bbfc6a41"
+    },
+    "13_ai_development_workflow_core.js": {
+      "sha256": "4517be14389aaebc797c7e225010168d08cb89bd5a20e6ce3249aa9b82cca2d6",
+      "byteSize": 34390,
+      "cacheKey": "4517be14389a"
+    },
+    "13_ai_development_workflow_storage.js": {
+      "sha256": "7f25b8f94b6bd0dde8d112144bca2fddbcc3d3c01c36dce91ccd9dc232bd672c",
+      "byteSize": 19875,
+      "cacheKey": "7f25b8f94b6b"
+    },
+    "13_ai_development_workflow_state.js": {
+      "sha256": "868a4e97c04f186fc3908cf52de668804eddb595777984e9b1f3323f0f05ac40",
+      "byteSize": 40010,
+      "cacheKey": "868a4e97c04f"
+    },
+    "13_ai_development_workflow_planning.js": {
+      "sha256": "66ff73104b7410aae0737bb53b2140a05be14d2c021d83c97b2e63e2ff6e307d",
+      "byteSize": 56654,
+      "cacheKey": "66ff73104b74"
+    },
+    "13_ai_development_workflow_adapter.js": {
+      "sha256": "dea344a4828b3ce2828c06d6a8378c81bfd2a6324efbfa8655de76f2e051fd01",
+      "byteSize": 33200,
+      "cacheKey": "dea344a4828b"
+    },
+    "13_ai_development_workflow_execution.js": {
+      "sha256": "26a0dd11db4d9aa7f843a0340eb052dff5e3fc86cd0876e8cb6a5c5ace450c33",
+      "byteSize": 58006,
+      "cacheKey": "26a0dd11db4d"
+    },
+    "13_ai_development_workflow_decision.js": {
+      "sha256": "6dbc3d6d19c5887cbf9d66b8da0e1ff05903ec26e401662d5d5c252b21a86696",
+      "byteSize": 55741,
+      "cacheKey": "6dbc3d6d19c5"
+    },
+    "13_ai_development_workflow_approval.js": {
+      "sha256": "6c20cffd26576bc12eb6b7581712567ad9ff762cc13dde8426ec8b801739a9e7",
+      "byteSize": 45956,
+      "cacheKey": "6c20cffd2657"
+    },
+    "13_ai_development_workflow_monitoring.js": {
+      "sha256": "e030e5b5c33e0bd7cba1b6a10de21faf5620b125f41e6547c7fb463dbb1b3889",
+      "byteSize": 25402,
+      "cacheKey": "e030e5b5c33e"
+    },
+    "13_ai_development_workflow_package.js": {
+      "sha256": "cf6981f2dd95b8c5858c349f850bea4e390c5d39c40d698cc15087bd6060cfa6",
+      "byteSize": 22421,
+      "cacheKey": "cf6981f2dd95"
+    },
+    "13_ai_development_workflow_completion.js": {
+      "sha256": "2e9d1940c392c69ab9fd3d009ee38ab14f85e5d9ae4aab9ff93e5ee123238fd2",
+      "byteSize": 27177,
+      "cacheKey": "2e9d1940c392"
+    },
+    "13_ai_development_workflow_integration.js": {
+      "sha256": "25c2843b9c2e1ba3ef50b01ac90d7a1d8804f71e236888a172f689aeb8ecdffa",
+      "byteSize": 13276,
+      "cacheKey": "25c2843b9c2e"
+    },
+    "13_ai_development_workflow_validation.js": {
+      "sha256": "2d2f92af8a736c281b0bcf65656bd6c693fde21c1034595d20d489153dd3e72e",
+      "byteSize": 11084,
+      "cacheKey": "2d2f92af8a73"
+    },
+    "13_intelligence_version_manifest.js": {
+      "sha256": "4c1851787cb3df3f929bf7b71c3a26b41d3e3d44e897421facb81c02cc8318c7",
+      "byteSize": 15324,
+      "cacheKey": "4c1851787cb3"
+    },
+    "13_intelligence_platform_core.js": {
+      "sha256": "00e8e334a919472691fe09cf323b1525659536f4a9236ef2f6922be82dae7367",
+      "byteSize": 61921,
+      "cacheKey": "00e8e334a919"
+    },
+    "13_intelligence_capability_registry.js": {
+      "sha256": "dc96c1b9eec1f7dd60beda1b8afc4923f9fbf488c53915afb5e1be2d6d69edf8",
+      "byteSize": 17065,
+      "cacheKey": "dc96c1b9eec1"
+    },
+    "13_intelligence_schema_registry.js": {
+      "sha256": "aad032898ce7e0c543d9d8258efead9901ec8809860143752f27d825983dadab",
+      "byteSize": 21962,
+      "cacheKey": "aad032898ce7"
+    },
+    "13_intelligence_source_adapter.js": {
+      "sha256": "c9c5143d454c79a7f380b8d66c4c11b297768a041547b7aa6a1b09f6b5ad1cc6",
+      "byteSize": 40212,
+      "cacheKey": "c9c5143d454c"
+    },
+    "13_intelligence_source_adapters_repository.js": {
+      "sha256": "bdd25fee97591401f1018c43b50f2dbd27481dfab2c7665c0108535e9d4ea6a5",
+      "byteSize": 16642,
+      "cacheKey": "bdd25fee9759"
+    },
+    "13_intelligence_source_adapters_platform.js": {
+      "sha256": "912595516fd71b9dba212f27509a4888c472f57ab0cf667418988ffbd62c8ab7",
+      "byteSize": 10858,
+      "cacheKey": "912595516fd7"
+    },
+    "13_intelligence_source_adapter_relationship.js": {
+      "sha256": "3f5be7445256758e2685cb87fca35a702a5462e1cd0696dc4c77c138967f3328",
+      "byteSize": 6962,
+      "cacheKey": "3f5be7445256"
+    },
+    "13_intelligence_canonical_model.js": {
+      "sha256": "51b79a121d357a011dc1568b3f3ca5345db3192bca8769bc728402c550a19729",
+      "byteSize": 27746,
+      "cacheKey": "51b79a121d35"
+    },
+    "13_intelligence_repository_snapshot.js": {
+      "sha256": "702c9c66158e5d66bbdf16cad6543d475313aead624fc86fa141d95f7dd29572",
+      "byteSize": 57347,
+      "cacheKey": "702c9c66158e"
+    },
+    "13_intelligence_relationship_registry.js": {
+      "sha256": "2e457a03dbda8939dac1245255ba482ceba5b09002751353d820912c19ca1170",
+      "byteSize": 13603,
+      "cacheKey": "2e457a03dbda"
+    },
+    "13_intelligence_evidence_graph.js": {
+      "sha256": "9a5d701e983a037e12a25666f89abdb455b3e3aca63dc2e5182f821685043fef",
+      "byteSize": 78276,
+      "cacheKey": "9a5d701e983a"
+    },
+    "13_intelligence_repository_understanding.js": {
+      "sha256": "441b1a9b4c084f0108d537e045e3598737e34941dddefe4f3a6bd08ff1d3e3f6",
+      "byteSize": 23033,
+      "cacheKey": "441b1a9b4c08"
+    },
+    "13_intelligence_workflow_understanding.js": {
+      "sha256": "257090ec83fbedbd839783beaa9d23d5532e66fa080c2dad955c82f5c52797f9",
+      "byteSize": 23037,
+      "cacheKey": "257090ec83fb"
+    },
+    "13_intelligence_understanding_pipeline.js": {
+      "sha256": "85f5f963b5097cb67c8b9f342154f62b047af01dddd01ced2d8cace149f33e08",
+      "byteSize": 60560,
+      "cacheKey": "85f5f963b509"
+    },
+    "13_intelligence_terminology_registry.js": {
+      "sha256": "bf45777bbc834ec2ac98ad7f4f7305ea03906c3caf7557cd48ef83adc9539be7",
+      "byteSize": 12283,
+      "cacheKey": "bf45777bbc83"
+    },
+    "13_intelligence_query_interpreter.js": {
+      "sha256": "b836cc6640b72340f444a17f322a52540f1061efea2cc2ebc029f337dc3bef6c",
+      "byteSize": 20339,
+      "cacheKey": "b836cc6640b7"
+    },
+    "13_intelligence_query_engine.js": {
+      "sha256": "bf2ceded441cbbf91c957eb5e2d6902ab0f0eb3b4ec96443f5e1641b569922b6",
+      "byteSize": 51363,
+      "cacheKey": "bf2ceded441c"
+    },
+    "13_intelligence_confidence.js": {
+      "sha256": "71a4eed1d7e712ea4fe0ff23263823990b2f9d49eb4a7ecc095aaec7da07e4c4",
+      "byteSize": 43446,
+      "cacheKey": "71a4eed1d7e7"
+    },
+    "13_intelligence_independent_validation.js": {
+      "sha256": "1207db9079bae912114ccd793f9a7bb727bf0f740c373215204723fc7d623326",
+      "byteSize": 53387,
+      "cacheKey": "1207db9079ba"
+    },
+    "13_intelligence_test_dataset_registry.js": {
+      "sha256": "e8fb0d096646ba84de92534a26bdc046524dd6864658bc09099b685bf77c2e34",
+      "byteSize": 27926,
+      "cacheKey": "e8fb0d096646"
+    },
+    "13_intelligence_validation_automation.js": {
+      "sha256": "41198930fa6080f10527f159df61f81dbc39af1780443512b06b37da759f08f2",
+      "byteSize": 49563,
+      "cacheKey": "41198930fa60"
+    },
+    "13_intelligence_validation_evidence.js": {
+      "sha256": "f5c98466c3dc72f6cc324f35d81a632cda0f39d31690bf73dcb944468f55e717",
+      "byteSize": 38565,
+      "cacheKey": "f5c98466c3dc"
+    },
+    "13_intelligence_test_procedure_intake.js": {
+      "sha256": "f4c80469cdd8c1ca8d6ac2edea089eb632e7cc2cbd1de39dcfaed0915ebfa519",
+      "byteSize": 13349,
+      "cacheKey": "f4c80469cdd8"
+    },
+    "13_intelligence_test_procedure_parser.js": {
+      "sha256": "53f80473926c94a81b1e5b520fc2ea509756a71dbfdd4d4760068a745f02cff3",
+      "byteSize": 34098,
+      "cacheKey": "53f80473926c"
+    },
+    "13_intelligence_validation_compiler.js": {
+      "sha256": "2bee052e6795aa86ee9c31580ade96e5a6213b3e9372680398a1baca8d51c371",
+      "byteSize": 56595,
+      "cacheKey": "2bee052e6795"
+    },
+    "13_intelligence_test_procedure_ui.js": {
+      "sha256": "fd88433ed4cd25e453bb0ff9bef52acc71a167aab8c4156afe9e01bc50be8db4",
+      "byteSize": 27913,
+      "cacheKey": "fd88433ed4cd"
+    },
+    "13_intelligence_version_validation.js": {
+      "sha256": "9be1552b9a1249e2e1b0b43be26e7303de5cca2d87461d9add4bf4565e67ba1a",
+      "byteSize": 20395,
+      "cacheKey": "9be1552b9a12"
+    },
+    "13_intelligence_validation_persistence.js": {
+      "sha256": "b08080da0274af28922e789a94054e4f0f170ddb531740bd18ecaa38aa2f01ec",
+      "byteSize": 22996,
+      "cacheKey": "b08080da0274"
+    },
+    "13_intelligence_package_model.js": {
+      "sha256": "39ddf1316dae0ef6ef54a09ad7ea8234d9051b8fbfafd84d7b25b398f014a6b5",
+      "byteSize": 53657,
+      "cacheKey": "39ddf1316dae"
+    },
+    "13_intelligence_ide180_handoff.js": {
+      "sha256": "75029934d247bdacab6b7fdec8680ad7f16d97181928d4fd42f895c88fea2f74",
+      "byteSize": 18356,
+      "cacheKey": "75029934d247"
+    },
+    "13_intelligence_package_validation.js": {
+      "sha256": "c31e042013159bd4cb309b23bd4b898beb1c1e8e8eb875bf989dc428bb98b99c",
+      "byteSize": 64941,
+      "cacheKey": "c31e04201315"
+    },
+    "13_intelligence_package_export.js": {
+      "sha256": "3b0a01705f11ee1cb25c5b4ebbecff707ebdaeee92c361ad0ddc26ac9399640b",
+      "byteSize": 19537,
+      "cacheKey": "3b0a01705f11"
+    },
+    "13_intelligence_validation.js": {
+      "sha256": "db0c62a5227637f9dc59007e0a7aee1d9b8e6339f32933ea3767110cb5f2a87e",
+      "byteSize": 74860,
+      "cacheKey": "db0c62a52276"
+    },
+    "13_knowledge_navigator_version_manifest.js": {
+      "sha256": "0b63d26f30a1997cbf6f98893d8cfa9cf5cb61e02eb83b4176c30b32d2173462",
+      "byteSize": 8357,
+      "cacheKey": "0b63d26f30a1"
+    },
+    "13_knowledge_navigator_core.js": {
+      "sha256": "b123e660a337ec9da01f68684904bc07da118933991e5698ba28fe7de64d9a01",
+      "byteSize": 15264,
+      "cacheKey": "b123e660a337"
+    },
+    "13_knowledge_navigator_contracts.js": {
+      "sha256": "4682342e4a5766758e9de06546ec66d5c0724e930850b03ced2e7f919f39ac30",
+      "byteSize": 19181,
+      "cacheKey": "4682342e4a57"
+    },
+    "13_knowledge_navigator_registry.js": {
+      "sha256": "bdabc846156a2dcaef9ccfb1d829d93375d29c05adc318f43625cb3a26423c99",
+      "byteSize": 12057,
+      "cacheKey": "bdabc846156a"
+    },
+    "13_knowledge_navigator_intelligence_provider.js": {
+      "sha256": "99b5ddac1ef0dd42c27ad4c4cbfef49f3ded3c07ab6d8fb6658aad01da6154a6",
+      "byteSize": 28367,
+      "cacheKey": "99b5ddac1ef0"
+    },
+    "13_knowledge_navigator_identity.js": {
+      "sha256": "7c481969ec065faf6091f831c8337f98a619ffd4a7c5f99891b4e83ef7194996",
+      "byteSize": 8449,
+      "cacheKey": "7c481969ec06"
+    },
+    "13_knowledge_navigator_query_resolution.js": {
+      "sha256": "79d28f5953aa0867c4067bbfb72573c042a3fe3af5d58c30ac38d2133a1219a9",
+      "byteSize": 8052,
+      "cacheKey": "79d28f5953aa"
+    },
+    "13_knowledge_navigator_basic_resolver.js": {
+      "sha256": "b322dc697ab9a8d5d0a5de33d32fcef51b5358e104772af41db91e911dbecc20",
+      "byteSize": 8388,
+      "cacheKey": "b322dc697ab9"
+    },
+    "13_knowledge_navigator_budget.js": {
+      "sha256": "cac78bfffd04a4a04fe9466c269a4a031269badf01b7367f020929fe84c90795",
+      "byteSize": 4142,
+      "cacheKey": "cac78bfffd04"
+    },
+    "13_knowledge_navigator_traversal.js": {
+      "sha256": "4fd2137090673c0f03785f7f56faca37f6eb93b1c2adfb177415654a9e2c4de3",
+      "byteSize": 13457,
+      "cacheKey": "4fd213709067"
+    },
+    "13_knowledge_navigator_relationship_resolver.js": {
+      "sha256": "ccf3ba7ac7cce40ee7597dd6eeecab2c4472ad63847eaaf6d476b9c967788b92",
+      "byteSize": 13164,
+      "cacheKey": "ccf3ba7ac7cc"
+    },
+    "13_knowledge_navigator_authority.js": {
+      "sha256": "d5085a3991c7de981279f1517bb9c4093f19ac92cc0e2b6a9cba5606ab5e4fb9",
+      "byteSize": 12484,
+      "cacheKey": "d5085a3991c7"
+    },
+    "13_knowledge_navigator_evidence.js": {
+      "sha256": "4d65ca49df7b84372c04a3f637a5dd193319d228dabe69b18f2bf543eecac76c",
+      "byteSize": 10743,
+      "cacheKey": "4d65ca49df7b"
+    },
+    "13_knowledge_navigator_lineage.js": {
+      "sha256": "5866dd0f9f5cfbb7bdbe3d8b8e662a6530fb0797048767cd4ab5e4041ef3b3a0",
+      "byteSize": 9510,
+      "cacheKey": "5866dd0f9f5c"
+    },
+    "13_knowledge_navigator_validation_resolver.js": {
+      "sha256": "fdc85a7d60cea6999386fe4403e1703efa372ea7d8fecea57c8255083406ab3b",
+      "byteSize": 5866,
+      "cacheKey": "fdc85a7d60ce"
+    },
+    "13_knowledge_navigator_memo_provider.js": {
+      "sha256": "ea58d1a0616bc5fdc464165f4438b6da6d34afcaea6dbc4793ef63608a6d7d9c",
+      "byteSize": 10116,
+      "cacheKey": "ea58d1a0616b"
+    },
+    "13_knowledge_navigator_knowledge_provider.js": {
+      "sha256": "1366bc317ee12e6ee8aac7190abb9ceb103880b14a39ee7ebfb763f36974c7b2",
+      "byteSize": 5125,
+      "cacheKey": "1366bc317ee1"
+    },
+    "13_knowledge_navigator_architecture_provider.js": {
+      "sha256": "37d927164a1d39133acc3242e54527fd4016f71e68d817f23abcef8b48b2a735",
+      "byteSize": 6313,
+      "cacheKey": "37d927164a1d"
+    },
+    "13_knowledge_navigator_validation_provider.js": {
+      "sha256": "4d8ca400a8f1f192252f9c1a91ae9a14975d24c7febd4f97282e802f345a4d53",
+      "byteSize": 5528,
+      "cacheKey": "4d8ca400a8f1"
+    },
+    "13_knowledge_navigator_conflict.js": {
+      "sha256": "cb9fb7367cf8383861340ceb83b1f7ca4738fd081034dd7b88481750d13b7d90",
+      "byteSize": 7174,
+      "cacheKey": "cb9fb7367cf8"
+    },
+    "13_knowledge_navigator_federation.js": {
+      "sha256": "b4e4546a6039334ced2ec11757e15f7f38321f8be8cdbabbcdc03aad2c9f2ae0",
+      "byteSize": 5877,
+      "cacheKey": "b4e4546a6039"
+    },
+    "13_knowledge_navigator_federated_resolver.js": {
+      "sha256": "e48226ba0caa1f0045ffca006a4145d7dd32dc85b2c304c51aabb2f81638cd12",
+      "byteSize": 10497,
+      "cacheKey": "e48226ba0caa"
+    },
+    "13_knowledge_navigator_explanation.js": {
+      "sha256": "167fcb0e0d1e23facb773950cfa4640140dee2df513b6a79fa6a0f8d6e4a7310",
+      "byteSize": 6398,
+      "cacheKey": "167fcb0e0d1e"
+    },
+    "13_knowledge_navigator_session.js": {
+      "sha256": "7c440e788ace094684e0e2a3fb69e24c4ffa5331a6cb3e04ab2aabeb148dace0",
+      "byteSize": 11142,
+      "cacheKey": "7c440e788ace"
+    },
+    "13_knowledge_navigator_persistence.js": {
+      "sha256": "2920ca07415c3dc8c39755f89b34e6d86856149c8609b13e2b8812b616be31d3",
+      "byteSize": 21366,
+      "cacheKey": "2920ca07415c"
+    },
+    "13_knowledge_navigator_memo_archive_provider.js": {
+      "sha256": "b4be372a2d38dce4f723e5bc8e23b09f70d83b53860e9d9772da001e93910bd4",
+      "byteSize": 21625,
+      "cacheKey": "b4be372a2d38"
+    },
+    "13_knowledge_navigator_recovery.js": {
+      "sha256": "14fb2926e0c92e5b5bfa23e536b281962b3f3e429ff729364358a289ba1448a5",
+      "byteSize": 11708,
+      "cacheKey": "14fb2926e0c9"
+    },
+    "13_knowledge_navigator_package.js": {
+      "sha256": "8a69cf49871e1ffbac2b792f5bfd3224f01fa6d58d33bfd03d37afd70bb4ee7c",
+      "byteSize": 12335,
+      "cacheKey": "8a69cf49871e"
+    },
+    "13_knowledge_navigator_ide190_handoff.js": {
+      "sha256": "3391aa23d92a576955db5ca30ba7dcc765ae1d58ab9c5f2654af8732c8a07595",
+      "byteSize": 9946,
+      "cacheKey": "3391aa23d92a"
+    },
+    "13_knowledge_navigator_orchestrator.js": {
+      "sha256": "860a705fe9333cc77bf8cab90e4f2b149d2bbf9d3617461f823e7cfa850ae468",
+      "byteSize": 14992,
+      "cacheKey": "860a705fe933"
+    },
+    "13_knowledge_navigator_validation.js": {
+      "sha256": "8f1d9dd5986290562ca32598576b4e191e027cd9f764d7788ce47a480b46385f",
+      "byteSize": 14957,
+      "cacheKey": "8f1d9dd59862"
+    },
+    "13_knowledge_navigator_phase2_validation.js": {
+      "sha256": "910a68259947bb8d9260cfd054e592efff503634acfbd2539b10b782dfaa1f37",
+      "byteSize": 20692,
+      "cacheKey": "910a68259947"
+    },
+    "13_knowledge_navigator_phase3_validation.js": {
+      "sha256": "911f86f6ff7b3d53122f06ec9a47025ba85bf7596b424e514075342a242acdb3",
+      "byteSize": 22589,
+      "cacheKey": "911f86f6ff7b"
+    },
+    "13_knowledge_navigator_phase4_validation.js": {
+      "sha256": "4c2b0e9102deb9f6ff2e787af7003af36e6f56a44d504d22e7a0cb734f22d3ce",
+      "byteSize": 34132,
+      "cacheKey": "4c2b0e9102de"
+    },
+    "13_knowledge_navigator_phase5_validation.js": {
+      "sha256": "f48f56cccdeaa100c889337277b642fbc0624a0a3319edf15cb986063b983398",
+      "byteSize": 26411,
+      "cacheKey": "f48f56cccdea"
+    },
+    "13_knowledge_navigator_phase6_validation.js": {
+      "sha256": "c9358b8799a51f033b1273ee28f7834b49e4f2b2031c6aa3c2374b8feb4aacae",
+      "byteSize": 22727,
+      "cacheKey": "c9358b8799a5"
+    },
+    "13_knowledge_navigator_phase7_validation.js": {
+      "sha256": "4f038972a055941643fe446a2f5705c84e972745174b054f7c922a040a4b7295",
+      "byteSize": 26680,
+      "cacheKey": "4f038972a055"
+    },
+    "13_knowledge_navigator_phase8_validation.js": {
+      "sha256": "2e5f6c6326ab46f63e8e66c379b3c687238d56eb2e5563e8213a341445ad1b67",
+      "byteSize": 21873,
+      "cacheKey": "2e5f6c6326ab"
+    },
+    "13_knowledge_navigator_phase9_validation.js": {
+      "sha256": "b3f5bb6d7634d062ae9f02d2fe156fe785cbc666d1cd0a02257823f05826eff8",
+      "byteSize": 21605,
+      "cacheKey": "b3f5bb6d7634"
+    },
+    "13_knowledge_navigator_phase10_validation.js": {
+      "sha256": "0b5dae1ac10ec5aa34c09ed7902c9a9034e179b8add47d7ee89bef9a54d741e6",
+      "byteSize": 42258,
+      "cacheKey": "0b5dae1ac10e"
+    },
+    "13_development_automation_version_manifest.js": {
+      "sha256": "5bb57f5dfdd4656d1ca5ce2153af2db006254a152b84b4247bd06f926eb26d82",
+      "byteSize": 11442,
+      "cacheKey": "5bb57f5dfdd4"
+    },
+    "13_development_automation_core.js": {
+      "sha256": "3c940c084d1a5f487bd6d5c0a46a5c53552419d0406fec6243610c58e3797719",
+      "byteSize": 30855,
+      "cacheKey": "3c940c084d1a"
+    },
+    "13_development_automation_contracts.js": {
+      "sha256": "a5d280c27cef476005b4815ab30eebed9bfc8cc09b518b56cc29ff9df206f66c",
+      "byteSize": 47040,
+      "cacheKey": "a5d280c27cef"
+    },
+    "13_development_automation_validation.js": {
+      "sha256": "51409704ba48fd871995a0cc040e13e942f64425d54ea93925f03f4725bca29e",
+      "byteSize": 21863,
+      "cacheKey": "51409704ba48"
+    },
+    "13_development_automation_intake.js": {
+      "sha256": "6572a38c1718517134dffbd01bb2ad58cd253dd8bc2253bbf7baddbfc1ece535",
+      "byteSize": 10443,
+      "cacheKey": "6572a38c1718"
+    },
+    "13_development_automation_grounding.js": {
+      "sha256": "da925ef2bf640afde79a51e94017f47e3ebc80a0a2b87bd6c87fd5aa077f06fd",
+      "byteSize": 8960,
+      "cacheKey": "da925ef2bf64"
+    },
+    "13_development_automation_phase2_validation.js": {
+      "sha256": "0269992eeb94657713b9f7d1217caf90120a97607197408818154c6017f000d3",
+      "byteSize": 19323,
+      "cacheKey": "0269992eeb94"
+    },
+    "13_development_automation_planning.js": {
+      "sha256": "6be35ba491d08aeceec6ecf674c667cbb2e486ce61fb8da95f4cf0b51efe6758",
+      "byteSize": 8414,
+      "cacheKey": "6be35ba491d0"
+    },
+    "13_development_automation_proposal.js": {
+      "sha256": "a4e3b4d90d942ba6aeba4fbfa90efe40a557027196233812fc038968370ef7d8",
+      "byteSize": 3971,
+      "cacheKey": "a4e3b4d90d94"
+    },
+    "13_development_automation_dry_run.js": {
+      "sha256": "799e6ce01279033fa77f9ca7324543cff069167b7d23b62125830a2c37ee4d82",
+      "byteSize": 4767,
+      "cacheKey": "799e6ce01279"
+    },
+    "13_development_automation_preflight.js": {
+      "sha256": "7284c9b03f1cae69ef6e0e694ba325ea0078e5160c80dfab8ab9c84f1141c373",
+      "byteSize": 7127,
+      "cacheKey": "7284c9b03f1c"
+    },
+    "13_development_automation_phase3_validation.js": {
+      "sha256": "c29ad9cb40d0104578236b858ea447f60bc36dafdf9f3dbbd5140635bb0b7f02",
+      "byteSize": 25280,
+      "cacheKey": "c29ad9cb40d0"
+    },
+    "13_development_automation_approval.js": {
+      "sha256": "15cb9e5a048cceacc5d9e99d81aa6f3ef7267242303af1c16df517dfdcc146d0",
+      "byteSize": 11214,
+      "cacheKey": "15cb9e5a048c"
+    },
+    "13_development_automation_consent.js": {
+      "sha256": "c1aa61a91125266b60c1c58df2512f8c1f8ee5f7e5db746cf99cc12cf2e0e3a6",
+      "byteSize": 5957,
+      "cacheKey": "c1aa61a91125"
+    },
+    "13_development_automation_gate.js": {
+      "sha256": "2da1c4aa4e3fade7cfee8834c8a0b97585650f61f69c0892801f5f821fca6c47",
+      "byteSize": 11675,
+      "cacheKey": "2da1c4aa4e3f"
+    },
+    "13_development_automation_phase4_validation.js": {
+      "sha256": "a2e6e01c84900a9a3f8b835a623a90c98454e843993f341512fc01d884933fe3",
+      "byteSize": 30274,
+      "cacheKey": "a2e6e01c8490"
+    },
+    "13_development_automation_dispatch.js": {
+      "sha256": "775a855847c6b34718d00798f697fa826bc4a2bdfafbd52f7a8aa4ec09aae814",
+      "byteSize": 16388,
+      "cacheKey": "775a855847c6"
+    },
+    "13_development_automation_phase5_validation.js": {
+      "sha256": "ba16595ff4641ef494ecbf3646813eec9839d2bd828e16f54ac18764653db0bf",
+      "byteSize": 23145,
+      "cacheKey": "ba16595ff464"
+    },
+    "13_project_report.js": {
+      "sha256": "d636cb6a67665a6a26975934e81c9ffe2e1aca43b7f1303d0b9dae1a221c813b",
+      "byteSize": 21481,
+      "cacheKey": "d636cb6a6766"
+    },
+    "13_project_handoff.js": {
+      "sha256": "a073ff86a1eb0bd9d488e6f95c2e16d0db447ecb377d765ba75c35eb4e41c432",
+      "byteSize": 14088,
+      "cacheKey": "a073ff86a1eb"
+    },
+    "13_function_relation_v3.js": {
+      "sha256": "0857a784aa3003a2afd493c02bbbe3255ee3b3316ae1eae6b3be96b1d4dd5b41",
+      "byteSize": 6367,
+      "cacheKey": "0857a784aa30"
+    },
+    "13_project_governance.js": {
+      "sha256": "1ab620d32aa07d001c6dda37bacdf47dd403374e50e757b0848eb1c47d711c2d",
+      "byteSize": 13751,
+      "cacheKey": "1ab620d32aa0"
+    },
+    "14_architecture_database.js": {
+      "sha256": "f26a5f8b954a8ce9777fcf9e082be54fb1b172085f4374ec4076ddf60b762d68",
+      "byteSize": 7198,
+      "cacheKey": "f26a5f8b954a"
+    },
+    "14_architecture_builder.js": {
+      "sha256": "39fcc2c27e966e16aacaac2ba0061b1ab3eafe6c856b85a52a8016be31852bca",
+      "byteSize": 6186,
+      "cacheKey": "39fcc2c27e96"
+    },
+    "14_architecture_repository.js": {
+      "sha256": "8190caaf34d8936217f31ef982ee66be4af7e1a868a153d8b2bb4a82bfd28aba",
+      "byteSize": 9377,
+      "cacheKey": "8190caaf34d8"
+    },
+    "15_engine_core.js": {
+      "sha256": "45f168edea69838092bcfbeda0549f628e52d00437934a035869d404e3296262",
+      "byteSize": 18959,
+      "cacheKey": "45f168edea69"
+    },
+    "16_search_engine.js": {
+      "sha256": "8b7c786e40c7441d28ff4d742d3dc894c0ed2213badeca0d728a605c5da57ee9",
+      "byteSize": 31360,
+      "cacheKey": "8b7c786e40c7"
+    },
+    "16_context_engine.js": {
+      "sha256": "51d8af09d9a805706c7d5da900ac80b33416e3b4fedbb9b905b04ad081b90eb1",
+      "byteSize": 26067,
+      "cacheKey": "51d8af09d9a8"
+    },
+    "16_perception_engine.js": {
+      "sha256": "245799f98fd9cde798735b0f166e108c95647e4aafd04c23bedd82bb568f0052",
+      "byteSize": 22457,
+      "cacheKey": "245799f98fd9"
+    },
+    "16_validation_engine.js": {
+      "sha256": "105c13151958ad09594e1425e58fae1393ebc27ae051f94964ed38571b467dfd",
+      "byteSize": 26134,
+      "cacheKey": "105c13151958"
+    },
+    "15_reasoning_engine.js": {
+      "sha256": "cf1ed13055639410f74f71c4e22f442785a6438965eb596f21d8d295ecb471ea",
+      "byteSize": 33180,
+      "cacheKey": "cf1ed1305563"
+    },
+    "16_workflow_engine.js": {
+      "sha256": "17dedd927e7fcb1fa9b48da54141023b2a2b924a823af6705f18961648fdebe7",
+      "byteSize": 35937,
+      "cacheKey": "17dedd927e7f"
+    },
+    "99_init.js": {
+      "sha256": "138e34ded10617cf57899215d4c79704b86c8b127c9bdec59ad31f3e08f1f728",
+      "byteSize": 4460,
+      "cacheKey": "138e34ded106"
+    }
+  },
+  "scriptSetHash": "76a72661b574560cbfbebdcf45137d58967188a27a1f0f8aa1aac9e77ebb89db",
+  "manifestHash": "73365fd5e032851a3c84a2c91fe3f933b24aa785d5e875c4af44630e66696b41"
 }
