@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_contracts.js
    IDE-190 Development Automation
-   Release: 1.2.0 / Module: Contracts 1.2.0
-   Phase 3: Plan / Propose / Dry Run / Preflight
+   Release: 1.3.0 / Module: Contracts 1.3.0
+   Phase 4: Gate / Approval / Consent
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -57,18 +57,21 @@
       description: "Phase 1 component state only. No automation session, approval, dispatch or mutation state is synthesized here.",
       fields: [
         field("initialized", { required: true, type: "boolean" }),
-        field("currentPhase", { required: true, type: "integer", enum: [1, 2, 3] }),
+        field("currentPhase", { required: true, type: "integer", enum: [1, 2, 3, 4] }),
         field("releaseAllowed", { required: true, type: "boolean", enum: [false] }),
         field("ide190Complete", { required: true, type: "boolean", enum: [false] }),
         field("phase2Allowed", { required: true, type: "boolean" }),
         field("phase3Allowed", { required: true, type: "boolean" }),
         field("phase4Allowed", { required: true, type: "boolean" }),
+        field("phase5Allowed", { required: true, type: "boolean" }),
         field("lastPreDeviceValidation", { required: true, type: "object|null" }),
         field("lastAndroidValidation", { required: true, type: "object|null" }),
         field("lastPhase2Validation", { required: true, type: "object|null" }),
         field("lastPhase2AndroidValidation", { required: true, type: "object|null" }),
         field("lastPhase3Validation", { required: true, type: "object|null" }),
-        field("lastPhase3AndroidValidation", { required: true, type: "object|null" })
+        field("lastPhase3AndroidValidation", { required: true, type: "object|null" }),
+        field("lastPhase4Validation", { required: true, type: "object|null" }),
+        field("lastPhase4AndroidValidation", { required: true, type: "object|null" })
       ]
     },
     {
@@ -252,7 +255,7 @@
         field("planHash", { required: true, type: "string" }),
         field("validationLayer", { required: true, type: "string", enum: ["V3"] }),
         field("preflightStatus", { required: true, type: "string", enum: ["Passed", "Blocked"] }),
-        field("approvalClassRequired", { required: true, type: "string", enum: ["P0", "P1", "P2"] }),
+        field("approvalClassRequired", { required: true, type: "string", enum: ["P0", "P1", "P2", "P3", "P4"] }),
         field("approvalRequested", { required: true, type: "boolean", enum: [false] }),
         field("gateRequired", { required: true, type: "boolean", enum: [true] }),
         field("gatePassed", { required: true, type: "boolean", enum: [false] }),
@@ -260,6 +263,102 @@
         field("repositoryMutation", { required: true, type: "boolean", enum: [false] }),
         field("repositoryWriteCount", { required: true, type: "integer", enum: [0] }),
         field("checks", { required: true, type: "array" }),
+        field("readOnly", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "authorizationGate",
+      name: "IDE-190 V4 Authorization Gate Contract",
+      description: "V4 authorization result bound to one Preflight and one immutable authorization context. Gate may authorize later Dispatch but never executes Dispatch or Repository mutation itself.",
+      fields: [
+        field("gateId", { required: true, type: "string" }),
+        field("preflightId", { required: true, type: "string" }),
+        field("planId", { required: true, type: "string" }),
+        field("planHash", { required: true, type: "string" }),
+        field("validationLayer", { required: true, type: "string", enum: ["V4"] }),
+        field("gateStatus", { required: true, type: "string", enum: ["Passed", "Awaiting-Approval", "Blocked"] }),
+        field("approvalClassRequired", { required: true, type: "string", enum: ["P0", "P1", "P2", "P3", "P4"] }),
+        field("approvalSatisfied", { required: true, type: "boolean" }),
+        field("approvalId", { required: true, type: "string|null" }),
+        field("approvalConsumed", { required: true, type: "boolean" }),
+        field("hardDeny", { required: true, type: "boolean" }),
+        field("contextHash", { required: true, type: "string" }),
+        field("authorizationBinding", { required: true, type: "object" }),
+        field("consentReference", { required: true, type: "string|null" }),
+        field("consentUsedAsApproval", { required: true, type: "boolean", enum: [false] }),
+        field("dispatchEligible", { required: true, type: "boolean" }),
+        field("dispatchExecuted", { required: true, type: "boolean", enum: [false] }),
+        field("repositoryMutation", { required: true, type: "boolean", enum: [false] }),
+        field("repositoryWriteCount", { required: true, type: "integer", enum: [0] }),
+        field("checks", { required: true, type: "array" }),
+        field("readOnly", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "approvalRequest",
+      name: "IDE-190 Human Approval Request Contract",
+      description: "Context-bound request for P1, P2 or P3 Human Approval. P4 is prohibited and P0 never creates Human Approval.",
+      fields: [
+        field("approvalRequestId", { required: true, type: "string" }),
+        field("preflightId", { required: true, type: "string" }),
+        field("approvalClass", { required: true, type: "string", enum: ["P1", "P2", "P3"] }),
+        field("contextHash", { required: true, type: "string" }),
+        field("authorizationBinding", { required: true, type: "object" }),
+        field("status", { required: true, type: "string", enum: ["Requested"] }),
+        field("singleUse", { required: true, type: "boolean", enum: [true] }),
+        field("requestedAt", { required: true, type: "string" }),
+        field("expiresAt", { required: true, type: "string" }),
+        field("readOnly", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "approvalRecord",
+      name: "IDE-190 Bound Human Approval Contract",
+      description: "Bound, context-specific, single-use, expiring and invalidatable Human Approval. Approval is evidence for Gate only and is not direct Dispatch or mutation permission.",
+      fields: [
+        field("approvalId", { required: true, type: "string" }),
+        field("approvalRequestId", { required: true, type: "string" }),
+        field("preflightId", { required: true, type: "string" }),
+        field("approvalClass", { required: true, type: "string", enum: ["P1", "P2", "P3"] }),
+        field("contextHash", { required: true, type: "string" }),
+        field("authorizationBinding", { required: true, type: "object" }),
+        field("actor", { required: true, type: "string" }),
+        field("actorRole", { required: true, type: "string" }),
+        field("reason", { required: true, type: "string" }),
+        field("explicitApproval", { required: true, type: "boolean", enum: [true] }),
+        field("singleUse", { required: true, type: "boolean", enum: [true] }),
+        field("approvedAt", { required: true, type: "string" }),
+        field("expiresAt", { required: true, type: "string" }),
+        field("initialStatus", { required: true, type: "string", enum: ["Approved"] }),
+        field("dispatchPermissionGranted", { required: true, type: "boolean", enum: [false] }),
+        field("mutationApplied", { required: true, type: "boolean", enum: [false] }),
+        field("readOnly", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "consentRecord",
+      name: "IDE-190 User Explicit Consent Contract",
+      description: "User consent for read-only recovery/search. Consent never becomes Approval, import authorization, mutation approval or Dispatch permission.",
+      fields: [
+        field("consentId", { required: true, type: "string" }),
+        field("consentType", { required: true, type: "string", enum: ["Read-Only Recovery", "Archive Search"] }),
+        field("actor", { required: true, type: "string" }),
+        field("scope", { required: true, type: "object" }),
+        field("target", { required: true, type: "object" }),
+        field("context", { required: true, type: "object" }),
+        field("contextHash", { required: true, type: "string" }),
+        field("status", { required: true, type: "string", enum: ["Active"] }),
+        field("isApproval", { required: true, type: "boolean", enum: [false] }),
+        field("importAuthorizationGranted", { required: true, type: "boolean", enum: [false] }),
+        field("mutationApprovalGranted", { required: true, type: "boolean", enum: [false] }),
+        field("dispatchPermissionGranted", { required: true, type: "boolean", enum: [false] }),
+        field("automaticImportAllowed", { required: true, type: "boolean", enum: [false] }),
         field("readOnly", { required: true, type: "boolean", enum: [true] }),
         field("immutable", { required: true, type: "boolean", enum: [true] }),
         field("createdAt", { required: true, type: "string" })
@@ -273,6 +372,7 @@
     if (type === "boolean") return typeof value === "boolean";
     if (type === "integer") return Number.isInteger(value);
     if (type === "string") return typeof value === "string";
+    if (type === "string|null") return value == null || typeof value === "string";
     if (type === "object|null") return value == null || internal.isPlainObject(value);
     return true;
   }
@@ -341,7 +441,37 @@
 
     check("Payload is an object", internal.isPlainObject(payload), typeof payload);
     if (!internal.isPlainObject(payload)) {
-  
+      const passed = checks.filter(function count(item) { return item.passed; }).length;
+      return { valid: false, status: "Invalid", contractId: definition.contractId, contractVersion: definition.version, passed: passed, failed: checks.length - passed, total: checks.length, health: Number(((passed / checks.length) * 100).toFixed(2)), checks: checks };
+    }
+
+    definition.fields.forEach(function validateField(rule) {
+      const has = Object.prototype.hasOwnProperty.call(payload, rule.name);
+      if (rule.required) check("Required field exists: " + rule.name, has, has ? "present" : "missing", rule.name);
+      if (!has) return;
+      check("Field type is valid: " + rule.name, typeMatches(payload[rule.name], rule.type), rule.type || "any", rule.name);
+      if (Array.isArray(rule.enum)) check("Field value is governed: " + rule.name, rule.enum.includes(payload[rule.name]), payload[rule.name], rule.name);
+    });
+
+    if (definition.key === "foundation") {
+      check("Frozen lifecycle is exact", JSON.stringify(payload.lifecycle) === JSON.stringify(VERSION_MANIFEST.lifecycle), payload.lifecycle && payload.lifecycle.join(" -> "), "lifecycle");
+      const safetyKeys = Object.keys(VERSION_MANIFEST.safety);
+      check("Safety key set is exact", JSON.stringify(Object.keys(payload.safetyDefaults || {}).sort()) === JSON.stringify(safetyKeys.slice().sort()), safetyKeys.length, "safetyDefaults");
+      safetyKeys.forEach(function validateSafety(key) { check("Safety remains false: " + key, payload.safetyDefaults && payload.safetyDefaults[key] === false, payload.safetyDefaults && payload.safetyDefaults[key], "safetyDefaults." + key); });
+    }
+
+    if (definition.key === "capabilityDescriptor") {
+      const prohibited = payload.automationLevel === "L5" || payload.mutationLevel === "M3" || payload.executionMode === "E2" || payload.externalEffectLevel === "X2" || payload.externalEffectLevel === "X3";
+      if (prohibited) check("Initial hard-deny capability remains prohibited", payload.permissionClass === "PROHIBITED", payload.permissionClass, "permissionClass");
+      check("Capability existence does not imply permission", !(payload.available === true && prohibited && payload.permissionClass !== "PROHIBITED"), payload.available + "/" + payload.permissionClass, "available");
+    }
+
+    if (definition.key === "platformProfile") {
+      check("Platform does not grant persistent commit", payload.persistentCommitPermission === false, payload.persistentCommitPermission, "persistentCommitPermission");
+      check("Platform does not grant GitHub automatic reflection", payload.githubAutomaticReflectionPermission === false, payload.githubAutomaticReflectionPermission, "githubAutomaticReflectionPermission");
+      check("Platform does not bypass approval", payload.approvalBypassAllowed === false, payload.approvalBypassAllowed, "approvalBypassAllowed");
+    }
+
     if (definition.key === "navigationIntake") {
       check("Formal input uses validated IDE-180 package and handoff", payload.groundingInputType === "validated-ide180-package-plus-handoff", payload.groundingInputType, "groundingInputType");
       check("IDE-180 Provider bypass is not used", payload.providerBypassUsed === false, payload.providerBypassUsed, "providerBypassUsed");
@@ -387,43 +517,48 @@
 
     if (definition.key === "preflightRecord") {
       check("Preflight requires Gate", payload.gateRequired === true, payload.gateRequired, "gateRequired");
-      check("Phase 3 Preflight never passes Gate", payload.gatePassed === false, payload.gatePassed, "gatePassed");
+      check("Preflight itself never passes Gate", payload.gatePassed === false, payload.gatePassed, "gatePassed");
       check("Preflight never Dispatches directly", payload.dispatchEligible === false, payload.dispatchEligible, "dispatchEligible");
       check("Preflight never mutates Repository", payload.repositoryMutation === false && payload.repositoryWriteCount === 0, payload.repositoryWriteCount, "repositoryWriteCount");
-      check("Preflight never requests Approval in Phase 3", payload.approvalRequested === false, payload.approvalRequested, "approvalRequested");
+      check("Preflight never requests Approval directly", payload.approvalRequested === false, payload.approvalRequested, "approvalRequested");
     }
 
-    const passed = checks.filter(function count(item) { return item.passed; }).length;
-      return { valid: false, status: "Invalid", contractId: definition.contractId, contractVersion: definition.version, passed: passed, failed: checks.length - passed, total: checks.length, health: Number(((passed / checks.length) * 100).toFixed(2)), checks: checks };
+    if (definition.key === "authorizationGate") {
+      const passedGate = payload.gateStatus === "Passed";
+      check("Consent is never used as Approval", payload.consentUsedAsApproval === false, payload.consentUsedAsApproval, "consentUsedAsApproval");
+      check("Gate never executes Dispatch", payload.dispatchExecuted === false, payload.dispatchExecuted, "dispatchExecuted");
+      check("Gate never mutates Repository", payload.repositoryMutation === false && payload.repositoryWriteCount === 0, payload.repositoryWriteCount, "repositoryWriteCount");
+      if (payload.approvalClassRequired === "P4") check("P4 Gate is always blocked", payload.gateStatus === "Blocked" && payload.hardDeny === true, payload.gateStatus, "gateStatus");
+      if (passedGate) {
+        check("Passed Gate is not Hard Deny", payload.hardDeny === false, payload.hardDeny, "hardDeny");
+        check("Passed Gate is Dispatch eligible for later Phase only", payload.dispatchEligible === true, payload.dispatchEligible, "dispatchEligible");
+        if (payload.approvalClassRequired === "P0") check("P0 requires no Human Approval", payload.approvalSatisfied === true && payload.approvalId === null && payload.approvalConsumed === false, payload.approvalId, "approvalId");
+        else check("Human Approval is satisfied and consumed exactly once", payload.approvalSatisfied === true && typeof payload.approvalId === "string" && payload.approvalId.length > 0 && payload.approvalConsumed === true, payload.approvalId, "approvalId");
+      } else {
+        check("Non-passed Gate cannot Dispatch", payload.dispatchEligible === false, payload.dispatchEligible, "dispatchEligible");
+      }
     }
 
-    definition.fields.forEach(function validateField(rule) {
-      const has = Object.prototype.hasOwnProperty.call(payload, rule.name);
-      if (rule.required) check("Required field exists: " + rule.name, has, has ? "present" : "missing", rule.name);
-      if (!has) return;
-      check("Field type is valid: " + rule.name, typeMatches(payload[rule.name], rule.type), rule.type || "any", rule.name);
-      if (Array.isArray(rule.enum)) check("Field value is governed: " + rule.name, rule.enum.includes(payload[rule.name]), payload[rule.name], rule.name);
-    });
-
-    if (definition.key === "foundation") {
-      check("Frozen lifecycle is exact", JSON.stringify(payload.lifecycle) === JSON.stringify(VERSION_MANIFEST.lifecycle), payload.lifecycle && payload.lifecycle.join(" -> "), "lifecycle");
-      const safetyKeys = Object.keys(VERSION_MANIFEST.safety);
-      check("Safety key set is exact", JSON.stringify(Object.keys(payload.safetyDefaults || {}).sort()) === JSON.stringify(safetyKeys.slice().sort()), safetyKeys.length, "safetyDefaults");
-      safetyKeys.forEach(function validateSafety(key) {
-        check("Safety remains false: " + key, payload.safetyDefaults && payload.safetyDefaults[key] === false, payload.safetyDefaults && payload.safetyDefaults[key], "safetyDefaults." + key);
-      });
+    if (definition.key === "approvalRequest") {
+      check("P4 cannot be requested", payload.approvalClass !== "P4", payload.approvalClass, "approvalClass");
+      check("P0 does not create Human Approval Request", payload.approvalClass !== "P0", payload.approvalClass, "approvalClass");
+      check("Approval Request is single-use scoped", payload.singleUse === true, payload.singleUse, "singleUse");
     }
 
-    if (definition.key === "capabilityDescriptor") {
-      const prohibited = payload.automationLevel === "L5" || payload.mutationLevel === "M3" || payload.executionMode === "E2" || payload.externalEffectLevel === "X2" || payload.externalEffectLevel === "X3";
-      if (prohibited) check("Initial hard-deny capability remains prohibited", payload.permissionClass === "PROHIBITED", payload.permissionClass, "permissionClass");
-      check("Capability existence does not imply permission", !(payload.available === true && prohibited && payload.permissionClass !== "PROHIBITED"), payload.available + "/" + payload.permissionClass, "available");
+    if (definition.key === "approvalRecord") {
+      check("Approval is explicit", payload.explicitApproval === true, payload.explicitApproval, "explicitApproval");
+      check("Approval is single-use", payload.singleUse === true, payload.singleUse, "singleUse");
+      check("Approval itself does not directly grant Dispatch", payload.dispatchPermissionGranted === false, payload.dispatchPermissionGranted, "dispatchPermissionGranted");
+      check("Approval itself does not mutate Repository", payload.mutationApplied === false, payload.mutationApplied, "mutationApplied");
+      if (payload.approvalClass === "P2") check("P2 is Project Owner Approval", payload.actorRole === "Project Owner", payload.actorRole, "actorRole");
     }
 
-    if (definition.key === "platformProfile") {
-      check("Platform does not grant persistent commit", payload.persistentCommitPermission === false, payload.persistentCommitPermission, "persistentCommitPermission");
-      check("Platform does not grant GitHub automatic reflection", payload.githubAutomaticReflectionPermission === false, payload.githubAutomaticReflectionPermission, "githubAutomaticReflectionPermission");
-      check("Platform does not bypass approval", payload.approvalBypassAllowed === false, payload.approvalBypassAllowed, "approvalBypassAllowed");
+    if (definition.key === "consentRecord") {
+      check("Consent is not Approval", payload.isApproval === false, payload.isApproval, "isApproval");
+      check("Archive Search Consent is not Import Authorization", payload.importAuthorizationGranted === false, payload.importAuthorizationGranted, "importAuthorizationGranted");
+      check("Consent is not Mutation Approval", payload.mutationApprovalGranted === false, payload.mutationApprovalGranted, "mutationApprovalGranted");
+      check("Consent is not Dispatch Permission", payload.dispatchPermissionGranted === false, payload.dispatchPermissionGranted, "dispatchPermissionGranted");
+      check("Consent never enables automatic Import", payload.automaticImportAllowed === false, payload.automaticImportAllowed, "automaticImportAllowed");
     }
 
     const passed = checks.filter(function count(item) { return item.passed; }).length;
@@ -467,7 +602,7 @@
     id: "IDE-190-CONTRACTS",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 3,
+    phase: 4,
     contractCount: BUILT_IN_CONTRACTS.length,
     readOnly: true,
     loadedAt: internal.nowIso()
