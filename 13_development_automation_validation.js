@@ -146,7 +146,7 @@
     check("Outcome model separates Timed-Out", VERSION_MANIFEST.outcomes.includes("Timed-Out"), VERSION_MANIFEST.outcomes.join(","), "Failure Model", "High");
 
     const contracts = namespace.listContractDefinitions();
-    check("All Phase 1 contracts are registered", contracts.length === 4, contracts.length, "Contracts", "Critical");
+    check("All Phase 1 contracts are registered", ["foundation","foundationState","capabilityDescriptor","platformProfile"].every(function(key){ return Boolean(namespace.getContractDefinition(key)); }), contracts.length, "Contracts", "Critical");
     check("Contract IDs are unique", new Set(contracts.map(function map(item) { return item.contractId; })).size === contracts.length, contracts.length, "Contracts", "Critical");
     contracts.forEach(function validateDefinition(definition) {
       check("Contract version is 1.0.0: " + definition.key, definition.version === "1.0.0", definition.version, "Contracts", "High");
