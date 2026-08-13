@@ -153,4 +153,3 @@
     loadedAt: internal.nowIso()
   };
 })(typeof window !== "undefined" ? window : globalThis);
-
