@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_development_automation_version_manifest.js
    IDE-190 Development Automation
-   Release: 1.8.0
-   Phase 9: UI / Reflection Package / Cross-Device
+   Release: 1.9.0
+   Phase 10: Integrated / Android Final Validation
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.8.0";
+  const RELEASE_VERSION = "1.9.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,8 +20,8 @@
   }
 
   const moduleVersions = {
-    core: "1.8.0",
-    contracts: "1.8.0",
+    core: "1.9.0",
+    contracts: "1.9.0",
     validation: BASELINE_VERSION,
     intake: BASELINE_VERSION,
     grounding: BASELINE_VERSION,
@@ -51,7 +51,8 @@
     crossDevice: BASELINE_VERSION,
     reflection: BASELINE_VERSION,
     ui: BASELINE_VERSION,
-    phase9Validation: BASELINE_VERSION
+    phase9Validation: BASELINE_VERSION,
+    phase10Validation: BASELINE_VERSION
   };
 
   const fileModules = {
@@ -86,12 +87,13 @@
     "13_development_automation_cross_device.js": "crossDevice",
     "13_development_automation_reflection.js": "reflection",
     "13_development_automation_ui.js": "ui",
-    "13_development_automation_phase9_validation.js": "phase9Validation"
+    "13_development_automation_phase9_validation.js": "phase9Validation",
+    "13_development_automation_phase10_validation.js": "phase10Validation"
   };
 
   const contractVersions = {
     foundation: BASELINE_VERSION,
-    foundationState: "1.8.0",
+    foundationState: "1.9.0",
     capabilityDescriptor: BASELINE_VERSION,
     platformProfile: BASELINE_VERSION,
     navigationIntake: BASELINE_VERSION,
@@ -293,14 +295,14 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 9 UI / Reflection Package / Cross-Device",
-      phase: 9,
+      implementationPhase: "Phase 10 Integrated / Android Final Validation",
+      phase: 10,
       phaseCount: 10,
       designFreezeId: "IDE-190-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
       decisionRange: "IDE-190-DECISION-001..012",
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Implementation - Phase 9"
+      status: "Implementation - Phase 10 Final Validation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -325,9 +327,9 @@
       minimumIDE160Version: "2.0.1"
     },
     implementation: {
-      phase: 9,
-      phaseName: "UI / Reflection Package / Cross-Device",
-      completedPhases: [1, 2, 3, 4, 5, 6, 7, 8],
+      phase: 10,
+      phaseName: "Integrated / Android Final Validation",
+      completedPhases: [1, 2, 3, 4, 5, 6, 7, 8, 9],
       contractFirst: true,
       inspectBeforeImplement: true,
       ide190Complete: false,
@@ -340,8 +342,8 @@
       phase6AllowedBeforeAndroidGate: true,
       phase7AllowedBeforeAndroidGate: true,
       phase8AllowedBeforeAndroidGate: true,
-      phase9AllowedBeforeAndroidGate: false,
-      phase10AllowedBeforeAndroidGate: false
+      phase9AllowedBeforeAndroidGate: true,
+      phase10AllowedBeforeAndroidGate: true
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
       const key = fileModules[moduleOrFile] || moduleOrFile;
