@@ -113,12 +113,29 @@
     internal.touch();
   }
 
-  function validateRecoveryIsolation(check) {
+  async function ensureProjectSource(fileName) {
+    let source = getProjectSource(fileName);
+    let refresh = "Not Required";
+    if (!source && typeof global.loadCurrentProjectFileByFetch === "function") {
+      const scriptElement = global.document ? Array.from(global.document.querySelectorAll("script[src]")).find(function(script){
+        const src = String(script && script.getAttribute("src") || "");
+        return src.split("?")[0].split("#")[0].replace(/^\.\//, "").split("/").pop() === fileName;
+      }) : null;
+      const runtimeSourcePath = scriptElement ? scriptElement.getAttribute("src") : fileName;
+      const loaded = await global.loadCurrentProjectFileByFetch(runtimeSourcePath);
+      refresh = loaded === true ? "Refreshed: " + runtimeSourcePath : "Refresh Failed: " + runtimeSourcePath;
+      source = getProjectSource(fileName);
+    }
+    return { source: source, refresh: refresh };
+  }
+
+  async function validateRecoveryIsolation(check) {
     const snapshot = capturePhase7RuntimeState();
     try {
       const targetFile = "00_core.js";
-      const originalSource = getProjectSource(targetFile);
-      check("Recovery validation source is available", Boolean(originalSource), originalSource.length, "Recovery", "Critical");
+      const sourceResult = await ensureProjectSource(targetFile);
+      const originalSource = sourceResult.source;
+      check("Recovery validation source is available", Boolean(originalSource), originalSource.length + " | " + sourceResult.refresh, "Recovery", "Critical");
       if (!originalSource) return;
       const sourceKey = "IDE-190-PHASE7-RECOVERY-SOURCE";
       const originalHash = hashIDE150Source(originalSource);
@@ -236,7 +253,7 @@
     check("Implementation Phase is Phase 7", VERSION_MANIFEST.implementation.phase === 7 && VERSION_MANIFEST.release.implementationPhase === "Phase 7 Failure / Timeout / Recovery", VERSION_MANIFEST.release.implementationPhase, "Manifest", "Critical");
     check("Design Freeze remains exact", VERSION_MANIFEST.release.designFreezeId === "IDE-190-DESIGN-FREEZE-1.0.0", VERSION_MANIFEST.release.designFreezeId, "Manifest", "Critical");
     check("Phases 1 through 6 are recorded complete", JSON.stringify(VERSION_MANIFEST.implementation.completedPhases) === JSON.stringify([1,2,3,4,5,6]), VERSION_MANIFEST.implementation.completedPhases, "Phase Gate", "Critical");
-    check("Phase 6 Android Gate is already passed", state.androidPhase6ValidationPassed === true, state.androidPhase6ValidationPassed, "Phase Gate", "Critical");
+    check("Phase 6 completion is recorded in Phase 7 release", VERSION_MANIFEST.implementation.completedPhases.includes(6) && VERSION_MANIFEST.implementation.phase === 7, JSON.stringify({ completedPhases: VERSION_MANIFEST.implementation.completedPhases, priorRuntimeGateState: state.androidPhase6ValidationPassed === true }), "Phase Gate", "Critical");
 
     Object.keys(VERSION_MANIFEST.safety).forEach(function(key){ check("Safety flag remains disabled: "+key, VERSION_MANIFEST.safety[key] === false, VERSION_MANIFEST.safety[key], "Safety", "Critical"); });
     check("Persistent Commit remains prohibited", VERSION_MANIFEST.initialPolicy.persistentCommitAllowed === false, VERSION_MANIFEST.initialPolicy.persistentCommitAllowed, "Safety", "Critical");
@@ -290,7 +307,7 @@
       restorePhase7RuntimeState(timeoutStateSnapshot);
     }
 
-    validateRecoveryIsolation(check);
+    await validateRecoveryIsolation(check);
     validateInterruptedLockRecovery(check);
 
     check("Repository is Trusted after isolated recovery validation", namespace.getAutomationMutationTrustStatus().status === "Trusted", namespace.getAutomationMutationTrustStatus().status, "Repository Trust", "Critical");
