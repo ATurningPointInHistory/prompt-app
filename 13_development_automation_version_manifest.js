@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_development_automation_version_manifest.js
    IDE-190 Development Automation
-   Release: 1.7.0
-   Phase 8: Audit / Session / Persistence / Receipt
+   Release: 1.8.0
+   Phase 9: UI / Reflection Package / Cross-Device
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.7.0";
+  const RELEASE_VERSION = "1.8.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,8 +20,8 @@
   }
 
   const moduleVersions = {
-    core: "1.7.0",
-    contracts: "1.7.0",
+    core: "1.8.0",
+    contracts: "1.8.0",
     validation: BASELINE_VERSION,
     intake: BASELINE_VERSION,
     grounding: BASELINE_VERSION,
@@ -47,7 +47,11 @@
     audit: BASELINE_VERSION,
     persistence: BASELINE_VERSION,
     receipt: BASELINE_VERSION,
-    phase8Validation: BASELINE_VERSION
+    phase8Validation: BASELINE_VERSION,
+    crossDevice: BASELINE_VERSION,
+    reflection: BASELINE_VERSION,
+    ui: BASELINE_VERSION,
+    phase9Validation: BASELINE_VERSION
   };
 
   const fileModules = {
@@ -78,12 +82,16 @@
     "13_development_automation_audit.js": "audit",
     "13_development_automation_persistence.js": "persistence",
     "13_development_automation_receipt.js": "receipt",
-    "13_development_automation_phase8_validation.js": "phase8Validation"
+    "13_development_automation_phase8_validation.js": "phase8Validation",
+    "13_development_automation_cross_device.js": "crossDevice",
+    "13_development_automation_reflection.js": "reflection",
+    "13_development_automation_ui.js": "ui",
+    "13_development_automation_phase9_validation.js": "phase9Validation"
   };
 
   const contractVersions = {
     foundation: BASELINE_VERSION,
-    foundationState: "1.7.0",
+    foundationState: "1.8.0",
     capabilityDescriptor: BASELINE_VERSION,
     platformProfile: BASELINE_VERSION,
     navigationIntake: BASELINE_VERSION,
@@ -107,7 +115,9 @@
     recoveryVerification: BASELINE_VERSION,
     automationSession: BASELINE_VERSION,
     auditEvent: BASELINE_VERSION,
-    automationReceipt: BASELINE_VERSION
+    automationReceipt: BASELINE_VERSION,
+    reflectionPackage: BASELINE_VERSION,
+    crossDeviceRecord: BASELINE_VERSION
   };
 
   const contractIds = {
@@ -136,7 +146,9 @@
     recoveryVerification: "IDE-190-CONTRACT-RECOVERY-VERIFICATION",
     automationSession: "IDE-190-CONTRACT-AUTOMATION-SESSION",
     auditEvent: "IDE-190-CONTRACT-AUDIT-EVENT",
-    automationReceipt: "IDE-190-CONTRACT-AUTOMATION-RECEIPT"
+    automationReceipt: "IDE-190-CONTRACT-AUTOMATION-RECEIPT",
+    reflectionPackage: "IDE-190-CONTRACT-REFLECTION-PACKAGE",
+    crossDeviceRecord: "IDE-190-CONTRACT-CROSS-DEVICE-RECORD"
   };
 
   const lifecycle = [
@@ -281,14 +293,14 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 8 Audit / Session / Persistence / Receipt",
-      phase: 8,
+      implementationPhase: "Phase 9 UI / Reflection Package / Cross-Device",
+      phase: 9,
       phaseCount: 10,
       designFreezeId: "IDE-190-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
       decisionRange: "IDE-190-DECISION-001..012",
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Implementation - Phase 8"
+      status: "Implementation - Phase 9"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -313,9 +325,9 @@
       minimumIDE160Version: "2.0.1"
     },
     implementation: {
-      phase: 8,
-      phaseName: "Audit / Session / Persistence / Receipt",
-      completedPhases: [1, 2, 3, 4, 5, 6, 7],
+      phase: 9,
+      phaseName: "UI / Reflection Package / Cross-Device",
+      completedPhases: [1, 2, 3, 4, 5, 6, 7, 8],
       contractFirst: true,
       inspectBeforeImplement: true,
       ide190Complete: false,
@@ -328,7 +340,8 @@
       phase6AllowedBeforeAndroidGate: true,
       phase7AllowedBeforeAndroidGate: true,
       phase8AllowedBeforeAndroidGate: true,
-      phase9AllowedBeforeAndroidGate: false
+      phase9AllowedBeforeAndroidGate: false,
+      phase10AllowedBeforeAndroidGate: false
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
       const key = fileModules[moduleOrFile] || moduleOrFile;
