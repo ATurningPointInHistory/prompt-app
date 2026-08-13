@@ -7,7 +7,7 @@
   "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1 and IDE-190 Phase 7 Failure / Timeout / Recovery 1.6.0 extension.",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-08-13T00:10:29Z",
+  "updatedAt": "2026-08-13T02:05:27.567Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -209,7 +209,7 @@
     "./13_development_automation_failure.js?h=0394f783eeab",
     "./13_development_automation_timeout.js?h=dfa02a297144",
     "./13_development_automation_recovery.js?h=9e4ae20feb42",
-    "./13_development_automation_phase7_validation.js?h=8069e9dc4d9d",
+    "./13_development_automation_phase7_validation.js?h=64616f1a9bab",
     "./13_project_report.js?h=d636cb6a6766",
     "./13_project_handoff.js?h=a073ff86a1eb",
     "./13_function_relation_v3.js?h=0857a784aa30",
@@ -1228,9 +1228,9 @@
       "cacheKey": "9e4ae20feb42"
     },
     "13_development_automation_phase7_validation.js": {
-      "sha256": "8069e9dc4d9da92e3115cc9d3e448740c9713263ba62d0534c33f5233ddb3188",
-      "byteSize": 31222,
-      "cacheKey": "8069e9dc4d9d"
+      "sha256": "64616f1a9bab5a687da7913a62387227be8dd985725277d812ec9e1713b4dca1",
+      "byteSize": 32430,
+      "cacheKey": "64616f1a9bab"
     },
     "13_project_report.js": {
       "sha256": "d636cb6a67665a6a26975934e81c9ffe2e1aca43b7f1303d0b9dae1a221c813b",
@@ -1308,6 +1308,6 @@
       "cacheKey": "138e34ded106"
     }
   },
-  "scriptSetHash": "5bcf6e0475c5000f1ff194acc3348bfdf411364b3cdd4936933e43d9d485a07a",
-  "manifestHash": "858bd9507195d31df0058e22bee1c1c96e8c6c4fe0c1d50b6b5734d17f185ffb"
+  "scriptSetHash": "4c9ee5a29e88c73cc24e86565d8ebd351895965105c6453ce7fd06c6af087ae8",
+  "manifestHash": "585c04928295b5f6b4fd7501e4291fc880d8ec88076e61cf434956b6c9f0b6ce"
 }
