@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_core.js
    IDE-190 Development Automation
-   Release: 1.8.0 / Module: Core 1.8.0
-   Phase 9: UI / Reflection Package / Cross-Device
+   Release: 1.9.0 / Module: Core 1.9.0
+   Phase 10: Integrated / Android Final Validation
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -276,6 +276,10 @@
   if (!Object.prototype.hasOwnProperty.call(state, "lastPhase9Validation")) state.lastPhase9Validation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastPhase9AndroidValidation")) state.lastPhase9AndroidValidation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "androidPhase9ValidationPassed")) state.androidPhase9ValidationPassed = false;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPhase10Validation")) state.lastPhase10Validation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPhase10AndroidValidation")) state.lastPhase10AndroidValidation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "androidPhase10ValidationPassed")) state.androidPhase10ValidationPassed = false;
+  if (!Object.prototype.hasOwnProperty.call(state, "ide190FinalReleaseReceipt")) state.ide190FinalReleaseReceipt = null;
   if (!(state.reflectionPackages instanceof Map)) state.reflectionPackages = new Map();
   if (!(state.reflectionPayloads instanceof Map)) state.reflectionPayloads = new Map();
   if (!Object.prototype.hasOwnProperty.call(state, "latestReflectionPackageId")) state.latestReflectionPackageId = null;
@@ -442,8 +446,8 @@
     return {
       initialized: state.initialized === true,
       currentPhase: VERSION_MANIFEST.implementation.phase,
-      releaseAllowed: false,
-      ide190Complete: false,
+      releaseAllowed: state.androidPhase10ValidationPassed === true,
+      ide190Complete: state.androidPhase10ValidationPassed === true,
       phase2Allowed: true,
       phase3Allowed: true,
       phase4Allowed: VERSION_MANIFEST.implementation.phase >= 4,
@@ -452,7 +456,7 @@
       phase7Allowed: VERSION_MANIFEST.implementation.completedPhases.includes(6),
       phase8Allowed: VERSION_MANIFEST.implementation.completedPhases.includes(7),
       phase9Allowed: VERSION_MANIFEST.implementation.completedPhases.includes(8),
-      phase10Allowed: state.androidPhase9ValidationPassed === true,
+      phase10Allowed: VERSION_MANIFEST.implementation.completedPhases.includes(9),
       lastPreDeviceValidation: clone(state.lastPreDeviceValidation),
       lastAndroidValidation: clone(state.lastAndroidValidation),
       lastPhase2Validation: clone(state.lastPhase2Validation),
@@ -470,7 +474,10 @@
       lastPhase8Validation: clone(state.lastPhase8Validation),
       lastPhase8AndroidValidation: clone(state.lastPhase8AndroidValidation),
       lastPhase9Validation: clone(state.lastPhase9Validation),
-      lastPhase9AndroidValidation: clone(state.lastPhase9AndroidValidation)
+      lastPhase9AndroidValidation: clone(state.lastPhase9AndroidValidation),
+      lastPhase10Validation: clone(state.lastPhase10Validation),
+      lastPhase10AndroidValidation: clone(state.lastPhase10AndroidValidation),
+      ide190FinalReleaseReceipt: clone(state.ide190FinalReleaseReceipt)
     };
   }
 
@@ -495,8 +502,8 @@
       dependency: getDependencyStatus(),
       platformProfile: detectPlatformProfile(),
       modules: modules,
-      ide190Complete: false,
-      releaseAllowed: false,
+      ide190Complete: state.androidPhase10ValidationPassed === true,
+      releaseAllowed: state.androidPhase10ValidationPassed === true,
       phase2Allowed: true,
       phase3Allowed: true,
       phase4Allowed: VERSION_MANIFEST.implementation.phase >= 4,
@@ -505,7 +512,7 @@
       phase7Allowed: VERSION_MANIFEST.implementation.completedPhases.includes(6),
       phase8Allowed: VERSION_MANIFEST.implementation.completedPhases.includes(7),
       phase9Allowed: VERSION_MANIFEST.implementation.completedPhases.includes(8),
-      phase10Allowed: state.androidPhase9ValidationPassed === true,
+      phase10Allowed: VERSION_MANIFEST.implementation.completedPhases.includes(9),
       androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true,
       androidPhase2ValidationPassed: state.androidPhase2ValidationPassed === true,
       androidPhase3ValidationPassed: state.androidPhase3ValidationPassed === true,
@@ -515,6 +522,7 @@
       androidPhase7ValidationPassed: state.androidPhase7ValidationPassed === true,
       androidPhase8ValidationPassed: state.androidPhase8ValidationPassed === true,
       androidPhase9ValidationPassed: state.androidPhase9ValidationPassed === true,
+      androidPhase10ValidationPassed: state.androidPhase10ValidationPassed === true,
       latestAutomationSessionId: state.latestAutomationSessionId,
       latestAuditEventId: state.latestAuditEventId,
       latestAutomationReceiptId: state.latestAutomationReceiptId,
@@ -555,6 +563,9 @@
       lastPhase8AndroidValidation: clone(state.lastPhase8AndroidValidation),
       lastPhase9Validation: clone(state.lastPhase9Validation),
       lastPhase9AndroidValidation: clone(state.lastPhase9AndroidValidation),
+      lastPhase10Validation: clone(state.lastPhase10Validation),
+      lastPhase10AndroidValidation: clone(state.lastPhase10AndroidValidation),
+      ide190FinalReleaseReceipt: clone(state.ide190FinalReleaseReceipt),
       latestReflectionPackageId: state.latestReflectionPackageId,
       lastError: clone(state.lastError),
       updatedAt: state.updatedAt
@@ -625,6 +636,7 @@
       if (typeof namespace.initializeReflection === "function") results.push(namespace.initializeReflection());
       if (typeof namespace.initializeDevelopmentAutomationUI === "function") results.push(namespace.initializeDevelopmentAutomationUI());
       if (typeof namespace.initializePhase9Validation === "function") results.push(namespace.initializePhase9Validation());
+      if (typeof namespace.initializePhase10Validation === "function") results.push(namespace.initializePhase10Validation());
       const failed = results.filter(function failedResult(result) { return !result || result.ok !== true; });
       if (typeof namespace.initializeContracts !== "function") {
         failed.push({ ok: false, code: "IDE190_CONTRACTS_NOT_READY" });
@@ -752,6 +764,18 @@
     touch();
   }
 
+  function markPhase10Validation(result) {
+    state.lastPhase10Validation = clone(result);
+    touch();
+  }
+
+  function markPhase10AndroidValidation(result) {
+    state.lastPhase10AndroidValidation = clone(result);
+    state.androidPhase10ValidationPassed = Boolean(result && result.passed === result.total && result.criticalFailed === 0 && result.phaseGatePassed === true && result.releaseAllowed === true && result.ide190Complete === true);
+    if (result && result.releaseReceipt) state.ide190FinalReleaseReceipt = clone(result.releaseReceipt);
+    touch();
+  }
+
   function getPublicApiDescription() {
     return {
       componentId: COMPONENT_ID,
@@ -778,7 +802,8 @@
       receiptImplemented: typeof namespace.buildAutomationReceipt === "function" && typeof namespace.restoreAutomationReceipt === "function",
       reflectionPackageImplemented: typeof namespace.prepareAutomationReflectionPackage === "function" && typeof namespace.buildAutomationReflectionZip === "function",
       uiImplemented: typeof namespace.getDevelopmentAutomationUIProjection === "function" && typeof namespace.openDevelopmentAutomationConsole === "function",
-      crossDeviceImplemented: typeof namespace.validateAutomationCrossDeviceParity === "function"
+      crossDeviceImplemented: typeof namespace.validateAutomationCrossDeviceParity === "function",
+      finalValidationImplemented: typeof namespace.runDevelopmentAutomationPhase10Validation === "function" && typeof namespace.runDevelopmentAutomationPhase10AndroidValidation === "function"
     };
   }
 
@@ -816,7 +841,9 @@
     markPhase8Validation: markPhase8Validation,
     markPhase8AndroidValidation: markPhase8AndroidValidation,
     markPhase9Validation: markPhase9Validation,
-    markPhase9AndroidValidation: markPhase9AndroidValidation
+    markPhase9AndroidValidation: markPhase9AndroidValidation,
+    markPhase10Validation: markPhase10Validation,
+    markPhase10AndroidValidation: markPhase10AndroidValidation
   });
   namespace.__internal = internal;
 
@@ -844,8 +871,8 @@
     id: "IDE-190-CORE",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 9,
-    phaseName: "UI / Reflection Package / Cross-Device",
+    phase: 10,
+    phaseName: "Integrated / Android Final Validation",
     designFreezeId: VERSION_MANIFEST.release.designFreezeId,
     safeAutomationOrchestrator: true,
     directMutation: false,
