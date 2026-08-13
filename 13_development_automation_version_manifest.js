@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_development_automation_version_manifest.js
    IDE-190 Development Automation
-   Release: 1.6.0
-   Phase 7: Failure / Timeout / Recovery
+   Release: 1.7.0
+   Phase 8: Audit / Session / Persistence / Receipt
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.6.0";
+  const RELEASE_VERSION = "1.7.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,8 +20,8 @@
   }
 
   const moduleVersions = {
-    core: "1.6.0",
-    contracts: "1.6.0",
+    core: "1.7.0",
+    contracts: "1.7.0",
     validation: BASELINE_VERSION,
     intake: BASELINE_VERSION,
     grounding: BASELINE_VERSION,
@@ -42,7 +42,12 @@
     failure: BASELINE_VERSION,
     timeout: BASELINE_VERSION,
     recovery: BASELINE_VERSION,
-    phase7Validation: BASELINE_VERSION
+    phase7Validation: "1.0.1",
+    session: BASELINE_VERSION,
+    audit: BASELINE_VERSION,
+    persistence: BASELINE_VERSION,
+    receipt: BASELINE_VERSION,
+    phase8Validation: BASELINE_VERSION
   };
 
   const fileModules = {
@@ -68,12 +73,17 @@
     "13_development_automation_failure.js": "failure",
     "13_development_automation_timeout.js": "timeout",
     "13_development_automation_recovery.js": "recovery",
-    "13_development_automation_phase7_validation.js": "phase7Validation"
+    "13_development_automation_phase7_validation.js": "phase7Validation",
+    "13_development_automation_session.js": "session",
+    "13_development_automation_audit.js": "audit",
+    "13_development_automation_persistence.js": "persistence",
+    "13_development_automation_receipt.js": "receipt",
+    "13_development_automation_phase8_validation.js": "phase8Validation"
   };
 
   const contractVersions = {
     foundation: BASELINE_VERSION,
-    foundationState: "1.6.0",
+    foundationState: "1.7.0",
     capabilityDescriptor: BASELINE_VERSION,
     platformProfile: BASELINE_VERSION,
     navigationIntake: BASELINE_VERSION,
@@ -94,7 +104,10 @@
     failureRecord: BASELINE_VERSION,
     timeoutRecord: BASELINE_VERSION,
     recoveryDecision: BASELINE_VERSION,
-    recoveryVerification: BASELINE_VERSION
+    recoveryVerification: BASELINE_VERSION,
+    automationSession: BASELINE_VERSION,
+    auditEvent: BASELINE_VERSION,
+    automationReceipt: BASELINE_VERSION
   };
 
   const contractIds = {
@@ -120,7 +133,10 @@
     failureRecord: "IDE-190-CONTRACT-FAILURE-RECORD",
     timeoutRecord: "IDE-190-CONTRACT-TIMEOUT-RECORD",
     recoveryDecision: "IDE-190-CONTRACT-RECOVERY-DECISION",
-    recoveryVerification: "IDE-190-CONTRACT-RECOVERY-VERIFICATION"
+    recoveryVerification: "IDE-190-CONTRACT-RECOVERY-VERIFICATION",
+    automationSession: "IDE-190-CONTRACT-AUTOMATION-SESSION",
+    auditEvent: "IDE-190-CONTRACT-AUDIT-EVENT",
+    automationReceipt: "IDE-190-CONTRACT-AUTOMATION-RECEIPT"
   };
 
   const lifecycle = [
@@ -265,14 +281,14 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 7 Failure / Timeout / Recovery",
-      phase: 7,
+      implementationPhase: "Phase 8 Audit / Session / Persistence / Receipt",
+      phase: 8,
       phaseCount: 10,
       designFreezeId: "IDE-190-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
       decisionRange: "IDE-190-DECISION-001..012",
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Implementation - Phase 7"
+      status: "Implementation - Phase 8"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -297,9 +313,9 @@
       minimumIDE160Version: "2.0.1"
     },
     implementation: {
-      phase: 7,
-      phaseName: "Failure / Timeout / Recovery",
-      completedPhases: [1, 2, 3, 4, 5, 6],
+      phase: 8,
+      phaseName: "Audit / Session / Persistence / Receipt",
+      completedPhases: [1, 2, 3, 4, 5, 6, 7],
       contractFirst: true,
       inspectBeforeImplement: true,
       ide190Complete: false,
@@ -311,7 +327,8 @@
       phase5AllowedBeforeAndroidGate: true,
       phase6AllowedBeforeAndroidGate: true,
       phase7AllowedBeforeAndroidGate: true,
-      phase8AllowedBeforeAndroidGate: false
+      phase8AllowedBeforeAndroidGate: true,
+      phase9AllowedBeforeAndroidGate: false
     },
     getModuleVersion: function getModuleVersion(moduleOrFile) {
       const key = fileModules[moduleOrFile] || moduleOrFile;
