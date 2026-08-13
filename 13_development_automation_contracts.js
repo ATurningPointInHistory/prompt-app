@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_contracts.js
    IDE-190 Development Automation
-   Release: 1.7.0 / Module: Contracts 1.7.0
-   Phase 8: Audit / Session / Persistence / Receipt
+   Release: 1.8.0 / Module: Contracts 1.8.0
+   Phase 9: UI / Reflection Package / Cross-Device
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -717,6 +717,62 @@
         field("createdAt", { required: true, type: "string" }),
         field("integrity", { required: true, type: "object" })
       ]
+    },
+    {
+      key: "reflectionPackage",
+      name: "IDE-190 User-Mediated Reflection Package Contract",
+      description: "Explicit-file X1 reflection preparation artifact. It may export selected Source payload for manual application, but never performs GitHub write, Repository write, automatic reflection or Persistent Commit.",
+      fields: [
+        field("reflectionPackageId", { required: true, type: "string" }),
+        field("reflectionPackageVersion", { required: true, type: "string" }),
+        field("componentId", { required: true, type: "string", enum: ["IDE-190"] }),
+        field("componentVersion", { required: true, type: "string" }),
+        field("artifactType", { required: true, type: "string", enum: ["manual-reflection-zip"] }),
+        field("externalEffectLevel", { required: true, type: "string", enum: ["X1"] }),
+        field("actorRole", { required: true, type: "string", enum: ["Project Owner"] }),
+        field("userMediated", { required: true, type: "boolean", enum: [true] }),
+        field("sourceSelectionMode", { required: true, type: "string", enum: ["explicit-only"] }),
+        field("automaticFileSelection", { required: true, type: "boolean", enum: [false] }),
+        field("automaticReflection", { required: true, type: "boolean", enum: [false] }),
+        field("githubWrite", { required: true, type: "boolean", enum: [false] }),
+        field("repositoryWriteCount", { required: true, type: "integer", enum: [0] }),
+        field("persistentCommit", { required: true, type: "boolean", enum: [false] }),
+        field("fileCount", { required: true, type: "integer" }),
+        field("files", { required: true, type: "array" }),
+        field("automationReceiptId", { required: true, type: "string|null" }),
+        field("receiptIncludedInExport", { required: true, type: "boolean" }),
+        field("staticIdentity", { required: true, type: "object" }),
+        field("sourcePayloadInDescriptor", { required: true, type: "boolean", enum: [false] }),
+        field("sourcePayloadInExport", { required: true, type: "boolean", enum: [true] }),
+        field("transientPayloadPersisted", { required: true, type: "boolean", enum: [false] }),
+        field("applyInstructions", { required: true, type: "array" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("preparedAt", { required: true, type: "string" }),
+        field("integrity", { required: true, type: "object" })
+      ]
+    },
+    {
+      key: "crossDeviceRecord",
+      name: "IDE-190 Cross-Device Safety Parity Contract",
+      description: "Common Web Runtime policy evidence proving Android/Web display or capability differences cannot escalate sensitive permissions.",
+      fields: [
+        field("crossDeviceRecordId", { required: true, type: "string" }),
+        field("recordVersion", { required: true, type: "string" }),
+        field("componentId", { required: true, type: "string", enum: ["IDE-190"] }),
+        field("componentVersion", { required: true, type: "string" }),
+        field("runtime", { required: true, type: "string", enum: ["Common Web Runtime"] }),
+        field("currentProfile", { required: true, type: "object" }),
+        field("policyMatrix", { required: true, type: "object" }),
+        field("parityVerified", { required: true, type: "boolean", enum: [true] }),
+        field("displayModeChangesPermission", { required: true, type: "boolean", enum: [false] }),
+        field("pcPermissionEscalationAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("androidPermissionEscalationAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("persistentCommitPermission", { required: true, type: "boolean", enum: [false] }),
+        field("githubAutomaticReflectionPermission", { required: true, type: "boolean", enum: [false] }),
+        field("approvalBypassAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
     }
 
   ];
@@ -1002,6 +1058,19 @@
       check("Receipt restore does not recreate Session", payload.selectivePersistence && payload.selectivePersistence.sessionRecreatedOnRestore === false, payload.selectivePersistence && payload.selectivePersistence.sessionRecreatedOnRestore, "selectivePersistence.sessionRecreatedOnRestore");
       check("Receipt excludes Automation Session persistence", payload.selectivePersistence && Array.isArray(payload.selectivePersistence.excluded) && payload.selectivePersistence.excluded.includes("automation-session"), payload.selectivePersistence && payload.selectivePersistence.excluded, "selectivePersistence.excluded");
       check("Receipt preserves federated authority ownership", payload.authorityBoundary && payload.authorityBoundary.navigation === "IDE-180" && payload.authorityBoundary.workflow === "IDE-160" && payload.authorityBoundary.controlledMutation === "IDE-150" && payload.authorityBoundary.automationOrchestration === "IDE-190", JSON.stringify(payload.authorityBoundary || {}), "authorityBoundary");
+    }
+
+    if (definition.key === "reflectionPackage") {
+      check("Reflection Package is explicit X1 user-mediated preparation", payload.externalEffectLevel === "X1" && payload.userMediated === true && payload.sourceSelectionMode === "explicit-only" && payload.automaticFileSelection === false, payload.externalEffectLevel, "externalEffectLevel");
+      check("Reflection Package performs no automatic external or Repository write", payload.automaticReflection === false && payload.githubWrite === false && payload.repositoryWriteCount === 0 && payload.persistentCommit === false, payload.repositoryWriteCount, "repositoryWriteCount");
+      check("Reflection descriptor never embeds/persists Source payload", payload.sourcePayloadInDescriptor === false && payload.transientPayloadPersisted === false && payload.sourcePayloadInExport === true, payload.sourcePayloadInDescriptor, "sourcePayloadInDescriptor");
+      check("Reflection file count matches explicit files", Array.isArray(payload.files) && payload.fileCount === payload.files.length && payload.fileCount > 0, payload.fileCount, "fileCount");
+    }
+
+    if (definition.key === "crossDeviceRecord") {
+      check("Cross-Device parity is verified", payload.parityVerified === true, payload.parityVerified, "parityVerified");
+      check("Cross-Device display/capability cannot escalate permission", payload.displayModeChangesPermission === false && payload.pcPermissionEscalationAllowed === false && payload.androidPermissionEscalationAllowed === false, payload.displayModeChangesPermission, "displayModeChangesPermission");
+      check("Sensitive permissions remain denied on every device", payload.persistentCommitPermission === false && payload.githubAutomaticReflectionPermission === false && payload.approvalBypassAllowed === false, payload.persistentCommitPermission, "persistentCommitPermission");
     }
 
     const passed = checks.filter(function count(item) { return item.passed; }).length;
