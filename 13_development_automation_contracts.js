@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_contracts.js
    IDE-190 Development Automation
-   Release: 1.6.0 / Module: Contracts 1.6.0
-   Phase 7: Failure / Timeout / Recovery
+   Release: 1.7.0 / Module: Contracts 1.7.0
+   Phase 8: Audit / Session / Persistence / Receipt
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -57,7 +57,7 @@
       description: "Phase 1 component state only. No automation session, approval, dispatch or mutation state is synthesized here.",
       fields: [
         field("initialized", { required: true, type: "boolean" }),
-        field("currentPhase", { required: true, type: "integer", enum: [1, 2, 3, 4, 5, 6, 7] }),
+        field("currentPhase", { required: true, type: "integer", enum: [1, 2, 3, 4, 5, 6, 7, 8] }),
         field("releaseAllowed", { required: true, type: "boolean", enum: [false] }),
         field("ide190Complete", { required: true, type: "boolean", enum: [false] }),
         field("phase2Allowed", { required: true, type: "boolean" }),
@@ -67,6 +67,7 @@
         field("phase6Allowed", { required: true, type: "boolean" }),
         field("phase7Allowed", { required: true, type: "boolean" }),
         field("phase8Allowed", { required: true, type: "boolean" }),
+        field("phase9Allowed", { required: true, type: "boolean" }),
         field("lastPreDeviceValidation", { required: true, type: "object|null" }),
         field("lastAndroidValidation", { required: true, type: "object|null" }),
         field("lastPhase2Validation", { required: true, type: "object|null" }),
@@ -80,7 +81,9 @@
         field("lastPhase6Validation", { required: true, type: "object|null" }),
         field("lastPhase6AndroidValidation", { required: true, type: "object|null" }),
         field("lastPhase7Validation", { required: true, type: "object|null" }),
-        field("lastPhase7AndroidValidation", { required: true, type: "object|null" })
+        field("lastPhase7AndroidValidation", { required: true, type: "object|null" }),
+        field("lastPhase8Validation", { required: true, type: "object|null" }),
+        field("lastPhase8AndroidValidation", { required: true, type: "object|null" })
       ]
     },
     {
@@ -621,7 +624,101 @@
         field("immutable", { required: true, type: "boolean", enum: [true] }),
         field("createdAt", { required: true, type: "string" })
       ]
+    },
+    {
+      key: "automationSession",
+      name: "IDE-190 Automation Session Contract",
+      description: "Runtime-only Automation Session with federated identities. No false global transaction identity is synthesized and the Session itself is never persisted.",
+      fields: [
+        field("automationRequestId", { required: true, type: "string" }),
+        field("automationSessionId", { required: true, type: "string" }),
+        field("automationAttemptId", { required: true, type: "string" }),
+        field("automationOperationId", { required: true, type: "string" }),
+        field("dispatchId", { required: true, type: "string|null" }),
+        field("automationReceiptId", { required: true, type: "string|null" }),
+        field("globalTransactionId", { required: true, type: "string|null", enum: [null] }),
+        field("falseGlobalTransactionSynthesized", { required: true, type: "boolean", enum: [false] }),
+        field("lifecycle", { required: true, type: "string", enum: VERSION_MANIFEST.lifecycle }),
+        field("status", { required: true, type: "string", enum: ["Active", "Closed"] }),
+        field("outcome", { required: true, type: "string|null" }),
+        field("actor", { required: true, type: "string" }),
+        field("federatedReferences", { required: true, type: "array" }),
+        field("auditEventIds", { required: true, type: "array" }),
+        field("runtimeOnly", { required: true, type: "boolean", enum: [true] }),
+        field("persisted", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("updatedAt", { required: true, type: "string" }),
+        field("closedAt", { required: true, type: "string|null" })
+      ]
+    },
+    {
+      key: "auditEvent",
+      name: "IDE-190 Federated Audit Event Contract",
+      description: "Immutable append-only federated Audit Event. Persists references and summaries only; no Source payload, Provider handle, Runtime queue/stack or hidden learning state.",
+      fields: [
+        field("auditEventId", { required: true, type: "string" }),
+        field("auditVersion", { required: true, type: "string" }),
+        field("automationRequestId", { required: true, type: "string" }),
+        field("automationSessionId", { required: true, type: "string" }),
+        field("automationAttemptId", { required: true, type: "string" }),
+        field("automationOperationId", { required: true, type: "string" }),
+        field("dispatchId", { required: true, type: "string|null" }),
+        field("sequence", { required: true, type: "integer" }),
+        field("eventType", { required: true, type: "string" }),
+        field("sourceComponentId", { required: true, type: "string" }),
+        field("actor", { required: true, type: "string" }),
+        field("outcome", { required: true, type: "string" }),
+        field("summary", { required: true, type: "string" }),
+        field("federatedReferences", { required: true, type: "array" }),
+        field("evidenceRefs", { required: true, type: "array" }),
+        field("previousEventHash", { required: true, type: "string|null" }),
+        field("appendOnly", { required: true, type: "boolean", enum: [true] }),
+        field("persisted", { required: true, type: "boolean", enum: [true] }),
+        field("containsSourcePayload", { required: true, type: "boolean", enum: [false] }),
+        field("containsProviderHandle", { required: true, type: "boolean", enum: [false] }),
+        field("containsRuntimeQueueOrStack", { required: true, type: "boolean", enum: [false] }),
+        field("containsHiddenLearningState", { required: true, type: "boolean", enum: [false] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("eventHash", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "automationReceipt",
+      name: "IDE-190 Final Automation Receipt Contract",
+      description: "Selective immutable V8 Completion Receipt with minimum identities, federated references, Audit summary, safety evidence, static identity and integrity. Receipt restore never recreates a Runtime Session.",
+      fields: [
+        field("automationReceiptId", { required: true, type: "string" }),
+        field("receiptVersion", { required: true, type: "string" }),
+        field("componentId", { required: true, type: "string", enum: ["IDE-190"] }),
+        field("componentVersion", { required: true, type: "string" }),
+        field("designFreezeId", { required: true, type: "string", enum: ["IDE-190-DESIGN-FREEZE-1.0.0"] }),
+        field("versionArchitecture", { required: true, type: "string", enum: ["independent-version-v1"] }),
+        field("automationRequestId", { required: true, type: "string" }),
+        field("automationSessionId", { required: true, type: "string" }),
+        field("automationAttemptId", { required: true, type: "string" }),
+        field("automationOperationId", { required: true, type: "string" }),
+        field("dispatchId", { required: true, type: "string|null" }),
+        field("globalTransactionId", { required: true, type: "string|null", enum: [null] }),
+        field("falseGlobalTransactionSynthesized", { required: true, type: "boolean", enum: [false] }),
+        field("outcome", { required: true, type: "string", enum: VERSION_MANIFEST.outcomes }),
+        field("validationLayer", { required: true, type: "string", enum: ["V8"] }),
+        field("status", { required: true, type: "string", enum: ["Finalized"] }),
+        field("federatedReferences", { required: true, type: "array" }),
+        field("auditSummary", { required: true, type: "object" }),
+        field("safetyEvidenceSummary", { required: true, type: "object" }),
+        field("staticIdentity", { required: true, type: "object" }),
+        field("contractVersions", { required: true, type: "object" }),
+        field("selectivePersistence", { required: true, type: "object" }),
+        field("authorityBoundary", { required: true, type: "object" }),
+        field("phase8ReloadGate", { required: true, type: "boolean" }),
+        field("functionalValidationPassed", { required: true, type: "boolean" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("integrity", { required: true, type: "object" })
+      ]
     }
+
   ];
 
   function typeMatches(value, type) {
@@ -885,6 +982,28 @@
       check("Recovery Verification writes zero Repository records", payload.repositoryWriteCount === 0 && payload.persistentCommit === false, payload.repositoryWriteCount, "repositoryWriteCount");
       check("Recovery Verification restores Trust only after lock release", payload.mutationLockReleased === true && payload.repositoryTrustBefore === "Untrusted" && payload.repositoryTrustAfter === "Trusted", payload.repositoryTrustAfter, "repositoryTrustAfter");
     }
+
+    if (definition.key === "automationSession") {
+      check("Automation Session is runtime-only", payload.runtimeOnly === true && payload.persisted === false, payload.persisted, "persisted");
+      check("Automation Session synthesizes no global transaction", payload.globalTransactionId === null && payload.falseGlobalTransactionSynthesized === false, payload.globalTransactionId, "globalTransactionId");
+      if (payload.status === "Closed") check("Closed Session has governed outcome", VERSION_MANIFEST.outcomes.includes(payload.outcome) && payload.lifecycle === "Close" && typeof payload.closedAt === "string", payload.outcome, "outcome");
+    }
+
+    if (definition.key === "auditEvent") {
+      check("Audit Event is append-only and immutable", payload.appendOnly === true && payload.immutable === true, payload.appendOnly, "appendOnly");
+      check("Audit Event persists no Source/Provider/Runtime/Hidden payload", payload.containsSourcePayload === false && payload.containsProviderHandle === false && payload.containsRuntimeQueueOrStack === false && payload.containsHiddenLearningState === false, payload.containsSourcePayload, "containsSourcePayload");
+      check("Audit Event has no global transaction field", !Object.prototype.hasOwnProperty.call(payload, "transactionId") && !Object.prototype.hasOwnProperty.call(payload, "globalTransactionId"), "none", "transactionId");
+    }
+
+    if (definition.key === "automationReceipt") {
+      check("Receipt is V8 Finalized record", payload.validationLayer === "V8" && payload.status === "Finalized", payload.validationLayer, "validationLayer");
+      check("Receipt synthesizes no global transaction", payload.globalTransactionId === null && payload.falseGlobalTransactionSynthesized === false, payload.globalTransactionId, "globalTransactionId");
+      check("Receipt never Persistent Commits", payload.safetyEvidenceSummary && payload.safetyEvidenceSummary.persistentCommit === false, payload.safetyEvidenceSummary && payload.safetyEvidenceSummary.persistentCommit, "safetyEvidenceSummary.persistentCommit");
+      check("Receipt restore does not recreate Session", payload.selectivePersistence && payload.selectivePersistence.sessionRecreatedOnRestore === false, payload.selectivePersistence && payload.selectivePersistence.sessionRecreatedOnRestore, "selectivePersistence.sessionRecreatedOnRestore");
+      check("Receipt excludes Automation Session persistence", payload.selectivePersistence && Array.isArray(payload.selectivePersistence.excluded) && payload.selectivePersistence.excluded.includes("automation-session"), payload.selectivePersistence && payload.selectivePersistence.excluded, "selectivePersistence.excluded");
+      check("Receipt preserves federated authority ownership", payload.authorityBoundary && payload.authorityBoundary.navigation === "IDE-180" && payload.authorityBoundary.workflow === "IDE-160" && payload.authorityBoundary.controlledMutation === "IDE-150" && payload.authorityBoundary.automationOrchestration === "IDE-190", JSON.stringify(payload.authorityBoundary || {}), "authorityBoundary");
+    }
+
     const passed = checks.filter(function count(item) { return item.passed; }).length;
     const failed = checks.length - passed;
     return {
@@ -926,7 +1045,7 @@
     id: "IDE-190-CONTRACTS",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 7,
+    phase: 8,
     contractCount: BUILT_IN_CONTRACTS.length,
     readOnly: true,
     loadedAt: internal.nowIso()
