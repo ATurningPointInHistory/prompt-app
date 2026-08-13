@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_contracts.js
    IDE-190 Development Automation
-   Release: 1.5.0 / Module: Contracts 1.5.0
-   Phase 6: IDE-150 Controlled Mutation Trial
+   Release: 1.6.0 / Module: Contracts 1.6.0
+   Phase 7: Failure / Timeout / Recovery
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -57,7 +57,7 @@
       description: "Phase 1 component state only. No automation session, approval, dispatch or mutation state is synthesized here.",
       fields: [
         field("initialized", { required: true, type: "boolean" }),
-        field("currentPhase", { required: true, type: "integer", enum: [1, 2, 3, 4, 5] }),
+        field("currentPhase", { required: true, type: "integer", enum: [1, 2, 3, 4, 5, 6, 7] }),
         field("releaseAllowed", { required: true, type: "boolean", enum: [false] }),
         field("ide190Complete", { required: true, type: "boolean", enum: [false] }),
         field("phase2Allowed", { required: true, type: "boolean" }),
@@ -65,6 +65,8 @@
         field("phase4Allowed", { required: true, type: "boolean" }),
         field("phase5Allowed", { required: true, type: "boolean" }),
         field("phase6Allowed", { required: true, type: "boolean" }),
+        field("phase7Allowed", { required: true, type: "boolean" }),
+        field("phase8Allowed", { required: true, type: "boolean" }),
         field("lastPreDeviceValidation", { required: true, type: "object|null" }),
         field("lastAndroidValidation", { required: true, type: "object|null" }),
         field("lastPhase2Validation", { required: true, type: "object|null" }),
@@ -74,7 +76,11 @@
         field("lastPhase4Validation", { required: true, type: "object|null" }),
         field("lastPhase4AndroidValidation", { required: true, type: "object|null" }),
         field("lastPhase5Validation", { required: true, type: "object|null" }),
-        field("lastPhase5AndroidValidation", { required: true, type: "object|null" })
+        field("lastPhase5AndroidValidation", { required: true, type: "object|null" }),
+        field("lastPhase6Validation", { required: true, type: "object|null" }),
+        field("lastPhase6AndroidValidation", { required: true, type: "object|null" }),
+        field("lastPhase7Validation", { required: true, type: "object|null" }),
+        field("lastPhase7AndroidValidation", { required: true, type: "object|null" })
       ]
     },
     {
@@ -521,6 +527,100 @@
         field("immutable", { required: true, type: "boolean", enum: [true] }),
         field("createdAt", { required: true, type: "string" })
       ]
+    },
+    {
+      key: "failureRecord",
+      name: "IDE-190 Failure Record Contract",
+      description: "Immutable evidence-backed failure classification. Root cause is never inferred and automatic retry is disabled by default.",
+      fields: [
+        field("failureRecordId", { required: true, type: "string" }),
+        field("sourcePhase", { required: true, type: "integer" }),
+        field("sourceRecordId", { required: true, type: "string|null" }),
+        field("category", { required: true, type: "string", enum: VERSION_MANIFEST.failureCategories }),
+        field("severity", { required: true, type: "string", enum: ["Critical", "High", "Medium", "Low"] }),
+        field("retryEligibility", { required: true, type: "string", enum: ["Retryable", "Conditionally Retryable", "Non-Retryable"] }),
+        field("outcome", { required: true, type: "string", enum: VERSION_MANIFEST.outcomes }),
+        field("mutationStarted", { required: true, type: "boolean" }),
+        field("rollbackVerified", { required: true, type: "boolean" }),
+        field("sourceRestored", { required: true, type: "boolean" }),
+        field("repositoryTrustStatus", { required: true, type: "string", enum: ["Trusted", "Untrusted"] }),
+        field("recoveryRequired", { required: true, type: "boolean" }),
+        field("automaticRetryAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("directCause", { required: true, type: "string|null" }),
+        field("rootCauseStatus", { required: true, type: "string", enum: ["Not Determined"] }),
+        field("rootCauseInferred", { required: true, type: "boolean", enum: [false] }),
+        field("evidence", { required: true, type: "array" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "timeoutRecord",
+      name: "IDE-190 Timeout Record Contract",
+      description: "Explicit-duration timeout observation. No hidden default, no implicit cancellation and no automatic retry.",
+      fields: [
+        field("timeoutRecordId", { required: true, type: "string" }),
+        field("failureRecordId", { required: true, type: "string" }),
+        field("timeoutWatchId", { required: true, type: "string" }),
+        field("operationId", { required: true, type: "string" }),
+        field("operationType", { required: true, type: "string" }),
+        field("timeoutMs", { required: true, type: "integer" }),
+        field("elapsedMs", { required: true, type: "integer" }),
+        field("outcome", { required: true, type: "string", enum: ["Timed-Out"] }),
+        field("mutationPossible", { required: true, type: "boolean" }),
+        field("mutationStarted", { required: true, type: "boolean" }),
+        field("rollbackVerified", { required: true, type: "boolean" }),
+        field("sourceRestored", { required: true, type: "boolean" }),
+        field("recoveryRequired", { required: true, type: "boolean" }),
+        field("automaticRetryAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("repositoryTrustStatus", { required: true, type: "string", enum: ["Trusted", "Untrusted"] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "recoveryDecision",
+      name: "IDE-190 Recovery Decision Contract",
+      description: "Evidence-bound recovery decision. Critical recovery requires explicit Project Owner decision and never performs automatic Repository repair.",
+      fields: [
+        field("recoveryDecisionId", { required: true, type: "string" }),
+        field("failureRecordId", { required: true, type: "string" }),
+        field("action", { required: true, type: "string", enum: ["Stop", "Retry-Later", "Verify-Restoration", "Cancel", "Escalate"] }),
+        field("actorRole", { required: true, type: "string" }),
+        field("explicitDecision", { required: true, type: "boolean" }),
+        field("retryAllowed", { required: true, type: "boolean" }),
+        field("repositoryTrustStatus", { required: true, type: "string", enum: ["Trusted", "Untrusted"] }),
+        field("automaticRepositoryWrite", { required: true, type: "boolean", enum: [false] }),
+        field("automaticRetry", { required: true, type: "boolean", enum: [false] }),
+        field("evidence", { required: true, type: "array" }),
+        field("status", { required: true, type: "string", enum: ["Approved"] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "recoveryVerification",
+      name: "IDE-190 Recovery Verification Contract",
+      description: "Exact source/hash restoration proof that can restore Repository Trust without writing to the Repository.",
+      fields: [
+        field("recoveryVerificationId", { required: true, type: "string" }),
+        field("recoveryDecisionId", { required: true, type: "string" }),
+        field("failureRecordId", { required: true, type: "string" }),
+        field("targetFile", { required: true, type: "string" }),
+        field("expectedOriginalHash", { required: true, type: "string" }),
+        field("currentHash", { required: true, type: "string" }),
+        field("sourceExact", { required: true, type: "boolean", enum: [true] }),
+        field("hashExact", { required: true, type: "boolean", enum: [true] }),
+        field("mutationLockReleased", { required: true, type: "boolean", enum: [true] }),
+        field("repositoryTrustBefore", { required: true, type: "string", enum: ["Untrusted"] }),
+        field("repositoryTrustAfter", { required: true, type: "string", enum: ["Trusted"] }),
+        field("repositoryWriteCount", { required: true, type: "integer", enum: [0] }),
+        field("persistentCommit", { required: true, type: "boolean", enum: [false] }),
+        field("verifiedBy", { required: true, type: "string", enum: ["Project Owner"] }),
+        field("status", { required: true, type: "string", enum: ["Verified"] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("createdAt", { required: true, type: "string" })
+      ]
     }
   ];
 
@@ -760,6 +860,31 @@
       if (payload.restorationStatus === "Recovery-Required") check("V7 Recovery-Required marks Repository Untrusted", payload.repositoryTrustStatus === "Untrusted", payload.repositoryTrustStatus, "repositoryTrustStatus");
     }
 
+
+    if (definition.key === "failureRecord") {
+      check("Failure Evidence is explicit", Array.isArray(payload.evidence) && payload.evidence.length > 0, payload.evidence && payload.evidence.length, "evidence");
+      check("Failure never infers Root Cause", payload.rootCauseInferred === false && payload.rootCauseStatus === "Not Determined", payload.rootCauseStatus, "rootCauseStatus");
+      check("Failure never enables automatic Retry", payload.automaticRetryAllowed === false, payload.automaticRetryAllowed, "automaticRetryAllowed");
+      if (payload.category === "Rollback" || payload.category === "Repository Integrity") check("Integrity/Rollback failure is Critical Non-Retryable", payload.severity === "Critical" && payload.retryEligibility === "Non-Retryable" && payload.recoveryRequired === true, payload.retryEligibility, "retryEligibility");
+    }
+
+    if (definition.key === "timeoutRecord") {
+      check("Timeout duration is explicit and positive", Number.isInteger(payload.timeoutMs) && payload.timeoutMs > 0, payload.timeoutMs, "timeoutMs");
+      check("Timeout never auto-retries", payload.automaticRetryAllowed === false, payload.automaticRetryAllowed, "automaticRetryAllowed");
+      if (payload.mutationStarted && (!payload.rollbackVerified || !payload.sourceRestored)) check("Timed-out mutation requires Recovery and Untrusted Repository", payload.recoveryRequired === true && payload.repositoryTrustStatus === "Untrusted", payload.repositoryTrustStatus, "repositoryTrustStatus");
+    }
+
+    if (definition.key === "recoveryDecision") {
+      check("Recovery performs no automatic Repository write", payload.automaticRepositoryWrite === false, payload.automaticRepositoryWrite, "automaticRepositoryWrite");
+      check("Recovery performs no automatic Retry", payload.automaticRetry === false, payload.automaticRetry, "automaticRetry");
+      check("Recovery Evidence is explicit", Array.isArray(payload.evidence) && payload.evidence.length > 0, payload.evidence && payload.evidence.length, "evidence");
+    }
+
+    if (definition.key === "recoveryVerification") {
+      check("Recovery Verification proves exact source/hash", payload.sourceExact === true && payload.hashExact === true && payload.expectedOriginalHash === payload.currentHash, payload.currentHash, "currentHash");
+      check("Recovery Verification writes zero Repository records", payload.repositoryWriteCount === 0 && payload.persistentCommit === false, payload.repositoryWriteCount, "repositoryWriteCount");
+      check("Recovery Verification restores Trust only after lock release", payload.mutationLockReleased === true && payload.repositoryTrustBefore === "Untrusted" && payload.repositoryTrustAfter === "Trusted", payload.repositoryTrustAfter, "repositoryTrustAfter");
+    }
     const passed = checks.filter(function count(item) { return item.passed; }).length;
     const failed = checks.length - passed;
     return {
@@ -801,7 +926,7 @@
     id: "IDE-190-CONTRACTS",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 5,
+    phase: 7,
     contractCount: BUILT_IN_CONTRACTS.length,
     readOnly: true,
     loadedAt: internal.nowIso()
