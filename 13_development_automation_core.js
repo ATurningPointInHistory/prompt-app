@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_core.js
    IDE-190 Development Automation
-   Release: 1.5.0 / Module: Core 1.5.0
-   Phase 6: IDE-150 Controlled Mutation Trial
+   Release: 1.6.0 / Module: Core 1.6.0
+   Phase 7: Failure / Timeout / Recovery
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -164,6 +164,19 @@
         lastPhase6Validation: null,
         lastPhase6AndroidValidation: null,
         androidPhase6ValidationPassed: false,
+        failureRecords: new Map(),
+        timeoutWatches: new Map(),
+        timeoutRecords: new Map(),
+        recoveryDecisions: new Map(),
+        recoveryVerifications: new Map(),
+        latestFailureRecordId: null,
+        latestTimeoutWatchId: null,
+        latestTimeoutRecordId: null,
+        latestRecoveryDecisionId: null,
+        latestRecoveryVerificationId: null,
+        lastPhase7Validation: null,
+        lastPhase7AndroidValidation: null,
+        androidPhase7ValidationPassed: false,
         lastError: null,
         updatedAt: null
       };
@@ -221,6 +234,19 @@
   if (!Object.prototype.hasOwnProperty.call(state, "lastPhase6Validation")) state.lastPhase6Validation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "lastPhase6AndroidValidation")) state.lastPhase6AndroidValidation = null;
   if (!Object.prototype.hasOwnProperty.call(state, "androidPhase6ValidationPassed")) state.androidPhase6ValidationPassed = false;
+  if (!(state.failureRecords instanceof Map)) state.failureRecords = new Map();
+  if (!(state.timeoutWatches instanceof Map)) state.timeoutWatches = new Map();
+  if (!(state.timeoutRecords instanceof Map)) state.timeoutRecords = new Map();
+  if (!(state.recoveryDecisions instanceof Map)) state.recoveryDecisions = new Map();
+  if (!(state.recoveryVerifications instanceof Map)) state.recoveryVerifications = new Map();
+  if (!Object.prototype.hasOwnProperty.call(state, "latestFailureRecordId")) state.latestFailureRecordId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestTimeoutWatchId")) state.latestTimeoutWatchId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestTimeoutRecordId")) state.latestTimeoutRecordId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestRecoveryDecisionId")) state.latestRecoveryDecisionId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "latestRecoveryVerificationId")) state.latestRecoveryVerificationId = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPhase7Validation")) state.lastPhase7Validation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "lastPhase7AndroidValidation")) state.lastPhase7AndroidValidation = null;
+  if (!Object.prototype.hasOwnProperty.call(state, "androidPhase7ValidationPassed")) state.androidPhase7ValidationPassed = false;
 
   function touch() {
     state.updatedAt = nowIso();
@@ -391,6 +417,7 @@
       phase5Allowed: state.androidPhase4ValidationPassed === true,
       phase6Allowed: true,
       phase7Allowed: state.androidPhase6ValidationPassed === true,
+      phase8Allowed: state.androidPhase7ValidationPassed === true,
       lastPreDeviceValidation: clone(state.lastPreDeviceValidation),
       lastAndroidValidation: clone(state.lastAndroidValidation),
       lastPhase2Validation: clone(state.lastPhase2Validation),
@@ -402,7 +429,9 @@
       lastPhase5Validation: clone(state.lastPhase5Validation),
       lastPhase5AndroidValidation: clone(state.lastPhase5AndroidValidation),
       lastPhase6Validation: clone(state.lastPhase6Validation),
-      lastPhase6AndroidValidation: clone(state.lastPhase6AndroidValidation)
+      lastPhase6AndroidValidation: clone(state.lastPhase6AndroidValidation),
+      lastPhase7Validation: clone(state.lastPhase7Validation),
+      lastPhase7AndroidValidation: clone(state.lastPhase7AndroidValidation)
     };
   }
 
@@ -435,12 +464,14 @@
       phase5Allowed: state.androidPhase4ValidationPassed === true,
       phase6Allowed: true,
       phase7Allowed: state.androidPhase6ValidationPassed === true,
+      phase8Allowed: state.androidPhase7ValidationPassed === true,
       androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true,
       androidPhase2ValidationPassed: state.androidPhase2ValidationPassed === true,
       androidPhase3ValidationPassed: state.androidPhase3ValidationPassed === true,
       androidPhase4ValidationPassed: state.androidPhase4ValidationPassed === true,
       androidPhase5ValidationPassed: state.androidPhase5ValidationPassed === true,
       androidPhase6ValidationPassed: state.androidPhase6ValidationPassed === true,
+      androidPhase7ValidationPassed: state.androidPhase7ValidationPassed === true,
       latestIntakeId: state.latestIntakeId,
       latestGroundingId: state.latestGroundingId,
       latestPlanId: state.latestPlanId,
@@ -454,6 +485,10 @@
       latestDispatchRequestId: state.latestDispatchRequestId,
       latestExecutionResultId: state.latestExecutionResultId,
       latestMutationTrialId: state.latestMutationTrialId,
+      latestFailureRecordId: state.latestFailureRecordId,
+      latestTimeoutRecordId: state.latestTimeoutRecordId,
+      latestRecoveryDecisionId: state.latestRecoveryDecisionId,
+      latestRecoveryVerificationId: state.latestRecoveryVerificationId,
       repositoryMutationTrust: clone(state.repositoryMutationTrust),
       mutationTrialLock: clone(state.mutationTrialLock),
       lastPreDeviceValidation: clone(state.lastPreDeviceValidation),
@@ -468,6 +503,8 @@
       lastPhase5AndroidValidation: clone(state.lastPhase5AndroidValidation),
       lastPhase6Validation: clone(state.lastPhase6Validation),
       lastPhase6AndroidValidation: clone(state.lastPhase6AndroidValidation),
+      lastPhase7Validation: clone(state.lastPhase7Validation),
+      lastPhase7AndroidValidation: clone(state.lastPhase7AndroidValidation),
       lastError: clone(state.lastError),
       updatedAt: state.updatedAt
     };
@@ -525,6 +562,9 @@
       if (typeof namespace.initializeAuthorizationGate === "function") results.push(namespace.initializeAuthorizationGate());
       if (typeof namespace.initializeDispatch === "function") results.push(namespace.initializeDispatch());
       if (typeof namespace.initializeMutationTrial === "function") results.push(namespace.initializeMutationTrial());
+      if (typeof namespace.initializeFailure === "function") results.push(namespace.initializeFailure());
+      if (typeof namespace.initializeTimeout === "function") results.push(namespace.initializeTimeout());
+      if (typeof namespace.initializeRecovery === "function") results.push(namespace.initializeRecovery());
       const failed = results.filter(function failedResult(result) { return !result || result.ok !== true; });
       if (typeof namespace.initializeContracts !== "function") {
         failed.push({ ok: false, code: "IDE190_CONTRACTS_NOT_READY" });
@@ -619,6 +659,17 @@
     touch();
   }
 
+  function markPhase7Validation(result) {
+    state.lastPhase7Validation = clone(result);
+    touch();
+  }
+
+  function markPhase7AndroidValidation(result) {
+    state.lastPhase7AndroidValidation = clone(result);
+    state.androidPhase7ValidationPassed = Boolean(result && result.passed === result.total && result.criticalFailed === 0);
+    touch();
+  }
+
   function getPublicApiDescription() {
     return {
       componentId: COMPONENT_ID,
@@ -671,7 +722,9 @@
     markPhase5Validation: markPhase5Validation,
     markPhase5AndroidValidation: markPhase5AndroidValidation,
     markPhase6Validation: markPhase6Validation,
-    markPhase6AndroidValidation: markPhase6AndroidValidation
+    markPhase6AndroidValidation: markPhase6AndroidValidation,
+    markPhase7Validation: markPhase7Validation,
+    markPhase7AndroidValidation: markPhase7AndroidValidation
   });
   namespace.__internal = internal;
 
