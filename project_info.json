@@ -4,7 +4,7 @@
   "project": "AIプロンプト生成Pro",
   "version": "v6.0",
   "entryFile": "index.html",
-  "savedAt": "2026-08-13T09:23:30.324Z",
+  "savedAt": "2026-08-13T12:26:12.742Z",
   "complete": true,
   "requestedFiles": [
     "index.html",
@@ -235,7 +235,8 @@
     "13_development_automation_cross_device.js",
     "13_development_automation_reflection.js",
     "13_development_automation_ui.js",
-    "13_development_automation_phase9_validation.js"
+    "13_development_automation_phase9_validation.js",
+    "13_development_automation_phase10_validation.js"
   ],
   "savedFiles": [
     "index.html",
@@ -466,24 +467,25 @@
     "13_development_automation_cross_device.js",
     "13_development_automation_reflection.js",
     "13_development_automation_ui.js",
-    "13_development_automation_phase9_validation.js"
+    "13_development_automation_phase9_validation.js",
+    "13_development_automation_phase10_validation.js"
   ],
   "missingFiles": [],
   "externalFiles": [
     "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
   ],
-  "localFileCount": 229,
+  "localFileCount": 230,
   "externalFileCount": 1,
-  "fileCount": 230,
+  "fileCount": 231,
   "cleanIndex": true,
   "scriptManifestSource": "00_script_manifest.json",
   "scriptManifestVersion": "1.9.2",
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "4b2bdf2f544bcd2a798a058ae22677919cac8473620c5d5f9c3f30454afcf7ac",
-  "scriptSetHash": "5cca540a6a48d090736bcc28055059755451d8cf772304c6276b4cec93c73221",
-  "scriptManifestCount": 225,
+  "scriptManifestHash": "aa73b907dba5e762a1c7cad091e56ee9c339d3c2f399e93fc9c5575379b46b40",
+  "scriptSetHash": "08a9d432de0d65c84f6e8ebd11654390828abd755db4936b176f9f5c3bc315cb",
+  "scriptManifestCount": 226,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
     "runtimeLoader": false,
