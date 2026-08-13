@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_development_automation_contracts.js
    IDE-190 Development Automation
-   Release: 1.8.0 / Module: Contracts 1.8.0
-   Phase 9: UI / Reflection Package / Cross-Device
+   Release: 1.9.0 / Module: Contracts 1.9.0
+   Phase 10: Integrated / Android Final Validation
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -57,9 +57,9 @@
       description: "Phase 1 component state only. No automation session, approval, dispatch or mutation state is synthesized here.",
       fields: [
         field("initialized", { required: true, type: "boolean" }),
-        field("currentPhase", { required: true, type: "integer", enum: [1, 2, 3, 4, 5, 6, 7, 8] }),
-        field("releaseAllowed", { required: true, type: "boolean", enum: [false] }),
-        field("ide190Complete", { required: true, type: "boolean", enum: [false] }),
+        field("currentPhase", { required: true, type: "integer", enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }),
+        field("releaseAllowed", { required: true, type: "boolean" }),
+        field("ide190Complete", { required: true, type: "boolean" }),
         field("phase2Allowed", { required: true, type: "boolean" }),
         field("phase3Allowed", { required: true, type: "boolean" }),
         field("phase4Allowed", { required: true, type: "boolean" }),
@@ -68,6 +68,7 @@
         field("phase7Allowed", { required: true, type: "boolean" }),
         field("phase8Allowed", { required: true, type: "boolean" }),
         field("phase9Allowed", { required: true, type: "boolean" }),
+        field("phase10Allowed", { required: true, type: "boolean" }),
         field("lastPreDeviceValidation", { required: true, type: "object|null" }),
         field("lastAndroidValidation", { required: true, type: "object|null" }),
         field("lastPhase2Validation", { required: true, type: "object|null" }),
@@ -83,7 +84,12 @@
         field("lastPhase7Validation", { required: true, type: "object|null" }),
         field("lastPhase7AndroidValidation", { required: true, type: "object|null" }),
         field("lastPhase8Validation", { required: true, type: "object|null" }),
-        field("lastPhase8AndroidValidation", { required: true, type: "object|null" })
+        field("lastPhase8AndroidValidation", { required: true, type: "object|null" }),
+        field("lastPhase9Validation", { required: true, type: "object|null" }),
+        field("lastPhase9AndroidValidation", { required: true, type: "object|null" }),
+        field("lastPhase10Validation", { required: true, type: "object|null" }),
+        field("lastPhase10AndroidValidation", { required: true, type: "object|null" }),
+        field("ide190FinalReleaseReceipt", { required: true, type: "object|null" })
       ]
     },
     {
