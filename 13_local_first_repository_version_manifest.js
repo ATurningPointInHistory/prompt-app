@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.1.0
+   Release: 1.1.1
    Phase 2: Android Replica Persistence / IndexedDB Adapter
    Architecture Baseline: DECISION-001..003 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.1.0";
+  const RELEASE_VERSION = "1.1.1";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,10 +20,10 @@
   const moduleVersions = {
     core: BASELINE_VERSION,
     contracts: BASELINE_VERSION,
-    metadata: BASELINE_VERSION,
+    metadata: "1.0.1",
     validation: BASELINE_VERSION,
-    persistence: BASELINE_VERSION,
-    phase2Validation: BASELINE_VERSION
+    persistence: "1.0.1",
+    phase2Validation: "1.0.1"
   };
 
   const fileModules = {
@@ -77,7 +77,7 @@
       version: RELEASE_VERSION,
       implementationPhase: "Phase 2 Android Replica Persistence / IndexedDB Adapter",
       architectureStatus: "DECISION-001..003 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 2 IMPLEMENTED / ANDROID REAL DEVICE VALIDATION REQUIRED",
+      implementationStatus: "PHASE 2 PERSISTENCE HOTFIX IMPLEMENTED / ANDROID REAL DEVICE REVALIDATION REQUIRED",
       decisionIds: [
         "REPOSITORY-010-DECISION-001",
         "REPOSITORY-010-DECISION-002",
