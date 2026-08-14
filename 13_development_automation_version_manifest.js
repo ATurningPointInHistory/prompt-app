@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_development_automation_version_manifest.js
    IDE-190 Development Automation
-   Release: 1.9.0
+   Release: 1.10.0
    Phase 10: Integrated / Android Final Validation
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.9.0";
+  const RELEASE_VERSION = "1.10.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -20,7 +20,7 @@
   }
 
   const moduleVersions = {
-    core: "1.9.0",
+    core: "1.10.0",
     contracts: "1.9.0",
     validation: BASELINE_VERSION,
     intake: BASELINE_VERSION,
@@ -50,9 +50,10 @@
     phase8Validation: BASELINE_VERSION,
     crossDevice: BASELINE_VERSION,
     reflection: BASELINE_VERSION,
-    ui: BASELINE_VERSION,
+    guide: BASELINE_VERSION,
+    ui: "1.1.0",
     phase9Validation: BASELINE_VERSION,
-    phase10Validation: BASELINE_VERSION
+    phase10Validation: "1.0.1"
   };
 
   const fileModules = {
@@ -86,6 +87,7 @@
     "13_development_automation_phase8_validation.js": "phase8Validation",
     "13_development_automation_cross_device.js": "crossDevice",
     "13_development_automation_reflection.js": "reflection",
+    "13_development_automation_guide.js": "guide",
     "13_development_automation_ui.js": "ui",
     "13_development_automation_phase9_validation.js": "phase9Validation",
     "13_development_automation_phase10_validation.js": "phase10Validation"
@@ -302,7 +304,9 @@
       designFreezeVersion: "1.0.0",
       decisionRange: "IDE-190-DECISION-001..012",
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Implementation - Phase 10 Final Validation"
+      status: "Released - v1.10.0 Compatible UI / Guide Enhancement",
+      baseCompletedReleaseVersion: "1.9.0",
+      compatibleFeatureRelease: true
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -328,7 +332,7 @@
     },
     implementation: {
       phase: 10,
-      phaseName: "Integrated / Android Final Validation",
+      phaseName: "Integrated / Android Final Validation + UI / Guide Enhancement",
       completedPhases: [1, 2, 3, 4, 5, 6, 7, 8, 9],
       contractFirst: true,
       inspectBeforeImplement: true,
