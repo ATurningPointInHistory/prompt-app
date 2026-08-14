@@ -183,6 +183,38 @@
     return validateAndStore("syncCandidateDescriptor", record, state.syncCandidateDescriptors, "syncCandidateId", "REPOSITORY010_SYNC_CANDIDATE_DESCRIPTOR_READY");
   }
 
+  function createTransferPackageDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const required = ["transferPackageId", "syncCandidateId", "projectId", "repositoryId", "sourceNodeId", "revisionId", "baseRevisionId", "integrityRecordId", "candidateStateRecordId", "v1GateId", "packageHash"];
+    const missing = required.filter(function missingField(key) { return !internal.text(source[key], ""); });
+    if (missing.length) return fail("REPOSITORY010_TRANSFER_PACKAGE_DESCRIPTOR_MISSING_FIELDS", "Required transfer package fields are missing.", { missing: missing });
+    const record = {
+      transferPackageId: internal.text(source.transferPackageId, ""),
+      syncCandidateId: internal.text(source.syncCandidateId, ""),
+      projectId: internal.text(source.projectId, ""),
+      repositoryId: internal.text(source.repositoryId, ""),
+      sourceNodeId: internal.text(source.sourceNodeId, ""),
+      revisionId: internal.text(source.revisionId, ""),
+      baseRevisionId: internal.text(source.baseRevisionId, ""),
+      integrityRecordId: internal.text(source.integrityRecordId, ""),
+      candidateStateRecordId: internal.text(source.candidateStateRecordId, ""),
+      v1GateId: internal.text(source.v1GateId, ""),
+      integritySnapshot: internal.clone(source.integritySnapshot || {}),
+      packageHashAlgorithm: "SHA-256",
+      packageHash: internal.text(source.packageHash, ""),
+      integrityPreflightStatus: "verified",
+      integrityPreflightPassed: true,
+      transferAttempted: false,
+      transferCompleted: false,
+      v2TransferIntegrityValidated: false,
+      syncEngineInvoked: false,
+      authorityEffect: "none",
+      createdAt: internal.text(source.createdAt, internal.nowIso()),
+      immutable: true
+    };
+    return validateAndStore("transferPackageDescriptor", record, state.transferPackageDescriptors, "transferPackageId", "REPOSITORY010_TRANSFER_PACKAGE_DESCRIPTOR_READY");
+  }
+
   function getRepositoryNodeIdentity(nodeId) {
     const record = state.nodeIdentities.get(internal.text(nodeId, ""));
     return record ? internal.clone(record) : null;
@@ -219,6 +251,11 @@
     return record ? internal.clone(record) : null;
   }
 
+  function getTransferPackageDescriptor(transferPackageId) {
+    const record = state.transferPackageDescriptors.get(internal.text(transferPackageId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
   function getMetadataModelStatus() {
     return {
       status: "Ready",
@@ -241,7 +278,8 @@
         stateRecords: state.stateRecords.size,
         validationGates: state.validationGates.size,
         offlineStagingDescriptors: state.offlineStagingDescriptors.size,
-        syncCandidateDescriptors: state.syncCandidateDescriptors.size
+        syncCandidateDescriptors: state.syncCandidateDescriptors.size,
+        transferPackageDescriptors: state.transferPackageDescriptors.size
       }
     };
   }
@@ -260,6 +298,7 @@
     createValidationGateDescriptor: createValidationGateDescriptor,
     createOfflineStagingDescriptor: createOfflineStagingDescriptor,
     createSyncCandidateDescriptor: createSyncCandidateDescriptor,
+    createTransferPackageDescriptor: createTransferPackageDescriptor,
     getRepositoryNodeIdentity: getRepositoryNodeIdentity,
     getRepositoryRevision: getRepositoryRevision,
     getRepositoryIntegrityRecord: getRepositoryIntegrityRecord,
@@ -267,6 +306,7 @@
     getValidationGateDescriptor: getValidationGateDescriptor,
     getOfflineStagingDescriptor: getOfflineStagingDescriptor,
     getSyncCandidateDescriptor: getSyncCandidateDescriptor,
+    getTransferPackageDescriptor: getTransferPackageDescriptor,
     getMetadataModelStatus: getMetadataModelStatus
   });
   Object.assign(namespace, namespace.api);
