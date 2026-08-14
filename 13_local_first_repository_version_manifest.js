@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.0.0
-   Phase 1: Foundation / Contracts / Metadata Model
+   Release: 1.1.0
+   Phase 2: Android Replica Persistence / IndexedDB Adapter
    Architecture Baseline: DECISION-001..003 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.0.0";
+  const RELEASE_VERSION = "1.1.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -21,14 +21,18 @@
     core: BASELINE_VERSION,
     contracts: BASELINE_VERSION,
     metadata: BASELINE_VERSION,
-    validation: BASELINE_VERSION
+    validation: BASELINE_VERSION,
+    persistence: BASELINE_VERSION,
+    phase2Validation: BASELINE_VERSION
   };
 
   const fileModules = {
     "13_local_first_repository_core.js": "core",
     "13_local_first_repository_contracts.js": "contracts",
     "13_local_first_repository_metadata.js": "metadata",
-    "13_local_first_repository_phase1_validation.js": "validation"
+    "13_local_first_repository_phase1_validation.js": "validation",
+    "13_local_first_repository_persistence.js": "persistence",
+    "13_local_first_repository_phase2_validation.js": "phase2Validation"
   };
 
   const contractVersions = {
@@ -71,9 +75,9 @@
     componentName: "Local-First Repository Coordination",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 1 Foundation / Contracts / Metadata Model",
+      implementationPhase: "Phase 2 Android Replica Persistence / IndexedDB Adapter",
       architectureStatus: "DECISION-001..003 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 1 IMPLEMENTED / REAL DEVICE VALIDATION REQUIRED",
+      implementationStatus: "PHASE 2 IMPLEMENTED / ANDROID REAL DEVICE VALIDATION REQUIRED",
       decisionIds: [
         "REPOSITORY-010-DECISION-001",
         "REPOSITORY-010-DECISION-002",
@@ -81,9 +85,11 @@
       ]
     },
     implementation: {
-      phase: 1,
-      phaseName: "Foundation / Contracts / Metadata Model",
-      persistenceImplemented: false,
+      phase: 2,
+      phaseName: "Android Replica Persistence / IndexedDB Adapter",
+      phase1PersistenceImplemented: false,
+      persistenceImplemented: true,
+      androidIndexedDBPersistenceImplemented: true,
       syncEngineImplemented: false,
       conflictResolutionImplemented: false,
       desktopAdapterImplemented: false,
@@ -116,6 +122,12 @@
       gateApplicability: gateApplicability.slice(),
       gateResults: gateResults.slice(),
       phase1RequiredGateSet: {
+        staticValidation: "required",
+        androidRealValidation: "required",
+        pcRealValidation: "not-required",
+        crossDeviceRealValidation: "not-required"
+      },
+      phase2RequiredGateSet: {
         staticValidation: "required",
         androidRealValidation: "required",
         pcRealValidation: "not-required",
