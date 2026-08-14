@@ -160,6 +160,34 @@
         field("createdAt", { required: true, type: "string" }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
       ]
+    },
+    {
+      key: "transferPackageDescriptor",
+      name: "REPOSITORY-010 Transfer Package Descriptor Contract",
+      fields: [
+        field("transferPackageId", { required: true, type: "string" }),
+        field("syncCandidateId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string" }),
+        field("revisionId", { required: true, type: "string" }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("integrityRecordId", { required: true, type: "string" }),
+        field("candidateStateRecordId", { required: true, type: "string" }),
+        field("v1GateId", { required: true, type: "string" }),
+        field("integritySnapshot", { required: true, type: "object" }),
+        field("packageHashAlgorithm", { required: true, type: "string", enum: ["SHA-256"] }),
+        field("packageHash", { required: true, type: "string" }),
+        field("integrityPreflightStatus", { required: true, type: "string", enum: ["verified"] }),
+        field("integrityPreflightPassed", { required: true, type: "boolean", enum: [true] }),
+        field("transferAttempted", { required: true, type: "boolean", enum: [false] }),
+        field("transferCompleted", { required: true, type: "boolean", enum: [false] }),
+        field("v2TransferIntegrityValidated", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
     }
   ];
 
