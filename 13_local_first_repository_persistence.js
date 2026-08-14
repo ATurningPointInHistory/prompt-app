@@ -1,4 +1,3 @@
-
 /* ============================================================
    FILE: 13_local_first_repository_persistence.js
    REPOSITORY-010 Local-First Repository Coordination
