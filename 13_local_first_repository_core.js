@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_core.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.1.0 / Module: Core 1.0.0
-   Phase 2: Android Replica Persistence / IndexedDB Adapter
+   Release: 1.2.0 / Module: Core 1.1.0
+   Phase 3: Offline Staging Lifecycle / Full-Reload Recovery
    ============================================================ */
 (function (global) {
   "use strict";
@@ -78,6 +78,7 @@
     integrityRecords: new Map(),
     stateRecords: new Map(),
     validationGates: new Map(),
+    offlineStagingDescriptors: new Map(),
     lastPhase1Validation: null,
     lastPhase1AndroidValidation: null,
     phase1PreDeviceValidationPassed: false,
@@ -86,13 +87,21 @@
     lastPhase2AndroidValidation: null,
     phase2PreDeviceValidationPassed: false,
     androidPhase2ValidationPassed: false,
+    lastPhase3Validation: null,
+    lastPhase3AndroidReloadPreparation: null,
+    lastPhase3AndroidValidation: null,
+    phase3PreDeviceValidationPassed: false,
+    phase3AndroidReloadPrepared: false,
+    androidPhase3ValidationPassed: false,
+    offlineStagingStatus: "Ready",
+    lastOfflineStagingRestore: null,
     persistenceStatus: "Not Initialized",
     lastPersistenceError: null,
     lastError: null,
     updatedAt: null
   };
 
-  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates"].forEach(function ensureMap(key) {
+  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
 
@@ -173,6 +182,10 @@
     return phase1Complete() && state.phase2PreDeviceValidationPassed === true && state.androidPhase2ValidationPassed === true;
   }
 
+  function phase3Complete() {
+    return phase2Complete() && state.phase3PreDeviceValidationPassed === true && state.androidPhase3ValidationPassed === true;
+  }
+
   function getStatus() {
     const modules = {};
     Object.keys(namespace.modules || {}).forEach(function mapModule(key) {
@@ -188,29 +201,38 @@
       initialized: state.initialized === true,
       phase1Complete: phase1Complete(),
       phase2Complete: phase2Complete(),
-      releaseAllowed: phase2Complete(),
+      phase3Complete: phase3Complete(),
+      releaseAllowed: phase3Complete(),
       logicalAuthority: VERSION_MANIFEST.authority.logicalAuthority,
       initialCanonicalNode: VERSION_MANIFEST.authority.initialCanonicalNode,
       androidRole: VERSION_MANIFEST.authority.androidIndexedDBRole,
       syncMode: VERSION_MANIFEST.authority.syncMode,
       persistenceImplemented: VERSION_MANIFEST.implementation.persistenceImplemented === true,
       androidIndexedDBPersistenceImplemented: VERSION_MANIFEST.implementation.androidIndexedDBPersistenceImplemented === true,
+      offlineStagingImplemented: VERSION_MANIFEST.implementation.offlineStagingImplemented === true,
+      fullReloadRecoveryImplemented: VERSION_MANIFEST.implementation.fullReloadRecoveryImplemented === true,
       syncEngineImplemented: false,
       directRepositoryMutationAllowed: false,
       automaticConflictWinnerAllowed: false,
       phase1RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase1RequiredGateSet),
       phase2RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase2RequiredGateSet),
+      phase3RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase3RequiredGateSet),
       phase1PreDeviceValidationPassed: state.phase1PreDeviceValidationPassed === true,
       androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true,
       phase2PreDeviceValidationPassed: state.phase2PreDeviceValidationPassed === true,
       androidPhase2ValidationPassed: state.androidPhase2ValidationPassed === true,
+      phase3PreDeviceValidationPassed: state.phase3PreDeviceValidationPassed === true,
+      phase3AndroidReloadPrepared: state.phase3AndroidReloadPrepared === true,
+      androidPhase3ValidationPassed: state.androidPhase3ValidationPassed === true,
+      offlineStagingStatus: state.offlineStagingStatus || "Ready",
       persistenceStatus: state.persistenceStatus,
       metadataCounts: {
         nodeIdentities: state.nodeIdentities.size,
         revisions: state.revisions.size,
         integrityRecords: state.integrityRecords.size,
         stateRecords: state.stateRecords.size,
-        validationGates: state.validationGates.size
+        validationGates: state.validationGates.size,
+        offlineStagingDescriptors: state.offlineStagingDescriptors.size
       },
       modules: modules,
       lastError: clone(state.lastError),
@@ -270,22 +292,44 @@
     touch();
   }
 
+  function markPhase3PreDeviceValidation(result) {
+    state.lastPhase3Validation = clone(result);
+    state.phase3PreDeviceValidationPassed = Boolean(result && result.failed === 0 && result.criticalFailed === 0);
+    touch();
+  }
+
+  function markPhase3AndroidReloadPreparation(result) {
+    state.lastPhase3AndroidReloadPreparation = clone(result);
+    state.phase3AndroidReloadPrepared = Boolean(result && result.failed === 0 && result.criticalFailed === 0 && result.androidRealDevice === true && result.reloadRequired === true);
+    touch();
+  }
+
+  function markPhase3AndroidValidation(result) {
+    state.lastPhase3AndroidValidation = clone(result);
+    state.androidPhase3ValidationPassed = Boolean(result && result.failed === 0 && result.criticalFailed === 0 && result.androidRealDevice === true && result.fullReloadValidated === true);
+    if (state.androidPhase3ValidationPassed) state.phase3AndroidReloadPrepared = true;
+    touch();
+  }
+
   function getPublicApiDescription() {
     return {
       componentId: COMPONENT_ID,
       version: RELEASE_VERSION,
       namespace: "window.REPOSITORY010LocalFirstRepository",
-      phase: 2,
+      phase: 3,
       namespaceFunctions: Object.keys(namespace.api || {}).sort(),
       contractsImplemented: typeof namespace.validateContract === "function",
       metadataModelImplemented: typeof namespace.createRepositoryNodeIdentity === "function",
       phase1PersistenceImplemented: false,
       persistenceImplemented: VERSION_MANIFEST.implementation.persistenceImplemented === true,
       androidIndexedDBPersistenceImplemented: VERSION_MANIFEST.implementation.androidIndexedDBPersistenceImplemented === true,
+      offlineStagingImplemented: VERSION_MANIFEST.implementation.offlineStagingImplemented === true,
+      fullReloadRecoveryImplemented: VERSION_MANIFEST.implementation.fullReloadRecoveryImplemented === true,
       syncEngineImplemented: false,
       mutationEngineImplemented: false,
       phase1ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase1Validation === "function",
-      phase2ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase2Validation === "function"
+      phase2ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase2Validation === "function",
+      phase3ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase3Validation === "function"
     };
   }
 
@@ -306,7 +350,10 @@
     markPhase1PreDeviceValidation: markPhase1PreDeviceValidation,
     markPhase1AndroidValidation: markPhase1AndroidValidation,
     markPhase2PreDeviceValidation: markPhase2PreDeviceValidation,
-    markPhase2AndroidValidation: markPhase2AndroidValidation
+    markPhase2AndroidValidation: markPhase2AndroidValidation,
+    markPhase3PreDeviceValidation: markPhase3PreDeviceValidation,
+    markPhase3AndroidReloadPreparation: markPhase3AndroidReloadPreparation,
+    markPhase3AndroidValidation: markPhase3AndroidValidation
   });
   namespace.__internal = internal;
 
@@ -332,9 +379,11 @@
     id: "REPOSITORY-010-CORE",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 2,
+    phase: 3,
     persistentMutationImplemented: false,
     persistenceImplemented: true,
+    offlineStagingImplemented: true,
+    fullReloadRecoveryImplemented: true,
     syncEngineImplemented: false,
     loadedAt: nowIso()
   };
