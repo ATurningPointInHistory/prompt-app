@@ -4,10 +4,10 @@
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1, IDE-190 v1.10.0 frozen baseline, and REPOSITORY-010 Phase 2 Android Replica Persistence / IndexedDB Adapter.",
+  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1, IDE-190 v1.10.0 frozen baseline, and REPOSITORY-010 Phase 2 Persistence Hotfix v1.1.1.",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-08-14T14:21:09.533Z",
+  "updatedAt": "2026-08-14T17:25:25.049Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -221,13 +221,13 @@
     "./13_development_automation_ui.js?h=869cc5f55fe2",
     "./13_development_automation_phase9_validation.js?h=c7e34495c7f0",
     "./13_development_automation_phase10_validation.js?h=115498505528",
-    "./13_local_first_repository_version_manifest.js?h=46a7221dd84d",
+    "./13_local_first_repository_version_manifest.js?h=e33f99c156e7",
     "./13_local_first_repository_core.js?h=3904266adcb5",
     "./13_local_first_repository_contracts.js?h=fd00cbb74d78",
-    "./13_local_first_repository_metadata.js?h=21ae66343065",
-    "./13_local_first_repository_persistence.js?h=bf877ad31738",
+    "./13_local_first_repository_metadata.js?h=c147b25e3037",
+    "./13_local_first_repository_persistence.js?h=ecfa39f3c670",
     "./13_local_first_repository_phase1_validation.js?h=00189f272c63",
-    "./13_local_first_repository_phase2_validation.js?h=9a0a1163530e",
+    "./13_local_first_repository_phase2_validation.js?h=aa4331489095",
     "./13_project_report.js?h=d636cb6a6766",
     "./13_project_handoff.js?h=a073ff86a1eb",
     "./13_function_relation_v3.js?h=0857a784aa30",
@@ -1306,9 +1306,9 @@
       "cacheKey": "115498505528"
     },
     "13_local_first_repository_version_manifest.js": {
-      "sha256": "46a7221dd84d5390f43c4be55c86fcf9e3ac66f9b4546c16600753f9119839fc",
-      "byteSize": 6492,
-      "cacheKey": "46a7221dd84d"
+      "sha256": "e33f99c156e7a1ba548113178f9ff853cee5796cc057e6baf7739e27b1fec27d",
+      "byteSize": 6486,
+      "cacheKey": "e33f99c156e7"
     },
     "13_local_first_repository_core.js": {
       "sha256": "3904266adcb5c84d37adba5c8cdb2a642377a6462157f246b28a7027a90754ee",
@@ -1321,14 +1321,14 @@
       "cacheKey": "fd00cbb74d78"
     },
     "13_local_first_repository_metadata.js": {
-      "sha256": "21ae66343065b70ce504a15d025181ea5c0fd5ba1e878062fd0bccc6418db0e1",
-      "byteSize": 10509,
-      "cacheKey": "21ae66343065"
+      "sha256": "c147b25e303738dbddce4c8eac03611acdc66a11d901e7d8fded5c8c1aa07423",
+      "byteSize": 10739,
+      "cacheKey": "c147b25e3037"
     },
     "13_local_first_repository_persistence.js": {
-      "sha256": "bf877ad3173822eda6b4bc8e4aac24f510fbe512e5ab95bfdfe264ec3a0c0e2f",
-      "byteSize": 13153,
-      "cacheKey": "bf877ad31738"
+      "sha256": "ecfa39f3c67022418dbd9ae0e8ac6ac1dc5ef9bd833c4b93186541773f4deefa",
+      "byteSize": 16201,
+      "cacheKey": "ecfa39f3c670"
     },
     "13_local_first_repository_phase1_validation.js": {
       "sha256": "00189f272c636f60fb5de207b71b5f7fe0195410658a7566f345e33ff5adb70e",
@@ -1336,9 +1336,9 @@
       "cacheKey": "00189f272c63"
     },
     "13_local_first_repository_phase2_validation.js": {
-      "sha256": "9a0a1163530e04b7b361de5715d272d197a9046768dc5e374d913e9e5de07337",
-      "byteSize": 15613,
-      "cacheKey": "9a0a1163530e"
+      "sha256": "aa433148909595c82881defe86cc6f01eeaaea8b6c64049f5a198f8b08f43a4e",
+      "byteSize": 17222,
+      "cacheKey": "aa4331489095"
     },
     "13_project_report.js": {
       "sha256": "d636cb6a67665a6a26975934e81c9ffe2e1aca43b7f1303d0b9dae1a221c813b",
@@ -1416,6 +1416,6 @@
       "cacheKey": "138e34ded106"
     }
   },
-  "scriptSetHash": "69036ace24ae509f1cc6ef0b1636a2c445594d9d93488e5e7ed1edc3b8713840",
-  "manifestHash": "64907278b5ccd68414a83df03b659aab5ac2b7f2ae25e30232262a375bc200b0"
+  "scriptSetHash": "c75e42df343f7457616410897f902cec79a0f3c5fc12cef7ef65cb24250cf809",
+  "manifestHash": "d88a5c7df75f9a99038b2911c0598417d9cd27c2ea4b9d4a0daebddeb2107468"
 }
