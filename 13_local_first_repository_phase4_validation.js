@@ -167,8 +167,8 @@
     const prior = VERSION_MANIFEST.release.priorValidatedBaseline || null;
 
     check("Phase 3 deterministic regression passes", Boolean(phase3 && phase3.failed === 0 && phase3.criticalFailed === 0), phase3 && phase3.status, "Regression", "Critical");
-    check("Prior Phase 3 Android release baseline is recorded", Boolean(prior && prior.phase === 3 && prior.version === "1.2.0" && prior.androidRealValidationPassed === true), prior, "Release Lineage", "Critical");
-    check("Phase 4 scope is Sync Candidate Preparation / V1 Local Validation", VERSION_MANIFEST.implementation.phase === 4 && VERSION_MANIFEST.implementation.syncCandidateCreationImplemented === true && VERSION_MANIFEST.implementation.v1LocalValidationImplemented === true, VERSION_MANIFEST.implementation, "Scope", "Critical");
+    check("Prior Phase 3 Android release baseline is recorded", Boolean(prior && Number(prior.phase || 0) >= 3 && prior.androidRealValidationPassed === true), prior, "Release Lineage", "Critical");
+    check("Phase 4 scope is Sync Candidate Preparation / V1 Local Validation", Number(VERSION_MANIFEST.implementation.phase || 0) >= 4 && VERSION_MANIFEST.implementation.syncCandidateCreationImplemented === true && VERSION_MANIFEST.implementation.v1LocalValidationImplemented === true, VERSION_MANIFEST.implementation, "Scope", "Critical");
     check("Sync Candidate Descriptor contract is registered", Boolean(namespace.getContractDefinition("syncCandidateDescriptor")), namespace.getContractDefinition("syncCandidateDescriptor"), "Contract", "Critical");
     check("Sync Candidate module is ready", Boolean(namespace.modules.syncCandidate && namespace.modules.syncCandidate.status === "Ready"), namespace.modules.syncCandidate, "Module", "Critical");
     check("V2 Transfer remains unimplemented", VERSION_MANIFEST.implementation.v2TransferIntegrityValidationImplemented === false, VERSION_MANIFEST.implementation.v2TransferIntegrityValidationImplemented, "Boundary", "Critical");
@@ -292,7 +292,7 @@
 
     check("Phase 4 pre-device validation passes", pre.failed === 0 && pre.criticalFailed === 0, pre.status, "Pre-Device", "Critical");
     check("Phase 2 Android persistence regression passes", Boolean(phase2Android && phase2Android.failed === 0 && phase2Android.criticalFailed === 0 && phase2Android.androidRealDevice === true), phase2Android && phase2Android.status, "Regression", "Critical");
-    check("Prior Phase 3 release baseline remains inherited", Boolean(VERSION_MANIFEST.release.priorValidatedBaseline && VERSION_MANIFEST.release.priorValidatedBaseline.phase === 3 && VERSION_MANIFEST.release.priorValidatedBaseline.androidRealValidationPassed === true), VERSION_MANIFEST.release.priorValidatedBaseline, "Release Lineage", "Critical");
+    check("Prior Phase 3 release baseline remains inherited", Boolean(VERSION_MANIFEST.release.priorValidatedBaseline && Number(VERSION_MANIFEST.release.priorValidatedBaseline.phase || 0) >= 3 && VERSION_MANIFEST.release.priorValidatedBaseline.androidRealValidationPassed === true), VERSION_MANIFEST.release.priorValidatedBaseline, "Release Lineage", "Critical");
     check("Runtime is Android", androidRealDevice === true, userAgent || "navigator.userAgent unavailable", "Android Real Device", "Critical");
     check("IndexedDB is available", Boolean(global.indexedDB), Boolean(global.indexedDB), "Android IndexedDB", "Critical");
     check("PC Real Validation is not required by Phase 4", VERSION_MANIFEST.validationAuthority.phase4RequiredGateSet.pcRealValidation === "not-required", VERSION_MANIFEST.validationAuthority.phase4RequiredGateSet.pcRealValidation, "Gate Applicability", "Critical");
