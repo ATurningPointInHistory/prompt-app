@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.1.1
-   Phase 2: Android Replica Persistence / IndexedDB Adapter
+   Release: 1.2.0
+   Phase 3: Offline Staging Lifecycle / Full-Reload Recovery
    Architecture Baseline: DECISION-001..003 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.1.1";
+  const RELEASE_VERSION = "1.2.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -18,12 +18,14 @@
   }
 
   const moduleVersions = {
-    core: BASELINE_VERSION,
-    contracts: BASELINE_VERSION,
-    metadata: "1.0.1",
+    core: "1.1.0",
+    contracts: "1.1.0",
+    metadata: "1.1.0",
     validation: BASELINE_VERSION,
-    persistence: "1.0.1",
-    phase2Validation: "1.0.1"
+    persistence: "1.1.0",
+    phase2Validation: "1.0.2",
+    offlineStaging: "1.0.0",
+    phase3Validation: "1.0.0"
   };
 
   const fileModules = {
@@ -32,7 +34,9 @@
     "13_local_first_repository_metadata.js": "metadata",
     "13_local_first_repository_phase1_validation.js": "validation",
     "13_local_first_repository_persistence.js": "persistence",
-    "13_local_first_repository_phase2_validation.js": "phase2Validation"
+    "13_local_first_repository_phase2_validation.js": "phase2Validation",
+    "13_local_first_repository_offline_staging.js": "offlineStaging",
+    "13_local_first_repository_phase3_validation.js": "phase3Validation"
   };
 
   const contractVersions = {
@@ -41,7 +45,8 @@
     repositoryRevision: BASELINE_VERSION,
     repositoryIntegrityRecord: BASELINE_VERSION,
     repositoryStateRecord: BASELINE_VERSION,
-    validationGateDescriptor: BASELINE_VERSION
+    validationGateDescriptor: BASELINE_VERSION,
+    offlineStagingDescriptor: "1.0.0"
   };
 
   const contractIds = {
@@ -50,7 +55,8 @@
     repositoryRevision: "REPOSITORY-010-CONTRACT-REVISION",
     repositoryIntegrityRecord: "REPOSITORY-010-CONTRACT-INTEGRITY-RECORD",
     repositoryStateRecord: "REPOSITORY-010-CONTRACT-STATE-RECORD",
-    validationGateDescriptor: "REPOSITORY-010-CONTRACT-VALIDATION-GATE"
+    validationGateDescriptor: "REPOSITORY-010-CONTRACT-VALIDATION-GATE",
+    offlineStagingDescriptor: "REPOSITORY-010-CONTRACT-OFFLINE-STAGING"
   };
 
   const repositoryStates = [
@@ -75,9 +81,9 @@
     componentName: "Local-First Repository Coordination",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 2 Android Replica Persistence / IndexedDB Adapter",
+      implementationPhase: "Phase 3 Offline Staging Lifecycle / Full-Reload Recovery",
       architectureStatus: "DECISION-001..003 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 2 PERSISTENCE HOTFIX IMPLEMENTED / ANDROID REAL DEVICE REVALIDATION REQUIRED",
+      implementationStatus: "PHASE 3 IMPLEMENTED / ANDROID FULL-RELOAD VALIDATION REQUIRED",
       decisionIds: [
         "REPOSITORY-010-DECISION-001",
         "REPOSITORY-010-DECISION-002",
@@ -85,11 +91,14 @@
       ]
     },
     implementation: {
-      phase: 2,
-      phaseName: "Android Replica Persistence / IndexedDB Adapter",
+      phase: 3,
+      phaseName: "Offline Staging Lifecycle / Full-Reload Recovery",
       phase1PersistenceImplemented: false,
       persistenceImplemented: true,
       androidIndexedDBPersistenceImplemented: true,
+      offlineStagingImplemented: true,
+      fullReloadRecoveryImplemented: true,
+      syncCandidateCreationImplemented: false,
       syncEngineImplemented: false,
       conflictResolutionImplemented: false,
       desktopAdapterImplemented: false,
@@ -128,6 +137,12 @@
         crossDeviceRealValidation: "not-required"
       },
       phase2RequiredGateSet: {
+        staticValidation: "required",
+        androidRealValidation: "required",
+        pcRealValidation: "not-required",
+        crossDeviceRealValidation: "not-required"
+      },
+      phase3RequiredGateSet: {
         staticValidation: "required",
         androidRealValidation: "required",
         pcRealValidation: "not-required",
