@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_contracts.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.0.0 / Module: Contracts 1.0.0
-   Phase 1: Foundation / Contracts / Metadata Model
+   Release: 1.2.0 / Module: Contracts 1.1.0
+   Phase 3 Compatible: Offline Staging Descriptor added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -108,6 +108,26 @@
         field("validationIsApproval", { required: true, type: "boolean", enum: [false] }),
         field("mutationAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
         field("recordedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "offlineStagingDescriptor",
+      name: "REPOSITORY-010 Offline Staging Descriptor Contract",
+      fields: [
+        field("stagingId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("nodeId", { required: true, type: "string" }),
+        field("revisionId", { required: true, type: "string" }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("integrityRecordId", { required: true, type: "string" }),
+        field("stateRecordId", { required: true, type: "string" }),
+        field("lifecycleStatus", { required: true, type: "string", enum: ["staged"] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("syncCandidateCreated", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
       ]
     }
