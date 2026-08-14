@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_persistence.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.1.0 / Module: Persistence 1.0.0
+   Release: 1.1.1 / Module: Persistence 1.0.1
    Phase 2: Android Replica Persistence / IndexedDB Adapter
    ============================================================ */
 (function (global) {
@@ -94,13 +94,28 @@
     });
   }
 
+  async function nativeDelete(recordType, id) {
+    const def = definition(recordType);
+    if (!def) throw new Error("Unknown repository record type: " + recordType);
+    const recordId = String(id || "");
+    if (!recordId) throw new Error("Repository record id is required for delete.");
+    const db = await openDatabase();
+    return new Promise(function executor(resolve, reject) {
+      const tx = db.transaction(def.storeName, "readwrite");
+      tx.objectStore(def.storeName).delete(recordId);
+      tx.oncomplete = function complete() { resolve(true); };
+      tx.onerror = function error() { reject(tx.error || new Error("IndexedDB delete failed.")); };
+    });
+  }
+
   const nativeAdapter = {
     adapterId: "REPOSITORY-010-ANDROID-INDEXEDDB-REPLICA-PERSISTENCE",
     role: "validated-working-replica-offline-staging",
     readMode: "validated-record-read-write-no-canonical-authority",
     async put(recordType, record) { return nativePut(recordType, record); },
     async get(recordType, id) { return nativeGet(recordType, id); },
-    async list(recordType) { return nativeList(recordType); }
+    async list(recordType) { return nativeList(recordType); },
+    async delete(recordType, id) { return nativeDelete(recordType, id); }
   };
 
   function createMemoryLocalFirstRepositoryPersistenceAdapter() {
@@ -126,6 +141,14 @@
         if (!def) throw new Error("Unknown repository record type: " + recordType);
         return Array.from(stores[recordType].values()).map(internal.clone);
       },
+      async delete(recordType, id) {
+        const def = definition(recordType);
+        if (!def) throw new Error("Unknown repository record type: " + recordType);
+        const recordId = String(id || "");
+        if (!recordId) throw new Error("Repository record id is required for delete.");
+        stores[recordType].delete(recordId);
+        return true;
+      },
       exportRecords: function exportRecords() {
         const output = {};
         Object.keys(stores).forEach(function exportStore(recordType) { output[recordType] = Array.from(stores[recordType].values()).map(internal.clone); });
@@ -143,7 +166,7 @@
       internal.touch();
       return internal.buildResult(true, "REPOSITORY010_PERSISTENCE_ADAPTER_RESET", "Ready", { adapterId: nativeAdapter.adapterId });
     }
-    const valid = adapter && typeof adapter.put === "function" && typeof adapter.get === "function" && typeof adapter.list === "function";
+    const valid = adapter && typeof adapter.put === "function" && typeof adapter.get === "function" && typeof adapter.list === "function" && typeof adapter.delete === "function";
     if (!valid) return internal.buildResult(false, "REPOSITORY010_PERSISTENCE_ADAPTER_INVALID", "Blocked", null);
     adapterOverride = adapter;
     state.persistenceStatus = "Ready";
@@ -204,6 +227,36 @@
   async function getPersistedLocalFirstRepositoryRecord(recordType, id) { return currentAdapter().get(recordType, id); }
   async function listPersistedLocalFirstRepositoryRecords(recordType) { return currentAdapter().list(recordType); }
 
+  async function deletePersistedLocalFirstRepositoryRecord(recordType, id) {
+    const def = definition(recordType);
+    const recordId = String(id || "");
+    if (!def) return internal.buildResult(false, "REPOSITORY010_PERSISTENCE_RECORD_TYPE_INVALID", "Blocked", { recordType: recordType || null });
+    if (!recordId) return internal.buildResult(false, "REPOSITORY010_PERSISTENCE_RECORD_ID_MISSING", "Blocked", { recordType: recordType, keyPath: def.keyPath });
+    try {
+      await currentAdapter().delete(recordType, recordId);
+      const readBack = await currentAdapter().get(recordType, recordId);
+      if (readBack !== null) throw new Error("Persistence delete read-back verification failed.");
+      state.persistenceStatus = "Verified";
+      state.lastPersistenceError = null;
+      internal.touch();
+      return internal.buildResult(true, "REPOSITORY010_RECORD_DELETED", "Verified", {
+        recordType: recordType,
+        recordId: recordId,
+        adapterId: currentAdapter().adapterId || "custom",
+        deleteReadBackVerified: true,
+        exactIdDelete: true,
+        broadClearPerformed: false,
+        authorityEffect: "none",
+        canonicalMutationPerformed: false
+      });
+    } catch (error) {
+      state.persistenceStatus = "Failed";
+      state.lastPersistenceError = error && error.message ? error.message : String(error);
+      internal.touch();
+      return internal.buildResult(false, "REPOSITORY010_RECORD_DELETE_FAILED", "Failed", { recordType: recordType, recordId: recordId }, { error: { message: state.lastPersistenceError, category: "Persistence" } });
+    }
+  }
+
   function getLocalFirstRepositoryPersistenceStatus() {
     return {
       status: state.persistenceStatus || "Not Initialized",
@@ -221,6 +274,8 @@
       canonicalMutationAuthority: false,
       authorityPromotionAllowed: false,
       readBackVerificationRequired: true,
+      exactIdDeleteSupported: true,
+      broadClearSupported: false,
       lastError: state.lastPersistenceError || null
     };
   }
@@ -232,6 +287,7 @@
     persistLocalFirstRepositoryRecord: persistLocalFirstRepositoryRecord,
     getPersistedLocalFirstRepositoryRecord: getPersistedLocalFirstRepositoryRecord,
     listPersistedLocalFirstRepositoryRecords: listPersistedLocalFirstRepositoryRecords,
+    deletePersistedLocalFirstRepositoryRecord: deletePersistedLocalFirstRepositoryRecord,
     getLocalFirstRepositoryPersistenceStatus: getLocalFirstRepositoryPersistenceStatus
   });
   Object.assign(namespace, namespace.api);
@@ -245,6 +301,9 @@
     indexedDBRequiredForAndroidGate: true,
     persistentCanonicalMutationImplemented: false,
     syncEngineImplemented: false,
+    exactIdDeleteSupported: true,
+    broadClearSupported: false,
+    validationFixtureCleanupSupported: true,
     loadedAt: internal.nowIso()
   };
 
