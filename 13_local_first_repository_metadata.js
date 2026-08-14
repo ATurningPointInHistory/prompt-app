@@ -149,6 +149,40 @@
     return validateAndStore("offlineStagingDescriptor", record, state.offlineStagingDescriptors, "stagingId", "REPOSITORY010_OFFLINE_STAGING_DESCRIPTOR_READY");
   }
 
+  function createSyncCandidateDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const required = ["syncCandidateId", "stagingId", "projectId", "repositoryId", "sourceNodeId", "revisionId", "baseRevisionId", "integrityRecordId", "stagedStateRecordId", "candidateStateRecordId", "v1GateId"];
+    const missing = required.filter(function missingField(key) { return !internal.text(source[key], ""); });
+    if (missing.length) return fail("REPOSITORY010_SYNC_CANDIDATE_DESCRIPTOR_MISSING_FIELDS", "Required sync candidate fields are missing.", { missing: missing });
+    const record = {
+      syncCandidateId: internal.text(source.syncCandidateId, ""),
+      stagingId: internal.text(source.stagingId, ""),
+      projectId: internal.text(source.projectId, ""),
+      repositoryId: internal.text(source.repositoryId, ""),
+      sourceNodeId: internal.text(source.sourceNodeId, ""),
+      revisionId: internal.text(source.revisionId, ""),
+      baseRevisionId: internal.text(source.baseRevisionId, ""),
+      integrityRecordId: internal.text(source.integrityRecordId, ""),
+      stagedStateRecordId: internal.text(source.stagedStateRecordId, ""),
+      candidateStateRecordId: internal.text(source.candidateStateRecordId, ""),
+      v1GateId: internal.text(source.v1GateId, ""),
+      lifecycleStatus: "sync-candidate",
+      validationLayer: "V1 Local Validation",
+      localValidationPassed: true,
+      transferAttempted: false,
+      transferIntegrityValidated: false,
+      baseConflictValidated: false,
+      targetEnvironmentValidated: false,
+      explicitAcceptanceReceived: false,
+      canonicalMutationPerformed: false,
+      syncEngineInvoked: false,
+      authorityEffect: "none",
+      createdAt: internal.text(source.createdAt, internal.nowIso()),
+      immutable: true
+    };
+    return validateAndStore("syncCandidateDescriptor", record, state.syncCandidateDescriptors, "syncCandidateId", "REPOSITORY010_SYNC_CANDIDATE_DESCRIPTOR_READY");
+  }
+
   function getRepositoryNodeIdentity(nodeId) {
     const record = state.nodeIdentities.get(internal.text(nodeId, ""));
     return record ? internal.clone(record) : null;
@@ -180,6 +214,11 @@
     return record ? internal.clone(record) : null;
   }
 
+  function getSyncCandidateDescriptor(syncCandidateId) {
+    const record = state.syncCandidateDescriptors.get(internal.text(syncCandidateId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
   function getMetadataModelStatus() {
     return {
       status: "Ready",
@@ -201,7 +240,8 @@
         integrityRecords: state.integrityRecords.size,
         stateRecords: state.stateRecords.size,
         validationGates: state.validationGates.size,
-        offlineStagingDescriptors: state.offlineStagingDescriptors.size
+        offlineStagingDescriptors: state.offlineStagingDescriptors.size,
+        syncCandidateDescriptors: state.syncCandidateDescriptors.size
       }
     };
   }
@@ -219,12 +259,14 @@
     createRepositoryStateRecord: createRepositoryStateRecord,
     createValidationGateDescriptor: createValidationGateDescriptor,
     createOfflineStagingDescriptor: createOfflineStagingDescriptor,
+    createSyncCandidateDescriptor: createSyncCandidateDescriptor,
     getRepositoryNodeIdentity: getRepositoryNodeIdentity,
     getRepositoryRevision: getRepositoryRevision,
     getRepositoryIntegrityRecord: getRepositoryIntegrityRecord,
     getRepositoryStateRecord: getRepositoryStateRecord,
     getValidationGateDescriptor: getValidationGateDescriptor,
     getOfflineStagingDescriptor: getOfflineStagingDescriptor,
+    getSyncCandidateDescriptor: getSyncCandidateDescriptor,
     getMetadataModelStatus: getMetadataModelStatus
   });
   Object.assign(namespace, namespace.api);
