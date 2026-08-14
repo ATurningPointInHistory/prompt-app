@@ -653,6 +653,31 @@ function registerDefaultIdeComponents() {
       probe:
         "getAiDevelopmentAssistantStatus",
       category: "IDE"
+    },
+    {
+      id: "IDE-190",
+      title: "Development Automation",
+      summary:
+        "安全な開発自動化の状態確認・使い方・Reflection Packageを開きます。実行権限はUIに追加しません。",
+      icon:
+        "🛡️",
+      version:
+        (typeof IDE190VersionManifest !== "undefined" && IDE190VersionManifest.release)
+          ? IDE190VersionManifest.release.version
+          : "1.10.0",
+      status: "Official",
+      ready:
+        typeof openDevelopmentAutomationConsole ===
+        "function",
+      progress: 100,
+      health: 100,
+      launcher:
+        "openDevelopmentAutomationConsole",
+      validator:
+        "runDevelopmentAutomationPhase10Validation",
+      probe:
+        "getDevelopmentAutomationStatus",
+      category: "IDE"
     }
   ];
 
