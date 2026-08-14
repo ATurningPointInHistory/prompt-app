@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_metadata.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.0.0 / Module: Metadata Model 1.0.0
+   Release: 1.1.1 / Module: Metadata Model 1.0.1
    Phase 1: Foundation / Contracts / Metadata Model
    ============================================================ */
 (function (global) {
@@ -162,8 +162,8 @@
       identityGrantsAuthority: false,
       stateGrantsAuthority: false,
       validationGrantsApproval: false,
-      persistenceImplemented: false,
-      syncEngineImplemented: false,
+      persistenceImplemented: VERSION_MANIFEST.implementation.persistenceImplemented === true,
+      syncEngineImplemented: VERSION_MANIFEST.implementation.syncEngineImplemented === true,
       counts: {
         nodeIdentities: state.nodeIdentities.size,
         revisions: state.revisions.size,
@@ -200,8 +200,8 @@
     version: MODULE_VERSION,
     status: "Loaded",
     phase: 1,
-    persistenceImplemented: false,
-    syncEngineImplemented: false,
+    persistenceImplemented: VERSION_MANIFEST.implementation.persistenceImplemented === true,
+    syncEngineImplemented: VERSION_MANIFEST.implementation.syncEngineImplemented === true,
     loadedAt: internal.nowIso()
   };
 })(typeof window !== "undefined" ? window : globalThis);
