@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_core.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.0.0 / Module: Core 1.0.0
-   Phase 1: Foundation / Contracts / Metadata Model
+   Release: 1.1.0 / Module: Core 1.0.0
+   Phase 2: Android Replica Persistence / IndexedDB Adapter
    ============================================================ */
 (function (global) {
   "use strict";
@@ -82,6 +82,12 @@
     lastPhase1AndroidValidation: null,
     phase1PreDeviceValidationPassed: false,
     androidPhase1ValidationPassed: false,
+    lastPhase2Validation: null,
+    lastPhase2AndroidValidation: null,
+    phase2PreDeviceValidationPassed: false,
+    androidPhase2ValidationPassed: false,
+    persistenceStatus: "Not Initialized",
+    lastPersistenceError: null,
     lastError: null,
     updatedAt: null
   };
@@ -127,7 +133,10 @@
       ),
       phase1DirectDependencyRequired: false,
       persistenceApiReusedInPhase1: false,
-      mutationApiReusedInPhase1: false
+      mutationApiReusedInPhase1: false,
+      phase2DirectDependencyRequired: false,
+      existingIndexedDBPatternReusedByDesign: true,
+      mutationApiReusedInPhase2: false
     };
   }
 
@@ -139,8 +148,8 @@
     return deepFreeze({
       componentId: COMPONENT_ID,
       componentName: COMPONENT_NAME,
-      version: RELEASE_VERSION,
-      implementationPhase: VERSION_MANIFEST.release.implementationPhase,
+      version: "1.0.0",
+      implementationPhase: "Phase 1 Foundation / Contracts / Metadata Model",
       architectureStatus: VERSION_MANIFEST.release.architectureStatus,
       decisions: clone(VERSION_MANIFEST.release.decisionIds),
       logicalAuthority: VERSION_MANIFEST.authority.logicalAuthority,
@@ -160,6 +169,10 @@
     return state.phase1PreDeviceValidationPassed === true && state.androidPhase1ValidationPassed === true;
   }
 
+  function phase2Complete() {
+    return phase1Complete() && state.phase2PreDeviceValidationPassed === true && state.androidPhase2ValidationPassed === true;
+  }
+
   function getStatus() {
     const modules = {};
     Object.keys(namespace.modules || {}).forEach(function mapModule(key) {
@@ -174,18 +187,24 @@
       decisionsFrozen: clone(VERSION_MANIFEST.release.decisionIds),
       initialized: state.initialized === true,
       phase1Complete: phase1Complete(),
-      releaseAllowed: phase1Complete(),
+      phase2Complete: phase2Complete(),
+      releaseAllowed: phase2Complete(),
       logicalAuthority: VERSION_MANIFEST.authority.logicalAuthority,
       initialCanonicalNode: VERSION_MANIFEST.authority.initialCanonicalNode,
       androidRole: VERSION_MANIFEST.authority.androidIndexedDBRole,
       syncMode: VERSION_MANIFEST.authority.syncMode,
-      persistenceImplemented: false,
+      persistenceImplemented: VERSION_MANIFEST.implementation.persistenceImplemented === true,
+      androidIndexedDBPersistenceImplemented: VERSION_MANIFEST.implementation.androidIndexedDBPersistenceImplemented === true,
       syncEngineImplemented: false,
       directRepositoryMutationAllowed: false,
       automaticConflictWinnerAllowed: false,
       phase1RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase1RequiredGateSet),
+      phase2RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase2RequiredGateSet),
       phase1PreDeviceValidationPassed: state.phase1PreDeviceValidationPassed === true,
       androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true,
+      phase2PreDeviceValidationPassed: state.phase2PreDeviceValidationPassed === true,
+      androidPhase2ValidationPassed: state.androidPhase2ValidationPassed === true,
+      persistenceStatus: state.persistenceStatus,
       metadataCounts: {
         nodeIdentities: state.nodeIdentities.size,
         revisions: state.revisions.size,
@@ -209,6 +228,9 @@
       if (typeof namespace.initializeMetadataModel === "function") results.push(namespace.initializeMetadataModel());
       if (typeof namespace.initializeContracts !== "function" || typeof namespace.initializeMetadataModel !== "function") {
         throw new Error("Phase 1 required modules are not loaded.");
+      }
+      if (typeof namespace.getLocalFirstRepositoryPersistenceStatus === "function") {
+        state.persistenceStatus = namespace.getLocalFirstRepositoryPersistenceStatus().status;
       }
       const failed = results.filter(function findFailed(item) { return !item || item.ok !== true; });
       state.initialized = failed.length === 0;
@@ -236,19 +258,34 @@
     touch();
   }
 
+  function markPhase2PreDeviceValidation(result) {
+    state.lastPhase2Validation = clone(result);
+    state.phase2PreDeviceValidationPassed = Boolean(result && result.failed === 0 && result.criticalFailed === 0);
+    touch();
+  }
+
+  function markPhase2AndroidValidation(result) {
+    state.lastPhase2AndroidValidation = clone(result);
+    state.androidPhase2ValidationPassed = Boolean(result && result.failed === 0 && result.criticalFailed === 0 && result.androidRealDevice === true);
+    touch();
+  }
+
   function getPublicApiDescription() {
     return {
       componentId: COMPONENT_ID,
       version: RELEASE_VERSION,
       namespace: "window.REPOSITORY010LocalFirstRepository",
-      phase: 1,
+      phase: 2,
       namespaceFunctions: Object.keys(namespace.api || {}).sort(),
       contractsImplemented: typeof namespace.validateContract === "function",
       metadataModelImplemented: typeof namespace.createRepositoryNodeIdentity === "function",
-      persistenceImplemented: false,
+      phase1PersistenceImplemented: false,
+      persistenceImplemented: VERSION_MANIFEST.implementation.persistenceImplemented === true,
+      androidIndexedDBPersistenceImplemented: VERSION_MANIFEST.implementation.androidIndexedDBPersistenceImplemented === true,
       syncEngineImplemented: false,
       mutationEngineImplemented: false,
-      phase1ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase1Validation === "function"
+      phase1ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase1Validation === "function",
+      phase2ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase2Validation === "function"
     };
   }
 
@@ -267,7 +304,9 @@
     touch: touch,
     buildResult: buildResult,
     markPhase1PreDeviceValidation: markPhase1PreDeviceValidation,
-    markPhase1AndroidValidation: markPhase1AndroidValidation
+    markPhase1AndroidValidation: markPhase1AndroidValidation,
+    markPhase2PreDeviceValidation: markPhase2PreDeviceValidation,
+    markPhase2AndroidValidation: markPhase2AndroidValidation
   });
   namespace.__internal = internal;
 
@@ -293,9 +332,9 @@
     id: "REPOSITORY-010-CORE",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 1,
+    phase: 2,
     persistentMutationImplemented: false,
-    persistenceImplemented: false,
+    persistenceImplemented: true,
     syncEngineImplemented: false,
     loadedAt: nowIso()
   };
