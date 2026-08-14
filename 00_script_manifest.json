@@ -4,10 +4,10 @@
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1 and IDE-190 v1.10.0 compatible UI / Guide enhancement.",
+  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1, IDE-190 v1.10.0 frozen baseline, and REPOSITORY-010 Phase 1 Local-First Repository foundation.",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-08-13T23:55:05.865Z",
+  "updatedAt": "2026-08-14T13:01:09.135Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -221,6 +221,11 @@
     "./13_development_automation_ui.js?h=869cc5f55fe2",
     "./13_development_automation_phase9_validation.js?h=c7e34495c7f0",
     "./13_development_automation_phase10_validation.js?h=115498505528",
+    "./13_local_first_repository_version_manifest.js?h=f6b8fcf362e4",
+    "./13_local_first_repository_core.js?h=2d8ed25a3a02",
+    "./13_local_first_repository_contracts.js?h=fd00cbb74d78",
+    "./13_local_first_repository_metadata.js?h=21ae66343065",
+    "./13_local_first_repository_phase1_validation.js?h=1260e8e4d27f",
     "./13_project_report.js?h=d636cb6a6766",
     "./13_project_handoff.js?h=a073ff86a1eb",
     "./13_function_relation_v3.js?h=0857a784aa30",
@@ -1372,8 +1377,33 @@
       "sha256": "138e34ded10617cf57899215d4c79704b86c8b127c9bdec59ad31f3e08f1f728",
       "byteSize": 4460,
       "cacheKey": "138e34ded106"
+    },
+    "13_local_first_repository_version_manifest.js": {
+      "sha256": "f6b8fcf362e465a012ee333ad49668a500d86c9cc138948f6a264bfaa8636b0c",
+      "byteSize": 5941,
+      "cacheKey": "f6b8fcf362e4"
+    },
+    "13_local_first_repository_core.js": {
+      "sha256": "2d8ed25a3a02cf0c557953cb7ff54724c103bfdea3bc7e1c8a8089c2d51d6279",
+      "byteSize": 12714,
+      "cacheKey": "2d8ed25a3a02"
+    },
+    "13_local_first_repository_contracts.js": {
+      "sha256": "fd00cbb74d780a9b5f498e25bad486fc0b343ce6483d5b000049844a22951e22",
+      "byteSize": 10667,
+      "cacheKey": "fd00cbb74d78"
+    },
+    "13_local_first_repository_metadata.js": {
+      "sha256": "21ae66343065b70ce504a15d025181ea5c0fd5ba1e878062fd0bccc6418db0e1",
+      "byteSize": 10509,
+      "cacheKey": "21ae66343065"
+    },
+    "13_local_first_repository_phase1_validation.js": {
+      "sha256": "1260e8e4d27f529644af9c6cabfc0c01e3c1eae57f8659fca5558bb2a08a2c78",
+      "byteSize": 16420,
+      "cacheKey": "1260e8e4d27f"
     }
   },
-  "scriptSetHash": "46d8360d448bbf494bc4bb1cf69a10714b7db80f883f0b1baa4790c0a8f509cc",
-  "manifestHash": "8fcc70c06902139df60361fc1c0f60018c2b0ce3d082a8552c24247df0c184a9"
+  "scriptSetHash": "a0124a6650d88ef9795a1457bc4c7508003e97004b0f597f395bc061dc93ec01",
+  "manifestHash": "f8258061a77f69e7845bfa2383bd5ebffcb65a836a7eae96afafb0f77aa36e5a"
 }
