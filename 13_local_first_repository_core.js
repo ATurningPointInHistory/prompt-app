@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_core.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.2.0 / Module: Core 1.1.0
-   Phase 3: Offline Staging Lifecycle / Full-Reload Recovery
+   Release: 1.3.0 / Module: Core 1.2.0
+   Phase 4: Sync Candidate Preparation / V1 Local Validation
    ============================================================ */
 (function (global) {
   "use strict";
@@ -79,6 +79,7 @@
     stateRecords: new Map(),
     validationGates: new Map(),
     offlineStagingDescriptors: new Map(),
+    syncCandidateDescriptors: new Map(),
     lastPhase1Validation: null,
     lastPhase1AndroidValidation: null,
     phase1PreDeviceValidationPassed: false,
@@ -93,6 +94,14 @@
     phase3PreDeviceValidationPassed: false,
     phase3AndroidReloadPrepared: false,
     androidPhase3ValidationPassed: false,
+    lastPhase4Validation: null,
+    lastPhase4AndroidReloadPreparation: null,
+    lastPhase4AndroidValidation: null,
+    phase4PreDeviceValidationPassed: false,
+    phase4AndroidReloadPrepared: false,
+    androidPhase4ValidationPassed: false,
+    syncCandidateStatus: "Ready",
+    lastSyncCandidateRestore: null,
     offlineStagingStatus: "Ready",
     lastOfflineStagingRestore: null,
     persistenceStatus: "Not Initialized",
@@ -101,7 +110,7 @@
     updatedAt: null
   };
 
-  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors"].forEach(function ensureMap(key) {
+  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
 
@@ -174,16 +183,25 @@
     });
   }
 
+  function priorValidatedPhase() {
+    const prior = VERSION_MANIFEST.release && VERSION_MANIFEST.release.priorValidatedBaseline;
+    return prior && prior.androidRealValidationPassed === true ? Number(prior.phase || 0) : 0;
+  }
+
   function phase1Complete() {
-    return state.phase1PreDeviceValidationPassed === true && state.androidPhase1ValidationPassed === true;
+    return priorValidatedPhase() >= 1 || (state.phase1PreDeviceValidationPassed === true && state.androidPhase1ValidationPassed === true);
   }
 
   function phase2Complete() {
-    return phase1Complete() && state.phase2PreDeviceValidationPassed === true && state.androidPhase2ValidationPassed === true;
+    return priorValidatedPhase() >= 2 || (phase1Complete() && state.phase2PreDeviceValidationPassed === true && state.androidPhase2ValidationPassed === true);
   }
 
   function phase3Complete() {
-    return phase2Complete() && state.phase3PreDeviceValidationPassed === true && state.androidPhase3ValidationPassed === true;
+    return priorValidatedPhase() >= 3 || (phase2Complete() && state.phase3PreDeviceValidationPassed === true && state.androidPhase3ValidationPassed === true);
+  }
+
+  function phase4Complete() {
+    return phase3Complete() && state.phase4PreDeviceValidationPassed === true && state.androidPhase4ValidationPassed === true;
   }
 
   function getStatus() {
@@ -198,11 +216,13 @@
       implementationPhase: VERSION_MANIFEST.release.implementationPhase,
       architectureStatus: VERSION_MANIFEST.release.architectureStatus,
       decisionsFrozen: clone(VERSION_MANIFEST.release.decisionIds),
+      priorValidatedBaseline: clone(VERSION_MANIFEST.release.priorValidatedBaseline || null),
       initialized: state.initialized === true,
       phase1Complete: phase1Complete(),
       phase2Complete: phase2Complete(),
       phase3Complete: phase3Complete(),
-      releaseAllowed: phase3Complete(),
+      phase4Complete: phase4Complete(),
+      releaseAllowed: phase4Complete(),
       logicalAuthority: VERSION_MANIFEST.authority.logicalAuthority,
       initialCanonicalNode: VERSION_MANIFEST.authority.initialCanonicalNode,
       androidRole: VERSION_MANIFEST.authority.androidIndexedDBRole,
@@ -211,19 +231,27 @@
       androidIndexedDBPersistenceImplemented: VERSION_MANIFEST.implementation.androidIndexedDBPersistenceImplemented === true,
       offlineStagingImplemented: VERSION_MANIFEST.implementation.offlineStagingImplemented === true,
       fullReloadRecoveryImplemented: VERSION_MANIFEST.implementation.fullReloadRecoveryImplemented === true,
+      syncCandidateCreationImplemented: VERSION_MANIFEST.implementation.syncCandidateCreationImplemented === true,
+      syncCandidatePersistenceImplemented: VERSION_MANIFEST.implementation.syncCandidatePersistenceImplemented === true,
+      v1LocalValidationImplemented: VERSION_MANIFEST.implementation.v1LocalValidationImplemented === true,
       syncEngineImplemented: false,
       directRepositoryMutationAllowed: false,
       automaticConflictWinnerAllowed: false,
       phase1RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase1RequiredGateSet),
       phase2RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase2RequiredGateSet),
       phase3RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase3RequiredGateSet),
+      phase4RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase4RequiredGateSet),
       phase1PreDeviceValidationPassed: state.phase1PreDeviceValidationPassed === true,
-      androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true,
+      androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true || priorValidatedPhase() >= 1,
       phase2PreDeviceValidationPassed: state.phase2PreDeviceValidationPassed === true,
-      androidPhase2ValidationPassed: state.androidPhase2ValidationPassed === true,
+      androidPhase2ValidationPassed: state.androidPhase2ValidationPassed === true || priorValidatedPhase() >= 2,
       phase3PreDeviceValidationPassed: state.phase3PreDeviceValidationPassed === true,
       phase3AndroidReloadPrepared: state.phase3AndroidReloadPrepared === true,
-      androidPhase3ValidationPassed: state.androidPhase3ValidationPassed === true,
+      androidPhase3ValidationPassed: state.androidPhase3ValidationPassed === true || priorValidatedPhase() >= 3,
+      phase4PreDeviceValidationPassed: state.phase4PreDeviceValidationPassed === true,
+      phase4AndroidReloadPrepared: state.phase4AndroidReloadPrepared === true,
+      androidPhase4ValidationPassed: state.androidPhase4ValidationPassed === true,
+      syncCandidateStatus: state.syncCandidateStatus || "Ready",
       offlineStagingStatus: state.offlineStagingStatus || "Ready",
       persistenceStatus: state.persistenceStatus,
       metadataCounts: {
@@ -232,7 +260,8 @@
         integrityRecords: state.integrityRecords.size,
         stateRecords: state.stateRecords.size,
         validationGates: state.validationGates.size,
-        offlineStagingDescriptors: state.offlineStagingDescriptors.size
+        offlineStagingDescriptors: state.offlineStagingDescriptors.size,
+        syncCandidateDescriptors: state.syncCandidateDescriptors.size
       },
       modules: modules,
       lastError: clone(state.lastError),
@@ -311,12 +340,31 @@
     touch();
   }
 
+  function markPhase4PreDeviceValidation(result) {
+    state.lastPhase4Validation = clone(result);
+    state.phase4PreDeviceValidationPassed = Boolean(result && result.failed === 0 && result.criticalFailed === 0);
+    touch();
+  }
+
+  function markPhase4AndroidReloadPreparation(result) {
+    state.lastPhase4AndroidReloadPreparation = clone(result);
+    state.phase4AndroidReloadPrepared = Boolean(result && result.failed === 0 && result.criticalFailed === 0 && result.androidRealDevice === true && result.reloadRequired === true);
+    touch();
+  }
+
+  function markPhase4AndroidValidation(result) {
+    state.lastPhase4AndroidValidation = clone(result);
+    state.androidPhase4ValidationPassed = Boolean(result && result.failed === 0 && result.criticalFailed === 0 && result.androidRealDevice === true && result.fullReloadValidated === true);
+    if (state.androidPhase4ValidationPassed) state.phase4AndroidReloadPrepared = true;
+    touch();
+  }
+
   function getPublicApiDescription() {
     return {
       componentId: COMPONENT_ID,
       version: RELEASE_VERSION,
       namespace: "window.REPOSITORY010LocalFirstRepository",
-      phase: 3,
+      phase: 4,
       namespaceFunctions: Object.keys(namespace.api || {}).sort(),
       contractsImplemented: typeof namespace.validateContract === "function",
       metadataModelImplemented: typeof namespace.createRepositoryNodeIdentity === "function",
@@ -325,11 +373,15 @@
       androidIndexedDBPersistenceImplemented: VERSION_MANIFEST.implementation.androidIndexedDBPersistenceImplemented === true,
       offlineStagingImplemented: VERSION_MANIFEST.implementation.offlineStagingImplemented === true,
       fullReloadRecoveryImplemented: VERSION_MANIFEST.implementation.fullReloadRecoveryImplemented === true,
+      syncCandidateCreationImplemented: VERSION_MANIFEST.implementation.syncCandidateCreationImplemented === true,
+      syncCandidatePersistenceImplemented: VERSION_MANIFEST.implementation.syncCandidatePersistenceImplemented === true,
+      v1LocalValidationImplemented: VERSION_MANIFEST.implementation.v1LocalValidationImplemented === true,
       syncEngineImplemented: false,
       mutationEngineImplemented: false,
       phase1ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase1Validation === "function",
       phase2ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase2Validation === "function",
-      phase3ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase3Validation === "function"
+      phase3ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase3Validation === "function",
+      phase4ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase4Validation === "function"
     };
   }
 
@@ -353,7 +405,10 @@
     markPhase2AndroidValidation: markPhase2AndroidValidation,
     markPhase3PreDeviceValidation: markPhase3PreDeviceValidation,
     markPhase3AndroidReloadPreparation: markPhase3AndroidReloadPreparation,
-    markPhase3AndroidValidation: markPhase3AndroidValidation
+    markPhase3AndroidValidation: markPhase3AndroidValidation,
+    markPhase4PreDeviceValidation: markPhase4PreDeviceValidation,
+    markPhase4AndroidReloadPreparation: markPhase4AndroidReloadPreparation,
+    markPhase4AndroidValidation: markPhase4AndroidValidation
   });
   namespace.__internal = internal;
 
@@ -379,11 +434,14 @@
     id: "REPOSITORY-010-CORE",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 3,
+    phase: 4,
     persistentMutationImplemented: false,
     persistenceImplemented: true,
     offlineStagingImplemented: true,
     fullReloadRecoveryImplemented: true,
+    syncCandidateCreationImplemented: true,
+    syncCandidatePersistenceImplemented: true,
+    v1LocalValidationImplemented: true,
     syncEngineImplemented: false,
     loadedAt: nowIso()
   };
