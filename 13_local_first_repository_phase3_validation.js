@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_phase3_validation.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.2.0 / Module: Phase 3 Validation 1.0.0
+   Release: 1.3.0 / Module: Phase 3 Validation 1.0.1
    Phase 3: Offline Staging Lifecycle / Full-Reload Recovery
    ============================================================ */
 (function (global) {
@@ -130,8 +130,10 @@
     const check = c.check;
 
     check("Phase 2 pre-device regression passes", Boolean(phase2 && phase2.failed === 0 && phase2.criticalFailed === 0), phase2 && phase2.status, "Regression", "Critical");
-    check("Release version is 1.2.0", VERSION_MANIFEST.release.version === "1.2.0", VERSION_MANIFEST.release.version, "Version", "Critical");
-    check("Phase 3 scope is Offline Staging / Full-Reload Recovery", VERSION_MANIFEST.implementation.phase === 3 && VERSION_MANIFEST.implementation.offlineStagingImplemented === true && VERSION_MANIFEST.implementation.fullReloadRecoveryImplemented === true, VERSION_MANIFEST.implementation, "Scope", "Critical");
+    const versionParts = String(VERSION_MANIFEST.release.version || "0.0.0").split(".").map(Number);
+    const phase3BaselineOrLater = versionParts[0] === 1 && versionParts[1] >= 2;
+    check("Release includes Phase 3 baseline or later", phase3BaselineOrLater, VERSION_MANIFEST.release.version, "Version", "Critical");
+    check("Phase 3 scope is Offline Staging / Full-Reload Recovery", VERSION_MANIFEST.implementation.phase >= 3 && VERSION_MANIFEST.implementation.offlineStagingImplemented === true && VERSION_MANIFEST.implementation.fullReloadRecoveryImplemented === true, VERSION_MANIFEST.implementation, "Scope", "Critical");
     check("Sync Engine remains unimplemented", VERSION_MANIFEST.implementation.syncEngineImplemented === false, VERSION_MANIFEST.implementation.syncEngineImplemented, "Safety", "Critical");
     check("Canonical Mutation remains disabled", VERSION_MANIFEST.safety.directRepositoryMutationAllowed === false && VERSION_MANIFEST.safety.offlineCanonicalFinalizationAllowed === false, VERSION_MANIFEST.safety, "Safety", "Critical");
     check("Offline staging API is available", typeof namespace.stageOfflineRepositoryWork === "function", typeof namespace.stageOfflineRepositoryWork, "API", "Critical");
