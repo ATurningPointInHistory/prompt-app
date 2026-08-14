@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.3.0
-   Phase 4: Sync Candidate Preparation / V1 Local Validation
+   Release: 1.4.0
+   Phase 5: Transfer Package / Integrity Preflight
    Architecture Baseline: DECISION-001..003 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.3.0";
+  const RELEASE_VERSION = "1.4.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -18,16 +18,18 @@
   }
 
   const moduleVersions = {
-    core: "1.2.0",
-    contracts: "1.2.0",
-    metadata: "1.2.0",
+    core: "1.3.0",
+    contracts: "1.3.0",
+    metadata: "1.3.0",
     validation: BASELINE_VERSION,
-    persistence: "1.2.0",
+    persistence: "1.3.0",
     phase2Validation: "1.0.2",
     offlineStaging: "1.0.0",
     phase3Validation: "1.0.1",
     syncCandidate: "1.0.0",
-    phase4Validation: "1.0.0"
+    phase4Validation: "1.0.0",
+    transferPackage: "1.0.0",
+    phase5Validation: "1.0.0"
   };
 
   const fileModules = {
@@ -40,7 +42,9 @@
     "13_local_first_repository_offline_staging.js": "offlineStaging",
     "13_local_first_repository_sync_candidate.js": "syncCandidate",
     "13_local_first_repository_phase3_validation.js": "phase3Validation",
-    "13_local_first_repository_phase4_validation.js": "phase4Validation"
+    "13_local_first_repository_phase4_validation.js": "phase4Validation",
+    "13_local_first_repository_transfer_package.js": "transferPackage",
+    "13_local_first_repository_phase5_validation.js": "phase5Validation"
   };
 
   const contractVersions = {
@@ -51,7 +55,8 @@
     repositoryStateRecord: BASELINE_VERSION,
     validationGateDescriptor: BASELINE_VERSION,
     offlineStagingDescriptor: "1.0.0",
-    syncCandidateDescriptor: "1.0.0"
+    syncCandidateDescriptor: "1.0.0",
+    transferPackageDescriptor: "1.0.0"
   };
 
   const contractIds = {
@@ -62,7 +67,8 @@
     repositoryStateRecord: "REPOSITORY-010-CONTRACT-STATE-RECORD",
     validationGateDescriptor: "REPOSITORY-010-CONTRACT-VALIDATION-GATE",
     offlineStagingDescriptor: "REPOSITORY-010-CONTRACT-OFFLINE-STAGING",
-    syncCandidateDescriptor: "REPOSITORY-010-CONTRACT-SYNC-CANDIDATE"
+    syncCandidateDescriptor: "REPOSITORY-010-CONTRACT-SYNC-CANDIDATE",
+    transferPackageDescriptor: "REPOSITORY-010-CONTRACT-TRANSFER-PACKAGE"
   };
 
   const repositoryStates = [
@@ -87,15 +93,15 @@
     componentName: "Local-First Repository Coordination",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 4 Sync Candidate Preparation / V1 Local Validation",
+      implementationPhase: "Phase 5 Transfer Package / Integrity Preflight",
       architectureStatus: "DECISION-001..003 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 4 IMPLEMENTED / ANDROID FULL-RELOAD VALIDATION REQUIRED",
+      implementationStatus: "PHASE 5 IMPLEMENTED / ANDROID FULL-RELOAD VALIDATION REQUIRED",
       priorValidatedBaseline: {
-        version: "1.2.0",
-        phase: 3,
+        version: "1.3.0",
+        phase: 4,
         androidRealValidationPassed: true,
-        validatedAt: "2026-08-14T19:34:05.105Z",
-        status: "REPOSITORY-010 Phase 3 Android Full-Reload Validation PASS"
+        validatedAt: "2026-08-14T20:48:27.850Z",
+        status: "REPOSITORY-010 Phase 4 Android Full-Reload Validation PASS"
       },
       decisionIds: [
         "REPOSITORY-010-DECISION-001",
@@ -104,8 +110,8 @@
       ]
     },
     implementation: {
-      phase: 4,
-      phaseName: "Sync Candidate Preparation / V1 Local Validation",
+      phase: 5,
+      phaseName: "Transfer Package / Integrity Preflight",
       phase1PersistenceImplemented: false,
       persistenceImplemented: true,
       androidIndexedDBPersistenceImplemented: true,
@@ -114,6 +120,9 @@
       syncCandidateCreationImplemented: true,
       syncCandidatePersistenceImplemented: true,
       v1LocalValidationImplemented: true,
+      transferPackagePreparationImplemented: true,
+      transferPackagePersistenceImplemented: true,
+      v2IntegrityPreflightImplemented: true,
       v2TransferIntegrityValidationImplemented: false,
       v3BaseConflictValidationImplemented: false,
       v4TargetEnvironmentValidationImplemented: false,
@@ -168,6 +177,12 @@
         crossDeviceRealValidation: "not-required"
       },
       phase4RequiredGateSet: {
+        staticValidation: "required",
+        androidRealValidation: "required",
+        pcRealValidation: "not-required",
+        crossDeviceRealValidation: "not-required"
+      },
+      phase5RequiredGateSet: {
         staticValidation: "required",
         androidRealValidation: "required",
         pcRealValidation: "not-required",
