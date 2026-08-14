@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_persistence.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.1.1 / Module: Persistence 1.0.1
+   Release: 1.2.0 / Module: Persistence 1.1.0
    Phase 2: Android Replica Persistence / IndexedDB Adapter
    ============================================================ */
 (function (global) {
@@ -18,13 +18,14 @@
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("persistence");
   const DB_NAME = "AI_PROMPT_OS_REPOSITORY010_LOCAL_FIRST_V1";
-  const DB_VERSION = 1;
+  const DB_VERSION = 2;
   const STORE_DEFINITIONS = Object.freeze({
     nodeIdentity: Object.freeze({ storeName: "node_identities", keyPath: "nodeId", contractKey: "repositoryNodeIdentity" }),
     revision: Object.freeze({ storeName: "revisions", keyPath: "revisionId", contractKey: "repositoryRevision" }),
     integrityRecord: Object.freeze({ storeName: "integrity_records", keyPath: "integrityRecordId", contractKey: "repositoryIntegrityRecord" }),
     stateRecord: Object.freeze({ storeName: "state_records", keyPath: "stateRecordId", contractKey: "repositoryStateRecord" }),
-    validationGate: Object.freeze({ storeName: "validation_gates", keyPath: "gateId", contractKey: "validationGateDescriptor" })
+    validationGate: Object.freeze({ storeName: "validation_gates", keyPath: "gateId", contractKey: "validationGateDescriptor" }),
+    offlineStaging: Object.freeze({ storeName: "offline_staging", keyPath: "stagingId", contractKey: "offlineStagingDescriptor" })
   });
 
   let adapterOverride = null;
@@ -304,6 +305,8 @@
     exactIdDeleteSupported: true,
     broadClearSupported: false,
     validationFixtureCleanupSupported: true,
+    offlineStagingStoreImplemented: true,
+    databaseMigration: "1->2-add-offline-staging",
     loadedAt: internal.nowIso()
   };
 
