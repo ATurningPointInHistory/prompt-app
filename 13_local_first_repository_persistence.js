@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_persistence.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.3.0 / Module: Persistence 1.2.0
+   Release: 1.4.0 / Module: Persistence 1.3.0
    Phase 2: Android Replica Persistence / IndexedDB Adapter
    ============================================================ */
 (function (global) {
@@ -18,7 +18,7 @@
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("persistence");
   const DB_NAME = "AI_PROMPT_OS_REPOSITORY010_LOCAL_FIRST_V1";
-  const DB_VERSION = 3;
+  const DB_VERSION = 4;
   const STORE_DEFINITIONS = Object.freeze({
     nodeIdentity: Object.freeze({ storeName: "node_identities", keyPath: "nodeId", contractKey: "repositoryNodeIdentity" }),
     revision: Object.freeze({ storeName: "revisions", keyPath: "revisionId", contractKey: "repositoryRevision" }),
@@ -26,7 +26,8 @@
     stateRecord: Object.freeze({ storeName: "state_records", keyPath: "stateRecordId", contractKey: "repositoryStateRecord" }),
     validationGate: Object.freeze({ storeName: "validation_gates", keyPath: "gateId", contractKey: "validationGateDescriptor" }),
     offlineStaging: Object.freeze({ storeName: "offline_staging", keyPath: "stagingId", contractKey: "offlineStagingDescriptor" }),
-    syncCandidate: Object.freeze({ storeName: "sync_candidates", keyPath: "syncCandidateId", contractKey: "syncCandidateDescriptor" })
+    syncCandidate: Object.freeze({ storeName: "sync_candidates", keyPath: "syncCandidateId", contractKey: "syncCandidateDescriptor" }),
+    transferPackage: Object.freeze({ storeName: "transfer_packages", keyPath: "transferPackageId", contractKey: "transferPackageDescriptor" })
   });
 
   let adapterOverride = null;
