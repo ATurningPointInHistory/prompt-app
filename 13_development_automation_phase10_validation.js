@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_development_automation_phase10_validation.js
    IDE-190 Development Automation
-   Release: 1.9.0 / Module: Phase 10 Final Validation 1.0.0
+   Release: 1.10.0 / Module: Phase 10 Final Validation 1.0.1
    Phase 10: Integrated / Android Final Validation
    Design Freeze: IDE-190-DESIGN-FREEZE-1.0.0
    ============================================================ */
@@ -18,9 +18,9 @@
   const internal = namespace.__internal;
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("phase10Validation");
-  const EXPECTED_RELEASE = "1.9.0";
+  const EXPECTED_RELEASE = "1.10.0";
   const EXPECTED_PHASE = "Phase 10 Integrated / Android Final Validation";
-  const EXPECTED_SCRIPT_COUNT = 226;
+  const EXPECTED_SCRIPT_COUNT = 227;
   const PHASE10_FILE = "13_development_automation_phase10_validation.js";
 
   function ide190Phase10AndroidTrialTarget(value) {
@@ -301,7 +301,7 @@
     const c = collector(), check = c.check;
     const init = namespace.initialize({ requireIDE180: true, requireIDE160: true });
     check("Foundation initialization succeeds", init && init.ok === true, init && init.code, "Initialization", "Critical");
-    check("Release Version is 1.9.0", VERSION_MANIFEST.release.version === EXPECTED_RELEASE, VERSION_MANIFEST.release.version, "Manifest", "Critical");
+    check("Release Version is 1.10.0", VERSION_MANIFEST.release.version === EXPECTED_RELEASE, VERSION_MANIFEST.release.version, "Manifest", "Critical");
     check("Implementation Phase is Phase 10", VERSION_MANIFEST.release.phase === 10 && VERSION_MANIFEST.release.implementationPhase === EXPECTED_PHASE, VERSION_MANIFEST.release.implementationPhase, "Manifest", "Critical");
     check("Design Freeze remains exact", VERSION_MANIFEST.release.designFreezeId === "IDE-190-DESIGN-FREEZE-1.0.0", VERSION_MANIFEST.release.designFreezeId, "Manifest", "Critical");
     check("Phases 1 through 9 are recorded complete", JSON.stringify(VERSION_MANIFEST.implementation.completedPhases) === JSON.stringify([1,2,3,4,5,6,7,8,9]), VERSION_MANIFEST.implementation.completedPhases, "Phase Gate", "Critical");
@@ -321,8 +321,18 @@
     check("Foundation State Contract is Phase 10 capable", Boolean(foundationStateDefinition && foundationStateDefinition.version === "1.9.0"), foundationStateDefinition && foundationStateDefinition.version, "Contracts", "Critical");
 
     const api = namespace.getPublicApiDescription();
-    ["intakeImplemented","groundingImplemented","planningImplemented","proposalImplemented","dryRunImplemented","preflightImplemented","gateImplemented","approvalImplemented","consentImplemented","dispatchImplemented","mutationImplemented","recoveryImplemented","sessionImplemented","auditImplemented","persistenceImplemented","receiptImplemented","reflectionPackageImplemented","uiImplemented","crossDeviceImplemented","finalValidationImplemented"].forEach(function flag(key) { check("Integrated API available: " + key, api[key] === true, api[key], "Modules", "Critical"); });
+    ["intakeImplemented","groundingImplemented","planningImplemented","proposalImplemented","dryRunImplemented","preflightImplemented","gateImplemented","approvalImplemented","consentImplemented","dispatchImplemented","mutationImplemented","recoveryImplemented","sessionImplemented","auditImplemented","persistenceImplemented","receiptImplemented","reflectionPackageImplemented","guideImplemented","uiImplemented","crossDeviceImplemented","finalValidationImplemented"].forEach(function flag(key) { check("Integrated API available: " + key, api[key] === true, api[key], "Modules", "Critical"); });
     check("Persistent Mutation remains unimplemented", api.persistentMutationImplemented === false, api.persistentMutationImplemented, "Safety", "Critical");
+
+    const guideStatus = typeof namespace.getDevelopmentAutomationGuideStatus === "function" ? namespace.getDevelopmentAutomationGuideStatus() : null;
+    const guide = typeof namespace.getDevelopmentAutomationGuide === "function" ? namespace.getDevelopmentAutomationGuide() : null;
+    const uiProjection = typeof namespace.getDevelopmentAutomationUIProjection === "function" ? namespace.getDevelopmentAutomationUIProjection() : null;
+    const launcherItem = typeof global.getIdeLauncherItem === "function" ? global.getIdeLauncherItem("IDE-190") : null;
+    check("v1.10 Usage Guide module is Ready", Boolean(guideStatus && guideStatus.status === "Ready" && guideStatus.readOnly === true), guideStatus, "UI / Guide", "Critical");
+    check("v1.10 Guide defines 3-step Quick Start and 9-step Workflow", Boolean(guide && guide.quickStart && guide.quickStart.length === 3 && guide.workflow && guide.workflow.length === 9), guide && { quickStart: guide.quickStart && guide.quickStart.length, workflow: guide.workflow && guide.workflow.length }, "UI / Guide", "Critical");
+    check("v1.10 Guide exposes no execution controls", Boolean(guide && guide.executionControlsExposed === false && guide.safety && guide.safety.uiExecutionControlsExposed === false), guide && guide.executionControlsExposed, "UI / Guide", "Critical");
+    check("v1.10 Safe UI exposes Guide/Tab navigation without execution permissions", Boolean(uiProjection && uiProjection.uiCapabilities && uiProjection.uiCapabilities.guideRead === true && uiProjection.uiCapabilities.tabNavigation === true && uiProjection.uiCapabilities.approvalAction === false && uiProjection.uiCapabilities.dispatchAction === false && uiProjection.uiCapabilities.mutationAction === false), uiProjection && uiProjection.uiCapabilities, "UI / Guide", "Critical");
+    check("IDE Launcher registers IDE-190 Safe UI entry", Boolean(launcherItem && launcherItem.id === "IDE-190" && launcherItem.launcher === "openDevelopmentAutomationConsole" && launcherItem.ready === true), launcherItem, "UI / Guide", "Critical");
 
     const grounded = await namespace.intakeAndGroundLatestIDE180Navigation(); const grounding = grounded && grounded.ok && grounded.data && grounded.data.grounding;
     check("V0 IDE-180 Grounding is fresh and Grounded", Boolean(grounding && grounding.groundingStatus === "Grounded"), grounding && grounding.groundingStatus, "Integrated Lifecycle", "Critical");
@@ -423,11 +433,18 @@
     check("IndexedDB is available", Boolean(global.indexedDB), Boolean(global.indexedDB), "Android Runtime", "Critical");
     check("Fetch API is available", typeof global.fetch === "function", typeof global.fetch, "Android Runtime", "Critical");
     check("JSZip is available", typeof global.JSZip === "function", typeof global.JSZip, "Android Runtime", "Critical");
+    const androidGuide = typeof namespace.getDevelopmentAutomationGuide === "function" ? namespace.getDevelopmentAutomationGuide() : null;
+    const androidUI = typeof namespace.getDevelopmentAutomationUIProjection === "function" ? namespace.getDevelopmentAutomationUIProjection() : null;
+    const androidLauncherItem = typeof global.getIdeLauncherItem === "function" ? global.getIdeLauncherItem("IDE-190") : null;
+    check("Android v1.10 Usage Guide is available", Boolean(androidGuide && androidGuide.readOnly === true && androidGuide.workflow && androidGuide.workflow.length === 9), androidGuide && androidGuide.workflow && androidGuide.workflow.length, "UI / Guide", "Critical");
+    check("Android IDE Launcher exposes IDE-190 Safe UI", Boolean(androidLauncherItem && androidLauncherItem.launcher === "openDevelopmentAutomationConsole" && androidLauncherItem.ready === true), androidLauncherItem && androidLauncherItem.launcher, "UI / Guide", "Critical");
+    check("Android Safe UI keeps Approval / Dispatch / Mutation controls disabled", Boolean(androidUI && androidUI.uiCapabilities && androidUI.uiCapabilities.approvalAction === false && androidUI.uiCapabilities.dispatchAction === false && androidUI.uiCapabilities.mutationAction === false), androidUI && androidUI.uiCapabilities, "UI / Guide", "Critical");
+    check("Android display mode still cannot change permission", Boolean(androidUI && androidUI.permissionChangesFromDisplayMode === false), androidUI && androidUI.permissionChangesFromDisplayMode, "UI / Guide", "Critical");
 
     const staticIntegrity = await verifyStaticRuntime();
-    check("Static Script Manifest structure is valid with exactly 226 scripts", staticIntegrity.manifestStructureValid === true && staticIntegrity.scriptCount === EXPECTED_SCRIPT_COUNT, staticIntegrity.scriptCount, "Static Integrity", "Critical");
+    check("Static Script Manifest structure is valid with exactly 227 scripts", staticIntegrity.manifestStructureValid === true && staticIntegrity.scriptCount === EXPECTED_SCRIPT_COUNT, staticIntegrity.scriptCount, "Static Integrity", "Critical");
     check("Static Script Manifest internal SHA-256 integrity is valid", staticIntegrity.manifestIntegrityValid === true, { manifestHash: staticIntegrity.computedManifestHash, scriptSetHash: staticIntegrity.computedScriptSetHash }, "Static Integrity", "Critical");
-    check("All 226 scripts are fetched on Android", staticIntegrity.fetchedScriptCount === EXPECTED_SCRIPT_COUNT && staticIntegrity.fetchFailureCount === 0, { fetched: staticIntegrity.fetchedScriptCount, failures: staticIntegrity.fetchFailureCount }, "Static Integrity", "Critical");
+    check("All 227 scripts are fetched on Android", staticIntegrity.fetchedScriptCount === EXPECTED_SCRIPT_COUNT && staticIntegrity.fetchFailureCount === 0, { fetched: staticIntegrity.fetchedScriptCount, failures: staticIntegrity.fetchFailureCount }, "Static Integrity", "Critical");
     check("All script SHA-256 hashes match", staticIntegrity.scriptHashMismatchCount === 0, staticIntegrity.mismatches.filter(function(m){return m.type === "sha256";}), "Static Integrity", "Critical");
     check("All script byte sizes match", staticIntegrity.scriptByteSizeMismatchCount === 0, staticIntegrity.mismatches.filter(function(m){return m.type === "byteSize";}), "Static Integrity", "Critical");
     check("All script cache keys match SHA-256", staticIntegrity.scriptCacheKeyMismatchCount === 0, staticIntegrity.mismatches.filter(function(m){return m.type === "cacheKey";}), "Static Integrity", "Critical");
