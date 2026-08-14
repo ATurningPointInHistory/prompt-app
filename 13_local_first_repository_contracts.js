@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_contracts.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.2.0 / Module: Contracts 1.1.0
+   Release: 1.3.0 / Module: Contracts 1.2.0
    Phase 3 Compatible: Offline Staging Descriptor added
    ============================================================ */
 (function (global) {
@@ -127,6 +127,36 @@
         field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
         field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
         field("syncCandidateCreated", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "syncCandidateDescriptor",
+      name: "REPOSITORY-010 Sync Candidate Descriptor Contract",
+      fields: [
+        field("syncCandidateId", { required: true, type: "string" }),
+        field("stagingId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string" }),
+        field("revisionId", { required: true, type: "string" }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("integrityRecordId", { required: true, type: "string" }),
+        field("stagedStateRecordId", { required: true, type: "string" }),
+        field("candidateStateRecordId", { required: true, type: "string" }),
+        field("v1GateId", { required: true, type: "string" }),
+        field("lifecycleStatus", { required: true, type: "string", enum: ["sync-candidate"] }),
+        field("validationLayer", { required: true, type: "string", enum: ["V1 Local Validation"] }),
+        field("localValidationPassed", { required: true, type: "boolean", enum: [true] }),
+        field("transferAttempted", { required: true, type: "boolean", enum: [false] }),
+        field("transferIntegrityValidated", { required: true, type: "boolean", enum: [false] }),
+        field("baseConflictValidated", { required: true, type: "boolean", enum: [false] }),
+        field("targetEnvironmentValidated", { required: true, type: "boolean", enum: [false] }),
+        field("explicitAcceptanceReceived", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
         field("createdAt", { required: true, type: "string" }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
       ]
