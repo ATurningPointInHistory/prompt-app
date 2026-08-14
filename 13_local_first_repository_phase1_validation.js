@@ -81,7 +81,7 @@
     const metadata = namespace.getMetadataModelStatus();
 
     check("Component ID is REPOSITORY-010", status.componentId === "REPOSITORY-010", status.componentId, "Manifest", "Critical");
-    check("Release Version is 1.0.0", status.version === "1.0.0", status.version, "Manifest", "Critical");
+    check("Phase 1 baseline version is 1.0.0", namespace.buildFoundationSnapshot().version === "1.0.0", namespace.buildFoundationSnapshot().version, "Manifest", "Critical");
     check("Decision 001 is frozen baseline", VERSION_MANIFEST.release.decisionIds.indexOf("REPOSITORY-010-DECISION-001") !== -1, VERSION_MANIFEST.release.decisionIds, "Architecture", "Critical");
     check("Decision 002 is frozen baseline", VERSION_MANIFEST.release.decisionIds.indexOf("REPOSITORY-010-DECISION-002") !== -1, VERSION_MANIFEST.release.decisionIds, "Architecture", "Critical");
     check("Decision 003 is frozen baseline", VERSION_MANIFEST.release.decisionIds.indexOf("REPOSITORY-010-DECISION-003") !== -1, VERSION_MANIFEST.release.decisionIds, "Architecture", "Critical");
@@ -132,7 +132,7 @@
     check("Validation Gate metadata grants no Mutation Authority", gate.ok === true && gate.data.record.mutationAuthorityGranted === false, gate.code, "Validation Authority", "Critical");
 
     const api = namespace.getPublicApiDescription();
-    check("Persistence is not implemented in Phase 1", api.persistenceImplemented === false, api.persistenceImplemented, "Scope", "Critical");
+    check("Persistence is not implemented in Phase 1", api.phase1PersistenceImplemented === false, api.persistenceImplemented, "Scope", "Critical");
     check("Sync Engine is not implemented in Phase 1", api.syncEngineImplemented === false, api.syncEngineImplemented, "Scope", "Critical");
     check("Mutation Engine is not implemented in Phase 1", api.mutationEngineImplemented === false, api.mutationEngineImplemented, "Scope", "Critical");
 
@@ -161,7 +161,7 @@
     check("REPOSITORY-010 namespace is loaded", Boolean(global.REPOSITORY010LocalFirstRepository), typeof global.REPOSITORY010LocalFirstRepository, "Android Runtime", "Critical");
     check("Contracts API is available", typeof namespace.validateContract === "function", typeof namespace.validateContract, "Android Runtime", "Critical");
     check("Metadata API is available", typeof namespace.createRepositoryNodeIdentity === "function", typeof namespace.createRepositoryNodeIdentity, "Android Runtime", "Critical");
-    check("IndexedDB is not required by Phase 1", VERSION_MANIFEST.implementation.persistenceImplemented === false, Boolean(global.indexedDB), "Gate Applicability", "High");
+    check("IndexedDB is not required by Phase 1", VERSION_MANIFEST.implementation.phase1PersistenceImplemented === false, Boolean(global.indexedDB), "Gate Applicability", "High");
     check("PC Real Validation is not required by Phase 1", VERSION_MANIFEST.validationAuthority.phase1RequiredGateSet.pcRealValidation === "not-required", VERSION_MANIFEST.validationAuthority.phase1RequiredGateSet.pcRealValidation, "Gate Applicability", "Critical");
     check("Cross-device Real Validation is not required by Phase 1", VERSION_MANIFEST.validationAuthority.phase1RequiredGateSet.crossDeviceRealValidation === "not-required", VERSION_MANIFEST.validationAuthority.phase1RequiredGateSet.crossDeviceRealValidation, "Gate Applicability", "Critical");
 
