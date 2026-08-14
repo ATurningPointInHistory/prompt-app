@@ -634,6 +634,7 @@
       if (typeof namespace.initializePhase8Validation === "function") results.push(namespace.initializePhase8Validation());
       if (typeof namespace.initializeCrossDevice === "function") results.push(namespace.initializeCrossDevice());
       if (typeof namespace.initializeReflection === "function") results.push(namespace.initializeReflection());
+      if (typeof namespace.initializeDevelopmentAutomationGuide === "function") results.push(namespace.initializeDevelopmentAutomationGuide());
       if (typeof namespace.initializeDevelopmentAutomationUI === "function") results.push(namespace.initializeDevelopmentAutomationUI());
       if (typeof namespace.initializePhase9Validation === "function") results.push(namespace.initializePhase9Validation());
       if (typeof namespace.initializePhase10Validation === "function") results.push(namespace.initializePhase10Validation());
@@ -801,6 +802,7 @@
       persistenceImplemented: typeof namespace.persistAutomationAuditEvent === "function" && typeof namespace.persistAutomationReceipt === "function",
       receiptImplemented: typeof namespace.buildAutomationReceipt === "function" && typeof namespace.restoreAutomationReceipt === "function",
       reflectionPackageImplemented: typeof namespace.prepareAutomationReflectionPackage === "function" && typeof namespace.buildAutomationReflectionZip === "function",
+      guideImplemented: typeof namespace.getDevelopmentAutomationGuide === "function" && typeof namespace.getDevelopmentAutomationGuideStatus === "function",
       uiImplemented: typeof namespace.getDevelopmentAutomationUIProjection === "function" && typeof namespace.openDevelopmentAutomationConsole === "function",
       crossDeviceImplemented: typeof namespace.validateAutomationCrossDeviceParity === "function",
       finalValidationImplemented: typeof namespace.runDevelopmentAutomationPhase10Validation === "function" && typeof namespace.runDevelopmentAutomationPhase10AndroidValidation === "function"
