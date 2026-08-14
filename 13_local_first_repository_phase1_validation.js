@@ -112,7 +112,8 @@
     check("Phase 1 Cross-device gate is not required", validationAuthority.phase1RequiredGateSet.crossDeviceRealValidation === "not-required", validationAuthority.phase1RequiredGateSet, "Validation Authority", "Critical");
 
     const definitions = namespace.listContractDefinitions();
-    check("Six Phase 1 contracts are registered", definitions.length === 6, definitions.length, "Contracts", "Critical");
+    const phase1ContractKeys = ["foundation", "repositoryNodeIdentity", "repositoryRevision", "repositoryIntegrityRecord", "repositoryStateRecord", "validationGateDescriptor"];
+    check("All six Phase 1 baseline contracts remain registered", phase1ContractKeys.every(function has(key) { return Boolean(namespace.getContractDefinition(key)); }), definitions.length, "Contracts", "Critical");
     check("Foundation contract validates", namespace.validateContract("foundation", namespace.buildFoundationSnapshot()).valid === true, "foundation", "Contracts", "Critical");
 
     const f = fixtures();
