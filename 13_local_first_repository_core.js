@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_core.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.3.0 / Module: Core 1.2.0
-   Phase 4: Sync Candidate Preparation / V1 Local Validation
+   Release: 1.4.0 / Module: Core 1.3.0
+   Phase 5: Transfer Package / Integrity Preflight
    ============================================================ */
 (function (global) {
   "use strict";
@@ -80,6 +80,7 @@
     validationGates: new Map(),
     offlineStagingDescriptors: new Map(),
     syncCandidateDescriptors: new Map(),
+    transferPackageDescriptors: new Map(),
     lastPhase1Validation: null,
     lastPhase1AndroidValidation: null,
     phase1PreDeviceValidationPassed: false,
@@ -100,6 +101,14 @@
     phase4PreDeviceValidationPassed: false,
     phase4AndroidReloadPrepared: false,
     androidPhase4ValidationPassed: false,
+    lastPhase5Validation: null,
+    lastPhase5AndroidReloadPreparation: null,
+    lastPhase5AndroidValidation: null,
+    phase5PreDeviceValidationPassed: false,
+    phase5AndroidReloadPrepared: false,
+    androidPhase5ValidationPassed: false,
+    transferPackageStatus: "Ready",
+    lastTransferPackageRestore: null,
     syncCandidateStatus: "Ready",
     lastSyncCandidateRestore: null,
     offlineStagingStatus: "Ready",
@@ -110,7 +119,7 @@
     updatedAt: null
   };
 
-  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors"].forEach(function ensureMap(key) {
+  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors", "transferPackageDescriptors"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
 
@@ -201,7 +210,11 @@
   }
 
   function phase4Complete() {
-    return phase3Complete() && state.phase4PreDeviceValidationPassed === true && state.androidPhase4ValidationPassed === true;
+    return priorValidatedPhase() >= 4 || (phase3Complete() && state.phase4PreDeviceValidationPassed === true && state.androidPhase4ValidationPassed === true);
+  }
+
+  function phase5Complete() {
+    return phase4Complete() && state.phase5PreDeviceValidationPassed === true && state.androidPhase5ValidationPassed === true;
   }
 
   function getStatus() {
@@ -222,7 +235,8 @@
       phase2Complete: phase2Complete(),
       phase3Complete: phase3Complete(),
       phase4Complete: phase4Complete(),
-      releaseAllowed: phase4Complete(),
+      phase5Complete: phase5Complete(),
+      releaseAllowed: phase5Complete(),
       logicalAuthority: VERSION_MANIFEST.authority.logicalAuthority,
       initialCanonicalNode: VERSION_MANIFEST.authority.initialCanonicalNode,
       androidRole: VERSION_MANIFEST.authority.androidIndexedDBRole,
@@ -234,6 +248,10 @@
       syncCandidateCreationImplemented: VERSION_MANIFEST.implementation.syncCandidateCreationImplemented === true,
       syncCandidatePersistenceImplemented: VERSION_MANIFEST.implementation.syncCandidatePersistenceImplemented === true,
       v1LocalValidationImplemented: VERSION_MANIFEST.implementation.v1LocalValidationImplemented === true,
+      transferPackagePreparationImplemented: VERSION_MANIFEST.implementation.transferPackagePreparationImplemented === true,
+      transferPackagePersistenceImplemented: VERSION_MANIFEST.implementation.transferPackagePersistenceImplemented === true,
+      v2IntegrityPreflightImplemented: VERSION_MANIFEST.implementation.v2IntegrityPreflightImplemented === true,
+      v2TransferIntegrityValidationImplemented: false,
       syncEngineImplemented: false,
       directRepositoryMutationAllowed: false,
       automaticConflictWinnerAllowed: false,
@@ -241,6 +259,7 @@
       phase2RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase2RequiredGateSet),
       phase3RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase3RequiredGateSet),
       phase4RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase4RequiredGateSet),
+      phase5RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase5RequiredGateSet),
       phase1PreDeviceValidationPassed: state.phase1PreDeviceValidationPassed === true,
       androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true || priorValidatedPhase() >= 1,
       phase2PreDeviceValidationPassed: state.phase2PreDeviceValidationPassed === true,
@@ -250,7 +269,11 @@
       androidPhase3ValidationPassed: state.androidPhase3ValidationPassed === true || priorValidatedPhase() >= 3,
       phase4PreDeviceValidationPassed: state.phase4PreDeviceValidationPassed === true,
       phase4AndroidReloadPrepared: state.phase4AndroidReloadPrepared === true,
-      androidPhase4ValidationPassed: state.androidPhase4ValidationPassed === true,
+      androidPhase4ValidationPassed: state.androidPhase4ValidationPassed === true || priorValidatedPhase() >= 4,
+      phase5PreDeviceValidationPassed: state.phase5PreDeviceValidationPassed === true,
+      phase5AndroidReloadPrepared: state.phase5AndroidReloadPrepared === true,
+      androidPhase5ValidationPassed: state.androidPhase5ValidationPassed === true,
+      transferPackageStatus: state.transferPackageStatus || "Ready",
       syncCandidateStatus: state.syncCandidateStatus || "Ready",
       offlineStagingStatus: state.offlineStagingStatus || "Ready",
       persistenceStatus: state.persistenceStatus,
@@ -261,7 +284,8 @@
         stateRecords: state.stateRecords.size,
         validationGates: state.validationGates.size,
         offlineStagingDescriptors: state.offlineStagingDescriptors.size,
-        syncCandidateDescriptors: state.syncCandidateDescriptors.size
+        syncCandidateDescriptors: state.syncCandidateDescriptors.size,
+        transferPackageDescriptors: state.transferPackageDescriptors.size
       },
       modules: modules,
       lastError: clone(state.lastError),
@@ -359,12 +383,31 @@
     touch();
   }
 
+  function markPhase5PreDeviceValidation(result) {
+    state.lastPhase5Validation = clone(result);
+    state.phase5PreDeviceValidationPassed = Boolean(result && result.failed === 0 && result.criticalFailed === 0);
+    touch();
+  }
+
+  function markPhase5AndroidReloadPreparation(result) {
+    state.lastPhase5AndroidReloadPreparation = clone(result);
+    state.phase5AndroidReloadPrepared = Boolean(result && result.failed === 0 && result.criticalFailed === 0 && result.androidRealDevice === true && result.reloadRequired === true);
+    touch();
+  }
+
+  function markPhase5AndroidValidation(result) {
+    state.lastPhase5AndroidValidation = clone(result);
+    state.androidPhase5ValidationPassed = Boolean(result && result.failed === 0 && result.criticalFailed === 0 && result.androidRealDevice === true && result.fullReloadValidated === true);
+    if (state.androidPhase5ValidationPassed) state.phase5AndroidReloadPrepared = true;
+    touch();
+  }
+
   function getPublicApiDescription() {
     return {
       componentId: COMPONENT_ID,
       version: RELEASE_VERSION,
       namespace: "window.REPOSITORY010LocalFirstRepository",
-      phase: 4,
+      phase: 5,
       namespaceFunctions: Object.keys(namespace.api || {}).sort(),
       contractsImplemented: typeof namespace.validateContract === "function",
       metadataModelImplemented: typeof namespace.createRepositoryNodeIdentity === "function",
@@ -376,12 +419,17 @@
       syncCandidateCreationImplemented: VERSION_MANIFEST.implementation.syncCandidateCreationImplemented === true,
       syncCandidatePersistenceImplemented: VERSION_MANIFEST.implementation.syncCandidatePersistenceImplemented === true,
       v1LocalValidationImplemented: VERSION_MANIFEST.implementation.v1LocalValidationImplemented === true,
+      transferPackagePreparationImplemented: VERSION_MANIFEST.implementation.transferPackagePreparationImplemented === true,
+      transferPackagePersistenceImplemented: VERSION_MANIFEST.implementation.transferPackagePersistenceImplemented === true,
+      v2IntegrityPreflightImplemented: VERSION_MANIFEST.implementation.v2IntegrityPreflightImplemented === true,
+      v2TransferIntegrityValidationImplemented: false,
       syncEngineImplemented: false,
       mutationEngineImplemented: false,
       phase1ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase1Validation === "function",
       phase2ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase2Validation === "function",
       phase3ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase3Validation === "function",
-      phase4ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase4Validation === "function"
+      phase4ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase4Validation === "function",
+      phase5ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase5Validation === "function"
     };
   }
 
@@ -408,7 +456,10 @@
     markPhase3AndroidValidation: markPhase3AndroidValidation,
     markPhase4PreDeviceValidation: markPhase4PreDeviceValidation,
     markPhase4AndroidReloadPreparation: markPhase4AndroidReloadPreparation,
-    markPhase4AndroidValidation: markPhase4AndroidValidation
+    markPhase4AndroidValidation: markPhase4AndroidValidation,
+    markPhase5PreDeviceValidation: markPhase5PreDeviceValidation,
+    markPhase5AndroidReloadPreparation: markPhase5AndroidReloadPreparation,
+    markPhase5AndroidValidation: markPhase5AndroidValidation
   });
   namespace.__internal = internal;
 
@@ -434,7 +485,7 @@
     id: "REPOSITORY-010-CORE",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 4,
+    phase: 5,
     persistentMutationImplemented: false,
     persistenceImplemented: true,
     offlineStagingImplemented: true,
@@ -442,6 +493,10 @@
     syncCandidateCreationImplemented: true,
     syncCandidatePersistenceImplemented: true,
     v1LocalValidationImplemented: true,
+    transferPackagePreparationImplemented: true,
+    transferPackagePersistenceImplemented: true,
+    v2IntegrityPreflightImplemented: true,
+    v2TransferIntegrityValidationImplemented: false,
     syncEngineImplemented: false,
     loadedAt: nowIso()
   };
