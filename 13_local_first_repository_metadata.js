@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_metadata.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.1.1 / Module: Metadata Model 1.0.1
+   Release: 1.2.0 / Module: Metadata Model 1.1.0
    Phase 1: Foundation / Contracts / Metadata Model
    ============================================================ */
 (function (global) {
@@ -124,6 +124,31 @@
     return validateAndStore("validationGateDescriptor", record, state.validationGates, "gateId", "REPOSITORY010_VALIDATION_GATE_READY");
   }
 
+
+  function createOfflineStagingDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const required = ["stagingId", "projectId", "repositoryId", "nodeId", "revisionId", "baseRevisionId", "integrityRecordId", "stateRecordId", "lifecycleStatus"];
+    const missing = required.filter(function missingField(key) { return !internal.text(source[key], ""); });
+    if (missing.length) return fail("REPOSITORY010_OFFLINE_STAGING_DESCRIPTOR_MISSING_FIELDS", "Required offline staging fields are missing.", { missing: missing });
+    const record = {
+      stagingId: internal.text(source.stagingId, ""),
+      projectId: internal.text(source.projectId, ""),
+      repositoryId: internal.text(source.repositoryId, ""),
+      nodeId: internal.text(source.nodeId, ""),
+      revisionId: internal.text(source.revisionId, ""),
+      baseRevisionId: internal.text(source.baseRevisionId, ""),
+      integrityRecordId: internal.text(source.integrityRecordId, ""),
+      stateRecordId: internal.text(source.stateRecordId, ""),
+      lifecycleStatus: internal.text(source.lifecycleStatus, "staged"),
+      authorityEffect: "none",
+      canonicalMutationPerformed: false,
+      syncCandidateCreated: false,
+      createdAt: internal.text(source.createdAt, internal.nowIso()),
+      immutable: true
+    };
+    return validateAndStore("offlineStagingDescriptor", record, state.offlineStagingDescriptors, "stagingId", "REPOSITORY010_OFFLINE_STAGING_DESCRIPTOR_READY");
+  }
+
   function getRepositoryNodeIdentity(nodeId) {
     const record = state.nodeIdentities.get(internal.text(nodeId, ""));
     return record ? internal.clone(record) : null;
@@ -149,6 +174,12 @@
     return record ? internal.clone(record) : null;
   }
 
+
+  function getOfflineStagingDescriptor(stagingId) {
+    const record = state.offlineStagingDescriptors.get(internal.text(stagingId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
   function getMetadataModelStatus() {
     return {
       status: "Ready",
@@ -169,7 +200,8 @@
         revisions: state.revisions.size,
         integrityRecords: state.integrityRecords.size,
         stateRecords: state.stateRecords.size,
-        validationGates: state.validationGates.size
+        validationGates: state.validationGates.size,
+        offlineStagingDescriptors: state.offlineStagingDescriptors.size
       }
     };
   }
@@ -186,11 +218,13 @@
     createRepositoryIntegrityRecord: createRepositoryIntegrityRecord,
     createRepositoryStateRecord: createRepositoryStateRecord,
     createValidationGateDescriptor: createValidationGateDescriptor,
+    createOfflineStagingDescriptor: createOfflineStagingDescriptor,
     getRepositoryNodeIdentity: getRepositoryNodeIdentity,
     getRepositoryRevision: getRepositoryRevision,
     getRepositoryIntegrityRecord: getRepositoryIntegrityRecord,
     getRepositoryStateRecord: getRepositoryStateRecord,
     getValidationGateDescriptor: getValidationGateDescriptor,
+    getOfflineStagingDescriptor: getOfflineStagingDescriptor,
     getMetadataModelStatus: getMetadataModelStatus
   });
   Object.assign(namespace, namespace.api);
