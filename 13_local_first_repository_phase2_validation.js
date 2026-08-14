@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_phase2_validation.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.1.0 / Module: Phase 2 Validation 1.0.0
+   Release: 1.1.1 / Module: Phase 2 Validation 1.0.1
    Phase 2: Android Replica Persistence / IndexedDB Adapter
    ============================================================ */
 (function (global) {
@@ -69,26 +69,42 @@
     };
   }
 
+  function recordId(recordType, record) {
+    return recordType === "nodeIdentity" ? record.nodeId :
+      recordType === "revision" ? record.revisionId :
+      recordType === "integrityRecord" ? record.integrityRecordId :
+      recordType === "stateRecord" ? record.stateRecordId : record.gateId;
+  }
+
   async function validatePersistenceRecords(records, c) {
     const check = c.check;
     for (const recordType of Object.keys(records)) {
       const record = records[recordType];
       const persisted = await namespace.persistLocalFirstRepositoryRecord(recordType, record);
       check("Persist succeeds: " + recordType, persisted.ok === true && persisted.data.readBackVerified === true, persisted.code, "Persistence", "Critical");
-      const defId = recordType === "nodeIdentity" ? record.nodeId :
-        recordType === "revision" ? record.revisionId :
-        recordType === "integrityRecord" ? record.integrityRecordId :
-        recordType === "stateRecord" ? record.stateRecordId : record.gateId;
+      const defId = recordId(recordType, record);
       const readBack = await namespace.getPersistedLocalFirstRepositoryRecord(recordType, defId);
       check("Read-back exists: " + recordType, Boolean(readBack), defId, "Persistence", "Critical");
       const listed = await namespace.listPersistedLocalFirstRepositoryRecords(recordType);
       check("List contains record: " + recordType, Array.isArray(listed) && listed.some(function item(x) {
-        const itemId = recordType === "nodeIdentity" ? x.nodeId :
-          recordType === "revision" ? x.revisionId :
-          recordType === "integrityRecord" ? x.integrityRecordId :
-          recordType === "stateRecord" ? x.stateRecordId : x.gateId;
-        return itemId === defId;
+        return recordId(recordType, x) === defId;
       }), listed.length, "Persistence", "High");
+    }
+  }
+
+  async function cleanupPersistenceFixtures(records, c) {
+    const check = c.check;
+    for (const recordType of Object.keys(records)) {
+      const defId = recordId(recordType, records[recordType]);
+      try {
+        const deleted = await namespace.deletePersistedLocalFirstRepositoryRecord(recordType, defId);
+        check("Fixture delete succeeds: " + recordType, Boolean(deleted && deleted.ok === true && deleted.data && deleted.data.exactIdDelete === true && deleted.data.broadClearPerformed === false), deleted && deleted.code, "Fixture Cleanup", "Critical");
+        const readBack = await namespace.getPersistedLocalFirstRepositoryRecord(recordType, defId);
+        check("Cleanup read-back confirms absence: " + recordType, readBack === null, defId, "Fixture Cleanup", "Critical");
+      } catch (error) {
+        check("Fixture delete succeeds: " + recordType, false, error && error.message ? error.message : String(error), "Fixture Cleanup", "Critical");
+        check("Cleanup read-back confirms absence: " + recordType, false, defId, "Fixture Cleanup", "Critical");
+      }
     }
   }
 
@@ -98,13 +114,16 @@
     const check = c.check;
 
     check("Phase 1 pre-device regression passes", Boolean(phase1 && phase1.failed === 0 && phase1.criticalFailed === 0), phase1 && phase1.status, "Regression", "Critical");
-    check("Release version is 1.1.0", VERSION_MANIFEST.release.version === "1.1.0", VERSION_MANIFEST.release.version, "Version", "Critical");
+    check("Release version is 1.1.1", VERSION_MANIFEST.release.version === "1.1.1", VERSION_MANIFEST.release.version, "Version", "Critical");
     check("Phase 2 is Android Replica Persistence", VERSION_MANIFEST.implementation.phase === 2 && VERSION_MANIFEST.implementation.persistenceImplemented === true, VERSION_MANIFEST.implementation, "Scope", "Critical");
     check("Sync Engine remains unimplemented", VERSION_MANIFEST.implementation.syncEngineImplemented === false, VERSION_MANIFEST.implementation.syncEngineImplemented, "Safety", "Critical");
     check("Direct Repository Mutation remains disabled", VERSION_MANIFEST.safety.directRepositoryMutationAllowed === false, VERSION_MANIFEST.safety.directRepositoryMutationAllowed, "Safety", "Critical");
     check("Automatic Conflict Winner remains disabled", VERSION_MANIFEST.safety.automaticConflictWinnerAllowed === false, VERSION_MANIFEST.safety.automaticConflictWinnerAllowed, "Safety", "Critical");
     check("Persistence API is available", typeof namespace.persistLocalFirstRepositoryRecord === "function", typeof namespace.persistLocalFirstRepositoryRecord, "API", "Critical");
+    check("Exact-ID delete API is available", typeof namespace.deletePersistedLocalFirstRepositoryRecord === "function", typeof namespace.deletePersistedLocalFirstRepositoryRecord, "API", "Critical");
     check("Memory persistence adapter is available", typeof namespace.createMemoryLocalFirstRepositoryPersistenceAdapter === "function", typeof namespace.createMemoryLocalFirstRepositoryPersistenceAdapter, "API", "Critical");
+    const metadataStatus = typeof namespace.getMetadataModelStatus === "function" ? namespace.getMetadataModelStatus() : null;
+    check("Metadata Status reflects implemented Persistence", Boolean(metadataStatus && metadataStatus.persistenceImplemented === true && metadataStatus.syncEngineImplemented === false), metadataStatus, "Metadata Status", "Critical");
 
     const memory = namespace.createMemoryLocalFirstRepositoryPersistenceAdapter();
     const setResult = namespace.setLocalFirstRepositoryPersistenceAdapter(memory);
@@ -116,6 +135,7 @@
     await validatePersistenceRecords(records, c);
     check("Staged state retains no Authority", records.stateRecord.state === "staged" && records.stateRecord.authorityEffect === "none", records.stateRecord, "Authority", "Critical");
     check("Validation Gate grants no Mutation Authority", records.validationGate.mutationAuthorityGranted === false, records.validationGate, "Authority", "Critical");
+    await cleanupPersistenceFixtures(records, c);
 
     const status = namespace.getLocalFirstRepositoryPersistenceStatus();
     check("Persistence role matches Android Replica / Offline Staging", /replica/i.test(status.role), status.role, "Scope", "Critical");
@@ -162,6 +182,7 @@
     const persistedState = await namespace.getPersistedLocalFirstRepositoryRecord("stateRecord", records.stateRecord.stateRecordId);
     check("Android IndexedDB persists staged Repository State", Boolean(persistedState && persistedState.state === "staged"), persistedState && persistedState.state, "Android IndexedDB", "Critical");
     check("Persisted staged State grants no Authority", Boolean(persistedState && persistedState.authorityEffect === "none"), persistedState && persistedState.authorityEffect, "Authority", "Critical");
+    await cleanupPersistenceFixtures(records, c);
 
     const status = namespace.getLocalFirstRepositoryPersistenceStatus();
     check("Native adapter is Android IndexedDB adapter", status.adapterId === "REPOSITORY-010-ANDROID-INDEXEDDB-REPLICA-PERSISTENCE", status.adapterId, "Android IndexedDB", "Critical");
