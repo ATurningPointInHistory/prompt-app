@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_phase2_validation.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.1.1 / Module: Phase 2 Validation 1.0.1
+   Release: 1.2.0 / Module: Phase 2 Validation 1.0.2
    Phase 2: Android Replica Persistence / IndexedDB Adapter
    ============================================================ */
 (function (global) {
@@ -114,8 +114,10 @@
     const check = c.check;
 
     check("Phase 1 pre-device regression passes", Boolean(phase1 && phase1.failed === 0 && phase1.criticalFailed === 0), phase1 && phase1.status, "Regression", "Critical");
-    check("Release version is 1.1.1", VERSION_MANIFEST.release.version === "1.1.1", VERSION_MANIFEST.release.version, "Version", "Critical");
-    check("Phase 2 is Android Replica Persistence", VERSION_MANIFEST.implementation.phase === 2 && VERSION_MANIFEST.implementation.persistenceImplemented === true, VERSION_MANIFEST.implementation, "Scope", "Critical");
+    const versionParts = String(VERSION_MANIFEST.release.version || "0.0.0").split(".").map(Number);
+    const phase2BaselineOrLater = versionParts[0] === 1 && (versionParts[1] > 1 || (versionParts[1] === 1 && versionParts[2] >= 1));
+    check("Release includes Phase 2 baseline or later", phase2BaselineOrLater, VERSION_MANIFEST.release.version, "Version", "Critical");
+    check("Phase 2 Android Replica Persistence capability remains implemented", VERSION_MANIFEST.implementation.phase >= 2 && VERSION_MANIFEST.implementation.persistenceImplemented === true, VERSION_MANIFEST.implementation, "Scope", "Critical");
     check("Sync Engine remains unimplemented", VERSION_MANIFEST.implementation.syncEngineImplemented === false, VERSION_MANIFEST.implementation.syncEngineImplemented, "Safety", "Critical");
     check("Direct Repository Mutation remains disabled", VERSION_MANIFEST.safety.directRepositoryMutationAllowed === false, VERSION_MANIFEST.safety.directRepositoryMutationAllowed, "Safety", "Critical");
     check("Automatic Conflict Winner remains disabled", VERSION_MANIFEST.safety.automaticConflictWinnerAllowed === false, VERSION_MANIFEST.safety.automaticConflictWinnerAllowed, "Safety", "Critical");
