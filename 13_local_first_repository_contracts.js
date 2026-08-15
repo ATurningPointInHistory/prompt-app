@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_contracts.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.6.0 / Module: Contracts 1.5.0
-   Phase 7: V2 Transfer Receipt Descriptor added
+   Release: 1.7.0 / Module: Contracts 1.6.0
+   Phase 8: Canonical Baseline + V3 Conflict Evidence Descriptors added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -221,6 +221,68 @@
         field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
         field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
         field("receivedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "canonicalBaselineDescriptor",
+      name: "REPOSITORY-010 Explicit Canonical Baseline Descriptor Contract",
+      fields: [
+        field("canonicalBaselineDescriptorId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("canonicalRevisionId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string" }),
+        field("directoryName", { required: true, type: "string" }),
+        field("manifestHash", { required: true, type: "string" }),
+        field("scriptSetHash", { required: true, type: "string" }),
+        field("scriptCount", { required: true, type: "number" }),
+        field("integrityStatus", { required: true, type: "string", enum: ["verified"] }),
+        field("baselineMode", { required: true, type: "string", enum: ["explicit-project-owner"] }),
+        field("explicitlyEstablished", { required: true, type: "boolean", enum: [true] }),
+        field("establishedBy", { required: true, type: "string", enum: ["Project Owner"] }),
+        field("revisionDerivedFromHash", { required: true, type: "boolean", enum: [false] }),
+        field("revisionDerivedFromVersion", { required: true, type: "boolean", enum: [false] }),
+        field("identityGrantsAuthority", { required: true, type: "boolean", enum: [false] }),
+        field("validationIsApproval", { required: true, type: "boolean", enum: [false] }),
+        field("mutationAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("establishedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "v3ConflictEvidenceDescriptor",
+      name: "REPOSITORY-010 V3 Base Revision / Conflict Evidence Descriptor Contract",
+      fields: [
+        field("conflictEvidenceId", { required: true, type: "string" }),
+        field("v3GateId", { required: true, type: "string" }),
+        field("receiptId", { required: true, type: "string" }),
+        field("transferPackageId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string" }),
+        field("candidateRevisionId", { required: true, type: "string" }),
+        field("candidateBaseRevisionId", { required: true, type: "string" }),
+        field("canonicalRevisionId", { required: true, type: "string" }),
+        field("baseRevisionMatch", { required: true, type: "boolean" }),
+        field("conflictDetected", { required: true, type: "boolean" }),
+        field("candidateState", { required: true, type: "string", enum: ["validated-base-match", "conflicted"] }),
+        field("blockingConflict", { required: true, type: "boolean" }),
+        field("resolutionStatus", { required: true, type: "string", enum: ["not-required", "manual-resolution-required"] }),
+        field("automaticWinnerSelected", { required: true, type: "boolean", enum: [false] }),
+        field("timestampWinnerUsed", { required: true, type: "boolean", enum: [false] }),
+        field("hashWinnerUsed", { required: true, type: "boolean", enum: [false] }),
+        field("validationIsApproval", { required: true, type: "boolean", enum: [false] }),
+        field("mutationAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("explicitAcceptanceGranted", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("v4TargetEnvironmentValidated", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("validatedAt", { required: true, type: "string" }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
       ]
     }

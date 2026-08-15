@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.6.0
-   Phase 7: Actual V2 Explicit File Transfer / Integrity Validation
-   Architecture Baseline: DECISION-001..003 / FROZEN
+   Release: 1.7.0
+   Phase 8: V3 Explicit Canonical Baseline / Base Revision / Conflict Validation
+   Architecture Baseline: DECISION-001..004 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.6.0";
+  const RELEASE_VERSION = "1.7.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -18,9 +18,9 @@
   }
 
   const moduleVersions = {
-    core: "1.5.0",
-    contracts: "1.5.0",
-    metadata: "1.5.0",
+    core: "1.6.0",
+    contracts: "1.6.0",
+    metadata: "1.6.0",
     validation: BASELINE_VERSION,
     persistence: "1.3.0",
     phase2Validation: "1.0.2",
@@ -33,7 +33,9 @@
     desktopAdapter: "1.0.0",
     phase6Validation: "1.0.0",
     v2Transfer: "1.0.0",
-    phase7Validation: "1.0.0"
+    phase7Validation: "1.0.0",
+    v3Conflict: "1.0.0",
+    phase8Validation: "1.0.0"
   };
 
   const fileModules = {
@@ -52,7 +54,9 @@
     "13_local_first_repository_desktop_adapter.js": "desktopAdapter",
     "13_local_first_repository_phase6_validation.js": "phase6Validation",
     "13_local_first_repository_v2_transfer.js": "v2Transfer",
-    "13_local_first_repository_phase7_validation.js": "phase7Validation"
+    "13_local_first_repository_phase7_validation.js": "phase7Validation",
+    "13_local_first_repository_v3_conflict.js": "v3Conflict",
+    "13_local_first_repository_phase8_validation.js": "phase8Validation"
   };
 
   const contractVersions = {
@@ -66,7 +70,9 @@
     syncCandidateDescriptor: "1.0.0",
     transferPackageDescriptor: "1.0.0",
     desktopRepositoryDescriptor: "1.0.0",
-    v2TransferReceiptDescriptor: "1.0.0"
+    v2TransferReceiptDescriptor: "1.0.0",
+    canonicalBaselineDescriptor: "1.0.0",
+    v3ConflictEvidenceDescriptor: "1.0.0"
   };
 
   const contractIds = {
@@ -80,7 +86,9 @@
     syncCandidateDescriptor: "REPOSITORY-010-CONTRACT-SYNC-CANDIDATE",
     transferPackageDescriptor: "REPOSITORY-010-CONTRACT-TRANSFER-PACKAGE",
     desktopRepositoryDescriptor: "REPOSITORY-010-CONTRACT-DESKTOP-REPOSITORY",
-    v2TransferReceiptDescriptor: "REPOSITORY-010-CONTRACT-V2-TRANSFER-RECEIPT"
+    v2TransferReceiptDescriptor: "REPOSITORY-010-CONTRACT-V2-TRANSFER-RECEIPT",
+    canonicalBaselineDescriptor: "REPOSITORY-010-CONTRACT-CANONICAL-BASELINE",
+    v3ConflictEvidenceDescriptor: "REPOSITORY-010-CONTRACT-V3-CONFLICT-EVIDENCE"
   };
 
   const repositoryStates = [
@@ -105,25 +113,28 @@
     componentName: "Local-First Repository Coordination",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 7 Actual V2 Explicit File Transfer / Integrity Validation",
-      architectureStatus: "DECISION-001..003 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 7 IMPLEMENTED / CROSS-DEVICE REAL VALIDATION REQUIRED",
+      implementationPhase: "Phase 8 V3 Explicit Canonical Baseline / Base Revision / Conflict Validation",
+      architectureStatus: "DECISION-001..004 / FORMALLY FROZEN",
+      implementationStatus: "PHASE 8 IMPLEMENTED / PC + CROSS-DEVICE REAL V3 VALIDATION REQUIRED",
       priorValidatedBaseline: {
-        version: "1.5.1",
-        phase: 6,
+        version: "1.6.0",
+        phase: 7,
+        crossDeviceRealValidationPassed: true,
         pcRealValidationPassed: true,
-        validatedAt: "2026-08-15T12:53:12.116Z",
-        status: "REPOSITORY-010 Phase 6 PC Local Repository Validation PASS"
+        androidRealValidationPassed: true,
+        validatedAt: "2026-08-15T14:07:52.521Z",
+        status: "REPOSITORY-010 Phase 7 Android-to-PC V2 Transfer Validation PASS"
       },
       decisionIds: [
         "REPOSITORY-010-DECISION-001",
         "REPOSITORY-010-DECISION-002",
-        "REPOSITORY-010-DECISION-003"
+        "REPOSITORY-010-DECISION-003",
+        "REPOSITORY-010-DECISION-004"
       ]
     },
     implementation: {
-      phase: 7,
-      phaseName: "Actual V2 Explicit File Transfer / Integrity Validation",
+      phase: 8,
+      phaseName: "V3 Explicit Canonical Baseline / Base Revision / Conflict Validation",
       phase1PersistenceImplemented: false,
       persistenceImplemented: true,
       androidIndexedDBPersistenceImplemented: true,
@@ -136,7 +147,7 @@
       transferPackagePersistenceImplemented: true,
       v2IntegrityPreflightImplemented: true,
       v2TransferIntegrityValidationImplemented: true,
-      v3BaseConflictValidationImplemented: false,
+      v3BaseConflictValidationImplemented: true,
       v4TargetEnvironmentValidationImplemented: false,
       v5PostReflectionVerificationImplemented: false,
       syncEngineImplemented: false,
@@ -148,7 +159,11 @@
       pcCanonicalMutationImplemented: false,
       crossDeviceRealSyncImplemented: false,
       explicitFileTransferImplemented: true,
-      v2TransferReceiptImplemented: true
+      v2TransferReceiptImplemented: true,
+      explicitCanonicalBaselineImplemented: true,
+      canonicalRevisionDerivedFromHash: false,
+      canonicalRevisionDerivedFromVersion: false,
+      v3ConflictEvidenceImplemented: true
     },
     authority: {
       model: "logical-authority-canonical-node-separation",
@@ -213,6 +228,12 @@
         crossDeviceRealValidation: "not-required"
       },
       phase7RequiredGateSet: {
+        staticValidation: "required",
+        androidRealValidation: "required",
+        pcRealValidation: "required",
+        crossDeviceRealValidation: "required"
+      },
+      phase8RequiredGateSet: {
         staticValidation: "required",
         androidRealValidation: "required",
         pcRealValidation: "required",

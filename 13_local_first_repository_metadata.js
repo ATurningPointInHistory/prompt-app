@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_metadata.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.6.0 / Module: Metadata Model 1.5.0
-   Phase 7 Compatible: V2 Transfer Receipt added
+   Release: 1.7.0 / Module: Metadata Model 1.6.0
+   Phase 8 Compatible: Explicit Canonical Baseline + V3 Conflict Evidence added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -254,6 +254,77 @@
     return validateAndStore("v2TransferReceiptDescriptor", record, state.v2TransferReceipts, "receiptId", "REPOSITORY010_V2_TRANSFER_RECEIPT_READY");
   }
 
+  function createCanonicalBaselineDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const required = ["canonicalBaselineDescriptorId", "projectId", "repositoryId", "canonicalRevisionId", "sourceNodeId", "directoryName", "manifestHash", "scriptSetHash"];
+    const missing = required.filter(function missingField(key) { return !internal.text(source[key], ""); });
+    if (missing.length) return fail("REPOSITORY010_CANONICAL_BASELINE_MISSING_FIELDS", "Required canonical baseline fields are missing.", { missing: missing });
+    const record = {
+      canonicalBaselineDescriptorId: internal.text(source.canonicalBaselineDescriptorId, ""),
+      projectId: internal.text(source.projectId, ""),
+      repositoryId: internal.text(source.repositoryId, ""),
+      canonicalRevisionId: internal.text(source.canonicalRevisionId, ""),
+      sourceNodeId: internal.text(source.sourceNodeId, ""),
+      directoryName: internal.text(source.directoryName, ""),
+      manifestHash: internal.text(source.manifestHash, ""),
+      scriptSetHash: internal.text(source.scriptSetHash, ""),
+      scriptCount: Number(source.scriptCount || 0),
+      integrityStatus: "verified",
+      baselineMode: "explicit-project-owner",
+      explicitlyEstablished: true,
+      establishedBy: "Project Owner",
+      revisionDerivedFromHash: false,
+      revisionDerivedFromVersion: false,
+      identityGrantsAuthority: false,
+      validationIsApproval: false,
+      mutationAuthorityGranted: false,
+      canonicalMutationPerformed: false,
+      authorityEffect: "none",
+      establishedAt: internal.text(source.establishedAt, internal.nowIso()),
+      immutable: true
+    };
+    return validateAndStore("canonicalBaselineDescriptor", record, state.canonicalBaselineDescriptors, "canonicalBaselineDescriptorId", "REPOSITORY010_CANONICAL_BASELINE_READY");
+  }
+
+  function createV3ConflictEvidenceDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const required = ["conflictEvidenceId", "v3GateId", "receiptId", "transferPackageId", "projectId", "repositoryId", "sourceNodeId", "targetNodeId", "candidateRevisionId", "candidateBaseRevisionId", "canonicalRevisionId", "candidateState", "resolutionStatus"];
+    const missing = required.filter(function missingField(key) { return !internal.text(source[key], ""); });
+    if (missing.length) return fail("REPOSITORY010_V3_CONFLICT_EVIDENCE_MISSING_FIELDS", "Required V3 conflict evidence fields are missing.", { missing: missing });
+    const match = source.baseRevisionMatch === true;
+    const record = {
+      conflictEvidenceId: internal.text(source.conflictEvidenceId, ""),
+      v3GateId: internal.text(source.v3GateId, ""),
+      receiptId: internal.text(source.receiptId, ""),
+      transferPackageId: internal.text(source.transferPackageId, ""),
+      projectId: internal.text(source.projectId, ""),
+      repositoryId: internal.text(source.repositoryId, ""),
+      sourceNodeId: internal.text(source.sourceNodeId, ""),
+      targetNodeId: internal.text(source.targetNodeId, ""),
+      candidateRevisionId: internal.text(source.candidateRevisionId, ""),
+      candidateBaseRevisionId: internal.text(source.candidateBaseRevisionId, ""),
+      canonicalRevisionId: internal.text(source.canonicalRevisionId, ""),
+      baseRevisionMatch: match,
+      conflictDetected: !match,
+      candidateState: match ? "validated-base-match" : "conflicted",
+      blockingConflict: !match,
+      resolutionStatus: match ? "not-required" : "manual-resolution-required",
+      automaticWinnerSelected: false,
+      timestampWinnerUsed: false,
+      hashWinnerUsed: false,
+      validationIsApproval: false,
+      mutationAuthorityGranted: false,
+      explicitAcceptanceGranted: false,
+      canonicalMutationPerformed: false,
+      v4TargetEnvironmentValidated: false,
+      syncEngineInvoked: false,
+      authorityEffect: "none",
+      validatedAt: internal.text(source.validatedAt, internal.nowIso()),
+      immutable: true
+    };
+    return validateAndStore("v3ConflictEvidenceDescriptor", record, state.v3ConflictEvidenceDescriptors, "conflictEvidenceId", "REPOSITORY010_V3_CONFLICT_EVIDENCE_READY");
+  }
+
   function createDesktopRepositoryDescriptor(input) {
     const source = internal.isPlainObject(input) ? input : {};
     const required = ["desktopRepositoryDescriptorId", "projectId", "repositoryId", "nodeId", "directoryName", "entryFile", "projectVersion", "manifestHash", "scriptSetHash"];
@@ -325,6 +396,16 @@
     return record ? internal.clone(record) : null;
   }
 
+  function getCanonicalBaselineDescriptor(descriptorId) {
+    const record = state.canonicalBaselineDescriptors.get(internal.text(descriptorId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
+  function getV3ConflictEvidenceDescriptor(conflictEvidenceId) {
+    const record = state.v3ConflictEvidenceDescriptors.get(internal.text(conflictEvidenceId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
   function getDesktopRepositoryDescriptor(descriptorId) {
     const record = state.desktopRepositoryDescriptors.get(internal.text(descriptorId, ""));
     return record ? internal.clone(record) : null;
@@ -360,7 +441,9 @@
         syncCandidateDescriptors: state.syncCandidateDescriptors.size,
         transferPackageDescriptors: state.transferPackageDescriptors.size,
         desktopRepositoryDescriptors: state.desktopRepositoryDescriptors.size,
-        v2TransferReceipts: state.v2TransferReceipts.size
+        v2TransferReceipts: state.v2TransferReceipts.size,
+        canonicalBaselineDescriptors: state.canonicalBaselineDescriptors.size,
+        v3ConflictEvidenceDescriptors: state.v3ConflictEvidenceDescriptors.size
       }
     };
   }
@@ -381,6 +464,8 @@
     createSyncCandidateDescriptor: createSyncCandidateDescriptor,
     createTransferPackageDescriptor: createTransferPackageDescriptor,
     createV2TransferReceiptDescriptor: createV2TransferReceiptDescriptor,
+    createCanonicalBaselineDescriptor: createCanonicalBaselineDescriptor,
+    createV3ConflictEvidenceDescriptor: createV3ConflictEvidenceDescriptor,
     createDesktopRepositoryDescriptor: createDesktopRepositoryDescriptor,
     getRepositoryNodeIdentity: getRepositoryNodeIdentity,
     getRepositoryRevision: getRepositoryRevision,
@@ -391,6 +476,8 @@
     getSyncCandidateDescriptor: getSyncCandidateDescriptor,
     getTransferPackageDescriptor: getTransferPackageDescriptor,
     getV2TransferReceiptDescriptor: getV2TransferReceiptDescriptor,
+    getCanonicalBaselineDescriptor: getCanonicalBaselineDescriptor,
+    getV3ConflictEvidenceDescriptor: getV3ConflictEvidenceDescriptor,
     getDesktopRepositoryDescriptor: getDesktopRepositoryDescriptor,
     getMetadataModelStatus: getMetadataModelStatus
   });
