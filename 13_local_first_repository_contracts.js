@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_contracts.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.3.0 / Module: Contracts 1.2.0
-   Phase 3 Compatible: Offline Staging Descriptor added
+   Release: 1.6.0 / Module: Contracts 1.5.0
+   Phase 7: V2 Transfer Receipt Descriptor added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -186,6 +186,67 @@
         field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
         field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
         field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "v2TransferReceiptDescriptor",
+      name: "REPOSITORY-010 V2 Transfer Receipt Descriptor Contract",
+      fields: [
+        field("receiptId", { required: true, type: "string" }),
+        field("transferPackageId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string" }),
+        field("revisionId", { required: true, type: "string" }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("packageHashAlgorithm", { required: true, type: "string", enum: ["SHA-256"] }),
+        field("packageHash", { required: true, type: "string" }),
+        field("receiverCalculatedPackageHash", { required: true, type: "string" }),
+        field("envelopeHash", { required: true, type: "string" }),
+        field("senderRuntimeVersion", { required: true, type: "string" }),
+        field("senderOrigin", { required: true, type: "string" }),
+        field("senderUserAgent", { required: true, type: "string" }),
+        field("transportMode", { required: true, type: "string", enum: ["explicit-file-transfer"] }),
+        field("sourceFileName", { required: true, type: "string" }),
+        field("receivedViaUserSelection", { required: true, type: "boolean", enum: [true] }),
+        field("v2TransferIntegrityValidated", { required: true, type: "boolean", enum: [true] }),
+        field("validationIsApproval", { required: true, type: "boolean", enum: [false] }),
+        field("mutationAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("explicitAcceptanceGranted", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("v3BaseConflictValidated", { required: true, type: "boolean", enum: [false] }),
+        field("v4TargetEnvironmentValidated", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("receivedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "desktopRepositoryDescriptor",
+      name: "REPOSITORY-010 Desktop Repository Descriptor Contract",
+      fields: [
+        field("desktopRepositoryDescriptorId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("nodeId", { required: true, type: "string" }),
+        field("nodeType", { required: true, type: "string", enum: ["canonical"] }),
+        field("directoryName", { required: true, type: "string" }),
+        field("entryFile", { required: true, type: "string", enum: ["index.html"] }),
+        field("projectVersion", { required: true, type: "string" }),
+        field("manifestHash", { required: true, type: "string" }),
+        field("scriptSetHash", { required: true, type: "string" }),
+        field("scriptCount", { required: true, type: "number" }),
+        field("integrityStatus", { required: true, type: "string", enum: ["verified"] }),
+        field("scanMode", { required: true, type: "string", enum: ["read-only"] }),
+        field("initialCanonicalNodeObserved", { required: true, type: "boolean", enum: [true] }),
+        field("identityGrantsAuthority", { required: true, type: "boolean", enum: [false] }),
+        field("mutationAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("writeAttempted", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("scannedAt", { required: true, type: "string" }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
       ]
     }

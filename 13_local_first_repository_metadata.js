@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_metadata.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.2.0 / Module: Metadata Model 1.1.0
-   Phase 1: Foundation / Contracts / Metadata Model
+   Release: 1.6.0 / Module: Metadata Model 1.5.0
+   Phase 7 Compatible: V2 Transfer Receipt added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -215,6 +215,75 @@
     return validateAndStore("transferPackageDescriptor", record, state.transferPackageDescriptors, "transferPackageId", "REPOSITORY010_TRANSFER_PACKAGE_DESCRIPTOR_READY");
   }
 
+  function createV2TransferReceiptDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const required = ["receiptId", "transferPackageId", "projectId", "repositoryId", "sourceNodeId", "targetNodeId", "revisionId", "baseRevisionId", "packageHash", "receiverCalculatedPackageHash", "envelopeHash", "senderRuntimeVersion", "senderOrigin", "senderUserAgent", "transportMode", "sourceFileName"];
+    const missing = required.filter(function missingField(key) { return !internal.text(source[key], ""); });
+    if (missing.length) return fail("REPOSITORY010_V2_TRANSFER_RECEIPT_MISSING_FIELDS", "Required V2 transfer receipt fields are missing.", { missing: missing });
+    const record = {
+      receiptId: internal.text(source.receiptId, ""),
+      transferPackageId: internal.text(source.transferPackageId, ""),
+      projectId: internal.text(source.projectId, ""),
+      repositoryId: internal.text(source.repositoryId, ""),
+      sourceNodeId: internal.text(source.sourceNodeId, ""),
+      targetNodeId: internal.text(source.targetNodeId, ""),
+      revisionId: internal.text(source.revisionId, ""),
+      baseRevisionId: internal.text(source.baseRevisionId, ""),
+      packageHashAlgorithm: "SHA-256",
+      packageHash: internal.text(source.packageHash, ""),
+      receiverCalculatedPackageHash: internal.text(source.receiverCalculatedPackageHash, ""),
+      envelopeHash: internal.text(source.envelopeHash, ""),
+      senderRuntimeVersion: internal.text(source.senderRuntimeVersion, ""),
+      senderOrigin: internal.text(source.senderOrigin, ""),
+      senderUserAgent: internal.text(source.senderUserAgent, ""),
+      transportMode: "explicit-file-transfer",
+      sourceFileName: internal.text(source.sourceFileName, "transfer-package.json"),
+      receivedViaUserSelection: source.receivedViaUserSelection === true,
+      v2TransferIntegrityValidated: true,
+      validationIsApproval: false,
+      mutationAuthorityGranted: false,
+      explicitAcceptanceGranted: false,
+      canonicalMutationPerformed: false,
+      v3BaseConflictValidated: false,
+      v4TargetEnvironmentValidated: false,
+      syncEngineInvoked: false,
+      authorityEffect: "none",
+      receivedAt: internal.text(source.receivedAt, internal.nowIso()),
+      immutable: true
+    };
+    return validateAndStore("v2TransferReceiptDescriptor", record, state.v2TransferReceipts, "receiptId", "REPOSITORY010_V2_TRANSFER_RECEIPT_READY");
+  }
+
+  function createDesktopRepositoryDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const required = ["desktopRepositoryDescriptorId", "projectId", "repositoryId", "nodeId", "directoryName", "entryFile", "projectVersion", "manifestHash", "scriptSetHash"];
+    const missing = required.filter(function missingField(key) { return !internal.text(source[key], ""); });
+    if (missing.length) return fail("REPOSITORY010_DESKTOP_REPOSITORY_DESCRIPTOR_MISSING_FIELDS", "Required desktop repository fields are missing.", { missing: missing });
+    const record = {
+      desktopRepositoryDescriptorId: internal.text(source.desktopRepositoryDescriptorId, ""),
+      projectId: internal.text(source.projectId, ""),
+      repositoryId: internal.text(source.repositoryId, ""),
+      nodeId: internal.text(source.nodeId, ""),
+      nodeType: "canonical",
+      directoryName: internal.text(source.directoryName, ""),
+      entryFile: internal.text(source.entryFile, "index.html"),
+      projectVersion: internal.text(source.projectVersion, ""),
+      manifestHash: internal.text(source.manifestHash, ""),
+      scriptSetHash: internal.text(source.scriptSetHash, ""),
+      scriptCount: Number(source.scriptCount || 0),
+      integrityStatus: "verified",
+      scanMode: "read-only",
+      initialCanonicalNodeObserved: true,
+      identityGrantsAuthority: false,
+      mutationAuthorityGranted: false,
+      writeAttempted: false,
+      authorityEffect: "none",
+      scannedAt: internal.text(source.scannedAt, internal.nowIso()),
+      immutable: true
+    };
+    return validateAndStore("desktopRepositoryDescriptor", record, state.desktopRepositoryDescriptors, "desktopRepositoryDescriptorId", "REPOSITORY010_DESKTOP_REPOSITORY_DESCRIPTOR_READY");
+  }
+
   function getRepositoryNodeIdentity(nodeId) {
     const record = state.nodeIdentities.get(internal.text(nodeId, ""));
     return record ? internal.clone(record) : null;
@@ -256,6 +325,16 @@
     return record ? internal.clone(record) : null;
   }
 
+  function getDesktopRepositoryDescriptor(descriptorId) {
+    const record = state.desktopRepositoryDescriptors.get(internal.text(descriptorId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
+  function getV2TransferReceiptDescriptor(receiptId) {
+    const record = state.v2TransferReceipts.get(internal.text(receiptId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
   function getMetadataModelStatus() {
     return {
       status: "Ready",
@@ -279,7 +358,9 @@
         validationGates: state.validationGates.size,
         offlineStagingDescriptors: state.offlineStagingDescriptors.size,
         syncCandidateDescriptors: state.syncCandidateDescriptors.size,
-        transferPackageDescriptors: state.transferPackageDescriptors.size
+        transferPackageDescriptors: state.transferPackageDescriptors.size,
+        desktopRepositoryDescriptors: state.desktopRepositoryDescriptors.size,
+        v2TransferReceipts: state.v2TransferReceipts.size
       }
     };
   }
@@ -299,6 +380,8 @@
     createOfflineStagingDescriptor: createOfflineStagingDescriptor,
     createSyncCandidateDescriptor: createSyncCandidateDescriptor,
     createTransferPackageDescriptor: createTransferPackageDescriptor,
+    createV2TransferReceiptDescriptor: createV2TransferReceiptDescriptor,
+    createDesktopRepositoryDescriptor: createDesktopRepositoryDescriptor,
     getRepositoryNodeIdentity: getRepositoryNodeIdentity,
     getRepositoryRevision: getRepositoryRevision,
     getRepositoryIntegrityRecord: getRepositoryIntegrityRecord,
@@ -307,6 +390,8 @@
     getOfflineStagingDescriptor: getOfflineStagingDescriptor,
     getSyncCandidateDescriptor: getSyncCandidateDescriptor,
     getTransferPackageDescriptor: getTransferPackageDescriptor,
+    getV2TransferReceiptDescriptor: getV2TransferReceiptDescriptor,
+    getDesktopRepositoryDescriptor: getDesktopRepositoryDescriptor,
     getMetadataModelStatus: getMetadataModelStatus
   });
   Object.assign(namespace, namespace.api);
