@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_phase12_validation.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.11.0 / Module: Phase 12 Validation 1.0.0
+   Release: 1.11.1 / Module: Phase 12 Validation 1.0.1
    Phase 12: Controlled Transaction Trial / Mandatory Rollback
    Required Gate: Android sender + PC real write + normal rollback
                   + forced-failure rollback + final repository restoration
@@ -83,6 +83,9 @@
     const writeAdapter = typeof namespace.getRestrictedDesktopWriteAdapterStatus === "function" ? namespace.getRestrictedDesktopWriteAdapterStatus() : null;
     check("Restricted Desktop Write Adapter is loaded", Boolean(namespace.modules.desktopWriteAdapter), namespace.modules.desktopWriteAdapter, "Write Adapter", "Critical");
     check("Unrestricted write API is not exposed", Boolean(writeAdapter && writeAdapter.unrestrictedWriteApiExposed === false && writeAdapter.transactionPermitRequired === true && writeAdapter.arbitraryFileCreateAllowed === false && writeAdapter.arbitraryFileDeleteAllowed === false), writeAdapter, "Write Adapter", "Critical");
+    check("Explicit Read-Write permission grant is required", Boolean(writeAdapter && writeAdapter.explicitReadWritePermissionGrantRequired === true), writeAdapter, "Permission Gate", "Critical");
+    check("Prompt permission is explicitly requested at Step 7", Boolean(writeAdapter && writeAdapter.promptPermissionRequestImplemented === true), writeAdapter, "Permission Gate", "Critical");
+    check("Read-Write permission is revalidated before Backup / Token Consumption", Boolean(writeAdapter && writeAdapter.preTransactionPermissionRevalidationRequired === true && writeAdapter.permissionMustBeGrantedBeforeBackupAndTokenConsumption === true), writeAdapter, "Permission Gate", "Critical");
 
     const txStatus = typeof namespace.getControlledTransactionStatus === "function" ? namespace.getControlledTransactionStatus() : null;
     check("Controlled Transaction module is loaded", Boolean(namespace.modules.controlledTransaction && txStatus && txStatus.controlledTransactionTrialImplemented === true), txStatus, "Transaction", "Critical");
@@ -400,7 +403,7 @@
       status.textContent = "Restricted Read-Write Repositoryを選択中...";
       const selected = await namespace.selectRestrictedDesktopWriteDirectory(); console.log(JSON.stringify(selected, null, 2));
       if (!selected || selected.ok !== true) { status.textContent = "Read-Write selection BLOCKED"; return; }
-      status.textContent = "Restricted Read-Write SELECTED。Step 8は実書込み+Rollback。"; normalButton.disabled = false;
+      status.textContent = "Restricted Read-Write GRANTED。Step 8は実書込み+Rollback。"; normalButton.disabled = false;
     });
 
     normalButton.addEventListener("click", async function () {

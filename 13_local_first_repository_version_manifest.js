@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.11.0
+   Release: 1.11.1
    Phase 12: Controlled Transaction Trial / Mandatory Rollback
    Architecture Baseline: DECISION-001..007 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.11.0";
+  const RELEASE_VERSION = "1.11.1";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -44,9 +44,9 @@
     ide150Bridge: "1.0.0",
     phase11Validation: "1.0.1",
     controlledTransactionPersistence: "1.0.0",
-    desktopWriteAdapter: "1.0.0",
+    desktopWriteAdapter: "1.0.1",
     controlledTransaction: "1.0.0",
-    phase12Validation: "1.0.0"
+    phase12Validation: "1.0.1"
   };
 
   const fileModules = {
@@ -151,7 +151,7 @@
       version: RELEASE_VERSION,
       implementationPhase: "Phase 12 Controlled Transaction Trial / Mandatory Rollback",
       architectureStatus: "DECISION-001..007 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 12 v1.11.0 / CONTROLLED TRANSACTION TRIAL / REAL PC WRITE + MANDATORY ROLLBACK VALIDATION REQUIRED",
+      implementationStatus: "PHASE 12 HOTFIX v1.11.1 / EXPLICIT READ-WRITE PERMISSION GATE / REAL PC WRITE + MANDATORY ROLLBACK VALIDATION REQUIRED",
       priorValidatedBaseline: {
         version: "1.10.1",
         phase: 11,
@@ -233,6 +233,9 @@
       ide150ReadOnlyBridgeImplemented: true,
       desktopReadOnlyTargetFileAccessImplemented: true,
       phase12MandatoryRollback: true,
+      phase12ExplicitReadWritePermissionGrantRequired: true,
+      phase12PromptPermissionRequestImplemented: true,
+      phase12PreTransactionPermissionRevalidationRequired: true,
       phase12PersistentCanonicalReflectionAllowed: false
     },
     authority: {
@@ -404,6 +407,8 @@
       controlledTrialWriteRequiresBoundToken: true,
       controlledTrialWriteRequiresBackup: true,
       controlledTrialWriteRequiresJournal: true,
+      controlledTrialWriteRequiresExplicitReadWritePermission: true,
+      permissionMustBeGrantedBeforeBackupAndTokenConsumption: true,
       phase12PersistentMutationAllowed: false
     },
     moduleVersions: moduleVersions,

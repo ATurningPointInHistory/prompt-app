@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_desktop_write_adapter.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.11.0 / Module: Restricted Desktop Write Adapter 1.0.0
+   Release: 1.11.1 / Module: Restricted Desktop Write Adapter 1.0.1
    Phase 12: Controlled Transaction Trial only
    Decision-007: No unrestricted filesystem write capability.
    ============================================================ */
@@ -45,6 +45,18 @@
     if (!handle) return "denied";
     if (typeof handle.queryPermission !== "function") return "granted";
     try { return await handle.queryPermission({ mode: mode }); } catch (_) { return "unknown"; }
+  }
+
+  async function requestPermission(handle, mode) {
+    if (!handle) return "denied";
+    if (typeof handle.requestPermission !== "function") return queryPermission(handle, mode);
+    try { return await handle.requestPermission({ mode: mode }); } catch (_) { return "unknown"; }
+  }
+
+  async function ensureExplicitReadWritePermission(handle) {
+    let permission = await queryPermission(handle, "readwrite");
+    if (permission === "prompt") permission = await requestPermission(handle, "readwrite");
+    return permission;
   }
 
   async function readText(handle, fileName) {
@@ -94,8 +106,8 @@
     try {
       const handle = await global.showDirectoryPicker({ mode: "readwrite" });
       if (!handle || handle.kind !== "directory") return fail("REPOSITORY010_WRITE_DIRECTORY_SELECTION_INVALID", "The selected handle is not a directory.");
-      const permission = await queryPermission(handle, "readwrite");
-      if (permission === "denied") return fail("REPOSITORY010_WRITE_PERMISSION_DENIED", "Read/write permission was denied.");
+      const permission = await ensureExplicitReadWritePermission(handle);
+      if (permission !== "granted") return fail("REPOSITORY010_WRITE_PERMISSION_NOT_GRANTED", "Explicit read/write permission must be granted before a Controlled Transaction can be prepared.", { permission: permission });
       selectedWriteDirectoryHandle = handle;
       state.desktopWriteAdapterStatus = "Selected / Restricted Read-Write";
       state.lastDesktopWriteAdapterError = null;
@@ -120,7 +132,7 @@
     if (!selectedWriteDirectoryHandle) return fail("REPOSITORY010_WRITE_DIRECTORY_REQUIRED", "Select the controlled write repository directory first.");
     if (typeof namespace.scanDesktopRepositoryDirectory !== "function") return fail("REPOSITORY010_READONLY_SCAN_REQUIRED", "Read-only Desktop Repository scanner is unavailable.");
     const permission = await queryPermission(selectedWriteDirectoryHandle, "readwrite");
-    if (permission === "denied") return fail("REPOSITORY010_WRITE_PERMISSION_DENIED", "Read/write permission is no longer available.");
+    if (permission !== "granted") return fail("REPOSITORY010_WRITE_PERMISSION_NOT_GRANTED", "Explicit read/write permission must still be granted immediately before transaction preparation. No backup, token consumption, or write may start.", { permission: permission, blockedBeforeBackup: true, blockedBeforeTokenConsumption: true, writeAttempted: false });
     const scan = await namespace.scanDesktopRepositoryDirectory(selectedWriteDirectoryHandle);
     if (!scan || scan.ok !== true) return scan || fail("REPOSITORY010_WRITE_REPOSITORY_SCAN_FAILED", "Fresh repository scan failed.");
     const baseline = state.lastCanonicalBaseline;
@@ -278,6 +290,10 @@
       arbitraryFileDeleteAllowed: false,
       unrestrictedWriteApiExposed: false,
       transactionPermitRequired: true,
+      explicitReadWritePermissionGrantRequired: true,
+      promptPermissionRequestImplemented: true,
+      preTransactionPermissionRevalidationRequired: true,
+      permissionMustBeGrantedBeforeBackupAndTokenConsumption: true,
       exactBeforeHashRequired: true,
       exactAfterHashRequired: true,
       directRepositoryMutationAllowed: false,
@@ -312,6 +328,10 @@
     functionPatchOnly: true,
     unrestrictedWriteApiExposed: false,
     transactionPermitRequired: true,
+    explicitReadWritePermissionGrantRequired: true,
+    promptPermissionRequestImplemented: true,
+    preTransactionPermissionRevalidationRequired: true,
+    permissionMustBeGrantedBeforeBackupAndTokenConsumption: true,
     directRepositoryMutationAllowed: false,
     pcCanonicalMutationImplemented: false,
     controlledTrialWriteImplemented: true,
