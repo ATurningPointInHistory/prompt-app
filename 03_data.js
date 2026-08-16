@@ -441,10 +441,15 @@ function loadSettings() {
     get("versionLabel").innerText =
       APP_VERSION;
 
-    get("changelogLabel").innerHTML =
-      CHANGELOG
-        .map(x => escapeHtml(x))
-        .join("<br>");
+    const changelogLabel =
+      get("changelogLabel");
+
+    if (changelogLabel) {
+      changelogLabel.innerHTML =
+        CHANGELOG
+          .map(x => escapeHtml(x))
+          .join("<br>");
+    }
 
   } finally {
 

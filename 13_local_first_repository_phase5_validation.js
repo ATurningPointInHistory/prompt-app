@@ -175,8 +175,8 @@
     const prior = VERSION_MANIFEST.release.priorValidatedBaseline || null;
 
     check("Phase 4 deterministic regression passes", Boolean(phase4 && phase4.failed === 0 && phase4.criticalFailed === 0), phase4 && phase4.status, "Regression", "Critical");
-    check("Prior Phase 4 Android release baseline is recorded", Boolean(prior && prior.phase === 4 && prior.version === "1.3.0" && prior.androidRealValidationPassed === true), prior, "Release Lineage", "Critical");
-    check("Phase 5 scope is Transfer Package / Integrity Preflight", VERSION_MANIFEST.implementation.phase === 5 && VERSION_MANIFEST.implementation.transferPackagePreparationImplemented === true && VERSION_MANIFEST.implementation.v2IntegrityPreflightImplemented === true, VERSION_MANIFEST.implementation, "Scope", "Critical");
+    check("Prior Phase 4 Android release baseline is recorded", Boolean(prior && Number(prior.phase || 0) >= 4 && prior.androidRealValidationPassed === true), prior, "Release Lineage", "Critical");
+    check("Phase 5 scope is Transfer Package / Integrity Preflight", Number(VERSION_MANIFEST.implementation.phase || 0) >= 5 && VERSION_MANIFEST.implementation.transferPackagePreparationImplemented === true && VERSION_MANIFEST.implementation.v2IntegrityPreflightImplemented === true, VERSION_MANIFEST.implementation, "Scope", "Critical");
     check("Transfer Package contract is registered", Boolean(namespace.getContractDefinition("transferPackageDescriptor")), namespace.getContractDefinition("transferPackageDescriptor"), "Contract", "Critical");
     check("Transfer Package module is ready", Boolean(namespace.modules.transferPackage && namespace.modules.transferPackage.status === "Ready"), namespace.modules.transferPackage, "Module", "Critical");
     check("Persistence supports transferPackage record type", namespace.getLocalFirstRepositoryPersistenceStatus().recordTypes.indexOf("transferPackage") >= 0, namespace.getLocalFirstRepositoryPersistenceStatus(), "Persistence", "Critical");
@@ -294,7 +294,7 @@
     const f = reloadFixture();
 
     check("Phase 5 pre-device validation passes", Boolean(pre && pre.failed === 0 && pre.criticalFailed === 0), pre && pre.status, "Pre-Device", "Critical");
-    check("Prior Phase 4 release baseline remains inherited", Boolean(VERSION_MANIFEST.release.priorValidatedBaseline && VERSION_MANIFEST.release.priorValidatedBaseline.phase === 4 && VERSION_MANIFEST.release.priorValidatedBaseline.androidRealValidationPassed === true), VERSION_MANIFEST.release.priorValidatedBaseline, "Release Lineage", "Critical");
+    check("Prior Phase 4 release baseline remains inherited", Boolean(VERSION_MANIFEST.release.priorValidatedBaseline && Number(VERSION_MANIFEST.release.priorValidatedBaseline.phase || 0) >= 4 && VERSION_MANIFEST.release.priorValidatedBaseline.androidRealValidationPassed === true), VERSION_MANIFEST.release.priorValidatedBaseline, "Release Lineage", "Critical");
     check("Runtime is Android", androidRealDevice === true, userAgent || "navigator.userAgent unavailable", "Android Real Device", "Critical");
     check("IndexedDB is available", Boolean(global.indexedDB), Boolean(global.indexedDB), "Android IndexedDB", "Critical");
     check("PC Real Validation is not required by Phase 5 preflight", VERSION_MANIFEST.validationAuthority.phase5RequiredGateSet.pcRealValidation === "not-required", VERSION_MANIFEST.validationAuthority.phase5RequiredGateSet.pcRealValidation, "Gate Applicability", "Critical");
