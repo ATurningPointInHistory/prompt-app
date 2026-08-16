@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_phase12_validation.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.11.2 / Module: Phase 12 Validation 1.0.2
+   Release: 1.12.0 / Module: Phase 12 Validation 1.0.2
    Phase 12: Controlled Transaction Trial / Mandatory Rollback
    Required Gate: Android sender + PC real write + normal rollback
                   + forced-failure rollback + final repository restoration

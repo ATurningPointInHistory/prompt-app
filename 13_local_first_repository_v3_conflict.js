@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_v3_conflict.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.11.2 / Module: V3 Base Revision / Conflict Validation 1.0.1
+   Release: 1.12.0 / Module: V3 Base Revision / Conflict Validation 1.0.1
    Decision-004: Explicit Canonical Baseline
    ============================================================ */
 (function (global) {
