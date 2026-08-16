@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_core.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.9.0 / Module: Core 1.8.0
-   Phase 10: Manual Acceptance Token / Authority Gate
+   Release: 1.10.0 / Module: Core 1.9.0
+   Phase 11: Hybrid Mutation Package / Smallest Safe Mutation Bridge
    ============================================================ */
 (function (global) {
   "use strict";
@@ -89,6 +89,7 @@
     acceptanceTokenDescriptors: new Map(),
     acceptanceTokenConsumptionRecords: new Map(),
     acceptanceTokenRevocationRecords: new Map(),
+    mutationPackageDescriptors: new Map(),
     lastPhase1Validation: null,
     lastPhase1AndroidValidation: null,
     phase1PreDeviceValidationPassed: false,
@@ -149,6 +150,14 @@
     crossDevicePhase10ValidationPassed: false,
     acceptanceStatus: "Ready",
     lastAcceptanceToken: null,
+    lastPhase11Validation: null,
+    lastPhase11CrossDeviceValidation: null,
+    phase11PreDeviceValidationPassed: false,
+    crossDevicePhase11ValidationPassed: false,
+    mutationPackageStatus: "Ready",
+    lastMutationPackage: null,
+    lastMutationPackageValidation: null,
+    lastIDE150BridgeEvidence: null,
     desktopAdapterStatus: "Not Initialized",
     lastDesktopRepositoryScan: null,
     transferPackageStatus: "Ready",
@@ -163,7 +172,7 @@
     updatedAt: null
   };
 
-  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors", "transferPackageDescriptors", "desktopRepositoryDescriptors", "v2TransferReceipts", "canonicalBaselineDescriptors", "v3ConflictEvidenceDescriptors", "v4TargetValidationEvidenceDescriptors", "acceptanceTokenDescriptors", "acceptanceTokenConsumptionRecords", "acceptanceTokenRevocationRecords"].forEach(function ensureMap(key) {
+  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors", "transferPackageDescriptors", "desktopRepositoryDescriptors", "v2TransferReceipts", "canonicalBaselineDescriptors", "v3ConflictEvidenceDescriptors", "v4TargetValidationEvidenceDescriptors", "acceptanceTokenDescriptors", "acceptanceTokenConsumptionRecords", "acceptanceTokenRevocationRecords", "mutationPackageDescriptors"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
 
@@ -278,7 +287,22 @@
   }
 
   function phase10Complete() {
-    return phase9Complete() && state.phase10PreDeviceValidationPassed === true && state.crossDevicePhase10ValidationPassed === true && Boolean(state.lastAcceptanceToken && state.lastAcceptanceToken.acceptanceMode === "MANUAL" && state.lastAcceptanceToken.explicitAcceptanceGranted === true && state.lastAcceptanceToken.mutationAuthorityGranted === false && state.lastAcceptanceToken.canonicalMutationPerformed === false);
+    return priorValidatedPhase() >= 10 || (phase9Complete() && state.phase10PreDeviceValidationPassed === true && state.crossDevicePhase10ValidationPassed === true && Boolean(state.lastAcceptanceToken && state.lastAcceptanceToken.acceptanceMode === "MANUAL" && state.lastAcceptanceToken.explicitAcceptanceGranted === true && state.lastAcceptanceToken.mutationAuthorityGranted === false && state.lastAcceptanceToken.canonicalMutationPerformed === false));
+  }
+
+  function phase11Complete() {
+    return phase10Complete() && state.phase11PreDeviceValidationPassed === true && state.crossDevicePhase11ValidationPassed === true && Boolean(
+      state.lastMutationPackage &&
+      Array.isArray(state.lastMutationPackage.allowedMutationSet) &&
+      state.lastMutationPackage.allowedMutationSet.length > 0 &&
+      state.lastIDE150BridgeEvidence &&
+      state.lastIDE150BridgeEvidence.repositoryWriteAttempted === false &&
+      state.lastAcceptanceToken &&
+      Array.isArray(state.lastAcceptanceToken.allowedMutationSet) &&
+      state.lastAcceptanceToken.allowedMutationSet.length === state.lastMutationPackage.allowedMutationSet.length &&
+      state.lastAcceptanceToken.mutationAuthorityGranted === false &&
+      state.lastAcceptanceToken.canonicalMutationPerformed === false
+    );
   }
 
   function getStatus() {
@@ -305,7 +329,8 @@
       phase8Complete: phase8Complete(),
       phase9Complete: phase9Complete(),
       phase10Complete: phase10Complete(),
-      releaseAllowed: phase10Complete(),
+      phase11Complete: phase11Complete(),
+      releaseAllowed: phase11Complete(),
       logicalAuthority: VERSION_MANIFEST.authority.logicalAuthority,
       initialCanonicalNode: VERSION_MANIFEST.authority.initialCanonicalNode,
       androidRole: VERSION_MANIFEST.authority.androidIndexedDBRole,
@@ -326,6 +351,10 @@
       explicitCanonicalBaselineImplemented: VERSION_MANIFEST.implementation.explicitCanonicalBaselineImplemented === true,
       explicitAcceptanceImplemented: VERSION_MANIFEST.implementation.explicitAcceptanceImplemented === true,
       manualAcceptanceTokenImplemented: VERSION_MANIFEST.implementation.manualAcceptanceTokenImplemented === true,
+      hybridMutationPackageImplemented: VERSION_MANIFEST.implementation.hybridMutationPackageImplemented === true,
+      smallestSafeMutationFirst: Boolean(VERSION_MANIFEST.mutationStrategy && VERSION_MANIFEST.mutationStrategy.smallestSafeMutationFirst === true),
+      functionPatchMutationPreparationImplemented: VERSION_MANIFEST.implementation.functionPatchMutationPreparationImplemented === true,
+      ide150ReadOnlyBridgeImplemented: VERSION_MANIFEST.implementation.ide150ReadOnlyBridgeImplemented === true,
       delegatedAcceptanceEnabled: Boolean(VERSION_MANIFEST.acceptance && VERSION_MANIFEST.acceptance.delegatedAcceptanceEnabled === true),
       controlledCanonicalTransactionImplemented: VERSION_MANIFEST.implementation.controlledCanonicalTransactionImplemented === true,
       v5PostReflectionVerificationImplemented: VERSION_MANIFEST.implementation.v5PostReflectionVerificationImplemented === true,
@@ -346,6 +375,7 @@
       phase8RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase8RequiredGateSet),
       phase9RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase9RequiredGateSet),
       phase10RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase10RequiredGateSet),
+      phase11RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase11RequiredGateSet),
       phase1PreDeviceValidationPassed: state.phase1PreDeviceValidationPassed === true,
       androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true || priorValidatedPhase() >= 1,
       phase2PreDeviceValidationPassed: state.phase2PreDeviceValidationPassed === true,
@@ -367,8 +397,14 @@
       crossDevicePhase8ValidationPassed: state.crossDevicePhase8ValidationPassed === true || priorValidatedPhase() >= 8,
       phase9PreDeviceValidationPassed: state.phase9PreDeviceValidationPassed === true,
       crossDevicePhase9ValidationPassed: state.crossDevicePhase9ValidationPassed === true || priorValidatedPhase() >= 9,
-      phase10PreDeviceValidationPassed: state.phase10PreDeviceValidationPassed === true,
-      crossDevicePhase10ValidationPassed: state.crossDevicePhase10ValidationPassed === true,
+      phase10PreDeviceValidationPassed: state.phase10PreDeviceValidationPassed === true || priorValidatedPhase() >= 10,
+      crossDevicePhase10ValidationPassed: state.crossDevicePhase10ValidationPassed === true || priorValidatedPhase() >= 10,
+      phase11PreDeviceValidationPassed: state.phase11PreDeviceValidationPassed === true,
+      crossDevicePhase11ValidationPassed: state.crossDevicePhase11ValidationPassed === true,
+      mutationPackageStatus: state.mutationPackageStatus || "Ready",
+      lastMutationPackage: clone(state.lastMutationPackage),
+      lastMutationPackageValidation: clone(state.lastMutationPackageValidation),
+      lastIDE150BridgeEvidence: clone(state.lastIDE150BridgeEvidence),
       acceptanceStatus: state.acceptanceStatus || "Ready",
       lastAcceptanceToken: clone(state.lastAcceptanceToken),
       acceptanceTokenTtlSeconds: VERSION_MANIFEST.acceptance && VERSION_MANIFEST.acceptance.tokenLifetimeSeconds || null,
@@ -400,6 +436,7 @@
         canonicalBaselineDescriptors: state.canonicalBaselineDescriptors.size,
         v3ConflictEvidenceDescriptors: state.v3ConflictEvidenceDescriptors.size,
         v4TargetValidationEvidenceDescriptors: state.v4TargetValidationEvidenceDescriptors.size,
+        mutationPackageDescriptors: state.mutationPackageDescriptors.size,
         acceptanceTokenDescriptors: state.acceptanceTokenDescriptors.size,
         acceptanceTokenConsumptionRecords: state.acceptanceTokenConsumptionRecords.size,
         acceptanceTokenRevocationRecords: state.acceptanceTokenRevocationRecords.size
@@ -583,12 +620,24 @@
     touch();
   }
 
+  function markPhase11PreDeviceValidation(result) {
+    state.lastPhase11Validation = clone(result);
+    state.phase11PreDeviceValidationPassed = Boolean(result && result.failed === 0 && result.criticalFailed === 0);
+    touch();
+  }
+
+  function markPhase11CrossDeviceValidation(result) {
+    state.lastPhase11CrossDeviceValidation = clone(result);
+    state.crossDevicePhase11ValidationPassed = Boolean(result && result.failed === 0 && result.criticalFailed === 0 && result.crossDeviceRealValidation === true && result.pcRealDevice === true && result.androidSenderRealDevice === true && result.mutationPackageValidated === true && result.ide150BridgeValidated === true && result.manualAcceptanceTokenIssued === true && result.tokenMutationSetBound === true && result.canonicalMutationPerformed === false);
+    touch();
+  }
+
   function getPublicApiDescription() {
     return {
       componentId: COMPONENT_ID,
       version: RELEASE_VERSION,
       namespace: "window.REPOSITORY010LocalFirstRepository",
-      phase: 10,
+      phase: 11,
       namespaceFunctions: Object.keys(namespace.api || {}).sort(),
       contractsImplemented: typeof namespace.validateContract === "function",
       metadataModelImplemented: typeof namespace.createRepositoryNodeIdentity === "function",
@@ -609,6 +658,9 @@
       explicitCanonicalBaselineImplemented: VERSION_MANIFEST.implementation.explicitCanonicalBaselineImplemented === true,
       explicitAcceptanceImplemented: VERSION_MANIFEST.implementation.explicitAcceptanceImplemented === true,
       manualAcceptanceTokenImplemented: VERSION_MANIFEST.implementation.manualAcceptanceTokenImplemented === true,
+      hybridMutationPackageImplemented: VERSION_MANIFEST.implementation.hybridMutationPackageImplemented === true,
+      functionPatchMutationPreparationImplemented: VERSION_MANIFEST.implementation.functionPatchMutationPreparationImplemented === true,
+      ide150ReadOnlyBridgeImplemented: VERSION_MANIFEST.implementation.ide150ReadOnlyBridgeImplemented === true,
       delegatedAcceptanceEnabled: Boolean(VERSION_MANIFEST.acceptance && VERSION_MANIFEST.acceptance.delegatedAcceptanceEnabled === true),
       controlledCanonicalTransactionImplemented: VERSION_MANIFEST.implementation.controlledCanonicalTransactionImplemented === true,
       v5PostReflectionVerificationImplemented: VERSION_MANIFEST.implementation.v5PostReflectionVerificationImplemented === true,
@@ -626,7 +678,8 @@
       phase7ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase7Validation === "function",
       phase8ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase8Validation === "function",
       phase9ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase9Validation === "function",
-      phase10ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase10Validation === "function"
+      phase10ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase10Validation === "function",
+      phase11ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase11Validation === "function"
     };
   }
 
@@ -666,7 +719,9 @@
     markPhase9PreDeviceValidation: markPhase9PreDeviceValidation,
     markPhase9CrossDeviceValidation: markPhase9CrossDeviceValidation,
     markPhase10PreDeviceValidation: markPhase10PreDeviceValidation,
-    markPhase10CrossDeviceValidation: markPhase10CrossDeviceValidation
+    markPhase10CrossDeviceValidation: markPhase10CrossDeviceValidation,
+    markPhase11PreDeviceValidation: markPhase11PreDeviceValidation,
+    markPhase11CrossDeviceValidation: markPhase11CrossDeviceValidation
   });
   namespace.__internal = internal;
 
@@ -692,7 +747,7 @@
     id: "REPOSITORY-010-CORE",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 10,
+    phase: 11,
     persistentMutationImplemented: false,
     persistenceImplemented: true,
     offlineStagingImplemented: true,
@@ -708,6 +763,10 @@
     v4TargetEnvironmentValidationImplemented: true,
     explicitCanonicalBaselineImplemented: true,
     manualAcceptanceTokenImplemented: true,
+    hybridMutationPackageImplemented: true,
+    smallestSafeMutationFirst: true,
+    functionPatchMutationPreparationImplemented: true,
+    ide150ReadOnlyBridgeImplemented: true,
     delegatedAcceptanceEnabled: false,
     controlledCanonicalTransactionImplemented: false,
     desktopAdapterImplemented: true,

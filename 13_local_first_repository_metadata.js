@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_metadata.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.9.0 / Module: Metadata Model 1.8.0
-   Phase 10 Compatible: Manual Acceptance Token Descriptor added
+   Release: 1.10.0 / Module: Metadata Model 1.9.0
+   Phase 11 Compatible: Hybrid Mutation Package Descriptor added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -375,6 +375,57 @@
     return validateAndStore("v4TargetValidationEvidenceDescriptor", record, state.v4TargetValidationEvidenceDescriptors, "v4EvidenceId", "REPOSITORY010_V4_TARGET_VALIDATION_EVIDENCE_READY");
   }
 
+  function createMutationPackageDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const required = ["mutationPackageId", "schema", "schemaVersion", "strategy", "projectId", "repositoryId", "sourceNodeId", "candidateId", "candidateRevisionId", "baseRevisionId", "transferPackageId", "sourceTransferPackageHash", "mutationSetHash", "payloadHash", "mutationPackageHash"];
+    const missing = required.filter(function missingField(key) { return !internal.text(source[key], ""); });
+    if (missing.length) return fail("REPOSITORY010_MUTATION_PACKAGE_MISSING_FIELDS", "Required Mutation Package fields are missing.", { missing: missing });
+    if (!Array.isArray(source.mutationSet) || !Array.isArray(source.allowedMutationSet) || !Array.isArray(source.enabledMutationTypes) || !Array.isArray(source.fallbackMutationTypes)) {
+      return fail("REPOSITORY010_MUTATION_PACKAGE_ARRAY_FIELDS_INVALID", "Mutation Package array fields are invalid.");
+    }
+    const record = {
+      mutationPackageId: internal.text(source.mutationPackageId, ""),
+      schema: internal.text(source.schema, ""),
+      schemaVersion: internal.text(source.schemaVersion, ""),
+      strategy: internal.text(source.strategy, ""),
+      projectId: internal.text(source.projectId, ""),
+      repositoryId: internal.text(source.repositoryId, ""),
+      sourceNodeId: internal.text(source.sourceNodeId, ""),
+      candidateId: internal.text(source.candidateId, ""),
+      candidateRevisionId: internal.text(source.candidateRevisionId, ""),
+      baseRevisionId: internal.text(source.baseRevisionId, ""),
+      transferPackageId: internal.text(source.transferPackageId, ""),
+      sourceTransferPackageHash: internal.text(source.sourceTransferPackageHash, ""),
+      mutationCount: Number(source.mutationCount || 0),
+      enabledMutationTypes: internal.clone(source.enabledMutationTypes),
+      fallbackMutationTypes: internal.clone(source.fallbackMutationTypes),
+      mutationSet: internal.clone(source.mutationSet),
+      allowedMutationSet: internal.clone(source.allowedMutationSet),
+      mutationSetHashAlgorithm: "SHA-256",
+      mutationSetHash: internal.text(source.mutationSetHash, ""),
+      payloadHashAlgorithm: "SHA-256",
+      payloadHash: internal.text(source.payloadHash, ""),
+      mutationPackageHashAlgorithm: "SHA-256",
+      mutationPackageHash: internal.text(source.mutationPackageHash, ""),
+      ide150BridgeMode: "read-only-compatibility-adapter",
+      smallestSafeMutationFirst: true,
+      fullFileReplacementEnabled: false,
+      multiFileZipMutationEnabled: false,
+      validationIsApproval: false,
+      explicitAcceptanceGranted: false,
+      mutationAuthorityGranted: false,
+      controlledTransactionStarted: false,
+      writeAttempted: false,
+      canonicalMutationPerformed: false,
+      v5PostReflectionVerified: false,
+      syncEngineInvoked: false,
+      authorityEffect: "none",
+      createdAt: internal.text(source.createdAt, internal.nowIso()),
+      immutable: true
+    };
+    return validateAndStore("mutationPackageDescriptor", record, state.mutationPackageDescriptors, "mutationPackageId", "REPOSITORY010_MUTATION_PACKAGE_DESCRIPTOR_READY");
+  }
+
   function createAcceptanceTokenDescriptor(input) {
     const source = internal.isPlainObject(input) ? input : {};
     const required = ["acceptanceTokenId", "candidateId", "candidateRevisionId", "baseRevisionId", "targetNodeId", "canonicalRevisionId", "v4EvidenceId", "transferPackageId", "receiptId", "packageHash", "acceptedBy", "issuerIdentity", "issuedAt", "expiresAt", "bindingHash"];
@@ -508,6 +559,11 @@
     return record ? internal.clone(record) : null;
   }
 
+  function getMutationPackageDescriptor(mutationPackageId) {
+    const record = state.mutationPackageDescriptors.get(internal.text(mutationPackageId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
   function getAcceptanceTokenDescriptor(acceptanceTokenId) {
     const record = state.acceptanceTokenDescriptors.get(internal.text(acceptanceTokenId, ""));
     return record ? internal.clone(record) : null;
@@ -552,6 +608,7 @@
         canonicalBaselineDescriptors: state.canonicalBaselineDescriptors.size,
         v3ConflictEvidenceDescriptors: state.v3ConflictEvidenceDescriptors.size,
         v4TargetValidationEvidenceDescriptors: state.v4TargetValidationEvidenceDescriptors.size,
+        mutationPackageDescriptors: state.mutationPackageDescriptors.size,
         acceptanceTokenDescriptors: state.acceptanceTokenDescriptors.size
       }
     };
@@ -576,6 +633,7 @@
     createCanonicalBaselineDescriptor: createCanonicalBaselineDescriptor,
     createV3ConflictEvidenceDescriptor: createV3ConflictEvidenceDescriptor,
     createV4TargetValidationEvidenceDescriptor: createV4TargetValidationEvidenceDescriptor,
+    createMutationPackageDescriptor: createMutationPackageDescriptor,
     createAcceptanceTokenDescriptor: createAcceptanceTokenDescriptor,
     createDesktopRepositoryDescriptor: createDesktopRepositoryDescriptor,
     getRepositoryNodeIdentity: getRepositoryNodeIdentity,
@@ -590,6 +648,7 @@
     getCanonicalBaselineDescriptor: getCanonicalBaselineDescriptor,
     getV3ConflictEvidenceDescriptor: getV3ConflictEvidenceDescriptor,
     getV4TargetValidationEvidenceDescriptor: getV4TargetValidationEvidenceDescriptor,
+    getMutationPackageDescriptor: getMutationPackageDescriptor,
     getAcceptanceTokenDescriptor: getAcceptanceTokenDescriptor,
     getDesktopRepositoryDescriptor: getDesktopRepositoryDescriptor,
     getMetadataModelStatus: getMetadataModelStatus

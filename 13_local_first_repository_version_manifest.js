@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.9.0
-   Phase 10: Manual Acceptance Token / Authority Gate
-   Architecture Baseline: DECISION-001..005 / FROZEN
+   Release: 1.10.0
+   Phase 11: Hybrid Mutation Package / Smallest Safe Mutation Bridge
+   Architecture Baseline: DECISION-001..006 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.9.0";
+  const RELEASE_VERSION = "1.10.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -18,9 +18,9 @@
   }
 
   const moduleVersions = {
-    core: "1.8.0",
-    contracts: "1.8.0",
-    metadata: "1.8.0",
+    core: "1.9.0",
+    contracts: "1.9.0",
+    metadata: "1.9.0",
     validation: BASELINE_VERSION,
     persistence: "1.3.0",
     phase2Validation: "1.0.2",
@@ -30,7 +30,7 @@
     phase4Validation: "1.0.0",
     transferPackage: "1.0.0",
     phase5Validation: "1.0.0",
-    desktopAdapter: "1.0.0",
+    desktopAdapter: "1.1.0",
     phase6Validation: "1.0.0",
     v2Transfer: "1.0.0",
     phase7Validation: "1.0.0",
@@ -39,7 +39,10 @@
     v4TargetValidation: "1.0.0",
     phase9Validation: "1.0.0",
     acceptanceToken: "1.0.0",
-    phase10Validation: "1.0.0"
+    phase10Validation: "1.0.0",
+    mutationPackage: "1.0.0",
+    ide150Bridge: "1.0.0",
+    phase11Validation: "1.0.0"
   };
 
   const fileModules = {
@@ -62,9 +65,12 @@
     "13_local_first_repository_v3_conflict.js": "v3Conflict",
     "13_local_first_repository_v4_target_validation.js": "v4TargetValidation",
     "13_local_first_repository_acceptance_token.js": "acceptanceToken",
+    "13_local_first_repository_mutation_package.js": "mutationPackage",
+    "13_local_first_repository_ide150_bridge.js": "ide150Bridge",
     "13_local_first_repository_phase8_validation.js": "phase8Validation",
     "13_local_first_repository_phase9_validation.js": "phase9Validation",
-    "13_local_first_repository_phase10_validation.js": "phase10Validation"
+    "13_local_first_repository_phase10_validation.js": "phase10Validation",
+    "13_local_first_repository_phase11_validation.js": "phase11Validation"
   };
 
   const contractVersions = {
@@ -82,7 +88,8 @@
     canonicalBaselineDescriptor: "1.0.0",
     v3ConflictEvidenceDescriptor: "1.0.0",
     v4TargetValidationEvidenceDescriptor: "1.0.0",
-    acceptanceTokenDescriptor: "1.0.0"
+    acceptanceTokenDescriptor: "1.0.0",
+    mutationPackageDescriptor: "1.0.0"
   };
 
   const contractIds = {
@@ -100,7 +107,8 @@
     canonicalBaselineDescriptor: "REPOSITORY-010-CONTRACT-CANONICAL-BASELINE",
     v3ConflictEvidenceDescriptor: "REPOSITORY-010-CONTRACT-V3-CONFLICT-EVIDENCE",
     v4TargetValidationEvidenceDescriptor: "REPOSITORY-010-CONTRACT-V4-TARGET-VALIDATION-EVIDENCE",
-    acceptanceTokenDescriptor: "REPOSITORY-010-CONTRACT-ACCEPTANCE-TOKEN"
+    acceptanceTokenDescriptor: "REPOSITORY-010-CONTRACT-ACCEPTANCE-TOKEN",
+    mutationPackageDescriptor: "REPOSITORY-010-CONTRACT-HYBRID-MUTATION-PACKAGE"
   };
 
   const repositoryStates = [
@@ -125,29 +133,30 @@
     componentName: "Local-First Repository Coordination",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 10 Manual Acceptance Token / Authority Gate",
-      architectureStatus: "DECISION-001..005 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 10 IMPLEMENTED / PC + CROSS-DEVICE REAL MANUAL ACCEPTANCE TOKEN VALIDATION REQUIRED",
+      implementationPhase: "Phase 11 Hybrid Mutation Package / Smallest Safe Mutation Bridge",
+      architectureStatus: "DECISION-001..006 / FORMALLY FROZEN",
+      implementationStatus: "PHASE 11 IMPLEMENTED / PC + ANDROID CROSS-DEVICE REAL MUTATION PACKAGE BRIDGE VALIDATION REQUIRED",
       priorValidatedBaseline: {
-        version: "1.8.0",
-        phase: 9,
+        version: "1.9.0",
+        phase: 10,
         crossDeviceRealValidationPassed: true,
         pcRealValidationPassed: true,
         androidRealValidationPassed: true,
-        validatedAt: "2026-08-16T01:16:07.323Z",
-        status: "REPOSITORY-010 Phase 9 V4 Target Environment Validation PASS"
+        validatedAt: "2026-08-16T02:19:53.460Z",
+        status: "REPOSITORY-010 Phase 10 Manual Acceptance Token Validation PASS"
       },
       decisionIds: [
         "REPOSITORY-010-DECISION-001",
         "REPOSITORY-010-DECISION-002",
         "REPOSITORY-010-DECISION-003",
         "REPOSITORY-010-DECISION-004",
-        "REPOSITORY-010-DECISION-005"
+        "REPOSITORY-010-DECISION-005",
+        "REPOSITORY-010-DECISION-006"
       ]
     },
     implementation: {
-      phase: 10,
-      phaseName: "Manual Acceptance Token / Authority Gate",
+      phase: 11,
+      phaseName: "Hybrid Mutation Package / Smallest Safe Mutation Bridge",
       phase1PersistenceImplemented: false,
       persistenceImplemented: true,
       androidIndexedDBPersistenceImplemented: true,
@@ -184,7 +193,17 @@
       delegatedAcceptanceEnabled: false,
       automaticLowRiskReflectionEnabled: false,
       controlledCanonicalTransactionImplemented: false,
-      acceptanceTokenConsumptionImplemented: false
+      acceptanceTokenConsumptionImplemented: false,
+      hybridMutationPackageImplemented: true,
+      functionPatchMutationPreparationImplemented: true,
+      structuredBlockMutationPreparationImplemented: false,
+      fullFileMutationPreparationImplemented: false,
+      multiFileZipMutationPreparationImplemented: false,
+      mutationPackageExplicitFileTransferImplemented: true,
+      mutationPackageIntegrityValidationImplemented: true,
+      mutationPackageV2LineageBindingImplemented: true,
+      ide150ReadOnlyBridgeImplemented: true,
+      desktopReadOnlyTargetFileAccessImplemented: true
     },
     authority: {
       model: "logical-authority-canonical-node-separation",
@@ -272,6 +291,12 @@
         pcRealValidation: "required",
         crossDeviceRealValidation: "required"
       },
+      phase11RequiredGateSet: {
+        staticValidation: "required",
+        androidRealValidation: "required",
+        pcRealValidation: "required",
+        crossDeviceRealValidation: "required"
+      },
       syncCandidateValidationLayers: [
         "V1 Local Validation",
         "V2 Transfer / Integrity Validation",
@@ -279,6 +304,18 @@
         "V4 Target Environment Validation",
         "V5 Post-Reflection Verification"
       ]
+    },
+    mutationStrategy: {
+      model: "hybrid-smallest-safe-mutation-first",
+      smallestSafeMutationFirst: true,
+      priorityOrder: ["function-patch", "structured-block-patch", "file-replace", "multi-file-zip"],
+      phase11EnabledMutationTypes: ["function-patch"],
+      phase11DisabledFallbackMutationTypes: ["structured-block-patch", "file-replace", "multi-file-zip"],
+      defaultMutationType: "function-patch",
+      ide150BridgeMode: "read-only-compatibility-adapter",
+      mutationPackageBindsTransferLineage: true,
+      acceptanceTokenBindsCompactAllowedMutationSet: true,
+      canonicalWriteImplemented: false
     },
     acceptance: {
       model: "acceptance-token-controlled-transaction",
@@ -296,7 +333,8 @@
       tokenV4EvidenceBound: true,
       tokenMutationSetBound: true,
       projectOwnerImpersonationAllowed: false,
-      phase10AuthorityGateMutationSet: []
+      phase10AuthorityGateMutationSet: [],
+      phase11MutationSetBindingRequired: true
     },
     safety: {
       directRepositoryMutationAllowed: false,

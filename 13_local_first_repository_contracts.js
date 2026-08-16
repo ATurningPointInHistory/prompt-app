@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_contracts.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.9.0 / Module: Contracts 1.8.0
-   Phase 10: Manual Acceptance Token Descriptor added
+   Release: 1.10.0 / Module: Contracts 1.9.0
+   Phase 11: Hybrid Mutation Package Descriptor added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -328,6 +328,50 @@
         field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
         field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
         field("validatedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "mutationPackageDescriptor",
+      name: "REPOSITORY-010 Hybrid Mutation Package Descriptor Contract",
+      fields: [
+        field("mutationPackageId", { required: true, type: "string" }),
+        field("schema", { required: true, type: "string", enum: ["REPOSITORY-010-HYBRID-MUTATION-PACKAGE"] }),
+        field("schemaVersion", { required: true, type: "string", enum: ["1.0.0"] }),
+        field("strategy", { required: true, type: "string", enum: ["smallest-safe-mutation-first"] }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string" }),
+        field("candidateId", { required: true, type: "string" }),
+        field("candidateRevisionId", { required: true, type: "string" }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("transferPackageId", { required: true, type: "string" }),
+        field("sourceTransferPackageHash", { required: true, type: "string" }),
+        field("mutationCount", { required: true, type: "number" }),
+        field("enabledMutationTypes", { required: true, type: "array" }),
+        field("fallbackMutationTypes", { required: true, type: "array" }),
+        field("mutationSet", { required: true, type: "array" }),
+        field("allowedMutationSet", { required: true, type: "array" }),
+        field("mutationSetHashAlgorithm", { required: true, type: "string", enum: ["SHA-256"] }),
+        field("mutationSetHash", { required: true, type: "string" }),
+        field("payloadHashAlgorithm", { required: true, type: "string", enum: ["SHA-256"] }),
+        field("payloadHash", { required: true, type: "string" }),
+        field("mutationPackageHashAlgorithm", { required: true, type: "string", enum: ["SHA-256"] }),
+        field("mutationPackageHash", { required: true, type: "string" }),
+        field("ide150BridgeMode", { required: true, type: "string", enum: ["read-only-compatibility-adapter"] }),
+        field("smallestSafeMutationFirst", { required: true, type: "boolean", enum: [true] }),
+        field("fullFileReplacementEnabled", { required: true, type: "boolean", enum: [false] }),
+        field("multiFileZipMutationEnabled", { required: true, type: "boolean", enum: [false] }),
+        field("validationIsApproval", { required: true, type: "boolean", enum: [false] }),
+        field("explicitAcceptanceGranted", { required: true, type: "boolean", enum: [false] }),
+        field("mutationAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("controlledTransactionStarted", { required: true, type: "boolean", enum: [false] }),
+        field("writeAttempted", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("v5PostReflectionVerified", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("createdAt", { required: true, type: "string" }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
       ]
     }

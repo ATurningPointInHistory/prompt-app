@@ -1,9 +1,9 @@
 /* ============================================================
    FILE: 13_local_first_repository_desktop_adapter.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.5.0 / Module: Desktop Adapter 1.0.0
-   Phase 6: PC Local Repository / Desktop Adapter Foundation
-   Read-only: no write, no canonical mutation, no transfer
+   Release: 1.10.0 / Module: Desktop Adapter 1.1.0
+   Phase 11 Compatible: Read-only target file access for Mutation Bridge
+   Read-only: no write, no canonical mutation
    ============================================================ */
 (function (global) {
   "use strict";
@@ -241,6 +241,35 @@
     return scanDesktopRepositoryDirectory(selectedDirectoryHandle);
   }
 
+  async function readDesktopRepositoryFileText(path) {
+    const fileName = normalizeScriptPath(path);
+    if (!selectedDirectoryHandle || selectedDirectoryHandle.kind !== "directory") {
+      return fail("REPOSITORY010_DESKTOP_DIRECTORY_REQUIRED", "Select a desktop repository directory first.");
+    }
+    if (!fileName || fileName.includes("/") || fileName.includes("\\") || fileName === "." || fileName === "..") {
+      return fail("REPOSITORY010_DESKTOP_FILE_PATH_INVALID", "Only root-level project files are allowed.", { path: path || null });
+    }
+    try {
+      const permission = await queryReadPermission(selectedDirectoryHandle);
+      if (permission === "denied") return fail("REPOSITORY010_DESKTOP_READ_PERMISSION_DENIED", "Desktop repository read permission is denied.");
+      const text = await readText(selectedDirectoryHandle, fileName);
+      const sha256Hash = await sha256(text);
+      return internal.buildResult(true, "REPOSITORY010_DESKTOP_FILE_READ", "Read", {
+        path: fileName,
+        text: text,
+        sha256: sha256Hash,
+        readOnly: true,
+        writePermissionRequested: false,
+        writeAttempted: false,
+        mutationAuthorityGranted: false,
+        canonicalMutationPerformed: false,
+        authorityEffect: "none"
+      });
+    } catch (error) {
+      return fail("REPOSITORY010_DESKTOP_FILE_READ_FAILED", error && error.message ? error.message : String(error), { path: fileName });
+    }
+  }
+
   function getDesktopRepositoryAdapterStatus() {
     return {
       status: state.desktopAdapterStatus || "Not Initialized",
@@ -270,6 +299,7 @@
     selectDesktopRepositoryDirectory: selectDesktopRepositoryDirectory,
     scanDesktopRepositoryDirectory: scanDesktopRepositoryDirectory,
     selectAndScanDesktopRepository: selectAndScanDesktopRepository,
+    readDesktopRepositoryFileText: readDesktopRepositoryFileText,
     getDesktopRepositoryAdapterStatus: getDesktopRepositoryAdapterStatus
   });
   Object.assign(namespace, namespace.api);
@@ -293,5 +323,6 @@
   global.selectLocalFirstRepositoryDesktopDirectory = selectDesktopRepositoryDirectory;
   global.scanLocalFirstRepositoryDesktopDirectory = scanDesktopRepositoryDirectory;
   global.selectAndScanLocalFirstRepositoryDesktopRepository = selectAndScanDesktopRepository;
+  global.readLocalFirstRepositoryDesktopFileText = readDesktopRepositoryFileText;
   global.getLocalFirstRepositoryDesktopAdapterStatus = getDesktopRepositoryAdapterStatus;
 })(typeof window !== "undefined" ? window : globalThis);
