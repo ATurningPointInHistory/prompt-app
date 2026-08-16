@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_contracts.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.8.0 / Module: Contracts 1.7.0
-   Phase 9: V4 Target Environment Validation Evidence Descriptor added
+   Release: 1.9.0 / Module: Contracts 1.8.0
+   Phase 10: Manual Acceptance Token Descriptor added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -328,6 +328,48 @@
         field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
         field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
         field("validatedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "acceptanceTokenDescriptor",
+      name: "REPOSITORY-010 Manual Acceptance Token Descriptor Contract",
+      fields: [
+        field("acceptanceTokenId", { required: true, type: "string" }),
+        field("acceptanceMode", { required: true, type: "string", enum: ["MANUAL"] }),
+        field("candidateId", { required: true, type: "string" }),
+        field("candidateRevisionId", { required: true, type: "string" }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string" }),
+        field("canonicalRevisionId", { required: true, type: "string" }),
+        field("v4EvidenceId", { required: true, type: "string" }),
+        field("transferPackageId", { required: true, type: "string" }),
+        field("receiptId", { required: true, type: "string" }),
+        field("packageHash", { required: true, type: "string" }),
+        field("allowedMutationSet", { required: true, type: "array" }),
+        field("mutationScopeMode", { required: true, type: "string", enum: ["explicit"] }),
+        field("policyId", { required: true, type: "string|null", enum: [null] }),
+        field("policyVersion", { required: true, type: "string|null", enum: [null] }),
+        field("delegatedBy", { required: true, type: "string|null", enum: [null] }),
+        field("acceptedBy", { required: true, type: "string", enum: ["Project Owner"] }),
+        field("issuerIdentity", { required: true, type: "string", enum: ["Project Owner"] }),
+        field("explicitProjectOwnerAction", { required: true, type: "boolean", enum: [true] }),
+        field("tokenTtlSeconds", { required: true, type: "number", enum: [900] }),
+        field("issuedAt", { required: true, type: "string" }),
+        field("expiresAt", { required: true, type: "string" }),
+        field("oneTimeUse", { required: true, type: "boolean", enum: [true] }),
+        field("consumedAt", { required: true, type: "string|null", enum: [null] }),
+        field("revokedAt", { required: true, type: "string|null", enum: [null] }),
+        field("tokenStatus", { required: true, type: "string", enum: ["issued"] }),
+        field("bindingHash", { required: true, type: "string" }),
+        field("validationIsApproval", { required: true, type: "boolean", enum: [false] }),
+        field("explicitAcceptanceGranted", { required: true, type: "boolean", enum: [true] }),
+        field("mutationAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("controlledTransactionStarted", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("v5PostReflectionVerified", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["acceptance-token-only"] }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
       ]
     }

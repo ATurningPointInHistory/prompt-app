@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_metadata.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.8.0 / Module: Metadata Model 1.7.0
-   Phase 9 Compatible: V4 Target Environment Validation Evidence added
+   Release: 1.9.0 / Module: Metadata Model 1.8.0
+   Phase 10 Compatible: Manual Acceptance Token Descriptor added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -375,6 +375,53 @@
     return validateAndStore("v4TargetValidationEvidenceDescriptor", record, state.v4TargetValidationEvidenceDescriptors, "v4EvidenceId", "REPOSITORY010_V4_TARGET_VALIDATION_EVIDENCE_READY");
   }
 
+  function createAcceptanceTokenDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const required = ["acceptanceTokenId", "candidateId", "candidateRevisionId", "baseRevisionId", "targetNodeId", "canonicalRevisionId", "v4EvidenceId", "transferPackageId", "receiptId", "packageHash", "acceptedBy", "issuerIdentity", "issuedAt", "expiresAt", "bindingHash"];
+    const missing = required.filter(function missingField(key) { return !internal.text(source[key], ""); });
+    if (missing.length) return fail("REPOSITORY010_ACCEPTANCE_TOKEN_MISSING_FIELDS", "Required Acceptance Token fields are missing.", { missing: missing });
+    if (!Array.isArray(source.allowedMutationSet)) return fail("REPOSITORY010_ACCEPTANCE_TOKEN_MUTATION_SET_INVALID", "allowedMutationSet must be an explicit array.");
+    const record = {
+      acceptanceTokenId: internal.text(source.acceptanceTokenId, ""),
+      acceptanceMode: "MANUAL",
+      candidateId: internal.text(source.candidateId, ""),
+      candidateRevisionId: internal.text(source.candidateRevisionId, ""),
+      baseRevisionId: internal.text(source.baseRevisionId, ""),
+      targetNodeId: internal.text(source.targetNodeId, ""),
+      canonicalRevisionId: internal.text(source.canonicalRevisionId, ""),
+      v4EvidenceId: internal.text(source.v4EvidenceId, ""),
+      transferPackageId: internal.text(source.transferPackageId, ""),
+      receiptId: internal.text(source.receiptId, ""),
+      packageHash: internal.text(source.packageHash, ""),
+      allowedMutationSet: internal.clone(source.allowedMutationSet),
+      mutationScopeMode: "explicit",
+      policyId: null,
+      policyVersion: null,
+      delegatedBy: null,
+      acceptedBy: internal.text(source.acceptedBy, ""),
+      issuerIdentity: internal.text(source.issuerIdentity, ""),
+      explicitProjectOwnerAction: source.explicitProjectOwnerAction === true,
+      tokenTtlSeconds: Number(source.tokenTtlSeconds || 0),
+      issuedAt: internal.text(source.issuedAt, ""),
+      expiresAt: internal.text(source.expiresAt, ""),
+      oneTimeUse: source.oneTimeUse === true,
+      consumedAt: null,
+      revokedAt: null,
+      tokenStatus: "issued",
+      bindingHash: internal.text(source.bindingHash, ""),
+      validationIsApproval: false,
+      explicitAcceptanceGranted: true,
+      mutationAuthorityGranted: false,
+      controlledTransactionStarted: false,
+      canonicalMutationPerformed: false,
+      v5PostReflectionVerified: false,
+      syncEngineInvoked: false,
+      authorityEffect: "acceptance-token-only",
+      immutable: true
+    };
+    return validateAndStore("acceptanceTokenDescriptor", record, state.acceptanceTokenDescriptors, "acceptanceTokenId", "REPOSITORY010_ACCEPTANCE_TOKEN_DESCRIPTOR_READY");
+  }
+
   function createDesktopRepositoryDescriptor(input) {
     const source = internal.isPlainObject(input) ? input : {};
     const required = ["desktopRepositoryDescriptorId", "projectId", "repositoryId", "nodeId", "directoryName", "entryFile", "projectVersion", "manifestHash", "scriptSetHash"];
@@ -461,6 +508,11 @@
     return record ? internal.clone(record) : null;
   }
 
+  function getAcceptanceTokenDescriptor(acceptanceTokenId) {
+    const record = state.acceptanceTokenDescriptors.get(internal.text(acceptanceTokenId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
   function getDesktopRepositoryDescriptor(descriptorId) {
     const record = state.desktopRepositoryDescriptors.get(internal.text(descriptorId, ""));
     return record ? internal.clone(record) : null;
@@ -499,7 +551,8 @@
         v2TransferReceipts: state.v2TransferReceipts.size,
         canonicalBaselineDescriptors: state.canonicalBaselineDescriptors.size,
         v3ConflictEvidenceDescriptors: state.v3ConflictEvidenceDescriptors.size,
-        v4TargetValidationEvidenceDescriptors: state.v4TargetValidationEvidenceDescriptors.size
+        v4TargetValidationEvidenceDescriptors: state.v4TargetValidationEvidenceDescriptors.size,
+        acceptanceTokenDescriptors: state.acceptanceTokenDescriptors.size
       }
     };
   }
@@ -523,6 +576,7 @@
     createCanonicalBaselineDescriptor: createCanonicalBaselineDescriptor,
     createV3ConflictEvidenceDescriptor: createV3ConflictEvidenceDescriptor,
     createV4TargetValidationEvidenceDescriptor: createV4TargetValidationEvidenceDescriptor,
+    createAcceptanceTokenDescriptor: createAcceptanceTokenDescriptor,
     createDesktopRepositoryDescriptor: createDesktopRepositoryDescriptor,
     getRepositoryNodeIdentity: getRepositoryNodeIdentity,
     getRepositoryRevision: getRepositoryRevision,
@@ -536,6 +590,7 @@
     getCanonicalBaselineDescriptor: getCanonicalBaselineDescriptor,
     getV3ConflictEvidenceDescriptor: getV3ConflictEvidenceDescriptor,
     getV4TargetValidationEvidenceDescriptor: getV4TargetValidationEvidenceDescriptor,
+    getAcceptanceTokenDescriptor: getAcceptanceTokenDescriptor,
     getDesktopRepositoryDescriptor: getDesktopRepositoryDescriptor,
     getMetadataModelStatus: getMetadataModelStatus
   });

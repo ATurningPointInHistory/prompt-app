@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.8.0
-   Phase 9: V4 Target Environment Revalidation / Drift Gate
-   Architecture Baseline: DECISION-001..004 / FROZEN
+   Release: 1.9.0
+   Phase 10: Manual Acceptance Token / Authority Gate
+   Architecture Baseline: DECISION-001..005 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.8.0";
+  const RELEASE_VERSION = "1.9.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -18,9 +18,9 @@
   }
 
   const moduleVersions = {
-    core: "1.7.0",
-    contracts: "1.7.0",
-    metadata: "1.7.0",
+    core: "1.8.0",
+    contracts: "1.8.0",
+    metadata: "1.8.0",
     validation: BASELINE_VERSION,
     persistence: "1.3.0",
     phase2Validation: "1.0.2",
@@ -37,7 +37,9 @@
     v3Conflict: "1.0.0",
     phase8Validation: "1.0.0",
     v4TargetValidation: "1.0.0",
-    phase9Validation: "1.0.0"
+    phase9Validation: "1.0.0",
+    acceptanceToken: "1.0.0",
+    phase10Validation: "1.0.0"
   };
 
   const fileModules = {
@@ -59,8 +61,10 @@
     "13_local_first_repository_phase7_validation.js": "phase7Validation",
     "13_local_first_repository_v3_conflict.js": "v3Conflict",
     "13_local_first_repository_v4_target_validation.js": "v4TargetValidation",
+    "13_local_first_repository_acceptance_token.js": "acceptanceToken",
     "13_local_first_repository_phase8_validation.js": "phase8Validation",
-    "13_local_first_repository_phase9_validation.js": "phase9Validation"
+    "13_local_first_repository_phase9_validation.js": "phase9Validation",
+    "13_local_first_repository_phase10_validation.js": "phase10Validation"
   };
 
   const contractVersions = {
@@ -77,7 +81,8 @@
     v2TransferReceiptDescriptor: "1.0.0",
     canonicalBaselineDescriptor: "1.0.0",
     v3ConflictEvidenceDescriptor: "1.0.0",
-    v4TargetValidationEvidenceDescriptor: "1.0.0"
+    v4TargetValidationEvidenceDescriptor: "1.0.0",
+    acceptanceTokenDescriptor: "1.0.0"
   };
 
   const contractIds = {
@@ -94,7 +99,8 @@
     v2TransferReceiptDescriptor: "REPOSITORY-010-CONTRACT-V2-TRANSFER-RECEIPT",
     canonicalBaselineDescriptor: "REPOSITORY-010-CONTRACT-CANONICAL-BASELINE",
     v3ConflictEvidenceDescriptor: "REPOSITORY-010-CONTRACT-V3-CONFLICT-EVIDENCE",
-    v4TargetValidationEvidenceDescriptor: "REPOSITORY-010-CONTRACT-V4-TARGET-VALIDATION-EVIDENCE"
+    v4TargetValidationEvidenceDescriptor: "REPOSITORY-010-CONTRACT-V4-TARGET-VALIDATION-EVIDENCE",
+    acceptanceTokenDescriptor: "REPOSITORY-010-CONTRACT-ACCEPTANCE-TOKEN"
   };
 
   const repositoryStates = [
@@ -119,28 +125,29 @@
     componentName: "Local-First Repository Coordination",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 9 V4 Target Environment Revalidation / Drift Gate",
-      architectureStatus: "DECISION-001..004 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 9 IMPLEMENTED / PC + CROSS-DEVICE REAL V4 VALIDATION REQUIRED",
+      implementationPhase: "Phase 10 Manual Acceptance Token / Authority Gate",
+      architectureStatus: "DECISION-001..005 / FORMALLY FROZEN",
+      implementationStatus: "PHASE 10 IMPLEMENTED / PC + CROSS-DEVICE REAL MANUAL ACCEPTANCE TOKEN VALIDATION REQUIRED",
       priorValidatedBaseline: {
-        version: "1.7.0",
-        phase: 8,
+        version: "1.8.0",
+        phase: 9,
         crossDeviceRealValidationPassed: true,
         pcRealValidationPassed: true,
         androidRealValidationPassed: true,
-        validatedAt: "2026-08-16T00:48:38.888Z",
-        status: "REPOSITORY-010 Phase 8 V3 Base Revision Validation PASS"
+        validatedAt: "2026-08-16T01:16:07.323Z",
+        status: "REPOSITORY-010 Phase 9 V4 Target Environment Validation PASS"
       },
       decisionIds: [
         "REPOSITORY-010-DECISION-001",
         "REPOSITORY-010-DECISION-002",
         "REPOSITORY-010-DECISION-003",
-        "REPOSITORY-010-DECISION-004"
+        "REPOSITORY-010-DECISION-004",
+        "REPOSITORY-010-DECISION-005"
       ]
     },
     implementation: {
-      phase: 9,
-      phaseName: "V4 Target Environment Revalidation / Drift Gate",
+      phase: 10,
+      phaseName: "Manual Acceptance Token / Authority Gate",
       phase1PersistenceImplemented: false,
       persistenceImplemented: true,
       androidIndexedDBPersistenceImplemented: true,
@@ -171,7 +178,13 @@
       canonicalRevisionDerivedFromVersion: false,
       v3ConflictEvidenceImplemented: true,
       v4TargetValidationEvidenceImplemented: true,
-      explicitAcceptanceImplemented: false
+      explicitAcceptanceImplemented: true,
+      manualAcceptanceTokenImplemented: true,
+      delegatedAcceptanceArchitectureSupported: true,
+      delegatedAcceptanceEnabled: false,
+      automaticLowRiskReflectionEnabled: false,
+      controlledCanonicalTransactionImplemented: false,
+      acceptanceTokenConsumptionImplemented: false
     },
     authority: {
       model: "logical-authority-canonical-node-separation",
@@ -253,6 +266,12 @@
         pcRealValidation: "required",
         crossDeviceRealValidation: "required"
       },
+      phase10RequiredGateSet: {
+        staticValidation: "required",
+        androidRealValidation: "required",
+        pcRealValidation: "required",
+        crossDeviceRealValidation: "required"
+      },
       syncCandidateValidationLayers: [
         "V1 Local Validation",
         "V2 Transfer / Integrity Validation",
@@ -260,6 +279,24 @@
         "V4 Target Environment Validation",
         "V5 Post-Reflection Verification"
       ]
+    },
+    acceptance: {
+      model: "acceptance-token-controlled-transaction",
+      automationPrinciple: "Automation First / Human on Exception / Authority remains explicit",
+      manualAcceptanceEnabled: true,
+      delegatedAcceptanceArchitectureSupported: true,
+      delegatedAcceptanceEnabled: false,
+      automaticLowRiskReflectionEnabled: false,
+      tokenLifetimePolicy: "transaction-start-window",
+      tokenLifetimeMinutes: 15,
+      tokenLifetimeSeconds: 900,
+      tokenOneTimeUse: true,
+      tokenCandidateBound: true,
+      tokenTargetBound: true,
+      tokenV4EvidenceBound: true,
+      tokenMutationSetBound: true,
+      projectOwnerImpersonationAllowed: false,
+      phase10AuthorityGateMutationSet: []
     },
     safety: {
       directRepositoryMutationAllowed: false,
@@ -274,7 +311,15 @@
       conflictScoringAllowed: false,
       automaticConflictWinnerAllowed: false,
       implicitAuthorityTransferAllowed: false,
-      offlineCanonicalFinalizationAllowed: false
+      offlineCanonicalFinalizationAllowed: false,
+      acceptanceTokenReusable: false,
+      acceptancePolicySelfApprovalAllowed: false,
+      uncontrolledPersistentMutationAllowed: false,
+      reflectionWithoutBackupAllowed: false,
+      reflectionWithoutRollbackPlanAllowed: false,
+      successfulReflectionWithoutV5Allowed: false,
+      automatedProjectOwnerImpersonationAllowed: false,
+      delegatedAcceptanceDefaultEnabled: false
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
