@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_phase12_validation.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.11.1 / Module: Phase 12 Validation 1.0.1
+   Release: 1.11.2 / Module: Phase 12 Validation 1.0.2
    Phase 12: Controlled Transaction Trial / Mandatory Rollback
    Required Gate: Android sender + PC real write + normal rollback
                   + forced-failure rollback + final repository restoration
@@ -276,6 +276,16 @@
   async function launchLocalFirstRepositoryPhase12Validation() {
     const pre = await runLocalFirstRepositoryPhase12Validation();
     if (!pre || pre.failed > 0 || !global.document || !global.document.body) return internal.buildResult(false, "REPOSITORY010_PHASE12_PREDEVICE_BLOCKED", "Blocked", { preDeviceValidation: pre });
+
+    const revisionSuggestion = typeof namespace.getCanonicalRevisionSuggestion === "function"
+      ? await namespace.getCanonicalRevisionSuggestion()
+      : null;
+    const revisionSuggestionData = revisionSuggestion && revisionSuggestion.ok === true && revisionSuggestion.data
+      ? revisionSuggestion.data
+      : {};
+    const lastEstablishedCanonicalRevisionId = internal.text(revisionSuggestionData.lastEstablishedCanonicalRevisionId, "");
+    const suggestedCanonicalRevisionId = internal.text(revisionSuggestionData.nextCanonicalRevisionCandidate, "");
+
     const old = global.document.getElementById("repository010Phase12Panel");
     if (old) old.remove();
 
@@ -313,14 +323,22 @@
     }
 
     const scanButton = button("1. PC RepositoryをRead-only検証");
+    const baselineContext = global.document.createElement("div");
+    baselineContext.textContent = lastEstablishedCanonicalRevisionId
+      ? "最後の確立済みCanonical Revision: " + lastEstablishedCanonicalRevisionId + " / 次候補: " + suggestedCanonicalRevisionId
+      : "最後の確立済みCanonical Revisionを自動特定できません。Project Ownerが確認してください。";
+    baselineContext.style.marginBottom = "6px";
+    baselineContext.style.opacity = "0.9";
+
     const revisionInput = global.document.createElement("input");
     revisionInput.type = "text";
-    revisionInput.value = "REPOSITORY010-CANONICAL-REVISION-0006";
+    revisionInput.value = suggestedCanonicalRevisionId;
+    revisionInput.placeholder = "Project OwnerがCanonical Revisionを確認 / 入力";
     revisionInput.style.width = "100%";
     revisionInput.style.boxSizing = "border-box";
     revisionInput.style.marginBottom = "6px";
     revisionInput.disabled = true;
-    const baselineButton = button("2. Project OwnerとしてBaseline 0006を確立"); baselineButton.disabled = true;
+    const baselineButton = button("2. Project Ownerとして次Baselineを確立"); baselineButton.disabled = true;
     const v2Button = button("3. Android V2 JSON → V2/V3評価"); v2Button.disabled = true;
     const v4Button = button("4. V4 Targetを直前再検証"); v4Button.disabled = true;
     const mutationButton = button("5. Android Mutation JSON → IDE-150 Bridge"); mutationButton.disabled = true;
@@ -346,10 +364,18 @@
     });
 
     baselineButton.addEventListener("click", function () {
-      const result = namespace.establishExplicitCanonicalBaseline({ canonicalRevisionId: revisionInput.value, explicitProjectOwnerAction: true });
+      const revisionId = internal.text(revisionInput.value, "");
+      if (!revisionId) {
+        status.textContent = "Baseline BLOCKED: Canonical RevisionをProject Ownerが確認 / 入力してください。";
+        return;
+      }
+      const result = namespace.establishExplicitCanonicalBaseline({ canonicalRevisionId: revisionId, explicitProjectOwnerAction: true });
       console.log(JSON.stringify(result, null, 2));
-      if (result && result.ok === true) { status.textContent = "Canonical Baseline ESTABLISHED。Step 3へ。"; revisionInput.disabled = true; baselineButton.disabled = true; v2Button.disabled = false; }
-      else status.textContent = "Baseline BLOCKED: " + (result && result.code || "unknown");
+      if (result && result.ok === true) {
+        baselineContext.textContent = "今回確立したCanonical Revision: " + revisionId + " / 自動昇格なし";
+        status.textContent = "Canonical Baseline ESTABLISHED。Step 3へ。";
+        revisionInput.disabled = true; baselineButton.disabled = true; v2Button.disabled = false;
+      } else status.textContent = "Baseline BLOCKED: " + (result && result.code || "unknown");
     });
 
     v2Button.addEventListener("click", function () { v2Input.value = ""; v2Input.click(); });
@@ -431,12 +457,16 @@
       console.log(JSON.stringify({ forcedFailureTrial: result, validation: validation, status: namespace.getStatus() }, null, 2));
     });
 
-    [title, status, scanButton, revisionInput, baselineButton, v2Button, v4Button, mutationButton, tokenButton, writeDirButton, normalButton, secondTokenButton, forcedButton, note, v2Input, mutationInput].forEach(function append(item) { panel.appendChild(item); });
+    [title, status, scanButton, baselineContext, revisionInput, baselineButton, v2Button, v4Button, mutationButton, tokenButton, writeDirButton, normalButton, secondTokenButton, forcedButton, note, v2Input, mutationInput].forEach(function append(item) { panel.appendChild(item); });
     global.document.body.appendChild(panel);
 
     return internal.buildResult(true, "REPOSITORY010_PHASE12_VALIDATION_UI_READY", "Ready", {
       preDeviceValidation: pre,
-      canonicalRevisionSuggested: "REPOSITORY010-CANONICAL-REVISION-0006",
+      lastEstablishedCanonicalRevisionId: lastEstablishedCanonicalRevisionId || null,
+      canonicalRevisionSuggested: suggestedCanonicalRevisionId || null,
+      canonicalRevisionSuggestionSource: internal.text(revisionSuggestionData.suggestionSource, "unresolved"),
+      projectOwnerConfirmationRequired: true,
+      automaticCanonicalRevisionPromotion: false,
       requiresFreshAndroidV2AndMutationPackage: true,
       realPhysicalWriteSteps: [8, 10],
       mandatoryRollback: true,

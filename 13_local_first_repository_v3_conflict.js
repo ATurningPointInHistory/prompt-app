@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_v3_conflict.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.7.0 / Module: V3 Base Revision / Conflict Validation 1.0.0
+   Release: 1.11.2 / Module: V3 Base Revision / Conflict Validation 1.0.1
    Decision-004: Explicit Canonical Baseline
    ============================================================ */
 (function (global) {
@@ -19,6 +19,94 @@
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("v3Conflict");
   const TARGET_NODE_ID = "REPOSITORY010-PC-LOCAL-INITIAL-CANONICAL";
   const BASELINE_DESCRIPTOR_ID = "REPOSITORY010-PC-CANONICAL-BASELINE-DESCRIPTOR";
+  const CANONICAL_REVISION_PREFIX = "REPOSITORY010-CANONICAL-REVISION-";
+  const CANONICAL_REVISION_HINT_KEY = "REPOSITORY010_LAST_EXPLICIT_CANONICAL_REVISION_ID";
+
+  function parseCanonicalRevisionSequence(value) {
+    const id = internal.text(value, "");
+    const match = id.match(/^REPOSITORY010-CANONICAL-REVISION-(\d{4,})$/);
+    if (!match) return null;
+    const sequence = Number(match[1]);
+    return Number.isInteger(sequence) && sequence >= 0 ? sequence : null;
+  }
+
+  function formatCanonicalRevisionId(sequence) {
+    const value = Number(sequence);
+    if (!Number.isInteger(value) || value < 0) return "";
+    return CANONICAL_REVISION_PREFIX + String(value).padStart(4, "0");
+  }
+
+  function readCanonicalRevisionHint() {
+    try {
+      if (!global.localStorage) return "";
+      return internal.text(global.localStorage.getItem(CANONICAL_REVISION_HINT_KEY), "");
+    } catch (_) { return ""; }
+  }
+
+  function persistCanonicalRevisionHint(revisionId) {
+    const id = internal.text(revisionId, "");
+    if (parseCanonicalRevisionSequence(id) === null) return false;
+    try {
+      if (!global.localStorage) return false;
+      global.localStorage.setItem(CANONICAL_REVISION_HINT_KEY, id);
+      return true;
+    } catch (_) { return false; }
+  }
+
+  async function getCanonicalRevisionSuggestion() {
+    const observed = [];
+
+    const runtimeId = internal.text(
+      state.lastCanonicalBaseline && state.lastCanonicalBaseline.canonicalRevisionId,
+      ""
+    );
+    if (parseCanonicalRevisionSequence(runtimeId) !== null) {
+      observed.push({ revisionId: runtimeId, source: "runtime-explicit-baseline" });
+    }
+
+    const persistedHint = readCanonicalRevisionHint();
+    if (parseCanonicalRevisionSequence(persistedHint) !== null) {
+      observed.push({ revisionId: persistedHint, source: "local-explicit-baseline-hint" });
+    }
+
+    if (typeof namespace.listControlledTransactionRecords === "function") {
+      const journals = await namespace.listControlledTransactionRecords("transactionJournal");
+      (Array.isArray(journals) ? journals : []).forEach(function each(record) {
+        const id = internal.text(record && record.canonicalRevisionId, "");
+        if (parseCanonicalRevisionSequence(id) !== null) {
+          observed.push({ revisionId: id, source: "persistent-transaction-journal" });
+        }
+      });
+    }
+
+    let selected = null;
+    observed.forEach(function choose(item) {
+      const sequence = parseCanonicalRevisionSequence(item.revisionId);
+      if (sequence === null) return;
+      if (!selected || sequence > selected.sequence) {
+        selected = { revisionId: item.revisionId, sequence: sequence, source: item.source };
+      }
+    });
+
+    const lastEstablishedCanonicalRevisionId = selected ? selected.revisionId : null;
+    const nextCanonicalRevisionCandidate = selected
+      ? formatCanonicalRevisionId(selected.sequence + 1)
+      : "";
+
+    if (lastEstablishedCanonicalRevisionId) persistCanonicalRevisionHint(lastEstablishedCanonicalRevisionId);
+
+    return internal.buildResult(true, "REPOSITORY010_CANONICAL_REVISION_SUGGESTION_READY", "Ready", {
+      lastEstablishedCanonicalRevisionId: lastEstablishedCanonicalRevisionId,
+      nextCanonicalRevisionCandidate: nextCanonicalRevisionCandidate,
+      suggestionSource: selected ? selected.source : "unresolved",
+      observedRevisionCount: observed.length,
+      projectOwnerConfirmationRequired: true,
+      automaticRevisionPromotion: false,
+      revisionDerivedFromHash: false,
+      revisionDerivedFromVersion: false,
+      authorityEffect: "none"
+    });
+  }
 
   function resolveReceipt(receiptOrId) {
     if (internal.isPlainObject(receiptOrId)) return internal.clone(receiptOrId);
@@ -111,6 +199,7 @@
       }
       state.lastCanonicalBaseline = internal.clone(existing);
       state.canonicalBaselineStatus = "Established";
+      persistCanonicalRevisionHint(existing.canonicalRevisionId);
       internal.touch();
       namespace.modules.v3Conflict.status = "Baseline Established";
       return internal.buildResult(true, "REPOSITORY010_CANONICAL_BASELINE_ALREADY_ESTABLISHED", "Established", {
@@ -128,6 +217,7 @@
     const baseline = created.data.record;
     state.lastCanonicalBaseline = internal.clone(baseline);
     state.canonicalBaselineStatus = "Established";
+    persistCanonicalRevisionHint(baseline.canonicalRevisionId);
     internal.touch();
     namespace.modules.v3Conflict.status = "Baseline Established";
     return internal.buildResult(true, "REPOSITORY010_CANONICAL_BASELINE_ESTABLISHED", "Established", {
@@ -264,6 +354,7 @@
 
   Object.assign(namespace.api, {
     establishExplicitCanonicalBaseline: establishExplicitCanonicalBaseline,
+    getCanonicalRevisionSuggestion: getCanonicalRevisionSuggestion,
     evaluateV3BaseRevision: evaluateV3BaseRevision,
     getV3ConflictStatus: getV3ConflictStatus
   });
@@ -287,6 +378,7 @@
   };
 
   global.establishLocalFirstRepositoryCanonicalBaseline = establishExplicitCanonicalBaseline;
+  global.getLocalFirstRepositoryCanonicalRevisionSuggestion = getCanonicalRevisionSuggestion;
   global.evaluateLocalFirstRepositoryV3BaseRevision = evaluateV3BaseRevision;
   global.getLocalFirstRepositoryV3ConflictStatus = getV3ConflictStatus;
 })(typeof window !== "undefined" ? window : globalThis);
