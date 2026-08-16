@@ -275,6 +275,200 @@
     }
   }
 
+  async function inspectExactClosureFile(fileName) {
+    const targetFile = rootFileName(fileName);
+    if (!["00_script_manifest.json", "index.html"].includes(targetFile)) return fail("REPOSITORY010_CLOSURE_FILE_BLOCKED", "Only exact Reflection Closure files are allowed.", { targetFile: targetFile });
+    if (!selectedWriteDirectoryHandle) return fail("REPOSITORY010_WRITE_DIRECTORY_REQUIRED", "Controlled write directory is unavailable.");
+    try {
+      const source = await readText(selectedWriteDirectoryHandle, targetFile);
+      return internal.buildResult(true, "REPOSITORY010_CLOSURE_FILE_READ", "Read", { targetFile: targetFile, source: source, sha256: await sha256(source), writeAttempted: false });
+    } catch (error) {
+      return fail("REPOSITORY010_CLOSURE_FILE_READ_FAILED", error && error.message ? error.message : String(error), { targetFile: targetFile });
+    }
+  }
+
+  async function executeBoundClosureWrite(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const transactionId = internal.text(source.transactionId, "");
+    const targetFile = rootFileName(source.targetFile);
+    const beforeFileSha256 = internal.text(source.beforeFileSha256, "");
+    const afterFileSha256 = internal.text(source.afterFileSha256, "");
+    const payload = typeof source.source === "string" ? source.source : null;
+    const transaction = state.controlledTransactionRecords instanceof Map ? state.controlledTransactionRecords.get(transactionId) : null;
+    if (!transaction || !transaction.closurePlan || payload == null) return fail("REPOSITORY010_CLOSURE_WRITE_CONTEXT_INVALID", "Transaction-bound Reflection Closure context is required.");
+    if (transaction.status !== "TARGET_WRITE_COMPLETED" && transaction.status !== "CLOSURE_WRITE_COMPLETED") return fail("REPOSITORY010_CLOSURE_WRITE_STATE_INVALID", "Target Function write must complete before Reflection Closure writes.", { status: transaction.status });
+    if (!["00_script_manifest.json", "index.html"].includes(targetFile)) return fail("REPOSITORY010_CLOSURE_WRITE_TARGET_BLOCKED", "Reflection Closure write target is outside Decision-008 scope.", { targetFile: targetFile });
+    const plan = transaction.closurePlan;
+    const expectedBefore = targetFile === "00_script_manifest.json" ? plan.beforeManifestFileSha256 : plan.beforeIndexFileSha256;
+    const expectedAfter = targetFile === "00_script_manifest.json" ? plan.afterManifestFileSha256 : plan.afterIndexFileSha256;
+    if (beforeFileSha256 !== expectedBefore || afterFileSha256 !== expectedAfter) return fail("REPOSITORY010_CLOSURE_WRITE_BINDING_MISMATCH", "Reflection Closure write hashes do not match frozen Closure Plan.");
+    if (!selectedWriteDirectoryHandle) return fail("REPOSITORY010_WRITE_DIRECTORY_REQUIRED", "Controlled write directory is unavailable.");
+    let invocationStarted = false;
+    try {
+      const current = await readText(selectedWriteDirectoryHandle, targetFile);
+      const currentHash = await sha256(current);
+      if (currentHash !== expectedBefore) return fail("REPOSITORY010_CLOSURE_CONCURRENT_CHANGE_BLOCKED", "Closure target no longer matches frozen Before hash.", { targetFile: targetFile, expected: expectedBefore, actual: currentHash });
+      const payloadHash = await sha256(payload);
+      if (payloadHash !== expectedAfter) return fail("REPOSITORY010_CLOSURE_PAYLOAD_HASH_BLOCKED", "Closure payload does not match frozen After hash.", { targetFile: targetFile, expected: expectedAfter, actual: payloadHash });
+      invocationStarted = true;
+      await writeText(selectedWriteDirectoryHandle, targetFile, payload);
+      const readback = await readText(selectedWriteDirectoryHandle, targetFile);
+      const readbackHash = await sha256(readback);
+      if (readbackHash !== expectedAfter) return fail("REPOSITORY010_CLOSURE_WRITE_READBACK_MISMATCH", "Closure write read-back verification failed.", { targetFile: targetFile, expected: expectedAfter, actual: readbackHash, physicalWriteMayHaveOccurred: true });
+      return internal.buildResult(true, "REPOSITORY010_BOUND_CLOSURE_WRITE_COMPLETED", "Written", { transactionId: transactionId, targetFile: targetFile, afterFileSha256: readbackHash, physicalWritePerformed: true });
+    } catch (error) {
+      return fail("REPOSITORY010_BOUND_CLOSURE_WRITE_FAILED", error && error.message ? error.message : String(error), { transactionId: transactionId, targetFile: targetFile, physicalWriteMayHaveOccurred: invocationStarted });
+    }
+  }
+
+  async function executeBoundClosureRestore(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const transactionId = internal.text(source.transactionId, "");
+    const targetFile = rootFileName(source.targetFile);
+    const restoreSource = typeof source.restoreSource === "string" ? source.restoreSource : null;
+    const expectedRestoreSha256 = internal.text(source.expectedRestoreSha256, "");
+    const transaction = state.controlledTransactionRecords instanceof Map ? state.controlledTransactionRecords.get(transactionId) : null;
+    if (!transaction || !transaction.closurePlan || restoreSource == null) return fail("REPOSITORY010_CLOSURE_RESTORE_CONTEXT_INVALID", "Transaction-bound Closure restore context is required.");
+    if (!["ROLLBACK_STARTED", "EMERGENCY_ROLLBACK_STARTED"].includes(transaction.status)) return fail("REPOSITORY010_CLOSURE_RESTORE_STATE_INVALID", "Rollback state is required before Closure restore.", { status: transaction.status });
+    if (!["00_script_manifest.json", "index.html"].includes(targetFile)) return fail("REPOSITORY010_CLOSURE_RESTORE_TARGET_BLOCKED", "Closure restore target is outside Decision-008 scope.");
+    const expected = targetFile === "00_script_manifest.json" ? transaction.closurePlan.beforeManifestFileSha256 : transaction.closurePlan.beforeIndexFileSha256;
+    if (expectedRestoreSha256 !== expected) return fail("REPOSITORY010_CLOSURE_RESTORE_BINDING_MISMATCH", "Closure restore hash is not bound to frozen Closure Plan.");
+    try {
+      if (await sha256(restoreSource) !== expected) return fail("REPOSITORY010_CLOSURE_RESTORE_SOURCE_HASH_MISMATCH", "Closure restore source hash mismatch.");
+      await writeText(selectedWriteDirectoryHandle, targetFile, restoreSource);
+      const restored = await readText(selectedWriteDirectoryHandle, targetFile);
+      const restoredHash = await sha256(restored);
+      if (restoredHash !== expected) return fail("REPOSITORY010_CLOSURE_RESTORE_READBACK_MISMATCH", "Closure rollback read-back mismatch.");
+      return internal.buildResult(true, "REPOSITORY010_CLOSURE_RESTORE_COMPLETED", "Restored", { transactionId: transactionId, targetFile: targetFile, restoredFileSha256: restoredHash, verified: true });
+    } catch (error) {
+      return fail("REPOSITORY010_CLOSURE_RESTORE_FAILED", error && error.message ? error.message : String(error), { targetFile: targetFile });
+    }
+  }
+
+  function normalizeScriptPath(src) { return String(src || "").split("?")[0].split("#")[0].replace(/^\.\//, ""); }
+  function stableValue(value) { if (Array.isArray(value)) return value.map(stableValue); if (!value || typeof value !== "object") return value; const output = {}; Object.keys(value).sort().forEach(function each(key) { output[key] = stableValue(value[key]); }); return output; }
+  function stableStringify(value) { return JSON.stringify(stableValue(value)); }
+  function manifestHashPayload(manifest) { const value = JSON.parse(JSON.stringify(manifest || {})); delete value.manifestHash; delete value.updatedAt; return value; }
+  function manifestScriptSetPayload(manifest) { const hashes = manifest && manifest.hashes || {}; return (manifest && Array.isArray(manifest.scripts) ? manifest.scripts : []).map(function map(src) { const path = normalizeScriptPath(src); return path + ":" + String(hashes[path] && hashes[path].sha256 || ""); }).join("\n"); }
+  function extractIndexScripts(indexHtml) { const output = []; const regex = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/gi; let match; while ((match = regex.exec(String(indexHtml || "")))) { const src = String(match[1] || ""); if (/^(?:https?:)?\/\//i.test(src) || /^data:/i.test(src)) continue; output.push(normalizeScriptPath(src)); } return output; }
+  function extractIndexTargetCacheKey(indexHtml, targetFile) { const target = normalizeScriptPath(targetFile); const regex = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/gi; let match; const keys = []; while ((match = regex.exec(String(indexHtml || "")))) { if (normalizeScriptPath(match[1]) !== target) continue; const q = String(match[1]).match(/[?&]h=([^&#]+)/); keys.push(q ? q[1] : ""); } return keys; }
+
+  async function fileHandleSha256(fileHandle) {
+    const file = await fileHandle.getFile();
+    const digest = await global.crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+    return Array.from(new Uint8Array(digest)).map(function hex(value) { return value.toString(16).padStart(2, "0"); }).join("");
+  }
+
+  async function captureRepositoryFileHashSnapshot() {
+    if (!selectedWriteDirectoryHandle) return fail("REPOSITORY010_WRITE_DIRECTORY_REQUIRED", "Controlled write directory is unavailable.");
+    try {
+      const files = {};
+      if (typeof selectedWriteDirectoryHandle.entries !== "function") return fail("REPOSITORY010_DIRECTORY_ENUMERATION_UNAVAILABLE", "Directory enumeration is required for Phase 13 full Repository hash snapshot.");
+      for await (const entry of selectedWriteDirectoryHandle.entries()) {
+        const name = entry[0];
+        const handle = entry[1];
+        if (!handle || handle.kind !== "file") continue;
+        const file = await handle.getFile();
+        files[name] = { sha256: await fileHandleSha256(handle), byteSize: Number(file.size) };
+      }
+      const names = Object.keys(files).sort();
+      const snapshotHash = await sha256(stableStringify(names.map(function map(name) { return { name: name, sha256: files[name].sha256, byteSize: files[name].byteSize }; })));
+      return internal.buildResult(true, "REPOSITORY010_PHASE13_REPOSITORY_HASH_SNAPSHOT", "Verified", { files: files, fileNames: names, fileCount: names.length, snapshotHash: snapshotHash, capturedAt: internal.nowIso() });
+    } catch (error) { return fail("REPOSITORY010_PHASE13_REPOSITORY_HASH_SNAPSHOT_FAILED", error && error.message ? error.message : String(error)); }
+  }
+
+  async function compareRepositoryFileHashSnapshot(beforeSnapshot, allowedChangedFiles) {
+    const current = await captureRepositoryFileHashSnapshot();
+    if (!current || !current.ok) return current;
+    const before = beforeSnapshot && beforeSnapshot.files && typeof beforeSnapshot.files === "object" ? beforeSnapshot.files : {};
+    const after = current.data.files || {};
+    const allowed = new Set((allowedChangedFiles || []).map(rootFileName));
+    const allNames = Array.from(new Set(Object.keys(before).concat(Object.keys(after)))).sort();
+    const unexpected = [];
+    allNames.forEach(function each(name) {
+      if (allowed.has(name)) return;
+      const a = before[name] || null;
+      const b = after[name] || null;
+      if (!a || !b || a.sha256 !== b.sha256 || Number(a.byteSize) !== Number(b.byteSize)) unexpected.push({ file: name, before: a, after: b });
+    });
+    const verified = unexpected.length === 0;
+    return internal.buildResult(verified, verified ? "REPOSITORY010_PHASE13_UNEXPECTED_FILE_CHANGE_NONE" : "REPOSITORY010_PHASE13_UNEXPECTED_FILE_CHANGE_DETECTED", verified ? "Verified" : "Mismatch", { verified: verified, unexpectedChanges: unexpected, beforeFileCount: Object.keys(before).length, afterFileCount: Object.keys(after).length, currentSnapshot: current.data });
+  }
+
+  async function verifyExactReflectionReadback(input) {
+    const transactionId = internal.text(input && input.transactionId, "");
+    const transaction = state.controlledTransactionRecords instanceof Map ? state.controlledTransactionRecords.get(transactionId) : null;
+    if (!transaction || !transaction.closurePlan) return fail("REPOSITORY010_PHASE13_READBACK_CONTEXT_INVALID", "Phase 13 transaction/Closure Plan is required.");
+    const plan = transaction.closurePlan;
+    try {
+      const targetSource = await readText(selectedWriteDirectoryHandle, transaction.targetFile);
+      const manifestSource = await readText(selectedWriteDirectoryHandle, "00_script_manifest.json");
+      const indexSource = await readText(selectedWriteDirectoryHandle, "index.html");
+      if (await sha256(targetSource) !== transaction.afterFileSha256) throw new Error("Target File After SHA-256 mismatch.");
+      if (await sha256(manifestSource) !== plan.afterManifestFileSha256) throw new Error("Manifest file SHA-256 mismatch.");
+      if (await sha256(indexSource) !== plan.afterIndexFileSha256) throw new Error("index.html file SHA-256 mismatch.");
+      const manifest = JSON.parse(manifestSource);
+      const item = manifest.hashes && manifest.hashes[transaction.targetFile];
+      if (!item || item.sha256 !== transaction.afterFileSha256 || item.cacheKey !== plan.expectedAfterCacheKey || Number(item.byteSize) !== new TextEncoder().encode(targetSource).byteLength) throw new Error("Manifest target entry mismatch.");
+      if (await sha256(manifestScriptSetPayload(manifest)) !== plan.expectedAfterScriptSetHash || manifest.scriptSetHash !== plan.expectedAfterScriptSetHash) throw new Error("Script Set Hash mismatch.");
+      if (await sha256(stableStringify(manifestHashPayload(manifest))) !== plan.expectedAfterManifestHash || manifest.manifestHash !== plan.expectedAfterManifestHash) throw new Error("Manifest Hash mismatch.");
+      const keys = extractIndexTargetCacheKey(indexSource, transaction.targetFile);
+      if (keys.length !== 1 || keys[0] !== plan.expectedAfterCacheKey) throw new Error("index.html target cacheKey mismatch.");
+      return internal.buildResult(true, "REPOSITORY010_PHASE13_READBACK_VERIFIED", "Verified", { transactionId: transactionId, targetFile: transaction.targetFile, manifestHash: manifest.manifestHash, scriptSetHash: manifest.scriptSetHash, cacheKey: keys[0] });
+    } catch (error) { return fail("REPOSITORY010_PHASE13_READBACK_FAILED", error && error.message ? error.message : String(error), { transactionId: transactionId }); }
+  }
+
+  async function runV5PostReflectionVerification(input) {
+    const transactionId = internal.text(input && input.transactionId, "");
+    const transaction = state.controlledTransactionRecords instanceof Map ? state.controlledTransactionRecords.get(transactionId) : null;
+    if (!transaction || !transaction.closurePlan) return fail("REPOSITORY010_V5_CONTEXT_INVALID", "Phase 13 transaction/Closure Plan is required.");
+    const plan = transaction.closurePlan;
+    try {
+      const repositoryDiff = await compareRepositoryFileHashSnapshot(transaction.preTransactionRepositorySnapshot, [transaction.targetFile, "00_script_manifest.json", "index.html"]);
+      if (!repositoryDiff || !repositoryDiff.ok) return fail("REPOSITORY010_V5_UNEXPECTED_FILE_CHANGE", "Unexpected Repository file modification detected outside exact Reflection Closure scope.", repositoryDiff && repositoryDiff.data || null);
+      const manifestSource = await readText(selectedWriteDirectoryHandle, "00_script_manifest.json");
+      const indexSource = await readText(selectedWriteDirectoryHandle, "index.html");
+      const manifest = JSON.parse(manifestSource);
+      const fileChecks = [];
+      for (const src of manifest.scripts) {
+        const path = normalizeScriptPath(src);
+        const expected = manifest.hashes && manifest.hashes[path] && manifest.hashes[path].sha256;
+        let actual = null;
+        try { actual = await sha256(await readText(selectedWriteDirectoryHandle, path)); } catch (_) { actual = null; }
+        fileChecks.push({ path: path, expectedSha256: expected || null, actualSha256: actual, passed: Boolean(expected && actual === expected) });
+      }
+      const manifestScripts = manifest.scripts.map(normalizeScriptPath);
+      const indexScripts = extractIndexScripts(indexSource);
+      const sequence = manifestScripts.length === indexScripts.length && manifestScripts.every(function same(path, i) { return indexScripts[i] === path; });
+      const allHashes = fileChecks.length === manifestScripts.length && fileChecks.every(function all(x) { return x.passed; });
+      const scriptSet = await sha256(manifestScriptSetPayload(manifest));
+      const manifestHash = await sha256(stableStringify(manifestHashPayload(manifest)));
+      const targetSource = await readText(selectedWriteDirectoryHandle, transaction.targetFile);
+      const indexKeys = extractIndexTargetCacheKey(indexSource, transaction.targetFile);
+      const baseline = state.lastCanonicalBaseline || null;
+      const v4 = state.lastV4TargetValidationEvidence || null;
+      const blockingConflict = Boolean(v4 && v4.blockingTargetDrift === true);
+      const backupOk = Boolean(transaction.functionBackupId && transaction.fullFileBackupId && transaction.manifestBackupId && transaction.indexBackupId);
+      const journalOk = transaction.journalPersisted === true;
+      const verified = repositoryDiff.ok === true && allHashes && sequence && scriptSet === plan.expectedAfterScriptSetHash && manifest.scriptSetHash === plan.expectedAfterScriptSetHash && manifestHash === plan.expectedAfterManifestHash && manifest.manifestHash === plan.expectedAfterManifestHash && await sha256(targetSource) === transaction.afterFileSha256 && indexKeys.length === 1 && indexKeys[0] === plan.expectedAfterCacheKey && backupOk && journalOk && !blockingConflict && baseline && baseline.canonicalRevisionId === transaction.canonicalRevisionId && transaction.targetNodeId === "REPOSITORY010-PC-LOCAL-INITIAL-CANONICAL";
+      if (!verified) return fail("REPOSITORY010_V5_POST_REFLECTION_FAILED", "V5 Repository-wide verification failed.", { allFileHashesVerified: allHashes, indexSequenceIntegrity: sequence, scriptSetHashMatch: scriptSet === plan.expectedAfterScriptSetHash, manifestHashMatch: manifestHash === plan.expectedAfterManifestHash, indexCacheKeyMatch: indexKeys.length === 1 && indexKeys[0] === plan.expectedAfterCacheKey, transactionJournalIntegrity: journalOk, backupIntegrity: backupOk, canonicalNodeIdentity: transaction.targetNodeId, noBlockingConflict: !blockingConflict, failedFiles: fileChecks.filter(function f(x) { return !x.passed; }).slice(0,20) });
+      return internal.buildResult(true, "REPOSITORY010_V5_POST_REFLECTION_VERIFIED", "Verified", { fullRepositoryUnexpectedChangeVerification: true, repositoryFileCount: repositoryDiff.data && repositoryDiff.data.afterFileCount, allFileHashesVerified: true, indexSequenceIntegrity: true, scriptSetHashMatch: true, manifestHashMatch: true, indexCacheKeyMatch: true, transactionJournalIntegrity: true, backupIntegrity: true, canonicalNodeIdentity: transaction.targetNodeId, noBlockingConflict: true, noTargetDrift: true, canonicalRevisionPromoted: false });
+    } catch (error) { return fail("REPOSITORY010_V5_POST_REFLECTION_FAILED", error && error.message ? error.message : String(error), { transactionId: transactionId }); }
+  }
+
+  async function verifyExactClosureRollback(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    try {
+      const target = await readText(selectedWriteDirectoryHandle, rootFileName(source.targetFile));
+      const manifestSource = await readText(selectedWriteDirectoryHandle, "00_script_manifest.json");
+      const indexSource = await readText(selectedWriteDirectoryHandle, "index.html");
+      const manifest = JSON.parse(manifestSource);
+      const keys = extractIndexTargetCacheKey(indexSource, source.targetFile);
+      const verified = await sha256(target) === source.targetSha256 && await sha256(manifestSource) === source.manifestSha256 && await sha256(indexSource) === source.indexSha256 && manifest.manifestHash === source.manifestHash && manifest.scriptSetHash === source.scriptSetHash && keys.length === 1 && keys[0] === source.cacheKey;
+      return internal.buildResult(verified, verified ? "REPOSITORY010_PHASE13_ROLLBACK_VERIFIED" : "REPOSITORY010_PHASE13_ROLLBACK_MISMATCH", verified ? "Verified" : "Mismatch", { verified: verified, manifestHash: manifest.manifestHash, scriptSetHash: manifest.scriptSetHash, cacheKey: keys[0] || null });
+    } catch (error) { return fail("REPOSITORY010_PHASE13_ROLLBACK_VERIFY_FAILED", error && error.message ? error.message : String(error)); }
+  }
+
   function getRestrictedDesktopWriteAdapterStatus() {
     return {
       status: state.desktopWriteAdapterStatus || "Not Initialized",
@@ -309,7 +503,15 @@
     inspectExactTarget: inspectExactTarget,
     authorizeBoundTransaction: authorizeBoundTransaction,
     executeBoundWrite: executeBoundWrite,
-    executeBoundRestore: executeBoundRestore
+    executeBoundRestore: executeBoundRestore,
+    inspectExactClosureFile: inspectExactClosureFile,
+    executeBoundClosureWrite: executeBoundClosureWrite,
+    executeBoundClosureRestore: executeBoundClosureRestore,
+    verifyExactReflectionReadback: verifyExactReflectionReadback,
+    runV5PostReflectionVerification: runV5PostReflectionVerification,
+    verifyExactClosureRollback: verifyExactClosureRollback,
+    captureRepositoryFileHashSnapshot: captureRepositoryFileHashSnapshot,
+    compareRepositoryFileHashSnapshot: compareRepositoryFileHashSnapshot
   };
 
   Object.assign(namespace.api, {
