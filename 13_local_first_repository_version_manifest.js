@@ -49,7 +49,7 @@
     phase12Validation: "1.0.1",
     reflectionClosure: "1.0.0",
     persistentReflection: "1.0.0",
-    phase13Validation: "1.0.0"
+    phase13Validation: "1.0.1"
   };
 
   const fileModules = {
