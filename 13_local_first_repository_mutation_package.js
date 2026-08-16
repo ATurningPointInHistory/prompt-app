@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_mutation_package.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.10.0 / Module: Hybrid Mutation Package 1.0.0
+   Release: 1.10.1 / Module: Hybrid Mutation Package 1.0.1
    Phase 11: Hybrid Mutation Package / Smallest Safe Mutation First
    IMPORTANT: Preparation / validation / explicit file transfer only.
    No Canonical write / no Transaction / no Token consumption / no V5.
@@ -69,6 +69,39 @@
     const envelope = state.lastV2TransferEnvelope;
     const pkg = envelope && internal.isPlainObject(envelope.transferPackage) ? envelope.transferPackage : null;
     if (pkg && (!transferPackageId || pkg.transferPackageId === transferPackageId)) return internal.clone(pkg);
+    return null;
+  }
+
+  async function resolveMutationPackageRecord(packageOrId) {
+    if (packageOrId && typeof packageOrId === "object") return internal.clone(packageOrId);
+    const mutationPackageId = internal.text(packageOrId, "");
+    if (!mutationPackageId) return null;
+
+    if (typeof namespace.getMutationPackageDescriptor === "function") {
+      const runtimeRecord = namespace.getMutationPackageDescriptor(mutationPackageId);
+      if (runtimeRecord) return runtimeRecord;
+    }
+
+    if (state.lastMutationPackage && state.lastMutationPackage.mutationPackageId === mutationPackageId) {
+      return internal.clone(state.lastMutationPackage);
+    }
+
+    if (typeof namespace.getPersistedLocalFirstRepositoryRecord === "function") {
+      const persisted = await namespace.getPersistedLocalFirstRepositoryRecord("mutationPackage", mutationPackageId);
+      if (persisted) {
+        if (typeof namespace.createMutationPackageDescriptor === "function") {
+          const restored = namespace.createMutationPackageDescriptor(persisted);
+          if (restored && restored.ok === true) {
+            state.lastMutationPackage = internal.clone(restored.data.record);
+            state.mutationPackageStatus = "Restored";
+            internal.touch();
+            return internal.clone(restored.data.record);
+          }
+        }
+        return internal.clone(persisted);
+      }
+    }
+
     return null;
   }
 
@@ -281,6 +314,24 @@
       const created = namespace.createMutationPackageDescriptor(draft);
       if (!created || created.ok !== true) return created;
       const record = created.data.record;
+
+      if (source.persistPackage !== false) {
+        if (typeof namespace.persistLocalFirstRepositoryRecord !== "function") {
+          state.mutationPackageDescriptors.delete(record.mutationPackageId);
+          return internal.buildResult(false, "REPOSITORY010_MUTATION_PACKAGE_PERSISTENCE_API_REQUIRED", "Blocked", null);
+        }
+        const persisted = await namespace.persistLocalFirstRepositoryRecord("mutationPackage", record);
+        if (!persisted || persisted.ok !== true) {
+          state.mutationPackageDescriptors.delete(record.mutationPackageId);
+          try {
+            if (typeof namespace.deletePersistedLocalFirstRepositoryRecord === "function") {
+              await namespace.deletePersistedLocalFirstRepositoryRecord("mutationPackage", record.mutationPackageId);
+            }
+          } catch (_) {}
+          return internal.buildResult(false, "REPOSITORY010_MUTATION_PACKAGE_PERSISTENCE_FAILED", "Failed", persisted && persisted.data || null);
+        }
+      }
+
       state.lastMutationPackage = internal.clone(record);
       state.mutationPackageStatus = "Prepared";
       internal.touch();
@@ -304,9 +355,7 @@
   }
 
   async function validateMutationPackage(packageOrId) {
-    const record = typeof packageOrId === "string"
-      ? (typeof namespace.getMutationPackageDescriptor === "function" ? namespace.getMutationPackageDescriptor(packageOrId) : null)
-      : internal.clone(packageOrId);
+    const record = await resolveMutationPackageRecord(packageOrId);
     const reasons = [];
     if (!record) return internal.buildResult(false, "REPOSITORY010_MUTATION_PACKAGE_REQUIRED", "Blocked", null);
 
@@ -376,9 +425,7 @@
   }
 
   async function buildMutationPackageEnvelope(packageOrId, senderEvidence) {
-    const record = typeof packageOrId === "string"
-      ? (typeof namespace.getMutationPackageDescriptor === "function" ? namespace.getMutationPackageDescriptor(packageOrId) : null)
-      : internal.clone(packageOrId);
+    const record = await resolveMutationPackageRecord(packageOrId);
     const validation = await validateMutationPackage(record);
     if (!validation || validation.ok !== true) return validation;
     const evidence = internal.isPlainObject(senderEvidence) ? senderEvidence : {};
@@ -525,6 +572,8 @@
       fullFileReplacementEnabled: false,
       multiFileZipMutationEnabled: false,
       ide150BridgeMode: "read-only-compatibility-adapter",
+      mutationPackagePersistenceImplemented: true,
+      mutationPackageReloadRecoveryImplemented: true,
       canonicalMutationImplemented: false,
       controlledTransactionImplemented: false,
       v5PostReflectionVerificationImplemented: false,
@@ -555,6 +604,8 @@
     smallestSafeMutationFirst: true,
     enabledMutationTypes: ENABLED_TYPES.slice(),
     fallbackMutationTypes: FALLBACK_TYPES.slice(),
+    mutationPackagePersistenceImplemented: true,
+    mutationPackageReloadRecoveryImplemented: true,
     canonicalMutationImplemented: false,
     controlledTransactionImplemented: false,
     loadedAt: internal.nowIso()

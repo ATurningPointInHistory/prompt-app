@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_phase11_validation.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.10.0 / Module: Phase 11 Validation 1.0.0
+   Release: 1.10.1 / Module: Phase 11 Validation 1.0.1
    Phase 11: Hybrid Mutation Package / Smallest Safe Mutation Bridge
    Required Gate: Android sender + PC target + Cross-device lineage + Mutation-bound Token
    IMPORTANT: No Canonical write / no Controlled Transaction / no Token consumption / no V5.
@@ -98,7 +98,7 @@
       packageHash: transferPackage.packageHash,
       receiverCalculatedPackageHash: transferPackage.packageHash,
       envelopeHash: "d".repeat(64),
-      senderRuntimeVersion: "1.10.0",
+      senderRuntimeVersion: "1.10.1",
       senderOrigin: "https://example.invalid",
       senderUserAgent: "Mozilla/5.0 (Linux; Android 10) Mobile",
       transportMode: "explicit-file-transfer",
@@ -202,6 +202,9 @@
     check("Structured / Full-File / ZIP fallbacks stay disabled", VERSION_MANIFEST.implementation.structuredBlockMutationPreparationImplemented === false && VERSION_MANIFEST.implementation.fullFileMutationPreparationImplemented === false && VERSION_MANIFEST.implementation.multiFileZipMutationPreparationImplemented === false, VERSION_MANIFEST.implementation, "Boundary", "Critical");
     check("Mutation Package contract is registered", Boolean(namespace.getContractDefinition("mutationPackageDescriptor")), namespace.getContractDefinition("mutationPackageDescriptor"), "Contract", "Critical");
     check("Mutation Package module is loaded", Boolean(namespace.modules.mutationPackage && namespace.modules.mutationPackage.status), namespace.modules.mutationPackage, "Module", "Critical");
+    const persistenceProfile = typeof namespace.getLocalFirstRepositoryPersistenceStatus === "function" ? namespace.getLocalFirstRepositoryPersistenceStatus() : null;
+    check("Mutation Package persistence store is registered", Boolean(persistenceProfile && Array.isArray(persistenceProfile.recordTypes) && persistenceProfile.recordTypes.indexOf("mutationPackage") !== -1), persistenceProfile, "Persistence", "Critical");
+    check("Mutation Package reload recovery is enabled", VERSION_MANIFEST.implementation.mutationPackagePersistenceImplemented === true && VERSION_MANIFEST.implementation.mutationPackageReloadRecoveryImplemented === true, VERSION_MANIFEST.implementation, "Persistence", "Critical");
     check("IDE-150 Bridge module is loaded", Boolean(namespace.modules.ide150Bridge && namespace.modules.ide150Bridge.status), namespace.modules.ide150Bridge, "Module", "Critical");
     check("IDE-150 runtime is present", Boolean(global.IDE150AutoRefactoring && global.__IDE150AutoRefactoringInternal), namespace.getDependencyStatus(), "IDE-150", "Critical");
     const controlledStatus = typeof global.getControlledAutoRefactoringApplicationStatus === "function" ? global.getControlledAutoRefactoringApplicationStatus() : null;
@@ -265,6 +268,7 @@
       const prepared = await namespace.prepareHybridMutationPackage({
         transferPackageId: transfer.transferPackageId,
         mutationPackageId: "REPOSITORY010-PHASE11-PREDEVICE-MUTATION-PACKAGE",
+        persistPackage: false,
         mutations: [{ mutationType: "function-patch", mutationId: "REPOSITORY010-PHASE11-PREDEVICE-MUTATION", targetFile: "phase11-fixture.js", targetFunction: "phase11FixtureTarget", beforeFunctionSource: before, afterFunctionSource: after, currentFileSource: currentFileSource }]
       });
       check("Function-Level Mutation Package prepares", Boolean(prepared && prepared.ok === true), prepared, "Preparation", "Critical");

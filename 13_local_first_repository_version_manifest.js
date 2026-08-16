@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.10.0
+   Release: 1.10.1
    Phase 11: Hybrid Mutation Package / Smallest Safe Mutation Bridge
    Architecture Baseline: DECISION-001..006 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.10.0";
+  const RELEASE_VERSION = "1.10.1";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -22,7 +22,7 @@
     contracts: "1.9.0",
     metadata: "1.9.0",
     validation: BASELINE_VERSION,
-    persistence: "1.3.0",
+    persistence: "1.4.0",
     phase2Validation: "1.0.2",
     offlineStaging: "1.0.0",
     phase3Validation: "1.0.1",
@@ -40,9 +40,9 @@
     phase9Validation: "1.0.0",
     acceptanceToken: "1.0.0",
     phase10Validation: "1.0.0",
-    mutationPackage: "1.0.0",
+    mutationPackage: "1.0.1",
     ide150Bridge: "1.0.0",
-    phase11Validation: "1.0.0"
+    phase11Validation: "1.0.1"
   };
 
   const fileModules = {
@@ -135,7 +135,7 @@
       version: RELEASE_VERSION,
       implementationPhase: "Phase 11 Hybrid Mutation Package / Smallest Safe Mutation Bridge",
       architectureStatus: "DECISION-001..006 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 11 IMPLEMENTED / PC + ANDROID CROSS-DEVICE REAL MUTATION PACKAGE BRIDGE VALIDATION REQUIRED",
+      implementationStatus: "PHASE 11 HOTFIX 1.10.1 / MUTATION PACKAGE RELOAD RECOVERY / CROSS-DEVICE REAL VALIDATION REQUIRED",
       priorValidatedBaseline: {
         version: "1.9.0",
         phase: 10,
@@ -202,6 +202,8 @@
       mutationPackageExplicitFileTransferImplemented: true,
       mutationPackageIntegrityValidationImplemented: true,
       mutationPackageV2LineageBindingImplemented: true,
+      mutationPackagePersistenceImplemented: true,
+      mutationPackageReloadRecoveryImplemented: true,
       ide150ReadOnlyBridgeImplemented: true,
       desktopReadOnlyTargetFileAccessImplemented: true
     },
@@ -314,6 +316,8 @@
       defaultMutationType: "function-patch",
       ide150BridgeMode: "read-only-compatibility-adapter",
       mutationPackageBindsTransferLineage: true,
+      mutationPackagePersistenceRequired: true,
+      mutationPackageReloadRecoveryRequired: true,
       acceptanceTokenBindsCompactAllowedMutationSet: true,
       canonicalWriteImplemented: false
     },
