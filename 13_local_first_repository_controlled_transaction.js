@@ -662,6 +662,14 @@
     };
   }
 
+  internal.phase12ControlledTransactionMechanics = {
+    prepareTransactionContext: prepareTransactionContext,
+    consumeToken: consumeToken,
+    createBackupsAndJournal: createBackupsAndJournal,
+    updateJournal: updateJournal,
+    rollbackTransaction: rollbackTransaction
+  };
+
   Object.assign(namespace.api, {
     executeControlledTransactionTrial: executeControlledTransactionTrial,
     listPendingControlledTransactionRecoveries: listPendingControlledTransactionRecoveries,
