@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_metadata.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.10.0 / Module: Metadata Model 1.9.0
-   Phase 11 Compatible: Hybrid Mutation Package Descriptor added
+   Release: 1.11.0 / Module: Metadata Model 1.10.0
+   Phase 12: Acceptance Token Consumption metadata added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -473,6 +473,37 @@
     return validateAndStore("acceptanceTokenDescriptor", record, state.acceptanceTokenDescriptors, "acceptanceTokenId", "REPOSITORY010_ACCEPTANCE_TOKEN_DESCRIPTOR_READY");
   }
 
+  function createAcceptanceTokenConsumptionRecord(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const required = ["acceptanceTokenId", "transactionId", "mutationPackageId", "candidateId", "candidateRevisionId", "baseRevisionId", "canonicalRevisionId", "targetNodeId", "bindingHash", "allowedMutationSetHash", "consumedAt"];
+    const missing = required.filter(function missingField(key) { return !internal.text(source[key], ""); });
+    if (missing.length) return fail("REPOSITORY010_TOKEN_CONSUMPTION_MISSING_FIELDS", "Required Acceptance Token Consumption fields are missing.", { missing: missing });
+    if (state.acceptanceTokenConsumptionRecords instanceof Map && state.acceptanceTokenConsumptionRecords.has(source.acceptanceTokenId)) {
+      return fail("REPOSITORY010_TOKEN_ALREADY_CONSUMED", "Acceptance Token already has a Consumption Record.", { acceptanceTokenId: source.acceptanceTokenId });
+    }
+    const record = {
+      acceptanceTokenId: internal.text(source.acceptanceTokenId, ""),
+      transactionId: internal.text(source.transactionId, ""),
+      mutationPackageId: internal.text(source.mutationPackageId, ""),
+      candidateId: internal.text(source.candidateId, ""),
+      candidateRevisionId: internal.text(source.candidateRevisionId, ""),
+      baseRevisionId: internal.text(source.baseRevisionId, ""),
+      canonicalRevisionId: internal.text(source.canonicalRevisionId, ""),
+      targetNodeId: internal.text(source.targetNodeId, ""),
+      bindingHash: internal.text(source.bindingHash, ""),
+      allowedMutationSetHashAlgorithm: "SHA-256",
+      allowedMutationSetHash: internal.text(source.allowedMutationSetHash, ""),
+      oneTimeUseEnforced: true,
+      consumedAt: internal.text(source.consumedAt, internal.nowIso()),
+      consumeReason: "controlled-transaction-trial-start",
+      mutationAuthorityGranted: false,
+      canonicalMutationPerformed: false,
+      authorityEffect: "transaction-start-only",
+      immutable: true
+    };
+    return validateAndStore("acceptanceTokenConsumptionRecord", record, state.acceptanceTokenConsumptionRecords, "acceptanceTokenId", "REPOSITORY010_ACCEPTANCE_TOKEN_CONSUMPTION_RECORDED");
+  }
+
   function createDesktopRepositoryDescriptor(input) {
     const source = internal.isPlainObject(input) ? input : {};
     const required = ["desktopRepositoryDescriptorId", "projectId", "repositoryId", "nodeId", "directoryName", "entryFile", "projectVersion", "manifestHash", "scriptSetHash"];
@@ -569,6 +600,11 @@
     return record ? internal.clone(record) : null;
   }
 
+  function getAcceptanceTokenConsumptionRecord(acceptanceTokenId) {
+    const record = state.acceptanceTokenConsumptionRecords.get(internal.text(acceptanceTokenId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
   function getDesktopRepositoryDescriptor(descriptorId) {
     const record = state.desktopRepositoryDescriptors.get(internal.text(descriptorId, ""));
     return record ? internal.clone(record) : null;
@@ -635,6 +671,7 @@
     createV4TargetValidationEvidenceDescriptor: createV4TargetValidationEvidenceDescriptor,
     createMutationPackageDescriptor: createMutationPackageDescriptor,
     createAcceptanceTokenDescriptor: createAcceptanceTokenDescriptor,
+    createAcceptanceTokenConsumptionRecord: createAcceptanceTokenConsumptionRecord,
     createDesktopRepositoryDescriptor: createDesktopRepositoryDescriptor,
     getRepositoryNodeIdentity: getRepositoryNodeIdentity,
     getRepositoryRevision: getRepositoryRevision,
@@ -650,6 +687,7 @@
     getV4TargetValidationEvidenceDescriptor: getV4TargetValidationEvidenceDescriptor,
     getMutationPackageDescriptor: getMutationPackageDescriptor,
     getAcceptanceTokenDescriptor: getAcceptanceTokenDescriptor,
+    getAcceptanceTokenConsumptionRecord: getAcceptanceTokenConsumptionRecord,
     getDesktopRepositoryDescriptor: getDesktopRepositoryDescriptor,
     getMetadataModelStatus: getMetadataModelStatus
   });

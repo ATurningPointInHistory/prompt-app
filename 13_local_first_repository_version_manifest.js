@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.10.1
-   Phase 11: Hybrid Mutation Package / Smallest Safe Mutation Bridge
-   Architecture Baseline: DECISION-001..006 / FROZEN
+   Release: 1.11.0
+   Phase 12: Controlled Transaction Trial / Mandatory Rollback
+   Architecture Baseline: DECISION-001..007 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.10.1";
+  const RELEASE_VERSION = "1.11.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -18,9 +18,9 @@
   }
 
   const moduleVersions = {
-    core: "1.9.0",
-    contracts: "1.9.0",
-    metadata: "1.9.0",
+    core: "1.10.0",
+    contracts: "1.10.0",
+    metadata: "1.10.0",
     validation: BASELINE_VERSION,
     persistence: "1.4.0",
     phase2Validation: "1.0.2",
@@ -42,7 +42,11 @@
     phase10Validation: "1.0.0",
     mutationPackage: "1.0.1",
     ide150Bridge: "1.0.0",
-    phase11Validation: "1.0.1"
+    phase11Validation: "1.0.1",
+    controlledTransactionPersistence: "1.0.0",
+    desktopWriteAdapter: "1.0.0",
+    controlledTransaction: "1.0.0",
+    phase12Validation: "1.0.0"
   };
 
   const fileModules = {
@@ -67,10 +71,14 @@
     "13_local_first_repository_acceptance_token.js": "acceptanceToken",
     "13_local_first_repository_mutation_package.js": "mutationPackage",
     "13_local_first_repository_ide150_bridge.js": "ide150Bridge",
+    "13_local_first_repository_controlled_transaction_persistence.js": "controlledTransactionPersistence",
+    "13_local_first_repository_desktop_write_adapter.js": "desktopWriteAdapter",
+    "13_local_first_repository_controlled_transaction.js": "controlledTransaction",
     "13_local_first_repository_phase8_validation.js": "phase8Validation",
     "13_local_first_repository_phase9_validation.js": "phase9Validation",
     "13_local_first_repository_phase10_validation.js": "phase10Validation",
-    "13_local_first_repository_phase11_validation.js": "phase11Validation"
+    "13_local_first_repository_phase11_validation.js": "phase11Validation",
+    "13_local_first_repository_phase12_validation.js": "phase12Validation"
   };
 
   const contractVersions = {
@@ -89,7 +97,11 @@
     v3ConflictEvidenceDescriptor: "1.0.0",
     v4TargetValidationEvidenceDescriptor: "1.0.0",
     acceptanceTokenDescriptor: "1.0.0",
-    mutationPackageDescriptor: "1.0.0"
+    mutationPackageDescriptor: "1.0.0",
+    acceptanceTokenConsumptionRecord: "1.0.0",
+    controlledTransactionJournalRecord: "1.0.0",
+    functionRollbackBackupRecord: "1.0.0",
+    fullFileEmergencyBackupRecord: "1.0.0"
   };
 
   const contractIds = {
@@ -108,7 +120,11 @@
     v3ConflictEvidenceDescriptor: "REPOSITORY-010-CONTRACT-V3-CONFLICT-EVIDENCE",
     v4TargetValidationEvidenceDescriptor: "REPOSITORY-010-CONTRACT-V4-TARGET-VALIDATION-EVIDENCE",
     acceptanceTokenDescriptor: "REPOSITORY-010-CONTRACT-ACCEPTANCE-TOKEN",
-    mutationPackageDescriptor: "REPOSITORY-010-CONTRACT-HYBRID-MUTATION-PACKAGE"
+    mutationPackageDescriptor: "REPOSITORY-010-CONTRACT-HYBRID-MUTATION-PACKAGE",
+    acceptanceTokenConsumptionRecord: "REPOSITORY-010-CONTRACT-ACCEPTANCE-TOKEN-CONSUMPTION",
+    controlledTransactionJournalRecord: "REPOSITORY-010-CONTRACT-CONTROLLED-TRANSACTION-JOURNAL",
+    functionRollbackBackupRecord: "REPOSITORY-010-CONTRACT-FUNCTION-ROLLBACK-BACKUP",
+    fullFileEmergencyBackupRecord: "REPOSITORY-010-CONTRACT-FULL-FILE-EMERGENCY-BACKUP"
   };
 
   const repositoryStates = [
@@ -133,17 +149,17 @@
     componentName: "Local-First Repository Coordination",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 11 Hybrid Mutation Package / Smallest Safe Mutation Bridge",
-      architectureStatus: "DECISION-001..006 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 11 HOTFIX 1.10.1 / MUTATION PACKAGE RELOAD RECOVERY / CROSS-DEVICE REAL VALIDATION REQUIRED",
+      implementationPhase: "Phase 12 Controlled Transaction Trial / Mandatory Rollback",
+      architectureStatus: "DECISION-001..007 / FORMALLY FROZEN",
+      implementationStatus: "PHASE 12 v1.11.0 / CONTROLLED TRANSACTION TRIAL / REAL PC WRITE + MANDATORY ROLLBACK VALIDATION REQUIRED",
       priorValidatedBaseline: {
-        version: "1.9.0",
-        phase: 10,
+        version: "1.10.1",
+        phase: 11,
         crossDeviceRealValidationPassed: true,
         pcRealValidationPassed: true,
         androidRealValidationPassed: true,
-        validatedAt: "2026-08-16T02:19:53.460Z",
-        status: "REPOSITORY-010 Phase 10 Manual Acceptance Token Validation PASS"
+        validatedAt: "2026-08-16T05:58:07.616Z",
+        status: "REPOSITORY-010 Phase 11 Hybrid Mutation Package Validation PASS"
       },
       decisionIds: [
         "REPOSITORY-010-DECISION-001",
@@ -151,12 +167,13 @@
         "REPOSITORY-010-DECISION-003",
         "REPOSITORY-010-DECISION-004",
         "REPOSITORY-010-DECISION-005",
-        "REPOSITORY-010-DECISION-006"
+        "REPOSITORY-010-DECISION-006",
+        "REPOSITORY-010-DECISION-007"
       ]
     },
     implementation: {
-      phase: 11,
-      phaseName: "Hybrid Mutation Package / Smallest Safe Mutation Bridge",
+      phase: 12,
+      phaseName: "Controlled Transaction Trial / Mandatory Rollback",
       phase1PersistenceImplemented: false,
       persistenceImplemented: true,
       androidIndexedDBPersistenceImplemented: true,
@@ -193,7 +210,16 @@
       delegatedAcceptanceEnabled: false,
       automaticLowRiskReflectionEnabled: false,
       controlledCanonicalTransactionImplemented: false,
-      acceptanceTokenConsumptionImplemented: false,
+      controlledTransactionTrialImplemented: true,
+      acceptanceTokenConsumptionImplemented: true,
+      controlledTransactionPersistenceImplemented: true,
+      restrictedDesktopWriteAdapterImplemented: true,
+      transactionJournalPersistenceImplemented: true,
+      functionRollbackBackupImplemented: true,
+      fullFileEmergencyBackupImplemented: true,
+      readAfterWriteVerificationImplemented: true,
+      automaticRollbackImplemented: true,
+      controlledTransactionReloadRecoveryImplemented: true,
       hybridMutationPackageImplemented: true,
       functionPatchMutationPreparationImplemented: true,
       structuredBlockMutationPreparationImplemented: false,
@@ -205,7 +231,9 @@
       mutationPackagePersistenceImplemented: true,
       mutationPackageReloadRecoveryImplemented: true,
       ide150ReadOnlyBridgeImplemented: true,
-      desktopReadOnlyTargetFileAccessImplemented: true
+      desktopReadOnlyTargetFileAccessImplemented: true,
+      phase12MandatoryRollback: true,
+      phase12PersistentCanonicalReflectionAllowed: false
     },
     authority: {
       model: "logical-authority-canonical-node-separation",
@@ -299,6 +327,12 @@
         pcRealValidation: "required",
         crossDeviceRealValidation: "required"
       },
+      phase12RequiredGateSet: {
+        staticValidation: "required",
+        androidRealValidation: "required",
+        pcRealValidation: "required",
+        crossDeviceRealValidation: "required"
+      },
       syncCandidateValidationLayers: [
         "V1 Local Validation",
         "V2 Transfer / Integrity Validation",
@@ -312,6 +346,7 @@
       smallestSafeMutationFirst: true,
       priorityOrder: ["function-patch", "structured-block-patch", "file-replace", "multi-file-zip"],
       phase11EnabledMutationTypes: ["function-patch"],
+      phase12EnabledMutationTypes: ["function-patch"],
       phase11DisabledFallbackMutationTypes: ["structured-block-patch", "file-replace", "multi-file-zip"],
       defaultMutationType: "function-patch",
       ide150BridgeMode: "read-only-compatibility-adapter",
@@ -319,7 +354,9 @@
       mutationPackagePersistenceRequired: true,
       mutationPackageReloadRecoveryRequired: true,
       acceptanceTokenBindsCompactAllowedMutationSet: true,
-      canonicalWriteImplemented: false
+      canonicalWriteImplemented: false,
+      controlledTrialPhysicalWriteImplemented: true,
+      mandatoryTrialRollback: true
     },
     acceptance: {
       model: "acceptance-token-controlled-transaction",
@@ -338,7 +375,9 @@
       tokenMutationSetBound: true,
       projectOwnerImpersonationAllowed: false,
       phase10AuthorityGateMutationSet: [],
-      phase11MutationSetBindingRequired: true
+      phase11MutationSetBindingRequired: true,
+      phase12TokenConsumptionImplemented: true,
+      phase12TokenConsumedAtTransactionStart: true
     },
     safety: {
       directRepositoryMutationAllowed: false,
@@ -361,7 +400,11 @@
       reflectionWithoutRollbackPlanAllowed: false,
       successfulReflectionWithoutV5Allowed: false,
       automatedProjectOwnerImpersonationAllowed: false,
-      delegatedAcceptanceDefaultEnabled: false
+      delegatedAcceptanceDefaultEnabled: false,
+      controlledTrialWriteRequiresBoundToken: true,
+      controlledTrialWriteRequiresBackup: true,
+      controlledTrialWriteRequiresJournal: true,
+      phase12PersistentMutationAllowed: false
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,

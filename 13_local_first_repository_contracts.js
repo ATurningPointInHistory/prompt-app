@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_contracts.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.10.0 / Module: Contracts 1.9.0
-   Phase 11: Hybrid Mutation Package Descriptor added
+   Release: 1.11.0 / Module: Contracts 1.10.0
+   Phase 12: Controlled Transaction safety contracts added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -415,6 +415,108 @@
         field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
         field("authorityEffect", { required: true, type: "string", enum: ["acceptance-token-only"] }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "acceptanceTokenConsumptionRecord",
+      name: "REPOSITORY-010 Acceptance Token Consumption Record Contract",
+      fields: [
+        field("acceptanceTokenId", { required: true, type: "string" }),
+        field("transactionId", { required: true, type: "string" }),
+        field("mutationPackageId", { required: true, type: "string" }),
+        field("candidateId", { required: true, type: "string" }),
+        field("candidateRevisionId", { required: true, type: "string" }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("canonicalRevisionId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string", enum: ["REPOSITORY010-PC-LOCAL-INITIAL-CANONICAL"] }),
+        field("bindingHash", { required: true, type: "string" }),
+        field("allowedMutationSetHashAlgorithm", { required: true, type: "string", enum: ["SHA-256"] }),
+        field("allowedMutationSetHash", { required: true, type: "string" }),
+        field("oneTimeUseEnforced", { required: true, type: "boolean", enum: [true] }),
+        field("consumedAt", { required: true, type: "string" }),
+        field("consumeReason", { required: true, type: "string", enum: ["controlled-transaction-trial-start"] }),
+        field("mutationAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["transaction-start-only"] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "functionRollbackBackupRecord",
+      name: "REPOSITORY-010 Function Rollback Backup Record Contract",
+      fields: [
+        field("backupId", { required: true, type: "string" }),
+        field("transactionId", { required: true, type: "string" }),
+        field("mutationPackageId", { required: true, type: "string" }),
+        field("mutationId", { required: true, type: "string" }),
+        field("targetFile", { required: true, type: "string" }),
+        field("targetFunction", { required: true, type: "string" }),
+        field("beforeFunctionSource", { required: true, type: "string" }),
+        field("beforeFunctionSha256", { required: true, type: "string" }),
+        field("expectedAfterFunctionSha256", { required: true, type: "string" }),
+        field("beforeFileSha256", { required: true, type: "string" }),
+        field("expectedAfterFileSha256", { required: true, type: "string" }),
+        field("backupMode", { required: true, type: "string", enum: ["function-level-primary"] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "fullFileEmergencyBackupRecord",
+      name: "REPOSITORY-010 Full-File Emergency Backup Record Contract",
+      fields: [
+        field("backupId", { required: true, type: "string" }),
+        field("transactionId", { required: true, type: "string" }),
+        field("mutationPackageId", { required: true, type: "string" }),
+        field("targetFile", { required: true, type: "string" }),
+        field("completeBeforeFileSource", { required: true, type: "string" }),
+        field("beforeFileSha256", { required: true, type: "string" }),
+        field("expectedAfterFileSha256", { required: true, type: "string" }),
+        field("backupMode", { required: true, type: "string", enum: ["full-file-emergency"] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "controlledTransactionJournalRecord",
+      name: "REPOSITORY-010 Controlled Transaction Journal Record Contract",
+      fields: [
+        field("schema", { required: true, type: "string", enum: ["REPOSITORY-010-CONTROLLED-TRANSACTION-JOURNAL"] }),
+        field("schemaVersion", { required: true, type: "string", enum: ["1.0.0"] }),
+        field("transactionId", { required: true, type: "string" }),
+        field("acceptanceTokenId", { required: true, type: "string" }),
+        field("mutationPackageId", { required: true, type: "string" }),
+        field("candidateId", { required: true, type: "string" }),
+        field("candidateRevisionId", { required: true, type: "string" }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("canonicalRevisionId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string", enum: ["REPOSITORY010-PC-LOCAL-INITIAL-CANONICAL"] }),
+        field("targetFile", { required: true, type: "string" }),
+        field("targetFunction", { required: true, type: "string" }),
+        field("mutationId", { required: true, type: "string" }),
+        field("beforeFunctionSha256", { required: true, type: "string" }),
+        field("afterFunctionSha256", { required: true, type: "string" }),
+        field("beforeFileSha256", { required: true, type: "string" }),
+        field("afterFileSha256", { required: true, type: "string" }),
+        field("functionBackupId", { required: true, type: "string" }),
+        field("fullFileBackupId", { required: true, type: "string" }),
+        field("status", { required: true, type: "string" }),
+        field("backupVerified", { required: true, type: "boolean" }),
+        field("journalPersisted", { required: true, type: "boolean", enum: [true] }),
+        field("acceptanceTokenConsumed", { required: true, type: "boolean" }),
+        field("physicalWritePerformed", { required: true, type: "boolean" }),
+        field("readbackVerified", { required: true, type: "boolean" }),
+        field("rollbackAttempted", { required: true, type: "boolean" }),
+        field("rollbackVerified", { required: true, type: "boolean" }),
+        field("emergencyRollbackUsed", { required: true, type: "boolean" }),
+        field("repositoryRestored", { required: true, type: "boolean" }),
+        field("forcedFailureTrial", { required: true, type: "boolean" }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("v5PostReflectionVerified", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["controlled-trial-only"] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("updatedAt", { required: true, type: "string" })
       ]
     }
     ,{

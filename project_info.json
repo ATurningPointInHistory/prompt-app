@@ -4,7 +4,7 @@
   "project": "AIプロンプト生成Pro",
   "version": "v6.0",
   "entryFile": "index.html",
-  "savedAt": "2026-08-16T11:35:00+09:00",
+  "savedAt": "2026-08-16T15:28:51+09:00",
   "complete": true,
   "requestedFiles": [
     "index.html",
@@ -243,6 +243,9 @@
     "13_local_first_repository_acceptance_token.js",
     "13_local_first_repository_mutation_package.js",
     "13_local_first_repository_ide150_bridge.js",
+    "13_local_first_repository_controlled_transaction_persistence.js",
+    "13_local_first_repository_desktop_write_adapter.js",
+    "13_local_first_repository_controlled_transaction.js",
     "13_local_first_repository_phase9_validation.js",
     "13_local_first_repository_phase10_validation.js",
     "13_local_first_repository_phase11_validation.js",
@@ -262,7 +265,8 @@
     "16_workflow_engine.js",
     "99_init.js",
     "00_style.css",
-    "00_script_manifest.json"
+    "00_script_manifest.json",
+    "13_local_first_repository_phase12_validation.js"
   ],
   "savedFiles": [
     "index.html",
