@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.7.0
-   Phase 8: V3 Explicit Canonical Baseline / Base Revision / Conflict Validation
+   Release: 1.8.0
+   Phase 9: V4 Target Environment Revalidation / Drift Gate
    Architecture Baseline: DECISION-001..004 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.7.0";
+  const RELEASE_VERSION = "1.8.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -18,9 +18,9 @@
   }
 
   const moduleVersions = {
-    core: "1.6.0",
-    contracts: "1.6.0",
-    metadata: "1.6.0",
+    core: "1.7.0",
+    contracts: "1.7.0",
+    metadata: "1.7.0",
     validation: BASELINE_VERSION,
     persistence: "1.3.0",
     phase2Validation: "1.0.2",
@@ -35,7 +35,9 @@
     v2Transfer: "1.0.0",
     phase7Validation: "1.0.0",
     v3Conflict: "1.0.0",
-    phase8Validation: "1.0.0"
+    phase8Validation: "1.0.0",
+    v4TargetValidation: "1.0.0",
+    phase9Validation: "1.0.0"
   };
 
   const fileModules = {
@@ -56,7 +58,9 @@
     "13_local_first_repository_v2_transfer.js": "v2Transfer",
     "13_local_first_repository_phase7_validation.js": "phase7Validation",
     "13_local_first_repository_v3_conflict.js": "v3Conflict",
-    "13_local_first_repository_phase8_validation.js": "phase8Validation"
+    "13_local_first_repository_v4_target_validation.js": "v4TargetValidation",
+    "13_local_first_repository_phase8_validation.js": "phase8Validation",
+    "13_local_first_repository_phase9_validation.js": "phase9Validation"
   };
 
   const contractVersions = {
@@ -72,7 +76,8 @@
     desktopRepositoryDescriptor: "1.0.0",
     v2TransferReceiptDescriptor: "1.0.0",
     canonicalBaselineDescriptor: "1.0.0",
-    v3ConflictEvidenceDescriptor: "1.0.0"
+    v3ConflictEvidenceDescriptor: "1.0.0",
+    v4TargetValidationEvidenceDescriptor: "1.0.0"
   };
 
   const contractIds = {
@@ -88,7 +93,8 @@
     desktopRepositoryDescriptor: "REPOSITORY-010-CONTRACT-DESKTOP-REPOSITORY",
     v2TransferReceiptDescriptor: "REPOSITORY-010-CONTRACT-V2-TRANSFER-RECEIPT",
     canonicalBaselineDescriptor: "REPOSITORY-010-CONTRACT-CANONICAL-BASELINE",
-    v3ConflictEvidenceDescriptor: "REPOSITORY-010-CONTRACT-V3-CONFLICT-EVIDENCE"
+    v3ConflictEvidenceDescriptor: "REPOSITORY-010-CONTRACT-V3-CONFLICT-EVIDENCE",
+    v4TargetValidationEvidenceDescriptor: "REPOSITORY-010-CONTRACT-V4-TARGET-VALIDATION-EVIDENCE"
   };
 
   const repositoryStates = [
@@ -113,17 +119,17 @@
     componentName: "Local-First Repository Coordination",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 8 V3 Explicit Canonical Baseline / Base Revision / Conflict Validation",
+      implementationPhase: "Phase 9 V4 Target Environment Revalidation / Drift Gate",
       architectureStatus: "DECISION-001..004 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 8 IMPLEMENTED / PC + CROSS-DEVICE REAL V3 VALIDATION REQUIRED",
+      implementationStatus: "PHASE 9 IMPLEMENTED / PC + CROSS-DEVICE REAL V4 VALIDATION REQUIRED",
       priorValidatedBaseline: {
-        version: "1.6.0",
-        phase: 7,
+        version: "1.7.0",
+        phase: 8,
         crossDeviceRealValidationPassed: true,
         pcRealValidationPassed: true,
         androidRealValidationPassed: true,
-        validatedAt: "2026-08-15T14:07:52.521Z",
-        status: "REPOSITORY-010 Phase 7 Android-to-PC V2 Transfer Validation PASS"
+        validatedAt: "2026-08-16T00:48:38.888Z",
+        status: "REPOSITORY-010 Phase 8 V3 Base Revision Validation PASS"
       },
       decisionIds: [
         "REPOSITORY-010-DECISION-001",
@@ -133,8 +139,8 @@
       ]
     },
     implementation: {
-      phase: 8,
-      phaseName: "V3 Explicit Canonical Baseline / Base Revision / Conflict Validation",
+      phase: 9,
+      phaseName: "V4 Target Environment Revalidation / Drift Gate",
       phase1PersistenceImplemented: false,
       persistenceImplemented: true,
       androidIndexedDBPersistenceImplemented: true,
@@ -148,7 +154,7 @@
       v2IntegrityPreflightImplemented: true,
       v2TransferIntegrityValidationImplemented: true,
       v3BaseConflictValidationImplemented: true,
-      v4TargetEnvironmentValidationImplemented: false,
+      v4TargetEnvironmentValidationImplemented: true,
       v5PostReflectionVerificationImplemented: false,
       syncEngineImplemented: false,
       conflictResolutionImplemented: false,
@@ -163,7 +169,9 @@
       explicitCanonicalBaselineImplemented: true,
       canonicalRevisionDerivedFromHash: false,
       canonicalRevisionDerivedFromVersion: false,
-      v3ConflictEvidenceImplemented: true
+      v3ConflictEvidenceImplemented: true,
+      v4TargetValidationEvidenceImplemented: true,
+      explicitAcceptanceImplemented: false
     },
     authority: {
       model: "logical-authority-canonical-node-separation",
@@ -234,6 +242,12 @@
         crossDeviceRealValidation: "required"
       },
       phase8RequiredGateSet: {
+        staticValidation: "required",
+        androidRealValidation: "required",
+        pcRealValidation: "required",
+        crossDeviceRealValidation: "required"
+      },
+      phase9RequiredGateSet: {
         staticValidation: "required",
         androidRealValidation: "required",
         pcRealValidation: "required",

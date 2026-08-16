@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_contracts.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.7.0 / Module: Contracts 1.6.0
-   Phase 8: Canonical Baseline + V3 Conflict Evidence Descriptors added
+   Release: 1.8.0 / Module: Contracts 1.7.0
+   Phase 9: V4 Target Environment Validation Evidence Descriptor added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -280,6 +280,51 @@
         field("explicitAcceptanceGranted", { required: true, type: "boolean", enum: [false] }),
         field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
         field("v4TargetEnvironmentValidated", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("validatedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "v4TargetValidationEvidenceDescriptor",
+      name: "REPOSITORY-010 V4 Target Environment Validation Evidence Descriptor Contract",
+      fields: [
+        field("v4EvidenceId", { required: true, type: "string" }),
+        field("v4GateId", { required: true, type: "string" }),
+        field("v3ConflictEvidenceId", { required: true, type: "string" }),
+        field("v3GateId", { required: true, type: "string" }),
+        field("receiptId", { required: true, type: "string" }),
+        field("transferPackageId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string" }),
+        field("candidateRevisionId", { required: true, type: "string" }),
+        field("candidateBaseRevisionId", { required: true, type: "string" }),
+        field("canonicalRevisionId", { required: true, type: "string" }),
+        field("baselineManifestHash", { required: true, type: "string" }),
+        field("currentManifestHash", { required: true, type: "string" }),
+        field("manifestHashMatch", { required: true, type: "boolean" }),
+        field("baselineScriptSetHash", { required: true, type: "string" }),
+        field("currentScriptSetHash", { required: true, type: "string" }),
+        field("scriptSetHashMatch", { required: true, type: "boolean" }),
+        field("baselineScriptCount", { required: true, type: "number" }),
+        field("currentScriptCount", { required: true, type: "number" }),
+        field("scriptCountMatch", { required: true, type: "boolean" }),
+        field("repositoryIdentityMatch", { required: true, type: "boolean" }),
+        field("targetNodeMatch", { required: true, type: "boolean" }),
+        field("directoryMatch", { required: true, type: "boolean" }),
+        field("integrityVerified", { required: true, type: "boolean" }),
+        field("targetEnvironmentMatch", { required: true, type: "boolean" }),
+        field("targetEnvironmentStatus", { required: true, type: "string", enum: ["validated-target-environment", "target-drift-detected"] }),
+        field("blockingTargetDrift", { required: true, type: "boolean" }),
+        field("v4TargetEnvironmentValidated", { required: true, type: "boolean" }),
+        field("validationIsApproval", { required: true, type: "boolean", enum: [false] }),
+        field("mutationAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("explicitAcceptanceGranted", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("v5PostReflectionVerified", { required: true, type: "boolean", enum: [false] }),
         field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
         field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
         field("validatedAt", { required: true, type: "string" }),

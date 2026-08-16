@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_metadata.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.7.0 / Module: Metadata Model 1.6.0
-   Phase 8 Compatible: Explicit Canonical Baseline + V3 Conflict Evidence added
+   Release: 1.8.0 / Module: Metadata Model 1.7.0
+   Phase 9 Compatible: V4 Target Environment Validation Evidence added
    ============================================================ */
 (function (global) {
   "use strict";
@@ -325,6 +325,56 @@
     return validateAndStore("v3ConflictEvidenceDescriptor", record, state.v3ConflictEvidenceDescriptors, "conflictEvidenceId", "REPOSITORY010_V3_CONFLICT_EVIDENCE_READY");
   }
 
+  function createV4TargetValidationEvidenceDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const required = ["v4EvidenceId", "v4GateId", "v3ConflictEvidenceId", "v3GateId", "receiptId", "transferPackageId", "projectId", "repositoryId", "sourceNodeId", "targetNodeId", "candidateRevisionId", "candidateBaseRevisionId", "canonicalRevisionId", "baselineManifestHash", "currentManifestHash", "baselineScriptSetHash", "currentScriptSetHash"];
+    const missing = required.filter(function missingField(key) { return !internal.text(source[key], ""); });
+    if (missing.length) return fail("REPOSITORY010_V4_TARGET_EVIDENCE_MISSING_FIELDS", "Required V4 target validation evidence fields are missing.", { missing: missing });
+    const match = source.targetEnvironmentMatch === true;
+    const record = {
+      v4EvidenceId: internal.text(source.v4EvidenceId, ""),
+      v4GateId: internal.text(source.v4GateId, ""),
+      v3ConflictEvidenceId: internal.text(source.v3ConflictEvidenceId, ""),
+      v3GateId: internal.text(source.v3GateId, ""),
+      receiptId: internal.text(source.receiptId, ""),
+      transferPackageId: internal.text(source.transferPackageId, ""),
+      projectId: internal.text(source.projectId, ""),
+      repositoryId: internal.text(source.repositoryId, ""),
+      sourceNodeId: internal.text(source.sourceNodeId, ""),
+      targetNodeId: internal.text(source.targetNodeId, ""),
+      candidateRevisionId: internal.text(source.candidateRevisionId, ""),
+      candidateBaseRevisionId: internal.text(source.candidateBaseRevisionId, ""),
+      canonicalRevisionId: internal.text(source.canonicalRevisionId, ""),
+      baselineManifestHash: internal.text(source.baselineManifestHash, ""),
+      currentManifestHash: internal.text(source.currentManifestHash, ""),
+      manifestHashMatch: source.manifestHashMatch === true,
+      baselineScriptSetHash: internal.text(source.baselineScriptSetHash, ""),
+      currentScriptSetHash: internal.text(source.currentScriptSetHash, ""),
+      scriptSetHashMatch: source.scriptSetHashMatch === true,
+      baselineScriptCount: Number(source.baselineScriptCount || 0),
+      currentScriptCount: Number(source.currentScriptCount || 0),
+      scriptCountMatch: source.scriptCountMatch === true,
+      repositoryIdentityMatch: source.repositoryIdentityMatch === true,
+      targetNodeMatch: source.targetNodeMatch === true,
+      directoryMatch: source.directoryMatch === true,
+      integrityVerified: source.integrityVerified === true,
+      targetEnvironmentMatch: match,
+      targetEnvironmentStatus: match ? "validated-target-environment" : "target-drift-detected",
+      blockingTargetDrift: !match,
+      v4TargetEnvironmentValidated: match,
+      validationIsApproval: false,
+      mutationAuthorityGranted: false,
+      explicitAcceptanceGranted: false,
+      canonicalMutationPerformed: false,
+      v5PostReflectionVerified: false,
+      syncEngineInvoked: false,
+      authorityEffect: "none",
+      validatedAt: internal.text(source.validatedAt, internal.nowIso()),
+      immutable: true
+    };
+    return validateAndStore("v4TargetValidationEvidenceDescriptor", record, state.v4TargetValidationEvidenceDescriptors, "v4EvidenceId", "REPOSITORY010_V4_TARGET_VALIDATION_EVIDENCE_READY");
+  }
+
   function createDesktopRepositoryDescriptor(input) {
     const source = internal.isPlainObject(input) ? input : {};
     const required = ["desktopRepositoryDescriptorId", "projectId", "repositoryId", "nodeId", "directoryName", "entryFile", "projectVersion", "manifestHash", "scriptSetHash"];
@@ -406,6 +456,11 @@
     return record ? internal.clone(record) : null;
   }
 
+  function getV4TargetValidationEvidenceDescriptor(v4EvidenceId) {
+    const record = state.v4TargetValidationEvidenceDescriptors.get(internal.text(v4EvidenceId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
   function getDesktopRepositoryDescriptor(descriptorId) {
     const record = state.desktopRepositoryDescriptors.get(internal.text(descriptorId, ""));
     return record ? internal.clone(record) : null;
@@ -443,7 +498,8 @@
         desktopRepositoryDescriptors: state.desktopRepositoryDescriptors.size,
         v2TransferReceipts: state.v2TransferReceipts.size,
         canonicalBaselineDescriptors: state.canonicalBaselineDescriptors.size,
-        v3ConflictEvidenceDescriptors: state.v3ConflictEvidenceDescriptors.size
+        v3ConflictEvidenceDescriptors: state.v3ConflictEvidenceDescriptors.size,
+        v4TargetValidationEvidenceDescriptors: state.v4TargetValidationEvidenceDescriptors.size
       }
     };
   }
@@ -466,6 +522,7 @@
     createV2TransferReceiptDescriptor: createV2TransferReceiptDescriptor,
     createCanonicalBaselineDescriptor: createCanonicalBaselineDescriptor,
     createV3ConflictEvidenceDescriptor: createV3ConflictEvidenceDescriptor,
+    createV4TargetValidationEvidenceDescriptor: createV4TargetValidationEvidenceDescriptor,
     createDesktopRepositoryDescriptor: createDesktopRepositoryDescriptor,
     getRepositoryNodeIdentity: getRepositoryNodeIdentity,
     getRepositoryRevision: getRepositoryRevision,
@@ -478,6 +535,7 @@
     getV2TransferReceiptDescriptor: getV2TransferReceiptDescriptor,
     getCanonicalBaselineDescriptor: getCanonicalBaselineDescriptor,
     getV3ConflictEvidenceDescriptor: getV3ConflictEvidenceDescriptor,
+    getV4TargetValidationEvidenceDescriptor: getV4TargetValidationEvidenceDescriptor,
     getDesktopRepositoryDescriptor: getDesktopRepositoryDescriptor,
     getMetadataModelStatus: getMetadataModelStatus
   });

@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_core.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.7.0 / Module: Core 1.6.0
-   Phase 8: Explicit Canonical Baseline / V3 Conflict Validation
+   Release: 1.8.0 / Module: Core 1.7.0
+   Phase 9: V4 Target Environment Revalidation / Drift Gate
    ============================================================ */
 (function (global) {
   "use strict";
@@ -85,6 +85,7 @@
     v2TransferReceipts: new Map(),
     canonicalBaselineDescriptors: new Map(),
     v3ConflictEvidenceDescriptors: new Map(),
+    v4TargetValidationEvidenceDescriptors: new Map(),
     lastPhase1Validation: null,
     lastPhase1AndroidValidation: null,
     phase1PreDeviceValidationPassed: false,
@@ -132,6 +133,13 @@
     v3ConflictStatus: "Ready",
     lastV3ConflictEvidence: null,
     lastV3Evaluation: null,
+    lastPhase9Validation: null,
+    lastPhase9CrossDeviceValidation: null,
+    phase9PreDeviceValidationPassed: false,
+    crossDevicePhase9ValidationPassed: false,
+    v4TargetStatus: "Ready",
+    lastV4TargetValidationEvidence: null,
+    lastV4Evaluation: null,
     desktopAdapterStatus: "Not Initialized",
     lastDesktopRepositoryScan: null,
     transferPackageStatus: "Ready",
@@ -146,7 +154,7 @@
     updatedAt: null
   };
 
-  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors", "transferPackageDescriptors", "desktopRepositoryDescriptors", "v2TransferReceipts", "canonicalBaselineDescriptors", "v3ConflictEvidenceDescriptors"].forEach(function ensureMap(key) {
+  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors", "transferPackageDescriptors", "desktopRepositoryDescriptors", "v2TransferReceipts", "canonicalBaselineDescriptors", "v3ConflictEvidenceDescriptors", "v4TargetValidationEvidenceDescriptors"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
 
@@ -253,7 +261,11 @@
   }
 
   function phase8Complete() {
-    return phase7Complete() && state.phase8PreDeviceValidationPassed === true && state.crossDevicePhase8ValidationPassed === true && !(state.lastV3ConflictEvidence && state.lastV3ConflictEvidence.blockingConflict === true);
+    return priorValidatedPhase() >= 8 || (phase7Complete() && state.phase8PreDeviceValidationPassed === true && state.crossDevicePhase8ValidationPassed === true && !(state.lastV3ConflictEvidence && state.lastV3ConflictEvidence.blockingConflict === true));
+  }
+
+  function phase9Complete() {
+    return phase8Complete() && state.phase9PreDeviceValidationPassed === true && state.crossDevicePhase9ValidationPassed === true && Boolean(state.lastV4TargetValidationEvidence && state.lastV4TargetValidationEvidence.v4TargetEnvironmentValidated === true && state.lastV4TargetValidationEvidence.blockingTargetDrift === false);
   }
 
   function getStatus() {
@@ -278,7 +290,8 @@
       phase6Complete: phase6Complete(),
       phase7Complete: phase7Complete(),
       phase8Complete: phase8Complete(),
-      releaseAllowed: phase8Complete(),
+      phase9Complete: phase9Complete(),
+      releaseAllowed: phase9Complete(),
       logicalAuthority: VERSION_MANIFEST.authority.logicalAuthority,
       initialCanonicalNode: VERSION_MANIFEST.authority.initialCanonicalNode,
       androidRole: VERSION_MANIFEST.authority.androidIndexedDBRole,
@@ -295,7 +308,10 @@
       v2IntegrityPreflightImplemented: VERSION_MANIFEST.implementation.v2IntegrityPreflightImplemented === true,
       v2TransferIntegrityValidationImplemented: VERSION_MANIFEST.implementation.v2TransferIntegrityValidationImplemented === true,
       v3BaseConflictValidationImplemented: VERSION_MANIFEST.implementation.v3BaseConflictValidationImplemented === true,
+      v4TargetEnvironmentValidationImplemented: VERSION_MANIFEST.implementation.v4TargetEnvironmentValidationImplemented === true,
       explicitCanonicalBaselineImplemented: VERSION_MANIFEST.implementation.explicitCanonicalBaselineImplemented === true,
+      explicitAcceptanceImplemented: VERSION_MANIFEST.implementation.explicitAcceptanceImplemented === true,
+      v5PostReflectionVerificationImplemented: VERSION_MANIFEST.implementation.v5PostReflectionVerificationImplemented === true,
       desktopAdapterImplemented: VERSION_MANIFEST.implementation.desktopAdapterImplemented === true,
       pcLocalRepositoryReadOnlyScanImplemented: VERSION_MANIFEST.implementation.pcLocalRepositoryReadOnlyScanImplemented === true,
       pcLocalRepositoryIntegrityVerificationImplemented: VERSION_MANIFEST.implementation.pcLocalRepositoryIntegrityVerificationImplemented === true,
@@ -311,6 +327,7 @@
       phase6RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase6RequiredGateSet),
       phase7RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase7RequiredGateSet),
       phase8RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase8RequiredGateSet),
+      phase9RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase9RequiredGateSet),
       phase1PreDeviceValidationPassed: state.phase1PreDeviceValidationPassed === true,
       androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true || priorValidatedPhase() >= 1,
       phase2PreDeviceValidationPassed: state.phase2PreDeviceValidationPassed === true,
@@ -329,7 +346,11 @@
       phase7PreDeviceValidationPassed: state.phase7PreDeviceValidationPassed === true,
       crossDevicePhase7ValidationPassed: state.crossDevicePhase7ValidationPassed === true || priorValidatedPhase() >= 7,
       phase8PreDeviceValidationPassed: state.phase8PreDeviceValidationPassed === true,
-      crossDevicePhase8ValidationPassed: state.crossDevicePhase8ValidationPassed === true,
+      crossDevicePhase8ValidationPassed: state.crossDevicePhase8ValidationPassed === true || priorValidatedPhase() >= 8,
+      phase9PreDeviceValidationPassed: state.phase9PreDeviceValidationPassed === true,
+      crossDevicePhase9ValidationPassed: state.crossDevicePhase9ValidationPassed === true,
+      v4TargetStatus: state.v4TargetStatus || "Ready",
+      lastV4TargetValidationEvidence: clone(state.lastV4TargetValidationEvidence),
       canonicalBaselineStatus: state.canonicalBaselineStatus || "Not Established",
       lastCanonicalBaseline: clone(state.lastCanonicalBaseline),
       v3ConflictStatus: state.v3ConflictStatus || "Ready",
@@ -354,7 +375,8 @@
         desktopRepositoryDescriptors: state.desktopRepositoryDescriptors.size,
         v2TransferReceipts: state.v2TransferReceipts.size,
         canonicalBaselineDescriptors: state.canonicalBaselineDescriptors.size,
-        v3ConflictEvidenceDescriptors: state.v3ConflictEvidenceDescriptors.size
+        v3ConflictEvidenceDescriptors: state.v3ConflictEvidenceDescriptors.size,
+        v4TargetValidationEvidenceDescriptors: state.v4TargetValidationEvidenceDescriptors.size
       },
       modules: modules,
       lastError: clone(state.lastError),
@@ -511,12 +533,24 @@
     touch();
   }
 
+  function markPhase9PreDeviceValidation(result) {
+    state.lastPhase9Validation = clone(result);
+    state.phase9PreDeviceValidationPassed = Boolean(result && result.failed === 0 && result.criticalFailed === 0);
+    touch();
+  }
+
+  function markPhase9CrossDeviceValidation(result) {
+    state.lastPhase9CrossDeviceValidation = clone(result);
+    state.crossDevicePhase9ValidationPassed = Boolean(result && result.failed === 0 && result.criticalFailed === 0 && result.crossDeviceRealValidation === true && result.pcRealDevice === true && result.androidSenderRealDevice === true && result.blockingTargetDrift !== true && result.v4TargetEnvironmentValidated === true);
+    touch();
+  }
+
   function getPublicApiDescription() {
     return {
       componentId: COMPONENT_ID,
       version: RELEASE_VERSION,
       namespace: "window.REPOSITORY010LocalFirstRepository",
-      phase: 8,
+      phase: 9,
       namespaceFunctions: Object.keys(namespace.api || {}).sort(),
       contractsImplemented: typeof namespace.validateContract === "function",
       metadataModelImplemented: typeof namespace.createRepositoryNodeIdentity === "function",
@@ -533,7 +567,10 @@
       v2IntegrityPreflightImplemented: VERSION_MANIFEST.implementation.v2IntegrityPreflightImplemented === true,
       v2TransferIntegrityValidationImplemented: VERSION_MANIFEST.implementation.v2TransferIntegrityValidationImplemented === true,
       v3BaseConflictValidationImplemented: VERSION_MANIFEST.implementation.v3BaseConflictValidationImplemented === true,
+      v4TargetEnvironmentValidationImplemented: VERSION_MANIFEST.implementation.v4TargetEnvironmentValidationImplemented === true,
       explicitCanonicalBaselineImplemented: VERSION_MANIFEST.implementation.explicitCanonicalBaselineImplemented === true,
+      explicitAcceptanceImplemented: VERSION_MANIFEST.implementation.explicitAcceptanceImplemented === true,
+      v5PostReflectionVerificationImplemented: VERSION_MANIFEST.implementation.v5PostReflectionVerificationImplemented === true,
       desktopAdapterImplemented: VERSION_MANIFEST.implementation.desktopAdapterImplemented === true,
       pcLocalRepositoryReadOnlyScanImplemented: VERSION_MANIFEST.implementation.pcLocalRepositoryReadOnlyScanImplemented === true,
       pcCanonicalMutationImplemented: false,
@@ -546,7 +583,8 @@
       phase5ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase5Validation === "function",
       phase6ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase6Validation === "function",
       phase7ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase7Validation === "function",
-      phase8ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase8Validation === "function"
+      phase8ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase8Validation === "function",
+      phase9ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase9Validation === "function"
     };
   }
 
@@ -582,7 +620,9 @@
     markPhase7PreDeviceValidation: markPhase7PreDeviceValidation,
     markPhase7CrossDeviceValidation: markPhase7CrossDeviceValidation,
     markPhase8PreDeviceValidation: markPhase8PreDeviceValidation,
-    markPhase8CrossDeviceValidation: markPhase8CrossDeviceValidation
+    markPhase8CrossDeviceValidation: markPhase8CrossDeviceValidation,
+    markPhase9PreDeviceValidation: markPhase9PreDeviceValidation,
+    markPhase9CrossDeviceValidation: markPhase9CrossDeviceValidation
   });
   namespace.__internal = internal;
 
@@ -608,7 +648,7 @@
     id: "REPOSITORY-010-CORE",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 8,
+    phase: 9,
     persistentMutationImplemented: false,
     persistenceImplemented: true,
     offlineStagingImplemented: true,
@@ -621,6 +661,7 @@
     v2IntegrityPreflightImplemented: true,
     v2TransferIntegrityValidationImplemented: true,
     v3BaseConflictValidationImplemented: true,
+    v4TargetEnvironmentValidationImplemented: true,
     explicitCanonicalBaselineImplemented: true,
     desktopAdapterImplemented: true,
     pcLocalRepositoryReadOnlyScanImplemented: true,
