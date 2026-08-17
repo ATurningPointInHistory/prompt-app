@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_desktop_adapter.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.10.0 / Module: Desktop Adapter 1.1.0
+   Release: 1.14.0 / Module: Desktop Adapter 1.1.1
    Phase 11 Compatible: Read-only target file access for Mutation Bridge
    Read-only: no write, no canonical mutation
    ============================================================ */
@@ -109,6 +109,43 @@
     try { return await directoryHandle.queryPermission({ mode: "read" }); } catch (_) { return "unknown"; }
   }
 
+  function ensureDesktopScanMetadataPrerequisites() {
+    const hasContract = typeof namespace.getContractDefinition === "function"
+      && !!namespace.getContractDefinition("repositoryNodeIdentity")
+      && !!namespace.getContractDefinition("desktopRepositoryDescriptor");
+
+    if (hasContract) {
+      return internal.buildResult(true, "REPOSITORY010_DESKTOP_SCAN_PREREQUISITES_READY", "Ready", {
+        contractsInitialized: true,
+        metadataInitialized: namespace.modules.metadata && namespace.modules.metadata.status === "Ready",
+        autoInitializationPerformed: false
+      });
+    }
+
+    if (typeof namespace.initializeContracts !== "function" || typeof namespace.initializeMetadataModel !== "function") {
+      return internal.buildResult(false, "REPOSITORY010_DESKTOP_SCAN_PREREQUISITES_UNAVAILABLE", "Blocked", {
+        initializeContractsAvailable: typeof namespace.initializeContracts === "function",
+        initializeMetadataModelAvailable: typeof namespace.initializeMetadataModel === "function"
+      });
+    }
+
+    const contracts = namespace.initializeContracts();
+    const metadata = namespace.initializeMetadataModel();
+    const ready = contracts && contracts.ok === true
+      && metadata && metadata.ok === true
+      && typeof namespace.getContractDefinition === "function"
+      && !!namespace.getContractDefinition("repositoryNodeIdentity")
+      && !!namespace.getContractDefinition("desktopRepositoryDescriptor");
+
+    return internal.buildResult(ready,
+      ready ? "REPOSITORY010_DESKTOP_SCAN_PREREQUISITES_AUTO_INITIALIZED" : "REPOSITORY010_DESKTOP_SCAN_PREREQUISITES_INITIALIZATION_FAILED",
+      ready ? "Ready" : "Blocked", {
+        contractsInitialization: contracts || null,
+        metadataInitialization: metadata || null,
+        autoInitializationPerformed: true
+      });
+  }
+
   function initializeDesktopRepositoryAdapter() {
     const available = typeof global.showDirectoryPicker === "function";
     const secure = global.isSecureContext !== false;
@@ -138,6 +175,12 @@
   async function scanDesktopRepositoryDirectory(directoryHandle) {
     const handle = directoryHandle || selectedDirectoryHandle;
     if (!handle || handle.kind !== "directory") return fail("REPOSITORY010_DESKTOP_DIRECTORY_REQUIRED", "Select a desktop repository directory first.");
+
+    const prerequisites = ensureDesktopScanMetadataPrerequisites();
+    if (!prerequisites || prerequisites.ok !== true) {
+      return fail("REPOSITORY010_DESKTOP_SCAN_PREREQUISITES_FAILED", "Desktop repository scan prerequisites could not be initialized.", prerequisites || null);
+    }
+
     try {
       const permission = await queryReadPermission(handle);
       const projectInfo = JSON.parse(await readText(handle, "project_info.json"));
@@ -282,6 +325,7 @@
       selectedDirectoryName: selectedDirectoryHandle ? internal.text(selectedDirectoryHandle.name, "selected-directory") : null,
       pcLocalRepositoryReadOnlyScanImplemented: true,
       pcLocalRepositoryIntegrityVerificationImplemented: true,
+      reloadSafeContractInitializationImplemented: true,
       readOnly: true,
       writePermissionRequested: false,
       writeAttempted: false,
@@ -315,6 +359,7 @@
     writeAttempted: false,
     pcCanonicalMutationImplemented: false,
     actualV2TransferImplemented: false,
+    reloadSafeContractInitializationImplemented: true,
     syncEngineImplemented: false,
     loadedAt: internal.nowIso()
   };
