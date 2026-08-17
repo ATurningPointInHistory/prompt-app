@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_sync_evidence.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.14.0 / Module: Sync Evidence 1.0.0
-   Phase 15: Controlled Sync Foundation
+   Release: 1.15.0 / Module: Sync Evidence 1.1.0
+   Phase 16: Controlled Cross-Device Sync Engine
    ============================================================ */
 (function (global) {
   "use strict";
@@ -16,7 +16,7 @@
   const internal = namespace.__internal;
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("syncEvidence");
-  const EVIDENCE_TYPES = Object.freeze(["session-created", "observation", "difference", "candidate-prepared", "transfer-prepared", "verification", "conflict", "failure", "interruption", "completion"]);
+  const EVIDENCE_TYPES = Object.freeze(["session-created", "observation", "difference", "candidate-prepared", "transfer-prepared", "transport-attempt", "transfer-exported", "transfer-received", "verification", "conflict", "resume", "failure", "interruption", "completion"]);
   if (!(state.syncEvidenceDescriptors instanceof Map)) state.syncEvidenceDescriptors = new Map();
 
   async function createSyncEvidence(input) {
@@ -46,7 +46,7 @@
       automaticAcceptancePerformed: false,
       automaticConflictWinnerApplied: false,
       automaticBaselinePromotionPerformed: false,
-      syncEngineInvoked: false,
+      syncEngineInvoked: session.syncEngineInvoked === true,
       createdAt: internal.text(source.createdAt, internal.nowIso()),
       immutable: true
     };
@@ -57,7 +57,7 @@
     state.syncEvidenceDescriptors.set(record.syncEvidenceId, internal.clone(record));
     state.lastSyncEvidenceId = record.syncEvidenceId;
     internal.touch();
-    return internal.buildResult(true, "REPOSITORY010_SYNC_EVIDENCE_PERSISTED", "Verified", { syncEvidence: internal.clone(record), validation: validation, authorityEffect: "none", canonicalMutationPerformed: false, syncEngineInvoked: false });
+    return internal.buildResult(true, "REPOSITORY010_SYNC_EVIDENCE_PERSISTED", "Verified", { syncEvidence: internal.clone(record), validation: validation, authorityEffect: "none", canonicalMutationPerformed: false, syncEngineInvoked: record.syncEngineInvoked === true });
   }
 
   async function restoreSyncEvidence(syncEvidenceId) {
@@ -79,7 +79,7 @@
   }
 
   function getSyncEvidenceStatus() {
-    return { status: "Ready", phase: 15, moduleVersion: MODULE_VERSION, evidenceTypes: EVIDENCE_TYPES.slice(), syncEvidenceImplemented: true, persistenceImplemented: true, reloadRecoveryImplemented: true, evidenceGrantsAuthority: false, syncEngineImplemented: false, runtimeEvidenceCount: state.syncEvidenceDescriptors.size, lastEvidenceId: state.lastSyncEvidenceId || null };
+    return { status: "Ready", phase: 16, moduleVersion: MODULE_VERSION, evidenceTypes: EVIDENCE_TYPES.slice(), syncEvidenceImplemented: true, persistenceImplemented: true, reloadRecoveryImplemented: true, evidenceGrantsAuthority: false, syncEngineImplemented: VERSION_MANIFEST.implementation.syncEngineImplemented === true, runtimeEvidenceCount: state.syncEvidenceDescriptors.size, lastEvidenceId: state.lastSyncEvidenceId || null };
   }
 
   Object.assign(namespace.api, {
@@ -89,5 +89,5 @@
     getLocalFirstRepositorySyncEvidenceStatus: getSyncEvidenceStatus
   });
   Object.assign(namespace, namespace.api);
-  namespace.modules.syncEvidence = { id: "REPOSITORY-010-SYNC-EVIDENCE", version: MODULE_VERSION, status: "Ready", phase: 15, syncEvidenceImplemented: true, persistenceImplemented: true, evidenceGrantsAuthority: false, syncEngineImplemented: false, loadedAt: internal.nowIso() };
+  namespace.modules.syncEvidence = { id: "REPOSITORY-010-SYNC-EVIDENCE", version: MODULE_VERSION, status: "Ready", phase: 16, syncEvidenceImplemented: true, persistenceImplemented: true, evidenceGrantsAuthority: false, syncEngineImplemented: VERSION_MANIFEST.implementation.syncEngineImplemented === true, loadedAt: internal.nowIso() };
 })(typeof window !== "undefined" ? window : globalThis);

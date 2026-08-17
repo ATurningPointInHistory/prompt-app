@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_contracts.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.14.0 / Module: Contracts 1.12.0
-   Phase 15: Controlled Sync Foundation contracts
+   Release: 1.15.0 / Module: Contracts 1.13.0
+   Phase 16: Controlled Cross-Device Sync Engine contracts
    ============================================================ */
 (function (global) {
   "use strict";
@@ -531,6 +531,8 @@
         field("promotionCandidateId", { required: true, type: "string" }),
         field("sourceEvidenceId", { required: true, type: "string" }),
         field("sourceTransactionId", { required: true, type: "string" }),
+        field("sourceEvidenceType", { required: false, type: "string" }),
+        field("developmentReleasePlanId", { required: false, type: "string|null" }),
         field("previousCanonicalRevisionId", { required: true, type: "string" }),
         field("suggestedCanonicalRevisionId", { required: true, type: "string" }),
         field("projectId", { required: true, type: "string" }),
@@ -563,6 +565,8 @@
         field("promotionCandidateId", { required: true, type: "string" }),
         field("sourceEvidenceId", { required: true, type: "string" }),
         field("sourceTransactionId", { required: true, type: "string" }),
+        field("sourceEvidenceType", { required: false, type: "string" }),
+        field("developmentReleasePlanId", { required: false, type: "string|null" }),
         field("previousCanonicalRevisionId", { required: true, type: "string" }),
         field("canonicalRevisionId", { required: true, type: "string" }),
         field("canonicalBaselineDescriptorId", { required: true, type: "string" }),
@@ -574,6 +578,8 @@
         field("scriptSetHash", { required: true, type: "string" }),
         field("scriptCount", { required: true, type: "number" }),
         field("repositoryStateHash", { required: true, type: "string" }),
+        field("manifestFileSha256", { required: false, type: "string" }),
+        field("indexFileSha256", { required: false, type: "string" }),
         field("sourceV5Verified", { required: true, type: "boolean", enum: [true] }),
         field("freshRevalidationPassed", { required: true, type: "boolean", enum: [true] }),
         field("exactPostV5FileHashesVerified", { required: true, type: "boolean", enum: [true] }),
@@ -605,13 +611,15 @@
         field("differenceId", { required: true, type: "string|null" }),
         field("syncCandidateId", { required: true, type: "string|null" }),
         field("transferPackageId", { required: true, type: "string|null" }),
+        field("transportAttemptId", { required: false, type: "string|null" }),
+        field("transitionHistory", { required: false, type: "array" }),
         field("conflictEvidenceId", { required: true, type: "string|null" }),
         field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
         field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
         field("automaticAcceptancePerformed", { required: true, type: "boolean", enum: [false] }),
         field("automaticConflictWinnerApplied", { required: true, type: "boolean", enum: [false] }),
         field("automaticBaselinePromotionPerformed", { required: true, type: "boolean", enum: [false] }),
-        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean" }),
         field("createdAt", { required: true, type: "string" }),
         field("updatedAt", { required: true, type: "string" }),
         field("immutable", { required: true, type: "boolean", enum: [false] })
@@ -654,7 +662,7 @@
       fields: [
         field("syncEvidenceId", { required: true, type: "string" }),
         field("syncSessionId", { required: true, type: "string" }),
-        field("evidenceType", { required: true, type: "string", enum: ["session-created", "observation", "difference", "candidate-prepared", "transfer-prepared", "verification", "conflict", "failure", "interruption", "completion"] }),
+        field("evidenceType", { required: true, type: "string", enum: ["session-created", "observation", "difference", "candidate-prepared", "transfer-prepared", "transport-attempt", "transfer-exported", "transfer-received", "verification", "conflict", "resume", "failure", "interruption", "completion"] }),
         field("sessionStatus", { required: true, type: "string" }),
         field("projectId", { required: true, type: "string" }),
         field("repositoryId", { required: true, type: "string" }),
@@ -671,7 +679,172 @@
         field("automaticAcceptancePerformed", { required: true, type: "boolean", enum: [false] }),
         field("automaticConflictWinnerApplied", { required: true, type: "boolean", enum: [false] }),
         field("automaticBaselinePromotionPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean" }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "transportAdapterDescriptor",
+      name: "REPOSITORY-010 Transport Adapter Descriptor Contract",
+      fields: [
+        field("transportAdapterId", { required: true, type: "string" }),
+        field("transportType", { required: true, type: "string" }),
+        field("adapterVersion", { required: true, type: "string" }),
+        field("requiresUserAction", { required: true, type: "boolean", enum: [true] }),
+        field("supportsExport", { required: true, type: "boolean" }),
+        field("supportsImport", { required: true, type: "boolean" }),
+        field("supportsRetry", { required: true, type: "boolean" }),
+        field("supportsResume", { required: true, type: "boolean" }),
+        field("canonicalMutationAuthority", { required: true, type: "boolean", enum: [false] }),
+        field("automaticAcceptanceAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("automaticPromotionAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "transportAttemptDescriptor",
+      name: "REPOSITORY-010 Transport Attempt Descriptor Contract",
+      fields: [
+        field("transportAttemptId", { required: true, type: "string" }),
+        field("syncSessionId", { required: true, type: "string" }),
+        field("transportAdapterId", { required: true, type: "string" }),
+        field("transportType", { required: true, type: "string" }),
+        field("transferPackageId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string" }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("sourceRevisionId", { required: true, type: "string|null" }),
+        field("targetRevisionId", { required: true, type: "string|null" }),
+        field("attemptStatus", { required: true, type: "string", enum: ["CREATED", "PREPARED", "EXPORT_READY", "TRANSFERRING", "RECEIVED", "VERIFYING", "VERIFIED", "FAILED", "INTERRUPTED"] }),
+        field("retryOrdinal", { required: true, type: "number" }),
+        field("packageHash", { required: true, type: "string|null" }),
+        field("v2EnvelopeHash", { required: true, type: "string|null" }),
+        field("transportEnvelopeHash", { required: true, type: "string|null" }),
+        field("transportEnvelope", { required: true, type: "object|null" }),
+        field("sourceSessionProofHash", { required: true, type: "string|null" }),
+        field("receiptId", { required: true, type: "string|null" }),
+        field("v3EvidenceId", { required: true, type: "string|null" }),
+        field("v4EvidenceId", { required: true, type: "string|null" }),
+        field("sourceFileName", { required: true, type: "string|null" }),
+        field("statusHistory", { required: true, type: "array" }),
+        field("startedAt", { required: true, type: "string" }),
+        field("completedAt", { required: true, type: "string|null" }),
+        field("interruptedFromStatus", { required: true, type: "string|null" }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("automaticAcceptancePerformed", { required: true, type: "boolean", enum: [false] }),
+        field("automaticConflictWinnerApplied", { required: true, type: "boolean", enum: [false] }),
+        field("automaticBaselinePromotionPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("updatedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [false] })
+      ]
+    }
+    ,{
+      key: "syncTransportEnvelopeDescriptor",
+      name: "REPOSITORY-010 Sync Transport Envelope Descriptor Contract",
+      fields: [
+        field("schema", { required: true, type: "string", enum: ["REPOSITORY-010-SYNC-TRANSPORT-ENVELOPE"] }),
+        field("version", { required: true, type: "string", enum: ["1.0.0"] }),
+        field("componentId", { required: true, type: "string", enum: ["REPOSITORY-010"] }),
+        field("syncSessionId", { required: true, type: "string" }),
+        field("transportAttemptId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string" }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("sourceRevisionId", { required: true, type: "string|null" }),
+        field("targetRevisionId", { required: true, type: "string|null" }),
+        field("transferPackageId", { required: true, type: "string" }),
+        field("packageHash", { required: true, type: "string" }),
+        field("sourceSessionSnapshot", { required: true, type: "object" }),
+        field("sourceSessionProofHashAlgorithm", { required: true, type: "string", enum: ["SHA-256"] }),
+        field("sourceSessionProofHash", { required: true, type: "string" }),
+        field("v2Envelope", { required: true, type: "object" }),
+        field("v2EnvelopeHash", { required: true, type: "string" }),
+        field("transportAdapterId", { required: true, type: "string", enum: ["REPOSITORY-010-EXPLICIT-FILE-TRANSPORT"] }),
+        field("transportType", { required: true, type: "string", enum: ["explicit-file-transfer"] }),
+        field("requiresUserAction", { required: true, type: "boolean", enum: [true] }),
+        field("canonicalMutationRequested", { required: true, type: "boolean", enum: [false] }),
+        field("automaticAcceptanceRequested", { required: true, type: "boolean", enum: [false] }),
+        field("automaticPromotionRequested", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] }),
+        field("transportEnvelopeHashAlgorithm", { required: true, type: "string", enum: ["SHA-256"] }),
+        field("transportEnvelopeHash", { required: true, type: "string" })
+      ]
+    }
+    ,{
+      key: "developmentReleasePlanDescriptor",
+      name: "REPOSITORY-010 Development Release Plan Descriptor Contract",
+      fields: [
+        field("schema", { required: true, type: "string", enum: ["REPOSITORY-010-DEVELOPMENT-RELEASE-PLAN"] }),
+        field("schemaVersion", { required: true, type: "string", enum: ["1.0.0"] }),
+        field("developmentReleasePlanId", { required: true, type: "string" }),
+        field("componentId", { required: true, type: "string", enum: ["REPOSITORY-010"] }),
+        field("phase", { required: true, type: "number" }),
+        field("version", { required: true, type: "string" }),
+        field("baseCanonicalRevisionId", { required: true, type: "string" }),
+        field("suggestedCanonicalRevisionId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string" }),
+        field("changedFiles", { required: true, type: "array" }),
+        field("addedFiles", { required: true, type: "array" }),
+        field("modifiedFiles", { required: true, type: "array" }),
+        field("removedFiles", { required: true, type: "array" }),
+        field("beforeFileHashes", { required: true, type: "object" }),
+        field("expectedAfterFileHashes", { required: true, type: "object" }),
+        field("beforeManifestHash", { required: true, type: "string" }),
+        field("expectedAfterManifestHash", { required: true, type: "string" }),
+        field("beforeScriptSetHash", { required: true, type: "string" }),
+        field("expectedAfterScriptSetHash", { required: true, type: "string" }),
+        field("beforeScriptCount", { required: true, type: "number" }),
+        field("expectedAfterScriptCount", { required: true, type: "number" }),
+        field("beforeRepositoryStateHash", { required: true, type: "string" }),
+        field("expectedAfterRepositoryStateHash", { required: true, type: "string" }),
+        field("expectedIndexFileHash", { required: true, type: "string" }),
+        field("releasePackageHash", { required: true, type: "string" }),
+        field("releasePlanHash", { required: true, type: "string" }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "developmentReleaseV5EvidenceDescriptor",
+      name: "REPOSITORY-010 Development Release V5 Evidence Descriptor Contract",
+      fields: [
+        field("developmentReleaseV5EvidenceId", { required: true, type: "string" }),
+        field("developmentReleasePlanId", { required: true, type: "string" }),
+        field("baseCanonicalRevisionId", { required: true, type: "string" }),
+        field("suggestedCanonicalRevisionId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string" }),
+        field("directoryName", { required: true, type: "string" }),
+        field("releasePlanHash", { required: true, type: "string" }),
+        field("releasePackageHash", { required: true, type: "string" }),
+        field("actualReleasePackageHash", { required: true, type: "string|null" }),
+        field("releasePackageHashVerified", { required: true, type: "boolean" }),
+        field("actualManifestHash", { required: true, type: "string" }),
+        field("actualScriptSetHash", { required: true, type: "string" }),
+        field("actualScriptCount", { required: true, type: "number" }),
+        field("actualFileHashes", { required: true, type: "object" }),
+        field("indexFileSha256", { required: true, type: "string" }),
+        field("repositoryStateHash", { required: true, type: "string" }),
+        field("freshReadOnlyScanPassed", { required: true, type: "boolean", enum: [true] }),
+        field("fullRepositoryIntegrityVerified", { required: true, type: "boolean", enum: [true] }),
+        field("releasePlanMatched", { required: true, type: "boolean", enum: [true] }),
+        field("unexpectedFileDifferenceDetected", { required: true, type: "boolean", enum: [false] }),
+        field("developmentReleaseV5Passed", { required: true, type: "boolean", enum: [true] }),
+        field("canonicalSourceFilesWrittenByEngine", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalMutationPerformedByEngine", { required: true, type: "boolean", enum: [false] }),
+        field("automaticAcceptancePerformed", { required: true, type: "boolean", enum: [false] }),
+        field("automaticPromotionPerformed", { required: true, type: "boolean", enum: [false] }),
         field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("githubReflectionPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
         field("createdAt", { required: true, type: "string" }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
       ]
@@ -706,8 +879,10 @@
 
   function typeMatches(value, type) {
     if (type === "string|null") return value === null || typeof value === "string";
+    if (type === "object|null") return value === null || internal.isPlainObject(value);
     if (type === "string") return typeof value === "string";
     if (type === "boolean") return typeof value === "boolean";
+    if (type === "number") return typeof value === "number" && Number.isFinite(value);
     if (type === "array") return Array.isArray(value);
     if (type === "object") return internal.isPlainObject(value);
     return true;

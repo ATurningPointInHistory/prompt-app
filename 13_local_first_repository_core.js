@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_core.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.14.0 / Module: Core 1.11.0
-   Phase 15: Controlled Sync Foundation compatibility
+   Release: 1.15.0 / Module: Core 1.12.0
+   Phase 16: Controlled Cross-Device Sync Engine compatibility
    ============================================================ */
 (function (global) {
   "use strict";
@@ -94,6 +94,10 @@
     syncSessionDescriptors: new Map(),
     syncDifferenceDescriptors: new Map(),
     syncEvidenceDescriptors: new Map(),
+    transportAdapters: new Map(),
+    transportAttemptDescriptors: new Map(),
+    developmentReleasePlans: new Map(),
+    developmentReleaseV5Evidence: new Map(),
     lastPhase1Validation: null,
     lastPhase1AndroidValidation: null,
     phase1PreDeviceValidationPassed: false,
@@ -187,6 +191,16 @@
     lastSyncDifferenceId: null,
     lastSyncEvidenceId: null,
     lastSyncCoordinatorError: null,
+    transportAdapterStatus: "Ready",
+    transportAttemptStatus: "Ready",
+    explicitFileTransportStatus: "Ready",
+    developmentReleaseStatus: "Ready",
+    syncEngineStatus: "Ready",
+    lastTransportAttemptId: null,
+    lastSyncTransportEnvelope: null,
+    lastDevelopmentReleaseV5EvidenceId: null,
+    lastSyncEngineSessionId: null,
+    lastSyncEngineError: null,
     lastSyncCandidateRestore: null,
     offlineStagingStatus: "Ready",
     lastOfflineStagingRestore: null,
@@ -196,7 +210,7 @@
     updatedAt: null
   };
 
-  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors", "transferPackageDescriptors", "desktopRepositoryDescriptors", "v2TransferReceipts", "canonicalBaselineDescriptors", "v3ConflictEvidenceDescriptors", "v4TargetValidationEvidenceDescriptors", "acceptanceTokenDescriptors", "acceptanceTokenConsumptionRecords", "acceptanceTokenRevocationRecords", "mutationPackageDescriptors", "controlledTransactionRecords", "syncSessionDescriptors", "syncDifferenceDescriptors", "syncEvidenceDescriptors"].forEach(function ensureMap(key) {
+  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors", "transferPackageDescriptors", "desktopRepositoryDescriptors", "v2TransferReceipts", "canonicalBaselineDescriptors", "v3ConflictEvidenceDescriptors", "v4TargetValidationEvidenceDescriptors", "acceptanceTokenDescriptors", "acceptanceTokenConsumptionRecords", "acceptanceTokenRevocationRecords", "mutationPackageDescriptors", "controlledTransactionRecords", "syncSessionDescriptors", "syncDifferenceDescriptors", "syncEvidenceDescriptors", "transportAdapters", "transportAttemptDescriptors", "developmentReleasePlans", "developmentReleaseV5Evidence"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
 
@@ -407,7 +421,11 @@
       pcLocalRepositoryReadOnlyScanImplemented: VERSION_MANIFEST.implementation.pcLocalRepositoryReadOnlyScanImplemented === true,
       pcLocalRepositoryIntegrityVerificationImplemented: VERSION_MANIFEST.implementation.pcLocalRepositoryIntegrityVerificationImplemented === true,
       pcCanonicalMutationImplemented: false,
-      syncEngineImplemented: false,
+      syncEngineImplemented: VERSION_MANIFEST.implementation.syncEngineImplemented === true,
+      guardedSyncStateMachineImplemented: VERSION_MANIFEST.implementation.guardedSyncStateMachineImplemented === true,
+      transportAttemptImplemented: VERSION_MANIFEST.implementation.transportAttemptImplemented === true,
+      explicitFileTransportImplemented: VERSION_MANIFEST.implementation.explicitFileTransportImplemented === true,
+      developmentReleaseV5Implemented: VERSION_MANIFEST.implementation.developmentReleaseV5Implemented === true,
       directRepositoryMutationAllowed: false,
       automaticConflictWinnerAllowed: false,
       phase1RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase1RequiredGateSet),
@@ -422,6 +440,7 @@
       phase10RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase10RequiredGateSet),
       phase11RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase11RequiredGateSet),
       phase12RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase12RequiredGateSet),
+      phase16RequiredGateSet: clone(VERSION_MANIFEST.validationAuthority.phase16RequiredGateSet),
       phase1PreDeviceValidationPassed: state.phase1PreDeviceValidationPassed === true,
       androidPhase1ValidationPassed: state.androidPhase1ValidationPassed === true || priorValidatedPhase() >= 1,
       phase2PreDeviceValidationPassed: state.phase2PreDeviceValidationPassed === true,
@@ -710,7 +729,7 @@
       componentId: COMPONENT_ID,
       version: RELEASE_VERSION,
       namespace: "window.REPOSITORY010LocalFirstRepository",
-      phase: 15,
+      phase: 16,
       namespaceFunctions: Object.keys(namespace.api || {}).sort(),
       contractsImplemented: typeof namespace.validateContract === "function",
       metadataModelImplemented: typeof namespace.createRepositoryNodeIdentity === "function",
@@ -750,8 +769,15 @@
       differenceDetectionImplemented: VERSION_MANIFEST.implementation.differenceDetectionImplemented === true,
       syncEvidenceImplemented: VERSION_MANIFEST.implementation.syncEvidenceImplemented === true,
       syncCoordinatorFoundationImplemented: VERSION_MANIFEST.implementation.syncCoordinatorFoundationImplemented === true,
-      syncEngineImplemented: false,
-      crossDeviceRealSyncImplemented: false,
+      guardedSyncStateMachineImplemented: VERSION_MANIFEST.implementation.guardedSyncStateMachineImplemented === true,
+      transportAdapterRegistryImplemented: VERSION_MANIFEST.implementation.transportAdapterRegistryImplemented === true,
+      transportAttemptImplemented: VERSION_MANIFEST.implementation.transportAttemptImplemented === true,
+      explicitFileTransportImplemented: VERSION_MANIFEST.implementation.explicitFileTransportImplemented === true,
+      developmentReleaseV5Implemented: VERSION_MANIFEST.implementation.developmentReleaseV5Implemented === true,
+      syncEngineImplemented: VERSION_MANIFEST.implementation.syncEngineImplemented === true,
+      androidToPcRealPushArchitectureImplemented: VERSION_MANIFEST.implementation.androidToPcRealPushArchitectureImplemented === true,
+      pcToAndroidRealPullImplemented: VERSION_MANIFEST.implementation.pcToAndroidRealPullImplemented === true,
+      crossDeviceRealSyncImplemented: VERSION_MANIFEST.implementation.crossDeviceRealSyncImplemented === true,
       mutationEngineImplemented: false,
       phase1ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase1Validation === "function",
       phase2ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase2Validation === "function",
@@ -867,8 +893,15 @@
     differenceDetectionImplemented: VERSION_MANIFEST.implementation.differenceDetectionImplemented === true,
     syncEvidenceImplemented: VERSION_MANIFEST.implementation.syncEvidenceImplemented === true,
     syncCoordinatorFoundationImplemented: VERSION_MANIFEST.implementation.syncCoordinatorFoundationImplemented === true,
-    syncEngineImplemented: false,
-    crossDeviceRealSyncImplemented: false,
+    guardedSyncStateMachineImplemented: VERSION_MANIFEST.implementation.guardedSyncStateMachineImplemented === true,
+    transportAdapterRegistryImplemented: VERSION_MANIFEST.implementation.transportAdapterRegistryImplemented === true,
+    transportAttemptImplemented: VERSION_MANIFEST.implementation.transportAttemptImplemented === true,
+    explicitFileTransportImplemented: VERSION_MANIFEST.implementation.explicitFileTransportImplemented === true,
+    developmentReleaseV5Implemented: VERSION_MANIFEST.implementation.developmentReleaseV5Implemented === true,
+    syncEngineImplemented: VERSION_MANIFEST.implementation.syncEngineImplemented === true,
+    androidToPcRealPushArchitectureImplemented: VERSION_MANIFEST.implementation.androidToPcRealPushArchitectureImplemented === true,
+    pcToAndroidRealPullImplemented: VERSION_MANIFEST.implementation.pcToAndroidRealPullImplemented === true,
+    crossDeviceRealSyncImplemented: VERSION_MANIFEST.implementation.crossDeviceRealSyncImplemented === true,
     loadedAt: nowIso()
   };
 

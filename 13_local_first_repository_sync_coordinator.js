@@ -1,9 +1,9 @@
 /* ============================================================
    FILE: 13_local_first_repository_sync_coordinator.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.14.0 / Module: Sync Coordinator Foundation 1.0.0
-   Phase 15: Controlled Sync Foundation
-   Decision-010: Evidence-Bound Controlled Two-Way Sync Coordinator
+   Release: 1.15.0 / Module: Sync Coordinator 1.1.0
+   Phase 16: Controlled Cross-Device Sync Engine coordination
+   Decision-010 / 011 / 012: Evidence-Bound Controlled Two-Way Sync Coordinator
    ============================================================ */
 (function (global) {
   "use strict";
@@ -37,8 +37,8 @@
       existingV3ApiReused: typeof namespace.evaluateV3BaseRevision === "function",
       existingV4ApiReused: typeof namespace.evaluateV4TargetEnvironment === "function",
       syncCoordinatorFoundationImplemented: true,
-      syncEngineImplemented: false,
-      crossDeviceRealSyncImplemented: false,
+      syncEngineImplemented: VERSION_MANIFEST.implementation.syncEngineImplemented === true,
+      crossDeviceRealSyncImplemented: VERSION_MANIFEST.implementation.crossDeviceRealSyncImplemented === true,
       canonicalMutationAuthority: false,
       automaticAcceptanceAllowed: false,
       automaticConflictWinnerAllowed: false,
@@ -60,14 +60,15 @@
       baseRevisionId: source.baseRevisionId,
       sourceRevisionId: source.sourceRevisionId,
       targetRevisionId: source.targetRevisionId,
-      sessionStatus: "CREATED"
+      sessionStatus: "CREATED",
+      syncEngineInvoked: source.syncEngineInvoked === true
     });
     if (!created || created.ok !== true) return created;
     const session = created.data.syncSession;
     await namespace.transitionLocalFirstRepositorySyncSession(session.syncSessionId, "OBSERVING");
     const evidence = await namespace.createLocalFirstRepositorySyncEvidence({ syncSessionId: session.syncSessionId, evidenceType: "session-created", sessionStatus: "OBSERVING", validationPassed: true, detail: { direction: session.direction, baseRevisionId: session.baseRevisionId } });
     if (!evidence || evidence.ok !== true) return evidence;
-    return internal.buildResult(true, "REPOSITORY010_SYNC_COORDINATOR_SESSION_READY", "Observing", { syncSessionId: session.syncSessionId, syncSession: (await namespace.restoreLocalFirstRepositorySyncSession(session.syncSessionId)).data.syncSession, syncEvidence: evidence.data.syncEvidence, authorityEffect: "none", canonicalMutationPerformed: false, syncEngineInvoked: false });
+    return internal.buildResult(true, "REPOSITORY010_SYNC_COORDINATOR_SESSION_READY", "Observing", { syncSessionId: session.syncSessionId, syncSession: (await namespace.restoreLocalFirstRepositorySyncSession(session.syncSessionId)).data.syncSession, syncEvidence: evidence.data.syncEvidence, authorityEffect: "none", canonicalMutationPerformed: false, syncEngineInvoked: session.syncEngineInvoked === true });
   }
 
   async function observeAndDetect(input) {
@@ -82,7 +83,7 @@
     if (!diff || diff.ok !== true) return diff;
     const evidence = await namespace.createLocalFirstRepositorySyncEvidence({ syncSessionId: sessionId, evidenceType: "difference", sessionStatus: diff.data.syncDifference.hasDifference ? "DIFFERENCE_DETECTED" : "COMPLETED", relatedRecordId: diff.data.syncDifference.differenceId, validationPassed: true, detail: { differenceType: diff.data.syncDifference.differenceType, hasDifference: diff.data.syncDifference.hasDifference, baseRevisionMatch: diff.data.syncDifference.baseRevisionMatch, changedFileCount: diff.data.syncDifference.changedFiles.length } });
     if (!evidence || evidence.ok !== true) return evidence;
-    return internal.buildResult(true, "REPOSITORY010_SYNC_COORDINATOR_OBSERVATION_COMPLETE", diff.data.syncDifference.hasDifference ? "Difference Detected" : "No Change", { syncSessionId: sessionId, syncDifference: diff.data.syncDifference, syncEvidence: evidence.data.syncEvidence, nextAction: diff.data.syncDifference.hasDifference ? "prepare-candidate-or-transfer-plan-explicitly" : "none", authorityEffect: "none", canonicalMutationPerformed: false, syncEngineInvoked: false });
+    return internal.buildResult(true, "REPOSITORY010_SYNC_COORDINATOR_OBSERVATION_COMPLETE", diff.data.syncDifference.hasDifference ? "Difference Detected" : "No Change", { syncSessionId: sessionId, syncDifference: diff.data.syncDifference, syncEvidence: evidence.data.syncEvidence, nextAction: diff.data.syncDifference.hasDifference ? "prepare-candidate-or-transfer-plan-explicitly" : "none", authorityEffect: "none", canonicalMutationPerformed: false, syncEngineInvoked: source.syncEngineInvoked === true });
   }
 
   async function preparePushFoundation(syncSessionId, stagingId, options) {
@@ -93,20 +94,22 @@
     if (!session || session.direction !== "push") return internal.buildResult(false, "REPOSITORY010_SYNC_COORDINATOR_PUSH_SESSION_REQUIRED", "Blocked", { syncSessionId: sessionId });
     const candidate = await namespace.prepareLocalSyncCandidate(staging, options || {});
     if (!candidate || candidate.ok !== true) return candidate;
-    await namespace.transitionLocalFirstRepositorySyncSession(sessionId, "CANDIDATE_READY", { syncCandidateId: candidate.data.syncCandidate.syncCandidateId });
+    await namespace.transitionLocalFirstRepositorySyncSession(sessionId, "CANDIDATE_READY", { syncCandidateId: candidate.data.syncCandidate.syncCandidateId, syncEngineInvoked: options && options.syncEngineInvoked === true, transitionReason: "sync-candidate-ready" });
     const transfer = await namespace.prepareLocalTransferPackage(candidate.data.syncCandidate.syncCandidateId, options || {});
     if (!transfer || transfer.ok !== true) return transfer;
-    await namespace.transitionLocalFirstRepositorySyncSession(sessionId, "TRANSFER_PREPARED", { transferPackageId: transfer.data.transferPackage.transferPackageId });
+    await namespace.transitionLocalFirstRepositorySyncSession(sessionId, "TRANSFER_PREPARED", { transferPackageId: transfer.data.transferPackage.transferPackageId, syncEngineInvoked: options && options.syncEngineInvoked === true, transitionReason: "transfer-package-prepared" });
     const evidence = await namespace.createLocalFirstRepositorySyncEvidence({ syncSessionId: sessionId, evidenceType: "transfer-prepared", sessionStatus: "TRANSFER_PREPARED", relatedRecordId: transfer.data.transferPackage.transferPackageId, validationPassed: true, detail: { syncCandidateId: candidate.data.syncCandidate.syncCandidateId, transferPackageId: transfer.data.transferPackage.transferPackageId, actualTransferPerformed: false } });
-    return internal.buildResult(true, "REPOSITORY010_SYNC_COORDINATOR_PUSH_FOUNDATION_PREPARED", "Transfer Prepared", { syncSessionId: sessionId, syncCandidate: candidate.data.syncCandidate, transferPackage: transfer.data.transferPackage, syncEvidence: evidence && evidence.data ? evidence.data.syncEvidence : null, actualTransferPerformed: false, v2Invoked: false, v3Invoked: false, v4Invoked: false, explicitAcceptanceReceived: false, canonicalMutationPerformed: false, baselinePromotionPerformed: false, syncEngineInvoked: false, authorityEffect: "none" });
+    return internal.buildResult(true, "REPOSITORY010_SYNC_COORDINATOR_PUSH_FOUNDATION_PREPARED", "Transfer Prepared", { syncSessionId: sessionId, syncCandidate: candidate.data.syncCandidate, transferPackage: transfer.data.transferPackage, syncEvidence: evidence && evidence.data ? evidence.data.syncEvidence : null, actualTransferPerformed: false, v2Invoked: false, v3Invoked: false, v4Invoked: false, explicitAcceptanceReceived: false, canonicalMutationPerformed: false, baselinePromotionPerformed: false, syncEngineInvoked: options && options.syncEngineInvoked === true, authorityEffect: "none" });
   }
 
   function getSyncCoordinatorStatus() {
     return {
       status: state.syncCoordinatorStatus || "Ready",
-      phase: 15,
+      phase: 16,
       moduleVersion: MODULE_VERSION,
       decisionId: "REPOSITORY-010-DECISION-010",
+      transportDecisionId: "REPOSITORY-010-DECISION-011",
+      stateMachineDecisionId: "REPOSITORY-010-DECISION-012",
       model: "Evidence-Bound Controlled Two-Way Sync Coordinator",
       syncCoordinatorFoundationImplemented: true,
       syncSessionImplemented: typeof namespace.createLocalFirstRepositorySyncSession === "function",
@@ -114,8 +117,8 @@
       syncEvidenceImplemented: typeof namespace.createLocalFirstRepositorySyncEvidence === "function",
       existingSyncCandidateReused: typeof namespace.prepareLocalSyncCandidate === "function",
       existingTransferPackageReused: typeof namespace.prepareLocalTransferPackage === "function",
-      syncEngineImplemented: false,
-      crossDeviceRealSyncImplemented: false,
+      syncEngineImplemented: VERSION_MANIFEST.implementation.syncEngineImplemented === true,
+      crossDeviceRealSyncImplemented: VERSION_MANIFEST.implementation.crossDeviceRealSyncImplemented === true,
       canonicalMutationAuthority: false,
       automaticAcceptanceAllowed: false,
       automaticConflictWinnerAllowed: false,
@@ -134,5 +137,5 @@
     getLocalFirstRepositorySyncCoordinatorStatus: getSyncCoordinatorStatus
   });
   Object.assign(namespace, namespace.api);
-  namespace.modules.syncCoordinator = { id: "REPOSITORY-010-SYNC-COORDINATOR-FOUNDATION", version: MODULE_VERSION, status: "Ready", phase: 15, decisionId: "REPOSITORY-010-DECISION-010", syncCoordinatorFoundationImplemented: true, syncEngineImplemented: false, crossDeviceRealSyncImplemented: false, canonicalMutationAuthority: false, loadedAt: internal.nowIso() };
+  namespace.modules.syncCoordinator = { id: "REPOSITORY-010-SYNC-COORDINATOR-FOUNDATION", version: MODULE_VERSION, status: "Ready", phase: 16, decisionId: "REPOSITORY-010-DECISION-010", syncCoordinatorFoundationImplemented: true, syncEngineImplemented: VERSION_MANIFEST.implementation.syncEngineImplemented === true, crossDeviceRealSyncImplemented: VERSION_MANIFEST.implementation.crossDeviceRealSyncImplemented === true, canonicalMutationAuthority: false, loadedAt: internal.nowIso() };
 })(typeof window !== "undefined" ? window : globalThis);

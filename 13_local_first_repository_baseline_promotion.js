@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_baseline_promotion.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.13.0 / Module: Baseline Promotion 1.0.0
+   Release: 1.15.0 / Module: Baseline Promotion 1.1.0
    Phase 14: V5-Bound Explicit Canonical Baseline Promotion
    Decision-009: Project Owner Explicit Revision Advancement
    IMPORTANT: Promotion changes metadata authority only.
@@ -175,6 +175,30 @@
         sourceSchema: record.schema
       };
     }
+
+    if (record.developmentReleaseV5Passed === true && record.fullRepositoryIntegrityVerified === true && record.releasePlanMatched === true && record.unexpectedFileDifferenceDetected === false) {
+      const hashes = internal.isPlainObject(record.actualFileHashes) ? record.actualFileHashes : {};
+      return {
+        evidenceId: internal.text(record.developmentReleaseV5EvidenceId, ""),
+        evidenceHash: internal.text(record.releasePlanHash, ""),
+        sourceTransactionId: internal.text(record.developmentReleasePlanId, ""),
+        sourceEvidenceType: "development-release-v5",
+        developmentReleasePlanId: internal.text(record.developmentReleasePlanId, ""),
+        previousCanonicalRevisionId: internal.text(record.baseCanonicalRevisionId, ""),
+        suggestedCanonicalRevisionId: internal.text(record.suggestedCanonicalRevisionId, ""),
+        targetNodeId: internal.text(record.targetNodeId, ""),
+        targetFile: "index.html",
+        targetFileSha256: internal.text(record.indexFileSha256, ""),
+        manifestHash: internal.text(record.actualManifestHash, ""),
+        scriptSetHash: internal.text(record.actualScriptSetHash, ""),
+        manifestFileSha256: internal.text(hashes["00_script_manifest.json"], ""),
+        indexFileSha256: internal.text(record.indexFileSha256, ""),
+        repositoryFileCount: Number(record.actualScriptCount || 0),
+        repositoryStateHash: internal.text(record.repositoryStateHash, ""),
+        sourceSchema: "REPOSITORY-010-DEVELOPMENT-RELEASE-V5-EVIDENCE",
+        createdAt: internal.text(record.createdAt, "")
+      };
+    }
     return null;
   }
 
@@ -184,12 +208,21 @@
       const exact = await readControlledRecord(requested);
       const normalized = normalizeV5Evidence(exact);
       if (normalized) return normalized;
+      if (typeof namespace.getPersistedLocalFirstRepositoryRecord === "function") {
+        const development = await namespace.getPersistedLocalFirstRepositoryRecord("developmentReleaseV5Evidence", requested);
+        const developmentNormalized = normalizeV5Evidence(development);
+        if (developmentNormalized) return developmentNormalized;
+      }
     }
     const records = typeof namespace.listControlledTransactionRecords === "function"
       ? await namespace.listControlledTransactionRecords("transactionJournal")
       : [];
     const normalized = (Array.isArray(records) ? records : []).map(normalizeV5Evidence).filter(Boolean);
-    normalized.sort(function sort(a, b) { return internal.text(a.evidenceId, "").localeCompare(internal.text(b.evidenceId, "")); });
+    if (typeof namespace.listPersistedLocalFirstRepositoryRecords === "function") {
+      const developmentRecords = await namespace.listPersistedLocalFirstRepositoryRecords("developmentReleaseV5Evidence");
+      (Array.isArray(developmentRecords) ? developmentRecords : []).map(normalizeV5Evidence).filter(Boolean).forEach(function (item) { normalized.push(item); });
+    }
+    normalized.sort(function sort(a, b) { return internal.text(a.createdAt, internal.text(a.evidenceId, "")).localeCompare(internal.text(b.createdAt, internal.text(b.evidenceId, ""))); });
     return normalized.length ? normalized[normalized.length - 1] : null;
   }
 
@@ -327,7 +360,10 @@
     const manifestRead = await namespace.readDesktopRepositoryFileText("00_script_manifest.json");
     const indexRead = await namespace.readDesktopRepositoryFileText("index.html");
     if (!targetRead.ok || !manifestRead.ok || !indexRead.ok) throw new Error("Exact Post-V5 file read failed.");
-    if (targetRead.data.sha256 !== v5.targetFileSha256 || manifestRead.data.sha256 !== v5.manifestFileSha256 || indexRead.data.sha256 !== v5.indexFileSha256) throw new Error("Exact Post-V5 file hash mismatch.");
+    const targetHashMatch = !v5.targetFileSha256 || targetRead.data.sha256 === v5.targetFileSha256;
+    const manifestFileHashMatch = !v5.manifestFileSha256 || manifestRead.data.sha256 === v5.manifestFileSha256;
+    const indexFileHashMatch = !v5.indexFileSha256 || indexRead.data.sha256 === v5.indexFileSha256;
+    if (!targetHashMatch || !manifestFileHashMatch || !indexFileHashMatch) throw new Error("Exact Post-V5 file hash mismatch.");
 
     const manifest = JSON.parse(manifestRead.data.text);
     return { scan: scan, targetRead: targetRead.data, manifestRead: manifestRead.data, indexRead: indexRead.data, manifest: manifest };
@@ -338,14 +374,14 @@
     try {
       await initializeBaselinePromotion();
       const v5 = await resolveV5Evidence(opts.sourceEvidenceId);
-      if (!v5) throw new Error("Eligible Phase 13 V5 Evidence is required.");
+      if (!v5) throw new Error("Eligible Controlled Transaction V5 or Development Release V5 Evidence is required.");
       const exact = await inspectExactPostV5State(v5);
       const suggestion = await namespace.getCanonicalRevisionSuggestion();
       const suggested = internal.text(suggestion && suggestion.data && suggestion.data.nextCanonicalRevisionCandidate, "");
       if (!suggested) throw new Error("Next Canonical Revision suggestion is unresolved.");
       if (suggestion.data.lastEstablishedCanonicalRevisionId !== v5.previousCanonicalRevisionId) throw new Error("Canonical Revision suggestion is not based on the V5 source baseline.");
       const requestedRevision = internal.text(opts.canonicalRevisionId, suggested);
-      if (requestedRevision !== suggested) throw new Error("Phase 14 initial implementation requires the deterministic next Canonical Revision candidate.");
+      if (requestedRevision !== suggested) throw new Error("Baseline Promotion requires the deterministic next Canonical Revision candidate.");
 
       const repositoryStateHash = await sha256(stableStringify({
         projectId: exact.scan.descriptor.projectId,
@@ -369,6 +405,8 @@
         promotionCandidateId: internal.text(opts.promotionCandidateId, internal.nextId("REPOSITORY010-BASELINE-PROMOTION-CANDIDATE")),
         sourceEvidenceId: v5.evidenceId,
         sourceTransactionId: v5.sourceTransactionId,
+        sourceEvidenceType: internal.text(v5.sourceEvidenceType, "controlled-transaction-v5"),
+        developmentReleasePlanId: v5.developmentReleasePlanId == null ? null : internal.text(v5.developmentReleasePlanId, ""),
         previousCanonicalRevisionId: v5.previousCanonicalRevisionId,
         suggestedCanonicalRevisionId: requestedRevision,
         projectId: exact.scan.descriptor.projectId,
@@ -537,6 +575,8 @@
         promotionCandidateId: candidate.promotionCandidateId,
         sourceEvidenceId: candidate.sourceEvidenceId,
         sourceTransactionId: candidate.sourceTransactionId,
+        sourceEvidenceType: internal.text(candidate.sourceEvidenceType, "controlled-transaction-v5"),
+        developmentReleasePlanId: candidate.developmentReleasePlanId == null ? null : internal.text(candidate.developmentReleasePlanId, ""),
         previousCanonicalRevisionId: candidate.previousCanonicalRevisionId,
         canonicalRevisionId: requestedRevision,
         canonicalBaselineDescriptorId: baselineResult.data.baseline.canonicalBaselineDescriptorId,
@@ -548,6 +588,8 @@
         scriptSetHash: candidate.scriptSetHash,
         scriptCount: Number(candidate.scriptCount),
         repositoryStateHash: candidate.repositoryStateHash,
+        manifestFileSha256: candidate.manifestFileSha256,
+        indexFileSha256: candidate.indexFileSha256,
         sourceV5Verified: true,
         freshRevalidationPassed: true,
         exactPostV5FileHashesVerified: true,
@@ -616,7 +658,7 @@
   function getBaselinePromotionStatus() {
     return {
       status: state.baselinePromotionStatus || "Not Initialized",
-      phase: 14,
+      phase: 16,
       moduleVersion: MODULE_VERSION,
       decisionId: "REPOSITORY-010-DECISION-009",
       model: "V5-Bound Explicit Baseline Promotion",
@@ -662,6 +704,7 @@
     promotionEvidencePersistenceImplemented: true,
     reloadRecoveryImplemented: true,
     bootstrapMigrationImplemented: true,
+    developmentReleaseV5Supported: true,
     canonicalSourceFilesWritten: false,
     syncEngineImplemented: false,
     githubAutomaticReflectionAllowed: false,

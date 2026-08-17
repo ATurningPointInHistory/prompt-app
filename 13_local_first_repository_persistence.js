@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_persistence.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.14.0 / Module: Persistence 1.6.0
-   Phase 15: Sync Session / Difference / Evidence persistence
+   Release: 1.15.0 / Module: Persistence 1.7.0
+   Phase 16: Transport / Verification / Development Release persistence
    ============================================================ */
 (function (global) {
   "use strict";
@@ -18,7 +18,7 @@
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("persistence");
   const DB_NAME = "AI_PROMPT_OS_REPOSITORY010_LOCAL_FIRST_V1";
-  const DB_VERSION = 7;
+  const DB_VERSION = 8;
   const STORE_DEFINITIONS = Object.freeze({
     nodeIdentity: Object.freeze({ storeName: "node_identities", keyPath: "nodeId", contractKey: "repositoryNodeIdentity" }),
     revision: Object.freeze({ storeName: "revisions", keyPath: "revisionId", contractKey: "repositoryRevision" }),
@@ -34,7 +34,13 @@
     baselinePromotionEvidence: Object.freeze({ storeName: "baseline_promotion_evidence", keyPath: "promotionEvidenceId", contractKey: "baselinePromotionEvidenceDescriptor" }),
     syncSession: Object.freeze({ storeName: "sync_sessions", keyPath: "syncSessionId", contractKey: "syncSessionDescriptor" }),
     syncDifference: Object.freeze({ storeName: "sync_differences", keyPath: "differenceId", contractKey: "syncDifferenceDescriptor" }),
-    syncEvidence: Object.freeze({ storeName: "sync_evidence", keyPath: "syncEvidenceId", contractKey: "syncEvidenceDescriptor" })
+    syncEvidence: Object.freeze({ storeName: "sync_evidence", keyPath: "syncEvidenceId", contractKey: "syncEvidenceDescriptor" }),
+    transportAttempt: Object.freeze({ storeName: "transport_attempts", keyPath: "transportAttemptId", contractKey: "transportAttemptDescriptor" }),
+    v2TransferReceipt: Object.freeze({ storeName: "v2_transfer_receipts", keyPath: "receiptId", contractKey: "v2TransferReceiptDescriptor" }),
+    v3ConflictEvidence: Object.freeze({ storeName: "v3_conflict_evidence", keyPath: "conflictEvidenceId", contractKey: "v3ConflictEvidenceDescriptor" }),
+    v4TargetValidationEvidence: Object.freeze({ storeName: "v4_target_validation_evidence", keyPath: "v4EvidenceId", contractKey: "v4TargetValidationEvidenceDescriptor" }),
+    developmentReleasePlan: Object.freeze({ storeName: "development_release_plans", keyPath: "developmentReleasePlanId", contractKey: "developmentReleasePlanDescriptor" }),
+    developmentReleaseV5Evidence: Object.freeze({ storeName: "development_release_v5_evidence", keyPath: "developmentReleaseV5EvidenceId", contractKey: "developmentReleaseV5EvidenceDescriptor" })
   });
 
   let adapterOverride = null;
@@ -279,7 +285,7 @@
       recordTypes: Object.keys(STORE_DEFINITIONS),
       androidRole: VERSION_MANIFEST.authority.androidIndexedDBRole,
       persistenceImplemented: true,
-      syncEngineImplemented: false,
+      syncEngineImplemented: true,
       directRepositoryMutationAllowed: false,
       canonicalMutationAuthority: false,
       authorityPromotionAllowed: false,
@@ -310,7 +316,7 @@
     adapterId: nativeAdapter.adapterId,
     indexedDBRequiredForAndroidGate: true,
     persistentCanonicalMutationImplemented: false,
-    syncEngineImplemented: false,
+    syncEngineImplemented: true,
     exactIdDeleteSupported: true,
     broadClearSupported: false,
     validationFixtureCleanupSupported: true,
@@ -318,7 +324,13 @@
     syncSessionStoreImplemented: true,
     syncDifferenceStoreImplemented: true,
     syncEvidenceStoreImplemented: true,
-    databaseMigration: "1->2-add-offline-staging / 2->3-add-sync-candidate / 3->4-add-transfer-package / 4->5-add-mutation-package / 5->6-add-canonical-baseline-and-promotion / 6->7-add-sync-session-difference-evidence",
+    transportAttemptStoreImplemented: true,
+    v2TransferReceiptStoreImplemented: true,
+    v3ConflictEvidenceStoreImplemented: true,
+    v4TargetValidationEvidenceStoreImplemented: true,
+    developmentReleasePlanStoreImplemented: true,
+    developmentReleaseV5EvidenceStoreImplemented: true,
+    databaseMigration: "1->2-add-offline-staging / 2->3-add-sync-candidate / 3->4-add-transfer-package / 4->5-add-mutation-package / 5->6-add-canonical-baseline-and-promotion / 6->7-add-sync-session-difference-evidence / 7->8-add-transport-verification-development-release",
     loadedAt: internal.nowIso()
   };
 
