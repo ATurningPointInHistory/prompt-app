@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_persistence.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.13.0 / Module: Persistence 1.5.0
-   Phase 14: Canonical Baseline / Promotion metadata persistence
+   Release: 1.14.0 / Module: Persistence 1.6.0
+   Phase 15: Sync Session / Difference / Evidence persistence
    ============================================================ */
 (function (global) {
   "use strict";
@@ -18,7 +18,7 @@
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("persistence");
   const DB_NAME = "AI_PROMPT_OS_REPOSITORY010_LOCAL_FIRST_V1";
-  const DB_VERSION = 6;
+  const DB_VERSION = 7;
   const STORE_DEFINITIONS = Object.freeze({
     nodeIdentity: Object.freeze({ storeName: "node_identities", keyPath: "nodeId", contractKey: "repositoryNodeIdentity" }),
     revision: Object.freeze({ storeName: "revisions", keyPath: "revisionId", contractKey: "repositoryRevision" }),
@@ -31,7 +31,10 @@
     mutationPackage: Object.freeze({ storeName: "mutation_packages", keyPath: "mutationPackageId", contractKey: "mutationPackageDescriptor" }),
     canonicalBaseline: Object.freeze({ storeName: "canonical_baselines", keyPath: "canonicalBaselineDescriptorId", contractKey: "canonicalBaselineDescriptor" }),
     baselinePromotionCandidate: Object.freeze({ storeName: "baseline_promotion_candidates", keyPath: "promotionCandidateId", contractKey: "baselinePromotionCandidateDescriptor" }),
-    baselinePromotionEvidence: Object.freeze({ storeName: "baseline_promotion_evidence", keyPath: "promotionEvidenceId", contractKey: "baselinePromotionEvidenceDescriptor" })
+    baselinePromotionEvidence: Object.freeze({ storeName: "baseline_promotion_evidence", keyPath: "promotionEvidenceId", contractKey: "baselinePromotionEvidenceDescriptor" }),
+    syncSession: Object.freeze({ storeName: "sync_sessions", keyPath: "syncSessionId", contractKey: "syncSessionDescriptor" }),
+    syncDifference: Object.freeze({ storeName: "sync_differences", keyPath: "differenceId", contractKey: "syncDifferenceDescriptor" }),
+    syncEvidence: Object.freeze({ storeName: "sync_evidence", keyPath: "syncEvidenceId", contractKey: "syncEvidenceDescriptor" })
   });
 
   let adapterOverride = null;
@@ -312,7 +315,10 @@
     broadClearSupported: false,
     validationFixtureCleanupSupported: true,
     offlineStagingStoreImplemented: true,
-    databaseMigration: "1->2-add-offline-staging / 2->3-add-sync-candidate / 3->4-add-transfer-package / 4->5-add-mutation-package / 5->6-add-canonical-baseline-and-promotion",
+    syncSessionStoreImplemented: true,
+    syncDifferenceStoreImplemented: true,
+    syncEvidenceStoreImplemented: true,
+    databaseMigration: "1->2-add-offline-staging / 2->3-add-sync-candidate / 3->4-add-transfer-package / 4->5-add-mutation-package / 5->6-add-canonical-baseline-and-promotion / 6->7-add-sync-session-difference-evidence",
     loadedAt: internal.nowIso()
   };
 

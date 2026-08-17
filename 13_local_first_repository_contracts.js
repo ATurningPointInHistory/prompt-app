@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_contracts.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.13.0 / Module: Contracts 1.11.0
-   Phase 14: Baseline Promotion contracts + Phase 13 Journal persistence compatibility
+   Release: 1.14.0 / Module: Contracts 1.12.0
+   Phase 15: Controlled Sync Foundation contracts
    ============================================================ */
 (function (global) {
   "use strict";
@@ -585,6 +585,94 @@
         field("githubReflectionPerformed", { required: true, type: "boolean", enum: [false] }),
         field("establishedBy", { required: true, type: "string", enum: ["Project Owner"] }),
         field("promotedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "syncSessionDescriptor",
+      name: "REPOSITORY-010 Sync Session Descriptor Contract",
+      fields: [
+        field("syncSessionId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string" }),
+        field("direction", { required: true, type: "string", enum: ["pull", "push"] }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("sourceRevisionId", { required: true, type: "string|null" }),
+        field("targetRevisionId", { required: true, type: "string|null" }),
+        field("sessionStatus", { required: true, type: "string", enum: ["CREATED", "OBSERVING", "DIFFERENCE_DETECTED", "TRANSFER_PREPARED", "TRANSFERRING", "TRANSFERRED", "VERIFYING", "CONFLICT_DETECTED", "CANDIDATE_READY", "AWAITING_ACCEPTANCE", "COMPLETED", "FAILED", "INTERRUPTED"] }),
+        field("differenceId", { required: true, type: "string|null" }),
+        field("syncCandidateId", { required: true, type: "string|null" }),
+        field("transferPackageId", { required: true, type: "string|null" }),
+        field("conflictEvidenceId", { required: true, type: "string|null" }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("automaticAcceptancePerformed", { required: true, type: "boolean", enum: [false] }),
+        field("automaticConflictWinnerApplied", { required: true, type: "boolean", enum: [false] }),
+        field("automaticBaselinePromotionPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("updatedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [false] })
+      ]
+    }
+    ,{
+      key: "syncDifferenceDescriptor",
+      name: "REPOSITORY-010 Sync Difference Descriptor Contract",
+      fields: [
+        field("differenceId", { required: true, type: "string" }),
+        field("syncSessionId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string" }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("sourceRevisionId", { required: true, type: "string|null" }),
+        field("targetRevisionId", { required: true, type: "string|null" }),
+        field("sourceManifestHash", { required: true, type: "string|null" }),
+        field("targetManifestHash", { required: true, type: "string|null" }),
+        field("sourceScriptSetHash", { required: true, type: "string|null" }),
+        field("targetScriptSetHash", { required: true, type: "string|null" }),
+        field("sourceRepositoryStateHash", { required: true, type: "string|null" }),
+        field("targetRepositoryStateHash", { required: true, type: "string|null" }),
+        field("differenceType", { required: true, type: "string", enum: ["no-change", "source-ahead", "target-ahead", "diverged", "unknown"] }),
+        field("hasDifference", { required: true, type: "boolean" }),
+        field("baseRevisionMatch", { required: true, type: "boolean" }),
+        field("changedFiles", { required: true, type: "array" }),
+        field("conflictCandidate", { required: true, type: "boolean" }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "syncEvidenceDescriptor",
+      name: "REPOSITORY-010 Sync Evidence Descriptor Contract",
+      fields: [
+        field("syncEvidenceId", { required: true, type: "string" }),
+        field("syncSessionId", { required: true, type: "string" }),
+        field("evidenceType", { required: true, type: "string", enum: ["session-created", "observation", "difference", "candidate-prepared", "transfer-prepared", "verification", "conflict", "failure", "interruption", "completion"] }),
+        field("sessionStatus", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string" }),
+        field("baseRevisionId", { required: true, type: "string" }),
+        field("sourceRevisionId", { required: true, type: "string|null" }),
+        field("targetRevisionId", { required: true, type: "string|null" }),
+        field("relatedRecordId", { required: true, type: "string|null" }),
+        field("validationPassed", { required: true, type: "boolean" }),
+        field("detail", { required: true, type: "object" }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("automaticAcceptancePerformed", { required: true, type: "boolean", enum: [false] }),
+        field("automaticConflictWinnerApplied", { required: true, type: "boolean", enum: [false] }),
+        field("automaticBaselinePromotionPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
       ]
     }

@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_metadata.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.11.0 / Module: Metadata Model 1.10.0
-   Phase 12: Acceptance Token Consumption metadata added
+   Release: 1.14.0 / Module: Metadata Model 1.11.0
+   Phase 15: Sync Session / Difference / Evidence metadata
    ============================================================ */
 (function (global) {
   "use strict";
@@ -534,6 +534,28 @@
     return validateAndStore("desktopRepositoryDescriptor", record, state.desktopRepositoryDescriptors, "desktopRepositoryDescriptorId", "REPOSITORY010_DESKTOP_REPOSITORY_DESCRIPTOR_READY");
   }
 
+
+  function createSyncSessionDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const record = internal.clone(source);
+    if (!internal.text(record.syncSessionId, "")) return fail("REPOSITORY010_SYNC_SESSION_DESCRIPTOR_ID_REQUIRED", "syncSessionId is required.");
+    return validateAndStore("syncSessionDescriptor", record, state.syncSessionDescriptors, "syncSessionId", "REPOSITORY010_SYNC_SESSION_DESCRIPTOR_READY");
+  }
+
+  function createSyncDifferenceDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const record = internal.clone(source);
+    if (!internal.text(record.differenceId, "")) return fail("REPOSITORY010_SYNC_DIFFERENCE_DESCRIPTOR_ID_REQUIRED", "differenceId is required.");
+    return validateAndStore("syncDifferenceDescriptor", record, state.syncDifferenceDescriptors, "differenceId", "REPOSITORY010_SYNC_DIFFERENCE_DESCRIPTOR_READY");
+  }
+
+  function createSyncEvidenceDescriptor(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const record = internal.clone(source);
+    if (!internal.text(record.syncEvidenceId, "")) return fail("REPOSITORY010_SYNC_EVIDENCE_DESCRIPTOR_ID_REQUIRED", "syncEvidenceId is required.");
+    return validateAndStore("syncEvidenceDescriptor", record, state.syncEvidenceDescriptors, "syncEvidenceId", "REPOSITORY010_SYNC_EVIDENCE_DESCRIPTOR_READY");
+  }
+
   function getRepositoryNodeIdentity(nodeId) {
     const record = state.nodeIdentities.get(internal.text(nodeId, ""));
     return record ? internal.clone(record) : null;
@@ -615,6 +637,22 @@
     return record ? internal.clone(record) : null;
   }
 
+
+  function getSyncSessionDescriptor(syncSessionId) {
+    const record = state.syncSessionDescriptors.get(internal.text(syncSessionId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
+  function getSyncDifferenceDescriptor(differenceId) {
+    const record = state.syncDifferenceDescriptors.get(internal.text(differenceId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
+  function getSyncEvidenceDescriptor(syncEvidenceId) {
+    const record = state.syncEvidenceDescriptors.get(internal.text(syncEvidenceId, ""));
+    return record ? internal.clone(record) : null;
+  }
+
   function getMetadataModelStatus() {
     return {
       status: "Ready",
@@ -645,7 +683,10 @@
         v3ConflictEvidenceDescriptors: state.v3ConflictEvidenceDescriptors.size,
         v4TargetValidationEvidenceDescriptors: state.v4TargetValidationEvidenceDescriptors.size,
         mutationPackageDescriptors: state.mutationPackageDescriptors.size,
-        acceptanceTokenDescriptors: state.acceptanceTokenDescriptors.size
+        acceptanceTokenDescriptors: state.acceptanceTokenDescriptors.size,
+        syncSessionDescriptors: state.syncSessionDescriptors instanceof Map ? state.syncSessionDescriptors.size : 0,
+        syncDifferenceDescriptors: state.syncDifferenceDescriptors instanceof Map ? state.syncDifferenceDescriptors.size : 0,
+        syncEvidenceDescriptors: state.syncEvidenceDescriptors instanceof Map ? state.syncEvidenceDescriptors.size : 0
       }
     };
   }
@@ -673,6 +714,9 @@
     createAcceptanceTokenDescriptor: createAcceptanceTokenDescriptor,
     createAcceptanceTokenConsumptionRecord: createAcceptanceTokenConsumptionRecord,
     createDesktopRepositoryDescriptor: createDesktopRepositoryDescriptor,
+    createSyncSessionDescriptor: createSyncSessionDescriptor,
+    createSyncDifferenceDescriptor: createSyncDifferenceDescriptor,
+    createSyncEvidenceDescriptor: createSyncEvidenceDescriptor,
     getRepositoryNodeIdentity: getRepositoryNodeIdentity,
     getRepositoryRevision: getRepositoryRevision,
     getRepositoryIntegrityRecord: getRepositoryIntegrityRecord,
@@ -689,6 +733,9 @@
     getAcceptanceTokenDescriptor: getAcceptanceTokenDescriptor,
     getAcceptanceTokenConsumptionRecord: getAcceptanceTokenConsumptionRecord,
     getDesktopRepositoryDescriptor: getDesktopRepositoryDescriptor,
+    getSyncSessionDescriptor: getSyncSessionDescriptor,
+    getSyncDifferenceDescriptor: getSyncDifferenceDescriptor,
+    getSyncEvidenceDescriptor: getSyncEvidenceDescriptor,
     getMetadataModelStatus: getMetadataModelStatus
   });
   Object.assign(namespace, namespace.api);

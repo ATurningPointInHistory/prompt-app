@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_core.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.11.0 / Module: Core 1.10.0
-   Phase 12: Controlled Transaction Trial / Mandatory Rollback
+   Release: 1.14.0 / Module: Core 1.11.0
+   Phase 15: Controlled Sync Foundation compatibility
    ============================================================ */
 (function (global) {
   "use strict";
@@ -91,6 +91,9 @@
     acceptanceTokenRevocationRecords: new Map(),
     mutationPackageDescriptors: new Map(),
     controlledTransactionRecords: new Map(),
+    syncSessionDescriptors: new Map(),
+    syncDifferenceDescriptors: new Map(),
+    syncEvidenceDescriptors: new Map(),
     lastPhase1Validation: null,
     lastPhase1AndroidValidation: null,
     phase1PreDeviceValidationPassed: false,
@@ -178,6 +181,12 @@
     transferPackageStatus: "Ready",
     lastTransferPackageRestore: null,
     syncCandidateStatus: "Ready",
+    syncSessionStatus: "Ready",
+    syncCoordinatorStatus: "Ready",
+    lastSyncSessionId: null,
+    lastSyncDifferenceId: null,
+    lastSyncEvidenceId: null,
+    lastSyncCoordinatorError: null,
     lastSyncCandidateRestore: null,
     offlineStagingStatus: "Ready",
     lastOfflineStagingRestore: null,
@@ -187,7 +196,7 @@
     updatedAt: null
   };
 
-  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors", "transferPackageDescriptors", "desktopRepositoryDescriptors", "v2TransferReceipts", "canonicalBaselineDescriptors", "v3ConflictEvidenceDescriptors", "v4TargetValidationEvidenceDescriptors", "acceptanceTokenDescriptors", "acceptanceTokenConsumptionRecords", "acceptanceTokenRevocationRecords", "mutationPackageDescriptors", "controlledTransactionRecords"].forEach(function ensureMap(key) {
+  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors", "transferPackageDescriptors", "desktopRepositoryDescriptors", "v2TransferReceipts", "canonicalBaselineDescriptors", "v3ConflictEvidenceDescriptors", "v4TargetValidationEvidenceDescriptors", "acceptanceTokenDescriptors", "acceptanceTokenConsumptionRecords", "acceptanceTokenRevocationRecords", "mutationPackageDescriptors", "controlledTransactionRecords", "syncSessionDescriptors", "syncDifferenceDescriptors", "syncEvidenceDescriptors"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
 
@@ -701,7 +710,7 @@
       componentId: COMPONENT_ID,
       version: RELEASE_VERSION,
       namespace: "window.REPOSITORY010LocalFirstRepository",
-      phase: 12,
+      phase: 15,
       namespaceFunctions: Object.keys(namespace.api || {}).sort(),
       contractsImplemented: typeof namespace.validateContract === "function",
       metadataModelImplemented: typeof namespace.createRepositoryNodeIdentity === "function",
@@ -737,7 +746,12 @@
       desktopAdapterImplemented: VERSION_MANIFEST.implementation.desktopAdapterImplemented === true,
       pcLocalRepositoryReadOnlyScanImplemented: VERSION_MANIFEST.implementation.pcLocalRepositoryReadOnlyScanImplemented === true,
       pcCanonicalMutationImplemented: false,
+      syncSessionImplemented: VERSION_MANIFEST.implementation.syncSessionImplemented === true,
+      differenceDetectionImplemented: VERSION_MANIFEST.implementation.differenceDetectionImplemented === true,
+      syncEvidenceImplemented: VERSION_MANIFEST.implementation.syncEvidenceImplemented === true,
+      syncCoordinatorFoundationImplemented: VERSION_MANIFEST.implementation.syncCoordinatorFoundationImplemented === true,
       syncEngineImplemented: false,
+      crossDeviceRealSyncImplemented: false,
       mutationEngineImplemented: false,
       phase1ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase1Validation === "function",
       phase2ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase2Validation === "function",
@@ -820,7 +834,7 @@
     id: "REPOSITORY-010-CORE",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 12,
+    phase: 15,
     persistentMutationImplemented: false,
     controlledTransactionTrialImplemented: true,
     acceptanceTokenConsumptionImplemented: true,
@@ -849,7 +863,12 @@
     desktopAdapterImplemented: true,
     pcLocalRepositoryReadOnlyScanImplemented: true,
     pcCanonicalMutationImplemented: false,
+    syncSessionImplemented: VERSION_MANIFEST.implementation.syncSessionImplemented === true,
+    differenceDetectionImplemented: VERSION_MANIFEST.implementation.differenceDetectionImplemented === true,
+    syncEvidenceImplemented: VERSION_MANIFEST.implementation.syncEvidenceImplemented === true,
+    syncCoordinatorFoundationImplemented: VERSION_MANIFEST.implementation.syncCoordinatorFoundationImplemented === true,
     syncEngineImplemented: false,
+    crossDeviceRealSyncImplemented: false,
     loadedAt: nowIso()
   };
 
