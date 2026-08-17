@@ -49,6 +49,7 @@
 
   async function runPhase15Validation() {
     const checks = [];
+    if (typeof namespace.initializeContracts === "function") namespace.initializeContracts();
     const init = await namespace.initializeLocalFirstRepositorySyncCoordinatorFoundation();
     const persistence = namespace.getLocalFirstRepositoryPersistenceStatus();
     const coordinator = namespace.getLocalFirstRepositorySyncCoordinatorStatus();
