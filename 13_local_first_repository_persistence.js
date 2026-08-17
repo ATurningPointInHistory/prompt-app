@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_persistence.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.10.1 / Module: Persistence 1.4.0
-   Phase 2: Android Replica Persistence / IndexedDB Adapter
+   Release: 1.13.0 / Module: Persistence 1.5.0
+   Phase 14: Canonical Baseline / Promotion metadata persistence
    ============================================================ */
 (function (global) {
   "use strict";
@@ -18,7 +18,7 @@
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("persistence");
   const DB_NAME = "AI_PROMPT_OS_REPOSITORY010_LOCAL_FIRST_V1";
-  const DB_VERSION = 5;
+  const DB_VERSION = 6;
   const STORE_DEFINITIONS = Object.freeze({
     nodeIdentity: Object.freeze({ storeName: "node_identities", keyPath: "nodeId", contractKey: "repositoryNodeIdentity" }),
     revision: Object.freeze({ storeName: "revisions", keyPath: "revisionId", contractKey: "repositoryRevision" }),
@@ -28,7 +28,10 @@
     offlineStaging: Object.freeze({ storeName: "offline_staging", keyPath: "stagingId", contractKey: "offlineStagingDescriptor" }),
     syncCandidate: Object.freeze({ storeName: "sync_candidates", keyPath: "syncCandidateId", contractKey: "syncCandidateDescriptor" }),
     transferPackage: Object.freeze({ storeName: "transfer_packages", keyPath: "transferPackageId", contractKey: "transferPackageDescriptor" }),
-    mutationPackage: Object.freeze({ storeName: "mutation_packages", keyPath: "mutationPackageId", contractKey: "mutationPackageDescriptor" })
+    mutationPackage: Object.freeze({ storeName: "mutation_packages", keyPath: "mutationPackageId", contractKey: "mutationPackageDescriptor" }),
+    canonicalBaseline: Object.freeze({ storeName: "canonical_baselines", keyPath: "canonicalBaselineDescriptorId", contractKey: "canonicalBaselineDescriptor" }),
+    baselinePromotionCandidate: Object.freeze({ storeName: "baseline_promotion_candidates", keyPath: "promotionCandidateId", contractKey: "baselinePromotionCandidateDescriptor" }),
+    baselinePromotionEvidence: Object.freeze({ storeName: "baseline_promotion_evidence", keyPath: "promotionEvidenceId", contractKey: "baselinePromotionEvidenceDescriptor" })
   });
 
   let adapterOverride = null;
@@ -309,7 +312,7 @@
     broadClearSupported: false,
     validationFixtureCleanupSupported: true,
     offlineStagingStoreImplemented: true,
-    databaseMigration: "1->2-add-offline-staging / 2->3-add-sync-candidate / 3->4-add-transfer-package / 4->5-add-mutation-package",
+    databaseMigration: "1->2-add-offline-staging / 2->3-add-sync-candidate / 3->4-add-transfer-package / 4->5-add-mutation-package / 5->6-add-canonical-baseline-and-promotion",
     loadedAt: internal.nowIso()
   };
 

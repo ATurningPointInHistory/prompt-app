@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_contracts.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.11.0 / Module: Contracts 1.10.0
-   Phase 12: Controlled Transaction safety contracts added
+   Release: 1.13.0 / Module: Contracts 1.11.0
+   Phase 14: Baseline Promotion contracts + Phase 13 Journal persistence compatibility
    ============================================================ */
 (function (global) {
   "use strict";
@@ -511,12 +511,81 @@
         field("emergencyRollbackUsed", { required: true, type: "boolean" }),
         field("repositoryRestored", { required: true, type: "boolean" }),
         field("forcedFailureTrial", { required: true, type: "boolean" }),
-        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
-        field("v5PostReflectionVerified", { required: true, type: "boolean", enum: [false] }),
+        field("closureWritePerformed", { required: true, type: "boolean" }),
+        field("persistentReflectionPerformed", { required: true, type: "boolean" }),
+        field("controlledCanonicalTransactionImplemented", { required: true, type: "boolean" }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean" }),
+        field("v5PostReflectionVerified", { required: true, type: "boolean" }),
+        field("canonicalRevisionPromoted", { required: true, type: "boolean", enum: [false] }),
+        field("automaticBaselinePromotionPerformed", { required: true, type: "boolean", enum: [false] }),
         field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
-        field("authorityEffect", { required: true, type: "string", enum: ["controlled-trial-only"] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["controlled-trial-only", "persistent-reflection"] }),
         field("createdAt", { required: true, type: "string" }),
         field("updatedAt", { required: true, type: "string" })
+      ]
+    }
+    ,{
+      key: "baselinePromotionCandidateDescriptor",
+      name: "REPOSITORY-010 Baseline Promotion Candidate Descriptor Contract",
+      fields: [
+        field("promotionCandidateId", { required: true, type: "string" }),
+        field("sourceEvidenceId", { required: true, type: "string" }),
+        field("sourceTransactionId", { required: true, type: "string" }),
+        field("previousCanonicalRevisionId", { required: true, type: "string" }),
+        field("suggestedCanonicalRevisionId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string", enum: ["REPOSITORY010-PC-LOCAL-INITIAL-CANONICAL"] }),
+        field("directoryName", { required: true, type: "string" }),
+        field("manifestHash", { required: true, type: "string" }),
+        field("scriptSetHash", { required: true, type: "string" }),
+        field("scriptCount", { required: true, type: "number" }),
+        field("targetFile", { required: true, type: "string" }),
+        field("targetFileSha256", { required: true, type: "string" }),
+        field("manifestFileSha256", { required: true, type: "string" }),
+        field("indexFileSha256", { required: true, type: "string" }),
+        field("repositoryStateHash", { required: true, type: "string" }),
+        field("sourceV5Verified", { required: true, type: "boolean", enum: [true] }),
+        field("freshRevalidationPassed", { required: true, type: "boolean", enum: [true] }),
+        field("exactPostV5FileHashesVerified", { required: true, type: "boolean", enum: [true] }),
+        field("projectOwnerConfirmationRequired", { required: true, type: "boolean", enum: [true] }),
+        field("automaticPromotionAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "baselinePromotionEvidenceDescriptor",
+      name: "REPOSITORY-010 Baseline Promotion Evidence Descriptor Contract",
+      fields: [
+        field("promotionEvidenceId", { required: true, type: "string" }),
+        field("promotionCandidateId", { required: true, type: "string" }),
+        field("sourceEvidenceId", { required: true, type: "string" }),
+        field("sourceTransactionId", { required: true, type: "string" }),
+        field("previousCanonicalRevisionId", { required: true, type: "string" }),
+        field("canonicalRevisionId", { required: true, type: "string" }),
+        field("canonicalBaselineDescriptorId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("targetNodeId", { required: true, type: "string", enum: ["REPOSITORY010-PC-LOCAL-INITIAL-CANONICAL"] }),
+        field("directoryName", { required: true, type: "string" }),
+        field("manifestHash", { required: true, type: "string" }),
+        field("scriptSetHash", { required: true, type: "string" }),
+        field("scriptCount", { required: true, type: "number" }),
+        field("repositoryStateHash", { required: true, type: "string" }),
+        field("sourceV5Verified", { required: true, type: "boolean", enum: [true] }),
+        field("freshRevalidationPassed", { required: true, type: "boolean", enum: [true] }),
+        field("exactPostV5FileHashesVerified", { required: true, type: "boolean", enum: [true] }),
+        field("explicitProjectOwnerAction", { required: true, type: "boolean", enum: [true] }),
+        field("canonicalRevisionPromoted", { required: true, type: "boolean", enum: [true] }),
+        field("automaticPromotionPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalSourceFilesWritten", { required: true, type: "boolean", enum: [false] }),
+        field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
+        field("githubReflectionPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("establishedBy", { required: true, type: "string", enum: ["Project Owner"] }),
+        field("promotedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
       ]
     }
     ,{

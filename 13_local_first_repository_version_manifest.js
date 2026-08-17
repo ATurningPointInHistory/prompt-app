@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.12.0
-   Phase 13: Persistent Canonical Reflection / V5
-   Architecture Baseline: DECISION-001..008 / FROZEN
+   Release: 1.13.0
+   Phase 14: Explicit Canonical Baseline Promotion
+   Architecture Baseline: DECISION-001..009 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.12.0";
+  const RELEASE_VERSION = "1.13.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -19,10 +19,10 @@
 
   const moduleVersions = {
     core: "1.10.0",
-    contracts: "1.10.0",
+    contracts: "1.11.0",
     metadata: "1.10.0",
     validation: BASELINE_VERSION,
-    persistence: "1.4.0",
+    persistence: "1.5.0",
     phase2Validation: "1.0.2",
     offlineStaging: "1.0.0",
     phase3Validation: "1.0.1",
@@ -45,11 +45,13 @@
     phase11Validation: "1.0.1",
     controlledTransactionPersistence: "1.0.0",
     desktopWriteAdapter: "1.0.1",
-    controlledTransaction: "1.0.0",
+    controlledTransaction: "1.0.1",
     phase12Validation: "1.0.2",
     reflectionClosure: "1.0.0",
     persistentReflection: "1.0.0",
-    phase13Validation: "1.0.2"
+    phase13Validation: "1.0.2",
+    baselinePromotion: "1.0.0",
+    phase14Validation: "1.0.0"
   };
 
   const fileModules = {
@@ -84,7 +86,9 @@
     "13_local_first_repository_phase12_validation.js": "phase12Validation",
     "13_local_first_repository_reflection_closure.js": "reflectionClosure",
     "13_local_first_repository_persistent_reflection.js": "persistentReflection",
-    "13_local_first_repository_phase13_validation.js": "phase13Validation"
+    "13_local_first_repository_phase13_validation.js": "phase13Validation",
+    "13_local_first_repository_baseline_promotion.js": "baselinePromotion",
+    "13_local_first_repository_phase14_validation.js": "phase14Validation"
   };
 
   const contractVersions = {
@@ -105,9 +109,11 @@
     acceptanceTokenDescriptor: "1.0.0",
     mutationPackageDescriptor: "1.0.0",
     acceptanceTokenConsumptionRecord: "1.0.0",
-    controlledTransactionJournalRecord: "1.0.0",
+    controlledTransactionJournalRecord: "1.1.0",
     functionRollbackBackupRecord: "1.0.0",
-    fullFileEmergencyBackupRecord: "1.0.0"
+    fullFileEmergencyBackupRecord: "1.0.0",
+    baselinePromotionCandidateDescriptor: "1.0.0",
+    baselinePromotionEvidenceDescriptor: "1.0.0"
   };
 
   const contractIds = {
@@ -130,7 +136,9 @@
     acceptanceTokenConsumptionRecord: "REPOSITORY-010-CONTRACT-ACCEPTANCE-TOKEN-CONSUMPTION",
     controlledTransactionJournalRecord: "REPOSITORY-010-CONTRACT-CONTROLLED-TRANSACTION-JOURNAL",
     functionRollbackBackupRecord: "REPOSITORY-010-CONTRACT-FUNCTION-ROLLBACK-BACKUP",
-    fullFileEmergencyBackupRecord: "REPOSITORY-010-CONTRACT-FULL-FILE-EMERGENCY-BACKUP"
+    fullFileEmergencyBackupRecord: "REPOSITORY-010-CONTRACT-FULL-FILE-EMERGENCY-BACKUP",
+    baselinePromotionCandidateDescriptor: "REPOSITORY-010-CONTRACT-BASELINE-PROMOTION-CANDIDATE",
+    baselinePromotionEvidenceDescriptor: "REPOSITORY-010-CONTRACT-BASELINE-PROMOTION-EVIDENCE"
   };
 
   const repositoryStates = [
@@ -155,18 +163,21 @@
     componentName: "Local-First Repository Coordination",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 13 Persistent Canonical Reflection / V5",
-      architectureStatus: "DECISION-001..008 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 13 v1.12.0 / FUNCTION-PATCH PERSISTENT REFLECTION + SYSTEM-GENERATED INTEGRITY CLOSURE + V5 VALIDATION REQUIRED",
+      implementationPhase: "Phase 14 Explicit Canonical Baseline Promotion",
+      architectureStatus: "DECISION-001..009 / FORMALLY FROZEN",
+      implementationStatus: "PHASE 14 v1.13.0 / V5-BOUND EXPLICIT BASELINE PROMOTION + PROJECT OWNER AUTHORITY + PERSISTENT LINEAGE",
       priorValidatedBaseline: {
-        version: "1.11.1",
-        phase: 12,
+        version: "1.12.0",
+        phase: 13,
         crossDeviceRealValidationPassed: true,
         pcRealValidationPassed: true,
         androidRealValidationPassed: true,
         preDeviceValidationPassed: true,
+        v5PostReflectionVerificationPassed: true,
+        baselinePromotionBootstrapCompleted: true,
+        canonicalRevisionId: "REPOSITORY010-CANONICAL-REVISION-0009",
         health: 100,
-        status: "REPOSITORY-010 Phase 12 COMPLETE / FROZEN"
+        status: "REPOSITORY-010 Phase 13 COMPLETE / FROZEN"
       },
       decisionIds: [
         "REPOSITORY-010-DECISION-001",
@@ -176,12 +187,13 @@
         "REPOSITORY-010-DECISION-005",
         "REPOSITORY-010-DECISION-006",
         "REPOSITORY-010-DECISION-007",
-        "REPOSITORY-010-DECISION-008"
+        "REPOSITORY-010-DECISION-008",
+        "REPOSITORY-010-DECISION-009"
       ]
     },
     implementation: {
-      phase: 13,
-      phaseName: "Persistent Canonical Reflection / V5",
+      phase: 14,
+      phaseName: "Explicit Canonical Baseline Promotion",
       phase1PersistenceImplemented: false,
       persistenceImplemented: true,
       androidIndexedDBPersistenceImplemented: true,
@@ -254,7 +266,13 @@
       phase13V5Required: true,
       phase13V5FailureRollbackRequired: true,
       phase13PersistentCanonicalReflectionAllowed: true,
-      canonicalRevisionPromotionImplemented: false,
+      canonicalRevisionPromotionImplemented: true,
+      baselinePromotionCandidateImplemented: true,
+      baselinePromotionCandidatePersistenceImplemented: true,
+      canonicalBaselinePersistenceImplemented: true,
+      baselinePromotionEvidencePersistenceImplemented: true,
+      baselinePromotionReloadRecoveryImplemented: true,
+      phase13JournalV5PersistenceHotfixImplemented: true,
       automaticCanonicalRevisionPromotionEnabled: false
     },
     authority: {
@@ -362,6 +380,13 @@
         crossDeviceRealValidation: "required",
         v5PostReflectionVerification: "required"
       },
+      phase14RequiredGateSet: {
+        staticValidation: "required",
+        androidRealValidation: "not-required",
+        pcRealValidation: "required",
+        crossDeviceRealValidation: "required",
+        v5BoundPromotionEvidence: "required"
+      },
       syncCandidateValidationLayers: [
         "V1 Local Validation",
         "V2 Transfer / Integrity Validation",
@@ -413,7 +438,10 @@
       phase12TokenConsumptionImplemented: true,
       phase12TokenConsumedAtTransactionStart: true,
       phase13TokenBindsReflectionClosurePlan: true,
-      phase13AutomaticRevisionPromotionAllowed: false
+      phase13AutomaticRevisionPromotionAllowed: false,
+      phase14ProjectOwnerExplicitPromotionRequired: true,
+      phase14PromotionCandidateAuthorityEffect: "none",
+      phase14AutomaticRevisionPromotionAllowed: false
     },
     safety: {
       directRepositoryMutationAllowed: false,
@@ -446,7 +474,13 @@
       phase13PersistentMutationAllowed: true,
       phase13FunctionPatchOnly: true,
       phase13ClosureScopeExactOnly: true,
-      phase13AutomaticRevisionPromotionAllowed: false
+      phase13AutomaticRevisionPromotionAllowed: false,
+      phase14ProjectOwnerExplicitPromotionRequired: true,
+      phase14PromotionCandidateAuthorityEffect: "none",
+      phase14AutomaticRevisionPromotionAllowed: false,
+      phase14SyncSideEffectAllowed: false,
+      phase14GitHubSideEffectAllowed: false,
+      phase14CanonicalSourceWriteAllowed: false
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,

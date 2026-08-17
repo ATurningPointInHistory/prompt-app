@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_controlled_transaction.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.11.0 / Module: Controlled Transaction Trial 1.0.0
+   Release: 1.13.0 / Module: Controlled Transaction Trial 1.0.1
    Phase 12: Backup -> Journal -> Token Consume -> Function Write
              -> Read-back -> Mandatory Rollback
    Decision-007: Controlled Canonical Transaction Responsibility Boundary
@@ -101,6 +101,15 @@
     transaction.status = status;
     transaction.updatedAt = internal.nowIso();
     Object.assign(transaction, extras || {});
+    const persistentReflectionMode = Boolean(
+      transaction.closurePlanId ||
+      transaction.closurePlan ||
+      transaction.persistentReflectionPerformed === true ||
+      transaction.closureWritePerformed === true ||
+      status === "CLOSURE_WRITE_COMPLETED" ||
+      status === "AWAITING_V5" ||
+      status === "V5_VERIFIED_AWAITING_BASELINE_PROMOTION"
+    );
     const journal = {
       schema: "REPOSITORY-010-CONTROLLED-TRANSACTION-JOURNAL",
       schemaVersion: "1.0.0",
@@ -132,10 +141,29 @@
       emergencyRollbackUsed: transaction.emergencyRollbackUsed === true,
       repositoryRestored: transaction.repositoryRestored === true,
       forcedFailureTrial: transaction.forcedFailureTrial === true,
-      canonicalMutationPerformed: false,
-      v5PostReflectionVerified: false,
-      syncEngineInvoked: false,
-      authorityEffect: "controlled-trial-only",
+      closurePlanId: transaction.closurePlanId || null,
+      closurePlanHash: transaction.closurePlanHash || null,
+      closurePlan: transaction.closurePlan ? internal.clone(transaction.closurePlan) : null,
+      beforeManifestHash: transaction.beforeManifestHash || null,
+      expectedAfterManifestHash: transaction.expectedAfterManifestHash || null,
+      beforeScriptSetHash: transaction.beforeScriptSetHash || null,
+      expectedAfterScriptSetHash: transaction.expectedAfterScriptSetHash || null,
+      beforeCacheKey: transaction.beforeCacheKey || null,
+      expectedAfterCacheKey: transaction.expectedAfterCacheKey || null,
+      beforeManifestFileSha256: transaction.beforeManifestFileSha256 || null,
+      afterManifestFileSha256: transaction.afterManifestFileSha256 || null,
+      beforeIndexFileSha256: transaction.beforeIndexFileSha256 || null,
+      afterIndexFileSha256: transaction.afterIndexFileSha256 || null,
+      preTransactionRepositorySnapshotHash: transaction.preTransactionRepositorySnapshotHash || null,
+      closureWritePerformed: transaction.closureWritePerformed === true,
+      persistentReflectionPerformed: transaction.persistentReflectionPerformed === true,
+      controlledCanonicalTransactionImplemented: transaction.controlledCanonicalTransactionImplemented === true,
+      canonicalMutationPerformed: transaction.canonicalMutationPerformed === true,
+      v5PostReflectionVerified: transaction.v5PostReflectionVerified === true,
+      canonicalRevisionPromoted: transaction.canonicalRevisionPromoted === true,
+      automaticBaselinePromotionPerformed: transaction.automaticBaselinePromotionPerformed === true,
+      syncEngineInvoked: transaction.syncEngineInvoked === true,
+      authorityEffect: persistentReflectionMode ? "persistent-reflection" : "controlled-trial-only",
       startedAt: transaction.startedAt || null,
       writeStartedAt: transaction.writeStartedAt || null,
       writeCompletedAt: transaction.writeCompletedAt || null,
