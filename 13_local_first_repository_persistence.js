@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_persistence.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.15.0 / Module: Persistence 1.7.0
-   Phase 16: Transport / Verification / Development Release persistence
+   Release: 1.16.0 / Module: Persistence 1.8.0
+   Phase 17: Operational Hardening persistence
    ============================================================ */
 (function (global) {
   "use strict";
@@ -18,7 +18,7 @@
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("persistence");
   const DB_NAME = "AI_PROMPT_OS_REPOSITORY010_LOCAL_FIRST_V1";
-  const DB_VERSION = 8;
+  const DB_VERSION = 9;
   const STORE_DEFINITIONS = Object.freeze({
     nodeIdentity: Object.freeze({ storeName: "node_identities", keyPath: "nodeId", contractKey: "repositoryNodeIdentity" }),
     revision: Object.freeze({ storeName: "revisions", keyPath: "revisionId", contractKey: "repositoryRevision" }),
@@ -40,7 +40,11 @@
     v3ConflictEvidence: Object.freeze({ storeName: "v3_conflict_evidence", keyPath: "conflictEvidenceId", contractKey: "v3ConflictEvidenceDescriptor" }),
     v4TargetValidationEvidence: Object.freeze({ storeName: "v4_target_validation_evidence", keyPath: "v4EvidenceId", contractKey: "v4TargetValidationEvidenceDescriptor" }),
     developmentReleasePlan: Object.freeze({ storeName: "development_release_plans", keyPath: "developmentReleasePlanId", contractKey: "developmentReleasePlanDescriptor" }),
-    developmentReleaseV5Evidence: Object.freeze({ storeName: "development_release_v5_evidence", keyPath: "developmentReleaseV5EvidenceId", contractKey: "developmentReleaseV5EvidenceDescriptor" })
+    developmentReleaseV5Evidence: Object.freeze({ storeName: "development_release_v5_evidence", keyPath: "developmentReleaseV5EvidenceId", contractKey: "developmentReleaseV5EvidenceDescriptor" }),
+    replicaBaselineReference: Object.freeze({ storeName: "replica_baseline_references", keyPath: "replicaBaselineReferenceId", contractKey: "replicaBaselineReferenceDescriptor" }),
+    replicaBaselineProvisionPackage: Object.freeze({ storeName: "replica_baseline_provision_packages", keyPath: "replicaBaselineProvisionPackageId", contractKey: "replicaBaselineProvisionPackageDescriptor" }),
+    replicaBaselineProvisionEvidence: Object.freeze({ storeName: "replica_baseline_provision_evidence", keyPath: "replicaBaselineProvisionEvidenceId", contractKey: "replicaBaselineProvisionEvidenceDescriptor" }),
+    operationalEvidence: Object.freeze({ storeName: "operational_evidence", keyPath: "operationalEvidenceId", contractKey: "operationalEvidenceDescriptor" })
   });
 
   let adapterOverride = null;
@@ -330,7 +334,11 @@
     v4TargetValidationEvidenceStoreImplemented: true,
     developmentReleasePlanStoreImplemented: true,
     developmentReleaseV5EvidenceStoreImplemented: true,
-    databaseMigration: "1->2-add-offline-staging / 2->3-add-sync-candidate / 3->4-add-transfer-package / 4->5-add-mutation-package / 5->6-add-canonical-baseline-and-promotion / 6->7-add-sync-session-difference-evidence / 7->8-add-transport-verification-development-release",
+    replicaBaselineReferenceStoreImplemented: true,
+    replicaBaselineProvisionPackageStoreImplemented: true,
+    replicaBaselineProvisionEvidenceStoreImplemented: true,
+    operationalEvidenceStoreImplemented: true,
+    databaseMigration: "1->2-add-offline-staging / 2->3-add-sync-candidate / 3->4-add-transfer-package / 4->5-add-mutation-package / 5->6-add-canonical-baseline-and-promotion / 6->7-add-sync-session-difference-evidence / 7->8-add-transport-verification-development-release / 8->9-add-replica-baseline-provisioning-and-operational-hardening",
     loadedAt: internal.nowIso()
   };
 

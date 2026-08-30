@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 13_local_first_repository_desktop_adapter.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.14.0 / Module: Desktop Adapter 1.1.1
+   Release: 1.16.0 / Module: Desktop Adapter 1.2.0
    Phase 11 Compatible: Read-only target file access for Mutation Bridge
    Read-only: no write, no canonical mutation
    ============================================================ */
@@ -21,6 +21,7 @@
   const DESKTOP_NODE_ID = "REPOSITORY010-PC-LOCAL-INITIAL-CANONICAL";
   const DESCRIPTOR_ID = "REPOSITORY010-PC-LOCAL-REPOSITORY-DESCRIPTOR";
   let selectedDirectoryHandle = null;
+  let selectionEpoch = 0;
 
   function fail(code, message, data) {
     state.desktopAdapterStatus = "Blocked";
@@ -163,6 +164,10 @@
       const handle = await global.showDirectoryPicker({ mode: "read" });
       if (!handle || handle.kind !== "directory") return fail("REPOSITORY010_DIRECTORY_SELECTION_INVALID", "The selected handle is not a directory.");
       selectedDirectoryHandle = handle;
+      selectionEpoch += 1;
+      state.activeDesktopScanBinding = null;
+      state.activeDesktopScanResult = null;
+      state.desktopSelectionRequired = false;
       state.desktopAdapterStatus = "Selected";
       internal.touch();
       return internal.buildResult(true, "REPOSITORY010_DESKTOP_DIRECTORY_SELECTED", "Selected", { directoryName: internal.text(handle.name, "selected-directory"), readOnly: true, writePermissionRequested: false });
@@ -265,7 +270,8 @@
         canonicalMutationPerformed: false,
         actualTransferAttempted: false,
         syncEngineInvoked: false,
-        scannedAt: descriptor.scannedAt
+        scannedAt: descriptor.scannedAt,
+        selectionEpoch: selectionEpoch
       };
       state.desktopAdapterStatus = "Verified";
       state.lastDesktopRepositoryScan = internal.clone(scan);
@@ -313,6 +319,17 @@
     }
   }
 
+  function getDesktopRepositorySelectionSnapshot() {
+    return {
+      directorySelected: Boolean(selectedDirectoryHandle),
+      directoryName: selectedDirectoryHandle ? internal.text(selectedDirectoryHandle.name, "selected-directory") : null,
+      selectionEpoch: selectionEpoch,
+      lastScan: internal.clone(state.lastDesktopRepositoryScan),
+      activeDesktopScanBinding: internal.clone(state.activeDesktopScanBinding),
+      authorityEffect: "none"
+    };
+  }
+
   function getDesktopRepositoryAdapterStatus() {
     return {
       status: state.desktopAdapterStatus || "Not Initialized",
@@ -323,6 +340,9 @@
       fileSystemAccessAvailable: typeof global.showDirectoryPicker === "function",
       directorySelected: Boolean(selectedDirectoryHandle),
       selectedDirectoryName: selectedDirectoryHandle ? internal.text(selectedDirectoryHandle.name, "selected-directory") : null,
+      selectionEpoch: selectionEpoch,
+      pickerSafeBindingSupported: true,
+      hiddenPickerAutoInvocationRequired: false,
       pcLocalRepositoryReadOnlyScanImplemented: true,
       pcLocalRepositoryIntegrityVerificationImplemented: true,
       reloadSafeContractInitializationImplemented: true,
@@ -333,7 +353,8 @@
       directRepositoryMutationAllowed: false,
       actualV2TransferImplemented: VERSION_MANIFEST.implementation.v2TransferIntegrityValidationImplemented === true,
       v2TransferIntegrityValidationImplemented: VERSION_MANIFEST.implementation.v2TransferIntegrityValidationImplemented === true,
-      syncEngineImplemented: false,
+      syncEngineImplemented: true,
+      pickerSafeTransportImplemented: true,
       lastScan: internal.clone(state.lastDesktopRepositoryScan)
     };
   }
@@ -344,6 +365,7 @@
     scanDesktopRepositoryDirectory: scanDesktopRepositoryDirectory,
     selectAndScanDesktopRepository: selectAndScanDesktopRepository,
     readDesktopRepositoryFileText: readDesktopRepositoryFileText,
+    getDesktopRepositorySelectionSnapshot: getDesktopRepositorySelectionSnapshot,
     getDesktopRepositoryAdapterStatus: getDesktopRepositoryAdapterStatus
   });
   Object.assign(namespace, namespace.api);
@@ -360,7 +382,8 @@
     pcCanonicalMutationImplemented: false,
     actualV2TransferImplemented: false,
     reloadSafeContractInitializationImplemented: true,
-    syncEngineImplemented: false,
+    syncEngineImplemented: true,
+      pickerSafeTransportImplemented: true,
     loadedAt: internal.nowIso()
   };
 

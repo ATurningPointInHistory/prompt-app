@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.15.0
-   Phase 16: Controlled Cross-Device Sync Engine
-   Architecture Baseline: DECISION-001..014 / FROZEN
+   Release: 1.16.0
+   Phase 17: Cross-Device Operational Hardening
+   Architecture Baseline: DECISION-001..015 / FROZEN
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.15.0";
+  const RELEASE_VERSION = "1.16.0";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -18,11 +18,11 @@
   }
 
   const moduleVersions = {
-    core: "1.12.0",
-    contracts: "1.13.0",
+    core: "1.13.0",
+    contracts: "1.14.0",
     metadata: "1.11.0",
     validation: BASELINE_VERSION,
-    persistence: "1.7.0",
+    persistence: "1.8.0",
     phase2Validation: "1.0.2",
     offlineStaging: "1.0.0",
     phase3Validation: "1.0.1",
@@ -30,7 +30,7 @@
     phase4Validation: "1.0.0",
     transferPackage: "1.0.0",
     phase5Validation: "1.0.0",
-    desktopAdapter: "1.1.1",
+    desktopAdapter: "1.2.0",
     phase6Validation: "1.0.0",
     v2Transfer: "1.0.0",
     phase7Validation: "1.0.0",
@@ -61,8 +61,13 @@
     transportAttempt: "1.0.0",
     explicitFileTransport: "1.0.0",
     developmentRelease: "1.0.0",
-    syncEngine: "1.0.0",
-    phase16Validation: "1.0.0"
+    syncEngine: "1.1.0",
+    phase16Validation: "1.0.0",
+    operationalEvidence: "1.0.0",
+    replicaBaselineProvisioning: "1.0.0",
+    pickerSafeTransport: "1.0.0",
+    operationalInitialization: "1.0.0",
+    phase17Validation: "1.0.0"
   };
 
   const fileModules = {
@@ -109,8 +114,13 @@
     "13_local_first_repository_transport_attempt.js": "transportAttempt",
     "13_local_first_repository_explicit_file_transport.js": "explicitFileTransport",
     "13_local_first_repository_development_release.js": "developmentRelease",
+    "13_local_first_repository_operational_evidence.js": "operationalEvidence",
+    "13_local_first_repository_replica_baseline_provisioning.js": "replicaBaselineProvisioning",
+    "13_local_first_repository_picker_safe_transport.js": "pickerSafeTransport",
     "13_local_first_repository_sync_engine.js": "syncEngine",
-    "13_local_first_repository_phase16_validation.js": "phase16Validation"
+    "13_local_first_repository_operational_initialization.js": "operationalInitialization",
+    "13_local_first_repository_phase16_validation.js": "phase16Validation",
+    "13_local_first_repository_phase17_validation.js": "phase17Validation"
   };
 
   const contractVersions = {
@@ -143,7 +153,12 @@
     transportAttemptDescriptor: "1.0.0",
     syncTransportEnvelopeDescriptor: "1.0.0",
     developmentReleasePlanDescriptor: "1.0.0",
-    developmentReleaseV5EvidenceDescriptor: "1.0.0"
+    developmentReleaseV5EvidenceDescriptor: "1.0.0",
+    replicaBaselineReferenceDescriptor: "1.0.0",
+    replicaBaselineProvisionPackageDescriptor: "1.0.0",
+    replicaBaselineProvisionEvidenceDescriptor: "1.0.0",
+    desktopScanBindingDescriptor: "1.0.0",
+    operationalEvidenceDescriptor: "1.0.0"
   };
 
   const contractIds = {
@@ -176,7 +191,12 @@
     transportAttemptDescriptor: "REPOSITORY-010-CONTRACT-TRANSPORT-ATTEMPT",
     syncTransportEnvelopeDescriptor: "REPOSITORY-010-CONTRACT-SYNC-TRANSPORT-ENVELOPE",
     developmentReleasePlanDescriptor: "REPOSITORY-010-CONTRACT-DEVELOPMENT-RELEASE-PLAN",
-    developmentReleaseV5EvidenceDescriptor: "REPOSITORY-010-CONTRACT-DEVELOPMENT-RELEASE-V5-EVIDENCE"
+    developmentReleaseV5EvidenceDescriptor: "REPOSITORY-010-CONTRACT-DEVELOPMENT-RELEASE-V5-EVIDENCE",
+    replicaBaselineReferenceDescriptor: "REPOSITORY-010-CONTRACT-REPLICA-BASELINE-REFERENCE",
+    replicaBaselineProvisionPackageDescriptor: "REPOSITORY-010-CONTRACT-REPLICA-BASELINE-PROVISION-PACKAGE",
+    replicaBaselineProvisionEvidenceDescriptor: "REPOSITORY-010-CONTRACT-REPLICA-BASELINE-PROVISION-EVIDENCE",
+    desktopScanBindingDescriptor: "REPOSITORY-010-CONTRACT-DESKTOP-SCAN-BINDING",
+    operationalEvidenceDescriptor: "REPOSITORY-010-CONTRACT-OPERATIONAL-EVIDENCE"
   };
 
   const repositoryStates = [
@@ -201,21 +221,22 @@
     componentName: "Local-First Repository Coordination",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 16 Controlled Cross-Device Sync Engine",
-      architectureStatus: "DECISION-001..014 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 16 v1.15.0 / GUARDED SYNC ENGINE + EXPLICIT FILE TRANSPORT + DEVELOPMENT RELEASE V5 / AWAITING_ACCEPTANCE AUTHORITY BOUNDARY",
+      implementationPhase: "Phase 17 Cross-Device Operational Hardening",
+      architectureStatus: "DECISION-001..015 / FORMALLY FROZEN",
+      implementationStatus: "PHASE 17 v1.16.0 / REPLICA BASELINE PROVISIONING + PICKER-SAFE TRANSPORT + UNIFIED RELOAD-SAFE INITIALIZATION",
       priorValidatedBaseline: {
-        version: "1.14.0",
-        phase: 15,
-        crossDeviceRealValidationPassed: false,
+        version: "1.15.0",
+        phase: 16,
+        crossDeviceRealValidationPassed: true,
         pcRealValidationPassed: true,
-        androidRealValidationPassed: false,
+        androidRealValidationPassed: true,
         preDeviceValidationPassed: true,
         phase14Complete: true,
         phase15Complete: true,
-        canonicalRevisionId: "REPOSITORY010-CANONICAL-REVISION-0010",
+        phase16Complete: true,
+        canonicalRevisionId: "REPOSITORY010-CANONICAL-REVISION-0011",
         health: 100,
-        status: "REPOSITORY-010 Phase 15 COMPLETE / FROZEN + Decision-013 Canonical 0010 Reconciled"
+        status: "REPOSITORY-010 Phase 16 COMPLETE / FROZEN + Canonical 0011"
       },
       decisionIds: [
         "REPOSITORY-010-DECISION-001",
@@ -231,12 +252,13 @@
         "REPOSITORY-010-DECISION-011",
         "REPOSITORY-010-DECISION-012",
         "REPOSITORY-010-DECISION-013",
-        "REPOSITORY-010-DECISION-014"
+        "REPOSITORY-010-DECISION-014",
+        "REPOSITORY-010-DECISION-015"
       ]
     },
     implementation: {
-      phase: 16,
-      phaseName: "Controlled Cross-Device Sync Engine",
+      phase: 17,
+      phaseName: "Cross-Device Operational Hardening",
       phase1PersistenceImplemented: false,
       persistenceImplemented: true,
       androidIndexedDBPersistenceImplemented: true,
@@ -337,7 +359,14 @@
       syncEngineImplemented: true,
       androidToPcRealPushArchitectureImplemented: true,
       pcToAndroidRealPullImplemented: false,
-      crossDeviceRealSyncImplemented: false
+      crossDeviceRealSyncImplemented: true,
+      crossDeviceOperationalHardeningImplemented: true,
+      replicaBaselineProvisioningImplemented: true,
+      pickerSafeTransportImplemented: true,
+      hiddenDirectoryPickerFallbackAllowed: false,
+      unifiedReloadSafeInitializationImplemented: true,
+      operationalEvidenceImplemented: true,
+      phase17DevelopmentReleasePlanImplemented: true
     },
     authority: {
       model: "logical-authority-canonical-node-separation",
@@ -469,6 +498,18 @@
         crossDeviceRealValidation: "required",
         actualSyncTransfer: "required"
       },
+      phase17RequiredGateSet: {
+        staticValidation: "required",
+        persistenceReloadValidation: "required",
+        developmentReleaseV5: "required",
+        canonical0012Promotion: "required",
+        replicaBaselineProvisioning: "required",
+        pickerSafeTransportValidation: "required",
+        pcRealValidation: "required",
+        androidRealValidation: "required",
+        crossDeviceRealValidation: "required",
+        actualSyncTransfer: "required"
+      },
       syncCandidateValidationLayers: [
         "V1 Local Validation",
         "V2 Transfer / Integrity Validation",
@@ -532,7 +573,12 @@
       phase16AutomaticAcceptanceAllowed: false,
       phase16AutomaticConflictWinnerAllowed: false,
       phase16AutomaticBaselinePromotionAllowed: false,
-      phase16DevelopmentReleaseExplicitPromotionRequired: true
+      phase16DevelopmentReleaseExplicitPromotionRequired: true,
+      phase17SyncEngineStopsAtAwaitingAcceptance: true,
+      phase17AutomaticAcceptanceAllowed: false,
+      phase17AutomaticConflictWinnerAllowed: false,
+      phase17AutomaticBaselinePromotionAllowed: false,
+      phase17DevelopmentReleaseExplicitPromotionRequired: true
     },
     safety: {
       directRepositoryMutationAllowed: false,
@@ -586,7 +632,18 @@
       phase16AutomaticBaselinePromotionAllowed: false,
       phase16AutomaticGitHubReflectionAllowed: false,
       phase16SyncEngineCanonicalMutationAuthority: false,
-      phase16TransportCanonicalMutationAuthority: false
+      phase16TransportCanonicalMutationAuthority: false,
+      phase17DirectRepositoryMutationAllowed: false,
+      phase17AutomaticSourceWriteAllowed: false,
+      phase17AutomaticAcceptanceAllowed: false,
+      phase17AutomaticConflictWinnerAllowed: false,
+      phase17AutomaticBaselinePromotionAllowed: false,
+      phase17AutomaticGitHubReflectionAllowed: false,
+      phase17SyncEngineCanonicalMutationAuthority: false,
+      phase17TransportCanonicalMutationAuthority: false,
+      replicaBaselineGrantsAuthority: false,
+      operationalInitializationGrantsAuthority: false,
+      pickerBindingGrantsAuthority: false
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,

@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_contracts.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.15.0 / Module: Contracts 1.13.0
-   Phase 16: Controlled Cross-Device Sync Engine contracts
+   Release: 1.16.0 / Module: Contracts 1.14.0
+   Phase 17: Cross-Device Operational Hardening contracts
    ============================================================ */
 (function (global) {
   "use strict";
@@ -845,6 +845,137 @@
         field("syncEngineInvoked", { required: true, type: "boolean", enum: [false] }),
         field("githubReflectionPerformed", { required: true, type: "boolean", enum: [false] }),
         field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "replicaBaselineReferenceDescriptor",
+      name: "REPOSITORY-010 Replica Baseline Reference Contract",
+      fields: [
+        field("replicaBaselineReferenceId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("targetReplicaNodeId", { required: true, type: "string" }),
+        field("sourceCanonicalNodeId", { required: true, type: "string" }),
+        field("sourceCanonicalBaselineDescriptorId", { required: true, type: "string" }),
+        field("canonicalRevisionId", { required: true, type: "string" }),
+        field("canonicalIntegrityRecordId", { required: true, type: "string" }),
+        field("promotionEvidenceId", { required: true, type: "string" }),
+        field("manifestHash", { required: true, type: "string" }),
+        field("scriptSetHash", { required: true, type: "string" }),
+        field("scriptCount", { required: true, type: "number" }),
+        field("repositoryStateHash", { required: true, type: "string" }),
+        field("integrityStatus", { required: true, type: "string", enum: ["verified"] }),
+        field("provisionedAt", { required: true, type: "string" }),
+        field("explicitUserTransfer", { required: true, type: "boolean", enum: [true] }),
+        field("explicitlyProvisioned", { required: true, type: "boolean", enum: [true] }),
+        field("identityGrantsAuthority", { required: true, type: "boolean", enum: [false] }),
+        field("validationIsApproval", { required: true, type: "boolean", enum: [false] }),
+        field("mutationAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "replicaBaselineProvisionPackageDescriptor",
+      name: "REPOSITORY-010 Replica Baseline Provision Package Contract",
+      fields: [
+        field("schema", { required: true, type: "string", enum: ["REPOSITORY-010-REPLICA-BASELINE-PROVISION-PACKAGE"] }),
+        field("version", { required: true, type: "string", enum: ["1.0.0"] }),
+        field("componentId", { required: true, type: "string", enum: ["REPOSITORY-010"] }),
+        field("replicaBaselineProvisionPackageId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("sourceCanonicalNodeId", { required: true, type: "string" }),
+        field("targetReplicaNodeId", { required: true, type: "string" }),
+        field("canonicalRevisionId", { required: true, type: "string" }),
+        field("canonicalBaseline", { required: true, type: "object" }),
+        field("revisionRecord", { required: true, type: "object" }),
+        field("integrityRecord", { required: true, type: "object" }),
+        field("stateRecord", { required: true, type: "object" }),
+        field("baselinePromotionEvidence", { required: true, type: "object" }),
+        field("replicaBaselineReference", { required: true, type: "object" }),
+        field("packageHashAlgorithm", { required: true, type: "string", enum: ["SHA-256"] }),
+        field("packageHash", { required: true, type: "string" }),
+        field("createdAt", { required: true, type: "string" }),
+        field("requiresUserAction", { required: true, type: "boolean", enum: [true] }),
+        field("canonicalMutationRequested", { required: true, type: "boolean", enum: [false] }),
+        field("automaticAcceptanceRequested", { required: true, type: "boolean", enum: [false] }),
+        field("automaticPromotionRequested", { required: true, type: "boolean", enum: [false] }),
+        field("githubReflectionRequested", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "replicaBaselineProvisionEvidenceDescriptor",
+      name: "REPOSITORY-010 Replica Baseline Provision Evidence Contract",
+      fields: [
+        field("replicaBaselineProvisionEvidenceId", { required: true, type: "string" }),
+        field("replicaBaselineProvisionPackageId", { required: true, type: "string" }),
+        field("replicaBaselineReferenceId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("sourceCanonicalNodeId", { required: true, type: "string" }),
+        field("targetReplicaNodeId", { required: true, type: "string" }),
+        field("canonicalRevisionId", { required: true, type: "string" }),
+        field("packageHash", { required: true, type: "string" }),
+        field("packageHashVerified", { required: true, type: "boolean", enum: [true] }),
+        field("lineageVerified", { required: true, type: "boolean", enum: [true] }),
+        field("staleProvisionBlocked", { required: true, type: "boolean" }),
+        field("rollbackPerformed", { required: true, type: "boolean" }),
+        field("explicitUserTransfer", { required: true, type: "boolean", enum: [true] }),
+        field("validationIsApproval", { required: true, type: "boolean", enum: [false] }),
+        field("mutationAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("automaticAcceptancePerformed", { required: true, type: "boolean", enum: [false] }),
+        field("automaticPromotionPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "desktopScanBindingDescriptor",
+      name: "REPOSITORY-010 Desktop Scan Binding Runtime Contract",
+      fields: [
+        field("desktopScanBindingId", { required: true, type: "string" }),
+        field("pageSessionId", { required: true, type: "string" }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("nodeId", { required: true, type: "string" }),
+        field("directoryName", { required: true, type: "string" }),
+        field("manifestHash", { required: true, type: "string" }),
+        field("scriptSetHash", { required: true, type: "string" }),
+        field("scriptCount", { required: true, type: "number" }),
+        field("integrityStatus", { required: true, type: "string", enum: ["verified"] }),
+        field("scannedAt", { required: true, type: "string" }),
+        field("userGestureBound", { required: true, type: "boolean", enum: [true] }),
+        field("singleUse", { required: true, type: "boolean", enum: [true] }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    }
+    ,{
+      key: "operationalEvidenceDescriptor",
+      name: "REPOSITORY-010 Operational Evidence Contract",
+      fields: [
+        field("operationalEvidenceId", { required: true, type: "string" }),
+        field("evidenceType", { required: true, type: "string", enum: ["fresh-desktop-scan", "desktop-receiver-prepared", "desktop-scan-binding-consumed", "reload-initialization", "reload-recovery", "replica-provision-started", "replica-provision-verified", "replica-provision-rollback", "picker-file-selected", "picker-operation-blocked"] }),
+        field("projectId", { required: true, type: "string" }),
+        field("repositoryId", { required: true, type: "string" }),
+        field("sourceNodeId", { required: true, type: "string|null" }),
+        field("targetNodeId", { required: true, type: "string|null" }),
+        field("revisionId", { required: true, type: "string|null" }),
+        field("relatedRecordId", { required: true, type: "string|null" }),
+        field("validationPassed", { required: true, type: "boolean" }),
+        field("detail", { required: true, type: "object" }),
+        field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
+        field("canonicalMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("automaticAcceptancePerformed", { required: true, type: "boolean", enum: [false] }),
+        field("automaticPromotionPerformed", { required: true, type: "boolean", enum: [false] }),
         field("createdAt", { required: true, type: "string" }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
       ]

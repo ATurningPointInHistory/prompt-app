@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 13_local_first_repository_core.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.15.0 / Module: Core 1.12.0
-   Phase 16: Controlled Cross-Device Sync Engine compatibility
+   Release: 1.16.0 / Module: Core 1.13.0
+   Phase 17: Controlled Cross-Device Sync Engine compatibility
    ============================================================ */
 (function (global) {
   "use strict";
@@ -98,6 +98,10 @@
     transportAttemptDescriptors: new Map(),
     developmentReleasePlans: new Map(),
     developmentReleaseV5Evidence: new Map(),
+    replicaBaselineReferences: new Map(),
+    replicaBaselineProvisionPackages: new Map(),
+    replicaBaselineProvisionEvidence: new Map(),
+    operationalEvidenceDescriptors: new Map(),
     lastPhase1Validation: null,
     lastPhase1AndroidValidation: null,
     phase1PreDeviceValidationPassed: false,
@@ -201,6 +205,22 @@
     lastDevelopmentReleaseV5EvidenceId: null,
     lastSyncEngineSessionId: null,
     lastSyncEngineError: null,
+    replicaBaselineProvisioningStatus: "Ready",
+    activeDesktopScanBinding: null,
+    activeDesktopScanResult: null,
+    desktopSelectionRequired: true,
+    operationalPageSessionId: null,
+    operationalInitializationStatus: "Not Initialized",
+    operationalInitializationPageSessionId: null,
+    operationalInitializationRunCount: 0,
+    lastOperationalInitializationError: null,
+    lastOperationalEvidenceId: null,
+    lastPhase17Validation: null,
+    lastPhase17PersistenceReloadValidation: null,
+    lastPhase17RealOperationalValidation: null,
+    phase17PreDeviceValidationPassed: false,
+    phase17PersistenceReloadValidationPassed: false,
+    phase17Complete: false,
     lastSyncCandidateRestore: null,
     offlineStagingStatus: "Ready",
     lastOfflineStagingRestore: null,
@@ -210,7 +230,7 @@
     updatedAt: null
   };
 
-  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors", "transferPackageDescriptors", "desktopRepositoryDescriptors", "v2TransferReceipts", "canonicalBaselineDescriptors", "v3ConflictEvidenceDescriptors", "v4TargetValidationEvidenceDescriptors", "acceptanceTokenDescriptors", "acceptanceTokenConsumptionRecords", "acceptanceTokenRevocationRecords", "mutationPackageDescriptors", "controlledTransactionRecords", "syncSessionDescriptors", "syncDifferenceDescriptors", "syncEvidenceDescriptors", "transportAdapters", "transportAttemptDescriptors", "developmentReleasePlans", "developmentReleaseV5Evidence"].forEach(function ensureMap(key) {
+  ["contracts", "nodeIdentities", "revisions", "integrityRecords", "stateRecords", "validationGates", "offlineStagingDescriptors", "syncCandidateDescriptors", "transferPackageDescriptors", "desktopRepositoryDescriptors", "v2TransferReceipts", "canonicalBaselineDescriptors", "v3ConflictEvidenceDescriptors", "v4TargetValidationEvidenceDescriptors", "acceptanceTokenDescriptors", "acceptanceTokenConsumptionRecords", "acceptanceTokenRevocationRecords", "mutationPackageDescriptors", "controlledTransactionRecords", "syncSessionDescriptors", "syncDifferenceDescriptors", "syncEvidenceDescriptors", "transportAdapters", "transportAttemptDescriptors", "developmentReleasePlans", "developmentReleaseV5Evidence", "replicaBaselineReferences", "replicaBaselineProvisionPackages", "replicaBaselineProvisionEvidence", "operationalEvidenceDescriptors"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
 
@@ -514,7 +534,11 @@
         acceptanceTokenDescriptors: state.acceptanceTokenDescriptors.size,
         acceptanceTokenConsumptionRecords: state.acceptanceTokenConsumptionRecords.size,
         acceptanceTokenRevocationRecords: state.acceptanceTokenRevocationRecords.size,
-        controlledTransactionRecords: state.controlledTransactionRecords.size
+        controlledTransactionRecords: state.controlledTransactionRecords.size,
+        replicaBaselineReferences: state.replicaBaselineReferences.size,
+        replicaBaselineProvisionPackages: state.replicaBaselineProvisionPackages.size,
+        replicaBaselineProvisionEvidence: state.replicaBaselineProvisionEvidence.size,
+        operationalEvidenceDescriptors: state.operationalEvidenceDescriptors.size
       },
       modules: modules,
       lastError: clone(state.lastError),
@@ -778,6 +802,10 @@
       androidToPcRealPushArchitectureImplemented: VERSION_MANIFEST.implementation.androidToPcRealPushArchitectureImplemented === true,
       pcToAndroidRealPullImplemented: VERSION_MANIFEST.implementation.pcToAndroidRealPullImplemented === true,
       crossDeviceRealSyncImplemented: VERSION_MANIFEST.implementation.crossDeviceRealSyncImplemented === true,
+      crossDeviceOperationalHardeningImplemented: VERSION_MANIFEST.implementation.crossDeviceOperationalHardeningImplemented === true,
+      replicaBaselineProvisioningImplemented: VERSION_MANIFEST.implementation.replicaBaselineProvisioningImplemented === true,
+      pickerSafeTransportImplemented: VERSION_MANIFEST.implementation.pickerSafeTransportImplemented === true,
+      unifiedReloadSafeInitializationImplemented: VERSION_MANIFEST.implementation.unifiedReloadSafeInitializationImplemented === true,
       mutationEngineImplemented: false,
       phase1ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase1Validation === "function",
       phase2ValidationImplemented: typeof namespace.runLocalFirstRepositoryPhase2Validation === "function",
@@ -860,7 +888,7 @@
     id: "REPOSITORY-010-CORE",
     version: MODULE_VERSION,
     status: "Loaded",
-    phase: 15,
+    phase: 17,
     persistentMutationImplemented: false,
     controlledTransactionTrialImplemented: true,
     acceptanceTokenConsumptionImplemented: true,
@@ -902,6 +930,10 @@
     androidToPcRealPushArchitectureImplemented: VERSION_MANIFEST.implementation.androidToPcRealPushArchitectureImplemented === true,
     pcToAndroidRealPullImplemented: VERSION_MANIFEST.implementation.pcToAndroidRealPullImplemented === true,
     crossDeviceRealSyncImplemented: VERSION_MANIFEST.implementation.crossDeviceRealSyncImplemented === true,
+      crossDeviceOperationalHardeningImplemented: VERSION_MANIFEST.implementation.crossDeviceOperationalHardeningImplemented === true,
+      replicaBaselineProvisioningImplemented: VERSION_MANIFEST.implementation.replicaBaselineProvisioningImplemented === true,
+      pickerSafeTransportImplemented: VERSION_MANIFEST.implementation.pickerSafeTransportImplemented === true,
+      unifiedReloadSafeInitializationImplemented: VERSION_MANIFEST.implementation.unifiedReloadSafeInitializationImplemented === true,
     loadedAt: nowIso()
   };
 

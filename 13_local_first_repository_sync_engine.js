@@ -1,9 +1,9 @@
 /* ============================================================
    FILE: 13_local_first_repository_sync_engine.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.15.0 / Module: Controlled Cross-Device Sync Engine 1.0.0
-   Phase 16
-   Decision-010 / 011 / 012
+   Release: 1.16.0 / Module: Controlled Cross-Device Sync Engine 1.1.0
+   Phase 17 Operational Hardening
+   Decision-010 / 011 / 012 / 015
    ============================================================ */
 (function (global) {
   "use strict";
@@ -42,6 +42,14 @@
     return baseline;
   }
 
+  async function currentReplicaBaselineReference() {
+    if (typeof namespace.getCurrentLocalFirstRepositoryReplicaBaselineReference === "function") {
+      const reference = await namespace.getCurrentLocalFirstRepositoryReplicaBaselineReference();
+      if (reference) return Object.assign({ sourceNodeId: reference.sourceCanonicalNodeId }, internal.clone(reference));
+    }
+    return null;
+  }
+
   async function initializeSyncEngine() {
     if (typeof namespace.initializeContracts === "function") namespace.initializeContracts();
     const persistence = await namespace.initializeLocalFirstRepositoryPersistence();
@@ -49,6 +57,7 @@
     const sessions = await namespace.listLocalFirstRepositorySyncSessions();
     const attempts = await namespace.listLocalFirstRepositoryTransportAttempts();
     if (typeof namespace.restoreLocalFirstRepositoryDevelopmentReleaseRecords === "function") await namespace.restoreLocalFirstRepositoryDevelopmentReleaseRecords();
+    if (typeof namespace.restoreLocalFirstRepositoryReplicaBaselineProvisioningRecords === "function") await namespace.restoreLocalFirstRepositoryReplicaBaselineProvisioningRecords();
     const adapters = namespace.listLocalFirstRepositoryTransportAdapters();
     const explicit = namespace.getLocalFirstRepositoryTransportAdapter("REPOSITORY-010-EXPLICIT-FILE-TRANSPORT");
     if (!explicit) return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_EXPLICIT_TRANSPORT_REQUIRED", "Blocked", { registeredAdapters: adapters });
@@ -108,11 +117,11 @@
     if (!stagingId) return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_STAGING_REQUIRED", "Blocked", null);
     const initialized = await initializeSyncEngine();
     if (!initialized || initialized.ok !== true) return initialized;
-    const baseline = await currentBaseline();
-    if (!baseline) return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_BASELINE_REQUIRED", "Blocked", null);
+    const baseline = await currentReplicaBaselineReference();
+    if (!baseline) return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_REPLICA_BASELINE_REQUIRED", "Blocked", { replicaBaselineReferenceRequired: true });
     const loaded = await loadStagingObservation(stagingId);
     if (!loaded) return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_STAGING_NOT_FOUND", "Blocked", { stagingId: stagingId });
-    if (loaded.staging.baseRevisionId !== baseline.canonicalRevisionId) return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_STAGING_BASE_STALE", "Blocked", { stagingBaseRevisionId: loaded.staging.baseRevisionId, currentCanonicalRevisionId: baseline.canonicalRevisionId });
+    if (loaded.staging.baseRevisionId !== baseline.canonicalRevisionId) return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_STAGING_BASE_STALE", "Blocked", { stagingBaseRevisionId: loaded.staging.baseRevisionId, currentReplicaBaselineRevisionId: baseline.canonicalRevisionId });
 
     const observed = await namespace.observeAndDetectLocalFirstRepositorySyncDifference({
       syncSessionId: source.syncSessionId,
@@ -202,8 +211,7 @@
       return internal.buildResult(true, "REPOSITORY010_SYNC_ENGINE_V3_CONFLICT_DETECTED", "Conflict Detected", { syncSessionId: sessionId, transportAttemptId: attemptId, v3: v3.data, automaticWinnerSelected: false, canonicalMutationPerformed: false, authorityEffect: "none" });
     }
 
-    let scanResult = opts.desktopScanResult;
-    if (!scanResult) scanResult = await namespace.selectAndScanDesktopRepository();
+    const scanResult = opts.desktopScanResult;
     if (!scanResult || scanResult.ok !== true) {
       await failVerification(sessionId, attemptId, "REPOSITORY010_SYNC_ENGINE_PC_SCAN_FAILED", { v3EvidenceId: v3.data.evidence.conflictEvidenceId }, false);
       return scanResult;
@@ -251,11 +259,15 @@
   }
 
   async function receiveAndroidToPcSyncFile(file, options) {
+    const opts = internal.isPlainObject(options) ? options : {};
     const initialized = await initializeSyncEngine();
     if (!initialized || initialized.ok !== true) return initialized;
+    if (!opts.desktopScanResult || opts.desktopScanResult.ok !== true) {
+      return internal.buildResult(false, "REPOSITORY010_FRESH_PC_SCAN_REQUIRED", "Blocked", { desktopSelectionRequired: true, hiddenDirectoryPickerInvoked: false, canonicalMutationPerformed: false, authorityEffect: "none" });
+    }
     const received = await namespace.receiveLocalFirstRepositoryExplicitFileTransport(file, { requireAndroidSender: true });
     if (!received || received.ok !== true) return received;
-    return verifyReceivedSession(received, options);
+    return verifyReceivedSession(received, opts);
   }
 
   async function restoreVerificationLineage(syncSessionId, baseline, lastAttempt) {
@@ -320,8 +332,8 @@
       return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_RESUME_REQUIRES_NEW_ATTEMPT", "Blocked", { syncSession: session, lastTransportAttempt: lastAttempt, freshRetryRequired: true, blindResumePerformed: false });
     }
     if (session.sessionStatus === "AWAITING_ACCEPTANCE") {
-      const scan = options && options.desktopScanResult ? options.desktopScanResult : await namespace.selectAndScanDesktopRepository();
-      if (!scan || scan.ok !== true) return scan;
+      const scan = options && options.desktopScanResult ? options.desktopScanResult : null;
+      if (!scan || scan.ok !== true) return internal.buildResult(false, "REPOSITORY010_FRESH_PC_SCAN_REQUIRED", "Blocked", { desktopSelectionRequired: true, blindResumePerformed: false, hiddenDirectoryPickerInvoked: false });
       const currentStable = scan.data.staticManifest.manifestHash === baseline.manifestHash && scan.data.staticManifest.scriptSetHash === baseline.scriptSetHash && Number(scan.data.staticManifest.scriptCount) === Number(baseline.scriptCount);
       if (!currentStable) return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_RESUME_TARGET_STALE", "Blocked", { blindResumePerformed: false, currentStable: false });
       const lineage = await restoreVerificationLineage(id, baseline, lastAttempt);
@@ -335,18 +347,21 @@
   function getSyncEngineStatus() {
     return {
       status: state.syncEngineStatus || "Ready",
-      phase: 16,
+      phase: 17,
       moduleVersion: MODULE_VERSION,
-      decisionIds: ["REPOSITORY-010-DECISION-010", "REPOSITORY-010-DECISION-011", "REPOSITORY-010-DECISION-012"],
+      decisionIds: ["REPOSITORY-010-DECISION-010", "REPOSITORY-010-DECISION-011", "REPOSITORY-010-DECISION-012", "REPOSITORY-010-DECISION-015"],
       syncEngineImplemented: true,
       controlledTwoWayArchitecture: true,
       androidToPcRealPushArchitectureImplemented: true,
       pcToAndroidRealPullImplemented: false,
-      crossDeviceRealSyncImplemented: state.crossDevicePhase16ValidationPassed === true,
+      crossDeviceRealSyncImplemented: true,
       crossDeviceRealSyncToAcceptanceBoundaryImplemented: true,
       guardedSyncStateMachineImplemented: true,
       evidenceBoundRecoveryImplemented: true,
       explicitFileTransportImplemented: typeof namespace.receiveLocalFirstRepositoryExplicitFileTransport === "function",
+      replicaBaselineReferenceResolutionImplemented: true,
+      pickerSafeFreshScanRequired: true,
+      hiddenDirectoryPickerFallbackAllowed: false,
       canonicalMutationAuthority: false,
       automaticAcceptanceAllowed: false,
       automaticConflictWinnerAllowed: false,
@@ -369,7 +384,7 @@
     id: "REPOSITORY-010-CONTROLLED-CROSS-DEVICE-SYNC-ENGINE",
     version: MODULE_VERSION,
     status: "Ready",
-    phase: 16,
+    phase: 17,
     syncEngineImplemented: true,
     androidToPcRealPushArchitectureImplemented: true,
     pcToAndroidRealPullImplemented: false,
