@@ -123,6 +123,40 @@
     if (!loaded) return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_STAGING_NOT_FOUND", "Blocked", { stagingId: stagingId });
     if (loaded.staging.baseRevisionId !== baseline.canonicalRevisionId) return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_STAGING_BASE_STALE", "Blocked", { stagingBaseRevisionId: loaded.staging.baseRevisionId, currentReplicaBaselineRevisionId: baseline.canonicalRevisionId });
 
+    const baselineIntegrityRecordId = internal.text(baseline.canonicalIntegrityRecordId, "");
+    if (!baselineIntegrityRecordId) {
+      return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_REPLICA_BASELINE_INTEGRITY_REQUIRED", "Blocked", {
+        canonicalRevisionId: baseline.canonicalRevisionId
+      });
+    }
+
+    const baselineIntegrity = await namespace.getPersistedLocalFirstRepositoryRecord(
+      "integrityRecord",
+      baselineIntegrityRecordId
+    );
+
+    if (
+      !baselineIntegrity ||
+      baselineIntegrity.revisionId !== baseline.canonicalRevisionId ||
+      baselineIntegrity.integrityStatus !== "verified"
+    ) {
+      return internal.buildResult(false, "REPOSITORY010_SYNC_ENGINE_REPLICA_BASELINE_INTEGRITY_INVALID", "Blocked", {
+        canonicalRevisionId: baseline.canonicalRevisionId,
+        canonicalIntegrityRecordId: baselineIntegrityRecordId
+      });
+    }
+
+    const targetObservation = baselineObservation(baseline);
+    targetObservation.fileHashes =
+      internal.clone(baselineIntegrity.fileHashes || {});
+    targetObservation.integrityStatus =
+      baselineIntegrity.integrityStatus;
+    targetObservation.repositoryStateHash =
+      internal.text(
+        baselineIntegrity.repositoryStateHash,
+        targetObservation.repositoryStateHash
+      );
+
     const observed = await namespace.observeAndDetectLocalFirstRepositorySyncDifference({
       syncSessionId: source.syncSessionId,
       projectId: loaded.staging.projectId,
@@ -134,7 +168,7 @@
       sourceRevisionId: loaded.staging.revisionId,
       targetRevisionId: baseline.canonicalRevisionId,
       sourceObservation: loaded.observation,
-      targetObservation: baselineObservation(baseline),
+      targetObservation: targetObservation,
       syncEngineInvoked: true
     });
     if (!observed || observed.ok !== true) return observed;
