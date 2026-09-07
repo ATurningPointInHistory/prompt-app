@@ -1,16 +1,17 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.1.0
-   Phase 02: Runtime / Gateway / Software Supply Chain Foundation
+   Release: 1.2.0
+   Phase 03: Source Governance / Discovery / Budget / Usage Policy
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.1.0";
-  const BASELINE_VERSION = "1.0.0";
+  const RELEASE_VERSION = "1.2.0";
+  const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
+  const PHASE3_VERSION = "1.2.0";
 
   function deepFreeze(value) {
     if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -19,16 +20,21 @@
   }
 
   const moduleVersions = {
-    core: PHASE2_VERSION,
-    contracts: PHASE2_VERSION,
-    schemaRegistry: PHASE2_VERSION,
-    authority: BASELINE_VERSION,
-    audit: BASELINE_VERSION,
+    core: PHASE3_VERSION,
+    contracts: PHASE3_VERSION,
+    schemaRegistry: PHASE3_VERSION,
+    authority: PHASE1_VERSION,
+    audit: PHASE1_VERSION,
     runtimeCoordination: PHASE2_VERSION,
     softwareSupplyChain: PHASE2_VERSION,
     gatewayClient: PHASE2_VERSION,
-    phase1Validation: PHASE2_VERSION,
-    phase2Validation: PHASE2_VERSION
+    sourceRegistry: PHASE3_VERSION,
+    sourceDiscovery: PHASE3_VERSION,
+    resourceBudget: PHASE3_VERSION,
+    usagePolicy: PHASE3_VERSION,
+    phase1Validation: PHASE3_VERSION,
+    phase2Validation: PHASE3_VERSION,
+    phase3Validation: PHASE3_VERSION
   };
 
   const fileModules = {
@@ -40,25 +46,37 @@
     "17_external_intelligence_runtime_coordination.js": "runtimeCoordination",
     "17_external_intelligence_software_supply_chain.js": "softwareSupplyChain",
     "17_external_intelligence_gateway_client.js": "gatewayClient",
+    "17_external_intelligence_source_registry.js": "sourceRegistry",
+    "17_external_intelligence_source_discovery.js": "sourceDiscovery",
+    "17_external_intelligence_resource_budget.js": "resourceBudget",
+    "17_external_intelligence_usage_policy.js": "usagePolicy",
     "17_external_intelligence_phase1_validation.js": "phase1Validation",
-    "17_external_intelligence_phase2_validation.js": "phase2Validation"
+    "17_external_intelligence_phase2_validation.js": "phase2Validation",
+    "17_external_intelligence_phase3_validation.js": "phase3Validation"
   };
 
   const contractVersions = {
-    foundationState: BASELINE_VERSION,
-    contractDefinition: BASELINE_VERSION,
-    schemaDefinition: BASELINE_VERSION,
-    compatibilityProfile: BASELINE_VERSION,
-    authorityEnvelope: BASELINE_VERSION,
-    auditEvent: BASELINE_VERSION,
-    validationResult: BASELINE_VERSION,
-    promotionBoundary: BASELINE_VERSION,
+    foundationState: PHASE3_VERSION,
+    contractDefinition: PHASE1_VERSION,
+    schemaDefinition: PHASE1_VERSION,
+    compatibilityProfile: PHASE1_VERSION,
+    authorityEnvelope: PHASE1_VERSION,
+    auditEvent: PHASE1_VERSION,
+    validationResult: PHASE3_VERSION,
+    promotionBoundary: PHASE1_VERSION,
     gatewayRuntimeState: PHASE2_VERSION,
     gatewaySessionMetadata: PHASE2_VERSION,
     runtimeCoordinationRecord: PHASE2_VERSION,
     dependencyCandidate: PHASE2_VERSION,
     runtimeProfile: PHASE2_VERSION,
-    phase2ValidationResult: PHASE2_VERSION
+    phase2ValidationResult: PHASE3_VERSION,
+    sourceRecord: PHASE3_VERSION,
+    sourceDiscoveryRecord: PHASE3_VERSION,
+    controlledInspectionRecord: PHASE3_VERSION,
+    resourceBudget: PHASE3_VERSION,
+    resourceUsageRecord: PHASE3_VERSION,
+    usagePolicy: PHASE3_VERSION,
+    phase3ValidationResult: PHASE3_VERSION
   };
 
   const contractIds = {
@@ -75,7 +93,14 @@
     runtimeCoordinationRecord: "EXTERNAL-010-CONTRACT-RUNTIME-COORDINATION-RECORD",
     dependencyCandidate: "EXTERNAL-010-CONTRACT-DEPENDENCY-CANDIDATE",
     runtimeProfile: "EXTERNAL-010-CONTRACT-RUNTIME-PROFILE",
-    phase2ValidationResult: "EXTERNAL-010-CONTRACT-PHASE2-VALIDATION-RESULT"
+    phase2ValidationResult: "EXTERNAL-010-CONTRACT-PHASE2-VALIDATION-RESULT",
+    sourceRecord: "EXTERNAL-010-CONTRACT-SOURCE-RECORD",
+    sourceDiscoveryRecord: "EXTERNAL-010-CONTRACT-SOURCE-DISCOVERY-RECORD",
+    controlledInspectionRecord: "EXTERNAL-010-CONTRACT-CONTROLLED-INSPECTION-RECORD",
+    resourceBudget: "EXTERNAL-010-CONTRACT-RESOURCE-BUDGET",
+    resourceUsageRecord: "EXTERNAL-010-CONTRACT-RESOURCE-USAGE-RECORD",
+    usagePolicy: "EXTERNAL-010-CONTRACT-USAGE-POLICY",
+    phase3ValidationResult: "EXTERNAL-010-CONTRACT-PHASE3-VALIDATION-RESULT"
   };
 
   const safety = {
@@ -94,7 +119,64 @@
     gatewaySessionTokenPersistenceAllowed: false,
     runtimePackageInstallAllowed: false,
     blindRetryUnknownExecutionAllowed: false,
-    remoteGatewayAllowed: false
+    remoteGatewayAllowed: false,
+
+    arbitraryUnregisteredSourceAccessAllowed: false,
+    automaticSourceActivationAllowed: false,
+    automaticPaidSourceActivationAllowed: false,
+    automaticSecretBindingAllowed: false,
+    automaticProviderSubscriptionAllowed: false,
+    sourceIdentityGrantsReliability: false,
+    sourceIdentityGrantsAuthority: false,
+    externalSourceGrantsEconomicAuthority: false,
+
+    sourceDiscoveryEqualsRegistration: false,
+    sourceRegistrationEqualsEnablement: false,
+    sourceEnablementEqualsTrust: false,
+    sourceEnablementGrantsAllOperations: false,
+    sourceDiscoveryGrantsUnlimitedNetworkAuthority: false,
+    sourceDiscoveryGrantsSecretAuthority: false,
+    sourceDiscoveryGrantsSubscriptionAuthority: false,
+    sourceDiscoveryGrantsFinancialAuthority: false,
+    searchRankingGrantsSourceTrust: false,
+    externalLinkGrantsSourceTrust: false,
+    controlledInspectionGrantsActivation: false,
+    automaticSubscriptionAllowed: false,
+    unknownHighRiskSourceAutoEnableAllowed: false,
+    aiSourceDiscoveryGrantsActivationAuthority: false,
+    sourceDisableDeletesHistoricalEvidence: false,
+
+    sourceEnabledMeansUnlimitedUsage: false,
+    secretAvailableMeansPaidAuthority: false,
+    freeSourceMeansUnlimitedUsage: false,
+    budgetAvailableMeansMustSpend: false,
+    hardBudgetLimitMayBeSilentlyExceeded: false,
+    paidRequestMayBypassBudgetCheck: false,
+    priorityMayBypassHardLimit: false,
+    unknownCostMayBeAssumedZero: false,
+    schedulerMayBypassBudgetCheck: false,
+    queueMayBypassBudgetCheck: false,
+    unusedBudgetMayBeSilentlyReallocated: false,
+    budgetProposalGrantsBudgetAuthority: false,
+    resourceBudgetGrantsSubscriptionAuthority: false,
+    resourceBudgetGrantsFinancialTradingAuthority: false,
+    storagePressureGrantsEvidenceDeletionAuthority: false,
+
+    technicalAccessEqualsPermission: false,
+    publicVisibilityEqualsUnlimitedReuse: false,
+    readPermissionGrantsStoragePermission: false,
+    readPermissionGrantsRedistributionPermission: false,
+    internalAnalysisGrantsCommercialUse: false,
+    noProhibitionFoundEqualsPermission: false,
+    unknownUsagePolicyEqualsAllowed: false,
+    ambiguousUsagePolicyEqualsAllowed: false,
+    aiInterpretationEqualsLegalAuthority: false,
+    termsLocatedEqualsFullyUnderstood: false,
+    parserFailureEqualsNoRestriction: false,
+    policyUnavailableEqualsPermission: false,
+    freeSourceEqualsOpenLicense: false,
+    paidSourceEqualsUnlimitedRights: false,
+    derivedDataEqualsUnrestrictedData: false
   };
 
   const authorityPolicy = {
@@ -109,7 +191,9 @@
       "ACTIVATE_PAID_API",
       "INSTALL_SOFTWARE",
       "EXECUTE_TRADE",
-      "EXPAND_AUTHORITY"
+      "EXPAND_AUTHORITY",
+      "AUTO_SUBSCRIBE_EXTERNAL_SOURCE",
+      "AUTO_BIND_EXTERNAL_SECRET"
     ]
   };
 
@@ -125,6 +209,7 @@
 
   const gateway = {
     contractVersion: "1.0.0",
+    gatewayVersion: PHASE2_VERSION,
     defaultBaseUrl: "http://127.0.0.1:43110",
     loopbackOnly: true,
     defaultPort: 43110,
@@ -152,6 +237,50 @@
     phase2GatewayDependencyMode: "node-builtins-only"
   };
 
+  const sourceGovernance = {
+    registryFirst: true,
+    sourceIdentityType: "stable-source-id",
+    arbitraryDirectUrlNormalOperation: false,
+    sourceTypes: ["PUBLIC_API", "MARKET_DATA", "FINANCIAL_DATA", "NEWS", "RSS", "WEB_PAGE", "SEARCH", "GITHUB", "GOVERNMENT_DATA", "TECHNICAL_DOCUMENTATION", "AI_SERVICE", "DATASET", "OTHER"],
+    accessModes: ["BROWSER_DIRECT", "LOCAL_GATEWAY", "AUTO_ROUTE", "DISABLED"],
+    authenticationModes: ["NONE", "API_KEY", "BEARER_TOKEN", "OAUTH", "CUSTOM"],
+    pricingModes: ["FREE", "FIXED_MONTHLY", "USAGE_BASED", "TIERED", "UNKNOWN"],
+    initialAllowedHttpMethods: ["GET"],
+    secretValuesStoredInRegistry: false
+  };
+
+  const discovery = {
+    lifecycle: ["DISCOVERED", "IDENTIFIED", "ASSESSED", "REGISTERED", "ENABLED", "ACTIVE", "REJECTED", "QUARANTINED", "DISABLED", "DEPRECATED", "REVOKED", "UNKNOWN"],
+    riskClasses: ["LOW", "MEDIUM", "HIGH", "UNKNOWN"],
+    aiMayDiscoverSourceCandidate: true,
+    aiMayAssessSourceCandidate: true,
+    controlledInspectionAvailable: true,
+    controlledInspectionGrantsActivation: false
+  };
+
+  const resourceBudget = {
+    hierarchy: ["GLOBAL", "CATEGORY", "SOURCE", "GOAL", "PLAN", "REQUEST"],
+    resourceDimensions: ["FINANCIAL_COST", "REQUEST_COUNT", "NETWORK_BYTES", "STORAGE_BYTES", "CPU_TIME", "MEMORY", "PROCESSING_TIME", "AI_TOKEN_USAGE", "PROVIDER_QUOTA"],
+    softLimitBlocksExecution: false,
+    hardLimitBlocksExecution: true,
+    aiMayOptimizeResourceUsage: true,
+    aiMayProposeAdditionalBudget: true,
+    aiMayCompareCostVsValue: true,
+    aiMayGenerateResourceAllocationCandidate: true
+  };
+
+  const usagePolicy = {
+    operations: ["READ", "TEMPORARY_CACHE", "LONG_TERM_STORAGE", "INTERNAL_ANALYSIS", "DERIVED_ANALYSIS", "EXPORT", "FULL_CONTENT_EXPORT", "REDISTRIBUTION", "COMMERCIAL_USE", "MODEL_TRAINING", "INDEXING", "ARCHIVING"],
+    states: ["ALLOWED", "ALLOWED_WITH_CONDITIONS", "RESTRICTED", "BLOCKED", "UNKNOWN", "AMBIGUOUS", "REVIEW_REQUIRED"],
+    aiMayReadTerms: true,
+    aiMayExtractPolicyClauses: true,
+    aiMayGenerateUsagePolicyCandidate: true,
+    aiMayDetectPolicyChanges: true,
+    aiMayGenerateTermsResearchGoal: true,
+    aiPolicyInterpretationEqualsLegalAuthority: false,
+    unknownDefaultsToAllowed: false
+  };
+
   const manifest = {
     componentId: "EXTERNAL-010",
     componentName: "External Intelligence Platform",
@@ -160,8 +289,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 02 Runtime / Gateway / Software Supply Chain Foundation",
-      phase: 2,
+      implementationPhase: "Phase 03 Source Governance / Discovery / Budget / Usage Policy",
+      phase: 3,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -170,7 +299,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 02 Runtime / Gateway / Software Supply Chain Implementation"
+      status: "Phase 03 Source Governance / Discovery / Budget / Usage Policy Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -181,13 +310,18 @@
     compatibility: compatibility,
     gateway: gateway,
     supplyChain: supplyChain,
+    sourceGovernance: sourceGovernance,
+    discovery: discovery,
+    resourceBudget: resourceBudget,
+    usagePolicy: usagePolicy,
     implementation: {
       inspectBeforeImplement: true,
       contractFirst: true,
       phase1Complete: true,
-      phase2Allowed: true,
-      phase2Complete: false,
-      phase3Allowed: false,
+      phase2Complete: true,
+      phase3Allowed: true,
+      phase3Complete: false,
+      phase4Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true

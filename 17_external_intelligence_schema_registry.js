@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_schema_registry.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.1.0
-   Phase 02: Runtime / Gateway / Software Supply Chain Foundation
+   Release: 1.2.0
+   Phase 03: Source Governance / Discovery / Budget / Usage Policy
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -96,9 +96,40 @@
       }),
     schema("EXTERNAL-010-SCHEMA-PHASE2-VALIDATION-RESULT", "External Intelligence Phase 02 Validation Result",
       ["id", "componentId", "version", "implementationPhase", "passed", "failed", "total", "health", "criticalFailed", "status", "releaseAllowed", "phase2Complete", "phase3Allowed", "validatedAt"], {
-        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.1.0"] }, implementationPhase: { type: "string" },
+        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.1.0", "1.2.0"] }, implementationPhase: { type: "string" },
         passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" },
         releaseAllowed: { type: "boolean" }, phase2Complete: { type: "boolean" }, phase3Allowed: { type: "boolean" }, validatedAt: { type: "string" }
+      }),
+    schema("EXTERNAL-010-SCHEMA-SOURCE-RECORD", "External Intelligence Governed Source Record",
+      ["sourceId", "sourceName", "sourceType", "provider", "accessMode", "adapterId", "endpointPolicy", "authenticationMode", "allowedOperations", "allowedMethods", "pricingMode", "enabled", "lifecycleState", "version", "identityState", "reliabilityState", "authorityGranted", "createdAt", "updatedAt", "immutable"], {
+        sourceId: { type: "string", pattern: "^SOURCE-[A-Z0-9-]+$" }, sourceName: { type: "string" }, sourceType: { type: "string" }, provider: { type: "string" }, category: { type: "string" }, accessMode: { type: "string" }, adapterId: { type: "string" },
+        endpointPolicy: { type: "object" }, authenticationMode: { type: "string" }, secretReferenceId: { type: ["string", "null"] }, allowedOperations: { type: "array" }, allowedMethods: { type: "array" }, pricingMode: { type: "string" }, costCurrency: { type: "string" },
+        enabled: { type: "boolean" }, lifecycleState: { type: "string" }, version: { type: "number" }, identityState: { type: "string" }, reliabilityState: { type: "string" }, authorityGranted: { type: "boolean", enum: [false] }, discoveryId: { type: ["string", "null"] }, createdAt: { type: "string" }, updatedAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-SOURCE-DISCOVERY-RECORD", "External Intelligence Source Discovery Record",
+      ["discoveryId", "candidateLocation", "discoveredAt", "discoveredBy", "discoveryReason", "sourceTypeCandidate", "lifecycleState", "identityState", "riskClassification", "costClassification", "authenticationRequirement", "operationRisk", "activationAuthorityGranted", "registrationAuthorityGranted", "provenance", "createdAt", "updatedAt", "immutable"], {
+        discoveryId: { type: "string" }, candidateLocation: { type: "string" }, discoveredAt: { type: "string" }, discoveredBy: { type: "string" }, discoveryReason: { type: "string" }, goalId: { type: ["string", "null"] }, planId: { type: ["string", "null"] }, sourceTypeCandidate: { type: "string" }, lifecycleState: { type: "string" },
+        identityState: { type: "string" }, riskClassification: { type: "string" }, costClassification: { type: "string" }, authenticationRequirement: { type: "string" }, operationRisk: { type: "string" }, activationAuthorityGranted: { type: "boolean", enum: [false] }, registrationAuthorityGranted: { type: "boolean", enum: [false] }, sourceId: { type: ["string", "null"] }, provenance: { type: "object" }, createdAt: { type: "string" }, updatedAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-CONTROLLED-INSPECTION-RECORD", "External Intelligence Controlled Inspection Record",
+      ["inspectionId", "discoveryId", "inspectionPurpose", "networkAuthorityGranted", "activationAuthorityGranted", "contentInstructionAuthorityGranted", "securityBoundaryRequired", "state", "createdAt", "immutable"], {
+        inspectionId: { type: "string" }, discoveryId: { type: "string" }, inspectionPurpose: { type: "string" }, networkAuthorityGranted: { type: "boolean", enum: [false] }, activationAuthorityGranted: { type: "boolean", enum: [false] }, contentInstructionAuthorityGranted: { type: "boolean", enum: [false] }, securityBoundaryRequired: { type: "boolean", enum: [true] }, state: { type: "string" }, createdAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-RESOURCE-BUDGET", "External Intelligence Resource Budget",
+      ["budgetId", "scopeType", "scopeId", "period", "currency", "limits", "consumed", "state", "authorityGranted", "automaticReallocationAllowed", "version", "createdAt", "updatedAt", "immutable"], {
+        budgetId: { type: "string" }, scopeType: { type: "string" }, scopeId: { type: "string" }, parentBudgetId: { type: ["string", "null"] }, period: { type: "object" }, currency: { type: "string" }, limits: { type: "object" }, consumed: { type: "object" }, state: { type: "string" }, authorityGranted: { type: "boolean", enum: [false] }, automaticReallocationAllowed: { type: "boolean", enum: [false] }, version: { type: "number" }, createdAt: { type: "string" }, updatedAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-RESOURCE-USAGE-RECORD", "External Intelligence Resource Usage Record",
+      ["usageRecordId", "operationId", "budgetIds", "estimatedUsage", "actualUsage", "reconciled", "createdAt", "immutable"], {
+        usageRecordId: { type: "string" }, operationId: { type: "string" }, budgetIds: { type: "array" }, estimatedUsage: { type: "object" }, actualUsage: { type: "object" }, sourceId: { type: ["string", "null"] }, goalId: { type: ["string", "null"] }, planId: { type: ["string", "null"] }, reconciled: { type: "boolean" }, createdAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-USAGE-POLICY", "External Intelligence Usage Policy",
+      ["usagePolicyId", "sourceId", "policyVersion", "observedAt", "policyEvidenceIds", "analysisVersion", "status", "rights", "policyCompleteness", "interpretationConfidence", "aiInterpretationEqualsLegalAuthority", "policyChangeDetected", "createdAt", "updatedAt", "immutable"], {
+        usagePolicyId: { type: "string" }, sourceId: { type: "string" }, policyVersion: { type: "string" }, effectiveAt: { type: ["string", "null"] }, observedAt: { type: "string" }, policyEvidenceIds: { type: "array" }, analysisVersion: { type: "string" }, status: { type: "string" }, rights: { type: "object" }, policyCompleteness: { type: "string" }, interpretationConfidence: { type: "string" }, aiInterpretationEqualsLegalAuthority: { type: "boolean", enum: [false] }, previousPolicyId: { type: ["string", "null"] }, policyChangeDetected: { type: "boolean" }, createdAt: { type: "string" }, updatedAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-PHASE3-VALIDATION-RESULT", "External Intelligence Phase 03 Validation Result",
+      ["id", "componentId", "version", "implementationPhase", "decisionCoverage", "passed", "failed", "total", "health", "criticalFailed", "status", "releaseAllowed", "phase3Complete", "phase4Allowed", "validatedAt"], {
+        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.2.0"] }, implementationPhase: { type: "string" }, decisionCoverage: { type: "number", enum: [54] }, passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" }, releaseAllowed: { type: "boolean" }, phase3Complete: { type: "boolean" }, phase4Allowed: { type: "boolean" }, validatedAt: { type: "string" }
       })
   ]);
 

@@ -4,10 +4,10 @@
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1, IDE-190 v1.10.0 frozen baseline, REPOSITORY-010 Phase 18 v1.17.3, and EXTERNAL-010 Phase 02 v1.1.0 Runtime / Gateway / Software Supply Chain Foundation.",
+  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1, IDE-190 v1.10.0 frozen baseline, REPOSITORY-010 Phase 18 v1.17.3, and EXTERNAL-010 Phase 03 v1.2.0 Source Governance / Discovery / Budget / Usage Policy.",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-07T07:27:16.850333Z",
+  "updatedAt": "2026-09-07T08:15:10.761692Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -289,17 +289,22 @@
     "./16_validation_engine.js?h=105c13151958",
     "./15_reasoning_engine.js?h=cf1ed1305563",
     "./16_workflow_engine.js?h=17dedd927e7f",
-    "./17_external_intelligence_version_manifest.js?h=fc9452c67529",
-    "./17_external_intelligence_core.js?h=0cb3d3641515",
-    "./17_external_intelligence_contracts.js?h=4ff4e8c72931",
-    "./17_external_intelligence_schema_registry.js?h=7c663d7f42a3",
+    "./17_external_intelligence_version_manifest.js?h=2dbb2f781f9b",
+    "./17_external_intelligence_core.js?h=11575b85f0b8",
+    "./17_external_intelligence_contracts.js?h=5408504f663f",
+    "./17_external_intelligence_schema_registry.js?h=0e24e28ceb20",
     "./17_external_intelligence_authority.js?h=102149846b07",
     "./17_external_intelligence_audit.js?h=cf56721b647b",
     "./17_external_intelligence_runtime_coordination.js?h=b42665428345",
     "./17_external_intelligence_software_supply_chain.js?h=d728b9870535",
     "./17_external_intelligence_gateway_client.js?h=3781710db229",
-    "./17_external_intelligence_phase1_validation.js?h=876fb95c363d",
-    "./17_external_intelligence_phase2_validation.js?h=fea82dd3a77a",
+    "./17_external_intelligence_source_registry.js?h=7e2f8c341d7b",
+    "./17_external_intelligence_source_discovery.js?h=86316b1672d5",
+    "./17_external_intelligence_resource_budget.js?h=2926bc99492c",
+    "./17_external_intelligence_usage_policy.js?h=a7c79a51e583",
+    "./17_external_intelligence_phase1_validation.js?h=0261dd7b7de4",
+    "./17_external_intelligence_phase2_validation.js?h=b342fb7a66cb",
+    "./17_external_intelligence_phase3_validation.js?h=d220d4b5f222",
     "./99_init.js?h=1bd8f46d1e40"
   ],
   "hashes": {
@@ -1704,24 +1709,24 @@
       "cacheKey": "17dedd927e7f"
     },
     "17_external_intelligence_version_manifest.js": {
-      "sha256": "fc9452c67529f2db1293c939a2cceafc6df0c50042a89ac56d7c37e7f9f84336",
-      "byteSize": 8156,
-      "cacheKey": "fc9452c67529"
+      "sha256": "2dbb2f781f9b266ffebb3e4218d53a5f247673d9f5f03c837baba8d0c47fae62",
+      "byteSize": 14490,
+      "cacheKey": "2dbb2f781f9b"
     },
     "17_external_intelligence_core.js": {
-      "sha256": "0cb3d3641515e13f5f405b4bb8bc259cc681ba117bfb5311f78d4fe1a5315421",
-      "byteSize": 10497,
-      "cacheKey": "0cb3d3641515"
+      "sha256": "11575b85f0b8130417c75b2c1517ba3001f26fe22955dfda5f59e736ed92898b",
+      "byteSize": 11998,
+      "cacheKey": "11575b85f0b8"
     },
     "17_external_intelligence_contracts.js": {
-      "sha256": "4ff4e8c72931b7ab28ead8e5825171005bff6d70766e7c9ff5a5a3538de278df",
-      "byteSize": 20909,
-      "cacheKey": "4ff4e8c72931"
+      "sha256": "5408504f663f50f74a487476bb175c033d5b451e33861fc8a796dc13017e0512",
+      "byteSize": 30650,
+      "cacheKey": "5408504f663f"
     },
     "17_external_intelligence_schema_registry.js": {
-      "sha256": "7c663d7f42a340a145024f13d44b262ddd3d1895c1e052b71e26328a568a379d",
-      "byteSize": 17871,
-      "cacheKey": "7c663d7f42a3"
+      "sha256": "0e24e28ceb209a8ab86ceca36ad36b04d24987d5355dac402e4a150d62062a6c",
+      "byteSize": 24787,
+      "cacheKey": "0e24e28ceb20"
     },
     "17_external_intelligence_authority.js": {
       "sha256": "102149846b0784e50b315e7a8975b6698d9852a8f92c2e42a8c3bba07bf83814",
@@ -1748,15 +1753,40 @@
       "byteSize": 16380,
       "cacheKey": "3781710db229"
     },
+    "17_external_intelligence_source_registry.js": {
+      "sha256": "7e2f8c341d7ba897447be6dd120f7258671f73f7c0114fc02b19db4acc3dfc77",
+      "byteSize": 22408,
+      "cacheKey": "7e2f8c341d7b"
+    },
+    "17_external_intelligence_source_discovery.js": {
+      "sha256": "86316b1672d559761d4f4c6c078f5cb8612d4632683ebe35eda2685e5d18a67a",
+      "byteSize": 16585,
+      "cacheKey": "86316b1672d5"
+    },
+    "17_external_intelligence_resource_budget.js": {
+      "sha256": "2926bc99492c59f57dd7b17487615ce0b16b9e5f3eba47e056f8ee81b37a58d7",
+      "byteSize": 21291,
+      "cacheKey": "2926bc99492c"
+    },
+    "17_external_intelligence_usage_policy.js": {
+      "sha256": "a7c79a51e5832949f301edf87e2d7883a4f83dd854eaf7a3885f3ff6af89b6e6",
+      "byteSize": 16401,
+      "cacheKey": "a7c79a51e583"
+    },
     "17_external_intelligence_phase1_validation.js": {
-      "sha256": "876fb95c363d5f3d6897898d8a7bc427dbff9474371eb9144296e1ec2fcfc8aa",
-      "byteSize": 18172,
-      "cacheKey": "876fb95c363d"
+      "sha256": "0261dd7b7de41767aea4da3b673e0d8289323ea8cb6f723789b1f2de06c0a3b5",
+      "byteSize": 18181,
+      "cacheKey": "0261dd7b7de4"
     },
     "17_external_intelligence_phase2_validation.js": {
-      "sha256": "fea82dd3a77a46adfec280049d9a65bf43d2bda97a20e823d1ed9520d29ae177",
-      "byteSize": 24199,
-      "cacheKey": "fea82dd3a77a"
+      "sha256": "b342fb7a66cb7612bb73f443618123bc775c64a77adea17eccfd41ba6a0f061e",
+      "byteSize": 24384,
+      "cacheKey": "b342fb7a66cb"
+    },
+    "17_external_intelligence_phase3_validation.js": {
+      "sha256": "d220d4b5f2227e5afc890dd1715b5b87ff7e9fea0e77fc8560d0e933cc0b9ba4",
+      "byteSize": 38281,
+      "cacheKey": "d220d4b5f222"
     },
     "99_init.js": {
       "sha256": "1bd8f46d1e40f463fd359c49925dcfd5dbcb9a3a6a01c14bd607c53b181bf9c8",
@@ -1764,6 +1794,6 @@
       "cacheKey": "1bd8f46d1e40"
     }
   },
-  "scriptSetHash": "cdff3baf497c190e2147837b7dfc3674c62f09b0f38d762289755af4432c9b01",
-  "manifestHash": "26ea325881579bd2fe05a845568791181ce8331a98c7e2787ed76e03c7f43046"
+  "scriptSetHash": "5e885ee94afa79102c68b37c79ca4f219e2b21fa6680c90418c0470edc000a62",
+  "manifestHash": "76dbda90b662ad4690e4ce47ac7f63737945eeeabb351f30a06a687e71a1b860"
 }

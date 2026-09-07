@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_core.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.1.0
-   Phase 02: Runtime / Gateway / Software Supply Chain Foundation
+   Release: 1.2.0
+   Phase 03: Source Governance / Discovery / Budget / Usage Policy
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -37,6 +37,20 @@
         workClaims: new Map(),
         dependencyCandidates: new Map(),
         runtimeProfiles: new Map(),
+        sourceRegistry: new Map(),
+        sourceVersions: new Map(),
+        sourceDiscoveryRecords: new Map(),
+        sourceDiscoveryHistory: new Map(),
+        controlledInspectionRecords: new Map(),
+        resourceBudgets: new Map(),
+        resourceBudgetHistory: new Map(),
+        resourceUsageRecords: new Map(),
+        resourceBudgetLedger: [],
+        usagePolicies: new Map(),
+        usagePolicyVersions: new Map(),
+        activeUsagePolicyBySource: new Map(),
+        sourceRiskAssessmentHook: null,
+        termsAnalysisHook: null,
         auditPersistenceAdapter: null,
         authorityApprovalAdapter: null,
         initialized: false,
@@ -49,10 +63,11 @@
         updatedAt: null
       };
 
-  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles"].forEach(function ensureMap(key) {
+  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles", "sourceRegistry", "sourceVersions", "sourceDiscoveryRecords", "sourceDiscoveryHistory", "controlledInspectionRecords", "resourceBudgets", "resourceBudgetHistory", "resourceUsageRecords", "usagePolicies", "usagePolicyVersions", "activeUsagePolicyBySource"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
   if (!Array.isArray(state.auditOrder)) state.auditOrder = [];
+  if (!Array.isArray(state.resourceBudgetLedger)) state.resourceBudgetLedger = [];
   if (!Number.isInteger(state.sequence)) state.sequence = 0;
 
   function nowIso() { return new Date().toISOString(); }
@@ -157,6 +172,11 @@
       runtimeInstanceCount: state.runtimeInstances.size,
       dependencyCandidateCount: state.dependencyCandidates.size,
       runtimeProfileCount: state.runtimeProfiles.size,
+      sourceCount: state.sourceRegistry.size,
+      sourceDiscoveryCount: state.sourceDiscoveryRecords.size,
+      resourceBudgetCount: state.resourceBudgets.size,
+      resourceUsageRecordCount: state.resourceUsageRecords.size,
+      usagePolicyCount: state.usagePolicies.size,
       gateway: state.gatewayClientState ? { baseUrl: state.gatewayClientState.baseUrl || null, healthState: state.gatewayClientState.healthState || "UNKNOWN", sessionActive: Boolean(state.gatewayClientState.session && state.gatewayClientState.session.state === "ACTIVE"), lastCheckedAt: state.gatewayClientState.lastCheckedAt || null } : null,
       safety: clone(VERSION_MANIFEST.safety),
       updatedAt: state.updatedAt || null
@@ -175,7 +195,11 @@
         ["audit", namespace.initializeExternalIntelligenceAudit],
         ["runtimeCoordination", namespace.initializeExternalIntelligenceRuntimeCoordination],
         ["softwareSupplyChain", namespace.initializeExternalIntelligenceSoftwareSupplyChain],
-        ["gatewayClient", namespace.initializeExternalIntelligenceGatewayClient]
+        ["gatewayClient", namespace.initializeExternalIntelligenceGatewayClient],
+        ["sourceRegistry", namespace.initializeExternalIntelligenceSourceRegistry],
+        ["sourceDiscovery", namespace.initializeExternalIntelligenceSourceDiscovery],
+        ["resourceBudget", namespace.initializeExternalIntelligenceResourceBudget],
+        ["usagePolicy", namespace.initializeExternalIntelligenceUsagePolicy]
       ];
       for (const item of initializers) {
         const name = item[0];
@@ -244,7 +268,7 @@
     id: "EXTERNAL-010-CORE",
     version: VERSION_MANIFEST.getModuleVersion("core"),
     status: "Loaded",
-    phase: 2,
+    phase: 3,
     directRepositoryMutationAllowed: false,
     loadedAt: nowIso()
   };

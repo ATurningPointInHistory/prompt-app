@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_phase2_validation.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.1.0
+   Release: 1.2.0
    Phase 02 Validation
    Decisions: 003 / 011 / 013 / 051 / 053 / 054
    ============================================================ */
@@ -28,6 +28,10 @@
     "17_external_intelligence_runtime_coordination.js",
     "17_external_intelligence_software_supply_chain.js",
     "17_external_intelligence_gateway_client.js",
+    "17_external_intelligence_source_registry.js",
+    "17_external_intelligence_source_discovery.js",
+    "17_external_intelligence_resource_budget.js",
+    "17_external_intelligence_usage_policy.js",
     "17_external_intelligence_phase1_validation.js",
     "17_external_intelligence_phase2_validation.js"
   ]);
@@ -71,8 +75,8 @@
     const c = collector();
     const check = c.check;
 
-    check("Release Version is 1.1.0", VERSION_MANIFEST.release.version === "1.1.0", VERSION_MANIFEST.release.version, "Foundation");
-    check("Implementation Phase is Phase 02", VERSION_MANIFEST.release.phase === 2 && VERSION_MANIFEST.release.implementationPhase.indexOf("Phase 02") === 0, VERSION_MANIFEST.release.implementationPhase, "Foundation");
+    check("Phase 02 release baseline remains compatible", ["1.1.0", "1.2.0"].includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
+    check("Implementation phase has not regressed below Phase 02", VERSION_MANIFEST.release.phase >= 2, VERSION_MANIFEST.release.implementationPhase, "Foundation");
     check("Design Freeze remains canonical", VERSION_MANIFEST.release.designFreezeId === "EXTERNAL-010-DESIGN-FREEZE-1.0.0", VERSION_MANIFEST.release.designFreezeId, "Foundation");
     check("Roadmap remains 2.1.0", VERSION_MANIFEST.release.implementationRoadmapId === "EXTERNAL-010-IMPLEMENTATION-ROADMAP-2.1.0", VERSION_MANIFEST.release.implementationRoadmapId, "Foundation");
     check("Decision coverage remains 54", VERSION_MANIFEST.release.decisionCount === 54, VERSION_MANIFEST.release.decisionCount, "Foundation");
