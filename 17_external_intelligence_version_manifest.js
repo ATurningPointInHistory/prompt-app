@@ -42,7 +42,8 @@
     phase2Validation: PHASE4_VERSION,
     phase3Validation: PHASE4_VERSION,
     phase4Validation: PHASE4_VERSION,
-    phase4RealRuntimeValidation: PHASE4_VERSION
+    phase4RealRuntimeValidation: PHASE4_VERSION,
+    phase4AndroidValidation: PHASE4_VERSION
   };
 
   const fileModules = {
@@ -66,7 +67,8 @@
     "17_external_intelligence_phase2_validation.js": "phase2Validation",
     "17_external_intelligence_phase3_validation.js": "phase3Validation",
     "17_external_intelligence_phase4_validation.js": "phase4Validation",
-    "17_external_intelligence_phase4_real_runtime_validation.js": "phase4RealRuntimeValidation"
+    "17_external_intelligence_phase4_real_runtime_validation.js": "phase4RealRuntimeValidation",
+    "17_external_intelligence_phase4_android_validation.js": "phase4AndroidValidation"
   };
 
   const contractVersions = {
