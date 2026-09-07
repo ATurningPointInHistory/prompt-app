@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 13_local_first_repository_version_manifest.js
    REPOSITORY-010 Local-First Repository Coordination
-   Release: 1.16.0
-   Phase 17: Cross-Device Operational Hardening
-   Architecture Baseline: DECISION-001..015 / FROZEN
+   Release: 1.17.3
+   Phase 18: Guided Repository Operations
+   Architecture Baseline: DECISION-001..015 / FROZEN + Additive Guided Operations
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.16.0";
+  const RELEASE_VERSION = "1.17.3";
   const BASELINE_VERSION = "1.0.0";
 
   function deepFreeze(value) {
@@ -67,7 +67,10 @@
     replicaBaselineProvisioning: "1.0.0",
     pickerSafeTransport: "1.0.0",
     operationalInitialization: "1.0.0",
-    phase17Validation: "1.0.0"
+    phase17Validation: "1.0.0",
+    guidedOperations: "1.0.3",
+    guidedOperationsUi: "1.0.3",
+    phase18Validation: "1.0.3"
   };
 
   const fileModules = {
@@ -120,7 +123,10 @@
     "13_local_first_repository_sync_engine.js": "syncEngine",
     "13_local_first_repository_operational_initialization.js": "operationalInitialization",
     "13_local_first_repository_phase16_validation.js": "phase16Validation",
-    "13_local_first_repository_phase17_validation.js": "phase17Validation"
+    "13_local_first_repository_phase17_validation.js": "phase17Validation",
+    "13_local_first_repository_guided_operations.js": "guidedOperations",
+    "13_local_first_repository_guided_operations_ui.js": "guidedOperationsUi",
+    "13_local_first_repository_phase18_validation.js": "phase18Validation"
   };
 
   const contractVersions = {
@@ -221,22 +227,25 @@
     componentName: "Local-First Repository Coordination",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 17 Cross-Device Operational Hardening",
-      architectureStatus: "DECISION-001..015 / FORMALLY FROZEN",
-      implementationStatus: "PHASE 17 v1.16.0 / REPLICA BASELINE PROVISIONING + PICKER-SAFE TRANSPORT + UNIFIED RELOAD-SAFE INITIALIZATION",
+      implementationPhase: "Phase 18 Guided Repository Operations",
+      architectureStatus: "DECISION-001..015 / FORMALLY FROZEN; PHASE18 ADDITIVE OPERATION LAYER",
+      implementationStatus: "PHASE 18 v1.17.2 / GUIDED REPOSITORY OPERATIONS + UI COLLISION / DARK-MODE CONTRAST HOTFIX + DIRECT USER-GESTURE PICKER BINDING + EXPLICIT AUTHORITY UI",
       priorValidatedBaseline: {
-        version: "1.15.0",
-        phase: 16,
+        version: "1.16.0",
+        phase: 17,
         crossDeviceRealValidationPassed: true,
         pcRealValidationPassed: true,
         androidRealValidationPassed: true,
         preDeviceValidationPassed: true,
+        persistenceReloadValidationPassed: true,
         phase14Complete: true,
         phase15Complete: true,
         phase16Complete: true,
-        canonicalRevisionId: "REPOSITORY010-CANONICAL-REVISION-0011",
+        phase17Complete: true,
+        phase17Frozen: true,
+        canonicalRevisionId: "REPOSITORY010-CANONICAL-REVISION-0016",
         health: 100,
-        status: "REPOSITORY-010 Phase 16 COMPLETE / FROZEN + Canonical 0011"
+        status: "REPOSITORY-010 Phase 17 COMPLETE / FROZEN + Canonical 0016"
       },
       decisionIds: [
         "REPOSITORY-010-DECISION-001",
@@ -257,8 +266,8 @@
       ]
     },
     implementation: {
-      phase: 17,
-      phaseName: "Cross-Device Operational Hardening",
+      phase: 18,
+      phaseName: "Guided Repository Operations",
       phase1PersistenceImplemented: false,
       persistenceImplemented: true,
       androidIndexedDBPersistenceImplemented: true,
@@ -366,7 +375,17 @@
       hiddenDirectoryPickerFallbackAllowed: false,
       unifiedReloadSafeInitializationImplemented: true,
       operationalEvidenceImplemented: true,
-      phase17DevelopmentReleasePlanImplemented: true
+      phase17DevelopmentReleasePlanImplemented: true,
+      guidedRepositoryOperationsImplemented: true,
+      guidedRepositoryUiImplemented: true,
+      dynamicCanonicalResolverImplemented: true,
+      consolePasteRequiredForNormalUse: false,
+      phase18BootstrapDevelopmentReleaseImplemented: true,
+      phase18DirectUserGesturePickerBindingHotfixImplemented: true,
+      phase18FloatingLauncherCollisionHotfixImplemented: true,
+      phase18DarkModeContrastHotfixImplemented: true,
+      phase18DevelopmentUpdateControlsImplemented: true,
+      phase18DevelopmentUpdateFlowImplemented: true
     },
     authority: {
       model: "logical-authority-canonical-node-separation",
@@ -502,13 +521,21 @@
         staticValidation: "required",
         persistenceReloadValidation: "required",
         developmentReleaseV5: "required",
-        canonical0012Promotion: "required",
+        canonical0016Promotion: "required",
         replicaBaselineProvisioning: "required",
         pickerSafeTransportValidation: "required",
         pcRealValidation: "required",
         androidRealValidation: "required",
         crossDeviceRealValidation: "required",
         actualSyncTransfer: "required"
+      },
+      phase18RequiredGateSet: {
+        staticValidation: "required",
+        guidedUiValidation: "required",
+        developmentReleaseV5: "required",
+        explicitCanonicalPromotion: "required",
+        reloadValidation: "required",
+        consoleFreeOperationalFlow: "required"
       },
       syncCandidateValidationLayers: [
         "V1 Local Validation",
@@ -578,7 +605,10 @@
       phase17AutomaticAcceptanceAllowed: false,
       phase17AutomaticConflictWinnerAllowed: false,
       phase17AutomaticBaselinePromotionAllowed: false,
-      phase17DevelopmentReleaseExplicitPromotionRequired: true
+      phase17DevelopmentReleaseExplicitPromotionRequired: true,
+      phase18ProjectOwnerExplicitActionsRequired: true,
+      phase18AutomaticAcceptanceAllowed: false,
+      phase18AutomaticBaselinePromotionAllowed: false
     },
     safety: {
       directRepositoryMutationAllowed: false,
@@ -643,7 +673,14 @@
       phase17TransportCanonicalMutationAuthority: false,
       replicaBaselineGrantsAuthority: false,
       operationalInitializationGrantsAuthority: false,
-      pickerBindingGrantsAuthority: false
+      pickerBindingGrantsAuthority: false,
+      phase18DirectRepositoryMutationAllowed: false,
+      phase18AutomaticSourceWriteAllowed: false,
+      phase18AutomaticAcceptanceAllowed: false,
+      phase18AutomaticConflictWinnerAllowed: false,
+      phase18AutomaticBaselinePromotionAllowed: false,
+      phase18AutomaticGitHubReflectionAllowed: false,
+      phase18GuidedControllerGrantsAuthority: false
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,

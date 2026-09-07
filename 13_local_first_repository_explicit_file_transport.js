@@ -290,11 +290,173 @@
 
   async function reconstructReceiverSession(envelope) {
     const id = envelope.syncSessionId;
+    const sourceSessionSnapshot = internal.isPlainObject(envelope.sourceSessionSnapshot) ? envelope.sourceSessionSnapshot : {};
+    const differenceId = internal.text(sourceSessionSnapshot.differenceId, "");
+    const transferPackage = envelope.v2Envelope && internal.isPlainObject(envelope.v2Envelope.transferPackage)
+      ? envelope.v2Envelope.transferPackage
+      : null;
+
+    if (!differenceId) {
+      return internal.buildResult(false, "REPOSITORY010_RECEIVER_DIFFERENCE_ID_REQUIRED", "Blocked", { syncSessionId: id || null });
+    }
+    if (!transferPackage || !internal.isPlainObject(transferPackage.integritySnapshot)) {
+      return internal.buildResult(false, "REPOSITORY010_RECEIVER_DIFFERENCE_SOURCE_INTEGRITY_REQUIRED", "Blocked", { syncSessionId: id || null, differenceId: differenceId });
+    }
+
+    function hashValue(value) {
+      if (internal.isPlainObject(value)) return internal.text(value.sha256, "");
+      return internal.text(value, "");
+    }
+
+    function changedFiles(sourceHashes, targetHashes) {
+      const source = internal.isPlainObject(sourceHashes) ? sourceHashes : {};
+      const target = internal.isPlainObject(targetHashes) ? targetHashes : {};
+      const keys = Array.from(new Set(Object.keys(source).concat(Object.keys(target)))).sort();
+      return keys.filter(function changed(key) {
+        return hashValue(source[key]) !== hashValue(target[key]);
+      });
+    }
+
+    function classifyDifference(sourceRevisionId, targetRevisionId, baseRevisionId, hasDifference) {
+      if (!hasDifference) return "no-change";
+      if (sourceRevisionId && targetRevisionId && sourceRevisionId === targetRevisionId) return "diverged";
+      if (baseRevisionId && targetRevisionId === baseRevisionId && sourceRevisionId && sourceRevisionId !== baseRevisionId) return "source-ahead";
+      if (baseRevisionId && sourceRevisionId === baseRevisionId && targetRevisionId && targetRevisionId !== baseRevisionId) return "target-ahead";
+      if (sourceRevisionId && targetRevisionId && sourceRevisionId !== targetRevisionId) return "diverged";
+      return "unknown";
+    }
+
+    async function ensureReceiverDifferenceRecord(currentSession) {
+      const existingDifference = await namespace.getPersistedLocalFirstRepositoryRecord("syncDifference", differenceId);
+      if (existingDifference) {
+        const validation = namespace.validateContract("syncDifferenceDescriptor", existingDifference);
+        const sameBinding = validation.valid === true &&
+          existingDifference.syncSessionId === currentSession.syncSessionId &&
+          existingDifference.projectId === currentSession.projectId &&
+          existingDifference.repositoryId === currentSession.repositoryId &&
+          existingDifference.sourceNodeId === envelope.sourceNodeId &&
+          existingDifference.targetNodeId === envelope.targetNodeId &&
+          existingDifference.baseRevisionId === envelope.baseRevisionId &&
+          existingDifference.sourceRevisionId === envelope.sourceRevisionId &&
+          existingDifference.targetRevisionId === envelope.targetRevisionId;
+        if (!sameBinding) {
+          return internal.buildResult(false, "REPOSITORY010_RECEIVER_DIFFERENCE_BINDING_MISMATCH", "Blocked", {
+            differenceId: differenceId,
+            existingDifference: internal.clone(existingDifference),
+            validation: validation
+          });
+        }
+        if (state.syncDifferenceDescriptors instanceof Map) {
+          state.syncDifferenceDescriptors.set(differenceId, internal.clone(existingDifference));
+        }
+        state.lastSyncDifferenceId = differenceId;
+        internal.touch();
+        return internal.buildResult(true, "REPOSITORY010_RECEIVER_DIFFERENCE_REUSED", "Verified", {
+          syncDifference: internal.clone(existingDifference),
+          reused: true,
+          persisted: true,
+          authorityEffect: "none"
+        });
+      }
+
+      const integrityRecords = await namespace.listPersistedLocalFirstRepositoryRecords("integrityRecord");
+      const targetIntegrity = (Array.isArray(integrityRecords) ? integrityRecords : []).find(function findTarget(record) {
+        return record && record.revisionId === envelope.baseRevisionId;
+      }) || null;
+      if (!targetIntegrity) {
+        return internal.buildResult(false, "REPOSITORY010_RECEIVER_DIFFERENCE_TARGET_INTEGRITY_REQUIRED", "Blocked", {
+          differenceId: differenceId,
+          baseRevisionId: envelope.baseRevisionId
+        });
+      }
+
+      const sourceIntegrity = transferPackage.integritySnapshot;
+      const sourceHashes = internal.isPlainObject(sourceIntegrity.fileHashes) ? sourceIntegrity.fileHashes : {};
+      const targetHashes = internal.isPlainObject(targetIntegrity.fileHashes) ? targetIntegrity.fileHashes : {};
+      const files = changedFiles(sourceHashes, targetHashes);
+      const sourceRevisionId = internal.text(envelope.sourceRevisionId, "") || null;
+      const targetRevisionId = internal.text(envelope.targetRevisionId, targetIntegrity.revisionId || "") || null;
+      const baseRevisionId = internal.text(envelope.baseRevisionId, currentSession.baseRevisionId || "");
+      const sourceManifestHash = internal.text(sourceIntegrity.manifestHash, "") || null;
+      const targetManifestHash = internal.text(targetIntegrity.manifestHash, "") || null;
+      const sourceScriptSetHash = internal.text(sourceIntegrity.scriptSetHash, "") || null;
+      const targetScriptSetHash = internal.text(targetIntegrity.scriptSetHash, "") || null;
+      const sourceRepositoryStateHash = internal.text(sourceIntegrity.repositoryStateHash, "") || null;
+      const targetRepositoryStateHash = internal.text(targetIntegrity.repositoryStateHash, "") || null;
+      const hashDifference = sourceManifestHash !== targetManifestHash ||
+        sourceScriptSetHash !== targetScriptSetHash ||
+        Boolean(sourceRepositoryStateHash && targetRepositoryStateHash && sourceRepositoryStateHash !== targetRepositoryStateHash);
+      const revisionDifference = Boolean(sourceRevisionId && targetRevisionId && sourceRevisionId !== targetRevisionId);
+      const hasDifference = Boolean(hashDifference || files.length > 0 || revisionDifference);
+      const baseRevisionMatch = Boolean(!targetRevisionId || targetRevisionId === baseRevisionId);
+      const differenceType = classifyDifference(sourceRevisionId, targetRevisionId, baseRevisionId, hasDifference);
+      const transitionHistory = Array.isArray(sourceSessionSnapshot.transitionHistory) ? sourceSessionSnapshot.transitionHistory : [];
+      const differenceTransition = transitionHistory.find(function findDifferenceTransition(entry) {
+        return entry && (entry.to === "DIFFERENCE_DETECTED" || entry.status === "DIFFERENCE_DETECTED");
+      }) || null;
+
+      const record = {
+        differenceId: differenceId,
+        syncSessionId: currentSession.syncSessionId,
+        projectId: currentSession.projectId,
+        repositoryId: currentSession.repositoryId,
+        sourceNodeId: currentSession.sourceNodeId,
+        targetNodeId: currentSession.targetNodeId,
+        baseRevisionId: baseRevisionId,
+        sourceRevisionId: sourceRevisionId,
+        targetRevisionId: targetRevisionId,
+        sourceManifestHash: sourceManifestHash,
+        targetManifestHash: targetManifestHash,
+        sourceScriptSetHash: sourceScriptSetHash,
+        targetScriptSetHash: targetScriptSetHash,
+        sourceRepositoryStateHash: sourceRepositoryStateHash,
+        targetRepositoryStateHash: targetRepositoryStateHash,
+        differenceType: differenceType,
+        hasDifference: hasDifference,
+        baseRevisionMatch: baseRevisionMatch,
+        changedFiles: files,
+        conflictCandidate: differenceType === "diverged" || baseRevisionMatch === false,
+        authorityEffect: "none",
+        canonicalMutationPerformed: false,
+        syncEngineInvoked: false,
+        createdAt: internal.text(differenceTransition && (differenceTransition.transitionedAt || differenceTransition.at || differenceTransition.createdAt), internal.text(envelope.createdAt, internal.nowIso())),
+        immutable: true
+      };
+
+      const validation = namespace.validateContract("syncDifferenceDescriptor", record);
+      if (!validation.valid) {
+        return internal.buildResult(false, "REPOSITORY010_RECEIVER_DIFFERENCE_CONTRACT_INVALID", "Blocked", {
+          record: record,
+          validation: validation
+        });
+      }
+      const persisted = await namespace.persistLocalFirstRepositoryRecord("syncDifference", record);
+      if (!persisted || persisted.ok !== true) return persisted;
+      if (state.syncDifferenceDescriptors instanceof Map) {
+        state.syncDifferenceDescriptors.set(differenceId, internal.clone(record));
+      }
+      state.lastSyncDifferenceId = differenceId;
+      internal.touch();
+      return internal.buildResult(true, "REPOSITORY010_RECEIVER_DIFFERENCE_PERSISTED", "Verified", {
+        syncDifference: internal.clone(record),
+        reused: false,
+        persisted: true,
+        authorityEffect: "none"
+      });
+    }
+
     let session = await namespace.getPersistedLocalFirstRepositoryRecord("syncSession", id);
     if (session) {
       const same = session.sourceNodeId === envelope.sourceNodeId && session.targetNodeId === envelope.targetNodeId && session.baseRevisionId === envelope.baseRevisionId && session.transferPackageId === envelope.transferPackageId;
       if (!same) return internal.buildResult(false, "REPOSITORY010_RECEIVER_SESSION_BINDING_MISMATCH", "Blocked", { existingSession: session, envelopeSessionId: id });
-      return internal.buildResult(true, "REPOSITORY010_RECEIVER_SESSION_REUSED", session.sessionStatus, { syncSession: session, reused: true });
+      const differenceReady = await ensureReceiverDifferenceRecord(session);
+      if (!differenceReady || differenceReady.ok !== true) return differenceReady;
+      return internal.buildResult(true, "REPOSITORY010_RECEIVER_SESSION_REUSED", session.sessionStatus, {
+        syncSession: session,
+        syncDifference: differenceReady.data.syncDifference,
+        differencePersisted: true,
+        reused: true
+      });
     }
     const created = await namespace.createLocalFirstRepositorySyncSession({
       syncSessionId: id,
@@ -309,11 +471,16 @@
       sessionStatus: "CREATED"
     });
     if (!created || created.ok !== true) return created;
+    session = created.data.syncSession;
+
+    const differenceReady = await ensureReceiverDifferenceRecord(session);
+    if (!differenceReady || differenceReady.ok !== true) return differenceReady;
+
     const path = ["OBSERVING", "DIFFERENCE_DETECTED", "CANDIDATE_READY", "TRANSFER_PREPARED", "TRANSFERRING"];
     for (const status of path) {
       const patch = {
-        differenceId: envelope.sourceSessionSnapshot.differenceId,
-        syncCandidateId: envelope.sourceSessionSnapshot.syncCandidateId,
+        differenceId: differenceId,
+        syncCandidateId: sourceSessionSnapshot.syncCandidateId,
         transferPackageId: envelope.transferPackageId,
         transportAttemptId: envelope.transportAttemptId,
         sourceRevisionId: envelope.sourceRevisionId,
@@ -324,7 +491,13 @@
       if (!transitioned || transitioned.ok !== true) return transitioned;
       session = transitioned.data.syncSession;
     }
-    return internal.buildResult(true, "REPOSITORY010_RECEIVER_SESSION_RECONSTRUCTED", "TRANSFERRING", { syncSession: session, reused: false, replayValidated: true });
+    return internal.buildResult(true, "REPOSITORY010_RECEIVER_SESSION_RECONSTRUCTED", "TRANSFERRING", {
+      syncSession: session,
+      syncDifference: differenceReady.data.syncDifference,
+      differencePersisted: true,
+      reused: false,
+      replayValidated: true
+    });
   }
 
   async function reconstructReceiverAttempt(envelope) {

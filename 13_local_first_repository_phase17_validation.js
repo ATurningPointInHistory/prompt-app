@@ -116,22 +116,69 @@
 
   async function runRealOperationalValidation() {
     const checks = [];
-    const refs = await namespace.listPersistedLocalFirstRepositoryRecords("replicaBaselineReference");
+    const provisionPackages = await namespace.listPersistedLocalFirstRepositoryRecords("replicaBaselineProvisionPackage");
+    const differences = await namespace.listPersistedLocalFirstRepositoryRecords("syncDifference");
     const sessions = await namespace.listPersistedLocalFirstRepositoryRecords("syncSession");
     const attempts = await namespace.listPersistedLocalFirstRepositoryRecords("transportAttempt");
     const receipts = await namespace.listPersistedLocalFirstRepositoryRecords("v2TransferReceipt");
     const v3 = await namespace.listPersistedLocalFirstRepositoryRecords("v3ConflictEvidence");
     const v4 = await namespace.listPersistedLocalFirstRepositoryRecords("v4TargetValidationEvidence");
-    const latestRef = (refs || []).sort(function (a, b) { return String(a.provisionedAt || "").localeCompare(String(b.provisionedAt || "")); }).slice(-1)[0] || null;
-    const awaiting = (sessions || []).filter(function (record) { return record.sessionStatus === "AWAITING_ACCEPTANCE"; }).slice(-1)[0] || null;
-    const verifiedAttempt = awaiting ? (attempts || []).filter(function (record) { return record.syncSessionId === awaiting.syncSessionId && record.attemptStatus === "VERIFIED"; }).slice(-1)[0] : null;
-    check(checks, "Replica Baseline Reference exists", Boolean(latestRef), latestRef, "Real Device");
-    check(checks, "Replica Reference grants no authority", Boolean(latestRef && latestRef.authorityEffect === "none" && latestRef.mutationAuthorityGranted === false), latestRef, "Authority");
+    const awaiting = (sessions || []).filter(function (record) { return record.sessionStatus === "AWAITING_ACCEPTANCE"; }).sort(function (a, b) { return String(a.updatedAt || a.createdAt || "").localeCompare(String(b.updatedAt || b.createdAt || "")); }).slice(-1)[0] || null;
+    const verifiedAttempt = awaiting ? (attempts || []).filter(function (record) { return record.syncSessionId === awaiting.syncSessionId && record.attemptStatus === "VERIFIED"; }).sort(function (a, b) { return String(a.updatedAt || a.completedAt || a.startedAt || "").localeCompare(String(b.updatedAt || b.completedAt || b.startedAt || "")); }).slice(-1)[0] : null;
+    const verifiedReceipt = verifiedAttempt ? (receipts || []).filter(function (record) { return record.receiptId === verifiedAttempt.receiptId && record.v2TransferIntegrityValidated === true; }).slice(-1)[0] || null : null;
+    const verifiedV3 = verifiedAttempt ? (v3 || []).filter(function (record) { return record.conflictEvidenceId === verifiedAttempt.v3EvidenceId && record.baseRevisionMatch === true && record.conflictDetected === false && record.blockingConflict === false; }).slice(-1)[0] || null : null;
+    const verifiedV4 = verifiedAttempt ? (v4 || []).filter(function (record) { return record.v4EvidenceId === verifiedAttempt.v4EvidenceId && record.v4TargetEnvironmentValidated === true && record.blockingTargetDrift === false; }).slice(-1)[0] || null : null;
+    const difference = awaiting ? (differences || []).filter(function (record) { return record.differenceId === awaiting.differenceId; }).slice(-1)[0] || null : null;
+    const senderEvidence = verifiedAttempt && verifiedAttempt.transportEnvelope && verifiedAttempt.transportEnvelope.v2Envelope && verifiedAttempt.transportEnvelope.v2Envelope.senderEvidence
+      ? verifiedAttempt.transportEnvelope.v2Envelope.senderEvidence
+      : null;
+    const provisionPackage = awaiting ? (provisionPackages || []).filter(function (record) {
+      return record &&
+        record.canonicalRevisionId === awaiting.baseRevisionId &&
+        record.targetReplicaNodeId === "REPOSITORY010-ANDROID-VALIDATED-REPLICA" &&
+        record.authorityEffect === "none" &&
+        record.replicaBaselineReference &&
+        record.replicaBaselineReference.canonicalRevisionId === record.canonicalRevisionId;
+    }).sort(function (a, b) { return String(a.createdAt || "").localeCompare(String(b.createdAt || "")); }).slice(-1)[0] || null : null;
+    const provisionReference = provisionPackage && provisionPackage.replicaBaselineReference ? provisionPackage.replicaBaselineReference : null;
+    const androidProvisionEvidenceBound = Boolean(
+      provisionPackage &&
+      provisionReference &&
+      senderEvidence &&
+      senderEvidence.realDeviceClaim === "android" &&
+      /Android/i.test(String(senderEvidence.userAgent || "")) &&
+      verifiedAttempt &&
+      verifiedAttempt.baseRevisionId === provisionPackage.canonicalRevisionId &&
+      awaiting &&
+      awaiting.baseRevisionId === provisionPackage.canonicalRevisionId
+    );
+    const replicaAuthoritySafe = Boolean(
+      provisionPackage &&
+      provisionPackage.authorityEffect === "none" &&
+      provisionPackage.canonicalMutationRequested === false &&
+      provisionPackage.automaticAcceptanceRequested === false &&
+      provisionPackage.automaticPromotionRequested === false &&
+      provisionReference &&
+      provisionReference.identityGrantsAuthority === false &&
+      provisionReference.mutationAuthorityGranted === false &&
+      provisionReference.canonicalMutationPerformed === false &&
+      provisionReference.authorityEffect === "none"
+    );
+    const precisionVerified = Boolean(
+      difference &&
+      difference.baseRevisionId === "REPOSITORY010-CANONICAL-REVISION-0013" &&
+      Array.isArray(difference.changedFiles) &&
+      difference.changedFiles.length === 1 &&
+      difference.changedFiles[0] === "13_local_first_repository_sync_engine.js"
+    );
+    check(checks, "Replica Baseline Provision evidence bound", androidProvisionEvidenceBound, { provisionPackage: provisionPackage, senderEvidence: senderEvidence }, "Real Device");
+    check(checks, "Replica Provision grants no authority", replicaAuthoritySafe, { provisionPackage: provisionPackage, replicaBaselineReference: provisionReference }, "Authority");
     check(checks, "AWAITING_ACCEPTANCE Session exists", Boolean(awaiting), awaiting, "Cross Device");
     check(checks, "Transport Attempt VERIFIED", Boolean(verifiedAttempt), verifiedAttempt, "Cross Device");
-    check(checks, "V2 Receipt persisted", Boolean(verifiedAttempt && receipts.some(function (record) { return record.receiptId === verifiedAttempt.receiptId && record.v2TransferIntegrityValidated === true; })), verifiedAttempt, "V2");
-    check(checks, "V3 Evidence persisted", Boolean(verifiedAttempt && v3.some(function (record) { return record.conflictEvidenceId === verifiedAttempt.v3EvidenceId && record.baseRevisionMatch === true && record.conflictDetected === false; })), verifiedAttempt, "V3");
-    check(checks, "V4 Evidence persisted", Boolean(verifiedAttempt && v4.some(function (record) { return record.v4EvidenceId === verifiedAttempt.v4EvidenceId && record.v4TargetEnvironmentValidated === true; })), verifiedAttempt, "V4");
+    check(checks, "V2 Receipt persisted", Boolean(verifiedReceipt), verifiedReceipt, "V2");
+    check(checks, "V3 Evidence persisted", Boolean(verifiedV3), verifiedV3, "V3");
+    check(checks, "V4 Evidence persisted", Boolean(verifiedV4), verifiedV4, "V4");
+    check(checks, "Sync Difference precision = exactly one target file", precisionVerified, difference, "Cross Device");
     check(checks, "No Canonical mutation", Boolean(awaiting && awaiting.canonicalMutationPerformed === false), awaiting, "Authority");
     check(checks, "No automatic acceptance", Boolean(awaiting && awaiting.automaticAcceptancePerformed === false), awaiting, "Authority");
     check(checks, "PC real environment", /Windows|Macintosh|Linux x86_64/i.test(global.navigator && global.navigator.userAgent || ""), global.navigator && global.navigator.userAgent || null, "Real Device");
@@ -139,14 +186,15 @@
     result.phase17Complete = result.releaseAllowed === true;
     result.crossDeviceOperationalHardeningImplemented = true;
     result.replicaBaselineProvisioningImplemented = true;
-    result.replicaBaselineProvisioningRealDeviceValidated = Boolean(latestRef);
+    result.replicaBaselineProvisioningRealDeviceValidated = androidProvisionEvidenceBound;
     result.pickerSafeTransportImplemented = true;
     result.pickerUserGestureIssueResolved = result.releaseAllowed === true;
     result.unifiedReloadSafeInitializationImplemented = true;
     result.reloadRecoveryRealDeviceValidated = state.phase17PersistenceReloadValidationPassed === true;
     result.androidToPcRealPushImplemented = true;
-    result.crossDeviceRealSyncImplemented = Boolean(awaiting && verifiedAttempt);
+    result.crossDeviceRealSyncImplemented = Boolean(awaiting && verifiedAttempt && verifiedReceipt && verifiedV3 && verifiedV4);
     result.crossDeviceRealSyncToAcceptanceBoundaryImplemented = Boolean(awaiting);
+    result.syncDifferencePrecisionValidated = precisionVerified;
     result.pcToAndroidRealPullImplemented = false;
     result.canonicalMutationAuthority = false;
     result.canonicalMutationPerformed = false;

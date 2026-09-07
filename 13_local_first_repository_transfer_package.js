@@ -41,9 +41,25 @@
   }
 
   function buildIntegritySnapshot(integrity) {
+    const sourceFileHashes = internal.isPlainObject(integrity.fileHashes) ? integrity.fileHashes : {};
+    const normalizedFileHashes = {};
+
+    Object.keys(sourceFileHashes).forEach(function normalizeFileHash(key) {
+      const entry = sourceFileHashes[key];
+      if (typeof entry === "string") {
+        normalizedFileHashes[key] = entry;
+        return;
+      }
+      if (internal.isPlainObject(entry) && typeof entry.sha256 === "string") {
+        normalizedFileHashes[key] = entry.sha256;
+        return;
+      }
+      normalizedFileHashes[key] = "";
+    });
+
     return {
       hashAlgorithm: integrity.hashAlgorithm,
-      fileHashes: internal.clone(integrity.fileHashes || {}),
+      fileHashes: normalizedFileHashes,
       manifestHash: integrity.manifestHash,
       scriptSetHash: integrity.scriptSetHash,
       contentHash: integrity.contentHash,

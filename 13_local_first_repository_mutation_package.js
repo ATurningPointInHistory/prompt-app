@@ -557,7 +557,7 @@
   }
 
   function phase11ReadOnlyBridgeFixture() {
-    return "REPOSITORY010_PHASE11_READ_ONLY_BEFORE";
+    return "REPOSITORY010_PHASE11_READ_ONLY_AFTER";
   }
 
   function getMutationPackageStatus() {
