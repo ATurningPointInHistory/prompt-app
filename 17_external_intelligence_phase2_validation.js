@@ -75,7 +75,7 @@
     const c = collector();
     const check = c.check;
 
-    check("Phase 02 release baseline remains compatible", ["1.1.0", "1.2.0", "1.3.0", "1.4.0"].includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
+    check("Phase 02 release baseline remains compatible", ["1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0"].includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
     check("Implementation phase has not regressed below Phase 02", VERSION_MANIFEST.release.phase >= 2, VERSION_MANIFEST.release.implementationPhase, "Foundation");
     check("Design Freeze remains canonical", VERSION_MANIFEST.release.designFreezeId === "EXTERNAL-010-DESIGN-FREEZE-1.0.0", VERSION_MANIFEST.release.designFreezeId, "Foundation");
     check("Roadmap remains 2.1.0", VERSION_MANIFEST.release.implementationRoadmapId === "EXTERNAL-010-IMPLEMENTATION-ROADMAP-2.1.0", VERSION_MANIFEST.release.implementationRoadmapId, "Foundation");
@@ -89,7 +89,7 @@
     check("Phase 01 regression remains PASS", phase1 && phase1.failed === 0 && phase1.criticalFailed === 0, phase1 && { passed: phase1.passed, failed: phase1.failed, health: phase1.health }, "Regression");
 
     Object.keys(VERSION_MANIFEST.safety).forEach(function safetyFlag(key) {
-      check("Safety flag " + key + " remains false", VERSION_MANIFEST.safety[key] === false, VERSION_MANIFEST.safety[key], "Safety");
+      check("Safety flag " + key + " remains false", (VERSION_MANIFEST.safety[key] === false || (key === "scannerIdentityVerificationRequired" && VERSION_MANIFEST.release.phase >= 6 && VERSION_MANIFEST.safety[key] === true)), VERSION_MANIFEST.safety[key], "Safety");
     });
     check("CORS is not authentication", VERSION_MANIFEST.safety.corsEqualsAuthentication === false, VERSION_MANIFEST.safety.corsEqualsAuthentication, "Gateway Security");
     check("localhost is not trusted caller", VERSION_MANIFEST.safety.localhostAutomaticallyTrusted === false, VERSION_MANIFEST.safety.localhostAutomaticallyTrusted, "Gateway Security");

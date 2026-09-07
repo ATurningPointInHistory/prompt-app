@@ -142,7 +142,7 @@
     const uniqueSuffix = Date.now().toString(36).toUpperCase();
 
     try {
-      check("Release Version is compatible with Phase 04 baseline", ["1.3.0", "1.4.0"].includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
+      check("Release Version is compatible with Phase 04 baseline", ["1.3.0", "1.4.0", "1.5.0"].includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
       check("Implementation Phase is Phase 04 or later", VERSION_MANIFEST.release.phase >= 4, VERSION_MANIFEST.release.implementationPhase, "Foundation");
       check("Design Freeze remains canonical", VERSION_MANIFEST.release.designFreezeId === "EXTERNAL-010-DESIGN-FREEZE-1.0.0", VERSION_MANIFEST.release.designFreezeId, "Foundation");
       check("Roadmap remains 2.1.0", VERSION_MANIFEST.release.implementationRoadmapId === "EXTERNAL-010-IMPLEMENTATION-ROADMAP-2.1.0", VERSION_MANIFEST.release.implementationRoadmapId, "Foundation");
@@ -157,7 +157,7 @@
       const phase3 = await namespace.runExternalIntelligencePhase3Validation();
       check("Phase 03 regression remains PASS", phase3.failed === 0 && phase3.health === 100, { passed: phase3.passed, failed: phase3.failed, health: phase3.health }, "Regression");
 
-      Object.keys(VERSION_MANIFEST.safety).forEach(function safetyFlag(key) { check("Safety flag " + key + " remains false", VERSION_MANIFEST.safety[key] === false, VERSION_MANIFEST.safety[key], "Safety"); });
+      Object.keys(VERSION_MANIFEST.safety).forEach(function safetyFlag(key) { check("Safety flag " + key + " remains false", (VERSION_MANIFEST.safety[key] === false || (key === "scannerIdentityVerificationRequired" && VERSION_MANIFEST.release.phase >= 6 && VERSION_MANIFEST.safety[key] === true)), VERSION_MANIFEST.safety[key], "Safety"); });
       check("Hybrid browser + local gateway architecture remains configured", VERSION_MANIFEST.gateway.loopbackOnly === true && VERSION_MANIFEST.acquisition.arbitraryUrlProxyAllowed === false, { gateway: VERSION_MANIFEST.gateway, acquisition: VERSION_MANIFEST.acquisition }, "Hybrid Routing");
       check("Unified acquisition contract uses finite retries", VERSION_MANIFEST.acquisition.maxRetryAttempts > 0 && VERSION_MANIFEST.acquisition.maxRetryAttempts <= 5, VERSION_MANIFEST.acquisition.maxRetryAttempts, "Acquisition Contract");
       check("Queue concurrency is finite", VERSION_MANIFEST.acquisition.concurrencyLimit > 0 && VERSION_MANIFEST.acquisition.concurrencyLimit <= 8, VERSION_MANIFEST.acquisition.concurrencyLimit, "Queue");
@@ -179,7 +179,7 @@
       check("Mock adapter has stable identity/version and is test-only", mockAdapter && mockAdapter.adapterVersion === "1.0.0" && mockAdapter.testOnly === true, mockAdapter, "Adapter Registry");
       check("Browser HTTP JSON adapter has no authority", browserAdapter && browserAdapter.sourceAuthorityGranted === false && browserAdapter.repositoryAuthorityGranted === false && browserAdapter.financialAuthorityGranted === false && browserAdapter.reliabilityAuthorityGranted === false, browserAdapter, "Adapter Registry");
       check("Gateway adapter is registered without enabling arbitrary proxy", gatewayAdapter && gatewayAdapter.arbitraryUrlAllowed === false, gatewayAdapter, "Adapter Registry");
-      check("Gateway public acquisition endpoint is explicitly versioned", VERSION_MANIFEST.gateway.publicAcquisitionEndpoint === "/v1/acquire/public" && ["1.2.0", "1.3.0"].includes(VERSION_MANIFEST.gateway.gatewayVersion), VERSION_MANIFEST.gateway, "Hybrid Routing");
+      check("Gateway public acquisition endpoint is explicitly versioned", VERSION_MANIFEST.gateway.publicAcquisitionEndpoint === "/v1/acquire/public" && ["1.2.0", "1.3.0", "1.4.0"].includes(VERSION_MANIFEST.gateway.gatewayVersion), VERSION_MANIFEST.gateway, "Hybrid Routing");
       check("Built-in governed Gateway acquisition bridge is available", typeof namespace.enableExternalIntelligenceGatewayAcquisitionBridge === "function" && typeof namespace.disableExternalIntelligenceGatewayAcquisitionBridge === "function", "built-in-bridge", "Hybrid Routing");
       check("Gateway acquisition still requires target allowlist and authority revalidation", VERSION_MANIFEST.acquisition.gatewayTargetAllowlistRequired === true && VERSION_MANIFEST.gateway.governedTargetAllowlistRequired === true, { acquisition: VERSION_MANIFEST.acquisition, gateway: VERSION_MANIFEST.gateway }, "Safety");
       check("Adapter acquire implementation is not exposed as normal public API", typeof namespace.api.invokeExternalIntelligenceAdapter !== "function" && typeof namespace.invokeExternalIntelligenceAdapter !== "function", "internal-only", "Adapter Registry");

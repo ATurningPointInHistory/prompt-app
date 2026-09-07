@@ -22,6 +22,18 @@
 
   function upper(value, fallback) { return internal.text(value, fallback || "").toUpperCase().replace(/[^A-Z0-9_:-]/g, "_"); }
 
+  const EVIDENCE_SENSITIVE_KEY = /(secret|token|password|credential|authorization|api[_-]?key|private[_-]?key|session[_-]?key)/i;
+  function stripSensitiveEvidenceFields(value) {
+    if (Array.isArray(value)) return value.map(stripSensitiveEvidenceFields);
+    if (!internal.isPlainObject(value)) return value;
+    const output = {};
+    Object.keys(value).forEach(function keepSafeEvidenceField(key) {
+      if (EVIDENCE_SENSITIVE_KEY.test(key)) return;
+      output[key] = stripSensitiveEvidenceFields(value[key]);
+    });
+    return output;
+  }
+
   function validateAdapterImplementation(adapter) {
     const errors = [];
     REQUIRED_METHODS.forEach(function required(name) { if (!adapter || typeof adapter[name] !== "function") errors.push("METHOD_REQUIRED:" + name); });
@@ -182,7 +194,7 @@
       normalizeResponseMetadata: function normalizeResponseMetadata(raw) { return internal.redactSensitive(raw && raw.responseMetadata || { status: raw && raw.status || 200, contentType: raw && raw.contentType || null, responseSize: raw && raw.responseSize || 0, providerRequestId: raw && raw.providerRequestId || null, rateLimitMetadata: {} }); },
       extractTemporalMetadata: function extractTemporalMetadata(raw) { return internal.clone(raw && raw.temporalMetadata || { observedAt: internal.nowIso(), publishedAt: null, availableAt: null, effectiveAt: null }); },
       sanitize: function sanitize(raw) { return internal.redactSensitive(raw); },
-      buildEvidenceInput: function buildEvidenceInput(context) { return { requestId: context.request.requestId, attemptId: context.attempt.attemptId, sourceId: context.request.sourceId, operationId: context.request.operationId, adapterId: context.adapter.adapterId, adapterVersion: context.adapter.adapterVersion, payload: internal.redactSensitive(context.raw && context.raw.payload), rawText: context.raw && typeof context.raw.rawText === "string" ? context.raw.rawText : internal.stableStringify(context.raw && context.raw.payload), responseMetadata: internal.clone(context.responseMetadata), temporalMetadata: internal.clone(context.temporalMetadata), persistenceAuthorityGranted: false }; }
+      buildEvidenceInput: function buildEvidenceInput(context) { return { requestId: context.request.requestId, attemptId: context.attempt.attemptId, sourceId: context.request.sourceId, operationId: context.request.operationId, adapterId: context.adapter.adapterId, adapterVersion: context.adapter.adapterVersion, payload: stripSensitiveEvidenceFields(internal.redactSensitive(context.raw && context.raw.payload)), rawText: context.raw && typeof context.raw.rawText === "string" ? context.raw.rawText : internal.stableStringify(context.raw && context.raw.payload), responseMetadata: internal.clone(context.responseMetadata), temporalMetadata: internal.clone(context.temporalMetadata), persistenceAuthorityGranted: false }; }
     };
   }
 

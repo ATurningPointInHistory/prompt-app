@@ -34,8 +34,8 @@
     let p5=null; let p4Android=null; let candidate=null; let blockedPersistence=null;
     try {
       const ua=global.navigator&&global.navigator.userAgent||"";
-      check("Release Version is 1.4.0",VERSION_MANIFEST.release.version==="1.4.0",VERSION_MANIFEST.release.version,"Foundation");
-      check("Gateway compatibility version is 1.3.0",VERSION_MANIFEST.gateway.gatewayVersion==="1.3.0",VERSION_MANIFEST.gateway.gatewayVersion,"Foundation");
+      check("Release Version is compatible with Phase 05 baseline",["1.4.0","1.5.0"].includes(VERSION_MANIFEST.release.version),VERSION_MANIFEST.release.version,"Foundation");
+      check("Gateway compatibility version is 1.3.0 or later supported",["1.3.0","1.4.0"].includes(VERSION_MANIFEST.gateway.gatewayVersion),VERSION_MANIFEST.gateway.gatewayVersion,"Foundation");
       check("Android real-device environment is detected",/Android/i.test(ua),ua,"Android Environment");
       check("Fetch API remains available",typeof global.fetch==="function",typeof global.fetch,"Android Environment");
       check("Web Crypto SHA-256 remains available",Boolean(global.crypto&&global.crypto.subtle&&typeof global.crypto.subtle.digest==="function"),Boolean(global.crypto&&global.crypto.subtle),"Android Environment");

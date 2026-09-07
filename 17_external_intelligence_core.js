@@ -73,6 +73,13 @@
         processingCheckpoints: new Map(),
         evidencePersistenceAdapter: null,
         latestPhase5Validation: null,
+        secretMetadataRegistry: new Map(),
+        trustedScannerRegistry: new Map(),
+        contentSecurityAssessments: new Map(),
+        dataLifecycleRecords: new Map(),
+        privacyAssessments: new Map(),
+        privacyIdentityLinks: new Map(),
+        latestPhase6Validation: null,
         sourceRiskAssessmentHook: null,
         termsAnalysisHook: null,
         auditPersistenceAdapter: null,
@@ -87,7 +94,7 @@
         updatedAt: null
       };
 
-  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles", "sourceRegistry", "sourceVersions", "sourceDiscoveryRecords", "sourceDiscoveryHistory", "controlledInspectionRecords", "resourceBudgets", "resourceBudgetHistory", "resourceUsageRecords",  "usagePolicies", "usagePolicyVersions", "activeUsagePolicyBySource", "sourceOperationContracts", "sourceOperationByKey", "acquisitionRequests", "acquisitionIdempotency", "acquisitionAttempts", "acquisitionAttemptOrder", "acquisitionResponses", "acquisitionErrors", "adapterRegistry", "adapterImplementations", "acquisitionRoutes", "acquisitionJobs", "acquisitionQueueCheckpoints", "rawEvidenceRecords", "acquisitionEvidenceRecords", "contentMetadataIndex", "processingCheckpoints"].forEach(function ensureMap(key) {
+  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles", "sourceRegistry", "sourceVersions", "sourceDiscoveryRecords", "sourceDiscoveryHistory", "controlledInspectionRecords", "resourceBudgets", "resourceBudgetHistory", "resourceUsageRecords",  "usagePolicies", "usagePolicyVersions", "activeUsagePolicyBySource", "sourceOperationContracts", "sourceOperationByKey", "acquisitionRequests", "acquisitionIdempotency", "acquisitionAttempts", "acquisitionAttemptOrder", "acquisitionResponses", "acquisitionErrors", "adapterRegistry", "adapterImplementations", "acquisitionRoutes", "acquisitionJobs", "acquisitionQueueCheckpoints", "rawEvidenceRecords", "acquisitionEvidenceRecords", "contentMetadataIndex", "processingCheckpoints", "secretMetadataRegistry", "trustedScannerRegistry", "contentSecurityAssessments", "dataLifecycleRecords", "privacyAssessments", "privacyIdentityLinks"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
   if (!Array.isArray(state.auditOrder)) state.auditOrder = [];
@@ -169,9 +176,15 @@
   }
 
   const SENSITIVE_KEY_PATTERN = /(secret|token|password|credential|authorization|api[_-]?key|private[_-]?key|session[_-]?key)/i;
+  const SAFE_SECRET_METADATA_KEYS = new Set([
+    "secretReferenceId", "secretType", "secretMetadata", "secretValueReturned",
+    "secretValueStored", "secretValueRedactionApplied", "secretValueFieldDetected",
+    "secretValueApiAvailable"
+  ]);
 
   function redactSensitive(value, keyHint) {
-    if (SENSITIVE_KEY_PATTERN.test(text(keyHint, ""))) return "[REDACTED]";
+    const safeKey = text(keyHint, "");
+    if (SENSITIVE_KEY_PATTERN.test(safeKey) && !SAFE_SECRET_METADATA_KEYS.has(safeKey)) return "[REDACTED]";
     if (Array.isArray(value)) return value.map(function redactArray(item) { return redactSensitive(item, ""); });
     if (!isPlainObject(value)) return value;
     const output = {};
@@ -213,6 +226,11 @@
       acquisitionEvidenceCount: state.acquisitionEvidenceRecords.size,
       uniqueContentCount: state.contentMetadataIndex.size,
       processingCheckpointCount: state.processingCheckpoints.size,
+      secretMetadataCount: state.secretMetadataRegistry.size,
+      trustedScannerCount: state.trustedScannerRegistry.size,
+      contentSecurityAssessmentCount: state.contentSecurityAssessments.size,
+      dataLifecycleRecordCount: state.dataLifecycleRecords.size,
+      privacyAssessmentCount: state.privacyAssessments.size,
       gateway: state.gatewayClientState ? { baseUrl: state.gatewayClientState.baseUrl || null, healthState: state.gatewayClientState.healthState || "UNKNOWN", sessionActive: Boolean(state.gatewayClientState.session && state.gatewayClientState.session.state === "ACTIVE"), lastCheckedAt: state.gatewayClientState.lastCheckedAt || null } : null,
       safety: clone(VERSION_MANIFEST.safety),
       updatedAt: state.updatedAt || null
@@ -240,7 +258,11 @@
         ["adapterRegistry", namespace.initializeExternalIntelligenceAdapterRegistry],
         ["sourceRouter", namespace.initializeExternalIntelligenceSourceRouter],
         ["acquisitionQueue", namespace.initializeExternalIntelligenceAcquisitionQueue],
-        ["evidencePersistence", namespace.initializeExternalIntelligenceEvidencePersistence]
+        ["evidencePersistence", namespace.initializeExternalIntelligenceEvidencePersistence],
+        ["secretGovernance", namespace.initializeExternalIntelligenceSecretGovernance],
+        ["externalContentSecurity", namespace.initializeExternalIntelligenceExternalContentSecurity],
+        ["dataLifecycle", namespace.initializeExternalIntelligenceDataLifecycle],
+        ["privacyIdentity", namespace.initializeExternalIntelligencePrivacyIdentity]
       ];
       for (const item of initializers) {
         const name = item[0];

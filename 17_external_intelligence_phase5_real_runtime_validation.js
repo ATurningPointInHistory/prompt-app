@@ -51,8 +51,8 @@
     const c = collector(); const check = c.check; const owned = [];
     let first = null; let second = null; let read = null; let integrity = null; let checkpoint = null; let p4pc = null; let p5 = null;
     try {
-      check("Release Version is 1.4.0", VERSION_MANIFEST.release.version === "1.4.0", VERSION_MANIFEST.release.version, "Foundation");
-      check("Gateway compatibility version is 1.3.0", VERSION_MANIFEST.gateway.gatewayVersion === "1.3.0", VERSION_MANIFEST.gateway.gatewayVersion, "Foundation");
+      check("Release Version is compatible with Phase 05 baseline", ["1.4.0", "1.5.0"].includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
+      check("Gateway compatibility version is 1.3.0 or later supported", ["1.3.0","1.4.0"].includes(VERSION_MANIFEST.gateway.gatewayVersion), VERSION_MANIFEST.gateway.gatewayVersion, "Foundation");
       const init = await namespace.initializeExternalIntelligenceFoundation();
       check("Phase 05 foundation initializes for PC real runtime", init && init.ok === true, init && init.code, "Foundation");
 
@@ -65,7 +65,7 @@
       const configured = namespace.configureExternalIntelligenceGatewayClient({ baseUrl: gatewayBaseUrl });
       check("Gateway client remains loopback-bound", configured.ok === true && /^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/i.test(configured.data.baseUrl), configured.data || configured.code, "Gateway");
       const health = await namespace.getExternalIntelligenceGatewayHealth();
-      check("Real Gateway health is READY at 1.3.0", health.ok === true && health.data.health && health.data.health.gatewayVersion === "1.3.0", health.data || health.code, "Gateway");
+      check("Real Gateway health is READY at supported Phase 05+ version", health.ok === true && health.data.health && ["1.3.0","1.4.0"].includes(health.data.health.gatewayVersion), health.data || health.code, "Gateway");
 
       const ownerApproval = namespace.setExternalIntelligenceAuthorityApprovalAdapter({ adapterId:"EXTERNAL-010-PHASE5-PC-OWNER-APPROVAL", requiresExplicitOwnerInteraction:true, async verifyApproval(){ return { approved:true, actorType:"Project Owner", interactionEvidenceId:"PHASE5-PC-OWNER-INTERACTION" }; } });
       check("Project Owner validation approval adapter configured", ownerApproval.ok === true, ownerApproval.data || ownerApproval.code, "Authority");

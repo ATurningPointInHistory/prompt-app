@@ -1,21 +1,23 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.4.0
-   Phase 05: Immutable Evidence / Storage / Incremental Persistence
+   Release: 1.5.0
+   Phase 06: Secrets / External Content Security / Privacy / Data Lifecycle
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.4.0";
+  const RELEASE_VERSION = "1.5.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
   const PHASE4_VERSION = "1.3.0";
   const PHASE5_VERSION = "1.4.0";
+  const PHASE6_VERSION = "1.5.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
+  const GATEWAY_PHASE6_VERSION = "1.4.0";
 
   function deepFreeze(value) {
     if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -49,7 +51,14 @@
     evidencePersistence: PHASE5_VERSION,
     phase5Validation: PHASE5_VERSION,
     phase5RealRuntimeValidation: PHASE5_VERSION,
-    phase5AndroidValidation: PHASE5_VERSION
+    phase5AndroidValidation: PHASE5_VERSION,
+    secretGovernance: PHASE6_VERSION,
+    externalContentSecurity: PHASE6_VERSION,
+    dataLifecycle: PHASE6_VERSION,
+    privacyIdentity: PHASE6_VERSION,
+    phase6Validation: PHASE6_VERSION,
+    phase6RealRuntimeValidation: PHASE6_VERSION,
+    phase6AndroidValidation: PHASE6_VERSION
   };
 
   const fileModules = {
@@ -78,7 +87,14 @@
     "17_external_intelligence_evidence_persistence.js": "evidencePersistence",
     "17_external_intelligence_phase5_validation.js": "phase5Validation",
     "17_external_intelligence_phase5_real_runtime_validation.js": "phase5RealRuntimeValidation",
-    "17_external_intelligence_phase5_android_validation.js": "phase5AndroidValidation"
+    "17_external_intelligence_phase5_android_validation.js": "phase5AndroidValidation",
+    "17_external_intelligence_secret_governance.js": "secretGovernance",
+    "17_external_intelligence_external_content_security.js": "externalContentSecurity",
+    "17_external_intelligence_data_lifecycle.js": "dataLifecycle",
+    "17_external_intelligence_privacy_identity.js": "privacyIdentity",
+    "17_external_intelligence_phase6_validation.js": "phase6Validation",
+    "17_external_intelligence_phase6_real_runtime_validation.js": "phase6RealRuntimeValidation",
+    "17_external_intelligence_phase6_android_validation.js": "phase6AndroidValidation"
   };
 
   const contractVersions = {
@@ -116,7 +132,12 @@
     acquisitionEvidenceRecord: PHASE5_VERSION,
     contentObjectMetadata: PHASE5_VERSION,
     processingCheckpoint: PHASE5_VERSION,
-    phase5ValidationResult: PHASE5_VERSION
+    phase5ValidationResult: PHASE5_VERSION,
+    secretMetadata: PHASE6_VERSION,
+    contentSecurityAssessment: PHASE6_VERSION,
+    dataLifecycleRecord: PHASE6_VERSION,
+    privacyAssessment: PHASE6_VERSION,
+    phase6ValidationResult: PHASE6_VERSION
   };
 
   const contractIds = {
@@ -154,7 +175,12 @@
     acquisitionEvidenceRecord: "EXTERNAL-010-CONTRACT-ACQUISITION-EVIDENCE",
     contentObjectMetadata: "EXTERNAL-010-CONTRACT-CONTENT-OBJECT",
     processingCheckpoint: "EXTERNAL-010-CONTRACT-PROCESSING-CHECKPOINT",
-    phase5ValidationResult: "EXTERNAL-010-CONTRACT-PHASE5-VALIDATION-RESULT"
+    phase5ValidationResult: "EXTERNAL-010-CONTRACT-PHASE5-VALIDATION-RESULT",
+    secretMetadata: "EXTERNAL-010-CONTRACT-SECRET-METADATA",
+    contentSecurityAssessment: "EXTERNAL-010-CONTRACT-CONTENT-SECURITY-ASSESSMENT",
+    dataLifecycleRecord: "EXTERNAL-010-CONTRACT-DATA-LIFECYCLE",
+    privacyAssessment: "EXTERNAL-010-CONTRACT-PRIVACY-ASSESSMENT",
+    phase6ValidationResult: "EXTERNAL-010-CONTRACT-PHASE6-VALIDATION-RESULT"
   };
 
   const safety = {
@@ -281,7 +307,82 @@
     aiGoalGenerationGrantsExecutionAuthority: false,
     aiGoalGenerationGrantsPaidAuthority: false,
     aiGoalGenerationGrantsFinancialAuthority: false,
-    aiGoalGenerationGrantsRepositoryAuthority: false
+    aiGoalGenerationGrantsRepositoryAuthority: false,
+
+    browserSecretStorageAllowed: false,
+    repositorySecretStorageAllowed: false,
+    memoSecretStorageAllowed: false,
+    evidenceSecretStorageAllowed: false,
+    secretExportWithProjectAllowed: false,
+    secretValueReturnedToBrowserAllowed: false,
+    secretInUnifiedRequestAllowed: false,
+    secretAvailabilityGrantsPaidAuthority: false,
+    secretAvailabilityGrantsFinancialAuthority: false,
+    automaticSecretDiscoveryAllowed: false,
+
+    externalContentGrantsInstructionAuthority: false,
+    externalContentGrantsToolAuthority: false,
+    externalContentGrantsSecretAuthority: false,
+    externalContentGrantsRepositoryAuthority: false,
+    externalContentGrantsFinancialAuthority: false,
+    externalContentGrantsScheduleAuthority: false,
+    externalContentMayDirectlyChangePolicy: false,
+    externalCodeAutoExecutionAllowed: false,
+    sanitizedContentAutomaticallyTrusted: false,
+    officialSourceGrantsInstructionAuthority: false,
+    highReliabilityGrantsInstructionAuthority: false,
+
+    externalBinaryAutoExecutionAllowed: false,
+    externalArchiveAutoExtractAllowed: false,
+    unsafeHtmlRenderingAllowed: false,
+    unvalidatedMimeTrustAllowed: false,
+    unlimitedPayloadSizeAllowed: false,
+    unlimitedArchiveExpansionAllowed: false,
+    unlimitedArchiveDepthAllowed: false,
+    archivePathTraversalAllowed: false,
+    parserArbitraryNetworkAccessAllowed: false,
+    parserRepositoryWriteAllowed: false,
+    parserSecretAccessAllowed: false,
+    arbitraryInternalNetworkAccessAllowed: false,
+    fileSchemeAccessAllowed: false,
+    redirectPolicyBypassAllowed: false,
+    externalLocalFileUploadAllowedByDefault: false,
+    downloadImpliesInstall: false,
+    downloadImpliesExecute: false,
+    malwareScanPassImpliesTrusted: false,
+    scanUnavailableImpliesClean: false,
+    securityUnknownImpliesSafe: false,
+    scannerAutoDiscoveryAllowed: false,
+    scannerAutoDownloadAllowed: false,
+    scannerAutoInstallAllowed: false,
+    unknownScannerExecutionAllowed: false,
+    scannerIdentityVerificationRequired: true,
+    scannerNameAloneGrantsTrust: false,
+    scannerCleanResultGrantsExecutionAuthority: false,
+    scannerCleanResultGrantsRepositoryAuthority: false,
+    scannerCleanResultGrantsFinancialAuthority: false,
+    securityPolicyAutoDowngradeAllowed: false,
+
+    mayAcquireEqualsMayStoreLongTerm: false,
+    mayStoreEqualsMayExport: false,
+    mayAnalyzeEqualsMayTrainModel: false,
+    mayCacheEqualsMayArchive: false,
+    immutableEqualsStoreForever: false,
+    rawRightsEqualsDerivedRights: false,
+    canCollectEqualsShouldCollect: false,
+    purposeAEqualsPurposeBUsageAuthority: false,
+    backupIsPolicyExempt: false,
+    policyChangeAllowsDeleteEverything: false,
+    retentionExpiredEqualsAlwaysDelete: false,
+    knowledgePromotionResetsRights: false,
+    aiMaySilentlyDeleteEvidence: false,
+
+    realPersonResolutionDefaultAllowed: false,
+    sensitiveAttributeInferenceDefaultAllowed: false,
+    crossPlatformIdentityLinkingDefaultAllowed: false,
+    reIdentificationDefaultAllowed: false,
+    publicVisibilityGrantsUnlimitedProfilingAuthority: false,
+    predictiveValueGrantsPrivacyAuthority: false
   };
 
   const authorityPolicy = {
@@ -314,7 +415,7 @@
 
   const gateway = {
     contractVersion: "1.0.0",
-    gatewayVersion: GATEWAY_PHASE5_VERSION,
+    gatewayVersion: GATEWAY_PHASE6_VERSION,
     defaultBaseUrl: "http://127.0.0.1:43110",
     loopbackOnly: true,
     defaultPort: 43110,
@@ -329,12 +430,16 @@
     probeEndpoint: "/v1/probe",
     runtimeEndpoint: "/v1/runtime",
     publicAcquisitionEndpoint: "/v1/acquire/public",
+    governedAcquisitionEndpoint: "/v1/acquire/governed",
+    secretStatusEndpoint: "/v1/secret/status",
     evidencePersistEndpoint: "/v1/evidence/persist",
     evidenceReadEndpoint: "/v1/evidence/read",
     evidenceIntegrityEndpoint: "/v1/evidence/integrity",
     processingCheckpointEndpoint: "/v1/evidence/checkpoint",
     localNetworkAddressSpace: "loopback",
     publicAcquisitionScope: "ACQUIRE_PUBLIC",
+    governedAcquisitionScope: "ACQUIRE_EXTERNAL",
+    secretMetadataScope: "READ_SECRET_METADATA",
     evidencePersistScope: "PERSIST_EVIDENCE",
     evidenceReadScope: "READ_EVIDENCE",
     governedTargetAllowlistRequired: true
@@ -449,6 +554,55 @@
     androidLocalSqlitePersistenceAvailable: false
   };
 
+  const secretGovernance = {
+    secretValueRuntime: "LOCAL_GATEWAY_ONLY",
+    browserReferenceOnly: true,
+    persistentSecretStorageTechnologyFixed: false,
+    defaultProvider: "EPHEMERAL_ENVIRONMENT_REFERENCE",
+    metadataFields: ["secretReferenceId", "secretType", "provider", "status", "createdAt", "updatedAt", "expiresAt"],
+    statuses: ["ACTIVE", "EXPIRED", "REVOKED", "DISABLED", "MISSING", "UNKNOWN"],
+    valuesReturnedToBrowser: false,
+    valuesIncludedInEvidence: false,
+    valuesIncludedInLogs: false,
+    valuesIncludedInProjectZip: false
+  };
+
+  const externalContentSecurity = {
+    defaultTrustClass: "UNTRUSTED_EXTERNAL",
+    defaultPayloadState: "QUARANTINED",
+    securityStates: ["QUARANTINED", "UNTRUSTED", "SANITIZED_UNTRUSTED", "REVIEW_REQUIRED", "BLOCKED", "UNKNOWN"],
+    rawEvidencePreservedBeforeInterpretation: true,
+    sanitizedViewIsDerived: true,
+    sanitizedAutomaticallyTrusted: false,
+    instructionAuthoritySeparated: true,
+    malwareScannerRequiredForTextJson: false,
+    unknownScannerRejected: true,
+    archiveAutoExtractAllowed: false,
+    binaryAutoExecuteAllowed: false,
+    parserIsolationRequiredForRiskyPayloads: true
+  };
+
+  const dataLifecycle = {
+    dataClasses: ["PUBLIC", "ACCOUNT_METADATA", "PERSONAL", "SENSITIVE", "DERIVED", "AGGREGATED", "UNKNOWN"],
+    lifecycleStates: ["ACTIVE", "REVIEW_REQUIRED", "RETENTION_EXPIRED", "PRESERVATION_HOLD", "DELETION_CANDIDATE", "TOMBSTONED", "DELETED_BY_POLICY", "UNKNOWN"],
+    retentionUnknownMeansUnlimited: false,
+    preservationHoldSupported: true,
+    automaticRawEvidenceDeletionAllowed: false,
+    exportRequiresIndependentPolicyCheck: true,
+    modelTrainingRequiresIndependentPolicyCheck: true,
+    externalAiTransmissionRequiresIndependentPolicyCheck: true
+  };
+
+  const privacy = {
+    defaultIdentityMode: "PSEUDONYMOUS_ACCOUNT",
+    privacyRiskStates: ["LOW", "MODERATE", "HIGH", "RESTRICTED", "PROHIBITED_BY_POLICY", "UNKNOWN"],
+    realPersonResolutionRestricted: true,
+    sensitiveAttributeInferenceRestricted: true,
+    crossPlatformLinkingCandidateOnly: true,
+    reIdentificationRestricted: true,
+    dataMinimizationRequired: true
+  };
+
   const manifest = {
     componentId: "EXTERNAL-010",
     componentName: "External Intelligence Platform",
@@ -457,8 +611,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 05 Immutable Evidence / Storage / Incremental Persistence",
-      phase: 5,
+      implementationPhase: "Phase 06 Secrets / External Content Security / Privacy / Data Lifecycle",
+      phase: 6,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -467,7 +621,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 05 Immutable Evidence / Storage / Incremental Persistence Implementation"
+      status: "Phase 06 Secrets / External Content Security / Privacy / Data Lifecycle Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -484,6 +638,10 @@
     usagePolicy: usagePolicy,
     acquisition: acquisition,
     persistence: persistence,
+    secretGovernance: secretGovernance,
+    externalContentSecurity: externalContentSecurity,
+    dataLifecycle: dataLifecycle,
+    privacy: privacy,
     implementation: {
       inspectBeforeImplement: true,
       contractFirst: true,
@@ -494,8 +652,10 @@
       phase4Allowed: true,
       phase4Complete: true,
       phase5Allowed: true,
-      phase5Complete: false,
-      phase6Allowed: false,
+      phase5Complete: true,
+      phase6Allowed: true,
+      phase6Complete: false,
+      phase7Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true

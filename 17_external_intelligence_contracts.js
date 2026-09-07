@@ -270,7 +270,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.1.0", "1.2.0", "1.3.0", "1.4.0"] }),
+        field("version", { required: true, type: "string", enum: ["1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0"] }),
         field("implementationPhase", { required: true, type: "string" }),
         field("passed", { required: true, type: "number" }),
         field("failed", { required: true, type: "number" }),
@@ -440,7 +440,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.2.0", "1.3.0", "1.4.0"] }),
+        field("version", { required: true, type: "string", enum: ["1.2.0", "1.3.0", "1.4.0", "1.5.0"] }),
         field("implementationPhase", { required: true, type: "string" }),
         field("decisionCoverage", { required: true, type: "number", enum: [54] }),
         field("passed", { required: true, type: "number" }),
@@ -666,7 +666,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.3.0", "1.4.0"] }),
+        field("version", { required: true, type: "string", enum: ["1.3.0", "1.4.0", "1.5.0"] }),
         field("implementationPhase", { required: true, type: "string" }),
         field("decisionCoverage", { required: true, type: "number", enum: [54] }),
         field("passed", { required: true, type: "number" }),
@@ -701,6 +701,27 @@
       key: "phase5ValidationResult", id: VERSION_MANIFEST.getContractId("phase5ValidationResult"), name: "EXTERNAL-010 Phase 05 Validation Result Contract", version: VERSION_MANIFEST.getContractVersion("phase5ValidationResult"), immutable: true,
       fields: [field("id",{required:true,type:"string"}),field("componentId",{required:true,type:"string",enum:["EXTERNAL-010"]}),field("version",{required:true,type:"string"}),field("implementationPhase",{required:true,type:"string"}),field("decisionCoverage",{required:true,type:"number",enum:[54]}),field("passed",{required:true,type:"number"}),field("failed",{required:true,type:"number"}),field("total",{required:true,type:"number"}),field("health",{required:true,type:"number"}),field("criticalFailed",{required:true,type:"number"}),field("status",{required:true,type:"string"}),field("releaseAllowed",{required:true,type:"boolean"}),field("phase5Complete",{required:true,type:"boolean"}),field("phase6Allowed",{required:true,type:"boolean"}),field("validatedAt",{required:true,type:"string"})]
     }
+    ,{
+      key: "secretMetadata", id: VERSION_MANIFEST.getContractId("secretMetadata"), name: "EXTERNAL-010 Secret Metadata Contract", version: VERSION_MANIFEST.getContractVersion("secretMetadata"), immutable: true,
+      fields: [field("secretReferenceId",{required:true,type:"string"}),field("secretType",{required:true,type:"string"}),field("provider",{required:true,type:"string"}),field("status",{required:true,type:"string"}),field("createdAt",{required:true,type:"string"}),field("updatedAt",{required:true,type:"string"}),field("expiresAt",{required:false,type:["string","null"]}),field("valueExposed",{required:true,type:"boolean",enum:[false]}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "contentSecurityAssessment", id: VERSION_MANIFEST.getContractId("contentSecurityAssessment"), name: "EXTERNAL-010 External Content Security Assessment Contract", version: VERSION_MANIFEST.getContractVersion("contentSecurityAssessment"), immutable: true,
+      fields: [field("securityAssessmentId",{required:true,type:"string"}),field("evidenceId",{required:true,type:["string","null"]}),field("sourceId",{required:true,type:["string","null"]}),field("contentHash",{required:true,type:["string","null"]}),field("trustClass",{required:true,type:"string"}),field("securityState",{required:true,type:"string"}),field("signals",{required:true,type:"array"}),field("instructionAuthorityGranted",{required:true,type:"boolean",enum:[false]}),field("toolAuthorityGranted",{required:true,type:"boolean",enum:[false]}),field("secretAuthorityGranted",{required:true,type:"boolean",enum:[false]}),field("repositoryAuthorityGranted",{required:true,type:"boolean",enum:[false]}),field("financialAuthorityGranted",{required:true,type:"boolean",enum:[false]}),field("scheduleAuthorityGranted",{required:true,type:"boolean",enum:[false]}),field("sanitizedAutomaticallyTrusted",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "dataLifecycleRecord", id: VERSION_MANIFEST.getContractId("dataLifecycleRecord"), name: "EXTERNAL-010 Data Lifecycle Contract", version: VERSION_MANIFEST.getContractVersion("dataLifecycleRecord"), immutable: true,
+      fields: [field("lifecycleRecordId",{required:true,type:"string"}),field("subjectType",{required:true,type:"string"}),field("subjectId",{required:true,type:"string"}),field("sourceId",{required:false,type:["string","null"]}),field("dataClass",{required:true,type:"string"}),field("purposeId",{required:true,type:"string"}),field("usagePolicyReference",{required:false,type:["string","null"]}),field("retentionPolicyReference",{required:false,type:["string","null"]}),field("policyVersion",{required:true,type:"string"}),field("lifecycleState",{required:true,type:"string"}),field("expiresAt",{required:false,type:["string","null"]}),field("preservationHold",{required:true,type:"boolean"}),field("deletionAuthorityGranted",{required:true,type:"boolean",enum:[false]}),field("automaticDeletionPerformed",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("updatedAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "privacyAssessment", id: VERSION_MANIFEST.getContractId("privacyAssessment"), name: "EXTERNAL-010 Privacy Assessment Contract", version: VERSION_MANIFEST.getContractVersion("privacyAssessment"), immutable: true,
+      fields: [field("privacyAssessmentId",{required:true,type:"string"}),field("subjectId",{required:true,type:"string"}),field("identityMode",{required:true,type:"string"}),field("purposeId",{required:true,type:"string"}),field("privacyRisk",{required:true,type:"string"}),field("sensitiveInferenceAllowed",{required:true,type:"boolean",enum:[false]}),field("realPersonResolutionAllowed",{required:true,type:"boolean",enum:[false]}),field("crossPlatformLinkConfirmed",{required:true,type:"boolean",enum:[false]}),field("reIdentificationAllowed",{required:true,type:"boolean",enum:[false]}),field("dataMinimized",{required:true,type:"boolean"}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "phase6ValidationResult", id: VERSION_MANIFEST.getContractId("phase6ValidationResult"), name: "EXTERNAL-010 Phase 06 Validation Result Contract", version: VERSION_MANIFEST.getContractVersion("phase6ValidationResult"), immutable: true,
+      fields: [field("id",{required:true,type:"string"}),field("componentId",{required:true,type:"string",enum:["EXTERNAL-010"]}),field("version",{required:true,type:"string"}),field("implementationPhase",{required:true,type:"string"}),field("decisionCoverage",{required:true,type:"number",enum:[54]}),field("passed",{required:true,type:"number"}),field("failed",{required:true,type:"number"}),field("total",{required:true,type:"number"}),field("health",{required:true,type:"number"}),field("criticalFailed",{required:true,type:"number"}),field("status",{required:true,type:"string"}),field("releaseAllowed",{required:true,type:"boolean"}),field("phase6Complete",{required:true,type:"boolean"}),field("phase7Allowed",{required:true,type:"boolean"}),field("validatedAt",{required:true,type:"string"})]
+    }
+
   ]);
 
   function typeMatches(value, expected) {

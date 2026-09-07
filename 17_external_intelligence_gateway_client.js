@@ -256,6 +256,7 @@
         lifecycleState: source.lifecycleState,
         accessMode: source.accessMode,
         authenticationMode: source.authenticationMode,
+        secretReferenceId: source.secretReferenceId || null,
         allowedOperations: internal.clone(source.allowedOperations || []),
         adapterId: source.adapterId,
         endpointPolicy: internal.clone(source.endpointPolicy || {})
@@ -301,12 +302,15 @@
     if (!authority.allowed || !authority.authorityEnvelopeId) {
       throw Object.assign(new Error("Gateway acquisition authority revalidation failed"), { externalCategory: "BLOCKED", retryable: false });
     }
-    const scopeReady = await ensureGatewaySessionScopes([VERSION_MANIFEST.gateway.publicAcquisitionScope || "ACQUIRE_PUBLIC"]);
+    const authenticated = String(source.authenticationMode || "NONE").toUpperCase() !== "NONE";
+    const requiredScope = authenticated ? (VERSION_MANIFEST.gateway.governedAcquisitionScope || "ACQUIRE_EXTERNAL") : (VERSION_MANIFEST.gateway.publicAcquisitionScope || "ACQUIRE_PUBLIC");
+    const endpoint = authenticated ? (VERSION_MANIFEST.gateway.governedAcquisitionEndpoint || "/v1/acquire/governed") : VERSION_MANIFEST.gateway.publicAcquisitionEndpoint;
+    const scopeReady = await ensureGatewaySessionScopes([requiredScope]);
     if (!scopeReady.ok) {
       throw Object.assign(new Error("Gateway acquisition session unavailable"), { externalCategory: "SOURCE_UNAVAILABLE", retryable: true });
     }
     const result = await guardedGatewayRequest(
-      VERSION_MANIFEST.gateway.publicAcquisitionEndpoint,
+      endpoint,
       buildGovernedGatewayAcquisitionPayload(context, authority),
       { method: "POST", requestId: request.requestId + "-GW" }
     );
@@ -389,6 +393,18 @@
     });
   }
 
+  async function getGatewaySecretMetadataStatus(input) {
+    const settings = internal.isPlainObject(input) ? input : {};
+    const secretReferenceId = internal.text(settings.secretReferenceId, "").toUpperCase();
+    if (!/^SECRET-[A-Z0-9-]+$/.test(secretReferenceId)) return internal.buildResult(false, "EXTERNAL010_SECRET_REFERENCE_INVALID", "Blocked", { secretReferenceId: secretReferenceId || null, secretValueReturned: false });
+    const scopeReady = await ensureGatewaySessionScopes([VERSION_MANIFEST.gateway.secretMetadataScope || "READ_SECRET_METADATA"]);
+    if (!scopeReady.ok) return scopeReady;
+    const result = await guardedGatewayRequest(VERSION_MANIFEST.gateway.secretStatusEndpoint || "/v1/secret/status", { secretReferenceId: secretReferenceId, secretType: settings.secretType || null }, { method: "POST" });
+    const response = result && result.data && result.data.response;
+    if (!result.ok || !response) return internal.buildResult(false, response && response.code || "EXTERNAL010_SECRET_STATUS_UNAVAILABLE", result && result.status || "Unavailable", { secretReferenceId, secretValueReturned:false });
+    return internal.buildResult(response.ok === true, response.code || "EXTERNAL010_SECRET_STATUS", response.ok ? "Ready" : "Blocked", { secretMetadata: internal.clone(response.secretMetadata || null), secretValueReturned:false });
+  }
+
   async function requestAuthorityGovernedGatewayOperation(input) {
     const settings = internal.isPlainObject(input) ? input : {};
     const action = internal.text(settings.action, "").toUpperCase();
@@ -459,6 +475,7 @@
     enableExternalIntelligenceGatewayAcquisitionBridge: enableGatewayAcquisitionBridge,
     disableExternalIntelligenceGatewayAcquisitionBridge: disableGatewayAcquisitionBridge,
     enableExternalIntelligenceGatewayEvidencePersistenceBridge: enableGatewayEvidencePersistenceBridge,
+    getExternalIntelligenceGatewaySecretMetadataStatus: getGatewaySecretMetadataStatus,
     requestAuthorityGovernedExternalIntelligenceGatewayOperation: requestAuthorityGovernedGatewayOperation,
     revokeExternalIntelligenceGatewaySession: revokeGatewaySession,
     initializeExternalIntelligenceStartup: initializeExternalIntelligenceStartup
@@ -477,6 +494,8 @@
     replayProtectionRequired: true,
     authorityRevalidationHook: true,
     governedAcquisitionBridgeAvailable: true,
+    governedAuthenticatedAcquisitionAvailable: true,
+    secretValueReturnedToBrowser: false,
     arbitraryUrlProxyEnabled: false,
     gatewayTargetAllowlistRequired: true,
     gatewayFailureBreaksCore: false,
