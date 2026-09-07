@@ -13,6 +13,7 @@
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
   const PHASE4_VERSION = "1.3.0";
+  const GATEWAY_PHASE4_VERSION = "1.2.0";
 
   function deepFreeze(value) {
     if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -28,7 +29,7 @@
     audit: PHASE1_VERSION,
     runtimeCoordination: PHASE2_VERSION,
     softwareSupplyChain: PHASE2_VERSION,
-    gatewayClient: PHASE2_VERSION,
+    gatewayClient: PHASE4_VERSION,
     sourceRegistry: PHASE3_VERSION,
     sourceDiscovery: PHASE3_VERSION,
     resourceBudget: PHASE3_VERSION,
@@ -40,7 +41,8 @@
     phase1Validation: PHASE4_VERSION,
     phase2Validation: PHASE4_VERSION,
     phase3Validation: PHASE4_VERSION,
-    phase4Validation: PHASE4_VERSION
+    phase4Validation: PHASE4_VERSION,
+    phase4RealRuntimeValidation: PHASE4_VERSION
   };
 
   const fileModules = {
@@ -63,7 +65,8 @@
     "17_external_intelligence_phase1_validation.js": "phase1Validation",
     "17_external_intelligence_phase2_validation.js": "phase2Validation",
     "17_external_intelligence_phase3_validation.js": "phase3Validation",
-    "17_external_intelligence_phase4_validation.js": "phase4Validation"
+    "17_external_intelligence_phase4_validation.js": "phase4Validation",
+    "17_external_intelligence_phase4_real_runtime_validation.js": "phase4RealRuntimeValidation"
   };
 
   const contractVersions = {
@@ -284,7 +287,7 @@
 
   const gateway = {
     contractVersion: "1.0.0",
-    gatewayVersion: PHASE2_VERSION,
+    gatewayVersion: GATEWAY_PHASE4_VERSION,
     defaultBaseUrl: "http://127.0.0.1:43110",
     loopbackOnly: true,
     defaultPort: 43110,
@@ -298,7 +301,10 @@
     revokeEndpoint: "/v1/session/revoke",
     probeEndpoint: "/v1/probe",
     runtimeEndpoint: "/v1/runtime",
-    localNetworkAddressSpace: "loopback"
+    publicAcquisitionEndpoint: "/v1/acquire/public",
+    localNetworkAddressSpace: "loopback",
+    publicAcquisitionScope: "ACQUIRE_PUBLIC",
+    governedTargetAllowlistRequired: true
   };
 
   const supplyChain = {
@@ -381,7 +387,9 @@
     commonAdapterMethods: ["validateRequest", "acquire", "normalizeResponseMetadata", "extractTemporalMetadata", "sanitize", "buildEvidenceInput"],
     persistentQueueMetadataRequired: true,
     preExecutionRevalidationRequired: true,
-    arbitraryUrlProxyAllowed: false
+    arbitraryUrlProxyAllowed: false,
+    gatewayPublicJsonAcquisitionEnabled: true,
+    gatewayTargetAllowlistRequired: true
   };
 
   const manifest = {

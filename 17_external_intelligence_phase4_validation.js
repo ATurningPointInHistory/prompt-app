@@ -40,7 +40,8 @@
     "17_external_intelligence_phase1_validation.js",
     "17_external_intelligence_phase2_validation.js",
     "17_external_intelligence_phase3_validation.js",
-    "17_external_intelligence_phase4_validation.js"
+    "17_external_intelligence_phase4_validation.js",
+    "17_external_intelligence_phase4_real_runtime_validation.js"
   ]);
 
   function collector() {
@@ -178,6 +179,9 @@
       check("Mock adapter has stable identity/version and is test-only", mockAdapter && mockAdapter.adapterVersion === "1.0.0" && mockAdapter.testOnly === true, mockAdapter, "Adapter Registry");
       check("Browser HTTP JSON adapter has no authority", browserAdapter && browserAdapter.sourceAuthorityGranted === false && browserAdapter.repositoryAuthorityGranted === false && browserAdapter.financialAuthorityGranted === false && browserAdapter.reliabilityAuthorityGranted === false, browserAdapter, "Adapter Registry");
       check("Gateway adapter is registered without enabling arbitrary proxy", gatewayAdapter && gatewayAdapter.arbitraryUrlAllowed === false, gatewayAdapter, "Adapter Registry");
+      check("Gateway public acquisition endpoint is explicitly versioned", VERSION_MANIFEST.gateway.publicAcquisitionEndpoint === "/v1/acquire/public" && VERSION_MANIFEST.gateway.gatewayVersion === "1.2.0", VERSION_MANIFEST.gateway, "Hybrid Routing");
+      check("Built-in governed Gateway acquisition bridge is available", typeof namespace.enableExternalIntelligenceGatewayAcquisitionBridge === "function" && typeof namespace.disableExternalIntelligenceGatewayAcquisitionBridge === "function", "built-in-bridge", "Hybrid Routing");
+      check("Gateway acquisition still requires target allowlist and authority revalidation", VERSION_MANIFEST.acquisition.gatewayTargetAllowlistRequired === true && VERSION_MANIFEST.gateway.governedTargetAllowlistRequired === true, { acquisition: VERSION_MANIFEST.acquisition, gateway: VERSION_MANIFEST.gateway }, "Safety");
       check("Adapter acquire implementation is not exposed as normal public API", typeof namespace.api.invokeExternalIntelligenceAdapter !== "function" && typeof namespace.invokeExternalIntelligenceAdapter !== "function", "internal-only", "Adapter Registry");
 
       const ownerApproval = namespace.setExternalIntelligenceAuthorityApprovalAdapter({ adapterId: "EXTERNAL-010-PHASE4-OWNER-APPROVAL", requiresExplicitOwnerInteraction: true, async verifyApproval() { return { approved: true, actorType: "Project Owner", interactionEvidenceId: "PHASE4-OWNER-INTERACTION" }; } });
@@ -324,7 +328,7 @@
       check("Phase 04 audit chain remains valid", auditChain.valid === true, { valid: auditChain.valid, eventCount: auditChain.eventCount }, "Audit");
 
       EXPECTED_BROWSER_FILES.forEach(function fileMapped(file) { check("Browser file mapped: " + file, file === "17_external_intelligence_version_manifest.js" || Boolean(VERSION_MANIFEST.fileModules[file]), file, "Static Integration"); });
-      ["core", "contracts", "schemaRegistry", "authority", "audit", "runtimeCoordination", "softwareSupplyChain", "gatewayClient", "sourceRegistry", "sourceDiscovery", "resourceBudget", "usagePolicy", "acquisitionContract", "adapterRegistry", "sourceRouter", "acquisitionQueue", "phase1Validation", "phase2Validation", "phase3Validation", "phase4Validation"].forEach(function moduleLoaded(name) { check("Module " + name + " is loaded", Boolean(namespace.modules[name]), namespace.modules[name] && namespace.modules[name].status, "Modules"); });
+      ["core", "contracts", "schemaRegistry", "authority", "audit", "runtimeCoordination", "softwareSupplyChain", "gatewayClient", "sourceRegistry", "sourceDiscovery", "resourceBudget", "usagePolicy", "acquisitionContract", "adapterRegistry", "sourceRouter", "acquisitionQueue", "phase1Validation", "phase2Validation", "phase3Validation", "phase4Validation", "phase4RealRuntimeValidation"].forEach(function moduleLoaded(name) { check("Module " + name + " is loaded", Boolean(namespace.modules[name]), namespace.modules[name] && namespace.modules[name].status, "Modules"); });
     } catch (error) {
       check("Phase 04 validation execution completes without exception", false, { message: error && error.message || String(error), stack: error && error.stack || null }, "Validation");
     } finally {

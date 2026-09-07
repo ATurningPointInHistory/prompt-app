@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_gateway_client.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.1.0
-   Phase 02: Runtime / Gateway / Software Supply Chain Foundation
+   Release: 1.3.0
+   Phase 02 Foundation + Phase 04 Governed Acquisition Bridge
    Decisions: 011 / 013 / 054
    ============================================================ */
 (function (global) {
@@ -213,6 +213,134 @@
     return guardedGatewayRequest(VERSION_MANIFEST.gateway.runtimeEndpoint, {}, { method: "POST" });
   }
 
+  function gatewaySessionHasScopes(requiredScopes) {
+    if (!isSessionUsable()) return false;
+    const granted = new Set((sessionMetadata && sessionMetadata.scope || []).map(function upperScope(value) { return String(value || "").toUpperCase(); }));
+    return (requiredScopes || []).every(function hasScope(scope) { return granted.has(String(scope || "").toUpperCase()); });
+  }
+
+  async function ensureGatewaySessionScopes(requiredScopes) {
+    const scopes = internal.unique(requiredScopes || []).map(function normalizeScope(value) { return internal.text(value, "").toUpperCase(); }).filter(Boolean);
+    if (gatewaySessionHasScopes(scopes)) return internal.buildResult(true, "EXTERNAL010_GATEWAY_SESSION_SCOPE_READY", "Ready", { session: internal.clone(sessionMetadata), requestedScope: scopes });
+    if (isSessionUsable()) clearSessionLocal("SCOPE_REHANDSHAKE");
+    return openGatewaySession({ requestedScope: internal.unique(["PROBE", "READ_RUNTIME"].concat(scopes)) });
+  }
+
+  function buildGatewayAcquisitionAuthority(context) {
+    const request = context && context.request;
+    if (!request) return { allowed: false, decision: "DENY", reason: "REQUEST_REQUIRED", authorityEnvelopeId: null };
+    return namespace.evaluateExternalIntelligenceAuthority({
+      action: "EXECUTE_EXTERNAL_ACQUISITION",
+      target: { type: "external-acquisition", id: request.requestId },
+      purpose: request.purpose
+    });
+  }
+
+  function buildGovernedGatewayAcquisitionPayload(context, authority) {
+    const request = context.request || {};
+    const source = context.source || {};
+    const operationContract = context.operationContract || {};
+    const route = context.route || {};
+    return {
+      request: {
+        requestId: request.requestId,
+        sourceId: request.sourceId,
+        operationId: request.operationId,
+        purpose: request.purpose,
+        parameters: internal.clone(request.parameters || {}),
+        timeoutPolicy: internal.clone(request.timeoutPolicy || {})
+      },
+      source: {
+        sourceId: source.sourceId,
+        enabled: source.enabled === true,
+        lifecycleState: source.lifecycleState,
+        accessMode: source.accessMode,
+        authenticationMode: source.authenticationMode,
+        allowedOperations: internal.clone(source.allowedOperations || []),
+        adapterId: source.adapterId,
+        endpointPolicy: internal.clone(source.endpointPolicy || {})
+      },
+      operationContract: {
+        operationContractId: operationContract.operationContractId,
+        sourceId: operationContract.sourceId,
+        operationId: operationContract.operationId,
+        method: operationContract.method,
+        adapterId: operationContract.adapterId,
+        endpoint: internal.clone(operationContract.endpoint || {}),
+        parameterPolicy: internal.clone(operationContract.parameterPolicy || {})
+      },
+      route: {
+        routeId: route.routeId,
+        sourceId: route.sourceId,
+        operationId: route.operationId,
+        runtimeTarget: route.runtimeTarget,
+        adapterId: route.adapterId,
+        operationContractId: route.operationContractId,
+        endpointReference: route.endpointReference
+      },
+      authority: {
+        action: "EXECUTE_EXTERNAL_ACQUISITION",
+        allowed: authority.allowed === true,
+        decision: authority.decision,
+        reason: authority.reason,
+        authorityEnvelopeId: authority.authorityEnvelopeId,
+        evaluatedAt: authority.evaluatedAt
+      }
+    };
+  }
+
+  async function executeGovernedGatewayAcquisition(context) {
+    const request = context && context.request;
+    const source = context && context.source;
+    const operationContract = context && context.operationContract;
+    const route = context && context.route;
+    if (!request || !source || !operationContract || !route || route.runtimeTarget !== "LOCAL_GATEWAY") {
+      throw Object.assign(new Error("Governed Gateway acquisition context invalid"), { externalCategory: "INVALID_REQUEST", retryable: false });
+    }
+    const authority = buildGatewayAcquisitionAuthority(context);
+    if (!authority.allowed || !authority.authorityEnvelopeId) {
+      throw Object.assign(new Error("Gateway acquisition authority revalidation failed"), { externalCategory: "BLOCKED", retryable: false });
+    }
+    const scopeReady = await ensureGatewaySessionScopes([VERSION_MANIFEST.gateway.publicAcquisitionScope || "ACQUIRE_PUBLIC"]);
+    if (!scopeReady.ok) {
+      throw Object.assign(new Error("Gateway acquisition session unavailable"), { externalCategory: "SOURCE_UNAVAILABLE", retryable: true });
+    }
+    const result = await guardedGatewayRequest(
+      VERSION_MANIFEST.gateway.publicAcquisitionEndpoint,
+      buildGovernedGatewayAcquisitionPayload(context, authority),
+      { method: "POST", requestId: request.requestId + "-GW" }
+    );
+    const response = result && result.data && result.data.response;
+    if (!result.ok || !response || response.ok !== true || !response.acquisition) {
+      const error = new Error(response && response.message || response && response.code || result.code || "Gateway acquisition failed");
+      error.externalCategory = response && response.category || (result.status === "Unavailable" ? "SOURCE_UNAVAILABLE" : "BLOCKED");
+      error.retryable = Boolean(response && response.retryable);
+      error.rawProviderStatus = response && response.providerStatus || result && result.data && result.data.httpStatus || null;
+      throw error;
+    }
+    return internal.clone(response.acquisition);
+  }
+
+  function enableGatewayAcquisitionBridge() {
+    if (typeof namespace.setExternalIntelligenceGatewayAcquisitionExecutor !== "function") {
+      return internal.buildResult(false, "EXTERNAL010_GATEWAY_ACQUISITION_BRIDGE_DEPENDENCY_MISSING", "Blocked", { adapterRegistryLoaded: false });
+    }
+    const configured = namespace.setExternalIntelligenceGatewayAcquisitionExecutor(executeGovernedGatewayAcquisition);
+    return internal.buildResult(configured.ok === true, configured.ok ? "EXTERNAL010_GATEWAY_ACQUISITION_BRIDGE_ENABLED" : "EXTERNAL010_GATEWAY_ACQUISITION_BRIDGE_ENABLE_FAILED", configured.ok ? "Ready" : "Blocked", {
+      baseUrl: baseUrl,
+      endpoint: VERSION_MANIFEST.gateway.publicAcquisitionEndpoint,
+      requiredScope: VERSION_MANIFEST.gateway.publicAcquisitionScope || "ACQUIRE_PUBLIC",
+      arbitraryUrlProxyEnabled: false,
+      authorityRevalidationRequired: true,
+      gatewayTargetAllowlistRequired: true
+    });
+  }
+
+  function disableGatewayAcquisitionBridge() {
+    if (typeof namespace.setExternalIntelligenceGatewayAcquisitionExecutor !== "function") return internal.buildResult(true, "EXTERNAL010_GATEWAY_ACQUISITION_BRIDGE_ALREADY_DISABLED", "Ready", null);
+    return namespace.setExternalIntelligenceGatewayAcquisitionExecutor(null);
+  }
+
   async function requestAuthorityGovernedGatewayOperation(input) {
     const settings = internal.isPlainObject(input) ? input : {};
     const action = internal.text(settings.action, "").toUpperCase();
@@ -279,6 +407,9 @@
     openExternalIntelligenceGatewaySession: openGatewaySession,
     probeExternalIntelligenceGateway: probeGateway,
     getProtectedExternalIntelligenceGatewayRuntime: getProtectedGatewayRuntime,
+    ensureExternalIntelligenceGatewaySessionScopes: ensureGatewaySessionScopes,
+    enableExternalIntelligenceGatewayAcquisitionBridge: enableGatewayAcquisitionBridge,
+    disableExternalIntelligenceGatewayAcquisitionBridge: disableGatewayAcquisitionBridge,
     requestAuthorityGovernedExternalIntelligenceGatewayOperation: requestAuthorityGovernedGatewayOperation,
     revokeExternalIntelligenceGatewaySession: revokeGatewaySession,
     initializeExternalIntelligenceStartup: initializeExternalIntelligenceStartup
@@ -296,6 +427,9 @@
     sessionTokenExposedByPublicState: false,
     replayProtectionRequired: true,
     authorityRevalidationHook: true,
+    governedAcquisitionBridgeAvailable: true,
+    arbitraryUrlProxyEnabled: false,
+    gatewayTargetAllowlistRequired: true,
     gatewayFailureBreaksCore: false,
     loadedAt: internal.nowIso()
   };
