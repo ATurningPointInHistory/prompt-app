@@ -4,10 +4,10 @@
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1, IDE-190 v1.10.0 frozen baseline, and REPOSITORY-010 Phase 17 v1.16.0 Cross-Device Operational Hardening.",
+  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1, IDE-190 v1.10.0 frozen baseline, REPOSITORY-010 Phase 18 v1.17.3, and EXTERNAL-010 Phase 01 v1.0.0 Governance / Contract / Authority Foundation.",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-08-30T11:26:35.280Z",
+  "updatedAt": "2026-09-07T06:43:48Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -221,14 +221,14 @@
     "./13_development_automation_ui.js?h=869cc5f55fe2",
     "./13_development_automation_phase9_validation.js?h=c7e34495c7f0",
     "./13_development_automation_phase10_validation.js?h=115498505528",
-    "./13_local_first_repository_version_manifest.js?h=f6b53aa0a3af",
+    "./13_local_first_repository_version_manifest.js?h=d75e1d53a19a",
     "./13_local_first_repository_core.js?h=73fe7ac6def5",
     "./13_local_first_repository_contracts.js?h=b7128caf93bc",
     "./13_local_first_repository_metadata.js?h=6adf62999fef",
     "./13_local_first_repository_persistence.js?h=c9ef947e0289",
     "./13_local_first_repository_offline_staging.js?h=8304da205fbe",
     "./13_local_first_repository_sync_candidate.js?h=a17b642108c6",
-    "./13_local_first_repository_transfer_package.js?h=a8143237b31a",
+    "./13_local_first_repository_transfer_package.js?h=95d4ed15530b",
     "./13_local_first_repository_desktop_adapter.js?h=d1c7e844b284",
     "./13_local_first_repository_v2_transfer.js?h=7fcb65fef4c8",
     "./13_local_first_repository_v3_conflict.js?h=d897171d3a51",
@@ -250,15 +250,15 @@
     "./13_local_first_repository_sync_coordinator.js?h=3d316c176019",
     "./13_local_first_repository_transport_adapter.js?h=d8983b1f9247",
     "./13_local_first_repository_transport_attempt.js?h=1c6b1b6b298d",
-    "./13_local_first_repository_explicit_file_transport.js?h=e9cacc607bbd",
+    "./13_local_first_repository_explicit_file_transport.js?h=baaa1fd3ca70",
     "./13_local_first_repository_development_release.js?h=65bf369ee1b1",
     "./13_local_first_repository_operational_evidence.js?h=c3490ab43f7a",
     "./13_local_first_repository_replica_baseline_provisioning.js?h=2fdf9a7257c9",
     "./13_local_first_repository_picker_safe_transport.js?h=2e8647a8bb6e",
-    "13_local_first_repository_sync_engine.js?h=949ff3bb6c06",
+    "./13_local_first_repository_sync_engine.js?h=949ff3bb6c06",
     "./13_local_first_repository_operational_initialization.js?h=e91f6fba3ff2",
     "./13_local_first_repository_phase16_validation.js?h=25e0b5a25895",
-    "./13_local_first_repository_phase17_validation.js?h=23ca39c52dcd",
+    "./13_local_first_repository_phase17_validation.js?h=3993e3df72ce",
     "./13_local_first_repository_phase15_validation.js?h=abe8a471e516",
     "./13_local_first_repository_phase1_validation.js?h=7e0904011de2",
     "./13_local_first_repository_phase2_validation.js?h=13d7d0b9fef6",
@@ -272,6 +272,9 @@
     "./13_local_first_repository_phase10_validation.js?h=354105de3918",
     "./13_local_first_repository_phase11_validation.js?h=3f03da3a9074",
     "./13_local_first_repository_phase12_validation.js?h=02b2431045b5",
+    "./13_local_first_repository_guided_operations.js?h=17831b44f956",
+    "./13_local_first_repository_guided_operations_ui.js?h=bb8d13780d14",
+    "./13_local_first_repository_phase18_validation.js?h=77b767c7d32a",
     "./13_project_report.js?h=d636cb6a6766",
     "./13_project_handoff.js?h=a073ff86a1eb",
     "./13_function_relation_v3.js?h=0857a784aa30",
@@ -286,6 +289,13 @@
     "./16_validation_engine.js?h=105c13151958",
     "./15_reasoning_engine.js?h=cf1ed1305563",
     "./16_workflow_engine.js?h=17dedd927e7f",
+    "./17_external_intelligence_version_manifest.js?h=75016927657f",
+    "./17_external_intelligence_core.js?h=3280acb339df",
+    "./17_external_intelligence_contracts.js?h=c2adcdc690bb",
+    "./17_external_intelligence_schema_registry.js?h=c325a0752b09",
+    "./17_external_intelligence_authority.js?h=102149846b07",
+    "./17_external_intelligence_audit.js?h=cf56721b647b",
+    "./17_external_intelligence_phase1_validation.js?h=4db30d7051b3",
     "./99_init.js?h=138e34ded106"
   ],
   "hashes": {
@@ -1350,9 +1360,9 @@
       "cacheKey": "115498505528"
     },
     "13_local_first_repository_version_manifest.js": {
-      "sha256": "f6b53aa0a3aff0f5099a3c3ab105bc44d42ca052849d32a0f1935c965fd71cf4",
-      "byteSize": 30366,
-      "cacheKey": "f6b53aa0a3af"
+      "sha256": "d75e1d53a19a2c57cc16ae15f107f670044a4ee4dcca31598138afdc5e2e3e8f",
+      "byteSize": 32248,
+      "cacheKey": "d75e1d53a19a"
     },
     "13_local_first_repository_core.js": {
       "sha256": "73fe7ac6def522fae270c6fa9f9c1d43148859162d7e5e9e67d203bc8b0cdf43",
@@ -1385,9 +1395,9 @@
       "cacheKey": "a17b642108c6"
     },
     "13_local_first_repository_transfer_package.js": {
-      "sha256": "a8143237b31a59b7fc5d048081cb4277a88b98aa82a6ab74d3c24656985165a8",
-      "byteSize": 15699,
-      "cacheKey": "a8143237b31a"
+      "sha256": "95d4ed15530b8b73b4564c0f85bc03f35e6642507a8efa2f13934835d56dcec9",
+      "byteSize": 16243,
+      "cacheKey": "95d4ed15530b"
     },
     "13_local_first_repository_desktop_adapter.js": {
       "sha256": "d1c7e844b2843a3fdec29f93081b5360d50eed7fc33f535977bae48bf494513a",
@@ -1495,9 +1505,9 @@
       "cacheKey": "1c6b1b6b298d"
     },
     "13_local_first_repository_explicit_file_transport.js": {
-      "sha256": "e9cacc607bbde365b3cb9ac40e660b20bdf04cbfd1f865bd137bbdc08efcb386",
-      "byteSize": 26655,
-      "cacheKey": "e9cacc607bbd"
+      "sha256": "baaa1fd3ca70e1204857f1e92b114afe21230eb314a42f672fae68ca3560bdbf",
+      "byteSize": 36272,
+      "cacheKey": "baaa1fd3ca70"
     },
     "13_local_first_repository_development_release.js": {
       "sha256": "65bf369ee1b1d97733196510fd84f88115027d6699b54406ceb2df014a82d8c0",
@@ -1535,9 +1545,9 @@
       "cacheKey": "25e0b5a25895"
     },
     "13_local_first_repository_phase17_validation.js": {
-      "sha256": "23ca39c52dcdce70d229b65d9ce54b68cfb8c6e3decd64525e84666c1618f4bb",
-      "byteSize": 17748,
-      "cacheKey": "23ca39c52dcd"
+      "sha256": "3993e3df72ce70238c71df2f1529d4541657c534cf832962d3f48f4938b25685",
+      "byteSize": 21131,
+      "cacheKey": "3993e3df72ce"
     },
     "13_local_first_repository_phase15_validation.js": {
       "sha256": "abe8a471e51691de0930b0d1bfa3650220df51a18dedef08a198963030190c39",
@@ -1603,6 +1613,21 @@
       "sha256": "02b2431045b5798fa15017131ee0d9c80a55072893838b759ff2209d1b6e9f79",
       "byteSize": 40817,
       "cacheKey": "02b2431045b5"
+    },
+    "13_local_first_repository_guided_operations.js": {
+      "sha256": "17831b44f956e3a4d35f94c900c6246ae566e18c3340a35d8fd32d66733af559",
+      "byteSize": 32540,
+      "cacheKey": "17831b44f956"
+    },
+    "13_local_first_repository_guided_operations_ui.js": {
+      "sha256": "bb8d13780d14bb271dcd91808f356639134df0847bc12d079c8ab8500b6ff018",
+      "byteSize": 18008,
+      "cacheKey": "bb8d13780d14"
+    },
+    "13_local_first_repository_phase18_validation.js": {
+      "sha256": "77b767c7d32a12bcb5ec28e57a3d145eab9f3390a97185112dbeec16cbe34014",
+      "byteSize": 8202,
+      "cacheKey": "77b767c7d32a"
     },
     "13_project_report.js": {
       "sha256": "d636cb6a67665a6a26975934e81c9ffe2e1aca43b7f1303d0b9dae1a221c813b",
@@ -1674,12 +1699,47 @@
       "byteSize": 35937,
       "cacheKey": "17dedd927e7f"
     },
+    "17_external_intelligence_version_manifest.js": {
+      "sha256": "75016927657f505853654c34480d7ec855c62dc2926f5315c4f18790c080247c",
+      "byteSize": 5687,
+      "cacheKey": "75016927657f"
+    },
+    "17_external_intelligence_core.js": {
+      "sha256": "3280acb339df9fb499d5e180d409105c5d6eefcab950db6370ba98e5cde4d945",
+      "byteSize": 9263,
+      "cacheKey": "3280acb339df"
+    },
+    "17_external_intelligence_contracts.js": {
+      "sha256": "c2adcdc690bb577b3d696418ecee816b790527f659b80e1d246b09daa90f22ac",
+      "byteSize": 14682,
+      "cacheKey": "c2adcdc690bb"
+    },
+    "17_external_intelligence_schema_registry.js": {
+      "sha256": "c325a0752b09fda0f685e27fa190210a9e5362d2800e8e662f953b32df57d931",
+      "byteSize": 13611,
+      "cacheKey": "c325a0752b09"
+    },
+    "17_external_intelligence_authority.js": {
+      "sha256": "102149846b0784e50b315e7a8975b6698d9852a8f92c2e42a8c3bba07bf83814",
+      "byteSize": 11132,
+      "cacheKey": "102149846b07"
+    },
+    "17_external_intelligence_audit.js": {
+      "sha256": "cf56721b647b94a960ddf90a07c8ebbbf87ac729cd53a01aa1f151a3a576b740",
+      "byteSize": 10013,
+      "cacheKey": "cf56721b647b"
+    },
+    "17_external_intelligence_phase1_validation.js": {
+      "sha256": "4db30d7051b3a88307f5446f395bcbf41ad44875a535f0216d595748c3b45e02",
+      "byteSize": 18101,
+      "cacheKey": "4db30d7051b3"
+    },
     "99_init.js": {
       "sha256": "138e34ded10617cf57899215d4c79704b86c8b127c9bdec59ad31f3e08f1f728",
       "byteSize": 4460,
       "cacheKey": "138e34ded106"
     }
   },
-  "scriptSetHash": "1f9bf8cda4bc5dfe4a5319991aaf750ecb08e531ac103857eef079ad235c2e27",
-  "manifestHash": "617ea7f9f0a37a2e5450806cb16d29c0061116e506c0f519061a72ad78bee9c8"
+  "scriptSetHash": "e94ae15cc39254879f9ba051aaf5538baa47105885deec4ca73d6851eaba2617",
+  "manifestHash": "716668b40a96736133524afb19dfc351939f7b5b0ef00c4445beda01087a07c7"
 }
