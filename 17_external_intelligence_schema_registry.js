@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_schema_registry.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.2.0
-   Phase 03: Source Governance / Discovery / Budget / Usage Policy
+   Release: 1.3.0
+   Phase 04: Acquisition Contract / Router / Adapter / Queue
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -96,7 +96,7 @@
       }),
     schema("EXTERNAL-010-SCHEMA-PHASE2-VALIDATION-RESULT", "External Intelligence Phase 02 Validation Result",
       ["id", "componentId", "version", "implementationPhase", "passed", "failed", "total", "health", "criticalFailed", "status", "releaseAllowed", "phase2Complete", "phase3Allowed", "validatedAt"], {
-        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.1.0", "1.2.0"] }, implementationPhase: { type: "string" },
+        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.1.0", "1.2.0", "1.3.0"] }, implementationPhase: { type: "string" },
         passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" },
         releaseAllowed: { type: "boolean" }, phase2Complete: { type: "boolean" }, phase3Allowed: { type: "boolean" }, validatedAt: { type: "string" }
       }),
@@ -129,7 +129,59 @@
       }),
     schema("EXTERNAL-010-SCHEMA-PHASE3-VALIDATION-RESULT", "External Intelligence Phase 03 Validation Result",
       ["id", "componentId", "version", "implementationPhase", "decisionCoverage", "passed", "failed", "total", "health", "criticalFailed", "status", "releaseAllowed", "phase3Complete", "phase4Allowed", "validatedAt"], {
-        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.2.0"] }, implementationPhase: { type: "string" }, decisionCoverage: { type: "number", enum: [54] }, passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" }, releaseAllowed: { type: "boolean" }, phase3Complete: { type: "boolean" }, phase4Allowed: { type: "boolean" }, validatedAt: { type: "string" }
+        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.2.0", "1.3.0"] }, implementationPhase: { type: "string" }, decisionCoverage: { type: "number", enum: [54] }, passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" }, releaseAllowed: { type: "boolean" }, phase3Complete: { type: "boolean" }, phase4Allowed: { type: "boolean" }, validatedAt: { type: "string" }
+      }),
+    schema("EXTERNAL-010-SCHEMA-SOURCE-OPERATION-CONTRACT", "External Intelligence Source Operation Contract",
+      ["operationContractId", "sourceId", "operationId", "adapterId", "method", "endpoint", "parameterPolicy", "timeoutPolicy", "retryPolicy", "responseMode", "executionHints", "estimatedUsage", "enabled", "authorityGranted", "createdAt", "updatedAt", "immutable"], {
+        operationContractId: { type: "string" }, sourceId: { type: "string" }, operationId: { type: "string" }, adapterId: { type: "string" }, method: { type: "string", enum: ["GET"] },
+        endpoint: { type: "object" }, parameterPolicy: { type: "object" }, timeoutPolicy: { type: "object" }, retryPolicy: { type: "object" }, responseMode: { type: "string" }, executionHints: { type: "object" }, estimatedUsage: { type: "object" },
+        enabled: { type: "boolean" }, authorityGranted: { type: "boolean", enum: [false] }, createdAt: { type: "string" }, updatedAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-ACQUISITION-REQUEST", "External Intelligence Unified Acquisition Request",
+      ["requestId", "sourceId", "operationId", "parameters", "requestedAt", "priority", "executionPreference", "timeoutPolicy", "retryPolicy", "requestContext", "purpose", "requestedBy", "budgetIds", "status", "executionAuthorityGranted", "validationGrantsExecutionAuthority", "immutable"], {
+        requestId: { type: "string" }, sourceId: { type: "string" }, operationId: { type: "string" }, parameters: { type: "object" }, requestedAt: { type: "string" }, priority: { type: "string" }, executionPreference: { type: "string" },
+        timeoutPolicy: { type: "object" }, retryPolicy: { type: "object" }, idempotencyKey: { type: ["string", "null"] }, requestContext: { type: "object" }, purpose: { type: "string" }, requestedBy: { type: "string" },
+        correlationId: { type: ["string", "null"] }, budgetIds: { type: "array" }, acquisitionPlanId: { type: ["string", "null"] }, researchGoalId: { type: ["string", "null"] }, status: { type: "string" },
+        executionAuthorityGranted: { type: "boolean", enum: [false] }, validationGrantsExecutionAuthority: { type: "boolean", enum: [false] }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-ACQUISITION-ATTEMPT", "External Intelligence Acquisition Attempt",
+      ["attemptId", "requestId", "sourceId", "operationId", "attemptNumber", "adapterId", "adapterVersion", "startedAt", "status", "retryable", "immutable"], {
+        attemptId: { type: "string" }, requestId: { type: "string" }, sourceId: { type: "string" }, operationId: { type: "string" }, attemptNumber: { type: "number" }, adapterId: { type: "string" }, adapterVersion: { type: "string" },
+        routeId: { type: ["string", "null"] }, startedAt: { type: "string" }, completedAt: { type: ["string", "null"] }, status: { type: "string" }, retryable: { type: "boolean" }, errorId: { type: ["string", "null"] }, responseId: { type: ["string", "null"] }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-ACQUISITION-RESPONSE", "External Intelligence Acquisition Response",
+      ["responseId", "requestId", "attemptId", "sourceId", "operationId", "status", "responseMetadata", "temporalMetadata", "evidenceInput", "externalResponseGrantsAuthority", "knowledgePromotionPerformed", "canonicalRepositoryMutationPerformed", "createdAt", "immutable"], {
+        responseId: { type: "string" }, requestId: { type: "string" }, attemptId: { type: "string" }, sourceId: { type: "string" }, operationId: { type: "string" }, status: { type: "string" },
+        responseMetadata: { type: "object" }, temporalMetadata: { type: "object" }, evidenceInput: { type: "object" }, externalResponseGrantsAuthority: { type: "boolean", enum: [false] },
+        knowledgePromotionPerformed: { type: "boolean", enum: [false] }, canonicalRepositoryMutationPerformed: { type: "boolean", enum: [false] }, createdAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-ACQUISITION-ERROR", "External Intelligence Acquisition Error",
+      ["errorId", "errorCode", "category", "message", "retryable", "sourceId", "operationId", "requestId", "attemptId", "occurredAt", "secretRedacted", "immutable"], {
+        errorId: { type: "string" }, errorCode: { type: "string" }, category: { type: "string" }, message: { type: "string" }, retryable: { type: "boolean" }, sourceId: { type: "string" }, operationId: { type: "string" },
+        requestId: { type: "string" }, attemptId: { type: "string" }, occurredAt: { type: "string" }, rawProviderStatus: { type: ["string", "null"] }, secretRedacted: { type: "boolean", enum: [true] }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-SOURCE-ADAPTER-DEFINITION", "External Intelligence Source Adapter Definition",
+      ["adapterId", "adapterVersion", "adapterType", "supportedSourceTypes", "supportedOperations", "runtimeTargets", "status", "testOnly", "sourceAuthorityGranted", "repositoryAuthorityGranted", "financialAuthorityGranted", "reliabilityAuthorityGranted", "automaticRetryAllowed", "arbitraryUrlAllowed", "createdAt", "immutable"], {
+        adapterId: { type: "string" }, adapterVersion: { type: "string" }, adapterType: { type: "string" }, supportedSourceTypes: { type: "array" }, supportedOperations: { type: "array" }, runtimeTargets: { type: "array" }, status: { type: "string" }, testOnly: { type: "boolean" },
+        sourceAuthorityGranted: { type: "boolean", enum: [false] }, repositoryAuthorityGranted: { type: "boolean", enum: [false] }, financialAuthorityGranted: { type: "boolean", enum: [false] }, reliabilityAuthorityGranted: { type: "boolean", enum: [false] },
+        automaticRetryAllowed: { type: "boolean", enum: [false] }, arbitraryUrlAllowed: { type: "boolean", enum: [false] }, createdAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-SOURCE-ROUTE-DECISION", "External Intelligence Source Route Decision",
+      ["routeId", "requestId", "sourceId", "sourceVersion", "operationId", "operationContractId", "adapterId", "adapterVersion", "accessMode", "runtimeTarget", "fallbackPerformed", "fallbackCanBypassPolicy", "sourceAuthorityGranted", "economicAuthorityGranted", "createdAt", "immutable"], {
+        routeId: { type: "string" }, requestId: { type: "string" }, sourceId: { type: "string" }, sourceVersion: { type: "number" }, operationId: { type: "string" }, operationContractId: { type: "string" },
+        adapterId: { type: "string" }, adapterVersion: { type: "string" }, accessMode: { type: "string" }, runtimeTarget: { type: "string" }, endpointReference: { type: ["string", "null"] },
+        fallbackPerformed: { type: "boolean", enum: [false] }, fallbackCanBypassPolicy: { type: "boolean", enum: [false] }, sourceAuthorityGranted: { type: "boolean", enum: [false] }, economicAuthorityGranted: { type: "boolean", enum: [false] }, createdAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-ACQUISITION-JOB", "External Intelligence Acquisition Job",
+      ["jobId", "requestId", "priority", "status", "scheduledAt", "attemptCount", "maxAttempts", "cancellationRequested", "executionAuthorityGranted", "researchGoalAuthorityGranted", "paidAuthorityGranted", "financialAuthorityGranted", "createdAt", "updatedAt", "immutable"], {
+        jobId: { type: "string" }, requestId: { type: "string" }, priority: { type: "string" }, status: { type: "string" }, scheduledAt: { type: "string" }, attemptCount: { type: "number" }, maxAttempts: { type: "number" },
+        checkpointId: { type: ["string", "null"] }, cancellationRequested: { type: "boolean" }, executionAuthorityGranted: { type: "boolean", enum: [false] }, researchGoalAuthorityGranted: { type: "boolean", enum: [false] },
+        paidAuthorityGranted: { type: "boolean", enum: [false] }, financialAuthorityGranted: { type: "boolean", enum: [false] }, createdAt: { type: "string" }, updatedAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-PHASE4-VALIDATION-RESULT", "External Intelligence Phase 04 Validation Result",
+      ["id", "componentId", "version", "implementationPhase", "decisionCoverage", "passed", "failed", "total", "health", "criticalFailed", "status", "releaseAllowed", "phase4Complete", "phase5Allowed", "validatedAt"], {
+        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.3.0"] }, implementationPhase: { type: "string" }, decisionCoverage: { type: "number", enum: [54] },
+        passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" }, releaseAllowed: { type: "boolean" }, phase4Complete: { type: "boolean" }, phase5Allowed: { type: "boolean" }, validatedAt: { type: "string" }
       })
   ]);
 

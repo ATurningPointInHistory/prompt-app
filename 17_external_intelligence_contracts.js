@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_contracts.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.2.0
-   Phase 03: Source Governance / Discovery / Budget / Usage Policy
+   Release: 1.3.0
+   Phase 04: Acquisition Contract / Router / Adapter / Queue
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -270,7 +270,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.1.0", "1.2.0"] }),
+        field("version", { required: true, type: "string", enum: ["1.1.0", "1.2.0", "1.3.0"] }),
         field("implementationPhase", { required: true, type: "string" }),
         field("passed", { required: true, type: "number" }),
         field("failed", { required: true, type: "number" }),
@@ -440,7 +440,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.2.0"] }),
+        field("version", { required: true, type: "string", enum: ["1.2.0", "1.3.0"] }),
         field("implementationPhase", { required: true, type: "string" }),
         field("decisionCoverage", { required: true, type: "number", enum: [54] }),
         field("passed", { required: true, type: "number" }),
@@ -452,6 +452,232 @@
         field("releaseAllowed", { required: true, type: "boolean" }),
         field("phase3Complete", { required: true, type: "boolean" }),
         field("phase4Allowed", { required: true, type: "boolean" }),
+        field("validatedAt", { required: true, type: "string" })
+      ]
+    },
+    {
+      key: "sourceOperationContract",
+      id: VERSION_MANIFEST.getContractId("sourceOperationContract"),
+      name: "EXTERNAL-010 Source Operation Contract",
+      version: VERSION_MANIFEST.getContractVersion("sourceOperationContract"),
+      immutable: true,
+      fields: [
+        field("operationContractId", { required: true, type: "string" }),
+        field("sourceId", { required: true, type: "string" }),
+        field("operationId", { required: true, type: "string" }),
+        field("adapterId", { required: true, type: "string" }),
+        field("method", { required: true, type: "string", enum: ["GET"] }),
+        field("endpoint", { required: true, type: "object" }),
+        field("parameterPolicy", { required: true, type: "object" }),
+        field("timeoutPolicy", { required: true, type: "object" }),
+        field("retryPolicy", { required: true, type: "object" }),
+        field("responseMode", { required: true, type: "string" }),
+        field("executionHints", { required: true, type: "object" }),
+        field("estimatedUsage", { required: true, type: "object" }),
+        field("enabled", { required: true, type: "boolean" }),
+        field("authorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("updatedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "externalAcquisitionRequest",
+      id: VERSION_MANIFEST.getContractId("externalAcquisitionRequest"),
+      name: "EXTERNAL-010 Unified External Acquisition Request Contract",
+      version: VERSION_MANIFEST.getContractVersion("externalAcquisitionRequest"),
+      immutable: true,
+      fields: [
+        field("requestId", { required: true, type: "string" }),
+        field("sourceId", { required: true, type: "string" }),
+        field("operationId", { required: true, type: "string" }),
+        field("parameters", { required: true, type: "object" }),
+        field("requestedAt", { required: true, type: "string" }),
+        field("priority", { required: true, type: "string" }),
+        field("executionPreference", { required: true, type: "string" }),
+        field("timeoutPolicy", { required: true, type: "object" }),
+        field("retryPolicy", { required: true, type: "object" }),
+        field("idempotencyKey", { required: false, type: ["string", "null"] }),
+        field("requestContext", { required: true, type: "object" }),
+        field("purpose", { required: true, type: "string" }),
+        field("requestedBy", { required: true, type: "string" }),
+        field("correlationId", { required: false, type: ["string", "null"] }),
+        field("budgetIds", { required: true, type: "array" }),
+        field("acquisitionPlanId", { required: false, type: ["string", "null"] }),
+        field("researchGoalId", { required: false, type: ["string", "null"] }),
+        field("status", { required: true, type: "string" }),
+        field("executionAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("validationGrantsExecutionAuthority", { required: true, type: "boolean", enum: [false] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "externalAcquisitionAttempt",
+      id: VERSION_MANIFEST.getContractId("externalAcquisitionAttempt"),
+      name: "EXTERNAL-010 External Acquisition Attempt Contract",
+      version: VERSION_MANIFEST.getContractVersion("externalAcquisitionAttempt"),
+      immutable: true,
+      fields: [
+        field("attemptId", { required: true, type: "string" }),
+        field("requestId", { required: true, type: "string" }),
+        field("sourceId", { required: true, type: "string" }),
+        field("operationId", { required: true, type: "string" }),
+        field("attemptNumber", { required: true, type: "number" }),
+        field("adapterId", { required: true, type: "string" }),
+        field("adapterVersion", { required: true, type: "string" }),
+        field("routeId", { required: false, type: ["string", "null"] }),
+        field("startedAt", { required: true, type: "string" }),
+        field("completedAt", { required: false, type: ["string", "null"] }),
+        field("status", { required: true, type: "string" }),
+        field("retryable", { required: true, type: "boolean" }),
+        field("errorId", { required: false, type: ["string", "null"] }),
+        field("responseId", { required: false, type: ["string", "null"] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "externalAcquisitionResponse",
+      id: VERSION_MANIFEST.getContractId("externalAcquisitionResponse"),
+      name: "EXTERNAL-010 External Acquisition Response Contract",
+      version: VERSION_MANIFEST.getContractVersion("externalAcquisitionResponse"),
+      immutable: true,
+      fields: [
+        field("responseId", { required: true, type: "string" }),
+        field("requestId", { required: true, type: "string" }),
+        field("attemptId", { required: true, type: "string" }),
+        field("sourceId", { required: true, type: "string" }),
+        field("operationId", { required: true, type: "string" }),
+        field("status", { required: true, type: "string" }),
+        field("responseMetadata", { required: true, type: "object" }),
+        field("temporalMetadata", { required: true, type: "object" }),
+        field("payload", { required: false }),
+        field("evidenceInput", { required: true, type: "object" }),
+        field("externalResponseGrantsAuthority", { required: true, type: "boolean", enum: [false] }),
+        field("knowledgePromotionPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("canonicalRepositoryMutationPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "externalAcquisitionError",
+      id: VERSION_MANIFEST.getContractId("externalAcquisitionError"),
+      name: "EXTERNAL-010 External Acquisition Error Contract",
+      version: VERSION_MANIFEST.getContractVersion("externalAcquisitionError"),
+      immutable: true,
+      fields: [
+        field("errorId", { required: true, type: "string" }),
+        field("errorCode", { required: true, type: "string" }),
+        field("category", { required: true, type: "string" }),
+        field("message", { required: true, type: "string" }),
+        field("retryable", { required: true, type: "boolean" }),
+        field("sourceId", { required: true, type: "string" }),
+        field("operationId", { required: true, type: "string" }),
+        field("requestId", { required: true, type: "string" }),
+        field("attemptId", { required: true, type: "string" }),
+        field("occurredAt", { required: true, type: "string" }),
+        field("rawProviderStatus", { required: false, type: ["string", "null"] }),
+        field("secretRedacted", { required: true, type: "boolean", enum: [true] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "sourceAdapterDefinition",
+      id: VERSION_MANIFEST.getContractId("sourceAdapterDefinition"),
+      name: "EXTERNAL-010 Source Adapter Definition Contract",
+      version: VERSION_MANIFEST.getContractVersion("sourceAdapterDefinition"),
+      immutable: true,
+      fields: [
+        field("adapterId", { required: true, type: "string" }),
+        field("adapterVersion", { required: true, type: "string" }),
+        field("adapterType", { required: true, type: "string" }),
+        field("supportedSourceTypes", { required: true, type: "array" }),
+        field("supportedOperations", { required: true, type: "array" }),
+        field("runtimeTargets", { required: true, type: "array" }),
+        field("status", { required: true, type: "string" }),
+        field("testOnly", { required: true, type: "boolean" }),
+        field("sourceAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("repositoryAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("financialAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("reliabilityAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("automaticRetryAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("arbitraryUrlAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "sourceRouteDecision",
+      id: VERSION_MANIFEST.getContractId("sourceRouteDecision"),
+      name: "EXTERNAL-010 Source Route Decision Contract",
+      version: VERSION_MANIFEST.getContractVersion("sourceRouteDecision"),
+      immutable: true,
+      fields: [
+        field("routeId", { required: true, type: "string" }),
+        field("requestId", { required: true, type: "string" }),
+        field("sourceId", { required: true, type: "string" }),
+        field("sourceVersion", { required: true, type: "number" }),
+        field("operationId", { required: true, type: "string" }),
+        field("operationContractId", { required: true, type: "string" }),
+        field("adapterId", { required: true, type: "string" }),
+        field("adapterVersion", { required: true, type: "string" }),
+        field("accessMode", { required: true, type: "string" }),
+        field("runtimeTarget", { required: true, type: "string" }),
+        field("endpointReference", { required: false, type: ["string", "null"] }),
+        field("fallbackPerformed", { required: true, type: "boolean", enum: [false] }),
+        field("fallbackCanBypassPolicy", { required: true, type: "boolean", enum: [false] }),
+        field("sourceAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("economicAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "acquisitionJob",
+      id: VERSION_MANIFEST.getContractId("acquisitionJob"),
+      name: "EXTERNAL-010 Acquisition Job Contract",
+      version: VERSION_MANIFEST.getContractVersion("acquisitionJob"),
+      immutable: true,
+      fields: [
+        field("jobId", { required: true, type: "string" }),
+        field("requestId", { required: true, type: "string" }),
+        field("priority", { required: true, type: "string" }),
+        field("status", { required: true, type: "string" }),
+        field("scheduledAt", { required: true, type: "string" }),
+        field("attemptCount", { required: true, type: "number" }),
+        field("maxAttempts", { required: true, type: "number" }),
+        field("checkpointId", { required: false, type: ["string", "null"] }),
+        field("cancellationRequested", { required: true, type: "boolean" }),
+        field("executionAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("researchGoalAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("paidAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("financialAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("updatedAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "phase4ValidationResult",
+      id: VERSION_MANIFEST.getContractId("phase4ValidationResult"),
+      name: "EXTERNAL-010 Phase 04 Validation Result Contract",
+      version: VERSION_MANIFEST.getContractVersion("phase4ValidationResult"),
+      immutable: true,
+      fields: [
+        field("id", { required: true, type: "string" }),
+        field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
+        field("version", { required: true, type: "string", enum: ["1.3.0"] }),
+        field("implementationPhase", { required: true, type: "string" }),
+        field("decisionCoverage", { required: true, type: "number", enum: [54] }),
+        field("passed", { required: true, type: "number" }),
+        field("failed", { required: true, type: "number" }),
+        field("total", { required: true, type: "number" }),
+        field("health", { required: true, type: "number" }),
+        field("criticalFailed", { required: true, type: "number" }),
+        field("status", { required: true, type: "string" }),
+        field("releaseAllowed", { required: true, type: "boolean" }),
+        field("phase4Complete", { required: true, type: "boolean" }),
+        field("phase5Allowed", { required: true, type: "boolean" }),
         field("validatedAt", { required: true, type: "string" })
       ]
     }

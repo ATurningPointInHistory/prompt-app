@@ -1,17 +1,18 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.2.0
-   Phase 03: Source Governance / Discovery / Budget / Usage Policy
+   Release: 1.3.0
+   Phase 04: Acquisition Contract / Router / Adapter / Queue
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.2.0";
+  const RELEASE_VERSION = "1.3.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
+  const PHASE4_VERSION = "1.3.0";
 
   function deepFreeze(value) {
     if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -32,9 +33,14 @@
     sourceDiscovery: PHASE3_VERSION,
     resourceBudget: PHASE3_VERSION,
     usagePolicy: PHASE3_VERSION,
-    phase1Validation: PHASE3_VERSION,
-    phase2Validation: PHASE3_VERSION,
-    phase3Validation: PHASE3_VERSION
+    acquisitionContract: PHASE4_VERSION,
+    adapterRegistry: PHASE4_VERSION,
+    sourceRouter: PHASE4_VERSION,
+    acquisitionQueue: PHASE4_VERSION,
+    phase1Validation: PHASE4_VERSION,
+    phase2Validation: PHASE4_VERSION,
+    phase3Validation: PHASE4_VERSION,
+    phase4Validation: PHASE4_VERSION
   };
 
   const fileModules = {
@@ -50,9 +56,14 @@
     "17_external_intelligence_source_discovery.js": "sourceDiscovery",
     "17_external_intelligence_resource_budget.js": "resourceBudget",
     "17_external_intelligence_usage_policy.js": "usagePolicy",
+    "17_external_intelligence_acquisition_contract.js": "acquisitionContract",
+    "17_external_intelligence_adapter_registry.js": "adapterRegistry",
+    "17_external_intelligence_source_router.js": "sourceRouter",
+    "17_external_intelligence_acquisition_queue.js": "acquisitionQueue",
     "17_external_intelligence_phase1_validation.js": "phase1Validation",
     "17_external_intelligence_phase2_validation.js": "phase2Validation",
-    "17_external_intelligence_phase3_validation.js": "phase3Validation"
+    "17_external_intelligence_phase3_validation.js": "phase3Validation",
+    "17_external_intelligence_phase4_validation.js": "phase4Validation"
   };
 
   const contractVersions = {
@@ -76,7 +87,16 @@
     resourceBudget: PHASE3_VERSION,
     resourceUsageRecord: PHASE3_VERSION,
     usagePolicy: PHASE3_VERSION,
-    phase3ValidationResult: PHASE3_VERSION
+    phase3ValidationResult: PHASE3_VERSION,
+    sourceOperationContract: PHASE4_VERSION,
+    externalAcquisitionRequest: PHASE4_VERSION,
+    externalAcquisitionAttempt: PHASE4_VERSION,
+    externalAcquisitionResponse: PHASE4_VERSION,
+    externalAcquisitionError: PHASE4_VERSION,
+    sourceAdapterDefinition: PHASE4_VERSION,
+    sourceRouteDecision: PHASE4_VERSION,
+    acquisitionJob: PHASE4_VERSION,
+    phase4ValidationResult: PHASE4_VERSION
   };
 
   const contractIds = {
@@ -100,7 +120,16 @@
     resourceBudget: "EXTERNAL-010-CONTRACT-RESOURCE-BUDGET",
     resourceUsageRecord: "EXTERNAL-010-CONTRACT-RESOURCE-USAGE-RECORD",
     usagePolicy: "EXTERNAL-010-CONTRACT-USAGE-POLICY",
-    phase3ValidationResult: "EXTERNAL-010-CONTRACT-PHASE3-VALIDATION-RESULT"
+    phase3ValidationResult: "EXTERNAL-010-CONTRACT-PHASE3-VALIDATION-RESULT",
+    sourceOperationContract: "EXTERNAL-010-CONTRACT-SOURCE-OPERATION",
+    externalAcquisitionRequest: "EXTERNAL-010-CONTRACT-ACQUISITION-REQUEST",
+    externalAcquisitionAttempt: "EXTERNAL-010-CONTRACT-ACQUISITION-ATTEMPT",
+    externalAcquisitionResponse: "EXTERNAL-010-CONTRACT-ACQUISITION-RESPONSE",
+    externalAcquisitionError: "EXTERNAL-010-CONTRACT-ACQUISITION-ERROR",
+    sourceAdapterDefinition: "EXTERNAL-010-CONTRACT-SOURCE-ADAPTER-DEFINITION",
+    sourceRouteDecision: "EXTERNAL-010-CONTRACT-SOURCE-ROUTE-DECISION",
+    acquisitionJob: "EXTERNAL-010-CONTRACT-ACQUISITION-JOB",
+    phase4ValidationResult: "EXTERNAL-010-CONTRACT-PHASE4-VALIDATION-RESULT"
   };
 
   const safety = {
@@ -176,7 +205,53 @@
     policyUnavailableEqualsPermission: false,
     freeSourceEqualsOpenLicense: false,
     paidSourceEqualsUnlimitedRights: false,
-    derivedDataEqualsUnrestrictedData: false
+    derivedDataEqualsUnrestrictedData: false,
+
+    arbitraryExternalRequestAllowed: false,
+    browserSecretStorageAllowed: false,
+    gatewaySecretExposureAllowed: false,
+    automaticPaidApiSubscriptionAllowed: false,
+    automaticPurchaseAllowed: false,
+    automaticFinancialTransactionAllowed: false,
+    externalResponseGrantsAuthority: false,
+    gatewayGrantsEconomicAuthority: false,
+    adapterDirectInvocationAsNormalFlow: false,
+    unregisteredSourceAccessAllowed: false,
+    unknownOperationExecutionAllowed: false,
+    secretInRequestContractAllowed: false,
+    automaticPaidRequestAuthorityAllowed: false,
+    requestValidationGrantsExecutionAuthority: false,
+    retryCanBypassPolicy: false,
+    fallbackCanBypassPolicy: false,
+    adapterGrantsSourceAuthority: false,
+    adapterMayUseArbitraryUrlByDefault: false,
+    adapterMayExposeSecret: false,
+    adapterMayAutoPromoteKnowledge: false,
+    adapterDeterminesFinalReliability: false,
+    adapterMayMutateCanonicalRepository: false,
+    adapterMayExecuteFinancialTransaction: false,
+    adapterMayIgnoreRetryPolicy: false,
+    adapterMayIgnoreSourcePolicy: false,
+    unlimitedRetryAllowed: false,
+    unlimitedConcurrencyAllowed: false,
+    schedulerMayInventResearchGoal: false,
+    schedulerMayInventAcquisitionPurpose: false,
+    schedulerMayDiscoverSource: false,
+    schedulerMayExpandAcquisitionScope: false,
+    schedulerMayCreateUnknownSource: false,
+    schedulerMayCreateUnknownOperation: false,
+    scheduleGrantsPaidAuthority: false,
+    scheduleGrantsFinancialAuthority: false,
+    queueBypassesSourcePolicy: false,
+    queueBypassesSecretPolicy: false,
+    queueBypassesBudgetPolicy: false,
+    gatewayRestartImpliesJobSuccess: false,
+    missedScheduleUnlimitedCatchupAllowed: false,
+    backgroundProcessingGrantsRepositoryAuthority: false,
+    aiGoalGenerationGrantsExecutionAuthority: false,
+    aiGoalGenerationGrantsPaidAuthority: false,
+    aiGoalGenerationGrantsFinancialAuthority: false,
+    aiGoalGenerationGrantsRepositoryAuthority: false
   };
 
   const authorityPolicy = {
@@ -281,6 +356,34 @@
     unknownDefaultsToAllowed: false
   };
 
+  const acquisition = {
+    executionPreferences: ["AUTO", "IMMEDIATE", "BACKGROUND"],
+    executionDecisions: ["IMMEDIATE", "QUEUE", "BLOCKED"],
+    priorities: ["CRITICAL", "HIGH", "NORMAL", "LOW", "BACKGROUND"],
+    jobStatuses: ["QUEUED", "WAITING", "RUNNING", "RETRY_PENDING", "COMPLETED", "FAILED", "BLOCKED", "CANCELLED", "PAUSED", "RECOVERING", "UNKNOWN_EXECUTION_STATE"],
+    errorCategories: ["AUTHENTICATION_FAILED", "RATE_LIMITED", "TIMEOUT", "SOURCE_UNAVAILABLE", "TEMPORARY_SOURCE_UNAVAILABLE", "INVALID_REQUEST", "INVALID_RESPONSE", "SCHEMA_MISMATCH", "BLOCKED", "UNKNOWN"],
+    defaultTimeoutMs: 15000,
+    maxTimeoutMs: 120000,
+    maxRetryAttempts: 5,
+    concurrencyLimit: 2,
+    defaultRetryPolicy: {
+      maxAttempts: 3,
+      initialDelayMs: 0,
+      maxDelayMs: 5000,
+      backoffPolicy: "EXPONENTIAL",
+      retryableCategories: ["TIMEOUT", "RATE_LIMITED", "SOURCE_UNAVAILABLE", "TEMPORARY_SOURCE_UNAVAILABLE"]
+    },
+    adapterIds: {
+      mock: "EXTERNAL-010-ADAPTER-MOCK-001",
+      browserHttpJson: "EXTERNAL-010-ADAPTER-HTTP-JSON-BROWSER-001",
+      localGateway: "EXTERNAL-010-ADAPTER-LOCAL-GATEWAY-001"
+    },
+    commonAdapterMethods: ["validateRequest", "acquire", "normalizeResponseMetadata", "extractTemporalMetadata", "sanitize", "buildEvidenceInput"],
+    persistentQueueMetadataRequired: true,
+    preExecutionRevalidationRequired: true,
+    arbitraryUrlProxyAllowed: false
+  };
+
   const manifest = {
     componentId: "EXTERNAL-010",
     componentName: "External Intelligence Platform",
@@ -289,8 +392,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 03 Source Governance / Discovery / Budget / Usage Policy",
-      phase: 3,
+      implementationPhase: "Phase 04 Acquisition Contract / Router / Adapter / Queue",
+      phase: 4,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -299,7 +402,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 03 Source Governance / Discovery / Budget / Usage Policy Implementation"
+      status: "Phase 04 Acquisition Contract / Router / Adapter / Queue Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -314,14 +417,17 @@
     discovery: discovery,
     resourceBudget: resourceBudget,
     usagePolicy: usagePolicy,
+    acquisition: acquisition,
     implementation: {
       inspectBeforeImplement: true,
       contractFirst: true,
       phase1Complete: true,
       phase2Complete: true,
       phase3Allowed: true,
-      phase3Complete: false,
-      phase4Allowed: false,
+      phase3Complete: true,
+      phase4Allowed: true,
+      phase4Complete: false,
+      phase5Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true

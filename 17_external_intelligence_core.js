@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_core.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.2.0
-   Phase 03: Source Governance / Discovery / Budget / Usage Policy
+   Release: 1.3.0
+   Phase 04: Acquisition Contract / Router / Adapter / Queue
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -49,6 +49,24 @@
         usagePolicies: new Map(),
         usagePolicyVersions: new Map(),
         activeUsagePolicyBySource: new Map(),
+        sourceOperationContracts: new Map(),
+        sourceOperationByKey: new Map(),
+        acquisitionRequests: new Map(),
+        acquisitionIdempotency: new Map(),
+        acquisitionAttempts: new Map(),
+        acquisitionAttemptOrder: new Map(),
+        acquisitionResponses: new Map(),
+        acquisitionErrors: new Map(),
+        adapterRegistry: new Map(),
+        adapterImplementations: new Map(),
+        acquisitionRoutes: new Map(),
+        acquisitionJobs: new Map(),
+        acquisitionQueueOrder: [],
+        acquisitionQueueCheckpoints: new Map(),
+        acquisitionQueuePersistenceAdapter: null,
+        gatewayAcquisitionExecutor: null,
+        acquisitionSchedulerRunning: 0,
+        latestPhase4Validation: null,
         sourceRiskAssessmentHook: null,
         termsAnalysisHook: null,
         auditPersistenceAdapter: null,
@@ -63,11 +81,13 @@
         updatedAt: null
       };
 
-  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles", "sourceRegistry", "sourceVersions", "sourceDiscoveryRecords", "sourceDiscoveryHistory", "controlledInspectionRecords", "resourceBudgets", "resourceBudgetHistory", "resourceUsageRecords", "usagePolicies", "usagePolicyVersions", "activeUsagePolicyBySource"].forEach(function ensureMap(key) {
+  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles", "sourceRegistry", "sourceVersions", "sourceDiscoveryRecords", "sourceDiscoveryHistory", "controlledInspectionRecords", "resourceBudgets", "resourceBudgetHistory", "resourceUsageRecords",  "usagePolicies", "usagePolicyVersions", "activeUsagePolicyBySource", "sourceOperationContracts", "sourceOperationByKey", "acquisitionRequests", "acquisitionIdempotency", "acquisitionAttempts", "acquisitionAttemptOrder", "acquisitionResponses", "acquisitionErrors", "adapterRegistry", "adapterImplementations", "acquisitionRoutes", "acquisitionJobs", "acquisitionQueueCheckpoints"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
   if (!Array.isArray(state.auditOrder)) state.auditOrder = [];
   if (!Array.isArray(state.resourceBudgetLedger)) state.resourceBudgetLedger = [];
+  if (!Array.isArray(state.acquisitionQueueOrder)) state.acquisitionQueueOrder = [];
+  if (!Number.isInteger(state.acquisitionSchedulerRunning)) state.acquisitionSchedulerRunning = 0;
   if (!Number.isInteger(state.sequence)) state.sequence = 0;
 
   function nowIso() { return new Date().toISOString(); }
@@ -177,6 +197,12 @@
       resourceBudgetCount: state.resourceBudgets.size,
       resourceUsageRecordCount: state.resourceUsageRecords.size,
       usagePolicyCount: state.usagePolicies.size,
+      sourceOperationContractCount: state.sourceOperationContracts.size,
+      adapterCount: state.adapterRegistry.size,
+      acquisitionRequestCount: state.acquisitionRequests.size,
+      acquisitionAttemptCount: state.acquisitionAttempts.size,
+      acquisitionResponseCount: state.acquisitionResponses.size,
+      acquisitionJobCount: state.acquisitionJobs.size,
       gateway: state.gatewayClientState ? { baseUrl: state.gatewayClientState.baseUrl || null, healthState: state.gatewayClientState.healthState || "UNKNOWN", sessionActive: Boolean(state.gatewayClientState.session && state.gatewayClientState.session.state === "ACTIVE"), lastCheckedAt: state.gatewayClientState.lastCheckedAt || null } : null,
       safety: clone(VERSION_MANIFEST.safety),
       updatedAt: state.updatedAt || null
@@ -199,7 +225,11 @@
         ["sourceRegistry", namespace.initializeExternalIntelligenceSourceRegistry],
         ["sourceDiscovery", namespace.initializeExternalIntelligenceSourceDiscovery],
         ["resourceBudget", namespace.initializeExternalIntelligenceResourceBudget],
-        ["usagePolicy", namespace.initializeExternalIntelligenceUsagePolicy]
+        ["usagePolicy", namespace.initializeExternalIntelligenceUsagePolicy],
+        ["acquisitionContract", namespace.initializeExternalIntelligenceAcquisitionContract],
+        ["adapterRegistry", namespace.initializeExternalIntelligenceAdapterRegistry],
+        ["sourceRouter", namespace.initializeExternalIntelligenceSourceRouter],
+        ["acquisitionQueue", namespace.initializeExternalIntelligenceAcquisitionQueue]
       ];
       for (const item of initializers) {
         const name = item[0];
@@ -268,7 +298,7 @@
     id: "EXTERNAL-010-CORE",
     version: VERSION_MANIFEST.getModuleVersion("core"),
     status: "Loaded",
-    phase: 3,
+    phase: 4,
     directRepositoryMutationAllowed: false,
     loadedAt: nowIso()
   };
