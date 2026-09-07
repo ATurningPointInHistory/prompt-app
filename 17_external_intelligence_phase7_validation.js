@@ -25,8 +25,8 @@
   async function runExternalIntelligencePhase7Validation(){
     const c=collector(),check=c.check;let normalized1=null,normalized2=null,claim1=null,claim2=null,temporalFuture=null,temporalHistorical=null,visualCandidate=null;
     try{
-      check("Release Version is 1.6.0",VERSION_MANIFEST.release.version==="1.6.0",VERSION_MANIFEST.release.version,"Foundation");
-      check("Implementation Phase is Phase 07",VERSION_MANIFEST.release.phase===7&&VERSION_MANIFEST.release.implementationPhase.indexOf("Phase 07")===0,VERSION_MANIFEST.release.implementationPhase,"Foundation");
+      check("Release Version is Phase 07 compatible or later",["1.6.0","1.7.0"].includes(VERSION_MANIFEST.release.version),VERSION_MANIFEST.release.version,"Foundation");
+      check("Implementation Phase is Phase 07 compatible or later",VERSION_MANIFEST.release.phase>=7,VERSION_MANIFEST.release.implementationPhase,"Foundation");
       check("Phase 07 primary Decisions are 009/022/026/027",internal.stableStringify(namespace.modules.phase7Validation.decisions)===internal.stableStringify(["009","022","026","027"]),namespace.modules.phase7Validation,"Foundation");
       check("Gateway remains unchanged at Phase 06 Gateway 1.4.0",VERSION_MANIFEST.gateway.gatewayVersion==="1.4.0",VERSION_MANIFEST.gateway.gatewayVersion,"Boundary");
 

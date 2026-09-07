@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_core.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.6.0
-   Phase 07: Normalization / Temporal / Claim / Entity Foundation
+   Release: 1.7.0
+   Phase 08: Analytical Capability Registry / Unified Lineage
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -96,6 +96,24 @@
         latestPhase7Validation: null,
         latestPhase7RealRuntimeValidation: null,
         latestPhase7AndroidValidation: null,
+        analyticalCapabilities: new Map(),
+        analyticalCapabilityVersions: new Map(),
+        capabilityPerformanceProfiles: new Map(),
+        capabilityRoutingCandidates: new Map(),
+        independentReviewPlans: new Map(),
+        shadowEvaluationRecords: new Map(),
+        analysisExecutionRecords: new Map(),
+        capabilityFallbackRecords: new Map(),
+        snapshotManifests: new Map(),
+        transformationRecords: new Map(),
+        lineageRecords: new Map(),
+        lineageForwardIndex: new Map(),
+        lineageReverseIndex: new Map(),
+        recomputeCandidates: new Map(),
+        emergencyDecisionLineageHooks: new Map(),
+        latestPhase8Validation: null,
+        latestPhase8RealRuntimeValidation: null,
+        latestPhase8AndroidValidation: null,
         sourceRiskAssessmentHook: null,
         termsAnalysisHook: null,
         auditPersistenceAdapter: null,
@@ -110,7 +128,7 @@
         updatedAt: null
       };
 
-  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles", "sourceRegistry", "sourceVersions", "sourceDiscoveryRecords", "sourceDiscoveryHistory", "controlledInspectionRecords", "resourceBudgets", "resourceBudgetHistory", "resourceUsageRecords",  "usagePolicies", "usagePolicyVersions", "activeUsagePolicyBySource", "sourceOperationContracts", "sourceOperationByKey", "acquisitionRequests", "acquisitionIdempotency", "acquisitionAttempts", "acquisitionAttemptOrder", "acquisitionResponses", "acquisitionErrors", "adapterRegistry", "adapterImplementations", "acquisitionRoutes", "acquisitionJobs", "acquisitionQueueCheckpoints", "rawEvidenceRecords", "acquisitionEvidenceRecords", "contentMetadataIndex", "processingCheckpoints", "secretMetadataRegistry", "trustedScannerRegistry", "contentSecurityAssessments", "dataLifecycleRecords", "privacyAssessments", "privacyIdentityLinks", "temporalContexts", "freshnessPolicies", "normalizerDefinitions", "normalizerImplementations", "normalizedRecords", "claimCandidates", "entityRegistry", "entityAliasRecords", "entityIdentifierRecords", "entityMentions", "entityResolutionCandidates", "entityMergeSplitCandidates"].forEach(function ensureMap(key) {
+  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles", "sourceRegistry", "sourceVersions", "sourceDiscoveryRecords", "sourceDiscoveryHistory", "controlledInspectionRecords", "resourceBudgets", "resourceBudgetHistory", "resourceUsageRecords",  "usagePolicies", "usagePolicyVersions", "activeUsagePolicyBySource", "sourceOperationContracts", "sourceOperationByKey", "acquisitionRequests", "acquisitionIdempotency", "acquisitionAttempts", "acquisitionAttemptOrder", "acquisitionResponses", "acquisitionErrors", "adapterRegistry", "adapterImplementations", "acquisitionRoutes", "acquisitionJobs", "acquisitionQueueCheckpoints", "rawEvidenceRecords", "acquisitionEvidenceRecords", "contentMetadataIndex", "processingCheckpoints", "secretMetadataRegistry", "trustedScannerRegistry", "contentSecurityAssessments", "dataLifecycleRecords", "privacyAssessments", "privacyIdentityLinks", "temporalContexts", "freshnessPolicies", "normalizerDefinitions", "normalizerImplementations", "normalizedRecords", "claimCandidates", "entityRegistry", "entityAliasRecords", "entityIdentifierRecords", "entityMentions", "entityResolutionCandidates", "entityMergeSplitCandidates", "analyticalCapabilities", "analyticalCapabilityVersions", "capabilityPerformanceProfiles", "capabilityRoutingCandidates", "independentReviewPlans", "shadowEvaluationRecords", "analysisExecutionRecords", "capabilityFallbackRecords", "snapshotManifests", "transformationRecords", "lineageRecords", "lineageForwardIndex", "lineageReverseIndex", "recomputeCandidates", "emergencyDecisionLineageHooks"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
   if (!Array.isArray(state.auditOrder)) state.auditOrder = [];
@@ -256,6 +274,13 @@
       entityCount: state.entityRegistry.size,
       entityMentionCount: state.entityMentions.size,
       entityResolutionCandidateCount: state.entityResolutionCandidates.size,
+      analyticalCapabilityCount: state.analyticalCapabilities.size,
+      capabilityPerformanceProfileCount: state.capabilityPerformanceProfiles.size,
+      capabilityRoutingCandidateCount: state.capabilityRoutingCandidates.size,
+      transformationRecordCount: state.transformationRecords.size,
+      lineageRecordCount: state.lineageRecords.size,
+      snapshotManifestCount: state.snapshotManifests.size,
+      recomputeCandidateCount: state.recomputeCandidates.size,
       gateway: state.gatewayClientState ? { baseUrl: state.gatewayClientState.baseUrl || null, healthState: state.gatewayClientState.healthState || "UNKNOWN", sessionActive: Boolean(state.gatewayClientState.session && state.gatewayClientState.session.state === "ACTIVE"), lastCheckedAt: state.gatewayClientState.lastCheckedAt || null } : null,
       safety: clone(VERSION_MANIFEST.safety),
       updatedAt: state.updatedAt || null
@@ -291,7 +316,10 @@
         ["temporal", namespace.initializeExternalIntelligenceTemporal],
         ["normalization", namespace.initializeExternalIntelligenceNormalization],
         ["claim", namespace.initializeExternalIntelligenceClaim],
-        ["entity", namespace.initializeExternalIntelligenceEntity]
+        ["entity", namespace.initializeExternalIntelligenceEntity],
+        ["capabilityRegistry", namespace.initializeExternalIntelligenceCapabilityRegistry],
+        ["capabilityRouting", namespace.initializeExternalIntelligenceCapabilityRouting],
+        ["lineage", namespace.initializeExternalIntelligenceLineage]
       ];
       for (const item of initializers) {
         const name = item[0];
@@ -360,7 +388,7 @@
     id: "EXTERNAL-010-CORE",
     version: VERSION_MANIFEST.getModuleVersion("core"),
     status: "Loaded",
-    phase: 7,
+    phase: 8,
     directRepositoryMutationAllowed: false,
     loadedAt: nowIso()
   };

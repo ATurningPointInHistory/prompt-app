@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.6.0
-   Phase 07: Normalization / Temporal / Claim / Entity Foundation
+   Release: 1.7.0
+   Phase 08: Analytical Capability Registry / Unified Lineage
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.6.0";
+  const RELEASE_VERSION = "1.7.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -16,6 +16,7 @@
   const PHASE5_VERSION = "1.4.0";
   const PHASE6_VERSION = "1.5.0";
   const PHASE7_VERSION = "1.6.0";
+  const PHASE8_VERSION = "1.7.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -66,7 +67,13 @@
     entity: PHASE7_VERSION,
     phase7Validation: PHASE7_VERSION,
     phase7RealRuntimeValidation: PHASE7_VERSION,
-    phase7AndroidValidation: PHASE7_VERSION
+    phase7AndroidValidation: PHASE7_VERSION,
+    capabilityRegistry: PHASE8_VERSION,
+    capabilityRouting: PHASE8_VERSION,
+    lineage: PHASE8_VERSION,
+    phase8Validation: PHASE8_VERSION,
+    phase8RealRuntimeValidation: PHASE8_VERSION,
+    phase8AndroidValidation: PHASE8_VERSION
   };
 
   const fileModules = {
@@ -109,7 +116,13 @@
     "17_external_intelligence_entity.js": "entity",
     "17_external_intelligence_phase7_validation.js": "phase7Validation",
     "17_external_intelligence_phase7_real_runtime_validation.js": "phase7RealRuntimeValidation",
-    "17_external_intelligence_phase7_android_validation.js": "phase7AndroidValidation"
+    "17_external_intelligence_phase7_android_validation.js": "phase7AndroidValidation",
+    "17_external_intelligence_capability_registry.js": "capabilityRegistry",
+    "17_external_intelligence_capability_routing.js": "capabilityRouting",
+    "17_external_intelligence_lineage.js": "lineage",
+    "17_external_intelligence_phase8_validation.js": "phase8Validation",
+    "17_external_intelligence_phase8_real_runtime_validation.js": "phase8RealRuntimeValidation",
+    "17_external_intelligence_phase8_android_validation.js": "phase8AndroidValidation"
   };
 
   const contractVersions = {
@@ -163,7 +176,19 @@
     entityMention: PHASE7_VERSION,
     entityResolutionCandidate: PHASE7_VERSION,
     entityMergeSplitCandidate: PHASE7_VERSION,
-    phase7ValidationResult: PHASE7_VERSION
+    phase7ValidationResult: PHASE7_VERSION,
+    analyticalCapability: PHASE8_VERSION,
+    capabilityPerformanceProfile: PHASE8_VERSION,
+    capabilityRoutingCandidate: PHASE8_VERSION,
+    analysisExecutionRecord: PHASE8_VERSION,
+    independentReviewPlan: PHASE8_VERSION,
+    shadowEvaluationRecord: PHASE8_VERSION,
+    capabilityFallbackRecord: PHASE8_VERSION,
+    snapshotManifest: PHASE8_VERSION,
+    transformationRecord: PHASE8_VERSION,
+    lineageRecord: PHASE8_VERSION,
+    recomputeCandidate: PHASE8_VERSION,
+    phase8ValidationResult: PHASE8_VERSION
   };
 
   const contractIds = {
@@ -217,7 +242,19 @@
     entityMention: "EXTERNAL-010-CONTRACT-ENTITY-MENTION",
     entityResolutionCandidate: "EXTERNAL-010-CONTRACT-ENTITY-RESOLUTION-CANDIDATE",
     entityMergeSplitCandidate: "EXTERNAL-010-CONTRACT-ENTITY-MERGE-SPLIT-CANDIDATE",
-    phase7ValidationResult: "EXTERNAL-010-CONTRACT-PHASE7-VALIDATION-RESULT"
+    phase7ValidationResult: "EXTERNAL-010-CONTRACT-PHASE7-VALIDATION-RESULT",
+    analyticalCapability: "EXTERNAL-010-CONTRACT-ANALYTICAL-CAPABILITY",
+    capabilityPerformanceProfile: "EXTERNAL-010-CONTRACT-CAPABILITY-PERFORMANCE-PROFILE",
+    capabilityRoutingCandidate: "EXTERNAL-010-CONTRACT-CAPABILITY-ROUTING-CANDIDATE",
+    analysisExecutionRecord: "EXTERNAL-010-CONTRACT-ANALYSIS-EXECUTION-RECORD",
+    independentReviewPlan: "EXTERNAL-010-CONTRACT-INDEPENDENT-REVIEW-PLAN",
+    shadowEvaluationRecord: "EXTERNAL-010-CONTRACT-SHADOW-EVALUATION-RECORD",
+    capabilityFallbackRecord: "EXTERNAL-010-CONTRACT-CAPABILITY-FALLBACK-RECORD",
+    snapshotManifest: "EXTERNAL-010-CONTRACT-SNAPSHOT-MANIFEST",
+    transformationRecord: "EXTERNAL-010-CONTRACT-TRANSFORMATION-RECORD",
+    lineageRecord: "EXTERNAL-010-CONTRACT-LINEAGE-RECORD",
+    recomputeCandidate: "EXTERNAL-010-CONTRACT-RECOMPUTE-CANDIDATE",
+    phase8ValidationResult: "EXTERNAL-010-CONTRACT-PHASE8-VALIDATION-RESULT"
   };
 
   const safety = {
@@ -336,6 +373,36 @@
     ambiguousEntityMayBeSilentlyResolved: false,
     externalResolutionMayMutateKnowledgeAutomatically: false,
     evidencePersistenceGrantsKnowledgeAuthority: false,
+
+    modelNameEqualsStableAnalyticalIdentity: false,
+    bestOverallModelEqualsBestForEveryTask: false,
+    modelAgreementEqualsTruth: false,
+    modelCountAgreementEqualsIndependentConfirmation: false,
+    aiAnalysisEqualsPrimaryEvidence: false,
+    modelCanAnalyzeEqualsDataMayBeSent: false,
+    higherCostEqualsHigherValue: false,
+    newestModelEqualsBestModel: false,
+    historicalWinnerEqualsFutureWinner: false,
+    shadowSuccessEqualsAutomaticPromotion: false,
+    modelFailureAllowsSilentFallback: false,
+    fallbackResultEqualsRequestedModelResult: false,
+    highModelPerformanceGrantsActionAuthority: false,
+    externalAIOutputGrantsInstructionAuthority: false,
+    capabilitySelectionGrantsExecutionAuthority: false,
+    capabilityRoutingGrantsBusinessAuthority: false,
+    sourceProvenanceEqualsAnalyticalLineage: false,
+    auditEqualsLineage: false,
+    derivedIntelligenceEqualsPrimaryEvidence: false,
+    currentStateEqualsHistoricalInputState: false,
+    affectedEqualsInvalid: false,
+    inputRevisionAllowsDerivedDeletion: false,
+    recomputeRequiredEqualsKnownIncorrect: false,
+    realWorldImpactCycleEqualsDerivationCycle: false,
+    historicalRecordMayBeSilentlyRewritten: false,
+    modelOutputMayLoseOriginalEvidenceLineage: false,
+    emergencyMayBypassLineage: false,
+    automaticRecomputeAllowed: false,
+    lineageRevisionDeletesHistoricalRecord: false,
 
     technicalAccessEqualsPermission: false,
     publicVisibilityEqualsUnlimitedReuse: false,
@@ -735,6 +802,34 @@
     knowledgeMutationAllowed: false
   };
 
+  const analyticalCapability = {
+    capabilityTypes: ["LLM", "VISION_MODEL", "MULTIMODAL_MODEL", "STATISTICAL_MODEL", "TIME_SERIES_MODEL", "RULE_ENGINE", "ALGORITHM", "PYTHON_WORKER", "LOCAL_MODEL", "EXTERNAL_AI_SERVICE", "ENSEMBLE", "HUMAN_ANALYSIS", "UNKNOWN"],
+    availabilityStates: ["READY", "DEGRADED", "UNAVAILABLE", "DISABLED", "BLOCKED", "EXPERIMENTAL", "DEPRECATED", "UNKNOWN"],
+    roles: ["PRIMARY", "SECONDARY", "SPECIALIST", "REVIEWER", "FALSIFICATION_REVIEWER", "SHADOW", "EXPERIMENTAL", "DEPRECATED", "DISABLED"],
+    outputClassifications: ["MODEL_ANALYSIS", "MODEL_DERIVED_CLAIM", "HYPOTHESIS", "PREDICTION", "SUMMARY", "CLASSIFICATION"],
+    stableIdentityRequired: true,
+    versionedHistoryRequired: true,
+    routingCandidateOnly: true,
+    independentReviewHook: true,
+    shadowEvaluationHook: true,
+    outcomePerformanceHook: true,
+    automaticPromotionAllowed: false,
+    actionAuthorityGrantedByPerformance: false
+  };
+
+  const lineage = {
+    transformationTypes: ["PARSE", "NORMALIZE", "EXTRACT", "AGGREGATE", "SUMMARIZE", "CLASSIFY", "SCORE", "INFER", "PREDICT", "REVIEW", "FUSE", "BACKTEST", "RECOMPUTE", "OTHER"],
+    relationTypes: ["DERIVED_FROM", "NORMALIZED_FROM", "EXTRACTED_FROM", "AGGREGATED_FROM", "SUMMARIZED_FROM", "CLASSIFIED_FROM", "SCORED_FROM", "INFERRED_FROM", "PREDICTED_FROM", "REVIEWED_FROM", "FUSED_FROM", "RECOMPUTED_FROM", "SUPERSEDES", "DEPENDS_ON"],
+    lineageStates: ["ACTIVE", "SUPERSEDED", "AFFECTED", "RECOMPUTE_CANDIDATE", "PARTIAL", "FAILED", "UNKNOWN"],
+    snapshotBasedReproducibility: true,
+    forwardDependencyQuery: true,
+    reverseProvenanceQuery: true,
+    blastRadiusHook: true,
+    recomputeCandidateOnly: true,
+    derivationGraphAcyclic: true,
+    historicalRewriteAllowed: false
+  };
+
   const manifest = {
     componentId: "EXTERNAL-010",
     componentName: "External Intelligence Platform",
@@ -743,8 +838,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 07 Normalization / Temporal / Claim / Entity Foundation",
-      phase: 7,
+      implementationPhase: "Phase 08 Analytical Capability Registry / Unified Lineage",
+      phase: 8,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -753,7 +848,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 07 Normalization / Temporal / Claim / Entity Foundation Implementation"
+      status: "Phase 08 Analytical Capability Registry / Unified Lineage Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -778,6 +873,8 @@
     normalization: normalization,
     claim: claim,
     entity: entity,
+    analyticalCapability: analyticalCapability,
+    lineage: lineage,
     implementation: {
       inspectBeforeImplement: true,
       contractFirst: true,
@@ -792,8 +889,10 @@
       phase6Allowed: true,
       phase6Complete: true,
       phase7Allowed: true,
-      phase7Complete: false,
-      phase8Allowed: false,
+      phase7Complete: true,
+      phase8Allowed: true,
+      phase8Complete: false,
+      phase9Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true
