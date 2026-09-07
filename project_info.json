@@ -4,7 +4,7 @@
   "project": "AIプロンプト生成Pro",
   "version": "v7.0.0",
   "entryFile": "index.html",
-  "savedAt": "2026-09-07T10:10:00.000Z",
+  "savedAt": "2026-09-07T12:41:28.237Z",
   "complete": true,
   "requestedFiles": [
     "index.html",
@@ -327,7 +327,14 @@
     "external_gateway/lib/acquisition.cjs",
     "external_gateway/phase4_fixture.cjs",
     "external_gateway/start_phase4_pc_runtime.bat",
-    "external_gateway/validate_phase4_acquisition.cjs"
+    "external_gateway/validate_phase4_acquisition.cjs",
+    "17_external_intelligence_evidence_persistence.js",
+    "17_external_intelligence_phase5_android_validation.js",
+    "17_external_intelligence_phase5_real_runtime_validation.js",
+    "17_external_intelligence_phase5_validation.js",
+    "external_gateway/lib/evidence_store.cjs",
+    "external_gateway/start_phase5_pc_runtime.bat",
+    "external_gateway/validate_phase5_persistence.cjs"
   ],
   "savedFiles": [
     "index.html",
@@ -651,30 +658,37 @@
     "external_gateway/phase4_fixture.cjs",
     "external_gateway/start_phase4_pc_runtime.bat",
     "external_gateway/validate_phase4_acquisition.cjs",
-    "project_info.json"
+    "project_info.json",
+    "17_external_intelligence_evidence_persistence.js",
+    "17_external_intelligence_phase5_android_validation.js",
+    "17_external_intelligence_phase5_real_runtime_validation.js",
+    "17_external_intelligence_phase5_validation.js",
+    "external_gateway/lib/evidence_store.cjs",
+    "external_gateway/start_phase5_pc_runtime.bat",
+    "external_gateway/validate_phase5_persistence.cjs"
   ],
   "missingFiles": [],
   "externalFiles": [
     "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
   ],
-  "localFileCount": 322,
+  "localFileCount": 329,
   "externalFileCount": 1,
-  "fileCount": 322,
+  "fileCount": 329,
   "cleanIndex": true,
   "scriptManifestSource": "00_script_manifest.json",
   "scriptManifestVersion": "1.9.2",
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "39f48cdb123d4fe735673dde8cc7c5d25fb1ccb535357c553a46a9a13d1ba123",
-  "scriptSetHash": "0cb011e32c0db109d7c5e424dfc76856f1eb31db1f1f4cdef1c4c757a76e31a7",
-  "scriptManifestCount": 304,
+  "scriptManifestHash": "03563e23d0a0811e48d2182c901310871b2a0bbf408db206bfe54a2206219f1b",
+  "scriptSetHash": "fc6918b78df10784adc4b5013e3d5b77fec4c1bcd7aecfec320b292d25491e65",
+  "scriptManifestCount": 308,
   "scriptLoading": {
-    "mode": "Build-time Manifest to Static Scripts",
-    "runtimeLoader": false,
     "documentWrite": false,
     "first": "00_core.js",
+    "generatedAtSave": true,
     "last": "99_init.js",
-    "generatedAtSave": true
+    "mode": "Build-time Manifest to Static Scripts",
+    "runtimeLoader": false
   }
 }

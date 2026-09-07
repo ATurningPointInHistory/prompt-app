@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_phase4_validation.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.3.0
+   Release: 1.4.0
    Phase 04 Validation: Acquisition Contract / Router / Adapter / Queue
    Decisions: 002 / 007 / 015 / 016
    ============================================================ */
@@ -142,8 +142,8 @@
     const uniqueSuffix = Date.now().toString(36).toUpperCase();
 
     try {
-      check("Release Version is 1.3.0", VERSION_MANIFEST.release.version === "1.3.0", VERSION_MANIFEST.release.version, "Foundation");
-      check("Implementation Phase is Phase 04", VERSION_MANIFEST.release.phase === 4 && VERSION_MANIFEST.release.implementationPhase.indexOf("Phase 04") === 0, VERSION_MANIFEST.release.implementationPhase, "Foundation");
+      check("Release Version is compatible with Phase 04 baseline", ["1.3.0", "1.4.0"].includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
+      check("Implementation Phase is Phase 04 or later", VERSION_MANIFEST.release.phase >= 4, VERSION_MANIFEST.release.implementationPhase, "Foundation");
       check("Design Freeze remains canonical", VERSION_MANIFEST.release.designFreezeId === "EXTERNAL-010-DESIGN-FREEZE-1.0.0", VERSION_MANIFEST.release.designFreezeId, "Foundation");
       check("Roadmap remains 2.1.0", VERSION_MANIFEST.release.implementationRoadmapId === "EXTERNAL-010-IMPLEMENTATION-ROADMAP-2.1.0", VERSION_MANIFEST.release.implementationRoadmapId, "Foundation");
       check("Decision coverage remains 54", VERSION_MANIFEST.release.decisionCount === 54, VERSION_MANIFEST.release.decisionCount, "Foundation");
@@ -179,7 +179,7 @@
       check("Mock adapter has stable identity/version and is test-only", mockAdapter && mockAdapter.adapterVersion === "1.0.0" && mockAdapter.testOnly === true, mockAdapter, "Adapter Registry");
       check("Browser HTTP JSON adapter has no authority", browserAdapter && browserAdapter.sourceAuthorityGranted === false && browserAdapter.repositoryAuthorityGranted === false && browserAdapter.financialAuthorityGranted === false && browserAdapter.reliabilityAuthorityGranted === false, browserAdapter, "Adapter Registry");
       check("Gateway adapter is registered without enabling arbitrary proxy", gatewayAdapter && gatewayAdapter.arbitraryUrlAllowed === false, gatewayAdapter, "Adapter Registry");
-      check("Gateway public acquisition endpoint is explicitly versioned", VERSION_MANIFEST.gateway.publicAcquisitionEndpoint === "/v1/acquire/public" && VERSION_MANIFEST.gateway.gatewayVersion === "1.2.0", VERSION_MANIFEST.gateway, "Hybrid Routing");
+      check("Gateway public acquisition endpoint is explicitly versioned", VERSION_MANIFEST.gateway.publicAcquisitionEndpoint === "/v1/acquire/public" && ["1.2.0", "1.3.0"].includes(VERSION_MANIFEST.gateway.gatewayVersion), VERSION_MANIFEST.gateway, "Hybrid Routing");
       check("Built-in governed Gateway acquisition bridge is available", typeof namespace.enableExternalIntelligenceGatewayAcquisitionBridge === "function" && typeof namespace.disableExternalIntelligenceGatewayAcquisitionBridge === "function", "built-in-bridge", "Hybrid Routing");
       check("Gateway acquisition still requires target allowlist and authority revalidation", VERSION_MANIFEST.acquisition.gatewayTargetAllowlistRequired === true && VERSION_MANIFEST.gateway.governedTargetAllowlistRequired === true, { acquisition: VERSION_MANIFEST.acquisition, gateway: VERSION_MANIFEST.gateway }, "Safety");
       check("Adapter acquire implementation is not exposed as normal public API", typeof namespace.api.invokeExternalIntelligenceAdapter !== "function" && typeof namespace.invokeExternalIntelligenceAdapter !== "function", "internal-only", "Adapter Registry");

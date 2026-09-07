@@ -1,19 +1,21 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.3.0
-   Phase 04: Acquisition Contract / Router / Adapter / Queue
+   Release: 1.4.0
+   Phase 05: Immutable Evidence / Storage / Incremental Persistence
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.3.0";
+  const RELEASE_VERSION = "1.4.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
   const PHASE4_VERSION = "1.3.0";
+  const PHASE5_VERSION = "1.4.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
+  const GATEWAY_PHASE5_VERSION = "1.3.0";
 
   function deepFreeze(value) {
     if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -43,7 +45,11 @@
     phase3Validation: PHASE4_VERSION,
     phase4Validation: PHASE4_VERSION,
     phase4RealRuntimeValidation: PHASE4_VERSION,
-    phase4AndroidValidation: PHASE4_VERSION
+    phase4AndroidValidation: PHASE4_VERSION,
+    evidencePersistence: PHASE5_VERSION,
+    phase5Validation: PHASE5_VERSION,
+    phase5RealRuntimeValidation: PHASE5_VERSION,
+    phase5AndroidValidation: PHASE5_VERSION
   };
 
   const fileModules = {
@@ -68,7 +74,11 @@
     "17_external_intelligence_phase3_validation.js": "phase3Validation",
     "17_external_intelligence_phase4_validation.js": "phase4Validation",
     "17_external_intelligence_phase4_real_runtime_validation.js": "phase4RealRuntimeValidation",
-    "17_external_intelligence_phase4_android_validation.js": "phase4AndroidValidation"
+    "17_external_intelligence_phase4_android_validation.js": "phase4AndroidValidation",
+    "17_external_intelligence_evidence_persistence.js": "evidencePersistence",
+    "17_external_intelligence_phase5_validation.js": "phase5Validation",
+    "17_external_intelligence_phase5_real_runtime_validation.js": "phase5RealRuntimeValidation",
+    "17_external_intelligence_phase5_android_validation.js": "phase5AndroidValidation"
   };
 
   const contractVersions = {
@@ -101,7 +111,12 @@
     sourceAdapterDefinition: PHASE4_VERSION,
     sourceRouteDecision: PHASE4_VERSION,
     acquisitionJob: PHASE4_VERSION,
-    phase4ValidationResult: PHASE4_VERSION
+    phase4ValidationResult: PHASE4_VERSION,
+    rawEvidenceRecord: PHASE5_VERSION,
+    acquisitionEvidenceRecord: PHASE5_VERSION,
+    contentObjectMetadata: PHASE5_VERSION,
+    processingCheckpoint: PHASE5_VERSION,
+    phase5ValidationResult: PHASE5_VERSION
   };
 
   const contractIds = {
@@ -134,7 +149,12 @@
     sourceAdapterDefinition: "EXTERNAL-010-CONTRACT-SOURCE-ADAPTER-DEFINITION",
     sourceRouteDecision: "EXTERNAL-010-CONTRACT-SOURCE-ROUTE-DECISION",
     acquisitionJob: "EXTERNAL-010-CONTRACT-ACQUISITION-JOB",
-    phase4ValidationResult: "EXTERNAL-010-CONTRACT-PHASE4-VALIDATION-RESULT"
+    phase4ValidationResult: "EXTERNAL-010-CONTRACT-PHASE4-VALIDATION-RESULT",
+    rawEvidenceRecord: "EXTERNAL-010-CONTRACT-RAW-EVIDENCE",
+    acquisitionEvidenceRecord: "EXTERNAL-010-CONTRACT-ACQUISITION-EVIDENCE",
+    contentObjectMetadata: "EXTERNAL-010-CONTRACT-CONTENT-OBJECT",
+    processingCheckpoint: "EXTERNAL-010-CONTRACT-PROCESSING-CHECKPOINT",
+    phase5ValidationResult: "EXTERNAL-010-CONTRACT-PHASE5-VALIDATION-RESULT"
   };
 
   const safety = {
@@ -195,6 +215,11 @@
     resourceBudgetGrantsSubscriptionAuthority: false,
     resourceBudgetGrantsFinancialTradingAuthority: false,
     storagePressureGrantsEvidenceDeletionAuthority: false,
+    rawEvidenceOverwriteAllowed: false,
+    metadataIndexOnlyEvidenceIdentityAllowed: false,
+    orphanContentAutomaticDeletionAllowed: false,
+    derivedDataMayRewriteRawEvidence: false,
+    evidencePersistenceGrantsKnowledgeAuthority: false,
 
     technicalAccessEqualsPermission: false,
     publicVisibilityEqualsUnlimitedReuse: false,
@@ -289,7 +314,7 @@
 
   const gateway = {
     contractVersion: "1.0.0",
-    gatewayVersion: GATEWAY_PHASE4_VERSION,
+    gatewayVersion: GATEWAY_PHASE5_VERSION,
     defaultBaseUrl: "http://127.0.0.1:43110",
     loopbackOnly: true,
     defaultPort: 43110,
@@ -304,8 +329,14 @@
     probeEndpoint: "/v1/probe",
     runtimeEndpoint: "/v1/runtime",
     publicAcquisitionEndpoint: "/v1/acquire/public",
+    evidencePersistEndpoint: "/v1/evidence/persist",
+    evidenceReadEndpoint: "/v1/evidence/read",
+    evidenceIntegrityEndpoint: "/v1/evidence/integrity",
+    processingCheckpointEndpoint: "/v1/evidence/checkpoint",
     localNetworkAddressSpace: "loopback",
     publicAcquisitionScope: "ACQUIRE_PUBLIC",
+    evidencePersistScope: "PERSIST_EVIDENCE",
+    evidenceReadScope: "READ_EVIDENCE",
     governedTargetAllowlistRequired: true
   };
 
@@ -394,6 +425,30 @@
     gatewayTargetAllowlistRequired: true
   };
 
+  const persistence = {
+    contentHashAlgorithm: "SHA-256",
+    contentAddressedStore: true,
+    metadataIndex: "SQLITE",
+    databaseSchemaVersion: "1.0.0",
+    rawContentDefaultStorage: "FILE_STORE",
+    storageClasses: ["HOT", "WARM", "COLD", "ARCHIVE"],
+    initialStorageClass: "HOT",
+    immutableRawEvidence: true,
+    acquisitionRecordSeparatedFromContent: true,
+    physicalContentDeduplication: true,
+    temporaryWriteBeforeCommit: true,
+    hashVerificationBeforeMetadataCommit: true,
+    atomicRenamePreferred: true,
+    metadataIndexIsOnlyEvidenceIdentityCopy: false,
+    orphanAutomaticDeletionAllowed: false,
+    incrementalProcessingRequired: true,
+    checkpointSupported: true,
+    projectZipAutoIncludesBulkEvidence: false,
+    localGatewayWriterRequired: true,
+    browserDirectPersistentStoreAllowed: false,
+    androidLocalSqlitePersistenceAvailable: false
+  };
+
   const manifest = {
     componentId: "EXTERNAL-010",
     componentName: "External Intelligence Platform",
@@ -402,8 +457,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 04 Acquisition Contract / Router / Adapter / Queue",
-      phase: 4,
+      implementationPhase: "Phase 05 Immutable Evidence / Storage / Incremental Persistence",
+      phase: 5,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -412,7 +467,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 04 Acquisition Contract / Router / Adapter / Queue Implementation"
+      status: "Phase 05 Immutable Evidence / Storage / Incremental Persistence Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -428,6 +483,7 @@
     resourceBudget: resourceBudget,
     usagePolicy: usagePolicy,
     acquisition: acquisition,
+    persistence: persistence,
     implementation: {
       inspectBeforeImplement: true,
       contractFirst: true,
@@ -436,8 +492,10 @@
       phase3Allowed: true,
       phase3Complete: true,
       phase4Allowed: true,
-      phase4Complete: false,
-      phase5Allowed: false,
+      phase4Complete: true,
+      phase5Allowed: true,
+      phase5Complete: false,
+      phase6Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true

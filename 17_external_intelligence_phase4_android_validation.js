@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_phase4_android_validation.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.3.0
+   Release: 1.4.0
    Phase 04 Android Real Device Validation
    Browser Direct + Graceful Gateway Unavailable + Static Integrity
    ============================================================ */
@@ -19,10 +19,10 @@
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("phase4AndroidValidation");
   const PURPOSE = "phase4-android-real-device";
-  const EXPECTED_RELEASE = "1.3.0";
-  const EXPECTED_GATEWAY_VERSION = "1.2.0";
+  const EXPECTED_RELEASES = ["1.3.0", "1.4.0"];
+  const EXPECTED_GATEWAY_VERSIONS = ["1.2.0", "1.3.0"];
   const EXPECTED_PHASE4_REGRESSION_TOTAL = 248;
-  const EXPECTED_SCRIPT_COUNT = 304;
+  const MINIMUM_PHASE4_SCRIPT_COUNT = 304;
 
   function collector() {
     const checks = [];
@@ -351,9 +351,9 @@
     let gatewayRoute = null;
 
     try {
-      check("Release Version is 1.3.0", VERSION_MANIFEST.release.version === EXPECTED_RELEASE, VERSION_MANIFEST.release.version, "Foundation");
-      check("Gateway compatibility version is 1.2.0", VERSION_MANIFEST.gateway.gatewayVersion === EXPECTED_GATEWAY_VERSION, VERSION_MANIFEST.gateway.gatewayVersion, "Foundation");
-      check("Phase 04 Android module version resolves", MODULE_VERSION === EXPECTED_RELEASE, MODULE_VERSION, "Foundation");
+      check("Release Version is compatible with Phase 04 baseline", EXPECTED_RELEASES.includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
+      check("Gateway compatibility version is 1.2.0", EXPECTED_GATEWAY_VERSIONS.includes(VERSION_MANIFEST.gateway.gatewayVersion), VERSION_MANIFEST.gateway.gatewayVersion, "Foundation");
+      check("Phase 04 Android module version resolves", EXPECTED_RELEASES.includes(MODULE_VERSION), MODULE_VERSION, "Foundation");
 
       const userAgent = global.navigator && global.navigator.userAgent || "";
       check("Android real-device environment is detected", /Android/i.test(userAgent), userAgent, "Android Environment");
@@ -371,11 +371,11 @@
       check("EXTERNAL-010 Foundation initializes on Android", init && init.ok === true, init && (init.data || init.code), "Foundation");
 
       regression = await namespace.runExternalIntelligencePhase4Validation();
-      check("Phase 04 Regression remains 248/248 PASS", Boolean(regression && regression.passed === EXPECTED_PHASE4_REGRESSION_TOTAL && regression.failed === 0 && regression.total === EXPECTED_PHASE4_REGRESSION_TOTAL), regression && { passed: regression.passed, failed: regression.failed, total: regression.total }, "Regression");
+      check("Phase 04 Regression remains PASS at 248 baseline or later", Boolean(regression && regression.failed === 0 && regression.criticalFailed === 0 && regression.total >= EXPECTED_PHASE4_REGRESSION_TOTAL && regression.passed === regression.total), regression && { passed: regression.passed, failed: regression.failed, total: regression.total, criticalFailed: regression.criticalFailed }, "Regression");
       check("Phase 04 Regression has zero critical failures", Boolean(regression && regression.criticalFailed === 0 && regression.health === 100 && regression.releaseAllowed === true && regression.phase4Complete === true), regression && { health: regression.health, criticalFailed: regression.criticalFailed, releaseAllowed: regression.releaseAllowed, phase4Complete: regression.phase4Complete }, "Regression");
 
       staticRuntime = await verifyStaticRuntime();
-      check("Static Script Manifest contains expected Android baseline", staticRuntime.scriptCount === EXPECTED_SCRIPT_COUNT && staticRuntime.indexLocalScriptCount === EXPECTED_SCRIPT_COUNT, { scriptCount: staticRuntime.scriptCount, indexLocalScriptCount: staticRuntime.indexLocalScriptCount }, "Static Integrity");
+      check("Static Script Manifest contains Phase 04 baseline or later", staticRuntime.scriptCount >= MINIMUM_PHASE4_SCRIPT_COUNT && staticRuntime.indexLocalScriptCount === staticRuntime.scriptCount, { scriptCount: staticRuntime.scriptCount, indexLocalScriptCount: staticRuntime.indexLocalScriptCount }, "Static Integrity");
       check("Static Script Manifest internal SHA-256 integrity is valid", staticRuntime.manifestStructureValid === true && staticRuntime.manifestIntegrityValid === true, { manifestHash: staticRuntime.computedManifestHash, scriptSetHash: staticRuntime.computedScriptSetHash }, "Static Integrity");
       check("All static scripts are fetched and hash/size/cache-key verified", staticRuntime.fetchedScriptCount === staticRuntime.scriptCount && staticRuntime.scriptHashMismatchCount === 0 && staticRuntime.scriptByteSizeMismatchCount === 0 && staticRuntime.scriptCacheKeyMismatchCount === 0 && staticRuntime.fetchFailureCount === 0, { fetched: staticRuntime.fetchedScriptCount, scriptCount: staticRuntime.scriptCount, hashMismatch: staticRuntime.scriptHashMismatchCount, byteSizeMismatch: staticRuntime.scriptByteSizeMismatchCount, cacheKeyMismatch: staticRuntime.scriptCacheKeyMismatchCount, fetchFailureCount: staticRuntime.fetchFailureCount, mismatches: staticRuntime.mismatches.slice(0, 10) }, "Static Integrity");
       check("index.html script sequence matches Static Manifest", staticRuntime.indexScriptSequenceMatches === true, { indexLocalScriptCount: staticRuntime.indexLocalScriptCount, manifestScriptCount: staticRuntime.scriptCount }, "Static Integrity");
@@ -476,7 +476,7 @@
         browserDirectRealHttp: Boolean(browserExecution && browserExecution.ok === true),
         gatewayUnavailableFailClosed: Boolean(gatewayRoute && gatewayRoute.ok === false && gatewayRoute.data && gatewayRoute.data.fallbackPerformed === false),
         staticIntegrityPassed: Boolean(staticRuntime && staticRuntime.ok === true),
-        phase4RegressionPassed: Boolean(regression && regression.failed === 0 && regression.total === EXPECTED_PHASE4_REGRESSION_TOTAL),
+        phase4RegressionPassed: Boolean(regression && regression.failed === 0 && regression.criticalFailed === 0 && regression.total >= EXPECTED_PHASE4_REGRESSION_TOTAL && regression.passed === regression.total),
         validatedAt: internal.nowIso()
       },
       staticManifest: staticRuntime && staticRuntime.manifest ? {

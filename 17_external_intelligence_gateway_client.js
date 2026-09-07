@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_gateway_client.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.3.0
+   Release: 1.4.0
    Phase 02 Foundation + Phase 04 Governed Acquisition Bridge
    Decisions: 011 / 013 / 054
    ============================================================ */
@@ -341,6 +341,54 @@
     return namespace.setExternalIntelligenceGatewayAcquisitionExecutor(null);
   }
 
+
+  async function gatewayEvidencePersist(payload) {
+    const scopeReady = await ensureGatewaySessionScopes([VERSION_MANIFEST.gateway.evidencePersistScope || "PERSIST_EVIDENCE"]);
+    if (!scopeReady.ok) return scopeReady;
+    return guardedGatewayRequest(VERSION_MANIFEST.gateway.evidencePersistEndpoint, payload, { method: "POST" });
+  }
+
+  async function gatewayEvidenceRead(payload) {
+    const scopeReady = await ensureGatewaySessionScopes([VERSION_MANIFEST.gateway.evidenceReadScope || "READ_EVIDENCE"]);
+    if (!scopeReady.ok) return scopeReady;
+    return guardedGatewayRequest(VERSION_MANIFEST.gateway.evidenceReadEndpoint, payload, { method: "POST" });
+  }
+
+  async function gatewayEvidenceIntegrity(payload) {
+    const scopeReady = await ensureGatewaySessionScopes([VERSION_MANIFEST.gateway.evidenceReadScope || "READ_EVIDENCE"]);
+    if (!scopeReady.ok) return scopeReady;
+    return guardedGatewayRequest(VERSION_MANIFEST.gateway.evidenceIntegrityEndpoint, payload, { method: "POST" });
+  }
+
+  async function gatewayProcessingCheckpoint(payload) {
+    const scopeReady = await ensureGatewaySessionScopes([VERSION_MANIFEST.gateway.evidencePersistScope || "PERSIST_EVIDENCE"]);
+    if (!scopeReady.ok) return scopeReady;
+    return guardedGatewayRequest(VERSION_MANIFEST.gateway.processingCheckpointEndpoint, payload, { method: "POST" });
+  }
+
+  function enableGatewayEvidencePersistenceBridge() {
+    if (typeof namespace.setExternalIntelligenceEvidencePersistenceAdapter !== "function") return internal.buildResult(false, "EXTERNAL010_GATEWAY_EVIDENCE_BRIDGE_DEPENDENCY_MISSING", "Blocked", null);
+    return namespace.setExternalIntelligenceEvidencePersistenceAdapter({
+      persistEvidence: async function persistEvidence(payload) {
+        const result = await gatewayEvidencePersist(payload);
+        const response = result && result.data && result.data.response;
+        return response && response.ok ? internal.buildResult(true, "EXTERNAL010_GATEWAY_EVIDENCE_PERSISTED", "Ready", response) : internal.buildResult(false, response && response.code || "EXTERNAL010_GATEWAY_EVIDENCE_PERSIST_FAILED", result && result.status || "Failed", response || null);
+      },
+      readEvidence: async function readEvidence(payload) {
+        const result = await gatewayEvidenceRead(payload); const response = result && result.data && result.data.response;
+        return response && response.ok ? internal.buildResult(true, "EXTERNAL010_GATEWAY_EVIDENCE_READ", "Ready", response.evidence) : internal.buildResult(false, response && response.code || "EXTERNAL010_GATEWAY_EVIDENCE_READ_FAILED", result && result.status || "Failed", response || null);
+      },
+      integrityScan: async function integrityScan(payload) {
+        const result = await gatewayEvidenceIntegrity(payload); const response = result && result.data && result.data.response;
+        return response && response.ok ? internal.buildResult(true, "EXTERNAL010_GATEWAY_EVIDENCE_INTEGRITY", "Ready", response.integrity) : internal.buildResult(false, response && response.code || "EXTERNAL010_GATEWAY_EVIDENCE_INTEGRITY_FAILED", result && result.status || "Failed", response || null);
+      },
+      persistCheckpoint: async function persistCheckpoint(payload) {
+        const result = await gatewayProcessingCheckpoint(payload); const response = result && result.data && result.data.response;
+        return response && response.ok ? internal.buildResult(true, "EXTERNAL010_GATEWAY_PROCESSING_CHECKPOINT_PERSISTED", "Ready", response.checkpoint) : internal.buildResult(false, response && response.code || "EXTERNAL010_GATEWAY_PROCESSING_CHECKPOINT_FAILED", result && result.status || "Failed", response || null);
+      }
+    });
+  }
+
   async function requestAuthorityGovernedGatewayOperation(input) {
     const settings = internal.isPlainObject(input) ? input : {};
     const action = internal.text(settings.action, "").toUpperCase();
@@ -410,6 +458,7 @@
     ensureExternalIntelligenceGatewaySessionScopes: ensureGatewaySessionScopes,
     enableExternalIntelligenceGatewayAcquisitionBridge: enableGatewayAcquisitionBridge,
     disableExternalIntelligenceGatewayAcquisitionBridge: disableGatewayAcquisitionBridge,
+    enableExternalIntelligenceGatewayEvidencePersistenceBridge: enableGatewayEvidencePersistenceBridge,
     requestAuthorityGovernedExternalIntelligenceGatewayOperation: requestAuthorityGovernedGatewayOperation,
     revokeExternalIntelligenceGatewaySession: revokeGatewaySession,
     initializeExternalIntelligenceStartup: initializeExternalIntelligenceStartup

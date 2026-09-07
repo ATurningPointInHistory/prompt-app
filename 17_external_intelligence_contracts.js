@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_contracts.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.3.0
-   Phase 04: Acquisition Contract / Router / Adapter / Queue
+   Release: 1.4.0
+   Phase 05: Immutable Evidence / Storage / Incremental Persistence
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -270,7 +270,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.1.0", "1.2.0", "1.3.0"] }),
+        field("version", { required: true, type: "string", enum: ["1.1.0", "1.2.0", "1.3.0", "1.4.0"] }),
         field("implementationPhase", { required: true, type: "string" }),
         field("passed", { required: true, type: "number" }),
         field("failed", { required: true, type: "number" }),
@@ -440,7 +440,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.2.0", "1.3.0"] }),
+        field("version", { required: true, type: "string", enum: ["1.2.0", "1.3.0", "1.4.0"] }),
         field("implementationPhase", { required: true, type: "string" }),
         field("decisionCoverage", { required: true, type: "number", enum: [54] }),
         field("passed", { required: true, type: "number" }),
@@ -666,7 +666,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.3.0"] }),
+        field("version", { required: true, type: "string", enum: ["1.3.0", "1.4.0"] }),
         field("implementationPhase", { required: true, type: "string" }),
         field("decisionCoverage", { required: true, type: "number", enum: [54] }),
         field("passed", { required: true, type: "number" }),
@@ -680,6 +680,26 @@
         field("phase5Allowed", { required: true, type: "boolean" }),
         field("validatedAt", { required: true, type: "string" })
       ]
+    },
+    {
+      key: "rawEvidenceRecord", id: VERSION_MANIFEST.getContractId("rawEvidenceRecord"), name: "EXTERNAL-010 Raw Evidence Contract", version: VERSION_MANIFEST.getContractVersion("rawEvidenceRecord"), immutable: true,
+      fields: [field("rawEvidenceId",{required:true,type:"string"}),field("contentId",{required:true,type:"string"}),field("contentHash",{required:true,type:"string",pattern:/^[a-f0-9]{64}$/}),field("contentType",{required:true,type:"string"}),field("sizeBytes",{required:true,type:"number"}),field("rawDataReference",{required:true,type:["string","null"]}),field("storageClass",{required:true,type:"string"}),field("acquiredAt",{required:true,type:"string"}),field("publishedAt",{required:false,type:["string","null"]}),field("sourceId",{required:true,type:"string"}),field("requestId",{required:true,type:"string"}),field("acquisitionStatus",{required:true,type:"string"}),field("schemaVersion",{required:true,type:"string"}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "acquisitionEvidenceRecord", id: VERSION_MANIFEST.getContractId("acquisitionEvidenceRecord"), name: "EXTERNAL-010 Acquisition Evidence Contract", version: VERSION_MANIFEST.getContractVersion("acquisitionEvidenceRecord"), immutable: true,
+      fields: [field("evidenceId",{required:true,type:"string"}),field("requestId",{required:true,type:"string"}),field("sourceId",{required:true,type:"string"}),field("sourceVersion",{required:true,type:"number"}),field("operationId",{required:true,type:"string"}),field("adapterId",{required:true,type:"string"}),field("adapterVersion",{required:true,type:"string"}),field("accessMode",{required:true,type:"string"}),field("acquiredAt",{required:true,type:"string"}),field("status",{required:true,type:"string"}),field("contentHash",{required:true,type:"string",pattern:/^[a-f0-9]{64}$/}),field("contentType",{required:true,type:"string"}),field("rawEvidenceId",{required:true,type:"string"}),field("attemptCount",{required:true,type:"number"}),field("recordHash",{required:true,type:"string",pattern:/^[a-f0-9]{64}$/}),field("schemaVersion",{required:true,type:"string"}),field("recordVersion",{required:true,type:"number"}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "contentObjectMetadata", id: VERSION_MANIFEST.getContractId("contentObjectMetadata"), name: "EXTERNAL-010 Content Object Metadata Contract", version: VERSION_MANIFEST.getContractVersion("contentObjectMetadata"), immutable: true,
+      fields: [field("contentId",{required:true,type:"string"}),field("contentHash",{required:true,type:"string",pattern:/^[a-f0-9]{64}$/}),field("storageClass",{required:true,type:"string"}),field("storageProvider",{required:true,type:"string"}),field("storageReference",{required:true,type:["string","null"]}),field("sizeBytes",{required:true,type:"number"}),field("contentType",{required:true,type:"string"}),field("integrityState",{required:true,type:"string"}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "processingCheckpoint", id: VERSION_MANIFEST.getContractId("processingCheckpoint"), name: "EXTERNAL-010 Incremental Processing Checkpoint Contract", version: VERSION_MANIFEST.getContractVersion("processingCheckpoint"), immutable: true,
+      fields: [field("checkpointId",{required:true,type:"string"}),field("contentHash",{required:true,type:"string",pattern:/^[a-f0-9]{64}$/}),field("processorId",{required:true,type:"string"}),field("processorVersion",{required:true,type:"string"}),field("parameterHash",{required:true,type:"string"}),field("processingState",{required:true,type:"string"}),field("resumeCursor",{required:false,type:["object","string","number","null"]}),field("supersedesCheckpointId",{required:false,type:["string","null"]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "phase5ValidationResult", id: VERSION_MANIFEST.getContractId("phase5ValidationResult"), name: "EXTERNAL-010 Phase 05 Validation Result Contract", version: VERSION_MANIFEST.getContractVersion("phase5ValidationResult"), immutable: true,
+      fields: [field("id",{required:true,type:"string"}),field("componentId",{required:true,type:"string",enum:["EXTERNAL-010"]}),field("version",{required:true,type:"string"}),field("implementationPhase",{required:true,type:"string"}),field("decisionCoverage",{required:true,type:"number",enum:[54]}),field("passed",{required:true,type:"number"}),field("failed",{required:true,type:"number"}),field("total",{required:true,type:"number"}),field("health",{required:true,type:"number"}),field("criticalFailed",{required:true,type:"number"}),field("status",{required:true,type:"string"}),field("releaseAllowed",{required:true,type:"boolean"}),field("phase5Complete",{required:true,type:"boolean"}),field("phase6Allowed",{required:true,type:"boolean"}),field("validatedAt",{required:true,type:"string"})]
     }
   ]);
 

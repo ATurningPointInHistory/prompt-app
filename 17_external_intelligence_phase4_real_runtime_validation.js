@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_phase4_real_runtime_validation.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.3.0
+   Release: 1.4.0
    Phase 04 PC Real Runtime Validation
    Browser Direct + Governed Local Gateway Real HTTP
    ============================================================ */
@@ -140,14 +140,14 @@
     const suffix = Date.now().toString(36).toUpperCase();
 
     try {
-      check("Release Version is 1.3.0", VERSION_MANIFEST.release.version === "1.3.0", VERSION_MANIFEST.release.version, "Foundation");
+      check("Release Version is compatible with Phase 04 baseline", ["1.3.0", "1.4.0"].includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
       const init = await namespace.initializeExternalIntelligenceFoundation();
       check("Foundation initializes for PC real runtime", init && init.ok === true, init && init.code, "Foundation");
 
       const configured = namespace.configureExternalIntelligenceGatewayClient({ baseUrl: gatewayBaseUrl });
       check("Gateway client uses explicit loopback base URL", configured.ok === true && configured.data.baseUrl === gatewayBaseUrl, configured.data || configured.code, "Gateway");
       const health = await namespace.getExternalIntelligenceGatewayHealth();
-      check("Real Gateway health is READY", health.ok === true && health.data.health && health.data.health.gatewayVersion === "1.2.0", health.data || health.code, "Gateway");
+      check("Real Gateway health is READY", health.ok === true && health.data.health && ["1.2.0", "1.3.0"].includes(health.data.health.gatewayVersion), health.data || health.code, "Gateway");
 
       const session = await namespace.openExternalIntelligenceGatewaySession({ requestedScope: ["PROBE", "READ_RUNTIME", "ACQUIRE_PUBLIC"] });
       check("Gateway session with ACQUIRE_PUBLIC is created", session.ok === true && session.data.session.scope.includes("ACQUIRE_PUBLIC"), session.data || session.code, "Gateway Security");

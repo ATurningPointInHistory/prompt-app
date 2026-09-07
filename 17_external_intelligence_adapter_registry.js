@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_adapter_registry.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.3.0
+   Release: 1.4.0
    Phase 04: Common Source Adapter Contract / Registry
    Decisions: 002 / 015
    ============================================================ */
@@ -122,7 +122,7 @@
       },
       extractTemporalMetadata: function extractTemporalMetadata(raw) { return { observedAt: raw.observedAt || internal.nowIso(), publishedAt: null, availableAt: null, effectiveAt: null }; },
       sanitize: function sanitize(raw) { return internal.redactSensitive(raw); },
-      buildEvidenceInput: function buildEvidenceInput(context) { return { requestId: context.request.requestId, attemptId: context.attempt.attemptId, sourceId: context.request.sourceId, operationId: context.request.operationId, adapterId: context.adapter.adapterId, adapterVersion: context.adapter.adapterVersion, payload: internal.redactSensitive(context.raw.payload), responseMetadata: internal.clone(context.responseMetadata), temporalMetadata: internal.clone(context.temporalMetadata), persistenceAuthorityGranted: false }; }
+      buildEvidenceInput: function buildEvidenceInput(context) { return { requestId: context.request.requestId, attemptId: context.attempt.attemptId, sourceId: context.request.sourceId, operationId: context.request.operationId, adapterId: context.adapter.adapterId, adapterVersion: context.adapter.adapterVersion, payload: internal.redactSensitive(context.raw.payload), rawText: typeof context.raw.rawText === "string" ? context.raw.rawText : internal.stableStringify(context.raw.payload), responseMetadata: internal.clone(context.responseMetadata), temporalMetadata: internal.clone(context.temporalMetadata), persistenceAuthorityGranted: false }; }
     };
   }
 
@@ -157,13 +157,13 @@
             const category = response.status === 429 ? "RATE_LIMITED" : response.status === 401 || response.status === 403 ? "AUTHENTICATION_FAILED" : response.status >= 500 ? "TEMPORARY_SOURCE_UNAVAILABLE" : "INVALID_RESPONSE";
             throw Object.assign(new Error("HTTP " + response.status), { externalCategory: category, retryable: response.status === 429 || response.status >= 500, rawProviderStatus: response.status });
           }
-          return { status: response.status, contentType: response.headers.get("content-type") || "application/json", payload: payload, providerRequestId: response.headers.get("x-request-id") || null, headers: { etag: response.headers.get("etag"), lastModified: response.headers.get("last-modified") }, observedAt: internal.nowIso() };
+          return { status: response.status, contentType: response.headers.get("content-type") || "application/json", payload: payload, rawText: text, providerRequestId: response.headers.get("x-request-id") || null, headers: { etag: response.headers.get("etag"), lastModified: response.headers.get("last-modified") }, observedAt: internal.nowIso() };
         } finally { if (timer) clearTimeout(timer); }
       },
       normalizeResponseMetadata: function normalizeResponseMetadata(raw) { const text = JSON.stringify(raw.payload == null ? null : raw.payload); return { status: raw.status, contentType: raw.contentType, responseSize: text.length, providerRequestId: raw.providerRequestId || null, rateLimitMetadata: {} }; },
       extractTemporalMetadata: function extractTemporalMetadata(raw) { return { observedAt: raw.observedAt || internal.nowIso(), publishedAt: null, availableAt: null, effectiveAt: null, providerLastModified: raw.headers && raw.headers.lastModified || null }; },
       sanitize: function sanitize(raw) { return internal.redactSensitive(raw); },
-      buildEvidenceInput: function buildEvidenceInput(context) { return { requestId: context.request.requestId, attemptId: context.attempt.attemptId, sourceId: context.request.sourceId, operationId: context.request.operationId, adapterId: context.adapter.adapterId, adapterVersion: context.adapter.adapterVersion, payload: internal.redactSensitive(context.raw.payload), responseMetadata: internal.clone(context.responseMetadata), temporalMetadata: internal.clone(context.temporalMetadata), persistenceAuthorityGranted: false }; }
+      buildEvidenceInput: function buildEvidenceInput(context) { return { requestId: context.request.requestId, attemptId: context.attempt.attemptId, sourceId: context.request.sourceId, operationId: context.request.operationId, adapterId: context.adapter.adapterId, adapterVersion: context.adapter.adapterVersion, payload: internal.redactSensitive(context.raw.payload), rawText: typeof context.raw.rawText === "string" ? context.raw.rawText : internal.stableStringify(context.raw.payload), responseMetadata: internal.clone(context.responseMetadata), temporalMetadata: internal.clone(context.temporalMetadata), persistenceAuthorityGranted: false }; }
     };
   }
 
@@ -182,7 +182,7 @@
       normalizeResponseMetadata: function normalizeResponseMetadata(raw) { return internal.redactSensitive(raw && raw.responseMetadata || { status: raw && raw.status || 200, contentType: raw && raw.contentType || null, responseSize: raw && raw.responseSize || 0, providerRequestId: raw && raw.providerRequestId || null, rateLimitMetadata: {} }); },
       extractTemporalMetadata: function extractTemporalMetadata(raw) { return internal.clone(raw && raw.temporalMetadata || { observedAt: internal.nowIso(), publishedAt: null, availableAt: null, effectiveAt: null }); },
       sanitize: function sanitize(raw) { return internal.redactSensitive(raw); },
-      buildEvidenceInput: function buildEvidenceInput(context) { return { requestId: context.request.requestId, attemptId: context.attempt.attemptId, sourceId: context.request.sourceId, operationId: context.request.operationId, adapterId: context.adapter.adapterId, adapterVersion: context.adapter.adapterVersion, payload: internal.redactSensitive(context.raw && context.raw.payload), responseMetadata: internal.clone(context.responseMetadata), temporalMetadata: internal.clone(context.temporalMetadata), persistenceAuthorityGranted: false }; }
+      buildEvidenceInput: function buildEvidenceInput(context) { return { requestId: context.request.requestId, attemptId: context.attempt.attemptId, sourceId: context.request.sourceId, operationId: context.request.operationId, adapterId: context.adapter.adapterId, adapterVersion: context.adapter.adapterVersion, payload: internal.redactSensitive(context.raw && context.raw.payload), rawText: context.raw && typeof context.raw.rawText === "string" ? context.raw.rawText : internal.stableStringify(context.raw && context.raw.payload), responseMetadata: internal.clone(context.responseMetadata), temporalMetadata: internal.clone(context.temporalMetadata), persistenceAuthorityGranted: false }; }
     };
   }
 

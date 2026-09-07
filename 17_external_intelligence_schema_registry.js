@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_schema_registry.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.3.0
+   Release: 1.4.0
    Phase 04: Acquisition Contract / Router / Adapter / Queue
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
@@ -96,7 +96,7 @@
       }),
     schema("EXTERNAL-010-SCHEMA-PHASE2-VALIDATION-RESULT", "External Intelligence Phase 02 Validation Result",
       ["id", "componentId", "version", "implementationPhase", "passed", "failed", "total", "health", "criticalFailed", "status", "releaseAllowed", "phase2Complete", "phase3Allowed", "validatedAt"], {
-        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.1.0", "1.2.0", "1.3.0"] }, implementationPhase: { type: "string" },
+        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.1.0", "1.2.0", "1.3.0", "1.4.0"] }, implementationPhase: { type: "string" },
         passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" },
         releaseAllowed: { type: "boolean" }, phase2Complete: { type: "boolean" }, phase3Allowed: { type: "boolean" }, validatedAt: { type: "string" }
       }),
@@ -129,7 +129,7 @@
       }),
     schema("EXTERNAL-010-SCHEMA-PHASE3-VALIDATION-RESULT", "External Intelligence Phase 03 Validation Result",
       ["id", "componentId", "version", "implementationPhase", "decisionCoverage", "passed", "failed", "total", "health", "criticalFailed", "status", "releaseAllowed", "phase3Complete", "phase4Allowed", "validatedAt"], {
-        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.2.0", "1.3.0"] }, implementationPhase: { type: "string" }, decisionCoverage: { type: "number", enum: [54] }, passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" }, releaseAllowed: { type: "boolean" }, phase3Complete: { type: "boolean" }, phase4Allowed: { type: "boolean" }, validatedAt: { type: "string" }
+        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.2.0", "1.3.0", "1.4.0"] }, implementationPhase: { type: "string" }, decisionCoverage: { type: "number", enum: [54] }, passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" }, releaseAllowed: { type: "boolean" }, phase3Complete: { type: "boolean" }, phase4Allowed: { type: "boolean" }, validatedAt: { type: "string" }
       }),
     schema("EXTERNAL-010-SCHEMA-SOURCE-OPERATION-CONTRACT", "External Intelligence Source Operation Contract",
       ["operationContractId", "sourceId", "operationId", "adapterId", "method", "endpoint", "parameterPolicy", "timeoutPolicy", "retryPolicy", "responseMode", "executionHints", "estimatedUsage", "enabled", "authorityGranted", "createdAt", "updatedAt", "immutable"], {
@@ -180,10 +180,25 @@
       }),
     schema("EXTERNAL-010-SCHEMA-PHASE4-VALIDATION-RESULT", "External Intelligence Phase 04 Validation Result",
       ["id", "componentId", "version", "implementationPhase", "decisionCoverage", "passed", "failed", "total", "health", "criticalFailed", "status", "releaseAllowed", "phase4Complete", "phase5Allowed", "validatedAt"], {
-        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.3.0"] }, implementationPhase: { type: "string" }, decisionCoverage: { type: "number", enum: [54] },
+        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.3.0", "1.4.0"] }, implementationPhase: { type: "string" }, decisionCoverage: { type: "number", enum: [54] },
         passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" }, releaseAllowed: { type: "boolean" }, phase4Complete: { type: "boolean" }, phase5Allowed: { type: "boolean" }, validatedAt: { type: "string" }
       })
-  ]);
+,
+    schema("EXTERNAL-010-SCHEMA-RAW-EVIDENCE", "External Intelligence Raw Evidence", ["rawEvidenceId","contentId","contentHash","contentType","sizeBytes","rawDataReference","storageClass","acquiredAt","sourceId","requestId","acquisitionStatus","schemaVersion","createdAt","immutable"], {
+      rawEvidenceId:{type:"string"},contentId:{type:"string"},contentHash:{type:"string"},contentType:{type:"string"},sizeBytes:{type:"number"},rawDataReference:{type:["string","null"]},storageClass:{type:"string"},acquiredAt:{type:"string"},publishedAt:{type:["string","null"]},sourceId:{type:"string"},requestId:{type:"string"},acquisitionStatus:{type:"string"},schemaVersion:{type:"string"},createdAt:{type:"string"},immutable:{type:"boolean",enum:[true]}
+    }),
+    schema("EXTERNAL-010-SCHEMA-ACQUISITION-EVIDENCE", "External Intelligence Acquisition Evidence", ["evidenceId","requestId","sourceId","sourceVersion","operationId","adapterId","adapterVersion","accessMode","acquiredAt","status","contentHash","contentType","rawEvidenceId","attemptCount","recordHash","schemaVersion","recordVersion","createdAt","immutable"], {
+      evidenceId:{type:"string"},requestId:{type:"string"},sourceId:{type:"string"},sourceVersion:{type:"number"},operationId:{type:"string"},adapterId:{type:"string"},adapterVersion:{type:"string"},accessMode:{type:"string"},acquiredAt:{type:"string"},publishedAt:{type:["string","null"]},status:{type:"string"},contentHash:{type:"string"},contentType:{type:"string"},rawEvidenceId:{type:"string"},attemptCount:{type:"number"},correlationId:{type:["string","null"]},acquisitionPlanId:{type:["string","null"]},researchGoalId:{type:["string","null"]},responseId:{type:["string","null"]},attemptId:{type:["string","null"]},routeId:{type:["string","null"]},runtimeVersion:{type:["string","null"]},gatewayVersion:{type:["string","null"]},schemaVersion:{type:"string"},recordVersion:{type:"number"},recordHash:{type:"string"},createdAt:{type:"string"},immutable:{type:"boolean",enum:[true]}
+    }),
+    schema("EXTERNAL-010-SCHEMA-CONTENT-OBJECT", "External Intelligence Content Object Metadata", ["contentId","contentHash","storageClass","storageProvider","storageReference","sizeBytes","contentType","integrityState","createdAt","immutable"], {
+      contentId:{type:"string"},contentHash:{type:"string"},storageClass:{type:"string"},storageProvider:{type:"string"},storageReference:{type:["string","null"]},sizeBytes:{type:"number"},contentType:{type:"string"},integrityState:{type:"string"},createdAt:{type:"string"},verifiedAt:{type:["string","null"]},immutable:{type:"boolean",enum:[true]}
+    }),
+    schema("EXTERNAL-010-SCHEMA-PROCESSING-CHECKPOINT", "External Intelligence Incremental Processing Checkpoint", ["checkpointId","contentHash","processorId","processorVersion","parameterHash","processingState","createdAt","immutable"], {
+      checkpointId:{type:"string"},contentHash:{type:"string"},processorId:{type:"string"},processorVersion:{type:"string"},parameterHash:{type:"string"},processingState:{type:"string"},resumeCursor:{type:["object","string","number","null"]},supersedesCheckpointId:{type:["string","null"]},createdAt:{type:"string"},immutable:{type:"boolean",enum:[true]}
+    }),
+    schema("EXTERNAL-010-SCHEMA-PHASE5-VALIDATION-RESULT", "External Intelligence Phase 05 Validation Result", ["id","componentId","version","implementationPhase","decisionCoverage","passed","failed","total","health","criticalFailed","status","releaseAllowed","phase5Complete","phase6Allowed","validatedAt"], {
+      id:{type:"string"},componentId:{type:"string",enum:["EXTERNAL-010"]},version:{type:"string",enum:["1.4.0"]},implementationPhase:{type:"string"},decisionCoverage:{type:"number",enum:[54]},passed:{type:"number"},failed:{type:"number"},total:{type:"number"},health:{type:"number"},criticalFailed:{type:"number"},status:{type:"string"},releaseAllowed:{type:"boolean"},phase5Complete:{type:"boolean"},phase6Allowed:{type:"boolean"},validatedAt:{type:"string"}
+    })  ]);
 
   function normalizeSchema(input) {
     const source = internal.isPlainObject(input) ? input : {};

@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_core.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.3.0
-   Phase 04: Acquisition Contract / Router / Adapter / Queue
+   Release: 1.4.0
+   Phase 05: Immutable Evidence / Storage / Incremental Persistence
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -67,6 +67,12 @@
         gatewayAcquisitionExecutor: null,
         acquisitionSchedulerRunning: 0,
         latestPhase4Validation: null,
+        rawEvidenceRecords: new Map(),
+        acquisitionEvidenceRecords: new Map(),
+        contentMetadataIndex: new Map(),
+        processingCheckpoints: new Map(),
+        evidencePersistenceAdapter: null,
+        latestPhase5Validation: null,
         sourceRiskAssessmentHook: null,
         termsAnalysisHook: null,
         auditPersistenceAdapter: null,
@@ -81,7 +87,7 @@
         updatedAt: null
       };
 
-  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles", "sourceRegistry", "sourceVersions", "sourceDiscoveryRecords", "sourceDiscoveryHistory", "controlledInspectionRecords", "resourceBudgets", "resourceBudgetHistory", "resourceUsageRecords",  "usagePolicies", "usagePolicyVersions", "activeUsagePolicyBySource", "sourceOperationContracts", "sourceOperationByKey", "acquisitionRequests", "acquisitionIdempotency", "acquisitionAttempts", "acquisitionAttemptOrder", "acquisitionResponses", "acquisitionErrors", "adapterRegistry", "adapterImplementations", "acquisitionRoutes", "acquisitionJobs", "acquisitionQueueCheckpoints"].forEach(function ensureMap(key) {
+  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles", "sourceRegistry", "sourceVersions", "sourceDiscoveryRecords", "sourceDiscoveryHistory", "controlledInspectionRecords", "resourceBudgets", "resourceBudgetHistory", "resourceUsageRecords",  "usagePolicies", "usagePolicyVersions", "activeUsagePolicyBySource", "sourceOperationContracts", "sourceOperationByKey", "acquisitionRequests", "acquisitionIdempotency", "acquisitionAttempts", "acquisitionAttemptOrder", "acquisitionResponses", "acquisitionErrors", "adapterRegistry", "adapterImplementations", "acquisitionRoutes", "acquisitionJobs", "acquisitionQueueCheckpoints", "rawEvidenceRecords", "acquisitionEvidenceRecords", "contentMetadataIndex", "processingCheckpoints"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
   if (!Array.isArray(state.auditOrder)) state.auditOrder = [];
@@ -203,6 +209,10 @@
       acquisitionAttemptCount: state.acquisitionAttempts.size,
       acquisitionResponseCount: state.acquisitionResponses.size,
       acquisitionJobCount: state.acquisitionJobs.size,
+      rawEvidenceCount: state.rawEvidenceRecords.size,
+      acquisitionEvidenceCount: state.acquisitionEvidenceRecords.size,
+      uniqueContentCount: state.contentMetadataIndex.size,
+      processingCheckpointCount: state.processingCheckpoints.size,
       gateway: state.gatewayClientState ? { baseUrl: state.gatewayClientState.baseUrl || null, healthState: state.gatewayClientState.healthState || "UNKNOWN", sessionActive: Boolean(state.gatewayClientState.session && state.gatewayClientState.session.state === "ACTIVE"), lastCheckedAt: state.gatewayClientState.lastCheckedAt || null } : null,
       safety: clone(VERSION_MANIFEST.safety),
       updatedAt: state.updatedAt || null
@@ -229,7 +239,8 @@
         ["acquisitionContract", namespace.initializeExternalIntelligenceAcquisitionContract],
         ["adapterRegistry", namespace.initializeExternalIntelligenceAdapterRegistry],
         ["sourceRouter", namespace.initializeExternalIntelligenceSourceRouter],
-        ["acquisitionQueue", namespace.initializeExternalIntelligenceAcquisitionQueue]
+        ["acquisitionQueue", namespace.initializeExternalIntelligenceAcquisitionQueue],
+        ["evidencePersistence", namespace.initializeExternalIntelligenceEvidencePersistence]
       ];
       for (const item of initializers) {
         const name = item[0];
