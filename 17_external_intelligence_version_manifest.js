@@ -1,20 +1,21 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.5.0
-   Phase 06: Secrets / External Content Security / Privacy / Data Lifecycle
+   Release: 1.6.0
+   Phase 07: Normalization / Temporal / Claim / Entity Foundation
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.5.0";
+  const RELEASE_VERSION = "1.6.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
   const PHASE4_VERSION = "1.3.0";
   const PHASE5_VERSION = "1.4.0";
   const PHASE6_VERSION = "1.5.0";
+  const PHASE7_VERSION = "1.6.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -58,7 +59,14 @@
     privacyIdentity: PHASE6_VERSION,
     phase6Validation: PHASE6_VERSION,
     phase6RealRuntimeValidation: PHASE6_VERSION,
-    phase6AndroidValidation: PHASE6_VERSION
+    phase6AndroidValidation: PHASE6_VERSION,
+    temporal: PHASE7_VERSION,
+    normalization: PHASE7_VERSION,
+    claim: PHASE7_VERSION,
+    entity: PHASE7_VERSION,
+    phase7Validation: PHASE7_VERSION,
+    phase7RealRuntimeValidation: PHASE7_VERSION,
+    phase7AndroidValidation: PHASE7_VERSION
   };
 
   const fileModules = {
@@ -94,7 +102,14 @@
     "17_external_intelligence_privacy_identity.js": "privacyIdentity",
     "17_external_intelligence_phase6_validation.js": "phase6Validation",
     "17_external_intelligence_phase6_real_runtime_validation.js": "phase6RealRuntimeValidation",
-    "17_external_intelligence_phase6_android_validation.js": "phase6AndroidValidation"
+    "17_external_intelligence_phase6_android_validation.js": "phase6AndroidValidation",
+    "17_external_intelligence_temporal.js": "temporal",
+    "17_external_intelligence_normalization.js": "normalization",
+    "17_external_intelligence_claim.js": "claim",
+    "17_external_intelligence_entity.js": "entity",
+    "17_external_intelligence_phase7_validation.js": "phase7Validation",
+    "17_external_intelligence_phase7_real_runtime_validation.js": "phase7RealRuntimeValidation",
+    "17_external_intelligence_phase7_android_validation.js": "phase7AndroidValidation"
   };
 
   const contractVersions = {
@@ -137,7 +152,18 @@
     contentSecurityAssessment: PHASE6_VERSION,
     dataLifecycleRecord: PHASE6_VERSION,
     privacyAssessment: PHASE6_VERSION,
-    phase6ValidationResult: PHASE6_VERSION
+    phase6ValidationResult: PHASE6_VERSION,
+    temporalContext: PHASE7_VERSION,
+    normalizerDefinition: PHASE7_VERSION,
+    normalizedRecord: PHASE7_VERSION,
+    claimCandidate: PHASE7_VERSION,
+    entityRecord: PHASE7_VERSION,
+    entityAliasRecord: PHASE7_VERSION,
+    entityIdentifierRecord: PHASE7_VERSION,
+    entityMention: PHASE7_VERSION,
+    entityResolutionCandidate: PHASE7_VERSION,
+    entityMergeSplitCandidate: PHASE7_VERSION,
+    phase7ValidationResult: PHASE7_VERSION
   };
 
   const contractIds = {
@@ -180,7 +206,18 @@
     contentSecurityAssessment: "EXTERNAL-010-CONTRACT-CONTENT-SECURITY-ASSESSMENT",
     dataLifecycleRecord: "EXTERNAL-010-CONTRACT-DATA-LIFECYCLE",
     privacyAssessment: "EXTERNAL-010-CONTRACT-PRIVACY-ASSESSMENT",
-    phase6ValidationResult: "EXTERNAL-010-CONTRACT-PHASE6-VALIDATION-RESULT"
+    phase6ValidationResult: "EXTERNAL-010-CONTRACT-PHASE6-VALIDATION-RESULT",
+    temporalContext: "EXTERNAL-010-CONTRACT-TEMPORAL-CONTEXT",
+    normalizerDefinition: "EXTERNAL-010-CONTRACT-NORMALIZER-DEFINITION",
+    normalizedRecord: "EXTERNAL-010-CONTRACT-NORMALIZED-RECORD",
+    claimCandidate: "EXTERNAL-010-CONTRACT-CLAIM-CANDIDATE",
+    entityRecord: "EXTERNAL-010-CONTRACT-ENTITY-RECORD",
+    entityAliasRecord: "EXTERNAL-010-CONTRACT-ENTITY-ALIAS",
+    entityIdentifierRecord: "EXTERNAL-010-CONTRACT-ENTITY-IDENTIFIER",
+    entityMention: "EXTERNAL-010-CONTRACT-ENTITY-MENTION",
+    entityResolutionCandidate: "EXTERNAL-010-CONTRACT-ENTITY-RESOLUTION-CANDIDATE",
+    entityMergeSplitCandidate: "EXTERNAL-010-CONTRACT-ENTITY-MERGE-SPLIT-CANDIDATE",
+    phase7ValidationResult: "EXTERNAL-010-CONTRACT-PHASE7-VALIDATION-RESULT"
   };
 
   const safety = {
@@ -245,6 +282,59 @@
     metadataIndexOnlyEvidenceIdentityAllowed: false,
     orphanContentAutomaticDeletionAllowed: false,
     derivedDataMayRewriteRawEvidence: false,
+    normalizationReplacesRawEvidence: false,
+    normalizationEqualsInterpretation: false,
+    entityCandidateEqualsResolvedEntity: false,
+    unknownMayBeSilentlyResolved: false,
+    ambiguousMayBeSilentlyResolved: false,
+    unitConversionEqualsOriginalEvidence: false,
+    derivedValueEqualsSourceClaim: false,
+    analysisEqualsEvidence: false,
+    normalizerUpgradeMayOverwriteHistory: false,
+    normalizationFailureInvalidatesRawEvidence: false,
+    newestEvidenceAutomaticallyWins: false,
+    oldEvidenceAutomaticallyInvalid: false,
+    historicalEqualsStale: false,
+    freshnessGrantsReliability: false,
+    officialSourceAlwaysWins: false,
+    acquiredAtEqualsPublishedAt: false,
+    futureEvidenceInBacktestAllowed: false,
+    unknownTimestampMayBeInvented: false,
+    temporalAmbiguityGrantsAutoSelection: false,
+    evidenceEqualsClaim: false,
+    claimEqualsTruth: false,
+    factualClaimEqualsVerifiedFact: false,
+    predictionEqualsFact: false,
+    publisherEqualsClaimant: false,
+    repeatedClaimEqualsIndependentConfirmation: false,
+    claimExtractionEqualsKnowledgePromotion: false,
+    claimExtractionSuccessEqualsVerification: false,
+    highExtractionConfidenceEqualsTruth: false,
+    unknownClaimantMayBeSilentlyResolved: false,
+    claimExtractorMayOverwriteRawEvidence: false,
+    claimExtractorUpgradeMayDeleteHistory: false,
+    futureOutcomeMayBeUsedAsPastEvidence: false,
+    aiExtractedMeaningEqualsOriginalStatement: false,
+    claimCandidateMayGrantToolAuthority: false,
+    claimCandidateMayGrantRepositoryAuthority: false,
+    entityNameEqualsEntityIdentity: false,
+    sameNameEqualsSameEntity: false,
+    aliasMatchEqualsExactIdentity: false,
+    identifierEqualsPermanentIdentity: false,
+    mentionEqualsResolvedEntity: false,
+    visualMentionEqualsResolvedEntity: false,
+    logoMatchEqualsCanonicalIdentity: false,
+    visualSimilarityEqualsIdentity: false,
+    visualMatchEqualsAuthenticity: false,
+    aiResolutionEqualsCanonicalConfirmation: false,
+    visionResolutionEqualsCanonicalConfirmation: false,
+    highConfidenceEqualsGuaranteedIdentity: false,
+    currentRelationshipEqualsHistoricalRelationship: false,
+    entityMergeCandidateEqualsDestructiveMerge: false,
+    aiResolutionMayDestructivelyMergeEntity: false,
+    unknownEntityMayBeSilentlyResolved: false,
+    ambiguousEntityMayBeSilentlyResolved: false,
+    externalResolutionMayMutateKnowledgeAutomatically: false,
     evidencePersistenceGrantsKnowledgeAuthority: false,
 
     technicalAccessEqualsPermission: false,
@@ -603,6 +693,48 @@
     dataMinimizationRequired: true
   };
 
+  const temporal = {
+    temporalIntents: ["LATEST", "OFFICIAL_EFFECTIVE", "HISTORICAL", "BACKTEST", "AS_OF"],
+    freshnessStates: ["FRESH", "STALE", "UNASSESSED", "HISTORICAL_CONTEXT", "UNKNOWN"],
+    evidenceTimeFields: ["publishedAt", "availableAt", "effectiveAt", "acquiredAt"],
+    historicalModeSupported: true,
+    backtestFutureEvidenceGuardRequired: true,
+    newestEvidenceAutomaticallyWins: false
+  };
+
+  const normalization = {
+    immutableRawRequired: true,
+    versionedNormalizedLayer: true,
+    normalizationStates: ["NORMALIZED", "PARTIAL", "FAILED", "UNKNOWN"],
+    resolutionStates: ["UNRESOLVED", "AMBIGUOUS", "PROBABLE", "IDENTIFIER_MATCH", "EXACT", "FAILED", "UNKNOWN"],
+    resolutionHookTypes: ["UNIT", "TEMPORAL", "ENTITY"],
+    reprocessingPreservesHistory: true,
+    derivedDataBoundaryRequired: true
+  };
+
+  const claim = {
+    candidateOnly: true,
+    stableClaimIdRequired: true,
+    claimantPublisherSeparationRequired: true,
+    atomicClaimRequired: true,
+    rawContextReferenceRequired: true,
+    extractionVersionRequired: true,
+    automaticTruthPromotionAllowed: false,
+    automaticKnowledgePromotionAllowed: false
+  };
+
+  const entity = {
+    stableEntityIdRequired: true,
+    aliasIdentifierGraphSupported: true,
+    resolutionStates: ["UNRESOLVED", "AMBIGUOUS", "PROBABLE", "IDENTIFIER_MATCH", "EXACT", "UNKNOWN"],
+    textMentionSupported: true,
+    visualMentionHookSupported: true,
+    multimodalResolutionCandidateSupported: true,
+    mergeSplitCandidateOnly: true,
+    visualSimilarityAutoResolveAllowed: false,
+    knowledgeMutationAllowed: false
+  };
+
   const manifest = {
     componentId: "EXTERNAL-010",
     componentName: "External Intelligence Platform",
@@ -611,8 +743,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 06 Secrets / External Content Security / Privacy / Data Lifecycle",
-      phase: 6,
+      implementationPhase: "Phase 07 Normalization / Temporal / Claim / Entity Foundation",
+      phase: 7,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -621,7 +753,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 06 Secrets / External Content Security / Privacy / Data Lifecycle Implementation"
+      status: "Phase 07 Normalization / Temporal / Claim / Entity Foundation Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -642,6 +774,10 @@
     externalContentSecurity: externalContentSecurity,
     dataLifecycle: dataLifecycle,
     privacy: privacy,
+    temporal: temporal,
+    normalization: normalization,
+    claim: claim,
+    entity: entity,
     implementation: {
       inspectBeforeImplement: true,
       contractFirst: true,
@@ -654,8 +790,10 @@
       phase5Allowed: true,
       phase5Complete: true,
       phase6Allowed: true,
-      phase6Complete: false,
-      phase7Allowed: false,
+      phase6Complete: true,
+      phase7Allowed: true,
+      phase7Complete: false,
+      phase8Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true

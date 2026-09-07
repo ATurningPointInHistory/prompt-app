@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_schema_registry.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.4.0
-   Phase 04: Acquisition Contract / Router / Adapter / Queue
+   Release: 1.6.0
+   Phase 07: Normalization / Temporal / Claim / Entity Foundation
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -96,7 +96,7 @@
       }),
     schema("EXTERNAL-010-SCHEMA-PHASE2-VALIDATION-RESULT", "External Intelligence Phase 02 Validation Result",
       ["id", "componentId", "version", "implementationPhase", "passed", "failed", "total", "health", "criticalFailed", "status", "releaseAllowed", "phase2Complete", "phase3Allowed", "validatedAt"], {
-        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0"] }, implementationPhase: { type: "string" },
+        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0"] }, implementationPhase: { type: "string" },
         passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" },
         releaseAllowed: { type: "boolean" }, phase2Complete: { type: "boolean" }, phase3Allowed: { type: "boolean" }, validatedAt: { type: "string" }
       }),
@@ -129,7 +129,7 @@
       }),
     schema("EXTERNAL-010-SCHEMA-PHASE3-VALIDATION-RESULT", "External Intelligence Phase 03 Validation Result",
       ["id", "componentId", "version", "implementationPhase", "decisionCoverage", "passed", "failed", "total", "health", "criticalFailed", "status", "releaseAllowed", "phase3Complete", "phase4Allowed", "validatedAt"], {
-        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.2.0", "1.3.0", "1.4.0", "1.5.0"] }, implementationPhase: { type: "string" }, decisionCoverage: { type: "number", enum: [54] }, passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" }, releaseAllowed: { type: "boolean" }, phase3Complete: { type: "boolean" }, phase4Allowed: { type: "boolean" }, validatedAt: { type: "string" }
+        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0"] }, implementationPhase: { type: "string" }, decisionCoverage: { type: "number", enum: [54] }, passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" }, releaseAllowed: { type: "boolean" }, phase3Complete: { type: "boolean" }, phase4Allowed: { type: "boolean" }, validatedAt: { type: "string" }
       }),
     schema("EXTERNAL-010-SCHEMA-SOURCE-OPERATION-CONTRACT", "External Intelligence Source Operation Contract",
       ["operationContractId", "sourceId", "operationId", "adapterId", "method", "endpoint", "parameterPolicy", "timeoutPolicy", "retryPolicy", "responseMode", "executionHints", "estimatedUsage", "enabled", "authorityGranted", "createdAt", "updatedAt", "immutable"], {
@@ -180,7 +180,7 @@
       }),
     schema("EXTERNAL-010-SCHEMA-PHASE4-VALIDATION-RESULT", "External Intelligence Phase 04 Validation Result",
       ["id", "componentId", "version", "implementationPhase", "decisionCoverage", "passed", "failed", "total", "health", "criticalFailed", "status", "releaseAllowed", "phase4Complete", "phase5Allowed", "validatedAt"], {
-        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.3.0", "1.4.0", "1.5.0"] }, implementationPhase: { type: "string" }, decisionCoverage: { type: "number", enum: [54] },
+        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.3.0", "1.4.0", "1.5.0", "1.6.0"] }, implementationPhase: { type: "string" }, decisionCoverage: { type: "number", enum: [54] },
         passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" }, releaseAllowed: { type: "boolean" }, phase4Complete: { type: "boolean" }, phase5Allowed: { type: "boolean" }, validatedAt: { type: "string" }
       })
 ,
@@ -197,7 +197,7 @@
       checkpointId:{type:"string"},contentHash:{type:"string"},processorId:{type:"string"},processorVersion:{type:"string"},parameterHash:{type:"string"},processingState:{type:"string"},resumeCursor:{type:["object","string","number","null"]},supersedesCheckpointId:{type:["string","null"]},createdAt:{type:"string"},immutable:{type:"boolean",enum:[true]}
     }),
     schema("EXTERNAL-010-SCHEMA-PHASE5-VALIDATION-RESULT", "External Intelligence Phase 05 Validation Result", ["id","componentId","version","implementationPhase","decisionCoverage","passed","failed","total","health","criticalFailed","status","releaseAllowed","phase5Complete","phase6Allowed","validatedAt"], {
-      id:{type:"string"},componentId:{type:"string",enum:["EXTERNAL-010"]},version:{type:"string",enum:["1.4.0","1.5.0"]},implementationPhase:{type:"string"},decisionCoverage:{type:"number",enum:[54]},passed:{type:"number"},failed:{type:"number"},total:{type:"number"},health:{type:"number"},criticalFailed:{type:"number"},status:{type:"string"},releaseAllowed:{type:"boolean"},phase5Complete:{type:"boolean"},phase6Allowed:{type:"boolean"},validatedAt:{type:"string"}
+      id:{type:"string"},componentId:{type:"string",enum:["EXTERNAL-010"]},version:{type:"string",enum:["1.4.0","1.5.0","1.6.0"]},implementationPhase:{type:"string"},decisionCoverage:{type:"number",enum:[54]},passed:{type:"number"},failed:{type:"number"},total:{type:"number"},health:{type:"number"},criticalFailed:{type:"number"},status:{type:"string"},releaseAllowed:{type:"boolean"},phase5Complete:{type:"boolean"},phase6Allowed:{type:"boolean"},validatedAt:{type:"string"}
     }),
     schema("EXTERNAL-010-SCHEMA-SECRET-METADATA", "External Intelligence Secret Metadata",
       ["secretReferenceId","secretType","provider","status","createdAt","updatedAt","valueExposed","immutable"], {
@@ -218,6 +218,50 @@
     schema("EXTERNAL-010-SCHEMA-PHASE6-VALIDATION-RESULT", "External Intelligence Phase 06 Validation Result",
       ["id","componentId","version","implementationPhase","decisionCoverage","passed","failed","total","health","criticalFailed","status","releaseAllowed","phase6Complete","phase7Allowed","validatedAt"], {
         id:{type:"string"}, componentId:{type:"string",enum:["EXTERNAL-010"]}, version:{type:"string"}, implementationPhase:{type:"string"}, decisionCoverage:{type:"number",enum:[54]}, passed:{type:"number"}, failed:{type:"number"}, total:{type:"number"}, health:{type:"number"}, criticalFailed:{type:"number"}, status:{type:"string"}, releaseAllowed:{type:"boolean"}, phase6Complete:{type:"boolean"}, phase7Allowed:{type:"boolean"}, validatedAt:{type:"string"}
+      }),
+    schema("EXTERNAL-010-SCHEMA-TEMPORAL-CONTEXT", "External Intelligence Temporal Context",
+      ["temporalContextId","evidenceId","rawEvidenceId","publishedAt","availableAt","effectiveAt","acquiredAt","temporalIntent","historicalMode","asOfTime","freshnessState","futureEvidenceBlocked","eligibilityState","newestEvidenceAutomaticallyWins","freshnessGrantsReliability","unknownTimestampInvented","createdAt","immutable"], {
+        temporalContextId:{type:"string"}, evidenceId:{type:["string","null"]}, rawEvidenceId:{type:["string","null"]}, publishedAt:{type:["string","null"]}, availableAt:{type:["string","null"]}, effectiveAt:{type:["string","null"]}, acquiredAt:{type:["string","null"]}, observedAt:{type:["string","null"]}, temporalIntent:{type:"string"}, historicalMode:{type:"boolean"}, asOfTime:{type:["string","null"]}, evaluationTime:{type:"string"}, freshnessPolicyId:{type:["string","null"]}, freshnessState:{type:"string"}, temporalAmbiguity:{type:"boolean"}, futureEvidenceBlocked:{type:"boolean"}, eligibilityState:{type:"string"}, newestEvidenceAutomaticallyWins:{type:"boolean",enum:[false]}, freshnessGrantsReliability:{type:"boolean",enum:[false]}, unknownTimestampInvented:{type:"boolean",enum:[false]}, createdAt:{type:"string"}, immutable:{type:"boolean",enum:[true]}
+      }),
+    schema("EXTERNAL-010-SCHEMA-NORMALIZER-DEFINITION", "External Intelligence Normalizer Definition",
+      ["normalizerId","normalizerVersion","schemaVersion","recordType","supportedSourceTypes","deterministic","rawEvidenceMutationAllowed","historicalOverwriteAllowed","createdAt","immutable"], {
+        normalizerId:{type:"string"}, normalizerVersion:{type:"string"}, schemaVersion:{type:"string"}, recordType:{type:"string"}, supportedSourceTypes:{type:"array"}, deterministic:{type:"boolean"}, rawEvidenceMutationAllowed:{type:"boolean",enum:[false]}, historicalOverwriteAllowed:{type:"boolean",enum:[false]}, createdAt:{type:"string"}, immutable:{type:"boolean",enum:[true]}
+      }),
+    schema("EXTERNAL-010-SCHEMA-NORMALIZED-RECORD", "External Intelligence Normalized Record",
+      ["normalizedRecordId","recordType","recordVersion","schemaVersion","rawEvidenceId","sourceEvidenceId","sourceContentHash","normalizerId","normalizerVersion","normalizationState","resolutionState","normalizedData","provenanceReference","derivedDataBoundary","rawEvidencePreserved","rawEvidenceOverwritePerformed","normalizationReplacesRawEvidence","historyOverwritePerformed","createdAt","immutable"], {
+        normalizedRecordId:{type:"string"}, recordType:{type:"string"}, recordVersion:{type:"number"}, schemaVersion:{type:"string"}, rawEvidenceId:{type:"string"}, sourceEvidenceId:{type:"string"}, sourceContentHash:{type:"string"}, normalizerId:{type:"string"}, normalizerVersion:{type:"string"}, normalizationState:{type:"string"}, resolutionState:{type:"string"}, normalizedData:{type:["object","array"]}, unitResolution:{type:"object"}, temporalResolution:{type:"object"}, entityResolution:{type:"object"}, provenanceReference:{type:"object"}, derivedDataBoundary:{type:"boolean",enum:[true]}, rawEvidencePreserved:{type:"boolean",enum:[true]}, rawEvidenceOverwritePerformed:{type:"boolean",enum:[false]}, normalizationReplacesRawEvidence:{type:"boolean",enum:[false]}, normalizationEqualsInterpretation:{type:"boolean",enum:[false]}, supersedesNormalizedRecordId:{type:["string","null"]}, historyOverwritePerformed:{type:"boolean",enum:[false]}, createdAt:{type:"string"}, immutable:{type:"boolean",enum:[true]}
+      }),
+    schema("EXTERNAL-010-SCHEMA-CLAIM-CANDIDATE", "External Intelligence Claim Candidate",
+      ["claimCandidateId","claimId","normalizedRecordId","sourceEvidenceId","rawEvidenceId","claimType","claimantId","publisherId","claimExtractorId","claimExtractorVersion","extractionState","atomicClaim","rawContextReference","lineageReference","claimEqualsTruth","claimExtractionEqualsKnowledgePromotion","truthVerified","knowledgePromotionPerformed","toolAuthorityGranted","repositoryAuthorityGranted","createdAt","immutable"], {
+        claimCandidateId:{type:"string"}, claimId:{type:"string"}, normalizedRecordId:{type:"string"}, sourceEvidenceId:{type:"string"}, rawEvidenceId:{type:"string"}, claimType:{type:"string"}, claimantId:{type:["string","null"]}, publisherId:{type:["string","null"]}, claimantPublisherSeparated:{type:"boolean"}, claimExtractorId:{type:"string"}, claimExtractorVersion:{type:"string"}, extractionState:{type:"string"}, extractionConfidence:{type:"string"}, assertedAt:{type:["string","null"]}, targetTime:{type:["string","null"]}, temporalContextId:{type:["string","null"]}, atomicClaim:{type:"object"}, rawContextReference:{type:"string"}, lineageReference:{type:"object"}, supersedesClaimCandidateId:{type:["string","null"]}, evidenceEqualsClaim:{type:"boolean",enum:[false]}, claimEqualsTruth:{type:"boolean",enum:[false]}, claimExtractionEqualsKnowledgePromotion:{type:"boolean",enum:[false]}, truthVerified:{type:"boolean",enum:[false]}, knowledgePromotionPerformed:{type:"boolean",enum:[false]}, toolAuthorityGranted:{type:"boolean",enum:[false]}, repositoryAuthorityGranted:{type:"boolean",enum:[false]}, historicalClaimCandidatePreserved:{type:"boolean",enum:[true]}, createdAt:{type:"string"}, immutable:{type:"boolean",enum:[true]}
+      }),
+    schema("EXTERNAL-010-SCHEMA-ENTITY-RECORD", "External Intelligence Entity Record",
+      ["entityId","entityType","canonicalLabel","namespace","resolutionState","evidenceRefs","identityCreatedFromNameMatchOnly","knowledgeIdentityLinkPerformed","createdAt","immutable"], {
+        entityId:{type:"string"}, entityType:{type:"string"}, canonicalLabel:{type:"string"}, namespace:{type:"string"}, validFrom:{type:["string","null"]}, validUntil:{type:["string","null"]}, resolutionState:{type:"string"}, evidenceRefs:{type:"array"}, aliasCount:{type:"number"}, identifierCount:{type:"number"}, identityCreatedFromNameMatchOnly:{type:"boolean",enum:[false]}, knowledgeIdentityLinkPerformed:{type:"boolean",enum:[false]}, createdAt:{type:"string"}, immutable:{type:"boolean",enum:[true]}
+      }),
+    schema("EXTERNAL-010-SCHEMA-ENTITY-ALIAS", "External Intelligence Entity Alias",
+      ["entityAliasId","entityId","alias","namespace","evidenceRefs","aliasMatchEqualsExactIdentity","createdAt","immutable"], {
+        entityAliasId:{type:"string"}, entityId:{type:"string"}, alias:{type:"string"}, namespace:{type:"string"}, language:{type:["string","null"]}, validFrom:{type:["string","null"]}, validUntil:{type:["string","null"]}, evidenceRefs:{type:"array"}, aliasMatchEqualsExactIdentity:{type:"boolean",enum:[false]}, createdAt:{type:"string"}, immutable:{type:"boolean",enum:[true]}
+      }),
+    schema("EXTERNAL-010-SCHEMA-ENTITY-IDENTIFIER", "External Intelligence Entity Identifier",
+      ["entityIdentifierId","entityId","namespace","identifier","evidenceRefs","identifierEqualsPermanentIdentity","createdAt","immutable"], {
+        entityIdentifierId:{type:"string"}, entityId:{type:"string"}, namespace:{type:"string"}, identifier:{type:"string"}, validFrom:{type:["string","null"]}, validUntil:{type:["string","null"]}, evidenceRefs:{type:"array"}, identifierEqualsPermanentIdentity:{type:"boolean",enum:[false]}, createdAt:{type:"string"}, immutable:{type:"boolean",enum:[true]}
+      }),
+    schema("EXTERNAL-010-SCHEMA-ENTITY-MENTION", "External Intelligence Entity Mention",
+      ["entityMentionId","sourceEvidenceId","mentionMode","mentionText","visualReference","candidateEntityIds","resolvedEntityId","resolutionState","mentionEqualsResolvedEntity","visualMentionEqualsResolvedEntity","createdAt","immutable"], {
+        entityMentionId:{type:"string"}, sourceEvidenceId:{type:"string"}, rawEvidenceId:{type:["string","null"]}, mentionMode:{type:"string",enum:["TEXT","VISUAL"]}, mentionText:{type:["string","null"]}, visualReference:{type:["string","null"]}, contextReference:{type:["string","null"]}, candidateEntityIds:{type:"array"}, resolvedEntityId:{type:["string","null"],enum:[null]}, resolutionState:{type:"string"}, mentionEqualsResolvedEntity:{type:"boolean",enum:[false]}, visualMentionEqualsResolvedEntity:{type:"boolean",enum:[false]}, createdAt:{type:"string"}, immutable:{type:"boolean",enum:[true]}
+      }),
+    schema("EXTERNAL-010-SCHEMA-ENTITY-RESOLUTION-CANDIDATE", "External Intelligence Entity Resolution Candidate",
+      ["entityResolutionCandidateId","entityMentionId","candidateEntityId","resolverId","resolverVersion","resolutionState","evidenceRefs","visualSimilarityOnly","canonicalResolutionPerformed","destructiveMergePerformed","knowledgeMutationPerformed","aiResolutionEqualsCanonicalConfirmation","visualSimilarityEqualsIdentity","createdAt","immutable"], {
+        entityResolutionCandidateId:{type:"string"}, entityMentionId:{type:"string"}, candidateEntityId:{type:["string","null"]}, resolverId:{type:"string"}, resolverVersion:{type:"string"}, resolutionState:{type:"string"}, confidence:{type:"string"}, evidenceRefs:{type:"array"}, contextEvidenceRefs:{type:"array"}, multimodalEvidenceRefs:{type:"array"}, visualSimilarityOnly:{type:"boolean"}, canonicalResolutionPerformed:{type:"boolean",enum:[false]}, destructiveMergePerformed:{type:"boolean",enum:[false]}, knowledgeMutationPerformed:{type:"boolean",enum:[false]}, aiResolutionEqualsCanonicalConfirmation:{type:"boolean",enum:[false]}, visualSimilarityEqualsIdentity:{type:"boolean",enum:[false]}, createdAt:{type:"string"}, immutable:{type:"boolean",enum:[true]}
+      }),
+    schema("EXTERNAL-010-SCHEMA-ENTITY-MERGE-SPLIT-CANDIDATE", "External Intelligence Entity Merge / Split Candidate",
+      ["entityMergeSplitCandidateId","operation","entityIds","proposedEntityIds","evidenceRefs","resolverId","resolverVersion","destructiveOperationPerformed","canonicalRegistryMutationPerformed","approvalGranted","createdAt","immutable"], {
+        entityMergeSplitCandidateId:{type:"string"}, operation:{type:"string",enum:["MERGE","SPLIT"]}, entityIds:{type:"array"}, proposedEntityIds:{type:"array"}, evidenceRefs:{type:"array"}, resolverId:{type:"string"}, resolverVersion:{type:"string"}, destructiveOperationPerformed:{type:"boolean",enum:[false]}, canonicalRegistryMutationPerformed:{type:"boolean",enum:[false]}, approvalGranted:{type:"boolean",enum:[false]}, createdAt:{type:"string"}, immutable:{type:"boolean",enum:[true]}
+      }),
+    schema("EXTERNAL-010-SCHEMA-PHASE7-VALIDATION-RESULT", "External Intelligence Phase 07 Validation Result",
+      ["id","componentId","version","implementationPhase","decisionCoverage","passed","failed","total","health","criticalFailed","status","releaseAllowed","phase7Complete","phase8Allowed","validatedAt"], {
+        id:{type:"string"}, componentId:{type:"string",enum:["EXTERNAL-010"]}, version:{type:"string",enum:["1.6.0"]}, implementationPhase:{type:"string"}, decisionCoverage:{type:"number",enum:[54]}, passed:{type:"number"}, failed:{type:"number"}, total:{type:"number"}, health:{type:"number"}, criticalFailed:{type:"number"}, status:{type:"string"}, releaseAllowed:{type:"boolean"}, phase7Complete:{type:"boolean"}, phase8Allowed:{type:"boolean"}, validatedAt:{type:"string"}
       })  ]);
 
   function normalizeSchema(input) {

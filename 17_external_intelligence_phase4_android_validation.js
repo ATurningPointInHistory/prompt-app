@@ -19,7 +19,7 @@
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("phase4AndroidValidation");
   const PURPOSE = "phase4-android-real-device";
-  const EXPECTED_RELEASES = ["1.3.0", "1.4.0", "1.5.0"];
+  const EXPECTED_RELEASES = ["1.3.0", "1.4.0", "1.5.0", "1.6.0"];
   const EXPECTED_GATEWAY_VERSIONS = ["1.2.0", "1.3.0", "1.4.0"];
   const EXPECTED_PHASE4_REGRESSION_TOTAL = 248;
   const MINIMUM_PHASE4_SCRIPT_COUNT = 304;

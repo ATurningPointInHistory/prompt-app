@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_core.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.4.0
-   Phase 05: Immutable Evidence / Storage / Incremental Persistence
+   Release: 1.6.0
+   Phase 07: Normalization / Temporal / Claim / Entity Foundation
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -80,6 +80,22 @@
         privacyAssessments: new Map(),
         privacyIdentityLinks: new Map(),
         latestPhase6Validation: null,
+        temporalContexts: new Map(),
+        freshnessPolicies: new Map(),
+        normalizerDefinitions: new Map(),
+        normalizerImplementations: new Map(),
+        normalizedRecords: new Map(),
+        normalizationResolutionHooks: { UNIT: null, TEMPORAL: null, ENTITY: null },
+        claimCandidates: new Map(),
+        entityRegistry: new Map(),
+        entityAliasRecords: new Map(),
+        entityIdentifierRecords: new Map(),
+        entityMentions: new Map(),
+        entityResolutionCandidates: new Map(),
+        entityMergeSplitCandidates: new Map(),
+        latestPhase7Validation: null,
+        latestPhase7RealRuntimeValidation: null,
+        latestPhase7AndroidValidation: null,
         sourceRiskAssessmentHook: null,
         termsAnalysisHook: null,
         auditPersistenceAdapter: null,
@@ -94,7 +110,7 @@
         updatedAt: null
       };
 
-  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles", "sourceRegistry", "sourceVersions", "sourceDiscoveryRecords", "sourceDiscoveryHistory", "controlledInspectionRecords", "resourceBudgets", "resourceBudgetHistory", "resourceUsageRecords",  "usagePolicies", "usagePolicyVersions", "activeUsagePolicyBySource", "sourceOperationContracts", "sourceOperationByKey", "acquisitionRequests", "acquisitionIdempotency", "acquisitionAttempts", "acquisitionAttemptOrder", "acquisitionResponses", "acquisitionErrors", "adapterRegistry", "adapterImplementations", "acquisitionRoutes", "acquisitionJobs", "acquisitionQueueCheckpoints", "rawEvidenceRecords", "acquisitionEvidenceRecords", "contentMetadataIndex", "processingCheckpoints", "secretMetadataRegistry", "trustedScannerRegistry", "contentSecurityAssessments", "dataLifecycleRecords", "privacyAssessments", "privacyIdentityLinks"].forEach(function ensureMap(key) {
+  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles", "sourceRegistry", "sourceVersions", "sourceDiscoveryRecords", "sourceDiscoveryHistory", "controlledInspectionRecords", "resourceBudgets", "resourceBudgetHistory", "resourceUsageRecords",  "usagePolicies", "usagePolicyVersions", "activeUsagePolicyBySource", "sourceOperationContracts", "sourceOperationByKey", "acquisitionRequests", "acquisitionIdempotency", "acquisitionAttempts", "acquisitionAttemptOrder", "acquisitionResponses", "acquisitionErrors", "adapterRegistry", "adapterImplementations", "acquisitionRoutes", "acquisitionJobs", "acquisitionQueueCheckpoints", "rawEvidenceRecords", "acquisitionEvidenceRecords", "contentMetadataIndex", "processingCheckpoints", "secretMetadataRegistry", "trustedScannerRegistry", "contentSecurityAssessments", "dataLifecycleRecords", "privacyAssessments", "privacyIdentityLinks", "temporalContexts", "freshnessPolicies", "normalizerDefinitions", "normalizerImplementations", "normalizedRecords", "claimCandidates", "entityRegistry", "entityAliasRecords", "entityIdentifierRecords", "entityMentions", "entityResolutionCandidates", "entityMergeSplitCandidates"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
   if (!Array.isArray(state.auditOrder)) state.auditOrder = [];
@@ -102,6 +118,7 @@
   if (!Array.isArray(state.acquisitionQueueOrder)) state.acquisitionQueueOrder = [];
   if (!Number.isInteger(state.acquisitionSchedulerRunning)) state.acquisitionSchedulerRunning = 0;
   if (!Number.isInteger(state.sequence)) state.sequence = 0;
+  if (!state.normalizationResolutionHooks || typeof state.normalizationResolutionHooks !== "object") state.normalizationResolutionHooks = { UNIT: null, TEMPORAL: null, ENTITY: null };
 
   function nowIso() { return new Date().toISOString(); }
 
@@ -231,6 +248,14 @@
       contentSecurityAssessmentCount: state.contentSecurityAssessments.size,
       dataLifecycleRecordCount: state.dataLifecycleRecords.size,
       privacyAssessmentCount: state.privacyAssessments.size,
+      temporalContextCount: state.temporalContexts.size,
+      freshnessPolicyCount: state.freshnessPolicies.size,
+      normalizerDefinitionCount: state.normalizerDefinitions.size,
+      normalizedRecordCount: state.normalizedRecords.size,
+      claimCandidateCount: state.claimCandidates.size,
+      entityCount: state.entityRegistry.size,
+      entityMentionCount: state.entityMentions.size,
+      entityResolutionCandidateCount: state.entityResolutionCandidates.size,
       gateway: state.gatewayClientState ? { baseUrl: state.gatewayClientState.baseUrl || null, healthState: state.gatewayClientState.healthState || "UNKNOWN", sessionActive: Boolean(state.gatewayClientState.session && state.gatewayClientState.session.state === "ACTIVE"), lastCheckedAt: state.gatewayClientState.lastCheckedAt || null } : null,
       safety: clone(VERSION_MANIFEST.safety),
       updatedAt: state.updatedAt || null
@@ -262,7 +287,11 @@
         ["secretGovernance", namespace.initializeExternalIntelligenceSecretGovernance],
         ["externalContentSecurity", namespace.initializeExternalIntelligenceExternalContentSecurity],
         ["dataLifecycle", namespace.initializeExternalIntelligenceDataLifecycle],
-        ["privacyIdentity", namespace.initializeExternalIntelligencePrivacyIdentity]
+        ["privacyIdentity", namespace.initializeExternalIntelligencePrivacyIdentity],
+        ["temporal", namespace.initializeExternalIntelligenceTemporal],
+        ["normalization", namespace.initializeExternalIntelligenceNormalization],
+        ["claim", namespace.initializeExternalIntelligenceClaim],
+        ["entity", namespace.initializeExternalIntelligenceEntity]
       ];
       for (const item of initializers) {
         const name = item[0];
@@ -331,7 +360,7 @@
     id: "EXTERNAL-010-CORE",
     version: VERSION_MANIFEST.getModuleVersion("core"),
     status: "Loaded",
-    phase: 4,
+    phase: 7,
     directRepositoryMutationAllowed: false,
     loadedAt: nowIso()
   };

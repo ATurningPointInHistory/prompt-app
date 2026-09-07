@@ -7,7 +7,7 @@
   "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1, IDE-190 v1.10.0 frozen baseline, REPOSITORY-010 Phase 18 v1.17.3, and EXTERNAL-010 Phase 06 v1.5.0 Secrets / External Content Security / Privacy / Data Lifecycle.",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-07T13:34:27.147Z",
+  "updatedAt": "2026-09-07T14:59:25.849Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -289,10 +289,10 @@
     "./16_validation_engine.js?h=105c13151958",
     "./15_reasoning_engine.js?h=cf1ed1305563",
     "./16_workflow_engine.js?h=17dedd927e7f",
-    "./17_external_intelligence_version_manifest.js?h=24e876883629",
-    "./17_external_intelligence_core.js?h=089a572722f7",
-    "./17_external_intelligence_contracts.js?h=55d78a6d9abf",
-    "./17_external_intelligence_schema_registry.js?h=3f9e77971d00",
+    "./17_external_intelligence_version_manifest.js?h=96a89ac69b61",
+    "./17_external_intelligence_core.js?h=06ab0394a05a",
+    "./17_external_intelligence_contracts.js?h=79d287a91397",
+    "./17_external_intelligence_schema_registry.js?h=53ba66cb5af1",
     "./17_external_intelligence_authority.js?h=102149846b07",
     "./17_external_intelligence_audit.js?h=cf56721b647b",
     "./17_external_intelligence_runtime_coordination.js?h=b42665428345",
@@ -306,23 +306,30 @@
     "./17_external_intelligence_adapter_registry.js?h=8211e5421e29",
     "./17_external_intelligence_source_router.js?h=fb1eef1a3d35",
     "./17_external_intelligence_acquisition_queue.js?h=4236cc0b1342",
-    "./17_external_intelligence_phase1_validation.js?h=3fb94cadbf16",
-    "./17_external_intelligence_phase2_validation.js?h=492f9718823a",
-    "./17_external_intelligence_phase3_validation.js?h=b77e43aabad4",
-    "./17_external_intelligence_phase4_validation.js?h=8dc974613d16",
+    "./17_external_intelligence_phase1_validation.js?h=4c82647fe40a",
+    "./17_external_intelligence_phase2_validation.js?h=9d0e1bec7bc9",
+    "./17_external_intelligence_phase3_validation.js?h=b5453aca67d3",
+    "./17_external_intelligence_phase4_validation.js?h=eb278f33b5c5",
     "./17_external_intelligence_phase4_real_runtime_validation.js?h=a1514ba113d0",
-    "./17_external_intelligence_phase4_android_validation.js?h=dfa4840bf02e",
+    "./17_external_intelligence_phase4_android_validation.js?h=8f726a6e1f50",
     "./17_external_intelligence_evidence_persistence.js?h=00b370e2b43b",
-    "./17_external_intelligence_phase5_validation.js?h=ef3daf2ff6c4",
+    "./17_external_intelligence_phase5_validation.js?h=02c15e98a752",
     "./17_external_intelligence_phase5_real_runtime_validation.js?h=39bf3f914ca4",
-    "./17_external_intelligence_phase5_android_validation.js?h=e7fc82003f80",
+    "./17_external_intelligence_phase5_android_validation.js?h=051efc03e361",
     "./17_external_intelligence_secret_governance.js?h=98b64722ca61",
     "./17_external_intelligence_external_content_security.js?h=38eece464ae9",
     "./17_external_intelligence_data_lifecycle.js?h=5492a5f3da5e",
     "./17_external_intelligence_privacy_identity.js?h=cecd71307af7",
-    "./17_external_intelligence_phase6_validation.js?h=9f88e07973e3",
+    "./17_external_intelligence_phase6_validation.js?h=2bd5a1ceff66",
     "./17_external_intelligence_phase6_real_runtime_validation.js?h=fcc81d895568",
-    "./17_external_intelligence_phase6_android_validation.js?h=e5469803c901",
+    "./17_external_intelligence_phase6_android_validation.js?h=6f5d1a1f1b15",
+    "./17_external_intelligence_temporal.js?h=08b551e34338",
+    "./17_external_intelligence_normalization.js?h=70c56460920c",
+    "./17_external_intelligence_claim.js?h=67cf9d9a110a",
+    "./17_external_intelligence_entity.js?h=2d4ef05b115e",
+    "./17_external_intelligence_phase7_validation.js?h=7afb6e8b16c9",
+    "./17_external_intelligence_phase7_real_runtime_validation.js?h=75bc460746f0",
+    "./17_external_intelligence_phase7_android_validation.js?h=1ef50131aa15",
     "./99_init.js?h=1bd8f46d1e40"
   ],
   "hashes": {
@@ -1727,24 +1734,24 @@
       "cacheKey": "17dedd927e7f"
     },
     "17_external_intelligence_version_manifest.js": {
-      "sha256": "24e876883629b0e00e7c24fbc6e9eb7bc43bf8c16bf73989ee588cb7cc0ea548",
-      "byteSize": 30110,
-      "cacheKey": "24e876883629"
+      "sha256": "96a89ac69b615961198c81caf7050ad4984eb0fe7f894d2a6b92026d91337a4f",
+      "byteSize": 36230,
+      "cacheKey": "96a89ac69b61"
     },
     "17_external_intelligence_core.js": {
-      "sha256": "089a572722f7a9e5cb74bc2a6687d4497982f06e6d2f6be16c79eafbdee10bd5",
-      "byteSize": 16092,
-      "cacheKey": "089a572722f7"
+      "sha256": "06ab0394a05aa3ca84c6060d1f4d91274cc1046d50bf6997483a737a12aa9563",
+      "byteSize": 18014,
+      "cacheKey": "06ab0394a05a"
     },
     "17_external_intelligence_contracts.js": {
-      "sha256": "55d78a6d9abf25bd7baad9263cfad019c0a86d75a7ce07774032d7c0ccb30f86",
-      "byteSize": 54421,
-      "cacheKey": "55d78a6d9abf"
+      "sha256": "79d287a9139731c18503f6dd0d992e0423c4e4be1c923df1d0f8abcd166c7339",
+      "byteSize": 66341,
+      "cacheKey": "79d287a91397"
     },
     "17_external_intelligence_schema_registry.js": {
-      "sha256": "3f9e77971d0009ba5b616a97646b3b11cf5085267f63b1be77c88357b0c32198",
-      "byteSize": 42199,
-      "cacheKey": "3f9e77971d00"
+      "sha256": "53ba66cb5af1707b2361a3d1ffd7511826fc67fa749b003630d5ad88778761f1",
+      "byteSize": 53411,
+      "cacheKey": "53ba66cb5af1"
     },
     "17_external_intelligence_authority.js": {
       "sha256": "102149846b0784e50b315e7a8975b6698d9852a8f92c2e42a8c3bba07bf83814",
@@ -1812,24 +1819,24 @@
       "cacheKey": "4236cc0b1342"
     },
     "17_external_intelligence_phase1_validation.js": {
-      "sha256": "3fb94cadbf16f460ad9b48c4e4bd5a759af48e3cc8bb5538567a54b75b783a23",
-      "byteSize": 18341,
-      "cacheKey": "3fb94cadbf16"
+      "sha256": "4c82647fe40a532a5767e17600e71607f89611b43ac1134e4727ee35eff667ac",
+      "byteSize": 18350,
+      "cacheKey": "4c82647fe40a"
     },
     "17_external_intelligence_phase2_validation.js": {
-      "sha256": "492f9718823af8cd9823c81d80443906c4ffc7b727b2026f636c4fcfbf776bf7",
-      "byteSize": 24544,
-      "cacheKey": "492f9718823a"
+      "sha256": "9d0e1bec7bc9852e8be2e40f908b4892714666e780d783f984103414099455b5",
+      "byteSize": 24553,
+      "cacheKey": "9d0e1bec7bc9"
     },
     "17_external_intelligence_phase3_validation.js": {
-      "sha256": "b77e43aabad44a40e2e4af96f8ec0f6638127452b7d12969e80440d5b0d4ce85",
-      "byteSize": 38411,
-      "cacheKey": "b77e43aabad4"
+      "sha256": "b5453aca67d30e892cb0ff6f7a047d978807fe293522d35d78087e43bbc6b44d",
+      "byteSize": 38420,
+      "cacheKey": "b5453aca67d3"
     },
     "17_external_intelligence_phase4_validation.js": {
-      "sha256": "8dc974613d165650999f66a1819a6ee12210194927274050801ff723b1ec01c3",
-      "byteSize": 44369,
-      "cacheKey": "8dc974613d16"
+      "sha256": "eb278f33b5c50ff214d15e4cd6e2328ed1dc519b920c206f76bc062aab1e5c1b",
+      "byteSize": 44378,
+      "cacheKey": "eb278f33b5c5"
     },
     "17_external_intelligence_phase4_real_runtime_validation.js": {
       "sha256": "a1514ba113d09af1ff2efbdf00955ccca94ce8a4fbc5117f3668378e43ee082d",
@@ -1837,9 +1844,9 @@
       "cacheKey": "a1514ba113d0"
     },
     "17_external_intelligence_phase4_android_validation.js": {
-      "sha256": "dfa4840bf02e421e0d9aeae76cd86c8497fb28def6851ebbd036f35ad80649b1",
-      "byteSize": 32397,
-      "cacheKey": "dfa4840bf02e"
+      "sha256": "8f726a6e1f50e2076aaaa13daff51a4e7ef57bafaaade27f8c5cbfe28e55c242",
+      "byteSize": 32406,
+      "cacheKey": "8f726a6e1f50"
     },
     "17_external_intelligence_evidence_persistence.js": {
       "sha256": "00b370e2b43b62388d6f833c5fac68d2d24dbfc64c6f2fe7d071b42f5774dd69",
@@ -1847,9 +1854,9 @@
       "cacheKey": "00b370e2b43b"
     },
     "17_external_intelligence_phase5_validation.js": {
-      "sha256": "ef3daf2ff6c45d598acc1d3b62eb3c95e1648cb3d226fbc41e2f8fade8285888",
-      "byteSize": 21337,
-      "cacheKey": "ef3daf2ff6c4"
+      "sha256": "02c15e98a752ce2b230f90656b38277f19c17157121d240d652ab5ac480d75f2",
+      "byteSize": 21346,
+      "cacheKey": "02c15e98a752"
     },
     "17_external_intelligence_phase5_real_runtime_validation.js": {
       "sha256": "39bf3f914ca4e352f7e5459080bb17d72c760334c59ae4036848389498d030b9",
@@ -1857,9 +1864,9 @@
       "cacheKey": "39bf3f914ca4"
     },
     "17_external_intelligence_phase5_android_validation.js": {
-      "sha256": "e7fc82003f80169a2ed6d7e76d35894f151bb24b7fe9d4cb3fe9a1e6b0146a66",
-      "byteSize": 12174,
-      "cacheKey": "e7fc82003f80"
+      "sha256": "051efc03e3615c856d33283fcadf98e4be6389878e56f31ce90ea255009eabb0",
+      "byteSize": 12182,
+      "cacheKey": "051efc03e361"
     },
     "17_external_intelligence_secret_governance.js": {
       "sha256": "98b64722ca612a7611757bb1b05cdddf0b788237413d8d83a33fefa5f8ed3ee4",
@@ -1882,9 +1889,9 @@
       "cacheKey": "cecd71307af7"
     },
     "17_external_intelligence_phase6_validation.js": {
-      "sha256": "9f88e07973e3491def117d3fb9ff3eee964bb4111c04938e5923273d95a8122f",
-      "byteSize": 19043,
-      "cacheKey": "9f88e07973e3"
+      "sha256": "2bd5a1ceff66da2b32cf6cd9a8ad28e8d0efab80a778b8d1d1b26aef3a596d46",
+      "byteSize": 19022,
+      "cacheKey": "2bd5a1ceff66"
     },
     "17_external_intelligence_phase6_real_runtime_validation.js": {
       "sha256": "fcc81d89556895f3ac8866372996c34b79f09c47b617b7c3a8213b1762014e05",
@@ -1892,9 +1899,44 @@
       "cacheKey": "fcc81d895568"
     },
     "17_external_intelligence_phase6_android_validation.js": {
-      "sha256": "e5469803c901c324e7fd7a95be8aaa917fa72a31b67973510801fd2285872633",
-      "byteSize": 13868,
-      "cacheKey": "e5469803c901"
+      "sha256": "6f5d1a1f1b15ae8e46a7ac22ba77b1194a3837c36fe76bf31d58decc6667269b",
+      "byteSize": 13909,
+      "cacheKey": "6f5d1a1f1b15"
+    },
+    "17_external_intelligence_temporal.js": {
+      "sha256": "08b551e3433853cb604a13b460629b5262946f9e3bd1f62dfee06389c8da76e8",
+      "byteSize": 11383,
+      "cacheKey": "08b551e34338"
+    },
+    "17_external_intelligence_normalization.js": {
+      "sha256": "70c56460920cc4403b5f3f44aad1d9243520a6b141331cf7d2a392dfa25d4a2e",
+      "byteSize": 13533,
+      "cacheKey": "70c56460920c"
+    },
+    "17_external_intelligence_claim.js": {
+      "sha256": "67cf9d9a110af49916b4caaba4dc083a839d2e7de284f1d48b4926da464d2f71",
+      "byteSize": 7115,
+      "cacheKey": "67cf9d9a110a"
+    },
+    "17_external_intelligence_entity.js": {
+      "sha256": "2d4ef05b115e6af7aee81b3dc2472132e8937635352eefd4b3b29fcfe5f4e11c",
+      "byteSize": 13104,
+      "cacheKey": "2d4ef05b115e"
+    },
+    "17_external_intelligence_phase7_validation.js": {
+      "sha256": "7afb6e8b16c9543bb37e87a510ea43d1338104921491aacfae2054a12f72fc2d",
+      "byteSize": 22430,
+      "cacheKey": "7afb6e8b16c9"
+    },
+    "17_external_intelligence_phase7_real_runtime_validation.js": {
+      "sha256": "75bc460746f07a3661517fb59c589e3c160ec259b72a2dc669237e3e7d578b7a",
+      "byteSize": 6637,
+      "cacheKey": "75bc460746f0"
+    },
+    "17_external_intelligence_phase7_android_validation.js": {
+      "sha256": "1ef50131aa158f139659d628362b3f47602d90cd9e19ab73c5d6dc383714320d",
+      "byteSize": 7927,
+      "cacheKey": "1ef50131aa15"
     },
     "99_init.js": {
       "sha256": "1bd8f46d1e40f463fd359c49925dcfd5dbcb9a3a6a01c14bd607c53b181bf9c8",
@@ -1902,6 +1944,6 @@
       "cacheKey": "1bd8f46d1e40"
     }
   },
-  "scriptSetHash": "e1a62eb2a517741ec7df8e86d7bfc45f39899070b39ea15bbe4bc25899c9f1f1",
-  "manifestHash": "b937b6607c1616aacae6dbf3b1753dc171d39f274a1b7d69ab5d4332c1328d0c"
+  "scriptSetHash": "b533a9995423744f8247e4ccff8270f174bd8090f0d3fe96bce1de72360c793d",
+  "manifestHash": "8808cfa13a61f560d723a48a13d50c9e0a50f4277e21c0d535df25305445a613"
 }

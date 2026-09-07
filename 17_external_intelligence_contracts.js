@@ -270,7 +270,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0"] }),
+        field("version", { required: true, type: "string", enum: ["1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0"] }),
         field("implementationPhase", { required: true, type: "string" }),
         field("passed", { required: true, type: "number" }),
         field("failed", { required: true, type: "number" }),
@@ -440,7 +440,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.2.0", "1.3.0", "1.4.0", "1.5.0"] }),
+        field("version", { required: true, type: "string", enum: ["1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0"] }),
         field("implementationPhase", { required: true, type: "string" }),
         field("decisionCoverage", { required: true, type: "number", enum: [54] }),
         field("passed", { required: true, type: "number" }),
@@ -666,7 +666,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.3.0", "1.4.0", "1.5.0"] }),
+        field("version", { required: true, type: "string", enum: ["1.3.0", "1.4.0", "1.5.0", "1.6.0"] }),
         field("implementationPhase", { required: true, type: "string" }),
         field("decisionCoverage", { required: true, type: "number", enum: [54] }),
         field("passed", { required: true, type: "number" }),
@@ -720,6 +720,50 @@
     {
       key: "phase6ValidationResult", id: VERSION_MANIFEST.getContractId("phase6ValidationResult"), name: "EXTERNAL-010 Phase 06 Validation Result Contract", version: VERSION_MANIFEST.getContractVersion("phase6ValidationResult"), immutable: true,
       fields: [field("id",{required:true,type:"string"}),field("componentId",{required:true,type:"string",enum:["EXTERNAL-010"]}),field("version",{required:true,type:"string"}),field("implementationPhase",{required:true,type:"string"}),field("decisionCoverage",{required:true,type:"number",enum:[54]}),field("passed",{required:true,type:"number"}),field("failed",{required:true,type:"number"}),field("total",{required:true,type:"number"}),field("health",{required:true,type:"number"}),field("criticalFailed",{required:true,type:"number"}),field("status",{required:true,type:"string"}),field("releaseAllowed",{required:true,type:"boolean"}),field("phase6Complete",{required:true,type:"boolean"}),field("phase7Allowed",{required:true,type:"boolean"}),field("validatedAt",{required:true,type:"string"})]
+    },
+    {
+      key: "temporalContext", id: VERSION_MANIFEST.getContractId("temporalContext"), name: "EXTERNAL-010 Temporal Context Contract", version: VERSION_MANIFEST.getContractVersion("temporalContext"), immutable: true,
+      fields: [field("temporalContextId",{required:true,type:"string"}),field("evidenceId",{required:true,type:["string","null"]}),field("rawEvidenceId",{required:true,type:["string","null"]}),field("publishedAt",{required:true,type:["string","null"]}),field("availableAt",{required:true,type:["string","null"]}),field("effectiveAt",{required:true,type:["string","null"]}),field("acquiredAt",{required:true,type:["string","null"]}),field("temporalIntent",{required:true,type:"string"}),field("historicalMode",{required:true,type:"boolean"}),field("asOfTime",{required:true,type:["string","null"]}),field("freshnessState",{required:true,type:"string"}),field("futureEvidenceBlocked",{required:true,type:"boolean"}),field("eligibilityState",{required:true,type:"string"}),field("newestEvidenceAutomaticallyWins",{required:true,type:"boolean",enum:[false]}),field("freshnessGrantsReliability",{required:true,type:"boolean",enum:[false]}),field("unknownTimestampInvented",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "normalizerDefinition", id: VERSION_MANIFEST.getContractId("normalizerDefinition"), name: "EXTERNAL-010 Normalizer Definition Contract", version: VERSION_MANIFEST.getContractVersion("normalizerDefinition"), immutable: true,
+      fields: [field("normalizerId",{required:true,type:"string"}),field("normalizerVersion",{required:true,type:"string"}),field("schemaVersion",{required:true,type:"string"}),field("recordType",{required:true,type:"string"}),field("supportedSourceTypes",{required:true,type:"array"}),field("deterministic",{required:true,type:"boolean"}),field("rawEvidenceMutationAllowed",{required:true,type:"boolean",enum:[false]}),field("historicalOverwriteAllowed",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "normalizedRecord", id: VERSION_MANIFEST.getContractId("normalizedRecord"), name: "EXTERNAL-010 Normalized Record Contract", version: VERSION_MANIFEST.getContractVersion("normalizedRecord"), immutable: true,
+      fields: [field("normalizedRecordId",{required:true,type:"string"}),field("recordType",{required:true,type:"string"}),field("recordVersion",{required:true,type:"number"}),field("schemaVersion",{required:true,type:"string"}),field("rawEvidenceId",{required:true,type:"string"}),field("sourceEvidenceId",{required:true,type:"string"}),field("sourceContentHash",{required:true,type:"string"}),field("normalizerId",{required:true,type:"string"}),field("normalizerVersion",{required:true,type:"string"}),field("normalizationState",{required:true,type:"string"}),field("resolutionState",{required:true,type:"string"}),field("normalizedData",{required:true,type:["object","array"]}),field("provenanceReference",{required:true,type:"object"}),field("derivedDataBoundary",{required:true,type:"boolean",enum:[true]}),field("rawEvidencePreserved",{required:true,type:"boolean",enum:[true]}),field("rawEvidenceOverwritePerformed",{required:true,type:"boolean",enum:[false]}),field("normalizationReplacesRawEvidence",{required:true,type:"boolean",enum:[false]}),field("historyOverwritePerformed",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "claimCandidate", id: VERSION_MANIFEST.getContractId("claimCandidate"), name: "EXTERNAL-010 Claim Candidate Contract", version: VERSION_MANIFEST.getContractVersion("claimCandidate"), immutable: true,
+      fields: [field("claimCandidateId",{required:true,type:"string"}),field("claimId",{required:true,type:"string"}),field("normalizedRecordId",{required:true,type:"string"}),field("sourceEvidenceId",{required:true,type:"string"}),field("rawEvidenceId",{required:true,type:"string"}),field("claimType",{required:true,type:"string"}),field("claimantId",{required:true,type:["string","null"]}),field("publisherId",{required:true,type:["string","null"]}),field("claimExtractorId",{required:true,type:"string"}),field("claimExtractorVersion",{required:true,type:"string"}),field("extractionState",{required:true,type:"string"}),field("atomicClaim",{required:true,type:"object"}),field("rawContextReference",{required:true,type:"string"}),field("lineageReference",{required:true,type:"object"}),field("claimEqualsTruth",{required:true,type:"boolean",enum:[false]}),field("claimExtractionEqualsKnowledgePromotion",{required:true,type:"boolean",enum:[false]}),field("truthVerified",{required:true,type:"boolean",enum:[false]}),field("knowledgePromotionPerformed",{required:true,type:"boolean",enum:[false]}),field("toolAuthorityGranted",{required:true,type:"boolean",enum:[false]}),field("repositoryAuthorityGranted",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "entityRecord", id: VERSION_MANIFEST.getContractId("entityRecord"), name: "EXTERNAL-010 Entity Record Contract", version: VERSION_MANIFEST.getContractVersion("entityRecord"), immutable: true,
+      fields: [field("entityId",{required:true,type:"string"}),field("entityType",{required:true,type:"string"}),field("canonicalLabel",{required:true,type:"string"}),field("namespace",{required:true,type:"string"}),field("resolutionState",{required:true,type:"string"}),field("evidenceRefs",{required:true,type:"array"}),field("identityCreatedFromNameMatchOnly",{required:true,type:"boolean",enum:[false]}),field("knowledgeIdentityLinkPerformed",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "entityAliasRecord", id: VERSION_MANIFEST.getContractId("entityAliasRecord"), name: "EXTERNAL-010 Entity Alias Contract", version: VERSION_MANIFEST.getContractVersion("entityAliasRecord"), immutable: true,
+      fields: [field("entityAliasId",{required:true,type:"string"}),field("entityId",{required:true,type:"string"}),field("alias",{required:true,type:"string"}),field("namespace",{required:true,type:"string"}),field("evidenceRefs",{required:true,type:"array"}),field("aliasMatchEqualsExactIdentity",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "entityIdentifierRecord", id: VERSION_MANIFEST.getContractId("entityIdentifierRecord"), name: "EXTERNAL-010 Entity Identifier Contract", version: VERSION_MANIFEST.getContractVersion("entityIdentifierRecord"), immutable: true,
+      fields: [field("entityIdentifierId",{required:true,type:"string"}),field("entityId",{required:true,type:"string"}),field("namespace",{required:true,type:"string"}),field("identifier",{required:true,type:"string"}),field("evidenceRefs",{required:true,type:"array"}),field("identifierEqualsPermanentIdentity",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "entityMention", id: VERSION_MANIFEST.getContractId("entityMention"), name: "EXTERNAL-010 Entity Mention Contract", version: VERSION_MANIFEST.getContractVersion("entityMention"), immutable: true,
+      fields: [field("entityMentionId",{required:true,type:"string"}),field("sourceEvidenceId",{required:true,type:"string"}),field("mentionMode",{required:true,type:"string",enum:["TEXT","VISUAL"]}),field("mentionText",{required:true,type:["string","null"]}),field("visualReference",{required:true,type:["string","null"]}),field("candidateEntityIds",{required:true,type:"array"}),field("resolvedEntityId",{required:true,type:["string","null"],enum:[null]}),field("resolutionState",{required:true,type:"string"}),field("mentionEqualsResolvedEntity",{required:true,type:"boolean",enum:[false]}),field("visualMentionEqualsResolvedEntity",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "entityResolutionCandidate", id: VERSION_MANIFEST.getContractId("entityResolutionCandidate"), name: "EXTERNAL-010 Entity Resolution Candidate Contract", version: VERSION_MANIFEST.getContractVersion("entityResolutionCandidate"), immutable: true,
+      fields: [field("entityResolutionCandidateId",{required:true,type:"string"}),field("entityMentionId",{required:true,type:"string"}),field("candidateEntityId",{required:true,type:["string","null"]}),field("resolverId",{required:true,type:"string"}),field("resolverVersion",{required:true,type:"string"}),field("resolutionState",{required:true,type:"string"}),field("evidenceRefs",{required:true,type:"array"}),field("visualSimilarityOnly",{required:true,type:"boolean"}),field("canonicalResolutionPerformed",{required:true,type:"boolean",enum:[false]}),field("destructiveMergePerformed",{required:true,type:"boolean",enum:[false]}),field("knowledgeMutationPerformed",{required:true,type:"boolean",enum:[false]}),field("aiResolutionEqualsCanonicalConfirmation",{required:true,type:"boolean",enum:[false]}),field("visualSimilarityEqualsIdentity",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "entityMergeSplitCandidate", id: VERSION_MANIFEST.getContractId("entityMergeSplitCandidate"), name: "EXTERNAL-010 Entity Merge / Split Candidate Contract", version: VERSION_MANIFEST.getContractVersion("entityMergeSplitCandidate"), immutable: true,
+      fields: [field("entityMergeSplitCandidateId",{required:true,type:"string"}),field("operation",{required:true,type:"string",enum:["MERGE","SPLIT"]}),field("entityIds",{required:true,type:"array"}),field("proposedEntityIds",{required:true,type:"array"}),field("evidenceRefs",{required:true,type:"array"}),field("resolverId",{required:true,type:"string"}),field("resolverVersion",{required:true,type:"string"}),field("destructiveOperationPerformed",{required:true,type:"boolean",enum:[false]}),field("canonicalRegistryMutationPerformed",{required:true,type:"boolean",enum:[false]}),field("approvalGranted",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})]
+    },
+    {
+      key: "phase7ValidationResult", id: VERSION_MANIFEST.getContractId("phase7ValidationResult"), name: "EXTERNAL-010 Phase 07 Validation Result Contract", version: VERSION_MANIFEST.getContractVersion("phase7ValidationResult"), immutable: true,
+      fields: [field("id",{required:true,type:"string"}),field("componentId",{required:true,type:"string",enum:["EXTERNAL-010"]}),field("version",{required:true,type:"string"}),field("implementationPhase",{required:true,type:"string"}),field("decisionCoverage",{required:true,type:"number",enum:[54]}),field("passed",{required:true,type:"number"}),field("failed",{required:true,type:"number"}),field("total",{required:true,type:"number"}),field("health",{required:true,type:"number"}),field("criticalFailed",{required:true,type:"number"}),field("status",{required:true,type:"string"}),field("releaseAllowed",{required:true,type:"boolean"}),field("phase7Complete",{required:true,type:"boolean"}),field("phase8Allowed",{required:true,type:"boolean"}),field("validatedAt",{required:true,type:"string"})]
     }
 
   ]);
