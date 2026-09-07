@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_phase1_validation.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.0.0
-   Phase 01 Validation
+   Release: 1.1.0
+   Phase 01 Regression Validation under Phase 02
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -58,7 +58,7 @@
 
     check("Version Manifest is loaded", Boolean(VERSION_MANIFEST), VERSION_MANIFEST && VERSION_MANIFEST.release.version, "Foundation");
     check("Component ID is EXTERNAL-010", VERSION_MANIFEST.componentId === "EXTERNAL-010", VERSION_MANIFEST.componentId, "Foundation");
-    check("Release Version is 1.0.0", VERSION_MANIFEST.release.version === "1.0.0", VERSION_MANIFEST.release.version, "Foundation");
+    check("Release Version is compatible with Phase 01 baseline", ["1.0.0", "1.1.0"].includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
     check("Design Freeze ID is canonical", VERSION_MANIFEST.release.designFreezeId === "EXTERNAL-010-DESIGN-FREEZE-1.0.0", VERSION_MANIFEST.release.designFreezeId, "Foundation");
     check("Roadmap ID is 2.1.0", VERSION_MANIFEST.release.implementationRoadmapId === "EXTERNAL-010-IMPLEMENTATION-ROADMAP-2.1.0", VERSION_MANIFEST.release.implementationRoadmapId, "Foundation");
     check("Decision coverage is 54", VERSION_MANIFEST.release.decisionCount === 54 && VERSION_MANIFEST.release.decisionRange === "EXTERNAL-010-DECISION-001..054", VERSION_MANIFEST.release.decisionRange, "Foundation");

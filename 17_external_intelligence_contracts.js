@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_contracts.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.0.0
-   Phase 01: Governance / Contract / Authority Foundation
+   Release: 1.1.0
+   Phase 02: Runtime / Gateway / Software Supply Chain Foundation
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -167,6 +167,121 @@
         field("authorityEffect", { required: true, type: "string", enum: ["none"] }),
         field("createdAt", { required: true, type: "string" }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "gatewayRuntimeState",
+      id: VERSION_MANIFEST.getContractId("gatewayRuntimeState"),
+      name: "EXTERNAL-010 Gateway Runtime State Contract",
+      version: VERSION_MANIFEST.getContractVersion("gatewayRuntimeState"),
+      immutable: true,
+      fields: [
+        field("runtimeInstanceId", { required: true, type: "string" }),
+        field("runtimeType", { required: true, type: "string" }),
+        field("runtimeVersion", { required: true, type: "string" }),
+        field("startupEpoch", { required: true, type: "string" }),
+        field("startedAt", { required: true, type: "string" }),
+        field("healthState", { required: true, type: "string" }),
+        field("executionAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("businessAuthorityGranted", { required: true, type: "boolean", enum: [false] }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "gatewaySessionMetadata",
+      id: VERSION_MANIFEST.getContractId("gatewaySessionMetadata"),
+      name: "EXTERNAL-010 Gateway Session Metadata Contract",
+      version: VERSION_MANIFEST.getContractVersion("gatewaySessionMetadata"),
+      immutable: true,
+      fields: [
+        field("gatewaySessionId", { required: true, type: "string" }),
+        field("runtimeInstanceId", { required: true, type: "string" }),
+        field("issuedAt", { required: true, type: "string" }),
+        field("expiresAt", { required: true, type: "string" }),
+        field("state", { required: true, type: "string", enum: ["ACTIVE", "EXPIRING", "EXPIRED", "REVOKED", "INVALID", "RUNTIME_INVALIDATED"] }),
+        field("origin", { required: true, type: "string" }),
+        field("contractVersion", { required: true, type: "string" }),
+        field("tokenPersisted", { required: true, type: "boolean", enum: [false] })
+      ]
+    },
+    {
+      key: "runtimeCoordinationRecord",
+      id: VERSION_MANIFEST.getContractId("runtimeCoordinationRecord"),
+      name: "EXTERNAL-010 Runtime Coordination Record Contract",
+      version: VERSION_MANIFEST.getContractVersion("runtimeCoordinationRecord"),
+      immutable: true,
+      fields: [
+        field("coordinationRecordId", { required: true, type: "string" }),
+        field("recordType", { required: true, type: "string" }),
+        field("state", { required: true, type: "string" }),
+        field("executionAuthorityGranted", { required: false, type: "boolean" }),
+        field("businessAuthorityGranted", { required: false, type: "boolean" }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "dependencyCandidate",
+      id: VERSION_MANIFEST.getContractId("dependencyCandidate"),
+      name: "EXTERNAL-010 Dependency Candidate Contract",
+      version: VERSION_MANIFEST.getContractVersion("dependencyCandidate"),
+      immutable: true,
+      fields: [
+        field("dependencyId", { required: true, type: "string" }),
+        field("packageEcosystem", { required: true, type: "string" }),
+        field("packageName", { required: true, type: "string" }),
+        field("version", { required: true, type: "string" }),
+        field("sourceType", { required: true, type: "string" }),
+        field("purpose", { required: true, type: "string" }),
+        field("runtimeTarget", { required: true, type: "string" }),
+        field("admissionState", { required: true, type: "string" }),
+        field("automaticInstallAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("hardSecurityFail", { required: true, type: "boolean" }),
+        field("elevatedSecurityExceptionGranted", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "runtimeProfile",
+      id: VERSION_MANIFEST.getContractId("runtimeProfile"),
+      name: "EXTERNAL-010 Runtime Profile Contract",
+      version: VERSION_MANIFEST.getContractVersion("runtimeProfile"),
+      immutable: true,
+      fields: [
+        field("runtimeProfileId", { required: true, type: "string" }),
+        field("nodeVersion", { required: true, type: "string" }),
+        field("pythonVersion", { required: true, type: "string" }),
+        field("dependencyManifestHash", { required: true, type: "string" }),
+        field("dependencyCount", { required: true, type: "number" }),
+        field("externalDependencyCount", { required: true, type: "number" }),
+        field("validationState", { required: true, type: "string" }),
+        field("automaticInstallAllowed", { required: true, type: "boolean", enum: [false] }),
+        field("createdAt", { required: true, type: "string" }),
+        field("immutable", { required: true, type: "boolean", enum: [true] })
+      ]
+    },
+    {
+      key: "phase2ValidationResult",
+      id: VERSION_MANIFEST.getContractId("phase2ValidationResult"),
+      name: "EXTERNAL-010 Phase 02 Validation Result Contract",
+      version: VERSION_MANIFEST.getContractVersion("phase2ValidationResult"),
+      immutable: true,
+      fields: [
+        field("id", { required: true, type: "string" }),
+        field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
+        field("version", { required: true, type: "string", enum: ["1.1.0"] }),
+        field("implementationPhase", { required: true, type: "string" }),
+        field("passed", { required: true, type: "number" }),
+        field("failed", { required: true, type: "number" }),
+        field("total", { required: true, type: "number" }),
+        field("health", { required: true, type: "number" }),
+        field("criticalFailed", { required: true, type: "number" }),
+        field("status", { required: true, type: "string" }),
+        field("releaseAllowed", { required: true, type: "boolean" }),
+        field("phase2Complete", { required: true, type: "boolean" }),
+        field("phase3Allowed", { required: true, type: "boolean" }),
+        field("validatedAt", { required: true, type: "string" })
       ]
     }
   ]);

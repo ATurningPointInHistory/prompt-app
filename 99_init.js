@@ -163,7 +163,8 @@ document.addEventListener("DOMContentLoaded", () => {
       ["initRepairIde", "initRepairIde"],
       ["initRepairSearchQuickPanel", "initRepairSearchQuickPanel"],
       ["initImportFileEvents", "initImportFileEvents"],
-      ["updateRepairFloatingPanelsVisibility", "updateRepairFloatingPanelsVisibility"]
+      ["updateRepairFloatingPanelsVisibility", "updateRepairFloatingPanelsVisibility"],
+      ["initializeExternalIntelligenceStartup", "initializeExternalIntelligenceStartup"]
     ];
 
     startupTasks.forEach(([fnName, label]) => {

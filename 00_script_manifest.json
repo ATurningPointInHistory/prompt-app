@@ -4,10 +4,10 @@
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1, IDE-190 v1.10.0 frozen baseline, REPOSITORY-010 Phase 18 v1.17.3, and EXTERNAL-010 Phase 01 v1.0.0 Governance / Contract / Authority Foundation.",
+  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1, IDE-190 v1.10.0 frozen baseline, REPOSITORY-010 Phase 18 v1.17.3, and EXTERNAL-010 Phase 02 v1.1.0 Runtime / Gateway / Software Supply Chain Foundation.",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-07T06:43:48Z",
+  "updatedAt": "2026-09-07T07:27:16.850333Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -40,7 +40,7 @@
     "./07_health_diagnose.js?h=6cfb32a71d4a",
     "./07_health_unused.js?h=7fa65234ac06",
     "./07_backup_manager.js?h=c3ea2011ff94",
-    "./07_project_package.js?h=d471662b4aff",
+    "./07_project_package.js?h=188a016dbb99",
     "./07_safe_mode.js?h=29a7bdc4685d",
     "./07_project_explorer.js?h=8a31a68897ff",
     "./07_backup_health.js?h=2fc43427c3e7",
@@ -289,14 +289,18 @@
     "./16_validation_engine.js?h=105c13151958",
     "./15_reasoning_engine.js?h=cf1ed1305563",
     "./16_workflow_engine.js?h=17dedd927e7f",
-    "./17_external_intelligence_version_manifest.js?h=75016927657f",
-    "./17_external_intelligence_core.js?h=3280acb339df",
-    "./17_external_intelligence_contracts.js?h=c2adcdc690bb",
-    "./17_external_intelligence_schema_registry.js?h=c325a0752b09",
+    "./17_external_intelligence_version_manifest.js?h=fc9452c67529",
+    "./17_external_intelligence_core.js?h=0cb3d3641515",
+    "./17_external_intelligence_contracts.js?h=4ff4e8c72931",
+    "./17_external_intelligence_schema_registry.js?h=7c663d7f42a3",
     "./17_external_intelligence_authority.js?h=102149846b07",
     "./17_external_intelligence_audit.js?h=cf56721b647b",
-    "./17_external_intelligence_phase1_validation.js?h=4db30d7051b3",
-    "./99_init.js?h=138e34ded106"
+    "./17_external_intelligence_runtime_coordination.js?h=b42665428345",
+    "./17_external_intelligence_software_supply_chain.js?h=d728b9870535",
+    "./17_external_intelligence_gateway_client.js?h=3781710db229",
+    "./17_external_intelligence_phase1_validation.js?h=876fb95c363d",
+    "./17_external_intelligence_phase2_validation.js?h=fea82dd3a77a",
+    "./99_init.js?h=1bd8f46d1e40"
   ],
   "hashes": {
     "00_core.js": {
@@ -455,9 +459,9 @@
       "cacheKey": "c3ea2011ff94"
     },
     "07_project_package.js": {
-      "sha256": "d471662b4aff4bd62429d48b89f9df36cef6adf786bcefb327daf67b3f6d1f52",
-      "byteSize": 33716,
-      "cacheKey": "d471662b4aff"
+      "sha256": "188a016dbb99befe2bbd29925c52412d1b0965d4433e70b1506b1e438ac4cb36",
+      "byteSize": 34244,
+      "cacheKey": "188a016dbb99"
     },
     "07_safe_mode.js": {
       "sha256": "29a7bdc4685dbf67fa06f881174a0d02e9992e922b317b8db60cd51f15bb281f",
@@ -1700,24 +1704,24 @@
       "cacheKey": "17dedd927e7f"
     },
     "17_external_intelligence_version_manifest.js": {
-      "sha256": "75016927657f505853654c34480d7ec855c62dc2926f5315c4f18790c080247c",
-      "byteSize": 5687,
-      "cacheKey": "75016927657f"
+      "sha256": "fc9452c67529f2db1293c939a2cceafc6df0c50042a89ac56d7c37e7f9f84336",
+      "byteSize": 8156,
+      "cacheKey": "fc9452c67529"
     },
     "17_external_intelligence_core.js": {
-      "sha256": "3280acb339df9fb499d5e180d409105c5d6eefcab950db6370ba98e5cde4d945",
-      "byteSize": 9263,
-      "cacheKey": "3280acb339df"
+      "sha256": "0cb3d3641515e13f5f405b4bb8bc259cc681ba117bfb5311f78d4fe1a5315421",
+      "byteSize": 10497,
+      "cacheKey": "0cb3d3641515"
     },
     "17_external_intelligence_contracts.js": {
-      "sha256": "c2adcdc690bb577b3d696418ecee816b790527f659b80e1d246b09daa90f22ac",
-      "byteSize": 14682,
-      "cacheKey": "c2adcdc690bb"
+      "sha256": "4ff4e8c72931b7ab28ead8e5825171005bff6d70766e7c9ff5a5a3538de278df",
+      "byteSize": 20909,
+      "cacheKey": "4ff4e8c72931"
     },
     "17_external_intelligence_schema_registry.js": {
-      "sha256": "c325a0752b09fda0f685e27fa190210a9e5362d2800e8e662f953b32df57d931",
-      "byteSize": 13611,
-      "cacheKey": "c325a0752b09"
+      "sha256": "7c663d7f42a340a145024f13d44b262ddd3d1895c1e052b71e26328a568a379d",
+      "byteSize": 17871,
+      "cacheKey": "7c663d7f42a3"
     },
     "17_external_intelligence_authority.js": {
       "sha256": "102149846b0784e50b315e7a8975b6698d9852a8f92c2e42a8c3bba07bf83814",
@@ -1729,17 +1733,37 @@
       "byteSize": 10013,
       "cacheKey": "cf56721b647b"
     },
+    "17_external_intelligence_runtime_coordination.js": {
+      "sha256": "b42665428345922844631382ba7e86e7a202d5f7a9ece003d5ca92eff001317e",
+      "byteSize": 10348,
+      "cacheKey": "b42665428345"
+    },
+    "17_external_intelligence_software_supply_chain.js": {
+      "sha256": "d728b987053526ef17949e33cdb41d7f7f5f0a26add022827f681b7aa60fc6ab",
+      "byteSize": 13149,
+      "cacheKey": "d728b9870535"
+    },
+    "17_external_intelligence_gateway_client.js": {
+      "sha256": "3781710db2293ca8009b2b8a06b39bbf7ee44c90f659154065bcf50a6f11391c",
+      "byteSize": 16380,
+      "cacheKey": "3781710db229"
+    },
     "17_external_intelligence_phase1_validation.js": {
-      "sha256": "4db30d7051b3a88307f5446f395bcbf41ad44875a535f0216d595748c3b45e02",
-      "byteSize": 18101,
-      "cacheKey": "4db30d7051b3"
+      "sha256": "876fb95c363d5f3d6897898d8a7bc427dbff9474371eb9144296e1ec2fcfc8aa",
+      "byteSize": 18172,
+      "cacheKey": "876fb95c363d"
+    },
+    "17_external_intelligence_phase2_validation.js": {
+      "sha256": "fea82dd3a77a46adfec280049d9a65bf43d2bda97a20e823d1ed9520d29ae177",
+      "byteSize": 24199,
+      "cacheKey": "fea82dd3a77a"
     },
     "99_init.js": {
-      "sha256": "138e34ded10617cf57899215d4c79704b86c8b127c9bdec59ad31f3e08f1f728",
-      "byteSize": 4460,
-      "cacheKey": "138e34ded106"
+      "sha256": "1bd8f46d1e40f463fd359c49925dcfd5dbcb9a3a6a01c14bd607c53b181bf9c8",
+      "byteSize": 4550,
+      "cacheKey": "1bd8f46d1e40"
     }
   },
-  "scriptSetHash": "e94ae15cc39254879f9ba051aaf5538baa47105885deec4ca73d6851eaba2617",
-  "manifestHash": "716668b40a96736133524afb19dfc351939f7b5b0ef00c4445beda01087a07c7"
+  "scriptSetHash": "cdff3baf497c190e2147837b7dfc3674c62f09b0f38d762289755af4432c9b01",
+  "manifestHash": "26ea325881579bd2fe05a845568791181ce8331a98c7e2787ed76e03c7f43046"
 }

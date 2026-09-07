@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_schema_registry.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.0.0
-   Phase 01: Governance / Contract / Authority Foundation
+   Release: 1.1.0
+   Phase 02: Runtime / Gateway / Software Supply Chain Foundation
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -68,6 +68,37 @@
       ["promotionBoundaryId", "candidateType", "automaticPromotionAllowed", "canonicalMutationPerformed", "validationEqualsApproval", "authorityEffect", "createdAt", "immutable"], {
         promotionBoundaryId: { type: "string" }, candidateType: { type: "string" }, automaticPromotionAllowed: { type: "boolean", enum: [false] }, canonicalMutationPerformed: { type: "boolean", enum: [false] },
         validationEqualsApproval: { type: "boolean", enum: [false] }, authorityEffect: { type: "string", enum: ["none"] }, createdAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-GATEWAY-RUNTIME-STATE", "External Intelligence Gateway Runtime State",
+      ["runtimeInstanceId", "runtimeType", "runtimeVersion", "startupEpoch", "startedAt", "healthState", "executionAuthorityGranted", "businessAuthorityGranted", "immutable"], {
+        runtimeInstanceId: { type: "string" }, runtimeType: { type: "string" }, runtimeVersion: { type: "string" }, startupEpoch: { type: "string" }, startedAt: { type: "string" },
+        healthState: { type: "string" }, executionAuthorityGranted: { type: "boolean", enum: [false] }, businessAuthorityGranted: { type: "boolean", enum: [false] }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-GATEWAY-SESSION-METADATA", "External Intelligence Gateway Session Metadata",
+      ["gatewaySessionId", "runtimeInstanceId", "issuedAt", "expiresAt", "state", "origin", "contractVersion", "tokenPersisted"], {
+        gatewaySessionId: { type: "string" }, runtimeInstanceId: { type: "string" }, issuedAt: { type: "string" }, expiresAt: { type: "string" },
+        state: { type: "string", enum: ["ACTIVE", "EXPIRING", "EXPIRED", "REVOKED", "INVALID", "RUNTIME_INVALIDATED"] }, origin: { type: "string" }, contractVersion: { type: "string" }, tokenPersisted: { type: "boolean", enum: [false] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-RUNTIME-COORDINATION-RECORD", "External Intelligence Runtime Coordination Record",
+      ["coordinationRecordId", "recordType", "state", "createdAt", "immutable"], {
+        coordinationRecordId: { type: "string" }, recordType: { type: "string" }, state: { type: "string" }, executionAuthorityGranted: { type: "boolean" }, businessAuthorityGranted: { type: "boolean" },
+        createdAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-DEPENDENCY-CANDIDATE", "External Intelligence Dependency Candidate",
+      ["dependencyId", "packageEcosystem", "packageName", "version", "sourceType", "purpose", "runtimeTarget", "admissionState", "automaticInstallAllowed", "hardSecurityFail", "elevatedSecurityExceptionGranted", "createdAt", "immutable"], {
+        dependencyId: { type: "string" }, packageEcosystem: { type: "string" }, packageName: { type: "string" }, version: { type: "string" }, sourceType: { type: "string" }, purpose: { type: "string" }, runtimeTarget: { type: "string" },
+        admissionState: { type: "string" }, automaticInstallAllowed: { type: "boolean", enum: [false] }, hardSecurityFail: { type: "boolean" }, elevatedSecurityExceptionGranted: { type: "boolean", enum: [false] }, createdAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-RUNTIME-PROFILE", "External Intelligence Runtime Profile",
+      ["runtimeProfileId", "nodeVersion", "pythonVersion", "dependencyManifestHash", "dependencyCount", "externalDependencyCount", "validationState", "automaticInstallAllowed", "createdAt", "immutable"], {
+        runtimeProfileId: { type: "string" }, nodeVersion: { type: "string" }, pythonVersion: { type: "string" }, dependencyManifestHash: { type: "string" }, dependencyCount: { type: "number" }, externalDependencyCount: { type: "number" },
+        validationState: { type: "string" }, automaticInstallAllowed: { type: "boolean", enum: [false] }, createdAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+      }),
+    schema("EXTERNAL-010-SCHEMA-PHASE2-VALIDATION-RESULT", "External Intelligence Phase 02 Validation Result",
+      ["id", "componentId", "version", "implementationPhase", "passed", "failed", "total", "health", "criticalFailed", "status", "releaseAllowed", "phase2Complete", "phase3Allowed", "validatedAt"], {
+        id: { type: "string" }, componentId: { type: "string", enum: ["EXTERNAL-010"] }, version: { type: "string", enum: ["1.1.0"] }, implementationPhase: { type: "string" },
+        passed: { type: "number" }, failed: { type: "number" }, total: { type: "number" }, health: { type: "number" }, criticalFailed: { type: "number" }, status: { type: "string" },
+        releaseAllowed: { type: "boolean" }, phase2Complete: { type: "boolean" }, phase3Allowed: { type: "boolean" }, validatedAt: { type: "string" }
       })
   ]);
 

@@ -7,6 +7,19 @@
 const AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE =
   "./00_script_manifest.json";
 
+const AI_PRO_PROJECT_PACKAGE_EXTRA_FILES = Object.freeze([
+  "external_gateway/package.json",
+  "external_gateway/gateway.cjs",
+  "external_gateway/validate_gateway.cjs",
+  "external_gateway/start_gateway.bat",
+  "external_gateway/README.txt",
+  "external_gateway/lib/config.cjs",
+  "external_gateway/lib/audit.cjs",
+  "external_gateway/lib/runtime.cjs",
+  "external_gateway/lib/security.cjs",
+  "external_gateway/lib/session_store.cjs"
+]);
+
 const AI_PRO_SCRIPT_BLOCK_START =
   "<!-- AI_PRO_SCRIPT_BLOCK_START -->";
 
@@ -1222,6 +1235,9 @@ function getProjectPackageReferences(html) {
   values.push(
     AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE
   );
+
+  AI_PRO_PROJECT_PACKAGE_EXTRA_FILES
+    .forEach(path => values.push("./" + path));
 
   const localMap = new Map();
   const external = [];

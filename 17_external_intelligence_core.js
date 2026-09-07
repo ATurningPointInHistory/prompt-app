@@ -1,8 +1,8 @@
 /* ============================================================
    FILE: 17_external_intelligence_core.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.0.0
-   Phase 01: Governance / Contract / Authority Foundation
+   Release: 1.1.0
+   Phase 02: Runtime / Gateway / Software Supply Chain Foundation
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
@@ -32,17 +32,24 @@
         authorityEnvelopes: new Map(),
         auditEvents: new Map(),
         auditOrder: [],
+        runtimeInstances: new Map(),
+        runtimeLeases: new Map(),
+        workClaims: new Map(),
+        dependencyCandidates: new Map(),
+        runtimeProfiles: new Map(),
         auditPersistenceAdapter: null,
         authorityApprovalAdapter: null,
         initialized: false,
         initializing: false,
         sequence: 0,
         latestValidation: null,
+        latestPhase2Validation: null,
+        gatewayClientState: { baseUrl: null, healthState: "UNKNOWN", session: null, lastError: null, lastCheckedAt: null },
         lastError: null,
         updatedAt: null
       };
 
-  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents"].forEach(function ensureMap(key) {
+  ["contracts", "schemas", "projectionAdapters", "authorityEnvelopes", "auditEvents", "runtimeInstances", "runtimeLeases", "workClaims", "dependencyCandidates", "runtimeProfiles"].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
   if (!Array.isArray(state.auditOrder)) state.auditOrder = [];
@@ -147,6 +154,10 @@
       schemaCount: state.schemas.size,
       authorityEnvelopeCount: state.authorityEnvelopes.size,
       auditEventCount: state.auditEvents.size,
+      runtimeInstanceCount: state.runtimeInstances.size,
+      dependencyCandidateCount: state.dependencyCandidates.size,
+      runtimeProfileCount: state.runtimeProfiles.size,
+      gateway: state.gatewayClientState ? { baseUrl: state.gatewayClientState.baseUrl || null, healthState: state.gatewayClientState.healthState || "UNKNOWN", sessionActive: Boolean(state.gatewayClientState.session && state.gatewayClientState.session.state === "ACTIVE"), lastCheckedAt: state.gatewayClientState.lastCheckedAt || null } : null,
       safety: clone(VERSION_MANIFEST.safety),
       updatedAt: state.updatedAt || null
     };
@@ -161,7 +172,10 @@
         ["contracts", namespace.initializeExternalIntelligenceContracts],
         ["schemas", namespace.initializeExternalIntelligenceSchemaRegistry],
         ["authority", namespace.initializeExternalIntelligenceAuthority],
-        ["audit", namespace.initializeExternalIntelligenceAudit]
+        ["audit", namespace.initializeExternalIntelligenceAudit],
+        ["runtimeCoordination", namespace.initializeExternalIntelligenceRuntimeCoordination],
+        ["softwareSupplyChain", namespace.initializeExternalIntelligenceSoftwareSupplyChain],
+        ["gatewayClient", namespace.initializeExternalIntelligenceGatewayClient]
       ];
       for (const item of initializers) {
         const name = item[0];
@@ -230,7 +244,7 @@
     id: "EXTERNAL-010-CORE",
     version: VERSION_MANIFEST.getModuleVersion("core"),
     status: "Loaded",
-    phase: 1,
+    phase: 2,
     directRepositoryMutationAllowed: false,
     loadedAt: nowIso()
   };
