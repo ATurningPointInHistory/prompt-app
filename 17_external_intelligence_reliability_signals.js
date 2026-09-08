@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_reliability_signals.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.9.0
+   Release: 1.9.1
    Phase 10: Reliability Signals / Uncertainty / Outcome Foundation
    ============================================================ */
 (function (global) {
@@ -15,6 +15,7 @@
 
   const SOURCE_ROLES = ["PRIMARY","OFFICIAL","SECONDARY","AGGREGATOR","COMMUNITY","AI_GENERATED","UNKNOWN"];
   function immutableRecord(input) { return internal.deepFreeze(internal.clone(input)); }
+  function validateRecord(contractKey,schemaId,record){const cv=namespace.validateExternalIntelligenceContract(contractKey,record);const sv=namespace.validateExternalIntelligenceRecord(schemaId,record);return {valid:cv.valid===true&&sv.valid===true,contract:cv,schema:sv};}
   function recordExternalIntelligenceReliabilitySignal(input) {
     const x = internal.isPlainObject(input) ? input : {};
     const sourceId = internal.text(x.sourceId, "");
@@ -28,6 +29,7 @@
       operationalReliabilityOnly: true, factualReliabilityDetermined: false, reliabilityScore: null, authorityScore: null,
       finalReliabilityAuthority: "EXTERNAL-020", createdAt: internal.nowIso(), immutable: true
     });
+    const validity=validateRecord("reliabilitySignal","EXTERNAL-010-SCHEMA-RELIABILITY-SIGNAL",record); if(!validity.valid)return internal.buildResult(false,"EXTERNAL010_RELIABILITY_SIGNAL_INVALID","Blocked",validity);
     state.reliabilitySignalRecords.set(record.reliabilitySignalId,record); internal.touch();
     return internal.buildResult(true,"EXTERNAL010_RELIABILITY_SIGNAL_RECORDED","Ready",{reliabilitySignal:internal.clone(record)});
   }
@@ -37,14 +39,16 @@
     const record=immutableRecord({qualitySignalId:internal.text(x.qualitySignalId,internal.nextId("EXTERNAL-010-EVIDENCE-QUALITY")),evidenceId,sourceId:internal.text(x.sourceId,"")||null,sourceRole:role,
       contentPresent:x.contentPresent===true,schemaValid:x.schemaValid===true,timestampPresent:x.timestampPresent===true,sourceIdentityResolved:x.sourceIdentityResolved===true,contentHashVerified:x.contentHashVerified===true,provenanceComplete:x.provenanceComplete===true,temporalMetadataComplete:x.temporalMetadataComplete===true,
       qualityScore:null,authorityScore:null,truthConfirmed:false,finalReliabilityAuthority:"EXTERNAL-020",createdAt:internal.nowIso(),immutable:true});
+    const validity=validateRecord("evidenceQualitySignal","EXTERNAL-010-SCHEMA-EVIDENCE-QUALITY-SIGNAL",record); if(!validity.valid)return internal.buildResult(false,"EXTERNAL010_EVIDENCE_QUALITY_INVALID","Blocked",validity);
     state.evidenceQualitySignals.set(record.qualitySignalId,record); internal.touch(); return internal.buildResult(true,"EXTERNAL010_EVIDENCE_QUALITY_RECORDED","Ready",{evidenceQualitySignal:internal.clone(record)});
   }
   function recordCandidate(kind,input){ const x=internal.isPlainObject(input)?input:{}; const ids=internal.unique(x.evidenceIds||[]); if(ids.length<2)return internal.buildResult(false,"EXTERNAL010_RELIABILITY_CANDIDATE_EVIDENCE_REQUIRED","Blocked",{evidenceIds:ids});
     const isContradiction=kind==="CONTRADICTION"; const id=internal.text(x.candidateId,internal.nextId("EXTERNAL-010-"+kind+"-CANDIDATE"));
     const rec=immutableRecord({candidateId:id,candidateType:kind,subjectRef:internal.text(x.subjectRef,"")||null,field:internal.text(x.field,"")||null,period:internal.text(x.period,"")||null,evidenceIds:ids,independenceVerified:x.independenceVerified===true,
       conflictWinner:null,truthConfirmed:false,automaticResolutionPerformed:false,duplicateEqualsIndependentConfirmation:false,finalReliabilityAuthority:"EXTERNAL-020",createdAt:internal.nowIso(),immutable:true});
+    const validity=validateRecord("reliabilityCandidate","EXTERNAL-010-SCHEMA-RELIABILITY-CANDIDATE",rec); if(!validity.valid)return internal.buildResult(false,"EXTERNAL010_RELIABILITY_CANDIDATE_INVALID","Blocked",validity);
     (isContradiction?state.contradictionCandidates:state.confirmationCandidates).set(id,rec); internal.touch(); return internal.buildResult(true,"EXTERNAL010_"+kind+"_CANDIDATE_RECORDED","Ready",{candidate:internal.clone(rec)}); }
-  function getReliabilityInputPackage(){return {operationalSignals:Array.from(state.reliabilitySignalRecords.values()).map(internal.clone),evidenceQualitySignals:Array.from(state.evidenceQualitySignals.values()).map(internal.clone),contradictionCandidates:Array.from(state.contradictionCandidates.values()).map(internal.clone),confirmationCandidates:Array.from(state.confirmationCandidates.values()).map(internal.clone),finalReliabilityAuthority:"EXTERNAL-020",generatedAt:internal.nowIso()};}
+  function getReliabilityInputPackage(){const pkg={operationalSignals:Array.from(state.reliabilitySignalRecords.values()).map(internal.clone),evidenceQualitySignals:Array.from(state.evidenceQualitySignals.values()).map(internal.clone),contradictionCandidates:Array.from(state.contradictionCandidates.values()).map(internal.clone),confirmationCandidates:Array.from(state.confirmationCandidates.values()).map(internal.clone),finalReliabilityAuthority:"EXTERNAL-020",generatedAt:internal.nowIso()};const validity=validateRecord("reliabilityInputPackage","EXTERNAL-010-SCHEMA-RELIABILITY-INPUT-PACKAGE",pkg);return Object.assign(pkg,{contractValid:validity.valid===true});}
   Object.assign(namespace.api,{recordExternalIntelligenceReliabilitySignal,recordExternalIntelligenceEvidenceQualitySignal,recordExternalIntelligenceContradictionCandidate:function(x){return recordCandidate("CONTRADICTION",x);},recordExternalIntelligenceConfirmationCandidate:function(x){return recordCandidate("CONFIRMATION",x);},getExternalIntelligenceReliabilityInputPackage:getReliabilityInputPackage}); Object.assign(namespace,namespace.api);
   namespace.modules.reliabilitySignals={id:"EXTERNAL-010-RELIABILITY-SIGNALS",version:MODULE_VERSION,status:"Ready",phase:10,decisions:["010"],finalReliabilityAuthority:"EXTERNAL-020",loadedAt:internal.nowIso()};
 })(typeof window !== "undefined" ? window : globalThis);

@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.9.0
+   Release: 1.9.1
    Phase 10: Reliability Signals / Uncertainty / Outcome Foundation
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.9.0";
+  const RELEASE_VERSION = "1.9.1";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -18,7 +18,7 @@
   const PHASE7_VERSION = "1.6.0";
   const PHASE8_VERSION = "1.7.3";
   const PHASE9_VERSION = "1.8.0";
-  const PHASE10_VERSION = "1.9.0";
+  const PHASE10_VERSION = "1.9.1";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -44,8 +44,8 @@
 
   const moduleVersions = {
     core: PHASE3_VERSION,
-    contracts: PHASE3_VERSION,
-    schemaRegistry: PHASE3_VERSION,
+    contracts: PHASE10_VERSION,
+    schemaRegistry: PHASE10_VERSION,
     authority: PHASE1_VERSION,
     audit: PHASE1_VERSION,
     runtimeCoordination: PHASE2_VERSION,
@@ -224,7 +224,8 @@
     lineageRecord: PHASE8_VERSION,
     recomputeCandidate: PHASE8_VERSION,
     phase8ValidationResult: PHASE8_VERSION,
-    temporalRelationRecord: PHASE9_VERSION, eventRecord: PHASE9_VERSION, eventStateTransition: PHASE9_VERSION, impactEdge: PHASE9_VERSION, impactPath: PHASE9_VERSION, impactObservation: PHASE9_VERSION, historicalAnalogCandidate: PHASE9_VERSION, scenarioCandidate: PHASE9_VERSION, impactOutcomeEvaluationCandidate: PHASE9_VERSION, phase9ValidationResult: PHASE9_VERSION
+    temporalRelationRecord: PHASE9_VERSION, eventRecord: PHASE9_VERSION, eventStateTransition: PHASE9_VERSION, impactEdge: PHASE9_VERSION, impactPath: PHASE9_VERSION, impactObservation: PHASE9_VERSION, historicalAnalogCandidate: PHASE9_VERSION, scenarioCandidate: PHASE9_VERSION, impactOutcomeEvaluationCandidate: PHASE9_VERSION, phase9ValidationResult: PHASE9_VERSION,
+    reliabilitySignal: PHASE10_VERSION, evidenceQualitySignal: PHASE10_VERSION, reliabilityCandidate: PHASE10_VERSION, reliabilityInputPackage: PHASE10_VERSION, predictionRecord: PHASE10_VERSION, benchmarkDefinition: PHASE10_VERSION, outcomeRecord: PHASE10_VERSION, outcomeEvaluation: PHASE10_VERSION, phase10ValidationResult: PHASE10_VERSION
   };
 
   const contractIds = {
@@ -300,7 +301,16 @@
     historicalAnalogCandidate: "EXTERNAL-010-CONTRACT-HISTORICAL-ANALOG-CANDIDATE",
     scenarioCandidate: "EXTERNAL-010-CONTRACT-SCENARIO-CANDIDATE",
     impactOutcomeEvaluationCandidate: "EXTERNAL-010-CONTRACT-IMPACT-OUTCOME-EVALUATION-CANDIDATE",
-    phase9ValidationResult: "EXTERNAL-010-CONTRACT-PHASE9-VALIDATION-RESULT"
+    phase9ValidationResult: "EXTERNAL-010-CONTRACT-PHASE9-VALIDATION-RESULT",
+    reliabilitySignal: "EXTERNAL-010-CONTRACT-RELIABILITY-SIGNAL",
+    evidenceQualitySignal: "EXTERNAL-010-CONTRACT-EVIDENCE-QUALITY-SIGNAL",
+    reliabilityCandidate: "EXTERNAL-010-CONTRACT-RELIABILITY-CANDIDATE",
+    reliabilityInputPackage: "EXTERNAL-010-CONTRACT-RELIABILITY-INPUT-PACKAGE",
+    predictionRecord: "EXTERNAL-010-CONTRACT-PREDICTION-RECORD",
+    benchmarkDefinition: "EXTERNAL-010-CONTRACT-BENCHMARK-DEFINITION",
+    outcomeRecord: "EXTERNAL-010-CONTRACT-OUTCOME-RECORD",
+    outcomeEvaluation: "EXTERNAL-010-CONTRACT-OUTCOME-EVALUATION",
+    phase10ValidationResult: "EXTERNAL-010-CONTRACT-PHASE10-VALIDATION-RESULT"
   };
 
   const safety = {

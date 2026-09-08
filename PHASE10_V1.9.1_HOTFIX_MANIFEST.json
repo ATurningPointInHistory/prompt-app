@@ -1,0 +1,22 @@
+{
+  "componentId": "EXTERNAL-010",
+  "fromVersion": "1.9.0",
+  "toVersion": "1.9.1",
+  "type": "Corrective Hotfix",
+  "scope": "Phase 10 Contract / Schema / Validation hardening",
+  "changedFiles": 11,
+  "addedFiles": 0,
+  "removedFiles": 0,
+  "designBoundaries": {
+    "gatewayVersion": "1.4.0",
+    "finalReliabilityAuthority": "EXTERNAL-020",
+    "persistenceArchitectureChanged": false,
+    "phase11Started": false
+  },
+  "validation": {
+    "phase10Internal": "23/23 PASS",
+    "nodePcRuntimeHarness": "7/7 PASS",
+    "realPcValidationRequired": true,
+    "realAndroidValidationRequired": true
+  }
+}
