@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.8.0
-   Phase 09: Temporal Relation / Event / Impact Graph
+   Release: 1.9.0
+   Phase 10: Reliability Signals / Uncertainty / Outcome Foundation
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.8.0";
+  const RELEASE_VERSION = "1.9.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -18,6 +18,7 @@
   const PHASE7_VERSION = "1.6.0";
   const PHASE8_VERSION = "1.7.3";
   const PHASE9_VERSION = "1.8.0";
+  const PHASE10_VERSION = "1.9.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -93,7 +94,9 @@
     impactGraph: PHASE9_VERSION,
     phase9Validation: PHASE9_VERSION,
     phase9RealRuntimeValidation: PHASE9_VERSION,
-    phase9AndroidValidation: PHASE9_VERSION
+    phase9AndroidValidation: PHASE9_VERSION,
+    reliabilitySignals: PHASE10_VERSION, uncertainty: PHASE10_VERSION, outcome: PHASE10_VERSION,
+    phase10Validation: PHASE10_VERSION, phase10RealRuntimeValidation: PHASE10_VERSION, phase10AndroidValidation: PHASE10_VERSION
   };
 
   const fileModules = {
@@ -148,7 +151,13 @@
     "17_external_intelligence_impact_graph.js": "impactGraph",
     "17_external_intelligence_phase9_validation.js": "phase9Validation",
     "17_external_intelligence_phase9_real_runtime_validation.js": "phase9RealRuntimeValidation",
-    "17_external_intelligence_phase9_android_validation.js": "phase9AndroidValidation"
+    "17_external_intelligence_phase9_android_validation.js": "phase9AndroidValidation",
+    "17_external_intelligence_reliability_signals.js": "reliabilitySignals",
+    "17_external_intelligence_uncertainty.js": "uncertainty",
+    "17_external_intelligence_outcome.js": "outcome",
+    "17_external_intelligence_phase10_validation.js": "phase10Validation",
+    "17_external_intelligence_phase10_real_runtime_validation.js": "phase10RealRuntimeValidation",
+    "17_external_intelligence_phase10_android_validation.js": "phase10AndroidValidation"
   };
 
   const contractVersions = {
@@ -971,8 +980,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 09 Temporal Relation / Event / Impact Graph",
-      phase: 9,
+      implementationPhase: "Phase 10 Reliability Signals / Uncertainty / Outcome Foundation",
+      phase: 10,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -981,7 +990,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 09 Temporal Relation / Event / Impact Graph Implementation"
+      status: "Phase 10 Reliability Signals / Uncertainty / Outcome Foundation Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -1029,8 +1038,10 @@
       phase8Allowed: true,
       phase8Complete: true,
       phase9Allowed: true,
-      phase9Complete: false,
-      phase10Allowed: false,
+      phase9Complete: true,
+      phase10Allowed: true,
+      phase10Complete: false,
+      phase11Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true
