@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.7.3
-   Phase 08: Analytical Capability Registry / Unified Lineage
+   Release: 1.8.0
+   Phase 09: Temporal Relation / Event / Impact Graph
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.7.3";
+  const RELEASE_VERSION = "1.8.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -17,6 +17,7 @@
   const PHASE6_VERSION = "1.5.0";
   const PHASE7_VERSION = "1.6.0";
   const PHASE8_VERSION = "1.7.3";
+  const PHASE9_VERSION = "1.8.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -86,7 +87,13 @@
     lineage: PHASE8_VERSION,
     phase8Validation: PHASE8_VERSION,
     phase8RealRuntimeValidation: PHASE8_VERSION,
-    phase8AndroidValidation: PHASE8_VERSION
+    phase8AndroidValidation: PHASE8_VERSION,
+    relationGraph: PHASE9_VERSION,
+    eventGraph: PHASE9_VERSION,
+    impactGraph: PHASE9_VERSION,
+    phase9Validation: PHASE9_VERSION,
+    phase9RealRuntimeValidation: PHASE9_VERSION,
+    phase9AndroidValidation: PHASE9_VERSION
   };
 
   const fileModules = {
@@ -135,7 +142,13 @@
     "17_external_intelligence_lineage.js": "lineage",
     "17_external_intelligence_phase8_validation.js": "phase8Validation",
     "17_external_intelligence_phase8_real_runtime_validation.js": "phase8RealRuntimeValidation",
-    "17_external_intelligence_phase8_android_validation.js": "phase8AndroidValidation"
+    "17_external_intelligence_phase8_android_validation.js": "phase8AndroidValidation",
+    "17_external_intelligence_relation_graph.js": "relationGraph",
+    "17_external_intelligence_event_graph.js": "eventGraph",
+    "17_external_intelligence_impact_graph.js": "impactGraph",
+    "17_external_intelligence_phase9_validation.js": "phase9Validation",
+    "17_external_intelligence_phase9_real_runtime_validation.js": "phase9RealRuntimeValidation",
+    "17_external_intelligence_phase9_android_validation.js": "phase9AndroidValidation"
   };
 
   const contractVersions = {
@@ -201,7 +214,8 @@
     transformationRecord: PHASE8_VERSION,
     lineageRecord: PHASE8_VERSION,
     recomputeCandidate: PHASE8_VERSION,
-    phase8ValidationResult: PHASE8_VERSION
+    phase8ValidationResult: PHASE8_VERSION,
+    temporalRelationRecord: PHASE9_VERSION, eventRecord: PHASE9_VERSION, eventStateTransition: PHASE9_VERSION, impactEdge: PHASE9_VERSION, impactPath: PHASE9_VERSION, impactObservation: PHASE9_VERSION, historicalAnalogCandidate: PHASE9_VERSION, scenarioCandidate: PHASE9_VERSION, impactOutcomeEvaluationCandidate: PHASE9_VERSION, phase9ValidationResult: PHASE9_VERSION
   };
 
   const contractIds = {
@@ -267,7 +281,17 @@
     transformationRecord: "EXTERNAL-010-CONTRACT-TRANSFORMATION-RECORD",
     lineageRecord: "EXTERNAL-010-CONTRACT-LINEAGE-RECORD",
     recomputeCandidate: "EXTERNAL-010-CONTRACT-RECOMPUTE-CANDIDATE",
-    phase8ValidationResult: "EXTERNAL-010-CONTRACT-PHASE8-VALIDATION-RESULT"
+    phase8ValidationResult: "EXTERNAL-010-CONTRACT-PHASE8-VALIDATION-RESULT",
+    temporalRelationRecord: "EXTERNAL-010-CONTRACT-TEMPORAL-RELATION-RECORD",
+    eventRecord: "EXTERNAL-010-CONTRACT-EVENT-RECORD",
+    eventStateTransition: "EXTERNAL-010-CONTRACT-EVENT-STATE-TRANSITION",
+    impactEdge: "EXTERNAL-010-CONTRACT-IMPACT-EDGE",
+    impactPath: "EXTERNAL-010-CONTRACT-IMPACT-PATH",
+    impactObservation: "EXTERNAL-010-CONTRACT-IMPACT-OBSERVATION",
+    historicalAnalogCandidate: "EXTERNAL-010-CONTRACT-HISTORICAL-ANALOG-CANDIDATE",
+    scenarioCandidate: "EXTERNAL-010-CONTRACT-SCENARIO-CANDIDATE",
+    impactOutcomeEvaluationCandidate: "EXTERNAL-010-CONTRACT-IMPACT-OUTCOME-EVALUATION-CANDIDATE",
+    phase9ValidationResult: "EXTERNAL-010-CONTRACT-PHASE9-VALIDATION-RESULT"
   };
 
   const safety = {
@@ -375,6 +399,38 @@
     visualMentionEqualsResolvedEntity: false,
     logoMatchEqualsCanonicalIdentity: false,
     visualSimilarityEqualsIdentity: false,
+    eventEqualsRelation: false,
+    announcementEqualsCompletion: false,
+    planEqualsActualEvent: false,
+    claimEqualsEventOccurred: false,
+    currentRelationEqualsHistoricalRelation: false,
+    relationCandidateEqualsVerifiedRelationship: false,
+    aiExtractedRelationEqualsCanonicalRelation: false,
+    visualAssociationEqualsBusinessRelationship: false,
+    eventOccurrenceEqualsCausation: false,
+    relationExistenceEqualsCausalImpact: false,
+    ambiguousEntityMayCreateExactRelation: false,
+    relationUpdateMayEraseHistoricalState: false,
+    eventUpdateMayEraseHistoricalState: false,
+    aiCandidateGenerationGrantsCanonicalAuthority: false,
+    relationEqualsImpact: false,
+    impactEqualsCausation: false,
+    correlationEqualsCausation: false,
+    temporalProximityEqualsCausation: false,
+    eventOccurrenceEqualsOutcomeCause: false,
+    historicalPatternEqualsGuaranteedFuture: false,
+    historicalSimilarityEqualsSameOutcome: false,
+    predictionEqualsOutcome: false,
+    aiCausalHypothesisEqualsVerifiedCausalLink: false,
+    highImpactScoreEqualsCertainCause: false,
+    highSimilarityEqualsCertainOutcome: false,
+    marketReactionTimeEqualsBusinessImpactTime: false,
+    businessImpactTimeEqualsAccountingRecognitionTime: false,
+    futureEvidenceMayBeUsedInHistoricalBacktest: false,
+    failedPredictionMayBeSilentlyDeleted: false,
+    failedPropagationMayBeSilentlyDeleted: false,
+    impactPathGrantsActionAuthority: false,
+    automaticImpactModelUpdateAllowed: false,
     visualMatchEqualsAuthenticity: false,
     aiResolutionEqualsCanonicalConfirmation: false,
     visionResolutionEqualsCanonicalConfirmation: false,
@@ -843,6 +899,70 @@
     historicalRewriteAllowed: false
   };
 
+  const relationEvent = {
+    relationTypes: [
+      "OWNS", "SUBSIDIARY_OF", "CEO_OF", "EMPLOYED_BY", "PARTNERS_WITH", "SUPPLIES_TO",
+      "CUSTOMER_OF", "COMPETES_WITH", "INVESTS_IN", "LICENSES_TECHNOLOGY_FROM", "MANUFACTURES",
+      "DISTRIBUTES", "MEMBER_OF", "LOCATED_IN", "RELATED_TO"
+    ],
+    relationStates: ["CANDIDATE", "SUPPORTED", "CONTRADICTED", "ACTIVE", "HISTORICAL", "SUPERSEDED", "DISPUTED", "UNKNOWN"],
+    eventTypes: [
+      "ACQUISITION", "MERGER", "SPIN_OFF", "PARTNERSHIP", "CONTRACT", "APPOINTMENT", "RESIGNATION",
+      "IPO", "DELISTING", "STOCK_SPLIT", "DIVIDEND", "BUYBACK", "EARNINGS_RELEASE", "GUIDANCE_REVISION",
+      "PRODUCT_LAUNCH", "FACTORY_OPENING", "FACTORY_SHUTDOWN", "REGULATORY_APPROVAL", "REGULATORY_ACTION",
+      "LAWSUIT", "BANKRUPTCY", "DISASTER", "OUTBREAK", "POLICY_CHANGE", "SUPPLY_DISRUPTION", "UNKNOWN"
+    ],
+    eventStates: [
+      "RUMORED", "PROPOSED", "ANNOUNCED", "PLANNED", "SCHEDULED", "REGULATORY_REVIEW", "APPROVED",
+      "IN_PROGRESS", "COMPLETED", "CANCELLED", "FAILED", "DISPUTED", "UNKNOWN"
+    ],
+    eventRelationLinkTypes: ["ESTABLISHES", "ENDS", "UPDATES", "SUPPORTS", "CONTRADICTS", "RELATED_TO"],
+    temporalValidityRequired: true,
+    versionedHistoryRequired: true,
+    historicalAsOfGraphSupported: true,
+    graphTraversalHookSupported: true,
+    impactAnalysisExtensionHookSupported: true,
+    canonicalAutoResolutionAllowed: false,
+    relationEqualsCausalImpact: false
+  };
+
+  const impactGraph = {
+    directions: ["POSITIVE", "NEGATIVE", "MIXED", "CONDITIONAL", "NEUTRAL", "UNKNOWN"],
+    causalStates: ["OBSERVED_ASSOCIATION", "CORRELATION", "INFLUENCE_CANDIDATE", "CAUSAL_HYPOTHESIS", "CAUSAL_LINK_SUPPORTED", "CAUSAL_LINK_CONTRADICTED", "INCONCLUSIVE", "UNKNOWN"],
+    impactDimensions: [
+      "DEMAND", "SUPPLY", "PRICE", "COST", "REVENUE", "PROFIT", "CAPACITY", "EMPLOYMENT", "FINANCING",
+      "REGULATION", "SENTIMENT", "MARKET_PRICE", "LIQUIDITY", "TECHNOLOGY", "COMPETITION", "LOGISTICS", "RISK", "UNKNOWN"
+    ],
+    timeHorizons: ["IMMEDIATE", "SHORT_TERM", "MEDIUM_TERM", "LONG_TERM", "STRUCTURAL", "UNKNOWN"],
+    stageStates: ["NOT_OBSERVED", "EARLY_SIGNAL", "PARTIALLY_OBSERVED", "OBSERVED", "CONFIRMED", "CONTRADICTED", "BYPASSED", "FAILED_TO_PROPAGATE", "UNKNOWN"],
+    lagUnits: ["MILLISECOND", "SECOND", "MINUTE", "HOUR", "DAY", "WEEK", "MONTH", "YEAR", "UNKNOWN"],
+    multiStagePaths: true,
+    earliestExpectedLatestLagRequired: true,
+    lagDistributionHookSupported: true,
+    intermediateObservationTracking: true,
+    remainingLagRecalculationHookSupported: true,
+    confounderAware: true,
+    historicalAnalogDifferenceRequired: true,
+    scenarioCandidateHookSupported: true,
+    predictionEvaluationHookSupported: true,
+    modelVersionRequired: true,
+    evidenceLineageRequired: true,
+    automaticCausalTruthAllowed: false,
+    automaticActionAllowed: false
+  };
+
+  const phase9Permissions = {
+    aiMayGenerateRelationCandidate: true,
+    aiMayGenerateEventCandidate: true,
+    observedIntermediateStateMayTriggerRecalculation: true,
+    aiMayGenerateCausalHypothesis: true,
+    aiMayGenerateHistoricalAnalogCandidate: true,
+    aiMayGenerateScenarioCandidate: true,
+    candidateGenerationGrantsCanonicalAuthority: false,
+    candidateGenerationGrantsActionAuthority: false,
+    candidateGenerationGrantsKnowledgeAuthority: false
+  };
+
   const manifest = {
     componentId: "EXTERNAL-010",
     componentName: "External Intelligence Platform",
@@ -851,8 +971,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 08 Analytical Capability Registry / Unified Lineage",
-      phase: 8,
+      implementationPhase: "Phase 09 Temporal Relation / Event / Impact Graph",
+      phase: 9,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -861,7 +981,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 08 Analytical Capability Registry / Unified Lineage Implementation"
+      status: "Phase 09 Temporal Relation / Event / Impact Graph Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -888,6 +1008,9 @@
     entity: entity,
     analyticalCapability: analyticalCapability,
     lineage: lineage,
+    relationEvent: relationEvent,
+    impactGraph: impactGraph,
+    phase9Permissions: phase9Permissions,
     implementation: {
       inspectBeforeImplement: true,
       contractFirst: true,
@@ -904,8 +1027,10 @@
       phase7Allowed: true,
       phase7Complete: true,
       phase8Allowed: true,
-      phase8Complete: false,
-      phase9Allowed: false,
+      phase8Complete: true,
+      phase9Allowed: true,
+      phase9Complete: false,
+      phase10Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true
