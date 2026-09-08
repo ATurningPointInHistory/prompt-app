@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_capability_registry.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.7.0
+   Release: 1.7.1
    Phase 08: Analytical Capability Registry
    Primary Decision: 036
    ============================================================ */
@@ -106,7 +106,13 @@
     const key = capabilityVersionKey(capabilityId, recordVersion);
     if (state.analyticalCapabilityVersions.has(key)) {
       const existing = state.analyticalCapabilityVersions.get(key);
-      const same = internal.stableStringify(existing) === internal.stableStringify(record);
+      // updatedAt is runtime metadata, not part of immutable capability-version identity.
+      // Re-registering the same semantic version must be safe across validation/runtime reruns.
+      const comparableExisting = internal.clone(existing);
+      const comparableRecord = internal.clone(record);
+      delete comparableExisting.updatedAt;
+      delete comparableRecord.updatedAt;
+      const same = internal.stableStringify(comparableExisting) === internal.stableStringify(comparableRecord);
       return internal.buildResult(same, same ? "EXTERNAL010_CAPABILITY_VERSION_ALREADY_REGISTERED" : "EXTERNAL010_CAPABILITY_VERSION_CONFLICT", same ? "Ready" : "Blocked", { analyticalCapability: internal.clone(existing) });
     }
 

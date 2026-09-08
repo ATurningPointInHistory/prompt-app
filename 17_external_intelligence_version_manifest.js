@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.7.0
+   Release: 1.7.1
    Phase 08: Analytical Capability Registry / Unified Lineage
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.7.0";
+  const RELEASE_VERSION = "1.7.1";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -16,7 +16,7 @@
   const PHASE5_VERSION = "1.4.0";
   const PHASE6_VERSION = "1.5.0";
   const PHASE7_VERSION = "1.6.0";
-  const PHASE8_VERSION = "1.7.0";
+  const PHASE8_VERSION = "1.7.1";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";

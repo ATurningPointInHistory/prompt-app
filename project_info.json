@@ -4,7 +4,7 @@
   "project": "AIプロンプト生成Pro",
   "version": "v7.0.0",
   "entryFile": "index.html",
-  "savedAt": "2026-09-07T16:11:35.445Z",
+  "savedAt": "2026-09-08T01:55:00.000Z",
   "complete": true,
   "requestedFiles": [
     "index.html",
@@ -730,8 +730,8 @@
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "ab95e9fcecdb55755ebfebaad7135a61c8990eb0381d553afc2450728569f5f7",
-  "scriptSetHash": "a17fd3ebfb5d4d20cc1bb3fd0f5556677e0d5cf47215770fa99f59b5560226f8",
+  "scriptManifestHash": "9114a1b4e78a290ec760af99f02b386327c4cf85f0936d2642b70ac73e992aeb",
+  "scriptSetHash": "69d3eb77e7f00100b19bb30a1f23c2125e11eaaa2b2ca3fd13277af1a9c1ecf5",
   "scriptManifestCount": 328,
   "scriptLoading": {
     "documentWrite": false,
