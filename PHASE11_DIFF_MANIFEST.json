@@ -1,0 +1,30 @@
+{
+  "componentId": "EXTERNAL-010",
+  "fromVersion": "1.9.1",
+  "toVersion": "1.10.0",
+  "implementationPhase": "Phase 11 Signal Detection / Competing Hypothesis / Research Priority",
+  "added": [
+    "17_external_intelligence_hypothesis.js",
+    "17_external_intelligence_phase11_android_validation.js",
+    "17_external_intelligence_phase11_real_runtime_validation.js",
+    "17_external_intelligence_phase11_validation.js",
+    "17_external_intelligence_research_priority.js",
+    "17_external_intelligence_signal_detection.js"
+  ],
+  "changed": [
+    "00_script_manifest.json",
+    "17_external_intelligence_contracts.js",
+    "17_external_intelligence_core.js",
+    "17_external_intelligence_hypothesis.js",
+    "17_external_intelligence_phase10_validation.js",
+    "17_external_intelligence_phase11_android_validation.js",
+    "17_external_intelligence_phase11_real_runtime_validation.js",
+    "17_external_intelligence_phase11_validation.js",
+    "17_external_intelligence_research_priority.js",
+    "17_external_intelligence_schema_registry.js",
+    "17_external_intelligence_signal_detection.js",
+    "17_external_intelligence_version_manifest.js",
+    "index.html"
+  ],
+  "removed": []
+}

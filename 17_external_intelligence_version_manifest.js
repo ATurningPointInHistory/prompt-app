@@ -8,7 +8,7 @@
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.9.1";
+  const RELEASE_VERSION = "1.10.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -19,6 +19,7 @@
   const PHASE8_VERSION = "1.7.3";
   const PHASE9_VERSION = "1.8.0";
   const PHASE10_VERSION = "1.9.1";
+  const PHASE11_VERSION = "1.10.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -96,7 +97,8 @@
     phase9RealRuntimeValidation: PHASE9_VERSION,
     phase9AndroidValidation: PHASE9_VERSION,
     reliabilitySignals: PHASE10_VERSION, uncertainty: PHASE10_VERSION, outcome: PHASE10_VERSION,
-    phase10Validation: PHASE10_VERSION, phase10RealRuntimeValidation: PHASE10_VERSION, phase10AndroidValidation: PHASE10_VERSION
+    phase10Validation: PHASE10_VERSION, phase10RealRuntimeValidation: PHASE10_VERSION, phase10AndroidValidation: PHASE10_VERSION,
+    signalDetection: PHASE11_VERSION, hypothesis: PHASE11_VERSION, researchPriority: PHASE11_VERSION, phase11Validation: PHASE11_VERSION, phase11RealRuntimeValidation: PHASE11_VERSION, phase11AndroidValidation: PHASE11_VERSION
   };
 
   const fileModules = {
@@ -157,7 +159,13 @@
     "17_external_intelligence_outcome.js": "outcome",
     "17_external_intelligence_phase10_validation.js": "phase10Validation",
     "17_external_intelligence_phase10_real_runtime_validation.js": "phase10RealRuntimeValidation",
-    "17_external_intelligence_phase10_android_validation.js": "phase10AndroidValidation"
+    "17_external_intelligence_phase10_android_validation.js": "phase10AndroidValidation",
+    "17_external_intelligence_signal_detection.js": "signalDetection",
+    "17_external_intelligence_hypothesis.js": "hypothesis",
+    "17_external_intelligence_research_priority.js": "researchPriority",
+    "17_external_intelligence_phase11_validation.js": "phase11Validation",
+    "17_external_intelligence_phase11_real_runtime_validation.js": "phase11RealRuntimeValidation",
+    "17_external_intelligence_phase11_android_validation.js": "phase11AndroidValidation"
   };
 
   const contractVersions = {
@@ -225,7 +233,7 @@
     recomputeCandidate: PHASE8_VERSION,
     phase8ValidationResult: PHASE8_VERSION,
     temporalRelationRecord: PHASE9_VERSION, eventRecord: PHASE9_VERSION, eventStateTransition: PHASE9_VERSION, impactEdge: PHASE9_VERSION, impactPath: PHASE9_VERSION, impactObservation: PHASE9_VERSION, historicalAnalogCandidate: PHASE9_VERSION, scenarioCandidate: PHASE9_VERSION, impactOutcomeEvaluationCandidate: PHASE9_VERSION, phase9ValidationResult: PHASE9_VERSION,
-    reliabilitySignal: PHASE10_VERSION, evidenceQualitySignal: PHASE10_VERSION, reliabilityCandidate: PHASE10_VERSION, reliabilityInputPackage: PHASE10_VERSION, predictionRecord: PHASE10_VERSION, benchmarkDefinition: PHASE10_VERSION, outcomeRecord: PHASE10_VERSION, outcomeEvaluation: PHASE10_VERSION, phase10ValidationResult: PHASE10_VERSION
+    reliabilitySignal: PHASE10_VERSION, evidenceQualitySignal: PHASE10_VERSION, reliabilityCandidate: PHASE10_VERSION, reliabilityInputPackage: PHASE10_VERSION, predictionRecord: PHASE10_VERSION, benchmarkDefinition: PHASE10_VERSION, outcomeRecord: PHASE10_VERSION, outcomeEvaluation: PHASE10_VERSION, phase10ValidationResult: PHASE10_VERSION, baselineRecord: PHASE11_VERSION, signalRecord: PHASE11_VERSION, signalCluster: PHASE11_VERSION, researchQuestion: PHASE11_VERSION, hypothesisRecord: PHASE11_VERSION, researchPriorityRecord: PHASE11_VERSION, phase11ValidationResult: PHASE11_VERSION
   };
 
   const contractIds = {
@@ -310,7 +318,8 @@
     benchmarkDefinition: "EXTERNAL-010-CONTRACT-BENCHMARK-DEFINITION",
     outcomeRecord: "EXTERNAL-010-CONTRACT-OUTCOME-RECORD",
     outcomeEvaluation: "EXTERNAL-010-CONTRACT-OUTCOME-EVALUATION",
-    phase10ValidationResult: "EXTERNAL-010-CONTRACT-PHASE10-VALIDATION-RESULT"
+    phase10ValidationResult: "EXTERNAL-010-CONTRACT-PHASE10-VALIDATION-RESULT",
+    baselineRecord: "EXTERNAL-010-CONTRACT-SIGNAL-BASELINE", signalRecord: "EXTERNAL-010-CONTRACT-SIGNAL-RECORD", signalCluster: "EXTERNAL-010-CONTRACT-SIGNAL-CLUSTER", researchQuestion: "EXTERNAL-010-CONTRACT-RESEARCH-QUESTION", hypothesisRecord: "EXTERNAL-010-CONTRACT-HYPOTHESIS-RECORD", researchPriorityRecord: "EXTERNAL-010-CONTRACT-RESEARCH-PRIORITY", phase11ValidationResult: "EXTERNAL-010-CONTRACT-PHASE11-VALIDATION-RESULT"
   };
 
   const safety = {
@@ -990,8 +999,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 10 Reliability Signals / Uncertainty / Outcome Foundation",
-      phase: 10,
+      implementationPhase: "Phase 11 Signal Detection / Competing Hypothesis / Research Priority",
+      phase: 11,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -1000,7 +1009,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 10 Reliability Signals / Uncertainty / Outcome Foundation Implementation"
+      status: "Phase 11 Signal Detection / Competing Hypothesis / Research Priority Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -1050,8 +1059,10 @@
       phase9Allowed: true,
       phase9Complete: true,
       phase10Allowed: true,
-      phase10Complete: false,
-      phase11Allowed: false,
+      phase10Complete: true,
+      phase11Allowed: true,
+      phase11Complete: false,
+      phase12Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true
