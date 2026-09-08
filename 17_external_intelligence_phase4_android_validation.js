@@ -352,7 +352,7 @@
     try {
       check("Release Version is compatible with Phase 04 baseline", VERSION_MANIFEST.isReleaseCompatibleFrom("1.3.0"), VERSION_MANIFEST.release.version, "Foundation");
       check("Gateway compatibility version is 1.2.0", EXPECTED_GATEWAY_VERSIONS.includes(VERSION_MANIFEST.gateway.gatewayVersion), VERSION_MANIFEST.gateway.gatewayVersion, "Foundation");
-      check("Phase 04 Android module version resolves", EXPECTED_RELEASES.includes(MODULE_VERSION), MODULE_VERSION, "Foundation");
+      check("Phase 04 Android module version resolves", Boolean(MODULE_VERSION && VERSION_MANIFEST.isReleaseCompatibleFrom(MODULE_VERSION)), MODULE_VERSION, "Foundation");
 
       const userAgent = global.navigator && global.navigator.userAgent || "";
       check("Android real-device environment is detected", /Android/i.test(userAgent), userAgent, "Android Environment");

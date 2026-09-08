@@ -4,10 +4,10 @@
   "applicationReleaseVersion": "1.9.2",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1, IDE-190 v1.10.0 frozen baseline, REPOSITORY-010 Phase 18 v1.17.3, and EXTERNAL-010 Phase 08 v1.7.2 Compatibility / Regression Hotfix.",
+  "description": "Static Script Manifest v2 for IDE-170 1.9.2 frozen baseline with IDE-180 Final 1.9.1, IDE-190 v1.10.0 frozen baseline, REPOSITORY-010 Phase 18 v1.17.3, and EXTERNAL-010 Phase 08 v1.7.3 Android Inherited Gate Hotfix.",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-08T02:06:00.000Z",
+  "updatedAt": "2026-09-08T02:27:36Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -289,7 +289,7 @@
     "./16_validation_engine.js?h=105c13151958",
     "./15_reasoning_engine.js?h=cf1ed1305563",
     "./16_workflow_engine.js?h=17dedd927e7f",
-    "./17_external_intelligence_version_manifest.js?h=4b890b02530c",
+    "./17_external_intelligence_version_manifest.js?h=9e2a6bb45f68",
     "./17_external_intelligence_core.js?h=9e62f7f438b8",
     "./17_external_intelligence_contracts.js?h=8e3e4873bbe4",
     "./17_external_intelligence_schema_registry.js?h=7edc50556512",
@@ -311,7 +311,7 @@
     "./17_external_intelligence_phase3_validation.js?h=839f83963595",
     "./17_external_intelligence_phase4_validation.js?h=92388efbedf5",
     "./17_external_intelligence_phase4_real_runtime_validation.js?h=730bdb841319",
-    "./17_external_intelligence_phase4_android_validation.js?h=99931a3eebd5",
+    "./17_external_intelligence_phase4_android_validation.js?h=86566b2ed34b",
     "./17_external_intelligence_evidence_persistence.js?h=00b370e2b43b",
     "./17_external_intelligence_phase5_validation.js?h=5d817c4c5c86",
     "./17_external_intelligence_phase5_real_runtime_validation.js?h=c5829d6ef3ee",
@@ -1740,9 +1740,9 @@
       "cacheKey": "17dedd927e7f"
     },
     "17_external_intelligence_version_manifest.js": {
-      "sha256": "4b890b02530c4615b1101ac601dd26d29961feffd27346ed1dd0b0f3a6348d0f",
+      "sha256": "9e2a6bb45f6894a6449b5320fe935d88a8f484bc309aceb4b2b191ff85b35e53",
       "byteSize": 42332,
-      "cacheKey": "4b890b02530c"
+      "cacheKey": "9e2a6bb45f68"
     },
     "17_external_intelligence_core.js": {
       "sha256": "9e62f7f438b8164b1b44fef58e31fcf7eae767736db645a905dccc37d21136f4",
@@ -1850,9 +1850,9 @@
       "cacheKey": "730bdb841319"
     },
     "17_external_intelligence_phase4_android_validation.js": {
-      "sha256": "99931a3eebd5db422f5333ffb85204fa8efe64f89b0b38983582d41b1704f9ae",
-      "byteSize": 32329,
-      "cacheKey": "99931a3eebd5"
+      "sha256": "86566b2ed34bfc5b844db5ae27d0cb9a4693ae0530237730b3881494856002f7",
+      "byteSize": 32370,
+      "cacheKey": "86566b2ed34b"
     },
     "17_external_intelligence_evidence_persistence.js": {
       "sha256": "00b370e2b43b62388d6f833c5fac68d2d24dbfc64c6f2fe7d071b42f5774dd69",
@@ -1980,6 +1980,6 @@
       "cacheKey": "1bd8f46d1e40"
     }
   },
-  "scriptSetHash": "fb44e782fe4a0e43f5ae6361278badbdd91265e4e635a190075505e3613add64",
-  "manifestHash": "d72443abcecb521504902e2c13cd7d568ed337137e8d19fa2073cc239d6578e0"
+  "scriptSetHash": "889c3c8248687b5a452c49c471eeb409468a12d1ca35ee3a13e082f454bb887d",
+  "manifestHash": "052f64b2238aff4f6650d3c11d7cf18f246f9ab24eff08f690751ae5f0cdb230"
 }
