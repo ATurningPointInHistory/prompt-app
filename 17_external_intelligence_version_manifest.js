@@ -8,7 +8,7 @@
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.10.0";
+  const RELEASE_VERSION = "1.11.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -20,6 +20,7 @@
   const PHASE9_VERSION = "1.8.0";
   const PHASE10_VERSION = "1.9.1";
   const PHASE11_VERSION = "1.10.0";
+  const PHASE12_VERSION = "1.11.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -45,8 +46,8 @@
 
   const moduleVersions = {
     core: PHASE3_VERSION,
-    contracts: PHASE10_VERSION,
-    schemaRegistry: PHASE10_VERSION,
+    contracts: PHASE12_VERSION,
+    schemaRegistry: PHASE12_VERSION,
     authority: PHASE1_VERSION,
     audit: PHASE1_VERSION,
     runtimeCoordination: PHASE2_VERSION,
@@ -98,7 +99,8 @@
     phase9AndroidValidation: PHASE9_VERSION,
     reliabilitySignals: PHASE10_VERSION, uncertainty: PHASE10_VERSION, outcome: PHASE10_VERSION,
     phase10Validation: PHASE10_VERSION, phase10RealRuntimeValidation: PHASE10_VERSION, phase10AndroidValidation: PHASE10_VERSION,
-    signalDetection: PHASE11_VERSION, hypothesis: PHASE11_VERSION, researchPriority: PHASE11_VERSION, phase11Validation: PHASE11_VERSION, phase11RealRuntimeValidation: PHASE11_VERSION, phase11AndroidValidation: PHASE11_VERSION
+    signalDetection: PHASE11_VERSION, hypothesis: PHASE11_VERSION, researchPriority: PHASE11_VERSION, phase11Validation: PHASE11_VERSION, phase11RealRuntimeValidation: PHASE11_VERSION, phase11AndroidValidation: PHASE11_VERSION,
+    workGraph: PHASE12_VERSION, workflowOrchestration: PHASE12_VERSION, emergencyFastPath: PHASE12_VERSION, phase12Validation: PHASE12_VERSION, phase12RealRuntimeValidation: PHASE12_VERSION, phase12AndroidValidation: PHASE12_VERSION
   };
 
   const fileModules = {
@@ -165,7 +167,13 @@
     "17_external_intelligence_research_priority.js": "researchPriority",
     "17_external_intelligence_phase11_validation.js": "phase11Validation",
     "17_external_intelligence_phase11_real_runtime_validation.js": "phase11RealRuntimeValidation",
-    "17_external_intelligence_phase11_android_validation.js": "phase11AndroidValidation"
+    "17_external_intelligence_phase11_android_validation.js": "phase11AndroidValidation",
+    "17_external_intelligence_work_graph.js": "workGraph",
+    "17_external_intelligence_workflow_orchestration.js": "workflowOrchestration",
+    "17_external_intelligence_emergency_fast_path.js": "emergencyFastPath",
+    "17_external_intelligence_phase12_validation.js": "phase12Validation",
+    "17_external_intelligence_phase12_real_runtime_validation.js": "phase12RealRuntimeValidation",
+    "17_external_intelligence_phase12_android_validation.js": "phase12AndroidValidation"
   };
 
   const contractVersions = {
@@ -233,7 +241,8 @@
     recomputeCandidate: PHASE8_VERSION,
     phase8ValidationResult: PHASE8_VERSION,
     temporalRelationRecord: PHASE9_VERSION, eventRecord: PHASE9_VERSION, eventStateTransition: PHASE9_VERSION, impactEdge: PHASE9_VERSION, impactPath: PHASE9_VERSION, impactObservation: PHASE9_VERSION, historicalAnalogCandidate: PHASE9_VERSION, scenarioCandidate: PHASE9_VERSION, impactOutcomeEvaluationCandidate: PHASE9_VERSION, phase9ValidationResult: PHASE9_VERSION,
-    reliabilitySignal: PHASE10_VERSION, evidenceQualitySignal: PHASE10_VERSION, reliabilityCandidate: PHASE10_VERSION, reliabilityInputPackage: PHASE10_VERSION, predictionRecord: PHASE10_VERSION, benchmarkDefinition: PHASE10_VERSION, outcomeRecord: PHASE10_VERSION, outcomeEvaluation: PHASE10_VERSION, phase10ValidationResult: PHASE10_VERSION, baselineRecord: PHASE11_VERSION, signalRecord: PHASE11_VERSION, signalCluster: PHASE11_VERSION, researchQuestion: PHASE11_VERSION, hypothesisRecord: PHASE11_VERSION, researchPriorityRecord: PHASE11_VERSION, phase11ValidationResult: PHASE11_VERSION
+    reliabilitySignal: PHASE10_VERSION, evidenceQualitySignal: PHASE10_VERSION, reliabilityCandidate: PHASE10_VERSION, reliabilityInputPackage: PHASE10_VERSION, predictionRecord: PHASE10_VERSION, benchmarkDefinition: PHASE10_VERSION, outcomeRecord: PHASE10_VERSION, outcomeEvaluation: PHASE10_VERSION, phase10ValidationResult: PHASE10_VERSION, baselineRecord: PHASE11_VERSION, signalRecord: PHASE11_VERSION, signalCluster: PHASE11_VERSION, researchQuestion: PHASE11_VERSION, hypothesisRecord: PHASE11_VERSION, researchPriorityRecord: PHASE11_VERSION, phase11ValidationResult: PHASE11_VERSION,
+    workItem: PHASE12_VERSION, workGraph: PHASE12_VERSION, workAssignment: PHASE12_VERSION, workflowConflict: PHASE12_VERSION, emergencyEvent: PHASE12_VERSION, emergencyDecision: PHASE12_VERSION, phase12ValidationResult: PHASE12_VERSION
   };
 
   const contractIds = {
@@ -319,7 +328,8 @@
     outcomeRecord: "EXTERNAL-010-CONTRACT-OUTCOME-RECORD",
     outcomeEvaluation: "EXTERNAL-010-CONTRACT-OUTCOME-EVALUATION",
     phase10ValidationResult: "EXTERNAL-010-CONTRACT-PHASE10-VALIDATION-RESULT",
-    baselineRecord: "EXTERNAL-010-CONTRACT-SIGNAL-BASELINE", signalRecord: "EXTERNAL-010-CONTRACT-SIGNAL-RECORD", signalCluster: "EXTERNAL-010-CONTRACT-SIGNAL-CLUSTER", researchQuestion: "EXTERNAL-010-CONTRACT-RESEARCH-QUESTION", hypothesisRecord: "EXTERNAL-010-CONTRACT-HYPOTHESIS-RECORD", researchPriorityRecord: "EXTERNAL-010-CONTRACT-RESEARCH-PRIORITY", phase11ValidationResult: "EXTERNAL-010-CONTRACT-PHASE11-VALIDATION-RESULT"
+    baselineRecord: "EXTERNAL-010-CONTRACT-SIGNAL-BASELINE", signalRecord: "EXTERNAL-010-CONTRACT-SIGNAL-RECORD", signalCluster: "EXTERNAL-010-CONTRACT-SIGNAL-CLUSTER", researchQuestion: "EXTERNAL-010-CONTRACT-RESEARCH-QUESTION", hypothesisRecord: "EXTERNAL-010-CONTRACT-HYPOTHESIS-RECORD", researchPriorityRecord: "EXTERNAL-010-CONTRACT-RESEARCH-PRIORITY", phase11ValidationResult: "EXTERNAL-010-CONTRACT-PHASE11-VALIDATION-RESULT",
+    workItem: "EXTERNAL-010-CONTRACT-WORK-ITEM", workGraph: "EXTERNAL-010-CONTRACT-WORK-GRAPH", workAssignment: "EXTERNAL-010-CONTRACT-WORK-ASSIGNMENT", workflowConflict: "EXTERNAL-010-CONTRACT-WORKFLOW-CONFLICT", emergencyEvent: "EXTERNAL-010-CONTRACT-EMERGENCY-EVENT", emergencyDecision: "EXTERNAL-010-CONTRACT-EMERGENCY-DECISION", phase12ValidationResult: "EXTERNAL-010-CONTRACT-PHASE12-VALIDATION-RESULT"
   };
 
   const safety = {
@@ -999,8 +1009,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 11 Signal Detection / Competing Hypothesis / Research Priority",
-      phase: 11,
+      implementationPhase: "Phase 12 Workflow Orchestration / Emergency Fast Path",
+      phase: 12,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
