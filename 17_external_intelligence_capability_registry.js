@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_capability_registry.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.7.1
+   Release: 1.7.2
    Phase 08: Analytical Capability Registry
    Primary Decision: 036
    ============================================================ */

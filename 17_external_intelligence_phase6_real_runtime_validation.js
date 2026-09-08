@@ -41,7 +41,7 @@
   async function runExternalIntelligencePhase6PcRealRuntimeValidation(input){
     const settings=internal.isPlainObject(input)?input:{},gatewayBaseUrl=internal.text(settings.gatewayBaseUrl,VERSION_MANIFEST.gateway.defaultBaseUrl).replace(/\/+$/,""),fixtureBaseUrl=internal.text(settings.fixtureBaseUrl,"http://127.0.0.1:43130").replace(/\/+$/,""),c=collector(),check=c.check,owned=[];let phase6=null,execution=null,persisted=null,security=null;
     try{
-      check("Release Version is 1.5.0",VERSION_MANIFEST.release.version==="1.5.0",VERSION_MANIFEST.release.version,"Foundation");
+      check("Release Version is Phase 06 compatible or later",VERSION_MANIFEST.isReleaseCompatibleFrom("1.5.0"),VERSION_MANIFEST.release.version,"Foundation");
       check("Gateway compatibility version is 1.4.0",VERSION_MANIFEST.gateway.gatewayVersion==="1.4.0",VERSION_MANIFEST.gateway.gatewayVersion,"Foundation");
       const init=await namespace.initializeExternalIntelligenceFoundation();check("Phase 06 foundation initializes for PC real runtime",init&&init.ok===true,init&&init.code,"Foundation");
       phase6=await namespace.runExternalIntelligencePhase6Validation();check("Phase 06 regression remains PASS",phase6.failed===0&&phase6.health===100&&phase6.phase6Complete===true,{passed:phase6.passed,failed:phase6.failed,total:phase6.total},"Regression");

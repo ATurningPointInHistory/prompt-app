@@ -16,7 +16,7 @@
     const c=collector(),check=c.check;let p6=null,p5Android=null,secretStatus=null,security=null;
     try{
       const ua=global.navigator&&global.navigator.userAgent||"";
-      check("Release Version is Phase 06 compatible or later",["1.5.0","1.6.0", "1.7.0"].includes(VERSION_MANIFEST.release.version),VERSION_MANIFEST.release.version,"Foundation");
+      check("Release Version is Phase 06 compatible or later",VERSION_MANIFEST.isReleaseCompatibleFrom("1.5.0"),VERSION_MANIFEST.release.version,"Foundation");
       check("Gateway compatibility version is 1.4.0",VERSION_MANIFEST.gateway.gatewayVersion==="1.4.0",VERSION_MANIFEST.gateway.gatewayVersion,"Foundation");
       check("Android real-device environment is detected",/Android/i.test(ua),ua,"Android Environment");
       check("Fetch API remains available",typeof global.fetch==="function",typeof global.fetch,"Android Environment");

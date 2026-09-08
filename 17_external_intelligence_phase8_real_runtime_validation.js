@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_phase8_real_runtime_validation.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.7.1 / Gateway 1.4.0 compatibility
+   Release: 1.7.2 / Gateway 1.4.0 compatibility
    Phase 08 PC Real Runtime Validation
    ============================================================ */
 (function(global){
@@ -15,7 +15,7 @@
     const c=collector(),check=c.check;let regression=null;
     try{
       const ua=global.navigator&&global.navigator.userAgent||"";
-      check("Release Version is 1.7.1",VERSION_MANIFEST.release.version==="1.7.1",VERSION_MANIFEST.release.version,"Foundation");
+      check("Release Version is Phase 08 compatible or later",VERSION_MANIFEST.isReleaseCompatibleFrom("1.7.0"),VERSION_MANIFEST.release.version,"Foundation");
       check("Gateway remains compatible at 1.4.0 without Phase 08 changes",VERSION_MANIFEST.gateway.gatewayVersion==="1.4.0",VERSION_MANIFEST.gateway.gatewayVersion,"Boundary");
       check("Runtime is not Android",!/Android/i.test(ua),ua,"PC Environment");
       check("Application document is loaded",Boolean(global.document&&global.document.readyState),global.document&&global.document.readyState,"PC Environment");

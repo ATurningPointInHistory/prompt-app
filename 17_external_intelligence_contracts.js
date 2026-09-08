@@ -23,6 +23,10 @@
     return Object.assign({ name: name, required: false }, options || {});
   }
 
+  function compatibleReleaseEnum(values) {
+    return Array.from(new Set((values || []).concat([VERSION_MANIFEST.release.version])));
+  }
+
   const BUILT_IN_CONTRACTS = Object.freeze([
     {
       key: "foundationState",
@@ -270,7 +274,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0", "1.7.0"] }),
+        field("version", { required: true, type: "string", enum: compatibleReleaseEnum(["1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0", "1.7.0"]) }),
         field("implementationPhase", { required: true, type: "string" }),
         field("passed", { required: true, type: "number" }),
         field("failed", { required: true, type: "number" }),
@@ -440,7 +444,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0", "1.7.0"] }),
+        field("version", { required: true, type: "string", enum: compatibleReleaseEnum(["1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0", "1.7.0"]) }),
         field("implementationPhase", { required: true, type: "string" }),
         field("decisionCoverage", { required: true, type: "number", enum: [54] }),
         field("passed", { required: true, type: "number" }),
@@ -666,7 +670,7 @@
       fields: [
         field("id", { required: true, type: "string" }),
         field("componentId", { required: true, type: "string", enum: ["EXTERNAL-010"] }),
-        field("version", { required: true, type: "string", enum: ["1.3.0", "1.4.0", "1.5.0", "1.6.0", "1.7.0"] }),
+        field("version", { required: true, type: "string", enum: compatibleReleaseEnum(["1.3.0", "1.4.0", "1.5.0", "1.6.0", "1.7.0"]) }),
         field("implementationPhase", { required: true, type: "string" }),
         field("decisionCoverage", { required: true, type: "number", enum: [54] }),
         field("passed", { required: true, type: "number" }),
@@ -776,7 +780,7 @@
     { key:"transformationRecord", id:VERSION_MANIFEST.getContractId("transformationRecord"), name:"EXTERNAL-010 Transformation Record Contract", version:VERSION_MANIFEST.getContractVersion("transformationRecord"), immutable:true, fields:[field("transformationId",{required:true,type:"string"}),field("transformationType",{required:true,type:"string"}),field("transformationVersion",{required:true,type:"string"}),field("inputReferenceIds",{required:true,type:"array"}),field("outputReferenceIds",{required:true,type:"array"}),field("status",{required:true,type:"string"}),field("sourceProvenanceEqualsAnalyticalLineage",{required:true,type:"boolean",enum:[false]}),field("auditEqualsLineage",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})] },
     { key:"lineageRecord", id:VERSION_MANIFEST.getContractId("lineageRecord"), name:"EXTERNAL-010 Lineage Record Contract", version:VERSION_MANIFEST.getContractVersion("lineageRecord"), immutable:true, fields:[field("lineageRecordId",{required:true,type:"string"}),field("inputReferenceId",{required:true,type:"string"}),field("outputReferenceId",{required:true,type:"string"}),field("relationType",{required:true,type:"string"}),field("lineageState",{required:true,type:"string"}),field("affectedEqualsInvalid",{required:true,type:"boolean",enum:[false]}),field("historicalRecordSilentlyRewritten",{required:true,type:"boolean",enum:[false]}),field("automaticRecomputePerformed",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})] },
     { key:"recomputeCandidate", id:VERSION_MANIFEST.getContractId("recomputeCandidate"), name:"EXTERNAL-010 Recompute Candidate Contract", version:VERSION_MANIFEST.getContractVersion("recomputeCandidate"), immutable:true, fields:[field("recomputeCandidateId",{required:true,type:"string"}),field("outputReferenceId",{required:true,type:"string"}),field("reason",{required:true,type:"string"}),field("triggerReferenceIds",{required:true,type:"array"}),field("recomputeRequiredEqualsKnownIncorrect",{required:true,type:"boolean",enum:[false]}),field("automaticRecomputePerformed",{required:true,type:"boolean",enum:[false]}),field("approvalGranted",{required:true,type:"boolean",enum:[false]}),field("createdAt",{required:true,type:"string"}),field("immutable",{required:true,type:"boolean",enum:[true]})] },
-    { key:"phase8ValidationResult", id:VERSION_MANIFEST.getContractId("phase8ValidationResult"), name:"EXTERNAL-010 Phase 08 Validation Result Contract", version:VERSION_MANIFEST.getContractVersion("phase8ValidationResult"), immutable:true, fields:[field("id",{required:true,type:"string"}),field("componentId",{required:true,type:"string",enum:["EXTERNAL-010"]}),field("version",{required:true,type:"string",enum:["1.7.0"]}),field("implementationPhase",{required:true,type:"string"}),field("decisionCoverage",{required:true,type:"number",enum:[54]}),field("passed",{required:true,type:"number"}),field("failed",{required:true,type:"number"}),field("total",{required:true,type:"number"}),field("health",{required:true,type:"number"}),field("criticalFailed",{required:true,type:"number"}),field("status",{required:true,type:"string"}),field("releaseAllowed",{required:true,type:"boolean"}),field("phase8Complete",{required:true,type:"boolean"}),field("phase9Allowed",{required:true,type:"boolean"}),field("validatedAt",{required:true,type:"string"})] }
+    { key:"phase8ValidationResult", id:VERSION_MANIFEST.getContractId("phase8ValidationResult"), name:"EXTERNAL-010 Phase 08 Validation Result Contract", version:VERSION_MANIFEST.getContractVersion("phase8ValidationResult"), immutable:true, fields:[field("id",{required:true,type:"string"}),field("componentId",{required:true,type:"string",enum:["EXTERNAL-010"]}),field("version",{required:true,type:"string",enum:compatibleReleaseEnum(["1.7.0"])}),field("implementationPhase",{required:true,type:"string"}),field("decisionCoverage",{required:true,type:"number",enum:[54]}),field("passed",{required:true,type:"number"}),field("failed",{required:true,type:"number"}),field("total",{required:true,type:"number"}),field("health",{required:true,type:"number"}),field("criticalFailed",{required:true,type:"number"}),field("status",{required:true,type:"string"}),field("releaseAllowed",{required:true,type:"boolean"}),field("phase8Complete",{required:true,type:"boolean"}),field("phase9Allowed",{required:true,type:"boolean"}),field("validatedAt",{required:true,type:"string"})] }
 
   ]);
 

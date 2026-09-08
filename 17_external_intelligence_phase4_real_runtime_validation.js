@@ -140,7 +140,7 @@
     const suffix = Date.now().toString(36).toUpperCase();
 
     try {
-      check("Release Version is compatible with Phase 04 baseline", ["1.3.0", "1.4.0", "1.5.0"].includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
+      check("Release Version is compatible with Phase 04 baseline", VERSION_MANIFEST.isReleaseCompatibleFrom("1.3.0"), VERSION_MANIFEST.release.version, "Foundation");
       const init = await namespace.initializeExternalIntelligenceFoundation();
       check("Foundation initializes for PC real runtime", init && init.ok === true, init && init.code, "Foundation");
 

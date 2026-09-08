@@ -51,7 +51,7 @@
     const c = collector(); const check = c.check; const owned = [];
     let first = null; let second = null; let read = null; let integrity = null; let checkpoint = null; let p4pc = null; let p5 = null;
     try {
-      check("Release Version is compatible with Phase 05 baseline", ["1.4.0", "1.5.0"].includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
+      check("Release Version is compatible with Phase 05 baseline", VERSION_MANIFEST.isReleaseCompatibleFrom("1.4.0"), VERSION_MANIFEST.release.version, "Foundation");
       check("Gateway compatibility version is 1.3.0 or later supported", ["1.3.0","1.4.0"].includes(VERSION_MANIFEST.gateway.gatewayVersion), VERSION_MANIFEST.gateway.gatewayVersion, "Foundation");
       const init = await namespace.initializeExternalIntelligenceFoundation();
       check("Phase 05 foundation initializes for PC real runtime", init && init.ok === true, init && init.code, "Foundation");

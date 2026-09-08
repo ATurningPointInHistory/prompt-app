@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.7.1
+   Release: 1.7.2
    Phase 08: Analytical Capability Registry / Unified Lineage
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.7.1";
+  const RELEASE_VERSION = "1.7.2";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -16,7 +16,7 @@
   const PHASE5_VERSION = "1.4.0";
   const PHASE6_VERSION = "1.5.0";
   const PHASE7_VERSION = "1.6.0";
-  const PHASE8_VERSION = "1.7.1";
+  const PHASE8_VERSION = "1.7.2";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -25,6 +25,19 @@
     if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
     Object.keys(value).forEach(function freezeChild(key) { deepFreeze(value[key]); });
     return Object.freeze(value);
+  }
+
+  function parseSemanticVersion(value) {
+    const match = String(value || "").trim().match(/^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/);
+    return match ? { major: Number(match[1]), minor: Number(match[2]), patch: Number(match[3]) } : null;
+  }
+
+  function isReleaseCompatibleFrom(minimumVersion) {
+    const current = parseSemanticVersion(RELEASE_VERSION);
+    const minimum = parseSemanticVersion(minimumVersion);
+    if (!current || !minimum || current.major !== minimum.major) return false;
+    if (current.minor !== minimum.minor) return current.minor > minimum.minor;
+    return current.patch >= minimum.patch;
   }
 
   const moduleVersions = {
@@ -910,7 +923,8 @@
     },
     getContractId: function getContractId(contractKey) {
       return contractIds[contractKey] || null;
-    }
+    },
+    isReleaseCompatibleFrom: isReleaseCompatibleFrom
   };
 
   global.EXTERNAL010VersionManifest = deepFreeze(manifest);

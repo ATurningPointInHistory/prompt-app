@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_phase8_validation.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.7.1
+   Release: 1.7.2
    Phase 08 Validation: Analytical Capability Registry / Unified Lineage
    Primary Decisions: 036 / 037
    ============================================================ */
@@ -18,7 +18,7 @@
   async function runExternalIntelligencePhase8Validation(){
     const c=collector(),check=c.check; let localCap=null,externalCap=null,reviewerCap=null,routing=null,snapshot=null,transform=null,lineage1=null,lineage2=null;
     try {
-      check("Release Version is 1.7.1",VERSION_MANIFEST.release.version==="1.7.1",VERSION_MANIFEST.release.version,"Foundation");
+      check("Release Version is Phase 08 compatible or later",VERSION_MANIFEST.isReleaseCompatibleFrom("1.7.0"),VERSION_MANIFEST.release.version,"Foundation");
       check("Implementation Phase is Phase 08",VERSION_MANIFEST.release.phase===8&&VERSION_MANIFEST.release.implementationPhase.indexOf("Phase 08")===0,VERSION_MANIFEST.release.implementationPhase,"Foundation");
       check("Phase 08 primary Decisions are 036/037",internal.stableStringify(namespace.modules.phase8Validation.decisions)===internal.stableStringify(["036","037"]),namespace.modules.phase8Validation,"Foundation");
       check("Gateway remains unchanged at 1.4.0",VERSION_MANIFEST.gateway.gatewayVersion==="1.4.0",VERSION_MANIFEST.gateway.gatewayVersion,"Boundary");

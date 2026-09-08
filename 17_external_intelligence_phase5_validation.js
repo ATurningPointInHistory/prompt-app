@@ -69,7 +69,7 @@
   async function runExternalIntelligencePhase5Validation() {
     const c = collector(); const check = c.check; const owned = [];
     try {
-      check("Release Version is compatible with Phase 05 baseline", ["1.4.0", "1.5.0", "1.6.0", "1.7.0"].includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
+      check("Release Version is compatible with Phase 05 baseline", VERSION_MANIFEST.isReleaseCompatibleFrom("1.4.0"), VERSION_MANIFEST.release.version, "Foundation");
       check("Implementation Phase is Phase 05 or later", VERSION_MANIFEST.release.phase >= 5, VERSION_MANIFEST.release.implementationPhase, "Foundation");
       check("Design Freeze remains canonical", VERSION_MANIFEST.release.designFreezeId === "EXTERNAL-010-DESIGN-FREEZE-1.0.0", VERSION_MANIFEST.release.designFreezeId, "Foundation");
       check("Roadmap remains 2.1.0", VERSION_MANIFEST.release.implementationRoadmapId === "EXTERNAL-010-IMPLEMENTATION-ROADMAP-2.1.0", VERSION_MANIFEST.release.implementationRoadmapId, "Foundation");

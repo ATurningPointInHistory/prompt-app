@@ -19,7 +19,6 @@
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("phase4AndroidValidation");
   const PURPOSE = "phase4-android-real-device";
-  const EXPECTED_RELEASES = ["1.3.0", "1.4.0", "1.5.0", "1.6.0", "1.7.0"];
   const EXPECTED_GATEWAY_VERSIONS = ["1.2.0", "1.3.0", "1.4.0"];
   const EXPECTED_PHASE4_REGRESSION_TOTAL = 248;
   const MINIMUM_PHASE4_SCRIPT_COUNT = 304;
@@ -351,7 +350,7 @@
     let gatewayRoute = null;
 
     try {
-      check("Release Version is compatible with Phase 04 baseline", EXPECTED_RELEASES.includes(VERSION_MANIFEST.release.version), VERSION_MANIFEST.release.version, "Foundation");
+      check("Release Version is compatible with Phase 04 baseline", VERSION_MANIFEST.isReleaseCompatibleFrom("1.3.0"), VERSION_MANIFEST.release.version, "Foundation");
       check("Gateway compatibility version is 1.2.0", EXPECTED_GATEWAY_VERSIONS.includes(VERSION_MANIFEST.gateway.gatewayVersion), VERSION_MANIFEST.gateway.gatewayVersion, "Foundation");
       check("Phase 04 Android module version resolves", EXPECTED_RELEASES.includes(MODULE_VERSION), MODULE_VERSION, "Foundation");
 
