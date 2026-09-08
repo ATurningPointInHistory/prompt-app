@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.9.1
-   Phase 10: Reliability Signals / Uncertainty / Outcome Foundation
+   Release: 1.12.0
+   Phase 13: Social Narrative / Propagation / Influence Intelligence
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.11.0";
+  const RELEASE_VERSION = "1.12.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -21,6 +21,7 @@
   const PHASE10_VERSION = "1.9.1";
   const PHASE11_VERSION = "1.10.0";
   const PHASE12_VERSION = "1.11.0";
+  const PHASE13_VERSION = "1.12.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -100,7 +101,8 @@
     reliabilitySignals: PHASE10_VERSION, uncertainty: PHASE10_VERSION, outcome: PHASE10_VERSION,
     phase10Validation: PHASE10_VERSION, phase10RealRuntimeValidation: PHASE10_VERSION, phase10AndroidValidation: PHASE10_VERSION,
     signalDetection: PHASE11_VERSION, hypothesis: PHASE11_VERSION, researchPriority: PHASE11_VERSION, phase11Validation: PHASE11_VERSION, phase11RealRuntimeValidation: PHASE11_VERSION, phase11AndroidValidation: PHASE11_VERSION,
-    workGraph: PHASE12_VERSION, workflowOrchestration: PHASE12_VERSION, emergencyFastPath: PHASE12_VERSION, phase12Validation: PHASE12_VERSION, phase12RealRuntimeValidation: PHASE12_VERSION, phase12AndroidValidation: PHASE12_VERSION
+    workGraph: PHASE12_VERSION, workflowOrchestration: PHASE12_VERSION, emergencyFastPath: PHASE12_VERSION, phase12Validation: PHASE12_VERSION, phase12RealRuntimeValidation: PHASE12_VERSION, phase12AndroidValidation: PHASE12_VERSION,
+    socialObservation: PHASE13_VERSION, socialNarrative: PHASE13_VERSION, socialInfluence: PHASE13_VERSION, phase13Validation: PHASE13_VERSION, phase13RealRuntimeValidation: PHASE13_VERSION, phase13AndroidValidation: PHASE13_VERSION
   };
 
   const fileModules = {
@@ -173,7 +175,13 @@
     "17_external_intelligence_emergency_fast_path.js": "emergencyFastPath",
     "17_external_intelligence_phase12_validation.js": "phase12Validation",
     "17_external_intelligence_phase12_real_runtime_validation.js": "phase12RealRuntimeValidation",
-    "17_external_intelligence_phase12_android_validation.js": "phase12AndroidValidation"
+    "17_external_intelligence_phase12_android_validation.js": "phase12AndroidValidation",
+    "17_external_intelligence_social_observation.js": "socialObservation",
+    "17_external_intelligence_social_narrative.js": "socialNarrative",
+    "17_external_intelligence_social_influence.js": "socialInfluence",
+    "17_external_intelligence_phase13_validation.js": "phase13Validation",
+    "17_external_intelligence_phase13_real_runtime_validation.js": "phase13RealRuntimeValidation",
+    "17_external_intelligence_phase13_android_validation.js": "phase13AndroidValidation"
   };
 
   const contractVersions = {
@@ -242,7 +250,8 @@
     phase8ValidationResult: PHASE8_VERSION,
     temporalRelationRecord: PHASE9_VERSION, eventRecord: PHASE9_VERSION, eventStateTransition: PHASE9_VERSION, impactEdge: PHASE9_VERSION, impactPath: PHASE9_VERSION, impactObservation: PHASE9_VERSION, historicalAnalogCandidate: PHASE9_VERSION, scenarioCandidate: PHASE9_VERSION, impactOutcomeEvaluationCandidate: PHASE9_VERSION, phase9ValidationResult: PHASE9_VERSION,
     reliabilitySignal: PHASE10_VERSION, evidenceQualitySignal: PHASE10_VERSION, reliabilityCandidate: PHASE10_VERSION, reliabilityInputPackage: PHASE10_VERSION, predictionRecord: PHASE10_VERSION, benchmarkDefinition: PHASE10_VERSION, outcomeRecord: PHASE10_VERSION, outcomeEvaluation: PHASE10_VERSION, phase10ValidationResult: PHASE10_VERSION, baselineRecord: PHASE11_VERSION, signalRecord: PHASE11_VERSION, signalCluster: PHASE11_VERSION, researchQuestion: PHASE11_VERSION, hypothesisRecord: PHASE11_VERSION, researchPriorityRecord: PHASE11_VERSION, phase11ValidationResult: PHASE11_VERSION,
-    workItem: PHASE12_VERSION, workGraph: PHASE12_VERSION, workAssignment: PHASE12_VERSION, workflowConflict: PHASE12_VERSION, emergencyEvent: PHASE12_VERSION, emergencyDecision: PHASE12_VERSION, phase12ValidationResult: PHASE12_VERSION
+    workItem: PHASE12_VERSION, workGraph: PHASE12_VERSION, workAssignment: PHASE12_VERSION, workflowConflict: PHASE12_VERSION, emergencyEvent: PHASE12_VERSION, emergencyDecision: PHASE12_VERSION, phase12ValidationResult: PHASE12_VERSION,
+    socialObservation: PHASE13_VERSION, socialNarrative: PHASE13_VERSION, socialNarrativeShift: PHASE13_VERSION, socialPropagationRecord: PHASE13_VERSION, socialAuthorProfile: PHASE13_VERSION, socialCoordinationCandidate: PHASE13_VERSION, socialAccountCluster: PHASE13_VERSION, socialAmplificationAssessment: PHASE13_VERSION, oldInformationResurgence: PHASE13_VERSION, socialPumpPatternCandidate: PHASE13_VERSION, socialMarketReaction: PHASE13_VERSION, socialInfluenceEvaluation: PHASE13_VERSION, phase13ValidationResult: PHASE13_VERSION
   };
 
   const contractIds = {
@@ -329,7 +338,20 @@
     outcomeEvaluation: "EXTERNAL-010-CONTRACT-OUTCOME-EVALUATION",
     phase10ValidationResult: "EXTERNAL-010-CONTRACT-PHASE10-VALIDATION-RESULT",
     baselineRecord: "EXTERNAL-010-CONTRACT-SIGNAL-BASELINE", signalRecord: "EXTERNAL-010-CONTRACT-SIGNAL-RECORD", signalCluster: "EXTERNAL-010-CONTRACT-SIGNAL-CLUSTER", researchQuestion: "EXTERNAL-010-CONTRACT-RESEARCH-QUESTION", hypothesisRecord: "EXTERNAL-010-CONTRACT-HYPOTHESIS-RECORD", researchPriorityRecord: "EXTERNAL-010-CONTRACT-RESEARCH-PRIORITY", phase11ValidationResult: "EXTERNAL-010-CONTRACT-PHASE11-VALIDATION-RESULT",
-    workItem: "EXTERNAL-010-CONTRACT-WORK-ITEM", workGraph: "EXTERNAL-010-CONTRACT-WORK-GRAPH", workAssignment: "EXTERNAL-010-CONTRACT-WORK-ASSIGNMENT", workflowConflict: "EXTERNAL-010-CONTRACT-WORKFLOW-CONFLICT", emergencyEvent: "EXTERNAL-010-CONTRACT-EMERGENCY-EVENT", emergencyDecision: "EXTERNAL-010-CONTRACT-EMERGENCY-DECISION", phase12ValidationResult: "EXTERNAL-010-CONTRACT-PHASE12-VALIDATION-RESULT"
+    workItem: "EXTERNAL-010-CONTRACT-WORK-ITEM", workGraph: "EXTERNAL-010-CONTRACT-WORK-GRAPH", workAssignment: "EXTERNAL-010-CONTRACT-WORK-ASSIGNMENT", workflowConflict: "EXTERNAL-010-CONTRACT-WORKFLOW-CONFLICT", emergencyEvent: "EXTERNAL-010-CONTRACT-EMERGENCY-EVENT", emergencyDecision: "EXTERNAL-010-CONTRACT-EMERGENCY-DECISION", phase12ValidationResult: "EXTERNAL-010-CONTRACT-PHASE12-VALIDATION-RESULT",
+    socialObservation: "EXTERNAL-010-CONTRACT-SOCIAL-OBSERVATION",
+    socialNarrative: "EXTERNAL-010-CONTRACT-SOCIAL-NARRATIVE",
+    socialNarrativeShift: "EXTERNAL-010-CONTRACT-SOCIAL-NARRATIVE-SHIFT",
+    socialPropagationRecord: "EXTERNAL-010-CONTRACT-SOCIAL-PROPAGATION",
+    socialAuthorProfile: "EXTERNAL-010-CONTRACT-SOCIAL-AUTHOR-PROFILE",
+    socialCoordinationCandidate: "EXTERNAL-010-CONTRACT-SOCIAL-COORDINATION-CANDIDATE",
+    socialAccountCluster: "EXTERNAL-010-CONTRACT-SOCIAL-ACCOUNT-CLUSTER",
+    socialAmplificationAssessment: "EXTERNAL-010-CONTRACT-SOCIAL-AMPLIFICATION-ASSESSMENT",
+    oldInformationResurgence: "EXTERNAL-010-CONTRACT-OLD-INFORMATION-RESURGENCE",
+    socialPumpPatternCandidate: "EXTERNAL-010-CONTRACT-SOCIAL-PUMP-PATTERN-CANDIDATE",
+    socialMarketReaction: "EXTERNAL-010-CONTRACT-SOCIAL-MARKET-REACTION",
+    socialInfluenceEvaluation: "EXTERNAL-010-CONTRACT-SOCIAL-INFLUENCE-EVALUATION",
+    phase13ValidationResult: "EXTERNAL-010-CONTRACT-PHASE13-VALIDATION-RESULT"
   };
 
   const safety = {
@@ -349,6 +371,27 @@
     runtimePackageInstallAllowed: false,
     blindRetryUnknownExecutionAllowed: false,
     remoteGatewayAllowed: false,
+    socialPopularityEqualsTruth: false,
+    sentimentEqualsFact: false,
+    rumorEqualsEvent: false,
+    highEngagementEqualsReliability: false,
+    manyPostsEqualsIndependentOpinions: false,
+    crowdConsensusEqualsIndependentConsensus: false,
+    authorAccuracyEqualsAuthorInfluence: false,
+    authorInfluenceEqualsCausation: false,
+    postBeforeMarketMoveEqualsCausation: false,
+    botActivityEqualsNoMarketImpact: false,
+    aiGeneratedContentEqualsNoMarketImpact: false,
+    advertisingEqualsNoSignal: false,
+    coordinationCandidateEqualsSamePersonConfirmed: false,
+    coordinationCandidateEqualsIllegalManipulation: false,
+    pumpPatternEqualsIllegalManipulationProven: false,
+    oldInformationEqualsNoCurrentImpact: false,
+    oldInformationEqualsNewEvent: false,
+    rumorVolumeEqualsEventConfirmation: false,
+    behaviorSimilarityGrantsRealIdentity: false,
+    socialSignalGrantsTradingAuthority: false,
+    socialSignalGrantsFinancialAuthority: false,
 
     arbitraryUnregisteredSourceAccessAllowed: false,
     automaticSourceActivationAllowed: false,
@@ -724,7 +767,7 @@
     registryFirst: true,
     sourceIdentityType: "stable-source-id",
     arbitraryDirectUrlNormalOperation: false,
-    sourceTypes: ["PUBLIC_API", "MARKET_DATA", "FINANCIAL_DATA", "NEWS", "RSS", "WEB_PAGE", "SEARCH", "GITHUB", "GOVERNMENT_DATA", "TECHNICAL_DOCUMENTATION", "AI_SERVICE", "DATASET", "OTHER"],
+    sourceTypes: ["PUBLIC_API", "MARKET_DATA", "FINANCIAL_DATA", "NEWS", "RSS", "WEB_PAGE", "SEARCH", "GITHUB", "GOVERNMENT_DATA", "TECHNICAL_DOCUMENTATION", "AI_SERVICE", "DATASET", "SOCIAL_PLATFORM", "FORUM", "COMMUNITY", "VIDEO_PLATFORM", "COMMENT_STREAM", "SOCIAL_DATA_PROVIDER", "OTHER"],
     accessModes: ["BROWSER_DIRECT", "LOCAL_GATEWAY", "AUTO_ROUTE", "DISABLED"],
     authenticationModes: ["NONE", "API_KEY", "BEARER_TOKEN", "OAUTH", "CUSTOM"],
     pricingModes: ["FREE", "FIXED_MONTHLY", "USAGE_BASED", "TIERED", "UNKNOWN"],
@@ -1001,6 +1044,30 @@
     candidateGenerationGrantsKnowledgeAuthority: false
   };
 
+
+  const socialIntelligence = {
+    sourceTypes: ["SOCIAL_PLATFORM","FORUM","COMMUNITY","VIDEO_PLATFORM","COMMENT_STREAM","SOCIAL_DATA_PROVIDER"],
+    contentTypes: ["POST","REPLY","COMMENT","REPOST","QUOTE","VIDEO","IMAGE","ARTICLE_LINK","ADVERTISEMENT","PROMOTIONAL_CONTENT","UNKNOWN"],
+    narrativeStates: ["EMERGING","GROWING","DOMINANT","SATURATED","DECLINING","REVERSING","DORMANT","RESURGING","DISPUTED","UNKNOWN"],
+    rumorStates: ["NOT_RUMOR","RUMOR_CANDIDATE","UNVERIFIED","DISPUTED","REFUTED","SUPPORTED","UNKNOWN"],
+    reactionDimensions: ["PRICE_DIRECTION","ABSOLUTE_RETURN","EXCESS_RETURN","VOLUME","VOLATILITY","LIQUIDITY","SPREAD","ORDER_IMBALANCE","SEARCH_ATTENTION"],
+    informationPropagationInfluenceSeparated: true,
+    factualReliabilityAuthority: "EXTERNAL-020",
+    advancedBotIdentityDetectionRequired: false,
+    illegalManipulationDeterminationAllowed: false,
+    falseSignalPreservationRequired: true,
+    rawIndependentOriginSeparationRequired: true,
+    usagePolicyRequired: true,
+    privacyBoundaryRequired: true,
+    resourceBudgetRequired: true,
+    governedAcquisitionPath: "SOURCE_REGISTRY->USAGE_POLICY->RESOURCE_BUDGET->ACQUISITION",
+    decision029ImpactHook: true,
+    decision030UncertaintyHook: true,
+    decision031OutcomeIntegration: true,
+    decision032SignalHook: true,
+    decision033ResearchHook: true,
+    evidenceLineageRequired: true
+  };
   const manifest = {
     componentId: "EXTERNAL-010",
     componentName: "External Intelligence Platform",
@@ -1009,8 +1076,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 12 Workflow Orchestration / Emergency Fast Path",
-      phase: 12,
+      implementationPhase: "Phase 13 Social Narrative / Propagation / Influence Intelligence",
+      phase: 13,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -1019,7 +1086,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 11 Signal Detection / Competing Hypothesis / Research Priority Implementation"
+      status: "Phase 13 Social Narrative / Propagation / Influence Intelligence Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -1049,6 +1116,7 @@
     relationEvent: relationEvent,
     impactGraph: impactGraph,
     phase9Permissions: phase9Permissions,
+    socialIntelligence: socialIntelligence,
     implementation: {
       inspectBeforeImplement: true,
       contractFirst: true,
@@ -1071,8 +1139,12 @@
       phase10Allowed: true,
       phase10Complete: true,
       phase11Allowed: true,
-      phase11Complete: false,
-      phase12Allowed: false,
+      phase11Complete: true,
+      phase12Allowed: true,
+      phase12Complete: true,
+      phase13Allowed: true,
+      phase13Complete: false,
+      phase14Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true
