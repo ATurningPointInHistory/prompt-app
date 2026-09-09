@@ -40,7 +40,7 @@
     "./07_health_diagnose.js?h=6cfb32a71d4a",
     "./07_health_unused.js?h=7fa65234ac06",
     "./07_backup_manager.js?h=c3ea2011ff94",
-    "./07_project_package.js?h=188a016dbb99",
+    "./07_project_package.js?h=b6676ce8eb6d",
     "./07_safe_mode.js?h=29a7bdc4685d",
     "./07_project_explorer.js?h=8a31a68897ff",
     "./07_backup_health.js?h=2fc43427c3e7",
@@ -525,9 +525,9 @@
       "cacheKey": "c3ea2011ff94"
     },
     "07_project_package.js": {
-      "sha256": "188a016dbb99befe2bbd29925c52412d1b0965d4433e70b1506b1e438ac4cb36",
-      "byteSize": 34244,
-      "cacheKey": "188a016dbb99"
+      "sha256": "b6676ce8eb6d1fdb419a734d05d4d61ef9aad336c44fc70d784b241fb0f4362b",
+      "byteSize": 36033,
+      "cacheKey": "b6676ce8eb6d"
     },
     "07_safe_mode.js": {
       "sha256": "29a7bdc4685dbf67fa06f881174a0d02e9992e922b317b8db60cd51f15bb281f",
@@ -2160,6 +2160,6 @@
       "cacheKey": "1bd8f46d1e40"
     }
   },
-  "scriptSetHash": "6629d197adb5d18f6829f5efd9c10cf14f4b7cc262d1d68aa8c32b8ff0ed8ea5",
-  "manifestHash": "362c0432e0cffa3882609e44ea93d8965a24f8a95b490faa98920be85120a722"
+  "scriptSetHash": "b24a280b2ac7e78dc3146fd06f9f310d647b9213550fc8fcd20488852a02e1c6",
+  "manifestHash": "d6b4bc5ad40e1841bc295c50f0a71ac5f68c9827bb044974d4bd0ef450d37fe8"
 }

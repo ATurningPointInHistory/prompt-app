@@ -8,17 +8,46 @@ const AI_PRO_STATIC_SCRIPT_MANIFEST_SOURCE =
   "./00_script_manifest.json";
 
 const AI_PRO_PROJECT_PACKAGE_EXTRA_FILES = Object.freeze([
+  "AI_Prompt_OS_Launcher.pyw",
+  "Start_AI_Prompt_OS.bat",
   "external_gateway/package.json",
   "external_gateway/gateway.cjs",
   "external_gateway/validate_gateway.cjs",
   "external_gateway/start_gateway.bat",
+  "external_gateway/start_external_gateway.bat",
+  "external_gateway/start_external_gateway.cjs",
   "external_gateway/README.txt",
   "external_gateway/lib/config.cjs",
   "external_gateway/lib/audit.cjs",
   "external_gateway/lib/runtime.cjs",
   "external_gateway/lib/security.cjs",
-  "external_gateway/lib/session_store.cjs"
+  "external_gateway/lib/session_store.cjs",
+  "external_gateway/lib/acquisition.cjs",
+  "external_gateway/lib/evidence_store.cjs",
+  "external_gateway/lib/secret_store.cjs",
+  "external_gateway/phase4_fixture.cjs",
+  "external_gateway/phase6_fixture.cjs",
+  "external_gateway/start_phase4_pc_runtime.bat",
+  "external_gateway/start_phase5_pc_runtime.bat",
+  "external_gateway/start_phase6_pc_runtime.bat",
+  "external_gateway/start_phase6_pc_runtime.cjs",
+  "external_gateway/validate_phase4_acquisition.cjs",
+  "external_gateway/validate_phase5_persistence.cjs",
+  "external_gateway/validate_phase6_security.cjs"
 ]);
+
+const AI_PRO_PROJECT_PACKAGE_EXCLUDED_PREFIXES = Object.freeze([
+  "external_gateway/data/"
+]);
+
+const AI_PRO_PROJECT_PACKAGE_GENERATED_TEXT_FILES = Object.freeze({
+  ".gitignore": [
+    "# AI Prompt OS local External Gateway runtime data",
+    "# Runtime DB / Evidence are local operational state, not canonical source.",
+    "external_gateway/data/",
+    ""
+  ].join("\n")
+});
 
 const AI_PRO_SCRIPT_BLOCK_START =
   "<!-- AI_PRO_SCRIPT_BLOCK_START -->";
@@ -102,9 +131,13 @@ async function saveProjectPackage() {
     const references =
       getProjectPackageReferences(html);
 
+    const generatedTextFiles =
+      Object.keys(AI_PRO_PROJECT_PACKAGE_GENERATED_TEXT_FILES);
+
     const requestedFiles = [
       "index.html",
-      ...references.local.map(item => item.path)
+      ...references.local.map(item => item.path),
+      ...generatedTextFiles
     ];
 
     const savedFiles = ["index.html"];
@@ -195,6 +228,18 @@ async function saveProjectPackage() {
         );
       }
     }
+
+    generatedTextFiles.forEach(path => {
+      if (isProjectPackageExcludedPath(path)) {
+        return;
+      }
+
+      zip.file(
+        path,
+        AI_PRO_PROJECT_PACKAGE_GENERATED_TEXT_FILES[path]
+      );
+      savedFiles.push(path);
+    });
 
     if (missingFiles.length) {
       alert(
@@ -1206,6 +1251,15 @@ async function getCleanProjectIndexHtml() {
   }
 }
 
+function isProjectPackageExcludedPath(path) {
+
+  const clean = cleanProjectPackagePath(path);
+
+  return AI_PRO_PROJECT_PACKAGE_EXCLUDED_PREFIXES
+    .some(prefix => clean.startsWith(prefix));
+}
+
+
 function getProjectPackageReferences(html) {
 
   const parser = new DOMParser();
@@ -1263,7 +1317,8 @@ function getProjectPackageReferences(html) {
     if (
       !path ||
       path === "index.html" ||
-      path.includes("../")
+      path.includes("../") ||
+      isProjectPackageExcludedPath(path)
     ) {
       return;
     }
@@ -1591,7 +1646,11 @@ function getProjectPackageFileCandidates() {
 
   state.files.forEach(file => {
 
-    if (!file || !file.path) {
+    if (
+      !file ||
+      !file.path ||
+      isProjectPackageExcludedPath(file.path)
+    ) {
       return;
     }
 
