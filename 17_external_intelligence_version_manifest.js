@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.13.0
-   Phase 14: Federated Evidence Read / Intelligence Package / Knowledge Boundary
+   Release: 1.14.0
+   Phase 15: Multi-Layer Validation Framework
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.13.0";
+  const RELEASE_VERSION = "1.14.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -23,6 +23,7 @@
   const PHASE12_VERSION = "1.11.0";
   const PHASE13_VERSION = "1.12.0";
   const PHASE14_VERSION = "1.13.0";
+  const PHASE15_VERSION = "1.14.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -48,8 +49,8 @@
 
   const moduleVersions = {
     core: PHASE3_VERSION,
-    contracts: PHASE12_VERSION,
-    schemaRegistry: PHASE12_VERSION,
+    contracts: PHASE15_VERSION,
+    schemaRegistry: PHASE15_VERSION,
     authority: PHASE1_VERSION,
     audit: PHASE1_VERSION,
     runtimeCoordination: PHASE2_VERSION,
@@ -104,7 +105,8 @@
     signalDetection: PHASE11_VERSION, hypothesis: PHASE11_VERSION, researchPriority: PHASE11_VERSION, phase11Validation: PHASE11_VERSION, phase11RealRuntimeValidation: PHASE11_VERSION, phase11AndroidValidation: PHASE11_VERSION,
     workGraph: PHASE12_VERSION, workflowOrchestration: PHASE12_VERSION, emergencyFastPath: PHASE12_VERSION, phase12Validation: PHASE12_VERSION, phase12RealRuntimeValidation: PHASE12_VERSION, phase12AndroidValidation: PHASE12_VERSION,
     socialObservation: PHASE13_VERSION, socialNarrative: PHASE13_VERSION, socialInfluence: PHASE13_VERSION, phase13Validation: PHASE13_VERSION, phase13RealRuntimeValidation: PHASE13_VERSION, phase13AndroidValidation: PHASE13_VERSION,
-    federatedRead: PHASE14_VERSION, intelligencePackage: PHASE14_VERSION, knowledgeBoundary: PHASE14_VERSION, phase14Validation: PHASE14_VERSION, phase14RealRuntimeValidation: PHASE14_VERSION, phase14AndroidValidation: PHASE14_VERSION
+    federatedRead: PHASE14_VERSION, intelligencePackage: PHASE14_VERSION, knowledgeBoundary: PHASE14_VERSION, phase14Validation: PHASE14_VERSION, phase14RealRuntimeValidation: PHASE14_VERSION, phase14AndroidValidation: PHASE14_VERSION,
+    validationFramework: PHASE15_VERSION, phase15Validation: PHASE15_VERSION, phase15RealRuntimeValidation: PHASE15_VERSION, phase15AndroidValidation: PHASE15_VERSION
   };
 
   const fileModules = {
@@ -189,7 +191,11 @@
     "17_external_intelligence_knowledge_boundary.js": "knowledgeBoundary",
     "17_external_intelligence_phase14_validation.js": "phase14Validation",
     "17_external_intelligence_phase14_real_runtime_validation.js": "phase14RealRuntimeValidation",
-    "17_external_intelligence_phase14_android_validation.js": "phase14AndroidValidation"
+    "17_external_intelligence_phase14_android_validation.js": "phase14AndroidValidation",
+    "17_external_intelligence_validation_framework.js": "validationFramework",
+    "17_external_intelligence_phase15_validation.js": "phase15Validation",
+    "17_external_intelligence_phase15_real_runtime_validation.js": "phase15RealRuntimeValidation",
+    "17_external_intelligence_phase15_android_validation.js": "phase15AndroidValidation"
   };
 
   const contractVersions = {
@@ -260,7 +266,8 @@
     reliabilitySignal: PHASE10_VERSION, evidenceQualitySignal: PHASE10_VERSION, reliabilityCandidate: PHASE10_VERSION, reliabilityInputPackage: PHASE10_VERSION, predictionRecord: PHASE10_VERSION, benchmarkDefinition: PHASE10_VERSION, outcomeRecord: PHASE10_VERSION, outcomeEvaluation: PHASE10_VERSION, phase10ValidationResult: PHASE10_VERSION, baselineRecord: PHASE11_VERSION, signalRecord: PHASE11_VERSION, signalCluster: PHASE11_VERSION, researchQuestion: PHASE11_VERSION, hypothesisRecord: PHASE11_VERSION, researchPriorityRecord: PHASE11_VERSION, phase11ValidationResult: PHASE11_VERSION,
     workItem: PHASE12_VERSION, workGraph: PHASE12_VERSION, workAssignment: PHASE12_VERSION, workflowConflict: PHASE12_VERSION, emergencyEvent: PHASE12_VERSION, emergencyDecision: PHASE12_VERSION, phase12ValidationResult: PHASE12_VERSION,
     socialObservation: PHASE13_VERSION, socialNarrative: PHASE13_VERSION, socialNarrativeShift: PHASE13_VERSION, socialPropagationRecord: PHASE13_VERSION, socialAuthorProfile: PHASE13_VERSION, socialCoordinationCandidate: PHASE13_VERSION, socialAccountCluster: PHASE13_VERSION, socialAmplificationAssessment: PHASE13_VERSION, oldInformationResurgence: PHASE13_VERSION, socialPumpPatternCandidate: PHASE13_VERSION, socialMarketReaction: PHASE13_VERSION, socialInfluenceEvaluation: PHASE13_VERSION, phase13ValidationResult: PHASE13_VERSION,
-    externalEvidenceReference: PHASE14_VERSION, federatedReadRequest: PHASE14_VERSION, federatedReadResult: PHASE14_VERSION, knowledgeCandidate: PHASE14_VERSION, knowledgePromotionBoundary: PHASE14_VERSION, externalIntelligenceRequest: PHASE14_VERSION, externalIntelligencePackage: PHASE14_VERSION, phase14ValidationResult: PHASE14_VERSION
+    externalEvidenceReference: PHASE14_VERSION, federatedReadRequest: PHASE14_VERSION, federatedReadResult: PHASE14_VERSION, knowledgeCandidate: PHASE14_VERSION, knowledgePromotionBoundary: PHASE14_VERSION, externalIntelligenceRequest: PHASE14_VERSION, externalIntelligencePackage: PHASE14_VERSION, phase14ValidationResult: PHASE14_VERSION,
+    validationSuite: PHASE15_VERSION, goldenValidationCase: PHASE15_VERSION, validationProfile: PHASE15_VERSION, validationEvidence: PHASE15_VERSION, releaseGate: PHASE15_VERSION, phase15ValidationResult: PHASE15_VERSION
   };
 
   const contractIds = {
@@ -368,7 +375,13 @@
     knowledgePromotionBoundary: "EXTERNAL-010-CONTRACT-KNOWLEDGE-PROMOTION-BOUNDARY",
     externalIntelligenceRequest: "EXTERNAL-010-CONTRACT-EXTERNAL-INTELLIGENCE-REQUEST",
     externalIntelligencePackage: "EXTERNAL-010-CONTRACT-EXTERNAL-INTELLIGENCE-PACKAGE",
-    phase14ValidationResult: "EXTERNAL-010-CONTRACT-PHASE14-VALIDATION-RESULT"
+    phase14ValidationResult: "EXTERNAL-010-CONTRACT-PHASE14-VALIDATION-RESULT",
+    validationSuite: "EXTERNAL-010-CONTRACT-VALIDATION-SUITE",
+    goldenValidationCase: "EXTERNAL-010-CONTRACT-GOLDEN-VALIDATION-CASE",
+    validationProfile: "EXTERNAL-010-CONTRACT-VALIDATION-PROFILE",
+    validationEvidence: "EXTERNAL-010-CONTRACT-VALIDATION-EVIDENCE",
+    releaseGate: "EXTERNAL-010-CONTRACT-RELEASE-GATE",
+    phase15ValidationResult: "EXTERNAL-010-CONTRACT-PHASE15-VALIDATION-RESULT"
   };
 
   const safety = {
@@ -731,7 +744,24 @@
     staleEqualsFalse: false,
     partialPackageEqualsCompleteCoverage: false,
     emergencyCompactAllowsEvidenceBypass: false,
-    packageRecommendationEqualsExecutionAuthority: false
+    packageRecommendationEqualsExecutionAuthority: false,
+
+    acquisitionSuccessEqualsParsingSuccess: false,
+    parsingSuccessEqualsNormalizationSuccess: false,
+    normalizationSuccessEqualsSemanticCorrectness: false,
+    semanticCorrectnessEqualsInformationTruth: false,
+    schemaValidEqualsFactuallyCorrect: false,
+    staleEqualsInvalid: false,
+    contradictionDetectedEqualsSystemError: false,
+    validationPassEqualsApproval: false,
+    validationPassEqualsAuthorityGrant: false,
+    validForPurposeAEqualsValidForPurposeB: false,
+    currentValidationEqualsHistoricalValidation: false,
+    historicalReplayEqualsOriginalProductionResult: false,
+    platformHealthEqualsInformationTruth: false,
+    systemValidationEqualsTruthAuthority: false,
+    mockPassEqualsRealRuntimeValidated: false,
+    validationFailureGrantsCanonicalModificationAuthority: false
   };
 
   const authorityPolicy = {
@@ -1122,6 +1152,30 @@
     canonicalMergeAllowed: false, automaticKnowledgePromotionAllowed: false,
     nativeIDE170PackageReuseClaimed: false, ide170IntegrationHook: true, ide180IntegrationHook: true
   };
+
+  const validationFramework = {
+    primaryDecision: "044",
+    supportingDecision: "054",
+    dimensions: ["STRUCTURAL","SEMANTIC","REFERENCE","LINEAGE","TEMPORAL","EVIDENCE","POLICY","SECURITY","FRESHNESS","COVERAGE","CONSISTENCY","CALIBRATION","OUTCOME","INTEGRATION"],
+    states: ["NOT_VALIDATED","VALIDATING","PASS","PASS_WITH_WARNINGS","PARTIAL","DEGRADED","FAIL","BLOCKED","INCONCLUSIVE","NOT_APPLICABLE","UNKNOWN"],
+    severities: ["INFO","WARNING","ERROR","CRITICAL"],
+    purposes: ["RESEARCH_USE","NAVIGATION_USE","PREDICTION_USE","BACKTEST_USE","EMERGENCY_USE","TRADING_CANDIDATE_USE","KNOWLEDGE_CANDIDATE_USE","AUDIT_USE"],
+    validationSuiteVersioned: true,
+    historicalValidationImmutable: true,
+    goldenDatasetSupportsFailureAmbiguity: true,
+    historicalReplayIsolated: true,
+    shadowDifferentialSupported: true,
+    runtimeHealthSeparatedFromTruth: true,
+    validationEvidenceRequiredForRelease: true,
+    persistenceReadbackSupported: true,
+    purposeSpecificGateRequired: true,
+    criticalFailureBlocksApplicablePurpose: true,
+    validationPassGrantsApproval: false,
+    validationPassGrantsAuthority: false,
+    truthAuthority: "EXTERNAL-020",
+    gatewayIntegrityDimensions: ["GATEWAY_SESSION","ORIGIN","HOST","REQUEST_FRESHNESS","REPLAY_PROTECTION","SESSION_EXPIRATION","SESSION_REVOCATION","RUNTIME_SESSION_BINDING","SESSION_SECRET_REDACTION","AUTHENTICATION_AUTHORIZATION_SEPARATION"]
+  };
+
   const manifest = {
     componentId: "EXTERNAL-010",
     componentName: "External Intelligence Platform",
@@ -1130,8 +1184,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 14 Federated Evidence Read / Intelligence Package / Knowledge Boundary",
-      phase: 14,
+      implementationPhase: "Phase 15 Multi-Layer Validation Framework",
+      phase: 15,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -1140,7 +1194,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 14 Federated Evidence Read / Intelligence Package / Knowledge Boundary Implementation"
+      status: "Phase 15 Multi-Layer Validation Framework Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -1172,6 +1226,7 @@
     phase9Permissions: phase9Permissions,
     socialIntelligence: socialIntelligence,
     federatedIntelligence: federatedIntelligence,
+    validationFramework: validationFramework,
     implementation: {
       inspectBeforeImplement: true,
       contractFirst: true,
@@ -1200,8 +1255,10 @@
       phase13Allowed: true,
       phase13Complete: true,
       phase14Allowed: true,
-      phase14Complete: false,
-      phase15Allowed: false,
+      phase14Complete: true,
+      phase15Allowed: true,
+      phase15Complete: false,
+      phase16Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true
