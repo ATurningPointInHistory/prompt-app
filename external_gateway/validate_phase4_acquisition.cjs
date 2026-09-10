@@ -101,7 +101,7 @@ async function main() {
 
     gateway = start("gateway.cjs", { EXTERNAL010_GATEWAY_PORT: String(gatewayPort), EXTERNAL010_ALLOWED_ORIGINS: origin, EXTERNAL010_ACQUISITION_ALLOWED_HOSTS: host, EXTERNAL010_ALLOW_HTTP_ACQUISITION: "true" }, (type, text) => { if (type === "stdout") gatewayStdout += text; else gatewayStderr += text; });
     const health = await waitFor(gatewayPort, "/health");
-    check("Phase 04 Gateway runtime is ready", health.body && ["1.2.0", "1.3.0"].includes(health.body.gatewayVersion) && health.body.runtimeState === "READY", JSON.stringify(health.body));
+    check("Phase 04 Gateway runtime is ready", health.body && ["1.2.0", "1.3.0", "1.4.0"].includes(health.body.gatewayVersion) && health.body.runtimeState === "READY", JSON.stringify(health.body));
 
     const session = await request({ method: "POST", route: "/v1/session", headers: { Origin: origin, "X-EXTERNAL-010-Client": "AI-Prompt-OS-Browser", "X-EXTERNAL-010-Contract-Version": "1.0.0" }, body: { clientSessionId: "phase4-pc-validator", requestedScope: ["PROBE", "READ_RUNTIME", "ACQUIRE_PUBLIC"] } });
     check("Gateway session grants ACQUIRE_PUBLIC only when requested", session.status === 201 && session.body.session.scope.includes("ACQUIRE_PUBLIC"), JSON.stringify(session.body && session.body.session && session.body.session.scope));

@@ -93,7 +93,7 @@ async function stopGateway(child) {
 
 async function main() {
   const pkg = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
-  check("Gateway package version is compatible with Phase 02 baseline", ["1.2.0", "1.3.0"].includes(pkg.version), pkg.version);
+  check("Gateway package version is compatible with Phase 02 baseline", ["1.2.0", "1.3.0", "1.4.0"].includes(pkg.version), pkg.version);
   check("Gateway has zero external dependencies", Object.keys(pkg.dependencies || {}).length === 0 && Object.keys(pkg.devDependencies || {}).length === 0, JSON.stringify({ dependencies: pkg.dependencies, devDependencies: pkg.devDependencies }));
   check("Runtime Node version is captured", /^v\d+\./.test(process.version), process.version);
 

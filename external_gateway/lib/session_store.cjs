@@ -47,7 +47,7 @@ function createSessionStore(config, runtime, audit) {
       expiresAtMs: now + config.sessionTtlMs,
       state: "ACTIVE",
       origin: input.origin,
-      scope: new Set((Array.isArray(input.scope) ? input.scope.map((value) => String(value).toUpperCase()) : []).filter((value) => ["PROBE", "READ_RUNTIME", "ACQUIRE_PUBLIC", "PERSIST_EVIDENCE", "READ_EVIDENCE"].includes(value))),
+      scope: new Set((Array.isArray(input.scope) ? input.scope.map((value) => String(value).toUpperCase()) : []).filter((value) => ["PROBE", "READ_RUNTIME", "ACQUIRE_PUBLIC", "ACQUIRE_EXTERNAL", "READ_SECRET_METADATA", "PERSIST_EVIDENCE", "READ_EVIDENCE"].includes(value))),
       tokenHash: sha256(rawToken),
       usedRequestIds: new Map(),
       usedNonces: new Map()

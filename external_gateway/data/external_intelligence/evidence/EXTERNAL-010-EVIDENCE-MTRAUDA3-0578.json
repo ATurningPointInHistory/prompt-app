@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0.0",
+  "evidenceId": "EXTERNAL-010-EVIDENCE-MTRAUDA3-0578",
+  "rawEvidenceId": "EXTERNAL-010-RAW-MTRAUDA3-0579",
+  "contentHash": "3051d5c2272b21955ff61c03ce8b63496d1602ad9d67d3d03feca7f1ddd361e7",
+  "sourceId": "SOURCE-PHASE6-PC-PROTECTED-MTRAUD8O",
+  "acquiredAt": "2026-09-07T13:51:37.651Z",
+  "mediaType": "application/json",
+  "contentLocation": "content/sha256/30/51/3051d5c2272b21955ff61c03ce8b63496d1602ad9d67d3d03feca7f1ddd361e7",
+  "recordHash": "fe14194c15f3423142133ed8989eb5b447a7a5110de6012b23d30bcc83911f89",
+  "immutable": true
+}

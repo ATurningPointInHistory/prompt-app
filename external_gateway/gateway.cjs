@@ -8,13 +8,15 @@ const { createSecurity } = require("./lib/security.cjs");
 const { createSessionStore } = require("./lib/session_store.cjs");
 const { createAcquisition } = require("./lib/acquisition.cjs");
 const { createEvidenceStore } = require("./lib/evidence_store.cjs");
+const { createSecretStore } = require("./lib/secret_store.cjs");
 
 const config = buildConfig();
 const audit = createAudit();
 const runtime = createRuntime(config);
 const security = createSecurity(config, audit);
 const sessions = createSessionStore(config, runtime, audit);
-const acquisition = createAcquisition(config, audit);
+const secretStore = createSecretStore(config, audit);
+const acquisition = createAcquisition(config, audit, secretStore);
 const evidenceStore = createEvidenceStore(config, audit);
 
 function sendJson(req, res, status, body, cors) {
@@ -164,6 +166,32 @@ async function route(req, res) {
   }
 
 
+  if (req.url === "/v1/acquire/governed" && req.method === "POST") {
+    const integrity = validateProtectedRequest(req, res, "ACQUIRE_EXTERNAL");
+    if (!integrity) return;
+    if (!String(req.headers["content-type"] || "").toLowerCase().startsWith("application/json")) return reject(req, res, 415, "JSON_REQUIRED");
+    let body;
+    try { body = await readJson(req); }
+    catch (error) { return reject(req, res, error.code === "BODY_TOO_LARGE" ? 413 : 400, error.code || "INVALID_BODY"); }
+    try {
+      const result = await acquisition.acquireGoverned(body, integrity);
+      return sendJson(req, res, 200, { ok: true, code: "GOVERNED_ACQUISITION_SUCCEEDED", acquisition: result }, true);
+    } catch (error) {
+      const status = Number(error && error.status) || 502;
+      audit.append("GATEWAY_GOVERNED_ACQUISITION_REJECTED", "Rejected", { code: error && error.code || "GOVERNED_ACQUISITION_FAILED", category: error && error.category || "SOURCE_UNAVAILABLE", providerStatus: error && error.providerStatus || null, requestId: integrity.requestId, secretValueLogged: false });
+      return sendJson(req, res, status, { ok: false, code: error && error.code || "GOVERNED_ACQUISITION_FAILED", category: error && error.category || "SOURCE_UNAVAILABLE", status: status >= 500 ? "Failed" : "Blocked", retryable: error && error.retryable === true, providerStatus: error && error.providerStatus || null, message: error && error.message ? String(error.message).slice(0, 256) : "Governed acquisition failed", secretValueReturned: false }, true);
+    }
+  }
+
+  if (req.url === "/v1/secret/status" && req.method === "POST") {
+    const integrity = validateProtectedRequest(req, res, "READ_SECRET_METADATA");
+    if (!integrity) return;
+    let body; try { body = await readJson(req); } catch (error) { return reject(req, res, 400, error.code || "INVALID_BODY"); }
+    const secretReferenceId = String(body.secretReferenceId || "").toUpperCase();
+    const status = secretStore.status(secretReferenceId, body.secretType || null);
+    return sendJson(req, res, status.ok ? 200 : 404, { ok: status.ok, code: status.code, secretMetadata: status.metadata, secretValueReturned: false }, true);
+  }
+
   if (req.url === "/v1/evidence/persist" && req.method === "POST") {
     const integrity = validateProtectedRequest(req, res, "PERSIST_EVIDENCE");
     if (!integrity) return;
@@ -255,4 +283,4 @@ function shutdown(signal) {
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 
-module.exports = { server, config, runtime, sessions, audit, acquisition, evidenceStore };
+module.exports = { server, config, runtime, sessions, audit, acquisition, evidenceStore, secretStore };
