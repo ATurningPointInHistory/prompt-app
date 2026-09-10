@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AI Prompt OS Selectable Launcher v1.4.1
+AI Prompt OS Selectable Launcher v1.4.3
 
 Canonical Gateway Edition
 
@@ -23,6 +23,7 @@ external_gateway\\start_phase6_pc_runtime.bat
 The normal launcher intentionally does NOT start the Phase 06 fixture.
 """
 
+import hashlib
 import json
 import math
 import os
@@ -38,12 +39,13 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 
-PROJECT_ROOT = Path(r"C:\AI_Prompt_OS")
+PROJECT_ROOT = Path(__file__).resolve().parent
 GATEWAY_DIR = PROJECT_ROOT / "external_gateway"
 GATEWAY_BAT = GATEWAY_DIR / "start_external_gateway.bat"
 
 WEB_URL = "http://localhost:8000/"
 WEB_PORT = 8000
+WEB_IDENTITY_FILE = "00_script_manifest.json"
 GATEWAY_PORT = 43110
 GATEWAY_HEALTH_URL = f"http://127.0.0.1:{GATEWAY_PORT}/health"
 GATEWAY_EXPECTED_COMPONENT = "EXTERNAL-010"
@@ -97,6 +99,87 @@ def port_open(port):
             return True
     except OSError:
         return False
+
+
+def normalized_project_root(value):
+    try:
+        return os.path.normcase(os.path.normpath(str(Path(value).resolve())))
+    except Exception:
+        return os.path.normcase(os.path.normpath(str(value)))
+
+
+def state_matches_project(state):
+    stored_root = state.get("project_root")
+    if not stored_root:
+        return False
+    return normalized_project_root(stored_root) == normalized_project_root(PROJECT_ROOT)
+
+
+def sha256_bytes(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def web_server_identity():
+    if not port_open(WEB_PORT):
+        return {"ok": False, "state": "STOPPED", "reason": "PORT_CLOSED"}
+
+    local_identity = PROJECT_ROOT / WEB_IDENTITY_FILE
+    if not local_identity.exists():
+        return {
+            "ok": False,
+            "state": "INVALID",
+            "reason": "LOCAL_IDENTITY_FILE_MISSING",
+        }
+
+    local_bytes = local_identity.read_bytes()
+    local_hash = sha256_bytes(local_bytes)
+    identity_url = f"{WEB_URL}{WEB_IDENTITY_FILE}?launcher_identity={time.time_ns()}"
+
+    try:
+        request = urllib.request.Request(
+            identity_url,
+            headers={"Accept": "application/json", "Cache-Control": "no-cache"},
+            method="GET",
+        )
+        with urllib.request.urlopen(request, timeout=0.8) as response:
+            if response.status != 200:
+                return {
+                    "ok": False,
+                    "state": "INVALID",
+                    "reason": f"HTTP_{response.status}",
+                    "localHash": local_hash,
+                }
+            remote_bytes = response.read()
+    except (OSError, urllib.error.URLError) as exc:
+        return {
+            "ok": False,
+            "state": "INVALID",
+            "reason": type(exc).__name__,
+            "localHash": local_hash,
+        }
+
+    remote_hash = sha256_bytes(remote_bytes)
+    ok = remote_hash == local_hash
+    return {
+        "ok": ok,
+        "state": "READY" if ok else "MISMATCH",
+        "reason": "PASS" if ok else "PROJECT_ROOT_MISMATCH",
+        "localHash": local_hash,
+        "remoteHash": remote_hash,
+        "identityFile": WEB_IDENTITY_FILE,
+    }
+
+
+def wait_for_web_ready(timeout=STARTUP_TIMEOUT):
+    deadline = time.time() + timeout
+    last = {"ok": False, "state": "STOPPED", "reason": "NOT_CHECKED"}
+    while time.time() < deadline:
+        last = web_server_identity()
+        if last.get("ok"):
+            return True, last
+        time.sleep(0.35)
+    last = web_server_identity()
+    return bool(last.get("ok")), last
 
 
 def gateway_health():
@@ -209,8 +292,16 @@ def start_web_server():
     state = cleanup_stale_state()
 
     if port_open(WEB_PORT):
-        log("Web Server already available; duplicate start skipped")
-        return "already"
+        identity = web_server_identity()
+        if identity.get("ok"):
+            log("Web Server already available for current Project Root; duplicate start skipped")
+            return "already"
+        raise RuntimeError(
+            "port 8000 は使用中ですが、現在のAI Prompt OS Projectと一致しません。\n"
+            f"Current Project: {PROJECT_ROOT}\n"
+            f"Reason: {identity.get('reason', 'UNKNOWN')}\n\n"
+            "旧版または別フォルダのWeb Serverを停止してから再実行してください。"
+        )
 
     if not PROJECT_ROOT.exists():
         raise FileNotFoundError(f"Project folder not found:\n{PROJECT_ROOT}")
@@ -221,8 +312,9 @@ def start_web_server():
         PROJECT_ROOT,
     )
     state["web_pid"] = proc.pid
+    state["project_root"] = str(PROJECT_ROOT)
     save_state(state)
-    log(f"Web Server started PID={proc.pid}")
+    log(f"Web Server started PID={proc.pid} PROJECT_ROOT={PROJECT_ROOT}")
     return "started"
 
 
@@ -252,6 +344,7 @@ def start_gateway():
         GATEWAY_DIR,
     )
     state["gateway_pid"] = proc.pid
+    state["project_root"] = str(PROJECT_ROOT)
     save_state(state)
     log(f"Canonical Gateway launcher started PID={proc.pid}")
     return "started"
@@ -268,9 +361,14 @@ def wait_for_ports(required_ports, timeout=STARTUP_TIMEOUT):
 
 def owned_state():
     state = cleanup_stale_state()
+    same_project = state_matches_project(state)
     return {
-        "web_owned": bool(state.get("web_pid") and pid_running(state.get("web_pid"))),
-        "gateway_owned": bool(state.get("gateway_pid") and pid_running(state.get("gateway_pid"))),
+        "web_owned": bool(
+            same_project and state.get("web_pid") and pid_running(state.get("web_pid"))
+        ),
+        "gateway_owned": bool(
+            same_project and state.get("gateway_pid") and pid_running(state.get("gateway_pid"))
+        ),
     }
 
 
@@ -278,7 +376,7 @@ def stop_web_server():
     state = cleanup_stale_state()
     pid = state.get("web_pid")
 
-    if pid and pid_running(pid):
+    if pid and pid_running(pid) and state_matches_project(state):
         log(f"Stopping Web Server PID={pid}")
         ok = kill_process_tree(pid)
         state.pop("web_pid", None)
@@ -298,7 +396,7 @@ def stop_gateway():
     state = cleanup_stale_state()
     pid = state.get("gateway_pid")
 
-    if pid and pid_running(pid):
+    if pid and pid_running(pid) and state_matches_project(state):
         log(f"Stopping Canonical Gateway PID={pid}")
         ok = kill_process_tree(pid)
         state.pop("gateway_pid", None)
@@ -322,10 +420,13 @@ class LauncherApp:
         self.status_text = tk.StringVar(value="起動モードを選択してください")
         self.web_text = tk.StringVar()
         self.gateway_text = tk.StringVar()
+        self.last_web_identity = None
+        self.last_gateway_health = None
 
         self.setup_style()
         self.build_ui()
-        self.refresh_status()
+        # Launcher open: perform one explicit deep identity / health check.
+        self.refresh_status(deep_check=True)
         self.fit_window_to_content()
         self.schedule_refresh()
 
@@ -367,7 +468,7 @@ class LauncherApp:
 
         ttk.Label(
             header,
-            text="AI Prompt OS Launcher v1.4.1 / Canonical Gateway",
+            text="AI Prompt OS Launcher v1.4.3 / Canonical Gateway",
             style="SubTitle.TLabel",
             anchor="center",
         ).grid(row=1, column=0, sticky="ew", pady=(0, 12))
@@ -495,7 +596,7 @@ class LauncherApp:
             utility_frame,
             text="状態更新",
             style="Small.TButton",
-            command=self.refresh_status,
+            command=lambda: self.refresh_status(deep_check=True),
         ).grid(row=0, column=1, sticky="ew", padx=8)
 
         ttk.Button(
@@ -553,10 +654,12 @@ class LauncherApp:
         self.root.geometry(f"{target_w}x{target_h}+{x}+{y}")
 
     def schedule_refresh(self):
-        self.refresh_status()
+        # Lightweight refresh only: port / owned-process state.
+        # Do not poll manifest or Gateway health every 2 seconds.
+        self.refresh_status(deep_check=False)
         self.root.after(2000, self.schedule_refresh)
 
-    def refresh_status(self):
+    def refresh_status(self, deep_check=False):
         ownership = owned_state()
 
         web_ok = port_open(WEB_PORT)
@@ -564,14 +667,38 @@ class LauncherApp:
 
         if web_ok:
             source = "Launcher" if ownership["web_owned"] else "External"
-            self.web_text.set(f"Web Server : READY    port {WEB_PORT}   [{source}]")
+            if deep_check:
+                self.last_web_identity = web_server_identity()
+
+            identity = self.last_web_identity
+            if identity is None:
+                self.web_text.set(
+                    f"Web Server : LISTENING port {WEB_PORT}   [{source} / Identity not checked]"
+                )
+            elif identity.get("ok"):
+                self.web_text.set(
+                    f"Web Server : READY    port {WEB_PORT}   [{source} / Project MATCH]"
+                )
+            else:
+                self.web_text.set(
+                    f"Web Server : MISMATCH port {WEB_PORT}   [{source}] "
+                    f"({identity.get('reason', 'UNKNOWN')})"
+                )
         else:
+            self.last_web_identity = None
             self.web_text.set(f"Web Server : STOPPED  port {WEB_PORT}")
 
         if gateway_ok:
             source = "Launcher" if ownership["gateway_owned"] else "External"
-            health = gateway_health()
-            if health.get("ok"):
+            if deep_check:
+                self.last_gateway_health = gateway_health()
+
+            health = self.last_gateway_health
+            if health is None:
+                self.gateway_text.set(
+                    f"Gateway    : LISTENING port {GATEWAY_PORT}  [{source} / Health not checked]"
+                )
+            elif health.get("ok"):
                 self.gateway_text.set(f"Gateway    : READY    port {GATEWAY_PORT}  [{source}]")
             else:
                 self.gateway_text.set(
@@ -579,6 +706,7 @@ class LauncherApp:
                     f"({health.get('reason', 'UNKNOWN')})"
                 )
         else:
+            self.last_gateway_health = None
             self.gateway_text.set(f"Gateway    : STOPPED  port {GATEWAY_PORT}")
 
     def set_busy(self, busy=True):
@@ -594,10 +722,15 @@ class LauncherApp:
             try:
                 start_web_server()
 
-                if not wait_for_ports([WEB_PORT]):
-                    raise RuntimeError("Web Server port 8000 がREADYになりませんでした。")
+                web_ready, web_detail = wait_for_web_ready()
+                if not web_ready:
+                    raise RuntimeError(
+                        "Web Serverが現在のProject RootとしてREADYになりませんでした。\n"
+                        f"Reason: {web_detail.get('reason', 'UNKNOWN')}"
+                    )
 
-                self.root.after(0, self.refresh_status)
+                self.last_web_identity = web_detail
+                self.root.after(0, lambda: self.refresh_status(deep_check=False))
                 self.root.after(0, lambda: self.status_text.set("通常モード READY"))
                 self.root.after(0, lambda: webbrowser.open(WEB_URL))
 
@@ -607,7 +740,7 @@ class LauncherApp:
                 self.root.after(0, lambda: self.status_text.set("通常モード起動 FAIL"))
             finally:
                 self.root.after(0, lambda: self.set_busy(False))
-                self.root.after(0, self.refresh_status)
+                self.root.after(0, lambda: self.refresh_status(deep_check=False))
 
         threading.Thread(target=worker, daemon=True).start()
 
@@ -620,12 +753,13 @@ class LauncherApp:
                 start_web_server()
                 start_gateway()
 
-                web_ready = wait_for_ports([WEB_PORT])
+                web_ready, web_detail = wait_for_web_ready()
                 gateway_ready, gateway_detail = wait_for_gateway_ready()
 
                 if not web_ready or not gateway_ready:
                     details = (
-                        f"Web Server 8000 : {'READY' if port_open(WEB_PORT) else 'NG'}\n"
+                        f"Web Server 8000 : {'READY' if web_ready else 'NG'}\n"
+                        f"Web Project     : {web_detail.get('reason', 'UNKNOWN')}\n"
                         f"Gateway 43110   : {'READY' if gateway_ready else 'NG'}\n"
                         f"Gateway Health  : {gateway_detail.get('reason', 'UNKNOWN')}"
                     )
@@ -635,7 +769,9 @@ class LauncherApp:
                         + "\n\n黒いConsole画面のエラーを確認してください。"
                     )
 
-                self.root.after(0, self.refresh_status)
+                self.last_web_identity = web_detail
+                self.last_gateway_health = gateway_detail
+                self.root.after(0, lambda: self.refresh_status(deep_check=False))
                 self.root.after(0, lambda: self.status_text.set("Canonical Gateway付きモード READY"))
                 self.root.after(0, lambda: webbrowser.open(WEB_URL))
 
@@ -645,7 +781,7 @@ class LauncherApp:
                 self.root.after(0, lambda: self.status_text.set("Canonical Gateway起動 FAIL"))
             finally:
                 self.root.after(0, lambda: self.set_busy(False))
-                self.root.after(0, self.refresh_status)
+                self.root.after(0, lambda: self.refresh_status(deep_check=False))
 
         threading.Thread(target=worker, daemon=True).start()
 
@@ -708,7 +844,7 @@ class LauncherApp:
 
 def main():
     ensure_state_dir()
-    log("Launcher v1.4.1 opened")
+    log(f"Launcher v1.4.3 opened PROJECT_ROOT={PROJECT_ROOT}")
     root = tk.Tk()
     app = LauncherApp(root)
     root.after(150, app.fit_window_to_content)

@@ -1,8 +1,8 @@
-﻿@echo off
+@echo off
 setlocal
-cd /d C:\AI_Prompt_OS
+cd /d "%~dp0"
 
-set "LAUNCHER=C:\AI_Prompt_OS\AI_Prompt_OS_Launcher.pyw"
+set "LAUNCHER=%~dp0AI_Prompt_OS_Launcher.pyw"
 
 if not exist "%LAUNCHER%" (
     echo Launcher not found:
