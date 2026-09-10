@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_validation_framework.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.14.0
+   Release: 1.14.1
    Phase 15: Multi-Layer Validation Framework
    Primary Decision: 044
    Supporting Decision: 054

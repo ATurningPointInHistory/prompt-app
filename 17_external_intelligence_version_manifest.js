@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.14.0
+   Release: 1.14.1
    Phase 15: Multi-Layer Validation Framework
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.14.0";
+  const RELEASE_VERSION = "1.14.1";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -23,7 +23,7 @@
   const PHASE12_VERSION = "1.11.0";
   const PHASE13_VERSION = "1.12.0";
   const PHASE14_VERSION = "1.13.0";
-  const PHASE15_VERSION = "1.14.0";
+  const PHASE15_VERSION = "1.14.1";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";

@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_contracts.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.14.0
+   Release: 1.14.1
    Phase 15: Contract Registry extended for Multi-Layer Validation
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */

@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_phase15_real_runtime_validation.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.14.0
+   Release: 1.14.1
    Phase 15 PC Real Runtime Validation
    Primary Decision: 044 / Supporting Decision: 054
    ============================================================ */
@@ -22,6 +22,8 @@
     add("PC browser runtime reports DOM capability", typeof global.document !== "undefined", typeof global.document, "Runtime");
     add("Web Crypto API available", Boolean(global.crypto && global.crypto.subtle), String(Boolean(global.crypto && global.crypto.subtle)), "Runtime");
     add("Phase 15 Validation Framework APIs loaded", ["runExternalIntelligenceValidation","createExternalIntelligenceReleaseGate","evaluateExternalIntelligenceGatewayRequestIntegrity","readBackExternalIntelligenceValidationRecord"].every(function has(key) { return typeof namespace[key] === "function"; }), "Phase15 API surface", "Runtime");
+    const persistenceState = namespace.getExternalIntelligenceValidationFrameworkState();
+    add("PC functional validation leaves production persistence on LocalStorage, not Memory", persistenceState.persistenceAdapterId === "EXTERNAL-010-VALIDATION-PERSISTENCE-LOCAL-STORAGE", persistenceState.persistenceAdapterId, "Persistence");
 
     const health = await namespace.getExternalIntelligenceGatewayHealth();
     add("PC Gateway health is READY", health.ok === true && health.data && health.data.health && health.data.health.gatewayAvailable === true, health.data || health.code, "Gateway Runtime");

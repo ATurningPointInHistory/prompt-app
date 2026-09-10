@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_phase15_android_validation.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.14.0
+   Release: 1.14.1
    Phase 15 Android Real Device Validation
    Primary Decision: 044 / Supporting Decision: 054
    ============================================================ */
@@ -28,7 +28,8 @@
     add("Validation PASS does not grant approval or authority on Android", VERSION_MANIFEST.safety.validationPassEqualsApproval === false && VERSION_MANIFEST.safety.validationPassEqualsAuthorityGrant === false, VERSION_MANIFEST.safety, "Authority");
     add("Gateway Session remains separate from business authority", VERSION_MANIFEST.safety.gatewaySessionEqualsBusinessAuthority === false && VERSION_MANIFEST.safety.corsEqualsAuthentication === false, VERSION_MANIFEST.safety, "Decision 054");
     add("No Android-local Node Gateway dependency was introduced by Phase 15", VERSION_MANIFEST.gateway.gatewayVersion === "1.4.0", VERSION_MANIFEST.gateway.gatewayVersion, "Compatibility");
-    add("Validation persistence has an explicit adapter boundary", typeof namespace.createExternalIntelligenceMemoryValidationPersistenceAdapter === "function" && typeof namespace.setExternalIntelligenceValidationPersistenceAdapter === "function", framework.persistenceAdapterId || "adapter API available", "Persistence");
+    add("Validation persistence has an explicit adapter boundary", typeof namespace.createExternalIntelligenceMemoryValidationPersistenceAdapter === "function" && typeof namespace.createExternalIntelligenceLocalStorageValidationPersistenceAdapter === "function" && typeof namespace.setExternalIntelligenceValidationPersistenceAdapter === "function", framework.persistenceAdapterId || "adapter API available", "Persistence");
+    add("Android functional validation leaves production persistence on LocalStorage, not Memory", framework.persistenceAdapterId === "EXTERNAL-010-VALIDATION-PERSISTENCE-LOCAL-STORAGE", framework.persistenceAdapterId, "Persistence");
     add("Real Runtime remains distinct from Mock/Functional validation", VERSION_MANIFEST.safety.mockPassEqualsRealRuntimeValidated === false, String(VERSION_MANIFEST.safety.mockPassEqualsRealRuntimeValidated), "Safety");
 
     const passed = checks.filter(function pass(item) { return item.passed; }).length;

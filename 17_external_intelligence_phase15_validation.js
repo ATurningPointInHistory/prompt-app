@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_phase15_validation.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.14.0
+   Release: 1.14.1
    Phase 15: Multi-Layer Validation Framework Validation
    Primary Decision: 044
    Supporting Decision: 054
@@ -37,7 +37,7 @@
       checks.push({ name: name, passed: passed === true, detail: detail == null ? "" : (typeof detail === "string" ? detail : internal.stableStringify(detail)), group: group || "Phase 15", severity: severity || "Critical" });
     }
 
-    add("Release is Phase 15 v1.14.0 compatible", VERSION_MANIFEST.isReleaseCompatibleFrom("1.14.0"), VERSION_MANIFEST.release.version, "Foundation");
+    add("Release is Phase 15 v1.14.1 compatible", VERSION_MANIFEST.isReleaseCompatibleFrom("1.14.1"), VERSION_MANIFEST.release.version, "Foundation");
     add("Implementation Phase is Phase 15", VERSION_MANIFEST.release.phase === 15, VERSION_MANIFEST.release.implementationPhase, "Foundation");
     add("Phase 15 primary/supporting Decisions are 044 / 054", namespace.modules.phase15Validation.primaryDecision === "044" && namespace.modules.phase15Validation.supportingDecision === "054", namespace.modules.phase15Validation, "Foundation");
     add("Gateway remains unchanged at 1.4.0", VERSION_MANIFEST.gateway.gatewayVersion === "1.4.0", VERSION_MANIFEST.gateway.gatewayVersion, "Boundary");
@@ -67,27 +67,69 @@
     const evidenceRef = namespace.registerExternalIntelligenceEvidenceReference({ evidenceReferenceId: "EVIDENCE-REF-P15", sourceId: sourceId, evidenceId: "EVIDENCE-P15", contentId: "CONTENT-P15", acquiredAt: internal.nowIso(), availableAt: "2026-09-10T10:00:00.000Z", freshnessState: "FRESH", reliabilityState: "UNASSESSED" });
     add("Phase 15 fixture Evidence Reference is available without becoming Knowledge", evidenceRef.ok === true && evidenceRef.data.evidenceReference.knowledgeIdentityAssigned === false, evidenceRef, "Fixture");
 
-    const memoryPersistence = namespace.createExternalIntelligenceMemoryValidationPersistenceAdapter();
-    const persistenceSet = namespace.setExternalIntelligenceValidationPersistenceAdapter(memoryPersistence);
-    add("Validation Result persistence adapter is explicitly configured", persistenceSet.ok === true, persistenceSet, "Persistence");
+    const originalPersistenceAdapter = state.validationPersistence.adapter;
+    const originalPersistenceAdapterId = state.validationPersistence.adapterId;
+    add("Default browser Validation persistence is not the temporary Memory adapter", !global.localStorage || originalPersistenceAdapterId === "EXTERNAL-010-VALIDATION-PERSISTENCE-LOCAL-STORAGE", { adapterId: originalPersistenceAdapterId }, "Persistence");
 
-    const validResult = await namespace.runExternalIntelligenceValidation({
-      targetRecordId: "EVIDENCE-REF-P15", targetRecordVersion: "1", targetSchemaVersion: "1.13.0",
-      targetRecord: evidenceRef.data.evidenceReference, schemaId: "EXTERNAL-010-SCHEMA-EXTERNAL-EVIDENCE-REFERENCE",
-      purpose: "RESEARCH_USE", references: [{ type: "SOURCE", id: sourceId }, { type: "EVIDENCE", id: "EVIDENCE-REF-P15" }],
-      evidenceIds: ["EVIDENCE-REF-P15"], sourceId: sourceId, policyOperation: "READ", securityState: "CLEAN",
-      freshnessState: "FRESH", coverageState: "COMPLETE", temporalIntent: "AS_OF", decisionTime: "2026-09-10T12:00:00.000Z", availableAt: "2026-09-10T10:00:00.000Z",
-      dimensionOverrides: [{ dimension: "LINEAGE", state: "PASS", severity: "INFO", code: "FIXTURE_LINEAGE_VALID", details: { validationFixture: true } }],
-      validationEnvironment: "PHASE15_FUNCTIONAL"
-    });
-    const validProfile = validResult.data && validResult.data.validationProfile;
-    add("Multi-layer validation creates an immutable purpose-specific profile", validResult.ok === true && validProfile && validProfile.purpose === "RESEARCH_USE" && validProfile.immutable === true, validProfile, "Validation Profile");
+    const memoryPersistence = namespace.createExternalIntelligenceMemoryValidationPersistenceAdapter();
+    let validResult = null;
+    let validProfile = null;
+    let readback = null;
+    try {
+      const persistenceSet = namespace.setExternalIntelligenceValidationPersistenceAdapter(memoryPersistence);
+      add("Temporary Memory persistence adapter can be explicitly configured for isolated validation", persistenceSet.ok === true && state.validationPersistence.adapterId === "EXTERNAL-010-VALIDATION-PERSISTENCE-MEMORY", persistenceSet, "Persistence");
+
+      validResult = await namespace.runExternalIntelligenceValidation({
+        targetRecordId: "EVIDENCE-REF-P15", targetRecordVersion: "1", targetSchemaVersion: "1.13.0",
+        targetRecord: evidenceRef.data.evidenceReference, schemaId: "EXTERNAL-010-SCHEMA-EXTERNAL-EVIDENCE-REFERENCE",
+        purpose: "RESEARCH_USE", references: [{ type: "SOURCE", id: sourceId }, { type: "EVIDENCE", id: "EVIDENCE-REF-P15" }],
+        evidenceIds: ["EVIDENCE-REF-P15"], sourceId: sourceId, policyOperation: "READ", securityState: "CLEAN",
+        freshnessState: "FRESH", coverageState: "COMPLETE", temporalIntent: "AS_OF", decisionTime: "2026-09-10T12:00:00.000Z", availableAt: "2026-09-10T10:00:00.000Z",
+        dimensionOverrides: [{ dimension: "LINEAGE", state: "PASS", severity: "INFO", code: "FIXTURE_LINEAGE_VALID", details: { validationFixture: true } }],
+        validationEnvironment: "PHASE15_FUNCTIONAL"
+      });
+      validProfile = validResult.data && validResult.data.validationProfile;
+      readback = validProfile ? await namespace.readBackExternalIntelligenceValidationRecord(validProfile.validationProfileId) : null;
+    } finally {
+      if (originalPersistenceAdapter) {
+        namespace.setExternalIntelligenceValidationPersistenceAdapter(originalPersistenceAdapter);
+      } else if (global.localStorage) {
+        namespace.setExternalIntelligenceValidationPersistenceAdapter(namespace.createExternalIntelligenceLocalStorageValidationPersistenceAdapter());
+      }
+    }
+
+    add("Multi-layer validation creates an immutable purpose-specific profile", validResult && validResult.ok === true && validProfile && validProfile.purpose === "RESEARCH_USE" && validProfile.immutable === true, validProfile, "Validation Profile");
     add("Validation PASS grants neither approval, authority, truth authority, nor promotion", validProfile && validProfile.approvalGranted === false && validProfile.authorityGranted === false && validProfile.truthAuthorityGranted === false && validProfile.canonicalPromotionPerformed === false, validProfile, "Authority");
     const validationLineage = namespace.traceExternalIntelligenceReverseProvenance(validProfile.validationProfileId);
     add("Validation Result is linked to target through immutable analytical lineage", validResult.data.lineage && validResult.data.lineage.ok === true && validationLineage.references.some(function has(item) { return item.referenceId === "EVIDENCE-REF-P15"; }), { lineage: validResult.data.lineage, trace: validationLineage }, "Lineage");
+    add("Temporary Memory validation persists and reads back without mutating historical result", readback && readback.ok === true && readback.data.record.validationProfileId === validProfile.validationProfileId && readback.data.record.immutable === true, readback, "Persistence");
+    add("Temporary Memory adapter is restored after isolated validation", state.validationPersistence.adapterId === originalPersistenceAdapterId && state.validationPersistence.adapter === originalPersistenceAdapter, { before: originalPersistenceAdapterId, after: state.validationPersistence.adapterId }, "Persistence");
 
-    const readback = await namespace.readBackExternalIntelligenceValidationRecord(validProfile.validationProfileId);
-    add("Validation Result persists and reads back without mutating historical result", readback.ok === true && readback.data.record.validationProfileId === validProfile.validationProfileId && readback.data.record.immutable === true, readback, "Persistence");
+    let localStoragePersistenceCheck = { supported: Boolean(global.localStorage), persisted: false, readBack: false, rawStored: false, restored: false, error: null };
+    if (global.localStorage) {
+      const probeStorageKey = "EXTERNAL010_VALIDATION_RESULTS_PHASE15_V1141_PROBE";
+      const restoreAdapter = state.validationPersistence.adapter;
+      const restoreAdapterId = state.validationPersistence.adapterId;
+      try {
+        global.localStorage.removeItem(probeStorageKey);
+        const localStorageAdapter = namespace.createExternalIntelligenceLocalStorageValidationPersistenceAdapter(probeStorageKey);
+        const localSet = namespace.setExternalIntelligenceValidationPersistenceAdapter(localStorageAdapter);
+        const persisted = await namespace.persistExternalIntelligenceValidationRecord(validProfile);
+        const localReadback = await namespace.readBackExternalIntelligenceValidationRecord(validProfile.validationProfileId);
+        const rawStored = global.localStorage.getItem(probeStorageKey);
+        localStoragePersistenceCheck.persisted = localSet.ok === true && persisted.ok === true;
+        localStoragePersistenceCheck.readBack = localReadback.ok === true && localReadback.data && localReadback.data.record && localReadback.data.record.validationProfileId === validProfile.validationProfileId;
+        localStoragePersistenceCheck.rawStored = typeof rawStored === "string" && rawStored.indexOf(validProfile.validationProfileId) >= 0;
+      } catch (error) {
+        localStoragePersistenceCheck.error = error && error.message || String(error);
+      } finally {
+        try { global.localStorage.removeItem(probeStorageKey); } catch (_) { /* cleanup best effort */ }
+        if (restoreAdapter) namespace.setExternalIntelligenceValidationPersistenceAdapter(restoreAdapter);
+        localStoragePersistenceCheck.restored = state.validationPersistence.adapter === restoreAdapter && state.validationPersistence.adapterId === restoreAdapterId;
+      }
+    }
+    add("Real LocalStorage persistence performs write/readback and restores production adapter", localStoragePersistenceCheck.supported && localStoragePersistenceCheck.persisted && localStoragePersistenceCheck.readBack && localStoragePersistenceCheck.rawStored && localStoragePersistenceCheck.restored, localStoragePersistenceCheck, "Persistence");
+    add("Production Validation persistence remains non-Memory after functional validation", state.validationPersistence.adapterId !== "EXTERNAL-010-VALIDATION-PERSISTENCE-MEMORY", { adapterId: state.validationPersistence.adapterId }, "Persistence");
 
     const evidence = namespace.createExternalIntelligenceValidationEvidence({ validationProfileId: validProfile.validationProfileId, testCaseId: "P15-VALID-BASELINE", expected: { state: "PASS" }, actual: { state: validProfile.overallState }, passed: validProfile.purposeAllowed === true, severity: "INFO", executionEnvironment: "PHASE15_FUNCTIONAL", relatedRecordIds: ["EVIDENCE-REF-P15"] });
     add("Validation Evidence is a separate immutable record", evidence.ok === true && evidence.data.validationEvidence.failedEvidencePreserved === true && evidence.data.validationEvidence.immutable === true, evidence, "Validation Evidence");
@@ -149,7 +191,7 @@
     const result = internal.deepFreeze({
       id: internal.nextId("EXTERNAL-010-PHASE15-VALIDATION"), componentId: "EXTERNAL-010", version: VERSION_MANIFEST.release.version,
       gatewayVersion: VERSION_MANIFEST.gateway.gatewayVersion, implementationPhase: VERSION_MANIFEST.release.implementationPhase,
-      decisionCoverage: 54, requirementCoverage: { primaryDecision: "044", supportingDecision: "054", multiLayerDimensions: 14, purposeSpecificSuites: 8, goldenDataset: true, persistenceReadback: true, releaseGate: true, gatewayIntegrityValidation: true },
+      decisionCoverage: 54, requirementCoverage: { primaryDecision: "044", supportingDecision: "054", multiLayerDimensions: 14, purposeSpecificSuites: 8, goldenDataset: true, persistenceReadback: true, localStoragePersistenceReadback: true, temporaryAdapterRestoration: true, releaseGate: true, gatewayIntegrityValidation: true },
       passed: passed, failed: failed, total: checks.length, health: checks.length ? Number((passed / checks.length * 100).toFixed(1)) : 0,
       criticalFailed: criticalFailed, status: failed === 0 ? "EXTERNAL-010 Phase 15 Validation PASS" : "EXTERNAL-010 Phase 15 Validation FAIL",
       releaseAllowed: failed === 0 && criticalFailed === 0, phase15Complete: failed === 0 && criticalFailed === 0, phase16Allowed: failed === 0 && criticalFailed === 0,
