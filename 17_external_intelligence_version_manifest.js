@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.15.0
-   Phase 16: Adaptive Monitoring / Notification Governance
+   Release: 1.16.0
+   Phase 17: Market Time-Series / Technical Intelligence Foundation
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.15.0";
+  const RELEASE_VERSION = "1.16.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -25,6 +25,7 @@
   const PHASE14_VERSION = "1.13.0";
   const PHASE15_VERSION = "1.14.1";
   const PHASE16_VERSION = "1.15.0";
+  const PHASE17_VERSION = "1.16.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -108,7 +109,8 @@
     socialObservation: PHASE13_VERSION, socialNarrative: PHASE13_VERSION, socialInfluence: PHASE13_VERSION, phase13Validation: PHASE13_VERSION, phase13RealRuntimeValidation: PHASE13_VERSION, phase13AndroidValidation: PHASE13_VERSION,
     federatedRead: PHASE14_VERSION, intelligencePackage: PHASE14_VERSION, knowledgeBoundary: PHASE14_VERSION, phase14Validation: PHASE14_VERSION, phase14RealRuntimeValidation: PHASE14_VERSION, phase14AndroidValidation: PHASE14_VERSION,
     validationFramework: PHASE15_VERSION, phase15Validation: PHASE15_VERSION, phase15RealRuntimeValidation: PHASE15_VERSION, phase15AndroidValidation: PHASE15_VERSION,
-    monitoringWatch: PHASE16_VERSION, monitoringChange: PHASE16_VERSION, notificationGovernance: PHASE16_VERSION, phase16Validation: PHASE16_VERSION, phase16RealRuntimeValidation: PHASE16_VERSION, phase16AndroidValidation: PHASE16_VERSION
+    monitoringWatch: PHASE16_VERSION, monitoringChange: PHASE16_VERSION, notificationGovernance: PHASE16_VERSION, phase16Validation: PHASE16_VERSION, phase16RealRuntimeValidation: PHASE16_VERSION, phase16AndroidValidation: PHASE16_VERSION,
+    marketIdentity: PHASE17_VERSION, marketTimeSeries: PHASE17_VERSION, technicalIndicator: PHASE17_VERSION, technicalSignal: PHASE17_VERSION, pythonWorker: PHASE17_VERSION, phase17Validation: PHASE17_VERSION, phase17RealRuntimeValidation: PHASE17_VERSION, phase17AndroidValidation: PHASE17_VERSION
   };
 
   const fileModules = {
@@ -203,7 +205,14 @@
     "17_external_intelligence_notification_governance.js": "notificationGovernance",
     "17_external_intelligence_phase16_validation.js": "phase16Validation",
     "17_external_intelligence_phase16_real_runtime_validation.js": "phase16RealRuntimeValidation",
-    "17_external_intelligence_phase16_android_validation.js": "phase16AndroidValidation"
+    "17_external_intelligence_phase16_android_validation.js": "phase16AndroidValidation",
+    "17_external_intelligence_market_identity.js": "marketIdentity",
+    "17_external_intelligence_market_timeseries.js": "marketTimeSeries",
+    "17_external_intelligence_technical_indicator.js": "technicalIndicator",
+    "17_external_intelligence_technical_signal.js": "technicalSignal",
+    "17_external_intelligence_phase17_validation.js": "phase17Validation",
+    "17_external_intelligence_phase17_real_runtime_validation.js": "phase17RealRuntimeValidation",
+    "17_external_intelligence_phase17_android_validation.js": "phase17AndroidValidation"
   };
 
   const contractVersions = {
@@ -1261,8 +1270,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 16 Adaptive Monitoring / Notification Governance",
-      phase: 16,
+      implementationPhase: "Phase 17 Market Time-Series / Technical Intelligence Foundation",
+      phase: 17,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -1338,8 +1347,10 @@
       phase15Allowed: true,
       phase15Complete: true,
       phase16Allowed: true,
-      phase16Complete: false,
-      phase17Allowed: false,
+      phase16Complete: true,
+      phase17Allowed: true,
+      phase17Complete: false,
+      phase18Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true

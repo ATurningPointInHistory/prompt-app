@@ -1,0 +1,33 @@
+{
+  "id": "EXTERNAL-010-PHASE17-DIFF-MANIFEST-2026-09-11",
+  "componentId": "EXTERNAL-010",
+  "version": "1.16.0",
+  "gatewayVersion": "1.4.0",
+  "implementationPhase": "Phase 17 Market Time-Series / Technical Intelligence Foundation",
+  "primaryDecision": "047",
+  "baseline": "AI_Prompt_OS Phase16 v1.15.0 PC_ANDROID_READY / final DIFF applied",
+  "newFiles": [
+    "17_external_intelligence_market_identity.js",
+    "17_external_intelligence_market_timeseries.js",
+    "17_external_intelligence_technical_indicator.js",
+    "17_external_intelligence_technical_signal.js",
+    "17_external_intelligence_phase17_validation.js",
+    "17_external_intelligence_phase17_real_runtime_validation.js",
+    "17_external_intelligence_phase17_android_validation.js"
+  ],
+  "modifiedFiles": [
+    "17_external_intelligence_version_manifest.js",
+    "00_script_manifest.json",
+    "index.html",
+    "project_info.json"
+  ],
+  "safety": {
+    "technicalSignalCandidateOnly": true,
+    "directTradingOrderAllowed": false,
+    "pythonWorkerOptional": true,
+    "pythonWorkerTradingAuthorityGranted": false,
+    "paidApiAuthorityGranted": false
+  },
+  "validationState": "IMPLEMENTATION_READY; PC/Android real-device gates pending",
+  "createdAt": "2026-09-11"
+}
