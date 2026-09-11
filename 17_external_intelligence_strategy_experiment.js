@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_strategy_experiment.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.18.0
+   Release: 1.18.1
    Phase 19: Market Strategy Experiment / Backtest Readiness
    Primary Decision: 049
    ============================================================ */
@@ -298,18 +298,26 @@
     const marketRuleSnapshotId = text(x.marketRuleSnapshotId, "") || internal.nextId("EXTERNAL-010-MARKET-RULE-SNAPSHOT");
     const version = versionNumber(x.version), id = marketRuleSnapshotId + "-V" + version;
     if (state.strategyMarketRuleSnapshots.has(id)) return internal.buildResult(false, "EXTERNAL010_MARKET_RULE_SNAPSHOT_VERSION_CONFLICT", "Blocked", { marketRuleSnapshotId, version });
-    const integrity = historicalEvidenceRefs.length ? normalizeState(x.historicalRuleIntegrityState, VALIDATION_STATES, "PASS") : normalizeState(x.historicalRuleIntegrityState, VALIDATION_STATES, "UNKNOWN");
+    const integrity = normalizeState(x.historicalRuleIntegrityState, VALIDATION_STATES, "UNKNOWN");
+    const inferredLimitations = [];
+    if (!historicalEvidenceRefs.length) inferredLimitations.push("HISTORICAL_RULE_EVIDENCE_NOT_PROVIDED");
+    if (x.tradingSession == null) inferredLimitations.push("HISTORICAL_TRADING_SESSION_NOT_PROVIDED");
+    if (x.tickSize == null) inferredLimitations.push("HISTORICAL_TICK_SIZE_NOT_PROVIDED");
+    if (x.tradingUnit == null) inferredLimitations.push("HISTORICAL_TRADING_UNIT_NOT_PROVIDED");
+    if (x.priceLimit == null) inferredLimitations.push("HISTORICAL_PRICE_LIMIT_NOT_PROVIDED");
+    if (x.marketControlRule == null) inferredLimitations.push("HISTORICAL_MARKET_CONTROL_RULE_NOT_PROVIDED");
     const record = internal.deepFreeze({
       marketRuleSnapshotId, version, marketRuleProfileId,
       periodStart: text(x.periodStart, "") || null, periodEnd: text(x.periodEnd, "") || null,
-      tradingSession: clone(x.tradingSession == null ? { policy: profile.sessionPolicy || "UNKNOWN" } : x.tradingSession),
-      tickSize: x.tickSize == null ? profile.tickSize : x.tickSize,
+      tradingSession: x.tradingSession == null ? null : clone(x.tradingSession),
+      tickSize: x.tickSize == null ? null : x.tickSize,
       tradingUnit: x.tradingUnit == null ? null : x.tradingUnit,
       priceLimit: x.priceLimit == null ? null : clone(x.priceLimit),
       marketControlRule: x.marketControlRule == null ? null : clone(x.marketControlRule),
       historicalEvidenceRefs, historicalRuleIntegrityState: integrity,
       currentMarketRuleEqualsHistoricalMarketRule: false,
-      knownLimitations: internal.unique(x.knownLimitations || (historicalEvidenceRefs.length ? [] : ["HISTORICAL_RULE_EVIDENCE_NOT_PROVIDED"])),
+      currentRuleFallbackApplied: false,
+      knownLimitations: internal.unique((x.knownLimitations || []).concat(inferredLimitations)),
       createdAt: internal.nowIso(), immutable: true
     });
     const v = validateRecord("marketRuleSnapshot", "EXTERNAL-010-SCHEMA-MARKET-RULE-SNAPSHOT", record);
@@ -381,7 +389,7 @@
     return r;
   }
 
-  function registerExternalIntelligenceStrategyExperimentProtocol(input) {
+  async function registerExternalIntelligenceStrategyExperimentProtocol(input) {
     if (!ensureDefinitions()) return internal.buildResult(false, "EXTERNAL010_PHASE19_DEFINITIONS_NOT_READY", "Blocked", null);
     const x = internal.isPlainObject(input) ? input : {};
     const experimentProtocolId = text(x.experimentProtocolId, "") || internal.nextId("EXTERNAL-010-EXPERIMENT-PROTOCOL");
@@ -419,8 +427,11 @@
     const executionExact = existingByKey(state.strategyExecutionModels, executionModelId, executionModelVersion);
 
     const backtestCapabilityId = text(x.backtestCapabilityId, "");
-    const backtestCapability = state.strategyBacktestCapabilities.get(backtestCapabilityId) || (state.analyticalCapabilities instanceof Map && state.analyticalCapabilities.get(backtestCapabilityId)) || null;
-    const backtestCapabilityVersion = versionText(x.backtestCapabilityVersion || backtestCapability && backtestCapability.recordVersion || MODULE_VERSION);
+    const currentBacktestCapability = state.strategyBacktestCapabilities.get(backtestCapabilityId) || (state.analyticalCapabilities instanceof Map && state.analyticalCapabilities.get(backtestCapabilityId)) || null;
+    const backtestCapabilityVersion = versionText(x.backtestCapabilityVersion || currentBacktestCapability && currentBacktestCapability.recordVersion || MODULE_VERSION);
+    const backtestCapability = state.analyticalCapabilityVersions instanceof Map
+      ? state.analyticalCapabilityVersions.get(backtestCapabilityId + "@" + backtestCapabilityVersion) || null
+      : currentBacktestCapability && versionText(currentBacktestCapability.recordVersion || MODULE_VERSION) === backtestCapabilityVersion ? currentBacktestCapability : null;
 
     const missing = [];
     if (!strategyExact) missing.push("strategyHypothesisId@version");
@@ -429,7 +440,7 @@
     if (!ruleExact) missing.push("marketRuleSnapshotId@version");
     if (!costExact) missing.push("transactionCostModelId@version");
     if (!executionExact) missing.push("executionModelId@version");
-    if (!backtestCapability || versionText(backtestCapability.recordVersion || MODULE_VERSION) !== backtestCapabilityVersion) missing.push("backtestCapabilityId@version");
+    if (!backtestCapability) missing.push("backtestCapabilityId@version");
     if (missing.length) return internal.buildResult(false, "EXTERNAL010_EXPERIMENT_PROTOCOL_REFERENCE_INVALID", "Blocked", { missing });
 
     const record = internal.deepFreeze({
@@ -463,7 +474,7 @@
       key(executionModelId, executionModelVersion),
       backtestCapabilityId + "@" + backtestCapabilityVersion
     ], id, "DEPENDS_ON");
-    audit("EXPERIMENT_PROTOCOL_REGISTERED", { experimentProtocolId, protocolVersion, preRegistered: true }, [id, strategyHypothesisId + "-V" + strategyHypothesisVersion]);
+    await audit("EXPERIMENT_PROTOCOL_REGISTERED", { experimentProtocolId, protocolVersion, preRegistered: true }, [id, strategyHypothesisId + "-V" + strategyHypothesisVersion]);
     return internal.buildResult(true, "EXTERNAL010_EXPERIMENT_PROTOCOL_REGISTERED", "Ready", { experimentProtocol: clone(record) });
   }
 
@@ -596,8 +607,19 @@
     const strategyFingerprintId = text(x.strategyFingerprintId, "");
     if (!state.strategyFingerprints.has(strategyFingerprintId)) return internal.buildResult(false, "EXTERNAL010_BACKTEST_FINGERPRINT_REQUIRED", "Blocked", { strategyFingerprintId });
     const engineCapabilityId = text(x.engineCapabilityId || protocol.backtestCapabilityId, "");
-    const engine = state.analyticalCapabilities instanceof Map ? state.analyticalCapabilities.get(engineCapabilityId) : null;
-    if (!engine) return internal.buildResult(false, "EXTERNAL010_BACKTEST_ENGINE_NOT_FOUND", "Blocked", { engineCapabilityId });
+    if (engineCapabilityId !== protocol.backtestCapabilityId) {
+      return internal.buildResult(false, "EXTERNAL010_BACKTEST_ENGINE_PROTOCOL_MISMATCH", "Blocked", {
+        engineCapabilityId, protocolEngineCapabilityId: protocol.backtestCapabilityId, protocolEngineVersion: protocol.backtestCapabilityVersion
+      });
+    }
+    const engine = state.analyticalCapabilityVersions instanceof Map
+      ? state.analyticalCapabilityVersions.get(engineCapabilityId + "@" + protocol.backtestCapabilityVersion) || null
+      : state.analyticalCapabilities instanceof Map && state.analyticalCapabilities.get(engineCapabilityId) || null;
+    if (!engine || versionText(engine.recordVersion || MODULE_VERSION) !== protocol.backtestCapabilityVersion) {
+      return internal.buildResult(false, "EXTERNAL010_BACKTEST_ENGINE_VERSION_MISMATCH", "Blocked", {
+        engineCapabilityId, requiredVersion: protocol.backtestCapabilityVersion, actualVersion: engine && engine.recordVersion || null
+      });
+    }
     const trials = Array.from(state.strategyTrialRecords.values()).filter(function trial(r) { return r.experimentProtocolId === experimentProtocolId && r.protocolVersion === protocolVersion; });
     const gate = requiredBacktestGate(x);
     const performanceCriteriaMet = x.performanceCriteriaMet === true;

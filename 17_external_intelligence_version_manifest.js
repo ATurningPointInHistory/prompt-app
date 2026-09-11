@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.18.0
+   Release: 1.18.1
    Phase 19: Market Strategy Experiment / Backtest Readiness
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.18.0";
+  const RELEASE_VERSION = "1.18.1";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -27,7 +27,7 @@
   const PHASE16_VERSION = "1.15.0";
   const PHASE17_VERSION = "1.16.0";
   const PHASE18_VERSION = "1.17.1";
-  const PHASE19_VERSION = "1.18.0";
+  const PHASE19_VERSION = "1.18.1";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";

@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_phase19_android_validation.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.18.0
+   Release: 1.18.1
    Phase 19 Android Real Device Validation
    ============================================================ */
 (function (global) {
