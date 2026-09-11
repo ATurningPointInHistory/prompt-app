@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.14.1
-   Phase 15: Multi-Layer Validation Framework
+   Release: 1.15.0
+   Phase 16: Adaptive Monitoring / Notification Governance
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.14.1";
+  const RELEASE_VERSION = "1.15.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -24,6 +24,7 @@
   const PHASE13_VERSION = "1.12.0";
   const PHASE14_VERSION = "1.13.0";
   const PHASE15_VERSION = "1.14.1";
+  const PHASE16_VERSION = "1.15.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -49,8 +50,8 @@
 
   const moduleVersions = {
     core: PHASE3_VERSION,
-    contracts: PHASE15_VERSION,
-    schemaRegistry: PHASE15_VERSION,
+    contracts: PHASE16_VERSION,
+    schemaRegistry: PHASE16_VERSION,
     authority: PHASE1_VERSION,
     audit: PHASE1_VERSION,
     runtimeCoordination: PHASE2_VERSION,
@@ -106,7 +107,8 @@
     workGraph: PHASE12_VERSION, workflowOrchestration: PHASE12_VERSION, emergencyFastPath: PHASE12_VERSION, phase12Validation: PHASE12_VERSION, phase12RealRuntimeValidation: PHASE12_VERSION, phase12AndroidValidation: PHASE12_VERSION,
     socialObservation: PHASE13_VERSION, socialNarrative: PHASE13_VERSION, socialInfluence: PHASE13_VERSION, phase13Validation: PHASE13_VERSION, phase13RealRuntimeValidation: PHASE13_VERSION, phase13AndroidValidation: PHASE13_VERSION,
     federatedRead: PHASE14_VERSION, intelligencePackage: PHASE14_VERSION, knowledgeBoundary: PHASE14_VERSION, phase14Validation: PHASE14_VERSION, phase14RealRuntimeValidation: PHASE14_VERSION, phase14AndroidValidation: PHASE14_VERSION,
-    validationFramework: PHASE15_VERSION, phase15Validation: PHASE15_VERSION, phase15RealRuntimeValidation: PHASE15_VERSION, phase15AndroidValidation: PHASE15_VERSION
+    validationFramework: PHASE15_VERSION, phase15Validation: PHASE15_VERSION, phase15RealRuntimeValidation: PHASE15_VERSION, phase15AndroidValidation: PHASE15_VERSION,
+    monitoringWatch: PHASE16_VERSION, monitoringChange: PHASE16_VERSION, notificationGovernance: PHASE16_VERSION, phase16Validation: PHASE16_VERSION, phase16RealRuntimeValidation: PHASE16_VERSION, phase16AndroidValidation: PHASE16_VERSION
   };
 
   const fileModules = {
@@ -195,7 +197,13 @@
     "17_external_intelligence_validation_framework.js": "validationFramework",
     "17_external_intelligence_phase15_validation.js": "phase15Validation",
     "17_external_intelligence_phase15_real_runtime_validation.js": "phase15RealRuntimeValidation",
-    "17_external_intelligence_phase15_android_validation.js": "phase15AndroidValidation"
+    "17_external_intelligence_phase15_android_validation.js": "phase15AndroidValidation",
+    "17_external_intelligence_monitoring_watch.js": "monitoringWatch",
+    "17_external_intelligence_monitoring_change.js": "monitoringChange",
+    "17_external_intelligence_notification_governance.js": "notificationGovernance",
+    "17_external_intelligence_phase16_validation.js": "phase16Validation",
+    "17_external_intelligence_phase16_real_runtime_validation.js": "phase16RealRuntimeValidation",
+    "17_external_intelligence_phase16_android_validation.js": "phase16AndroidValidation"
   };
 
   const contractVersions = {
@@ -267,7 +275,8 @@
     workItem: PHASE12_VERSION, workGraph: PHASE12_VERSION, workAssignment: PHASE12_VERSION, workflowConflict: PHASE12_VERSION, emergencyEvent: PHASE12_VERSION, emergencyDecision: PHASE12_VERSION, phase12ValidationResult: PHASE12_VERSION,
     socialObservation: PHASE13_VERSION, socialNarrative: PHASE13_VERSION, socialNarrativeShift: PHASE13_VERSION, socialPropagationRecord: PHASE13_VERSION, socialAuthorProfile: PHASE13_VERSION, socialCoordinationCandidate: PHASE13_VERSION, socialAccountCluster: PHASE13_VERSION, socialAmplificationAssessment: PHASE13_VERSION, oldInformationResurgence: PHASE13_VERSION, socialPumpPatternCandidate: PHASE13_VERSION, socialMarketReaction: PHASE13_VERSION, socialInfluenceEvaluation: PHASE13_VERSION, phase13ValidationResult: PHASE13_VERSION,
     externalEvidenceReference: PHASE14_VERSION, federatedReadRequest: PHASE14_VERSION, federatedReadResult: PHASE14_VERSION, knowledgeCandidate: PHASE14_VERSION, knowledgePromotionBoundary: PHASE14_VERSION, externalIntelligenceRequest: PHASE14_VERSION, externalIntelligencePackage: PHASE14_VERSION, phase14ValidationResult: PHASE14_VERSION,
-    validationSuite: PHASE15_VERSION, goldenValidationCase: PHASE15_VERSION, validationProfile: PHASE15_VERSION, validationEvidence: PHASE15_VERSION, releaseGate: PHASE15_VERSION, phase15ValidationResult: PHASE15_VERSION
+    validationSuite: PHASE15_VERSION, goldenValidationCase: PHASE15_VERSION, validationProfile: PHASE15_VERSION, validationEvidence: PHASE15_VERSION, releaseGate: PHASE15_VERSION, phase15ValidationResult: PHASE15_VERSION,
+    watchRecord: PHASE16_VERSION, monitoringBaseline: PHASE16_VERSION, monitoringObservation: PHASE16_VERSION, materialChangeCandidate: PHASE16_VERSION, monitoringGap: PHASE16_VERSION, monitoringOutcomeEvaluation: PHASE16_VERSION, notificationCandidate: PHASE16_VERSION, notificationThread: PHASE16_VERSION, notificationDelivery: PHASE16_VERSION, phase16ValidationResult: PHASE16_VERSION
   };
 
   const contractIds = {
@@ -381,7 +390,17 @@
     validationProfile: "EXTERNAL-010-CONTRACT-VALIDATION-PROFILE",
     validationEvidence: "EXTERNAL-010-CONTRACT-VALIDATION-EVIDENCE",
     releaseGate: "EXTERNAL-010-CONTRACT-RELEASE-GATE",
-    phase15ValidationResult: "EXTERNAL-010-CONTRACT-PHASE15-VALIDATION-RESULT"
+    phase15ValidationResult: "EXTERNAL-010-CONTRACT-PHASE15-VALIDATION-RESULT",
+    watchRecord: "EXTERNAL-010-CONTRACT-WATCH-RECORD",
+    monitoringBaseline: "EXTERNAL-010-CONTRACT-MONITORING-BASELINE",
+    monitoringObservation: "EXTERNAL-010-CONTRACT-MONITORING-OBSERVATION",
+    materialChangeCandidate: "EXTERNAL-010-CONTRACT-MATERIAL-CHANGE-CANDIDATE",
+    monitoringGap: "EXTERNAL-010-CONTRACT-MONITORING-GAP",
+    monitoringOutcomeEvaluation: "EXTERNAL-010-CONTRACT-MONITORING-OUTCOME-EVALUATION",
+    notificationCandidate: "EXTERNAL-010-CONTRACT-NOTIFICATION-CANDIDATE",
+    notificationThread: "EXTERNAL-010-CONTRACT-NOTIFICATION-THREAD",
+    notificationDelivery: "EXTERNAL-010-CONTRACT-NOTIFICATION-DELIVERY",
+    phase16ValidationResult: "EXTERNAL-010-CONTRACT-PHASE16-VALIDATION-RESULT"
   };
 
   const safety = {
@@ -761,7 +780,29 @@
     platformHealthEqualsInformationTruth: false,
     systemValidationEqualsTruthAuthority: false,
     mockPassEqualsRealRuntimeValidated: false,
-    validationFailureGrantsCanonicalModificationAuthority: false
+    validationFailureGrantsCanonicalModificationAuthority: false,
+    researchGoalEqualsMonitoringGoal: false,
+    monitoringEqualsFixedFrequentPolling: false,
+    monitoringTriggerEqualsEmergencyConfirmed: false,
+    dataChangedEqualsMaterialIntelligenceChange: false,
+    sameEventReobservedEqualsNewEvent: false,
+    noObservationEqualsNoChange: false,
+    monitoringGapEqualsStableWorld: false,
+    highPriorityAllowsUnlimitedMonitoringBudget: false,
+    monitorAuthorityAllowsUnlimitedPaidAPI: false,
+    watchDefinitionEqualsScheduler: false,
+    schedulerExecutionEqualsGoalAuthority: false,
+    changePackageEqualsActionAuthority: false,
+    marketWatchAuthorityEqualsTradingAuthority: false,
+    alwaysOnArchitectureRequiresAlwaysOnRuntimeToday: false,
+    detectedEqualsShouldNotify: false,
+    notificationSentEqualsDelivered: false,
+    deliveredEqualsSeen: false,
+    seenEqualsAcknowledged: false,
+    acknowledgedEqualsApproved: false,
+    criticalNotificationEqualsTradingAuthority: false,
+    notificationEqualsRecommendation: false,
+    recommendationEqualsExecution: false
   };
 
   const authorityPolicy = {
@@ -1176,6 +1217,42 @@
     gatewayIntegrityDimensions: ["GATEWAY_SESSION","ORIGIN","HOST","REQUEST_FRESHNESS","REPLAY_PROTECTION","SESSION_EXPIRATION","SESSION_REVOCATION","RUNTIME_SESSION_BINDING","SESSION_SECRET_REDACTION","AUTHENTICATION_AUTHORIZATION_SEPARATION"]
   };
 
+
+  const monitoring = {
+    primaryDecision: "045",
+    watchTypes: ["ENTITY_WATCH","EVENT_WATCH","SIGNAL_WATCH","MARKET_WATCH","SOCIAL_NARRATIVE_WATCH","SOURCE_CHANGE_WATCH","POLICY_CHANGE_WATCH","EMERGENCY_WATCH","OUTCOME_WATCH","RESEARCH_FOLLOWUP_WATCH"],
+    purposes: ["CURRENT_AWARENESS","FOLLOWUP_RESEARCH","MARKET_RISK","SOCIAL_SIGNAL","EMERGENCY_DETECTION","POLICY_CHANGE","SOURCE_HEALTH","OUTCOME_SETTLEMENT","PREDICTION_REVALIDATION"],
+    modes: ["POLL","STREAM","WEBHOOK","SCHEDULED_CHECK","CHANGE_DETECTION","EVENT_TRIGGERED","HYBRID"],
+    watchStates: ["DRAFT","ACTIVE","PAUSED","ESCALATED","COOLDOWN","EXPIRED","DISABLED","BLOCKED","DEGRADED","UNKNOWN"],
+    alertStates: ["NEW","UPDATED_MATERIALLY","UNCHANGED","SUPPRESSED_DUPLICATE"],
+    materialChangeTypes: ["NEW_CLAIM","CLAIM_REVISION","OFFICIAL_CORRECTION","EVENT_STATE_CHANGE","RELATION_CHANGE","POLICY_CHANGE","PRICE_ANOMALY","SOCIAL_NARRATIVE_SHIFT","SOURCE_SCHEMA_CHANGE","SIGNIFICANT_NEW_EVIDENCE"],
+    catchUpStrategies: ["LATEST_ONLY","MISSING_WINDOW_SUMMARY","FULL_HISTORY_IF_AVAILABLE","NO_CATCHUP","PURPOSE_SPECIFIC"],
+    stableWatchRecord: true,
+    adaptiveCadence: true,
+    materialitySeparatedFromRawChange: true,
+    monitoringGapExplicit: true,
+    noObservationMeansNoChange: false,
+    unlimitedCatchupAllowed: false,
+    alwaysOnRequired: false,
+    initialOperatingMode: "APP_START_DUE_WATCH",
+    futureAlwaysOnCompatible: true
+  };
+
+  const notificationGovernance = {
+    primaryDecision: "046",
+    levels: ["N0_RECORD_ONLY","N1_INFO","N2_NOTICE","N3_IMPORTANT","N4_URGENT","N5_CRITICAL"],
+    types: ["INFORMATION","MATERIAL_CHANGE","RESEARCH_RESULT","ACTION_RECOMMENDATION","APPROVAL_REQUEST","EMERGENCY_ALERT","EXECUTION_REPORT","FAILURE_ALERT","RECOVERY_ALERT","POLICY_ALERT"],
+    deliveryStates: ["CANDIDATE","QUEUED","DEFERRED","SENT","DELIVERED","SEEN","ACKNOWLEDGED","SUPPRESSED","STALE","EXPIRED","FAILED","CANCELLED"],
+    initialChannels: ["IN_APP","DASHBOARD"],
+    futureChannels: ["SYSTEM_NOTIFICATION","PUSH","EMAIL","SMS","WEBHOOK","FUTURE_CHANNEL"],
+    stableNotificationCandidate: true,
+    incidentThreading: true,
+    deduplication: true,
+    materialUpdateRenotification: true,
+    acknowledgementSeparatedFromApproval: true,
+    notificationSeparatedFromExecution: true
+  };
+
   const manifest = {
     componentId: "EXTERNAL-010",
     componentName: "External Intelligence Platform",
@@ -1184,8 +1261,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 15 Multi-Layer Validation Framework",
-      phase: 15,
+      implementationPhase: "Phase 16 Adaptive Monitoring / Notification Governance",
+      phase: 16,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -1194,7 +1271,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 15 Multi-Layer Validation Framework Implementation"
+      status: "Phase 16 Adaptive Monitoring / Notification Governance Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -1227,6 +1304,8 @@
     socialIntelligence: socialIntelligence,
     federatedIntelligence: federatedIntelligence,
     validationFramework: validationFramework,
+    monitoring: monitoring,
+    notificationGovernance: notificationGovernance,
     implementation: {
       inspectBeforeImplement: true,
       contractFirst: true,
@@ -1257,8 +1336,10 @@
       phase14Allowed: true,
       phase14Complete: true,
       phase15Allowed: true,
-      phase15Complete: false,
-      phase16Allowed: false,
+      phase15Complete: true,
+      phase16Allowed: true,
+      phase16Complete: false,
+      phase17Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true
