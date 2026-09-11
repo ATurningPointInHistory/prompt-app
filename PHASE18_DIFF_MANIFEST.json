@@ -1,0 +1,84 @@
+{
+  "id": "EXTERNAL-010-PHASE18-DIFF-MANIFEST-2026-09-11",
+  "componentId": "EXTERNAL-010",
+  "version": "1.17.1",
+  "gatewayVersion": "1.4.0",
+  "implementationPhase": "Phase 18 Cross-Domain Market Intelligence Fusion",
+  "primaryDecision": "048",
+  "baseline": "AI_Prompt_OS EXTERNAL-010 Phase17 v1.16.0 PC_ANDROID_READY / Project Owner Approved Freeze",
+  "newFiles": [
+    "17_external_intelligence_market_fusion.js",
+    "17_external_intelligence_phase18_validation.js",
+    "17_external_intelligence_phase18_real_runtime_validation.js",
+    "17_external_intelligence_phase18_android_validation.js"
+  ],
+  "modifiedFiles": [
+    "17_external_intelligence_version_manifest.js",
+    "00_script_manifest.json",
+    "index.html"
+  ],
+  "safety": {
+    "moreSignalsEqualsIndependentInformation": false,
+    "signalAgreementEqualsTruth": false,
+    "correlationEqualsCausation": false,
+    "unknownIndependenceAssumedIndependent": false,
+    "futureInformationLeakageAllowed": false,
+    "inventedProbabilityAllowed": false,
+    "abstentionAllowed": true,
+    "predictionEqualsStrategy": false,
+    "strategyEqualsOrder": false,
+    "tradingAuthorityGranted": false,
+    "paidApiAuthorityGranted": false,
+    "directRepositoryMutationAllowed": false
+  },
+  "implementationScope": [
+    "Signal Family",
+    "Signal Direction",
+    "Time Horizon",
+    "Independence Group Hook",
+    "Contradiction Reference",
+    "Regime Context Hook",
+    "Composite Market Hypothesis",
+    "Fusion Capability ID / Version",
+    "Abstention State",
+    "Prediction Candidate Hook",
+    "Feature Availability Check",
+    "Leakage Validation Hook",
+    "Fusion Package",
+    "Outcome Evaluation Hook",
+    "Evidence / Lineage / Audit"
+  ],
+  "deferred": [
+    "Advanced Machine Learning",
+    "Bayesian Fusion",
+    "Advanced Causal Model",
+    "Portfolio Strategy",
+    "Real Trading"
+  ],
+  "validationState": "IMPLEMENTATION_READY HOTFIX; functional rerun 20/20 PASS twice; synthetic PC real-runtime 5/5 PASS; physical PC/Android gates pending",
+  "functionalHarness": {
+    "firstRun": {
+      "passed": 20,
+      "failed": 0,
+      "total": 20,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "secondRun": {
+      "passed": 20,
+      "failed": 0,
+      "total": 20,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "pcSynthetic": {
+      "passed": 5,
+      "failed": 0,
+      "total": 5,
+      "health": 100,
+      "criticalFailed": 0
+    }
+  },
+  "createdAt": "2026-09-11",
+  "hotfix": "Functional validation rerun safety: replace fixed validation fixture IDs with per-run unique IDs so PC/Android real-runtime gates can invoke Phase18 validation repeatedly in the same browser session."
+}

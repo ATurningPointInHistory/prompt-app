@@ -1,0 +1,23 @@
+AI Prompt OS / EXTERNAL-010 Phase 18 v1.17.1
+Cross-Domain Market Intelligence Fusion
+
+STATUS: IMPLEMENTATION_READY HOTFIX
+BASELINE: Phase17 v1.16.0 PC_ANDROID_READY
+GATEWAY: 1.4.0 unchanged
+
+After applying this DIFF to AI_Prompt_OS:
+1. Start AI Prompt OS normally (Gateway may remain the existing v1.4.0).
+2. In Dev Console async mode run:
+   await runExternalIntelligencePhase18Validation()
+3. If failed=0, run on PC:
+   await runExternalIntelligencePhase18RealRuntimeValidation()
+4. After PC PASS, open the same build on Android and run:
+   await runExternalIntelligencePhase18AndroidValidation()
+5. Do not promote Phase19 until PC + Android gates pass and Project Owner approves.
+
+Expected functional baseline before real-device gates:
+passed=20 failed=0 total=20 health=100 criticalFailed=0
+
+Authority boundary:
+Prediction != Strategy != Order
+Market Fusion does not grant trading authority.

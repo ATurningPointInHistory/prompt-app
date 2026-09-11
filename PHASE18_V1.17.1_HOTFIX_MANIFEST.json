@@ -1,0 +1,29 @@
+{
+  "id": "EXTERNAL-010-PHASE18-V1.17.1-HOTFIX-MANIFEST-2026-09-11",
+  "componentId": "EXTERNAL-010",
+  "version": "1.17.1",
+  "supersedes": "1.17.0 IMPLEMENTATION_READY",
+  "gatewayVersion": "1.4.0",
+  "issue": "Phase18 functional validation used fixed fixture IDs. Real-runtime validation re-invokes functional validation in the same session, causing duplicate signal creation and undefined data.signal access.",
+  "rootCause": "Validation harness was not re-runnable; production market-fusion duplicate rejection behaved as designed.",
+  "fix": [
+    "Use per-run unique validation fixture IDs",
+    "Bind fusion capability fixture version to Phase18 module version",
+    "Preserve production duplicate-signal rejection semantics",
+    "Refresh static script manifest and index cache hashes"
+  ],
+  "regression": {
+    "functionalFirstRun": "20/20 PASS",
+    "functionalSecondRunSameSession": "20/20 PASS",
+    "pcSyntheticRealRuntime": "5/5 PASS"
+  },
+  "physicalGates": {
+    "pcRealRuntime": "PENDING",
+    "androidRealDevice": "PENDING"
+  },
+  "authorityBoundary": {
+    "predictionEqualsStrategy": false,
+    "strategyEqualsOrder": false,
+    "tradingAuthorityGranted": false
+  }
+}

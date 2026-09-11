@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.16.0
-   Phase 17: Market Time-Series / Technical Intelligence Foundation
+   Release: 1.17.1
+   Phase 18: Cross-Domain Market Intelligence Fusion
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.16.0";
+  const RELEASE_VERSION = "1.17.1";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -26,6 +26,7 @@
   const PHASE15_VERSION = "1.14.1";
   const PHASE16_VERSION = "1.15.0";
   const PHASE17_VERSION = "1.16.0";
+  const PHASE18_VERSION = "1.17.1";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -110,7 +111,8 @@
     federatedRead: PHASE14_VERSION, intelligencePackage: PHASE14_VERSION, knowledgeBoundary: PHASE14_VERSION, phase14Validation: PHASE14_VERSION, phase14RealRuntimeValidation: PHASE14_VERSION, phase14AndroidValidation: PHASE14_VERSION,
     validationFramework: PHASE15_VERSION, phase15Validation: PHASE15_VERSION, phase15RealRuntimeValidation: PHASE15_VERSION, phase15AndroidValidation: PHASE15_VERSION,
     monitoringWatch: PHASE16_VERSION, monitoringChange: PHASE16_VERSION, notificationGovernance: PHASE16_VERSION, phase16Validation: PHASE16_VERSION, phase16RealRuntimeValidation: PHASE16_VERSION, phase16AndroidValidation: PHASE16_VERSION,
-    marketIdentity: PHASE17_VERSION, marketTimeSeries: PHASE17_VERSION, technicalIndicator: PHASE17_VERSION, technicalSignal: PHASE17_VERSION, pythonWorker: PHASE17_VERSION, phase17Validation: PHASE17_VERSION, phase17RealRuntimeValidation: PHASE17_VERSION, phase17AndroidValidation: PHASE17_VERSION
+    marketIdentity: PHASE17_VERSION, marketTimeSeries: PHASE17_VERSION, technicalIndicator: PHASE17_VERSION, technicalSignal: PHASE17_VERSION, pythonWorker: PHASE17_VERSION, phase17Validation: PHASE17_VERSION, phase17RealRuntimeValidation: PHASE17_VERSION, phase17AndroidValidation: PHASE17_VERSION,
+    marketFusion: PHASE18_VERSION, phase18Validation: PHASE18_VERSION, phase18RealRuntimeValidation: PHASE18_VERSION, phase18AndroidValidation: PHASE18_VERSION
   };
 
   const fileModules = {
@@ -212,7 +214,11 @@
     "17_external_intelligence_technical_signal.js": "technicalSignal",
     "17_external_intelligence_phase17_validation.js": "phase17Validation",
     "17_external_intelligence_phase17_real_runtime_validation.js": "phase17RealRuntimeValidation",
-    "17_external_intelligence_phase17_android_validation.js": "phase17AndroidValidation"
+    "17_external_intelligence_phase17_android_validation.js": "phase17AndroidValidation",
+    "17_external_intelligence_market_fusion.js": "marketFusion",
+    "17_external_intelligence_phase18_validation.js": "phase18Validation",
+    "17_external_intelligence_phase18_real_runtime_validation.js": "phase18RealRuntimeValidation",
+    "17_external_intelligence_phase18_android_validation.js": "phase18AndroidValidation"
   };
 
   const contractVersions = {
@@ -1270,8 +1276,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 17 Market Time-Series / Technical Intelligence Foundation",
-      phase: 17,
+      implementationPhase: "Phase 18 Cross-Domain Market Intelligence Fusion",
+      phase: 18,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -1280,7 +1286,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 16 Adaptive Monitoring / Notification Governance Implementation"
+      status: "Phase 18 Cross-Domain Market Intelligence Fusion Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -1349,8 +1355,10 @@
       phase16Allowed: true,
       phase16Complete: true,
       phase17Allowed: true,
-      phase17Complete: false,
-      phase18Allowed: false,
+      phase17Complete: true,
+      phase18Allowed: true,
+      phase18Complete: false,
+      phase19Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true

@@ -7,7 +7,7 @@
   "description": "AI Prompt OS static script manifest - EXTERNAL-010 Phase 16 Adaptive Monitoring / Notification Governance v1.15.0",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-11T12:19:35.898Z",
+  "updatedAt": "2026-09-11T13:44:31.000Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -289,7 +289,7 @@
     "./16_validation_engine.js?h=105c13151958",
     "./15_reasoning_engine.js?h=cf1ed1305563",
     "./16_workflow_engine.js?h=17dedd927e7f",
-    "./17_external_intelligence_version_manifest.js?h=7b2f364059fb",
+    "./17_external_intelligence_version_manifest.js?h=37fffbdf1177",
     "./17_external_intelligence_core.js?h=615dc5a8a157",
     "./17_external_intelligence_contracts.js?h=d347574d011f",
     "./17_external_intelligence_schema_registry.js?h=4d39c6c96594",
@@ -1786,9 +1786,9 @@
       "cacheKey": "17dedd927e7f"
     },
     "17_external_intelligence_version_manifest.js": {
-      "sha256": "7b2f364059fb3893a71acb9564b340d24a95e032b1d2f436dbb6a68f64610f77",
-      "byteSize": 71407,
-      "cacheKey": "7b2f364059fb"
+      "sha256": "37fffbdf1177bdecfd9aa57483a1dec4aa255e66668259a475d2c6cf2713b56a",
+      "byteSize": 72919,
+      "cacheKey": "37fffbdf1177"
     },
     "17_external_intelligence_core.js": {
       "sha256": "615dc5a8a157749688679c6308e38e3450aa9ab361bfadee140a8df2a0c15b3e",
@@ -2256,8 +2256,8 @@
       "cacheKey": "275899a3ea23"
     }
   },
-  "scriptSetHash": "91e41f5ca8191a31a32581ef80cb0dbd0ad6ecc3fa27b928736608c1e3d9d188",
-  "manifestHash": "35a11881473a5817265cd3bf7c5e9c5134aa8d8f49dce96feb504b1fbb11a336",
+  "scriptSetHash": "37d838ef18761a990698ef72849f81d892760ca2abb8b7dd4061e5b3002697fa",
+  "manifestHash": "6ac83a7ab0d0a153f5d6b4e62434b0e7b51ee3d11a6f2127d3fcc4084ea2eeec",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -3660,9 +3660,9 @@
       "cacheKey": "17dedd927e7f"
     },
     "17_external_intelligence_version_manifest.js": {
-      "sha256": "f6621022e7e6b963769ea0b7e4690418aad6cd58ce3c10596968a3125802eb83",
-      "byteSize": 72372,
-      "cacheKey": "f6621022e7e6"
+      "sha256": "37fffbdf1177bdecfd9aa57483a1dec4aa255e66668259a475d2c6cf2713b56a",
+      "byteSize": 72919,
+      "cacheKey": "37fffbdf1177"
     },
     "17_external_intelligence_core.js": {
       "sha256": "615dc5a8a157749688679c6308e38e3450aa9ab361bfadee140a8df2a0c15b3e",
@@ -4163,6 +4163,26 @@
       "sha256": "275899a3ea23c9806901ece717dd821f16289af4fb86c7c7c6cdad9f108e3086",
       "byteSize": 4664,
       "cacheKey": "275899a3ea23"
+    },
+    "17_external_intelligence_market_fusion.js": {
+      "sha256": "0992473c837b21f635561ccb9967b9c9aacac383d6a6cdd1c03f5e6ec00b97f3",
+      "byteSize": 45816,
+      "cacheKey": "0992473c837b"
+    },
+    "17_external_intelligence_phase18_validation.js": {
+      "sha256": "8e037cc7273fd455305bc4347b4fa39f6c479cc9c0c066d6bd8d90cd720fdfe7",
+      "byteSize": 14826,
+      "cacheKey": "8e037cc7273f"
+    },
+    "17_external_intelligence_phase18_real_runtime_validation.js": {
+      "sha256": "856cdd49d1be599c160cb704a704a66184ccc1c647e09790c17cb86003bceee4",
+      "byteSize": 2865,
+      "cacheKey": "856cdd49d1be"
+    },
+    "17_external_intelligence_phase18_android_validation.js": {
+      "sha256": "ce3e0737e92be1d24e4d0e0692fb7bdfe2debd9fd3a1d01c4cae4f451a968727",
+      "byteSize": 3007,
+      "cacheKey": "ce3e0737e92b"
     }
   }
 }
