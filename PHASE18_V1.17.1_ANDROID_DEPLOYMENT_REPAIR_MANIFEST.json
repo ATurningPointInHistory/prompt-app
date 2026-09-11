@@ -1,0 +1,26 @@
+{
+  "id": "EXTERNAL-010-PHASE18-V1.17.1-ANDROID-DEPLOYMENT-REPAIR-2026-09-11",
+  "componentId": "EXTERNAL-010",
+  "version": "1.17.1",
+  "gatewayVersion": "1.4.0",
+  "type": "DEPLOYMENT_PACKAGING_REPAIR",
+  "applicationLogicChanged": false,
+  "reason": "The v1.17.1 hotfix DIFF contained only files changed by the validation rerun fix and therefore omitted the unchanged Phase18 Android validator. Repackage the complete Phase18 browser-side deployment set to prevent partial GitHub deployment.",
+  "requiredFunction": "runExternalIntelligencePhase18AndroidValidation",
+  "requiredFile": "17_external_intelligence_phase18_android_validation.js",
+  "expectedAndroidGate": "5/5 PASS",
+  "includedFiles": [
+    "17_external_intelligence_version_manifest.js",
+    "17_external_intelligence_market_fusion.js",
+    "17_external_intelligence_phase18_validation.js",
+    "17_external_intelligence_phase18_real_runtime_validation.js",
+    "17_external_intelligence_phase18_android_validation.js",
+    "00_script_manifest.json",
+    "index.html"
+  ],
+  "authorityBoundary": {
+    "predictionEqualsStrategy": false,
+    "strategyEqualsOrder": false,
+    "tradingAuthorityGranted": false
+  }
+}
