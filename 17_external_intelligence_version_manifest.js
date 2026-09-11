@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.17.1
-   Phase 18: Cross-Domain Market Intelligence Fusion
+   Release: 1.18.0
+   Phase 19: Market Strategy Experiment / Backtest Readiness
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.17.1";
+  const RELEASE_VERSION = "1.18.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -27,6 +27,7 @@
   const PHASE16_VERSION = "1.15.0";
   const PHASE17_VERSION = "1.16.0";
   const PHASE18_VERSION = "1.17.1";
+  const PHASE19_VERSION = "1.18.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -112,7 +113,8 @@
     validationFramework: PHASE15_VERSION, phase15Validation: PHASE15_VERSION, phase15RealRuntimeValidation: PHASE15_VERSION, phase15AndroidValidation: PHASE15_VERSION,
     monitoringWatch: PHASE16_VERSION, monitoringChange: PHASE16_VERSION, notificationGovernance: PHASE16_VERSION, phase16Validation: PHASE16_VERSION, phase16RealRuntimeValidation: PHASE16_VERSION, phase16AndroidValidation: PHASE16_VERSION,
     marketIdentity: PHASE17_VERSION, marketTimeSeries: PHASE17_VERSION, technicalIndicator: PHASE17_VERSION, technicalSignal: PHASE17_VERSION, pythonWorker: PHASE17_VERSION, phase17Validation: PHASE17_VERSION, phase17RealRuntimeValidation: PHASE17_VERSION, phase17AndroidValidation: PHASE17_VERSION,
-    marketFusion: PHASE18_VERSION, phase18Validation: PHASE18_VERSION, phase18RealRuntimeValidation: PHASE18_VERSION, phase18AndroidValidation: PHASE18_VERSION
+    marketFusion: PHASE18_VERSION, phase18Validation: PHASE18_VERSION, phase18RealRuntimeValidation: PHASE18_VERSION, phase18AndroidValidation: PHASE18_VERSION,
+    strategyExperiment: PHASE19_VERSION, phase19Validation: PHASE19_VERSION, phase19RealRuntimeValidation: PHASE19_VERSION, phase19AndroidValidation: PHASE19_VERSION
   };
 
   const fileModules = {
@@ -218,7 +220,11 @@
     "17_external_intelligence_market_fusion.js": "marketFusion",
     "17_external_intelligence_phase18_validation.js": "phase18Validation",
     "17_external_intelligence_phase18_real_runtime_validation.js": "phase18RealRuntimeValidation",
-    "17_external_intelligence_phase18_android_validation.js": "phase18AndroidValidation"
+    "17_external_intelligence_phase18_android_validation.js": "phase18AndroidValidation",
+    "17_external_intelligence_strategy_experiment.js": "strategyExperiment",
+    "17_external_intelligence_phase19_validation.js": "phase19Validation",
+    "17_external_intelligence_phase19_real_runtime_validation.js": "phase19RealRuntimeValidation",
+    "17_external_intelligence_phase19_android_validation.js": "phase19AndroidValidation"
   };
 
   const contractVersions = {
@@ -1276,8 +1282,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 18 Cross-Domain Market Intelligence Fusion",
-      phase: 18,
+      implementationPhase: "Phase 19 Market Strategy Experiment / Backtest Readiness",
+      phase: 19,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -1286,7 +1292,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 18 Cross-Domain Market Intelligence Fusion Implementation"
+      status: "Phase 19 Market Strategy Experiment / Backtest Readiness Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -1357,8 +1363,10 @@
       phase17Allowed: true,
       phase17Complete: true,
       phase18Allowed: true,
-      phase18Complete: false,
-      phase19Allowed: false,
+      phase18Complete: true,
+      phase19Allowed: true,
+      phase19Complete: false,
+      phase20Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true
