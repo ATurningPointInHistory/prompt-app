@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AI Prompt OS Selectable Launcher v1.4.3
+AI Prompt OS Selectable Launcher v1.4.4
 
 Canonical Gateway Edition
 
@@ -49,7 +49,7 @@ WEB_IDENTITY_FILE = "00_script_manifest.json"
 GATEWAY_PORT = 43110
 GATEWAY_HEALTH_URL = f"http://127.0.0.1:{GATEWAY_PORT}/health"
 GATEWAY_EXPECTED_COMPONENT = "EXTERNAL-010"
-GATEWAY_EXPECTED_VERSION = "1.4.0"
+GATEWAY_PACKAGE_FILE = GATEWAY_DIR / "package.json"
 STARTUP_TIMEOUT = 20
 
 CREATE_NEW_CONSOLE = getattr(subprocess, "CREATE_NEW_CONSOLE", 0)
@@ -182,9 +182,26 @@ def wait_for_web_ready(timeout=STARTUP_TIMEOUT):
     return bool(last.get("ok")), last
 
 
+def gateway_expected_version():
+    try:
+        payload = json.loads(GATEWAY_PACKAGE_FILE.read_text(encoding="utf-8"))
+        version = str(payload.get("version", "")).strip()
+        return version or None
+    except (OSError, ValueError, json.JSONDecodeError):
+        return None
+
+
 def gateway_health():
     if not port_open(GATEWAY_PORT):
         return {"ok": False, "state": "STOPPED", "reason": "PORT_CLOSED"}
+
+    expected_version = gateway_expected_version()
+    if not expected_version:
+        return {
+            "ok": False,
+            "state": "INVALID",
+            "reason": "LOCAL_GATEWAY_VERSION_UNRESOLVED",
+        }
 
     try:
         request = urllib.request.Request(
@@ -212,7 +229,7 @@ def gateway_health():
         "gatewayAvailable": payload.get("gatewayAvailable") is True,
         "runtimeState": payload.get("runtimeState") == "READY",
         "loopbackOnly": payload.get("loopbackOnly") is True,
-        "gatewayVersion": payload.get("gatewayVersion") == GATEWAY_EXPECTED_VERSION,
+        "gatewayVersion": payload.get("gatewayVersion") == expected_version,
     }
     ok = all(checks.values())
     return {
@@ -221,6 +238,7 @@ def gateway_health():
         "reason": "PASS" if ok else "HEALTH_CONTRACT_MISMATCH",
         "payload": payload,
         "checks": checks,
+        "expectedGatewayVersion": expected_version,
     }
 
 
@@ -335,7 +353,7 @@ def start_gateway():
         raise FileNotFoundError(
             "Canonical Gateway launcher not found:\n"
             f"{GATEWAY_BAT}\n\n"
-            "v1.4.0 ZIP内の external_gateway フォルダも反映してください。"
+            "同じAI Prompt OS配布ZIP内の external_gateway フォルダも反映してください。"
         )
 
     proc = start_console(
@@ -468,7 +486,7 @@ class LauncherApp:
 
         ttk.Label(
             header,
-            text="AI Prompt OS Launcher v1.4.3 / Canonical Gateway",
+            text="AI Prompt OS Launcher v1.4.4 / Canonical Gateway",
             style="SubTitle.TLabel",
             anchor="center",
         ).grid(row=1, column=0, sticky="ew", pady=(0, 12))
@@ -844,7 +862,7 @@ class LauncherApp:
 
 def main():
     ensure_state_dir()
-    log(f"Launcher v1.4.3 opened PROJECT_ROOT={PROJECT_ROOT}")
+    log(f"Launcher v1.4.4 opened PROJECT_ROOT={PROJECT_ROOT}")
     root = tk.Tk()
     app = LauncherApp(root)
     root.after(150, app.fit_window_to_content)

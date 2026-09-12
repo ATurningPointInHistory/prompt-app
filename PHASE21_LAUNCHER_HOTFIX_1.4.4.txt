@@ -1,0 +1,27 @@
+AI Prompt OS / EXTERNAL-010 Phase 21 Launcher Hotfix
+Launcher: v1.4.4
+Phase 21 release: v1.20.0 VALIDATION_READY
+Date: 2026-09-12
+
+Issue:
+AI_Prompt_OS_Launcher.pyw v1.4.3 hard-coded the expected Canonical Gateway version as 1.4.0.
+Phase 20 upgraded the actual Canonical Gateway to 1.5.0, causing HEALTH_CONTRACT_MISMATCH even when the Gateway was READY.
+
+Fix:
+- Launcher v1.4.4 no longer hard-codes the Gateway version.
+- Expected Gateway version is read from external_gateway/package.json.
+- Health still validates componentId, gatewayAvailable, runtimeState, loopbackOnly, and exact local package version.
+- If the local Gateway package version cannot be resolved, the launcher fails closed with LOCAL_GATEWAY_VERSION_UNRESOLVED.
+- Missing Gateway folder guidance is version-neutral.
+
+Validation:
+- Python syntax compile: PASS
+- Local package expected Gateway version: 1.5.0
+- Live /health contract against Canonical Gateway v1.5.0: PASS
+- componentId: PASS
+- gatewayAvailable: PASS
+- runtimeState READY: PASS
+- loopbackOnly: PASS
+- gatewayVersion exact match: PASS
+
+This hotfix does not change EXTERNAL-010 Phase 21 product version 1.20.0.
