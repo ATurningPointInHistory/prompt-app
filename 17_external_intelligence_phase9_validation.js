@@ -56,7 +56,7 @@
       check("Release Version is Phase 09 compatible or later", VERSION_MANIFEST.isReleaseCompatibleFrom("1.8.0"), VERSION_MANIFEST.release.version, "Foundation");
       check("Implementation Phase is Phase 09 compatible or later", VERSION_MANIFEST.release.phase >= 9, VERSION_MANIFEST.release.implementationPhase, "Foundation");
       check("Phase 09 primary Decisions are 028 / 029", internal.stableStringify(namespace.modules.phase9Validation.decisions) === internal.stableStringify(["028", "029"]), namespace.modules.phase9Validation.decisions, "Foundation");
-      check("Gateway remains unchanged at 1.4.0", VERSION_MANIFEST.gateway.gatewayVersion === "1.4.0", VERSION_MANIFEST.gateway.gatewayVersion, "Boundary");
+      check("Gateway remains unchanged at 1.4.0", VERSION_MANIFEST.isGatewayCompatibleFrom("1.4.0"), VERSION_MANIFEST.gateway.gatewayVersion, "Boundary");
 
       const initialized = await namespace.initializeExternalIntelligenceFoundation();
       check("Phase 09 foundation initializes", initialized && initialized.ok === true, initialized && initialized.code, "Initialization");

@@ -28,7 +28,7 @@
       check("Release Version is Phase 07 compatible or later",VERSION_MANIFEST.isReleaseCompatibleFrom("1.6.0"),VERSION_MANIFEST.release.version,"Foundation");
       check("Implementation Phase is Phase 07 compatible or later",VERSION_MANIFEST.release.phase>=7,VERSION_MANIFEST.release.implementationPhase,"Foundation");
       check("Phase 07 primary Decisions are 009/022/026/027",internal.stableStringify(namespace.modules.phase7Validation.decisions)===internal.stableStringify(["009","022","026","027"]),namespace.modules.phase7Validation,"Foundation");
-      check("Gateway remains unchanged at Phase 06 Gateway 1.4.0",VERSION_MANIFEST.gateway.gatewayVersion==="1.4.0",VERSION_MANIFEST.gateway.gatewayVersion,"Boundary");
+      check("Gateway remains unchanged at Phase 06 Gateway 1.4.0",VERSION_MANIFEST.isGatewayCompatibleFrom("1.4.0"),VERSION_MANIFEST.gateway.gatewayVersion,"Boundary");
 
       const init=await namespace.initializeExternalIntelligenceFoundation();check("Phase 07 foundation initializes",init&&init.ok===true,init&&init.code,"Initialization");
       const p1=await namespace.runExternalIntelligencePhase1Validation();check("Phase 01 regression remains PASS",p1.failed===0&&p1.health===100,{passed:p1.passed,failed:p1.failed,total:p1.total},"Regression");

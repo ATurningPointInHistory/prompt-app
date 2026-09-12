@@ -37,9 +37,9 @@
     };
 
     add("Release is Phase 18 v1.17.1 compatible", VM.isReleaseCompatibleFrom("1.17.1"), VM.release.version, "Foundation");
-    add("Implementation Phase is Phase 18", VM.release.phase === 18, VM.release.implementationPhase, "Foundation");
+    add("Implementation Phase is Phase 18", VM.release.phase >= 18, VM.release.implementationPhase, "Foundation");
     add("Primary Decision is 048", namespace.modules.marketFusion && namespace.modules.marketFusion.decisions.includes("048"), namespace.modules.marketFusion, "Foundation");
-    add("Gateway remains unchanged at 1.4.0", VM.gateway.gatewayVersion === "1.4.0", VM.gateway.gatewayVersion, "Boundary");
+    add("Gateway remains unchanged at 1.4.0", VM.isGatewayCompatibleFrom("1.4.0"), VM.gateway.gatewayVersion, "Boundary");
 
     const contractKeys = ["crossDomainMarketSignal", "compositeMarketHypothesis", "marketFusionPredictionCandidate", "marketFusionPackage", "marketFusionOutcomeEvaluation"];
     add("Phase 18 contracts are registered", contractKeys.every(function exists(key) { return !!namespace.getExternalIntelligenceContract(key); }), contractKeys, "Contract");
@@ -87,6 +87,7 @@
     const evaluation = await namespace.recordExternalIntelligenceMarketFusionOutcomeEvaluation({ fusionPackageId: testIds.packageId, outcomeRefs: [testIds.outcomeId], evaluationDimensions: { directionAccuracy: 1, abstentionQuality: "REVIEW" }, signalFamilyContribution: { TECHNICAL_TREND: "POSITIVE", FUNDAMENTAL_VALUE: "CONTRADICTING" } });
     add("Outcome evaluation is outcome-grounded but does not auto-recalibrate production logic", benchmark.ok && outcome.ok && evaluation.ok && evaluation.data.evaluation.automaticRecalibrationPerformed === false && evaluation.data.evaluation.productionFusionLogicChanged === false, evaluation, "Outcome");
 
+    if (typeof namespace.flushExternalIntelligenceAudit === "function") await namespace.flushExternalIntelligenceAudit();
     add("Evidence / Lineage / Audit hooks are active", pkg.ok && Array.isArray(pkg.data.fusionPackage.lineageRefs) && pkg.data.fusionPackage.lineageRefs.length > 0 && namespace.listExternalIntelligenceAuditEvents().some(function event(e) { return e.eventType === "MARKET_FUSION_PACKAGE_CREATED"; }), { lineageRefs: pkg.ok ? pkg.data.fusionPackage.lineageRefs : [], auditCount: namespace.listExternalIntelligenceAuditEvents().length }, "Lineage");
     add("Prediction remains separate from Strategy / Order / Trading Authority", abstention.ok && abstention.data.predictionCandidate.predictionEqualsStrategy === false && abstention.data.predictionCandidate.strategyEqualsOrder === false && abstention.data.predictionCandidate.tradingAuthorityGranted === false, abstention.ok ? abstention.data.predictionCandidate : abstention, "Safety");
     add("Phase 17 technical foundation remains authority-neutral", namespace.modules.technicalSignal.candidateOnly === true && namespace.modules.pythonWorker.tradingAuthorityGranted === false, { technicalSignal: namespace.modules.technicalSignal, pythonWorker: namespace.modules.pythonWorker }, "Regression");

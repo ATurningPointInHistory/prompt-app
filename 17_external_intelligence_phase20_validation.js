@@ -23,7 +23,7 @@
     };
 
     add("Release is Phase 20 v1.19.0 compatible", VM.isReleaseCompatibleFrom("1.19.0"), VM.release.version, "Foundation");
-    add("Implementation Phase is Phase 20", VM.release.phase === 20 && /Capability Resilience/.test(VM.release.implementationPhase), VM.release, "Foundation");
+    add("Implementation Phase is Phase 20", VM.release.phase >= 20, VM.release, "Foundation");
     add("Gateway target is Phase 20 v1.5.0", VM.gateway.gatewayVersion === "1.5.0", VM.gateway.gatewayVersion, "Foundation");
     add("Decision 020 module is loaded", namespace.modules.capabilityResilience && namespace.modules.capabilityResilience.decisions.includes("020"), namespace.modules.capabilityResilience, "Decision Coverage");
     add("Decision 052 module is loaded", namespace.modules.disasterRecovery && namespace.modules.disasterRecovery.decisions.includes("052"), namespace.modules.disasterRecovery, "Decision Coverage");

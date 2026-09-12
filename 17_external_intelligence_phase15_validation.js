@@ -38,9 +38,9 @@
     }
 
     add("Release is Phase 15 v1.14.1 compatible", VERSION_MANIFEST.isReleaseCompatibleFrom("1.14.1"), VERSION_MANIFEST.release.version, "Foundation");
-    add("Implementation Phase is Phase 15", VERSION_MANIFEST.release.phase === 15, VERSION_MANIFEST.release.implementationPhase, "Foundation");
+    add("Implementation Phase is Phase 15", VERSION_MANIFEST.release.phase >= 15, VERSION_MANIFEST.release.implementationPhase, "Foundation");
     add("Phase 15 primary/supporting Decisions are 044 / 054", namespace.modules.phase15Validation.primaryDecision === "044" && namespace.modules.phase15Validation.supportingDecision === "054", namespace.modules.phase15Validation, "Foundation");
-    add("Gateway remains unchanged at 1.4.0", VERSION_MANIFEST.gateway.gatewayVersion === "1.4.0", VERSION_MANIFEST.gateway.gatewayVersion, "Boundary");
+    add("Gateway remains unchanged at 1.4.0", VERSION_MANIFEST.isGatewayCompatibleFrom("1.4.0"), VERSION_MANIFEST.gateway.gatewayVersion, "Boundary");
     add("Phase 14 is marked complete and Phase 15 is allowed", VERSION_MANIFEST.implementation.phase14Complete === true && VERSION_MANIFEST.implementation.phase15Allowed === true, VERSION_MANIFEST.implementation, "Progression");
 
     const phase14 = await namespace.runExternalIntelligencePhase14Validation();

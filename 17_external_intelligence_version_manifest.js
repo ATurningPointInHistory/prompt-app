@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.19.0
-   Phase 20: Capability Resilience / Disaster Recovery
+   Release: 1.20.0
+   Phase 21: Integrated Validation / Release Gate / Handoff
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.19.0";
+  const RELEASE_VERSION = "1.20.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -29,6 +29,7 @@
   const PHASE18_VERSION = "1.17.1";
   const PHASE19_VERSION = "1.18.1";
   const PHASE20_VERSION = "1.19.0";
+  const PHASE21_VERSION = "1.20.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -47,6 +48,14 @@
 
   function isReleaseCompatibleFrom(minimumVersion) {
     const current = parseSemanticVersion(RELEASE_VERSION);
+    const minimum = parseSemanticVersion(minimumVersion);
+    if (!current || !minimum || current.major !== minimum.major) return false;
+    if (current.minor !== minimum.minor) return current.minor > minimum.minor;
+    return current.patch >= minimum.patch;
+  }
+
+  function isGatewayCompatibleFrom(minimumVersion) {
+    const current = parseSemanticVersion(GATEWAY_PHASE20_VERSION);
     const minimum = parseSemanticVersion(minimumVersion);
     if (!current || !minimum || current.major !== minimum.major) return false;
     if (current.minor !== minimum.minor) return current.minor > minimum.minor;
@@ -117,7 +126,8 @@
     marketIdentity: PHASE17_VERSION, marketTimeSeries: PHASE17_VERSION, technicalIndicator: PHASE17_VERSION, technicalSignal: PHASE17_VERSION, pythonWorker: PHASE17_VERSION, phase17Validation: PHASE17_VERSION, phase17RealRuntimeValidation: PHASE17_VERSION, phase17AndroidValidation: PHASE17_VERSION,
     marketFusion: PHASE18_VERSION, phase18Validation: PHASE18_VERSION, phase18RealRuntimeValidation: PHASE18_VERSION, phase18AndroidValidation: PHASE18_VERSION,
     strategyExperiment: PHASE19_VERSION, phase19Validation: PHASE19_VERSION, phase19RealRuntimeValidation: PHASE19_VERSION, phase19AndroidValidation: PHASE19_VERSION,
-    capabilityResilience: PHASE20_VERSION, disasterRecovery: PHASE20_VERSION, phase20Validation: PHASE20_VERSION, phase20RealRuntimeValidation: PHASE20_VERSION, phase20AndroidValidation: PHASE20_VERSION
+    capabilityResilience: PHASE20_VERSION, disasterRecovery: PHASE20_VERSION, phase20Validation: PHASE20_VERSION, phase20RealRuntimeValidation: PHASE20_VERSION, phase20AndroidValidation: PHASE20_VERSION,
+    phase21Validation: PHASE21_VERSION, phase21RealRuntimeValidation: PHASE21_VERSION, phase21AndroidValidation: PHASE21_VERSION
   };
 
   const fileModules = {
@@ -232,7 +242,10 @@
     "17_external_intelligence_disaster_recovery.js": "disasterRecovery",
     "17_external_intelligence_phase20_validation.js": "phase20Validation",
     "17_external_intelligence_phase20_real_runtime_validation.js": "phase20RealRuntimeValidation",
-    "17_external_intelligence_phase20_android_validation.js": "phase20AndroidValidation"
+    "17_external_intelligence_phase20_android_validation.js": "phase20AndroidValidation",
+    "17_external_intelligence_phase21_validation.js": "phase21Validation",
+    "17_external_intelligence_phase21_real_runtime_validation.js": "phase21RealRuntimeValidation",
+    "17_external_intelligence_phase21_android_validation.js": "phase21AndroidValidation"
   };
 
   const contractVersions = {
@@ -1303,8 +1316,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 20 Capability Resilience / Disaster Recovery",
-      phase: 20,
+      implementationPhase: "Phase 21 Integrated Validation / Release Gate / Handoff",
+      phase: 21,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -1313,7 +1326,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 20 Capability Resilience / Disaster Recovery Implementation"
+      status: "Phase 21 Integrated Validation / Release Gate / Handoff Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -1388,8 +1401,9 @@
       phase19Allowed: true,
       phase19Complete: true,
       phase20Allowed: true,
-      phase20Complete: false,
-      phase21Allowed: false,
+      phase20Complete: true,
+      phase21Allowed: true,
+      phase21Complete: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true
@@ -1408,7 +1422,8 @@
     getContractId: function getContractId(contractKey) {
       return contractIds[contractKey] || null;
     },
-    isReleaseCompatibleFrom: isReleaseCompatibleFrom
+    isReleaseCompatibleFrom: isReleaseCompatibleFrom,
+    isGatewayCompatibleFrom: isGatewayCompatibleFrom
   };
 
   global.EXTERNAL010VersionManifest = deepFreeze(manifest);

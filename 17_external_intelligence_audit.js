@@ -19,6 +19,11 @@
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("audit");
 
+  // Serialize append-only hash-chain mutations. Multiple feature modules may emit
+  // audit events without awaiting the returned Promise; a queue prevents two events
+  // from observing the same previous hash/sequence.
+  let auditAppendTail = Promise.resolve();
+
   function getCrypto() {
     if (global.crypto && global.crypto.subtle) return global.crypto;
     return null;
@@ -72,7 +77,7 @@
     return state.auditEvents.get(state.auditOrder[state.auditOrder.length - 1]) || null;
   }
 
-  async function appendExternalIntelligenceAuditEvent(input) {
+  async function appendExternalIntelligenceAuditEventInternal(input) {
     const settings = internal.isPlainObject(input) ? input : {};
     const eventType = internal.text(settings.eventType, "");
     const actor = internal.text(settings.actor, "System");
@@ -129,6 +134,23 @@
     });
   }
 
+  function appendExternalIntelligenceAuditEvent(input) {
+    const execute = function execute() {
+      return appendExternalIntelligenceAuditEventInternal(input);
+    };
+    const task = auditAppendTail.then(execute, execute);
+    auditAppendTail = task.then(function settled() { return undefined; }, function settledError() { return undefined; });
+    return task;
+  }
+
+  async function flushExternalIntelligenceAudit() {
+    await auditAppendTail;
+    return internal.buildResult(true, "EXTERNAL010_AUDIT_FLUSHED", "Ready", {
+      eventCount: state.auditEvents.size,
+      lastEventId: state.auditOrder.length ? state.auditOrder[state.auditOrder.length - 1] : null
+    });
+  }
+
   async function verifyAuditEvent(event) {
     const validation = namespace.validateExternalIntelligenceContract("auditEvent", event);
     const expectedHash = await computeAuditEventHash(event);
@@ -137,6 +159,7 @@
   }
 
   async function verifyExternalIntelligenceAuditChain(eventsOverride) {
+    if (!Array.isArray(eventsOverride)) await auditAppendTail;
     const events = Array.isArray(eventsOverride)
       ? eventsOverride.map(internal.clone)
       : state.auditOrder.map(function get(id) { return state.auditEvents.get(id); }).filter(Boolean).map(internal.clone);
@@ -190,6 +213,7 @@
     createExternalIntelligenceMemoryAuditPersistenceAdapter: createMemoryAuditPersistenceAdapter,
     setExternalIntelligenceAuditPersistenceAdapter: setAuditPersistenceAdapter,
     appendExternalIntelligenceAuditEvent: appendExternalIntelligenceAuditEvent,
+    flushExternalIntelligenceAudit: flushExternalIntelligenceAudit,
     verifyExternalIntelligenceAuditEvent: verifyAuditEvent,
     verifyExternalIntelligenceAuditChain: verifyExternalIntelligenceAuditChain,
     getExternalIntelligenceAuditEvent: getAuditEvent,

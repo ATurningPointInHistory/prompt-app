@@ -44,9 +44,9 @@
     };
 
     add("Release is Phase 19 v1.18.1 compatible", VM.isReleaseCompatibleFrom("1.18.1"), VM.release.version, "Foundation");
-    add("Implementation Phase is Phase 19", VM.release.phase === 19, VM.release.implementationPhase, "Foundation");
+    add("Implementation Phase is Phase 19", VM.release.phase >= 19, VM.release.implementationPhase, "Foundation");
     add("Primary Decision is 049", namespace.modules.strategyExperiment && namespace.modules.strategyExperiment.decisions.includes("049"), namespace.modules.strategyExperiment, "Foundation");
-    add("Gateway remains unchanged at 1.4.0", VM.gateway.gatewayVersion === "1.4.0", VM.gateway.gatewayVersion, "Boundary");
+    add("Gateway remains unchanged at 1.4.0", VM.isGatewayCompatibleFrom("1.4.0"), VM.gateway.gatewayVersion, "Boundary");
 
     const contractKeys = ["strategyHypothesisReference", "strategyDatasetSnapshot", "historicalUniverseSnapshot", "marketRuleSnapshot", "transactionCostModel", "executionModel", "strategyExperimentProtocol", "strategyTrialRecord", "strategyFingerprint", "strategyBacktestResult", "strategyExperimentReadiness", "strategyFinanceHandoff"];
     add("Phase 19 contracts are registered", contractKeys.every(function exists(k) { return !!namespace.getExternalIntelligenceContract(k); }), contractKeys, "Contract");

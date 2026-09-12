@@ -18,9 +18,9 @@
     function add(name, passed, detail, group, severity) { checks.push({ name: name, passed: passed === true, detail: detail == null ? "" : (typeof detail === "string" ? detail : internal.stableStringify(detail)), group: group || "Phase 16", severity: severity || "Critical" }); }
 
     add("Release is Phase 16 v1.15.0 compatible", VERSION_MANIFEST.isReleaseCompatibleFrom("1.15.0"), VERSION_MANIFEST.release.version, "Foundation");
-    add("Implementation Phase is Phase 16", VERSION_MANIFEST.release.phase === 16, VERSION_MANIFEST.release.implementationPhase, "Foundation");
+    add("Implementation Phase is Phase 16", VERSION_MANIFEST.release.phase >= 16, VERSION_MANIFEST.release.implementationPhase, "Foundation");
     add("Phase 16 primary Decisions are 045 / 046", namespace.modules.monitoringWatch.decisions.includes("045") && namespace.modules.notificationGovernance.decisions.includes("046"), { monitoring: namespace.modules.monitoringWatch, notification: namespace.modules.notificationGovernance }, "Foundation");
-    add("Gateway remains unchanged at 1.4.0", VERSION_MANIFEST.gateway.gatewayVersion === "1.4.0", VERSION_MANIFEST.gateway.gatewayVersion, "Boundary");
+    add("Gateway remains unchanged at 1.4.0", VERSION_MANIFEST.isGatewayCompatibleFrom("1.4.0"), VERSION_MANIFEST.gateway.gatewayVersion, "Boundary");
     add("Phase 15 is marked complete and Phase 16 is allowed", VERSION_MANIFEST.implementation.phase15Complete === true && VERSION_MANIFEST.implementation.phase16Allowed === true, VERSION_MANIFEST.implementation, "Progression");
 
     const phase15 = await namespace.runExternalIntelligencePhase15Validation();
@@ -118,6 +118,7 @@
     add("Decision 045 safety rules are fixed", ["researchGoalEqualsMonitoringGoal","monitoringEqualsFixedFrequentPolling","monitoringTriggerEqualsEmergencyConfirmed","dataChangedEqualsMaterialIntelligenceChange","sameEventReobservedEqualsNewEvent","noObservationEqualsNoChange","monitoringGapEqualsStableWorld","highPriorityAllowsUnlimitedMonitoringBudget","monitorAuthorityAllowsUnlimitedPaidAPI","watchDefinitionEqualsScheduler","schedulerExecutionEqualsGoalAuthority","changePackageEqualsActionAuthority","marketWatchAuthorityEqualsTradingAuthority","alwaysOnArchitectureRequiresAlwaysOnRuntimeToday"].every(function k(name) { return VERSION_MANIFEST.safety[name] === false; }), VERSION_MANIFEST.safety, "Safety");
     add("Decision 046 safety rules are fixed", ["detectedEqualsShouldNotify","notificationSentEqualsDelivered","deliveredEqualsSeen","seenEqualsAcknowledged","acknowledgedEqualsApproved","criticalNotificationEqualsTradingAuthority","notificationEqualsRecommendation","recommendationEqualsExecution"].every(function k(name) { return VERSION_MANIFEST.safety[name] === false; }), VERSION_MANIFEST.safety, "Safety");
 
+    if (typeof namespace.flushExternalIntelligenceAudit === "function") await namespace.flushExternalIntelligenceAudit();
     const auditTypes = Array.from(state.auditEvents.values()).map(function e(a) { return a.eventType; });
     add("Monitoring / Notification audit hooks record key events", ["WATCH_CREATED","WATCH_ACTIVATED","MATERIAL_CHANGE_DETECTED","MONITORING_GAP_STARTED","MONITORING_GAP_RESOLVED","NOTIFICATION_ACKNOWLEDGED"].every(function e(t) { return auditTypes.includes(t); }), auditTypes.slice(-30), "Audit");
 

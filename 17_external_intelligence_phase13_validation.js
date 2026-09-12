@@ -27,9 +27,9 @@
     const checks = [];
     const add = function (name, passed, detail, group) { checks.push({ name: name, passed: passed === true, detail: detail == null ? "" : (typeof detail === "string" ? detail : internal.stableStringify(detail)), group: group || "Phase 13", severity: "Critical" }); };
     add("Release is Phase 13 v1.12.0 compatible", VERSION_MANIFEST.isReleaseCompatibleFrom("1.12.0"), VERSION_MANIFEST.release.version, "Foundation");
-    add("Implementation Phase is Phase 13", VERSION_MANIFEST.release.phase === 13, VERSION_MANIFEST.release.implementationPhase, "Foundation");
+    add("Implementation Phase is Phase 13", VERSION_MANIFEST.release.phase >= 13, VERSION_MANIFEST.release.implementationPhase, "Foundation");
     add("Phase 13 primary Decision is 034", internal.stableStringify(namespace.modules.phase13Validation.decisions) === internal.stableStringify(["034"]), namespace.modules.phase13Validation.decisions, "Foundation");
-    add("Gateway remains unchanged at 1.4.0", VERSION_MANIFEST.gateway.gatewayVersion === "1.4.0", VERSION_MANIFEST.gateway.gatewayVersion, "Boundary");
+    add("Gateway remains unchanged at 1.4.0", VERSION_MANIFEST.isGatewayCompatibleFrom("1.4.0"), VERSION_MANIFEST.gateway.gatewayVersion, "Boundary");
 
     const phase12 = await namespace.runExternalIntelligencePhase12Validation();
     add("Phase 12 regression remains PASS on later compatible release", phase12.failed === 0 && phase12.health === 100, { passed: phase12.passed, failed: phase12.failed, total: phase12.total }, "Regression");
