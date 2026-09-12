@@ -9,6 +9,7 @@ const { createSessionStore } = require("./lib/session_store.cjs");
 const { createAcquisition } = require("./lib/acquisition.cjs");
 const { createEvidenceStore } = require("./lib/evidence_store.cjs");
 const { createSecretStore } = require("./lib/secret_store.cjs");
+const { createRecoveryStore } = require("./lib/recovery_store.cjs");
 
 const config = buildConfig();
 const audit = createAudit();
@@ -18,6 +19,7 @@ const sessions = createSessionStore(config, runtime, audit);
 const secretStore = createSecretStore(config, audit);
 const acquisition = createAcquisition(config, audit, secretStore);
 const evidenceStore = createEvidenceStore(config, audit);
+const recoveryStore = createRecoveryStore(config, runtime, audit, evidenceStore);
 
 function sendJson(req, res, status, body, cors) {
   if (cors) security.applyCors(req, res);
@@ -132,6 +134,7 @@ async function route(req, res) {
       requestId: integrity.requestId,
       sessionSummary: sessions.summary(),
       auditSummary: audit.summary(),
+      recovery: recoveryStore.currentRecoveryState(),
       supplyChain: {
         dependencyMode: "node-builtins-only",
         externalDependencyCount: 0,
@@ -224,6 +227,50 @@ async function route(req, res) {
     catch (error) { return sendJson(req, res, Number(error.status) || 500, { ok: false, code: error.code || "PROCESSING_CHECKPOINT_FAILED", status: Number(error.status) >= 500 ? "Failed" : "Blocked" }, true); }
   }
 
+
+  if (req.url === "/v1/recovery/create" && req.method === "POST") {
+    const integrity = validateProtectedRequest(req, res, "MANAGE_RECOVERY");
+    if (!integrity) return;
+    let body; try { body = await readJson(req); } catch (error) { return reject(req, res, error.code === "BODY_TOO_LARGE" ? 413 : 400, error.code || "INVALID_BODY"); }
+    try { return sendJson(req, res, 201, { ok: true, code: "RECOVERY_POINT_CREATED", recovery: recoveryStore.createRecoveryPoint(body) }, true); }
+    catch (error) { return sendJson(req, res, Number(error.status) || 500, { ok: false, code: error.code || "RECOVERY_POINT_CREATE_FAILED", status: Number(error.status) >= 500 ? "Failed" : "Blocked" }, true); }
+  }
+
+  if (req.url === "/v1/recovery/list" && req.method === "POST") {
+    const integrity = validateProtectedRequest(req, res, "MANAGE_RECOVERY");
+    if (!integrity) return;
+    let body; try { body = await readJson(req); } catch (error) { return reject(req, res, 400, error.code || "INVALID_BODY"); }
+    try { return sendJson(req, res, 200, { ok: true, code: "RECOVERY_POINT_CATALOG", recovery: recoveryStore.listRecoveryPoints(body) }, true); }
+    catch (error) { return sendJson(req, res, Number(error.status) || 500, { ok: false, code: error.code || "RECOVERY_POINT_LIST_FAILED", status: Number(error.status) >= 500 ? "Failed" : "Blocked" }, true); }
+  }
+
+  if (req.url === "/v1/recovery/validate" && req.method === "POST") {
+    const integrity = validateProtectedRequest(req, res, "MANAGE_RECOVERY");
+    if (!integrity) return;
+    let body; try { body = await readJson(req); } catch (error) { return reject(req, res, 400, error.code || "INVALID_BODY"); }
+    try { return sendJson(req, res, 200, { ok: true, code: "RECOVERY_POINT_VALIDATED", recovery: recoveryStore.validateRecoveryPoint(body) }, true); }
+    catch (error) { return sendJson(req, res, Number(error.status) || 500, { ok: false, code: error.code || "RECOVERY_POINT_VALIDATE_FAILED", status: Number(error.status) >= 500 ? "Failed" : "Blocked" }, true); }
+  }
+
+  if (req.url === "/v1/recovery/restore" && req.method === "POST") {
+    const integrity = validateProtectedRequest(req, res, "MANAGE_RECOVERY");
+    if (!integrity) return;
+    let body; try { body = await readJson(req); } catch (error) { return reject(req, res, 400, error.code || "INVALID_BODY"); }
+    try {
+      const recovery = recoveryStore.restoreRecoveryPoint(body);
+      if (recovery.sessionInvalidationRequired === true) sessions.invalidateAll("RECOVERY_EPOCH_CHANGED");
+      return sendJson(req, res, recovery.state === "BLOCKED" ? 409 : 200, { ok: recovery.state !== "BLOCKED", code: recovery.drillOnly ? "RECOVERY_RESTORE_DRILL_COMPLETE" : "RECOVERY_PHYSICAL_RESTORE_COMPLETE", recovery }, true);
+    } catch (error) { return sendJson(req, res, Number(error.status) || 500, { ok: false, code: error.code || "RECOVERY_RESTORE_FAILED", status: Number(error.status) >= 500 ? "Failed" : "Blocked" }, true); }
+  }
+
+  if (req.url === "/v1/recovery/rebuild-assessment" && req.method === "POST") {
+    const integrity = validateProtectedRequest(req, res, "MANAGE_RECOVERY");
+    if (!integrity) return;
+    let body; try { body = await readJson(req); } catch (error) { return reject(req, res, 400, error.code || "INVALID_BODY"); }
+    try { return sendJson(req, res, 200, { ok: true, code: "RECOVERY_METADATA_REBUILD_ASSESSED", recovery: recoveryStore.metadataRebuildAssessment(body) }, true); }
+    catch (error) { return sendJson(req, res, Number(error.status) || 500, { ok: false, code: error.code || "RECOVERY_METADATA_REBUILD_ASSESSMENT_FAILED", status: Number(error.status) >= 500 ? "Failed" : "Blocked" }, true); }
+  }
+
   if (req.url === "/v1/session/revoke" && req.method === "POST") {
     const integrity = validateProtectedRequest(req, res);
     if (!integrity) return;
@@ -283,4 +330,4 @@ function shutdown(signal) {
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 
-module.exports = { server, config, runtime, sessions, audit, acquisition, evidenceStore, secretStore };
+module.exports = { server, config, runtime, sessions, audit, acquisition, evidenceStore, secretStore, recoveryStore };

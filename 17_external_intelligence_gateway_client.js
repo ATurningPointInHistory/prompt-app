@@ -193,7 +193,7 @@
     try {
       const result = await fetchJson(path, { method: settings.method || "POST", headers: secureHeaders(requestId, nonce, createdAt), body: JSON.stringify(body || {}) });
       if (result.status === 401 || result.status === 403) {
-        if (result.body && ["SESSION_EXPIRED", "SESSION_INVALID", "SESSION_REVOKED", "RUNTIME_INVALIDATED"].includes(result.body.code)) clearSessionLocal(result.body.code);
+        if (result.body && ["SESSION_EXPIRED", "SESSION_INVALID", "SESSION_REVOKED", "RUNTIME_INVALIDATED", "RECOVERY_EPOCH_INVALIDATED"].includes(result.body.code)) clearSessionLocal(result.body.code);
       }
       return internal.buildResult(result.ok, result.ok ? "EXTERNAL010_GATEWAY_REQUEST_ACCEPTED" : "EXTERNAL010_GATEWAY_REQUEST_REJECTED", result.ok ? "Ready" : "Blocked", {
         httpStatus: result.status,
@@ -415,6 +415,52 @@
     return guardedGatewayRequest(internal.text(settings.path, VERSION_MANIFEST.gateway.runtimeEndpoint), { action: action, target: target, purpose: purpose, payload: internal.clone(settings.payload || {}) }, {});
   }
 
+
+  function evaluateGatewayRecoveryAuthority(action, recoveryPointId, purpose) {
+    const targetId = internal.text(recoveryPointId, "") || "RECOVERY-POINT-NEW";
+    return namespace.evaluateExternalIntelligenceAuthority({
+      action: action,
+      target: { type: "external-intelligence-recovery", id: targetId },
+      purpose: internal.text(purpose, "phase20-recovery")
+    });
+  }
+
+  async function gatewayRecoveryRequest(endpoint, action, input, authorityTargetId) {
+    const settings = internal.isPlainObject(input) ? input : {};
+    const scopeReady = await ensureGatewaySessionScopes([VERSION_MANIFEST.gateway.recoveryScope || "MANAGE_RECOVERY"]);
+    if (!scopeReady.ok) return scopeReady;
+    const recoveryPointId = internal.text(settings.recoveryPointId, "") || null;
+    const authorityTarget = internal.text(authorityTargetId, "") || recoveryPointId;
+    const authority = evaluateGatewayRecoveryAuthority(action, authorityTarget, settings.purpose);
+    if (!authority.allowed || !authority.authorityEnvelopeId) {
+      return internal.buildResult(false, "EXTERNAL010_RECOVERY_AUTHORITY_DENIED", "Blocked", { action, recoveryPointId, authorityTargetId: authorityTarget || null, authority, gatewayRequestSent: false });
+    }
+    const payload = Object.assign({}, internal.clone(settings), {
+      authority: { action, allowed: true, decision: authority.decision, reason: authority.reason, authorityEnvelopeId: authority.authorityEnvelopeId, evaluatedAt: authority.evaluatedAt }
+    });
+    delete payload.purpose;
+    const result = await guardedGatewayRequest(endpoint, payload, { method: "POST" });
+    const response = result && result.data && result.data.response;
+    if (response && response.recovery && response.recovery.sessionInvalidationRequired === true) clearSessionLocal("RECOVERY_EPOCH_CHANGED");
+    return result;
+  }
+
+  async function createExternalIntelligenceGatewayRecoveryPoint(input) {
+    return gatewayRecoveryRequest(VERSION_MANIFEST.gateway.recoveryCreateEndpoint || "/v1/recovery/create", "CREATE_RECOVERY_POINT", input);
+  }
+  async function listExternalIntelligenceGatewayRecoveryPoints(input) {
+    return gatewayRecoveryRequest(VERSION_MANIFEST.gateway.recoveryListEndpoint || "/v1/recovery/list", "READ_RECOVERY_POINT", input, "RECOVERY_CATALOG");
+  }
+  async function validateExternalIntelligenceGatewayRecoveryPoint(input) {
+    return gatewayRecoveryRequest(VERSION_MANIFEST.gateway.recoveryValidateEndpoint || "/v1/recovery/validate", "READ_RECOVERY_POINT", input);
+  }
+  async function restoreExternalIntelligenceGatewayRecoveryPoint(input) {
+    return gatewayRecoveryRequest(VERSION_MANIFEST.gateway.recoveryRestoreEndpoint || "/v1/recovery/restore", "RESTORE_RECOVERY_POINT", input);
+  }
+  async function assessExternalIntelligenceGatewayMetadataRebuild(input) {
+    return gatewayRecoveryRequest(VERSION_MANIFEST.gateway.recoveryRebuildAssessmentEndpoint || "/v1/recovery/rebuild-assessment", "READ_RECOVERY_POINT", input, "CURRENT_METADATA_STORE");
+  }
+
   async function revokeGatewaySession() {
     if (!isSessionUsable()) {
       clearSessionLocal("LOCAL_REVOKE_NO_ACTIVE_SESSION");
@@ -476,6 +522,11 @@
     disableExternalIntelligenceGatewayAcquisitionBridge: disableGatewayAcquisitionBridge,
     enableExternalIntelligenceGatewayEvidencePersistenceBridge: enableGatewayEvidencePersistenceBridge,
     getExternalIntelligenceGatewaySecretMetadataStatus: getGatewaySecretMetadataStatus,
+    createExternalIntelligenceGatewayRecoveryPoint: createExternalIntelligenceGatewayRecoveryPoint,
+    listExternalIntelligenceGatewayRecoveryPoints: listExternalIntelligenceGatewayRecoveryPoints,
+    validateExternalIntelligenceGatewayRecoveryPoint: validateExternalIntelligenceGatewayRecoveryPoint,
+    restoreExternalIntelligenceGatewayRecoveryPoint: restoreExternalIntelligenceGatewayRecoveryPoint,
+    assessExternalIntelligenceGatewayMetadataRebuild: assessExternalIntelligenceGatewayMetadataRebuild,
     requestAuthorityGovernedExternalIntelligenceGatewayOperation: requestAuthorityGovernedGatewayOperation,
     revokeExternalIntelligenceGatewaySession: revokeGatewaySession,
     initializeExternalIntelligenceStartup: initializeExternalIntelligenceStartup
@@ -498,6 +549,8 @@
     secretValueReturnedToBrowser: false,
     arbitraryUrlProxyEnabled: false,
     gatewayTargetAllowlistRequired: true,
+    recoveryBridgeAvailable: true,
+    restoredSessionRecordEqualsCurrentAuthentication: false,
     gatewayFailureBreaksCore: false,
     loadedAt: internal.nowIso()
   };

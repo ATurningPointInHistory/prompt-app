@@ -25,6 +25,7 @@ function createSessionStore(config, runtime, audit) {
     return {
       gatewaySessionId: session.gatewaySessionId,
       runtimeInstanceId: session.runtimeInstanceId,
+      recoveryEpoch: session.recoveryEpoch,
       issuedAt: session.issuedAt,
       expiresAt: session.expiresAt,
       state: session.state,
@@ -41,13 +42,14 @@ function createSessionStore(config, runtime, audit) {
     const session = {
       gatewaySessionId: `EXTERNAL-010-GATEWAY-SESSION-${randomUUID()}`,
       runtimeInstanceId: runtime.runtime.runtimeInstanceId,
+      recoveryEpoch: runtime.runtime.recoveryEpoch,
       clientSessionId: String(input.clientSessionId || "unknown"),
       issuedAt: new Date(now).toISOString(),
       expiresAt: new Date(now + config.sessionTtlMs).toISOString(),
       expiresAtMs: now + config.sessionTtlMs,
       state: "ACTIVE",
       origin: input.origin,
-      scope: new Set((Array.isArray(input.scope) ? input.scope.map((value) => String(value).toUpperCase()) : []).filter((value) => ["PROBE", "READ_RUNTIME", "ACQUIRE_PUBLIC", "ACQUIRE_EXTERNAL", "READ_SECRET_METADATA", "PERSIST_EVIDENCE", "READ_EVIDENCE"].includes(value))),
+      scope: new Set((Array.isArray(input.scope) ? input.scope.map((value) => String(value).toUpperCase()) : []).filter((value) => ["PROBE", "READ_RUNTIME", "ACQUIRE_PUBLIC", "ACQUIRE_EXTERNAL", "READ_SECRET_METADATA", "PERSIST_EVIDENCE", "READ_EVIDENCE", "MANAGE_RECOVERY"].includes(value))),
       tokenHash: sha256(rawToken),
       usedRequestIds: new Map(),
       usedNonces: new Map()
@@ -65,6 +67,7 @@ function createSessionStore(config, runtime, audit) {
     const session = find(id);
     if (!session || !rawToken) return { ok: false, status: 401, code: "SESSION_INVALID" };
     if (session.runtimeInstanceId !== runtime.runtime.runtimeInstanceId) return { ok: false, status: 401, code: "RUNTIME_INVALIDATED" };
+    if (session.recoveryEpoch !== runtime.runtime.recoveryEpoch) return { ok: false, status: 401, code: "RECOVERY_EPOCH_INVALIDATED" };
     if (session.state !== "ACTIVE") return { ok: false, status: 401, code: session.state === "REVOKED" ? "SESSION_REVOKED" : "SESSION_INVALID" };
     if (Date.now() >= session.expiresAtMs) {
       session.state = "EXPIRED";

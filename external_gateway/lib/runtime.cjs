@@ -9,6 +9,7 @@ function createRuntime(config) {
     runtimeType: "NODE_GATEWAY",
     runtimeVersion: config.gatewayVersion,
     startupEpoch: `${Date.now().toString(36).toUpperCase()}-${randomUUID()}`,
+    recoveryEpoch: null,
     startedAt,
     healthState: "STARTING",
     executionAuthorityGranted: false,
@@ -22,6 +23,7 @@ function createRuntime(config) {
   };
 
   function setState(value) { runtime.healthState = String(value || "UNKNOWN").toUpperCase(); }
+  function setRecoveryEpoch(value) { runtime.recoveryEpoch = String(value || "").trim() || null; }
   function minimalHealth() {
     return {
       componentId: config.componentId,
@@ -29,6 +31,7 @@ function createRuntime(config) {
       gatewayVersion: config.gatewayVersion,
       contractVersion: config.contractVersion,
       runtimeState: runtime.healthState,
+      recoveryEpochPresent: Boolean(runtime.recoveryEpoch),
       loopbackOnly: true,
       sessionRequiredForProtectedEndpoints: true
     };
@@ -39,6 +42,7 @@ function createRuntime(config) {
       runtimeType: runtime.runtimeType,
       runtimeVersion: runtime.runtimeVersion,
       startupEpoch: runtime.startupEpoch,
+      recoveryEpoch: runtime.recoveryEpoch,
       startedAt: runtime.startedAt,
       healthState: runtime.healthState,
       executionAuthorityGranted: false,
@@ -50,7 +54,7 @@ function createRuntime(config) {
       architecture: runtime.architecture
     };
   }
-  return { runtime, setState, minimalHealth, protectedDetails };
+  return { runtime, setState, setRecoveryEpoch, minimalHealth, protectedDetails };
 }
 
 module.exports = { createRuntime };

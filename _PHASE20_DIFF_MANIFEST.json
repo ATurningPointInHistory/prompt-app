@@ -1,0 +1,133 @@
+{
+  "manifestId": "EXTERNAL-010-PHASE20-DIFF-MANIFEST-2026-09-12",
+  "componentId": "EXTERNAL-010",
+  "phase": 20,
+  "title": "Capability Resilience / Disaster Recovery",
+  "applicationVersion": "1.19.0",
+  "gatewayVersion": "1.5.0",
+  "baseline": {
+    "applicationVersion": "1.18.1",
+    "gatewayVersion": "1.4.0",
+    "status": "PC_ANDROID_READY / Project Owner Approved Freeze",
+    "baselineZip": "AI_Prompt_OS_EXTERNAL-010_Phase19_v1.18.1_PC_ANDROID_READY_HANDOFF_TO_PHASE20(1).zip",
+    "baselineApplicationFileCount": 436
+  },
+  "decisions": {
+    "primary": [
+      "020",
+      "052"
+    ],
+    "supporting": [
+      "013",
+      "051",
+      "054"
+    ]
+  },
+  "changeSummary": {
+    "changedExistingFiles": 14,
+    "newApplicationFiles": 7,
+    "deletedFiles": 0,
+    "intendedChangedOrNewApplicationFiles": 21,
+    "currentApplicationFileCount": 443,
+    "unexpectedChangedFiles": 0
+  },
+  "changedFiles": [
+    {
+      "path": "17_external_intelligence_core.js",
+      "sha256": "98a01a5c9af5068208840c6d8dc434987d33a4153ba0c16a48efa8bc07c52838"
+    },
+    {
+      "path": "17_external_intelligence_gateway_client.js",
+      "sha256": "ffa94ed528e5d94e398401fe36d15a57c20887e494d4df7179b3204b0f11a50e"
+    },
+    {
+      "path": "17_external_intelligence_version_manifest.js",
+      "sha256": "eb550efb16034404fd1cfef001d8554a5660f4d5634b583a44bca3a2a6187a9c"
+    },
+    {
+      "path": "external_gateway/gateway.cjs",
+      "sha256": "57198cfa7ff7f81e0f24ec34fa2537e756e2411cbb91fef865bb0605cd4e94f1"
+    },
+    {
+      "path": "external_gateway/lib/config.cjs",
+      "sha256": "c4efabcc46c06bc1c452c12db4a3332da7ed91e80be9dfd81e286e470dc09cf6"
+    },
+    {
+      "path": "external_gateway/lib/evidence_store.cjs",
+      "sha256": "da6310a2451e3d8dd48212a64f10ed5cf4ec15084312b16b5033b70f74bfe982"
+    },
+    {
+      "path": "external_gateway/lib/runtime.cjs",
+      "sha256": "50b3b7f4d8c59e2c287c9f979b13b94e3d12425f405ca7f399b8a179ef6e5717"
+    },
+    {
+      "path": "external_gateway/lib/session_store.cjs",
+      "sha256": "5ce89e4ee6512919364b8e8413b2f860d8d322d976f174be2a5dc8841a94cc35"
+    },
+    {
+      "path": "external_gateway/package.json",
+      "sha256": "1f86bd9c488d1ad55cec1e684364d2f1ebede355d26272b10818b5597b8105c2"
+    },
+    {
+      "path": "external_gateway/validate_gateway.cjs",
+      "sha256": "31d48e4fcb98c8dce739dfa846686650f7a839e65700f63bd5a80bd0f3097f3b"
+    },
+    {
+      "path": "external_gateway/validate_phase4_acquisition.cjs",
+      "sha256": "4bcceffb845615a4ee358ffe8d30ad41609908641a62e7c2caaa9af917ff62d0"
+    },
+    {
+      "path": "external_gateway/validate_phase5_persistence.cjs",
+      "sha256": "bc59720b81d4a00aca76f0ab5e3baa97344fc13f0312a77718abb1c225c38f19"
+    },
+    {
+      "path": "external_gateway/validate_phase6_security.cjs",
+      "sha256": "cfa4b615317756c95396ac0093311b629ce150ba8bbc60fa2c1c45c16ea038ae"
+    },
+    {
+      "path": "index.html",
+      "sha256": "dd50bc5ed753613c8529d71b1990b7e59835aa904076bf147fa3460f2d9ff0f0"
+    }
+  ],
+  "newFiles": [
+    {
+      "path": "17_external_intelligence_capability_resilience.js",
+      "sha256": "0291f61972a97e9d42fba88dc52ac3d85d1965151683fc18251cf9e661cd6c92"
+    },
+    {
+      "path": "17_external_intelligence_disaster_recovery.js",
+      "sha256": "47005b49547cd6440097f2fad2c132e6781ccdf479705c98ebba9a866efb5b0c"
+    },
+    {
+      "path": "17_external_intelligence_phase20_android_validation.js",
+      "sha256": "0a034ad907285b849ac9da2d3c9cfe4cebe70618b540828693f0aadca111e77e"
+    },
+    {
+      "path": "17_external_intelligence_phase20_real_runtime_validation.js",
+      "sha256": "090879b8c8bc8af76497ec1dadd79fa703a0ae134e8ff67250080fb7e1082752"
+    },
+    {
+      "path": "17_external_intelligence_phase20_validation.js",
+      "sha256": "419b2ee89acdfa2b929d8d881030210b85047361da1f1f3f1c25d7368af56b23"
+    },
+    {
+      "path": "external_gateway/lib/recovery_store.cjs",
+      "sha256": "8b6e22d475d9eec82e8e775f551f22677346f6c0c8805e9e99e6884f05484ce4"
+    },
+    {
+      "path": "external_gateway/validate_phase20_recovery.cjs",
+      "sha256": "37879883d69832fc93a499d7cafcb2ceff90fe2f98a914fdca39db45242d6850"
+    }
+  ],
+  "safetyBoundaries": {
+    "backupExistsEqualsRecoveryProven": false,
+    "filesRestoredEqualsPlatformReady": false,
+    "partialRecoveryEqualsFullRecovery": false,
+    "restoredSessionRecordEqualsCurrentAuthentication": false,
+    "evidenceBackupMayReconstructCredential": false,
+    "recoveryGrantsBusinessAuthority": false,
+    "orphanDetectionGrantsDeletionAuthority": false,
+    "blindRetryUnknownExecutionAllowed": false
+  },
+  "status": "IMPLEMENTED_AWAITING_PROJECT_OWNER_PC_ANDROID_VALIDATION"
+}

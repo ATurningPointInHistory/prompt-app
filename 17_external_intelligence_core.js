@@ -326,7 +326,9 @@
         ["lineage", namespace.initializeExternalIntelligenceLineage],
         ["relationGraph", namespace.initializeExternalIntelligenceRelationGraph],
         ["eventGraph", namespace.initializeExternalIntelligenceEventGraph],
-        ["impactGraph", namespace.initializeExternalIntelligenceImpactGraph]
+        ["impactGraph", namespace.initializeExternalIntelligenceImpactGraph],
+        ["capabilityResilience", namespace.initializeExternalIntelligenceCapabilityResilience],
+        ["disasterRecovery", namespace.initializeExternalIntelligenceDisasterRecovery]
       ];
       for (const item of initializers) {
         const name = item[0];

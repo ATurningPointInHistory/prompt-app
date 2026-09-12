@@ -41,44 +41,50 @@ function createEvidenceStore(config, audit) {
   fs.mkdirSync(evidenceRoot, { recursive: true });
   fs.mkdirSync(tempRoot, { recursive: true });
   const dbPath = path.join(root, "metadata.sqlite");
-  const db = new DatabaseSync(dbPath);
-  db.exec("PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON;");
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS schema_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-    INSERT OR REPLACE INTO schema_meta(key,value) VALUES ('databaseSchemaVersion','1.0.0');
-    CREATE TABLE IF NOT EXISTS content_objects (
-      content_hash TEXT PRIMARY KEY, content_id TEXT NOT NULL, size_bytes INTEGER NOT NULL,
-      content_type TEXT NOT NULL, storage_class TEXT NOT NULL, storage_provider TEXT NOT NULL,
-      storage_reference TEXT NOT NULL, integrity_state TEXT NOT NULL, created_at TEXT NOT NULL, verified_at TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS raw_evidence (
-      raw_evidence_id TEXT PRIMARY KEY, content_hash TEXT NOT NULL, content_id TEXT NOT NULL,
-      content_type TEXT NOT NULL, size_bytes INTEGER NOT NULL, raw_data_reference TEXT NOT NULL,
-      storage_class TEXT NOT NULL, acquired_at TEXT NOT NULL, published_at TEXT,
-      source_id TEXT NOT NULL, request_id TEXT NOT NULL, acquisition_status TEXT NOT NULL,
-      schema_version TEXT NOT NULL, created_at TEXT NOT NULL, immutable INTEGER NOT NULL CHECK(immutable=1)
-    );
-    CREATE TABLE IF NOT EXISTS acquisition_evidence (
-      evidence_id TEXT PRIMARY KEY, raw_evidence_id TEXT NOT NULL, request_id TEXT NOT NULL,
-      source_id TEXT NOT NULL, source_version INTEGER NOT NULL, operation_id TEXT NOT NULL,
-      adapter_id TEXT NOT NULL, adapter_version TEXT NOT NULL, access_mode TEXT NOT NULL,
-      acquired_at TEXT NOT NULL, published_at TEXT, status TEXT NOT NULL, content_hash TEXT NOT NULL,
-      content_type TEXT NOT NULL, attempt_count INTEGER NOT NULL, correlation_id TEXT,
-      acquisition_plan_id TEXT, research_goal_id TEXT, response_id TEXT, attempt_id TEXT, route_id TEXT,
-      runtime_version TEXT, gateway_version TEXT, schema_version TEXT NOT NULL, record_version INTEGER NOT NULL,
-      record_hash TEXT NOT NULL, created_at TEXT NOT NULL, immutable INTEGER NOT NULL CHECK(immutable=1)
-    );
-    CREATE INDEX IF NOT EXISTS idx_evidence_request ON acquisition_evidence(request_id);
-    CREATE INDEX IF NOT EXISTS idx_evidence_source_time ON acquisition_evidence(source_id, acquired_at);
-    CREATE INDEX IF NOT EXISTS idx_evidence_content_hash ON acquisition_evidence(content_hash);
-    CREATE TABLE IF NOT EXISTS processing_checkpoints (
-      checkpoint_id TEXT PRIMARY KEY, content_hash TEXT NOT NULL, processor_id TEXT NOT NULL,
-      processor_version TEXT NOT NULL, parameter_hash TEXT NOT NULL, processing_state TEXT NOT NULL,
-      resume_cursor_json TEXT, supersedes_checkpoint_id TEXT, created_at TEXT NOT NULL,
-      immutable INTEGER NOT NULL CHECK(immutable=1)
-    );
-    CREATE INDEX IF NOT EXISTS idx_checkpoint_input ON processing_checkpoints(content_hash, processor_id, processor_version, parameter_hash, created_at);
-  `);
+
+  function initializeDatabase(database) {
+    database.exec("PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON;");
+    database.exec(`
+      CREATE TABLE IF NOT EXISTS schema_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+      INSERT OR REPLACE INTO schema_meta(key,value) VALUES ('databaseSchemaVersion','1.0.0');
+      CREATE TABLE IF NOT EXISTS content_objects (
+        content_hash TEXT PRIMARY KEY, content_id TEXT NOT NULL, size_bytes INTEGER NOT NULL,
+        content_type TEXT NOT NULL, storage_class TEXT NOT NULL, storage_provider TEXT NOT NULL,
+        storage_reference TEXT NOT NULL, integrity_state TEXT NOT NULL, created_at TEXT NOT NULL, verified_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS raw_evidence (
+        raw_evidence_id TEXT PRIMARY KEY, content_hash TEXT NOT NULL, content_id TEXT NOT NULL,
+        content_type TEXT NOT NULL, size_bytes INTEGER NOT NULL, raw_data_reference TEXT NOT NULL,
+        storage_class TEXT NOT NULL, acquired_at TEXT NOT NULL, published_at TEXT,
+        source_id TEXT NOT NULL, request_id TEXT NOT NULL, acquisition_status TEXT NOT NULL,
+        schema_version TEXT NOT NULL, created_at TEXT NOT NULL, immutable INTEGER NOT NULL CHECK(immutable=1)
+      );
+      CREATE TABLE IF NOT EXISTS acquisition_evidence (
+        evidence_id TEXT PRIMARY KEY, raw_evidence_id TEXT NOT NULL, request_id TEXT NOT NULL,
+        source_id TEXT NOT NULL, source_version INTEGER NOT NULL, operation_id TEXT NOT NULL,
+        adapter_id TEXT NOT NULL, adapter_version TEXT NOT NULL, access_mode TEXT NOT NULL,
+        acquired_at TEXT NOT NULL, published_at TEXT, status TEXT NOT NULL, content_hash TEXT NOT NULL,
+        content_type TEXT NOT NULL, attempt_count INTEGER NOT NULL, correlation_id TEXT,
+        acquisition_plan_id TEXT, research_goal_id TEXT, response_id TEXT, attempt_id TEXT, route_id TEXT,
+        runtime_version TEXT, gateway_version TEXT, schema_version TEXT NOT NULL, record_version INTEGER NOT NULL,
+        record_hash TEXT NOT NULL, created_at TEXT NOT NULL, immutable INTEGER NOT NULL CHECK(immutable=1)
+      );
+      CREATE INDEX IF NOT EXISTS idx_evidence_request ON acquisition_evidence(request_id);
+      CREATE INDEX IF NOT EXISTS idx_evidence_source_time ON acquisition_evidence(source_id, acquired_at);
+      CREATE INDEX IF NOT EXISTS idx_evidence_content_hash ON acquisition_evidence(content_hash);
+      CREATE TABLE IF NOT EXISTS processing_checkpoints (
+        checkpoint_id TEXT PRIMARY KEY, content_hash TEXT NOT NULL, processor_id TEXT NOT NULL,
+        processor_version TEXT NOT NULL, parameter_hash TEXT NOT NULL, processing_state TEXT NOT NULL,
+        resume_cursor_json TEXT, supersedes_checkpoint_id TEXT, created_at TEXT NOT NULL,
+        immutable INTEGER NOT NULL CHECK(immutable=1)
+      );
+      CREATE INDEX IF NOT EXISTS idx_checkpoint_input ON processing_checkpoints(content_hash, processor_id, processor_version, parameter_hash, created_at);
+    `);
+    return database;
+  }
+
+  function openDatabase(file) { return initializeDatabase(new DatabaseSync(file)); }
+  let db = openDatabase(dbPath);
 
   function relativeContentReference(hash) { return path.posix.join("content", "sha256", hash.slice(0, 2), hash.slice(2, 4), hash); }
   function contentPath(hash) { return path.join(root, ...relativeContentReference(hash).split("/")); }
@@ -124,7 +130,18 @@ function createEvidenceStore(config, audit) {
     const acquisitionBase = Object.assign({}, ev, { contentHash, contentType: contentObject.contentType, rawEvidenceId, immutable: true });
     delete acquisitionBase.recordHash;
     const acquisitionEvidence = Object.assign({}, acquisitionBase, { recordHash: sha256Text(stableStringify(acquisitionBase)) });
-    const manifest = { schemaVersion: "1.0.0", evidenceId, rawEvidenceId, contentHash, sourceId: acquisitionEvidence.sourceId, acquiredAt: acquisitionEvidence.acquiredAt, mediaType: contentObject.contentType, contentLocation: storageReference, recordHash: acquisitionEvidence.recordHash, immutable: true };
+    const manifest = {
+      schemaVersion: "1.1.0", evidenceId, rawEvidenceId, contentHash, sourceId: acquisitionEvidence.sourceId,
+      acquiredAt: acquisitionEvidence.acquiredAt, mediaType: contentObject.contentType, contentLocation: storageReference,
+      recordHash: acquisitionEvidence.recordHash,
+      recoveryMetadata: {
+        contentObject: contentObject,
+        rawEvidence: rawEvidence,
+        acquisitionEvidence: acquisitionEvidence
+      },
+      credentialMaterialPresent: false,
+      immutable: true
+    };
     const manifestFile = evidenceManifestPath(evidenceId);
     atomicWrite(manifestFile, Buffer.from(JSON.stringify(manifest, null, 2), "utf8"));
     db.exec("BEGIN IMMEDIATE");
@@ -204,9 +221,91 @@ function createEvidenceStore(config, audit) {
     return { valid: missing.length === 0 && corrupted.length === 0, counts, missing, corrupted, orphan, orphanAutomaticDeletionPerformed: false, databaseSchemaVersion: db.prepare("SELECT value FROM schema_meta WHERE key='databaseSchemaVersion'").get().value, metadataIndex: "SQLITE", contentStore: "CONTENT_ADDRESSED_FILE_STORE" };
   }
 
+  function contentInventory() {
+    return db.prepare("SELECT content_hash,storage_reference,size_bytes,content_type,integrity_state FROM content_objects ORDER BY content_hash").all();
+  }
+
+  function evidenceManifestInventory() {
+    if (!fs.existsSync(evidenceRoot)) return [];
+    return fs.readdirSync(evidenceRoot, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+      .map((entry) => path.join(evidenceRoot, entry.name));
+  }
+
+  function createMetadataSnapshot(targetPath) {
+    const target = path.resolve(String(targetPath || ""));
+    if (!target || target === dbPath) { const e = new Error("RECOVERY_SNAPSHOT_PATH_INVALID"); e.code = "RECOVERY_SNAPSHOT_PATH_INVALID"; throw e; }
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    if (fs.existsSync(target)) fs.unlinkSync(target);
+    try { db.exec("PRAGMA wal_checkpoint(FULL)"); } catch (_) {}
+    const escaped = target.replace(/'/g, "''");
+    db.exec(`VACUUM INTO '${escaped}'`);
+    const bytes = fs.readFileSync(target);
+    return { path: target, sha256: sha256Buffer(bytes), sizeBytes: bytes.byteLength, databaseSchemaVersion: db.prepare("SELECT value FROM schema_meta WHERE key='databaseSchemaVersion'").get().value };
+  }
+
+  function validateMetadataSnapshot(snapshotPath) {
+    const file = path.resolve(String(snapshotPath || ""));
+    if (!fs.existsSync(file)) return { valid: false, code: "METADATA_SNAPSHOT_MISSING" };
+    let probe = null;
+    try {
+      probe = new DatabaseSync(file, { readOnly: true });
+      const check = probe.prepare("PRAGMA integrity_check").get();
+      const version = probe.prepare("SELECT value FROM schema_meta WHERE key='databaseSchemaVersion'").get();
+      return { valid: check && String(check.integrity_check || Object.values(check)[0]).toLowerCase() === "ok", integrityCheck: check, databaseSchemaVersion: version && version.value || null, sha256: sha256Buffer(fs.readFileSync(file)) };
+    } catch (error) { return { valid: false, code: "METADATA_SNAPSHOT_INVALID", message: error && error.message || String(error) }; }
+    finally { try { if (probe) probe.close(); } catch (_) {} }
+  }
+
+  function replaceMetadataFromSnapshot(snapshotPath) {
+    const source = path.resolve(String(snapshotPath || ""));
+    const validation = validateMetadataSnapshot(source);
+    if (!validation.valid) { const e = new Error("METADATA_SNAPSHOT_INVALID"); e.code = "METADATA_SNAPSHOT_INVALID"; e.validation = validation; throw e; }
+    const previous = `${dbPath}.pre-recovery-${Date.now()}-${randomUUID()}`;
+    const staged = `${dbPath}.recovery-staged-${randomUUID()}`;
+    try { db.close(); } catch (_) {}
+    try {
+      for (const suffix of ["-wal", "-shm"]) { try { if (fs.existsSync(dbPath + suffix)) fs.unlinkSync(dbPath + suffix); } catch (_) {} }
+      fs.copyFileSync(source, staged);
+      if (fs.existsSync(dbPath)) fs.renameSync(dbPath, previous);
+      fs.renameSync(staged, dbPath);
+      db = openDatabase(dbPath);
+      const post = db.prepare("PRAGMA integrity_check").get();
+      const ok = post && String(post.integrity_check || Object.values(post)[0]).toLowerCase() === "ok";
+      if (!ok) throw new Error("RESTORED_METADATA_INTEGRITY_FAILED");
+      try { if (fs.existsSync(previous)) fs.unlinkSync(previous); } catch (_) {}
+      return { restored: true, integrityCheck: post, sourceSnapshotSha256: validation.sha256 };
+    } catch (error) {
+      try { if (db) db.close(); } catch (_) {}
+      try { if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath); } catch (_) {}
+      try { if (fs.existsSync(previous)) fs.renameSync(previous, dbPath); } catch (_) {}
+      try { if (fs.existsSync(staged)) fs.unlinkSync(staged); } catch (_) {}
+      db = openDatabase(dbPath);
+      throw error;
+    }
+  }
+
+  function inspectMetadataRebuild() {
+    const files = evidenceManifestInventory();
+    let rebuildableCount = 0, legacyInsufficientCount = 0, invalidManifestCount = 0;
+    for (const file of files) {
+      try {
+        const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
+        if (manifest && manifest.recoveryMetadata && manifest.recoveryMetadata.acquisitionEvidence && manifest.recoveryMetadata.rawEvidence && manifest.recoveryMetadata.contentObject) rebuildableCount += 1;
+        else legacyInsufficientCount += 1;
+      } catch (_) { invalidManifestCount += 1; }
+    }
+    return { manifestCount: files.length, rebuildableCount, legacyInsufficientCount, invalidManifestCount, automaticRebuildPerformed: false, fullRebuildPossible: files.length > 0 && legacyInsufficientCount === 0 && invalidManifestCount === 0 };
+  }
+
+  function internalIntegrityScan() {
+    const authority = { action: "READ_EXTERNAL_EVIDENCE", allowed: true, authorityEnvelopeId: "INTERNAL-RECOVERY-INTEGRITY" };
+    return integrityScan({ authority });
+  }
+
   function close() { try { db.close(); } catch (_) {} }
-  function details() { return { metadataIndex: "SQLITE", databaseSchemaVersion: "1.0.0", contentStore: "CONTENT_ADDRESSED_FILE_STORE", hashAlgorithm: "SHA-256", storageRootConfigured: true, storageRootExposed: false }; }
-  return { persistEvidence, readEvidence, persistCheckpoint, integrityScan, details, close, root, dbPath };
+  function details() { return { metadataIndex: "SQLITE", databaseSchemaVersion: "1.0.0", contentStore: "CONTENT_ADDRESSED_FILE_STORE", hashAlgorithm: "SHA-256", storageRootConfigured: true, storageRootExposed: false, recoveryMetadataManifestVersion: "1.1.0" }; }
+  return { persistEvidence, readEvidence, persistCheckpoint, integrityScan, internalIntegrityScan, contentInventory, evidenceManifestInventory, createMetadataSnapshot, validateMetadataSnapshot, replaceMetadataFromSnapshot, inspectMetadataRebuild, contentPath, evidenceRoot, details, close, root, dbPath };
 }
 
 module.exports = { createEvidenceStore, sha256Text, stableStringify };

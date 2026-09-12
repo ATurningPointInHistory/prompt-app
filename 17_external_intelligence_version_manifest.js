@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.18.1
-   Phase 19: Market Strategy Experiment / Backtest Readiness
+   Release: 1.19.0
+   Phase 20: Capability Resilience / Disaster Recovery
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.18.1";
+  const RELEASE_VERSION = "1.19.0";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -28,9 +28,11 @@
   const PHASE17_VERSION = "1.16.0";
   const PHASE18_VERSION = "1.17.1";
   const PHASE19_VERSION = "1.18.1";
+  const PHASE20_VERSION = "1.19.0";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
+  const GATEWAY_PHASE20_VERSION = "1.5.0";
 
   function deepFreeze(value) {
     if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -114,7 +116,8 @@
     monitoringWatch: PHASE16_VERSION, monitoringChange: PHASE16_VERSION, notificationGovernance: PHASE16_VERSION, phase16Validation: PHASE16_VERSION, phase16RealRuntimeValidation: PHASE16_VERSION, phase16AndroidValidation: PHASE16_VERSION,
     marketIdentity: PHASE17_VERSION, marketTimeSeries: PHASE17_VERSION, technicalIndicator: PHASE17_VERSION, technicalSignal: PHASE17_VERSION, pythonWorker: PHASE17_VERSION, phase17Validation: PHASE17_VERSION, phase17RealRuntimeValidation: PHASE17_VERSION, phase17AndroidValidation: PHASE17_VERSION,
     marketFusion: PHASE18_VERSION, phase18Validation: PHASE18_VERSION, phase18RealRuntimeValidation: PHASE18_VERSION, phase18AndroidValidation: PHASE18_VERSION,
-    strategyExperiment: PHASE19_VERSION, phase19Validation: PHASE19_VERSION, phase19RealRuntimeValidation: PHASE19_VERSION, phase19AndroidValidation: PHASE19_VERSION
+    strategyExperiment: PHASE19_VERSION, phase19Validation: PHASE19_VERSION, phase19RealRuntimeValidation: PHASE19_VERSION, phase19AndroidValidation: PHASE19_VERSION,
+    capabilityResilience: PHASE20_VERSION, disasterRecovery: PHASE20_VERSION, phase20Validation: PHASE20_VERSION, phase20RealRuntimeValidation: PHASE20_VERSION, phase20AndroidValidation: PHASE20_VERSION
   };
 
   const fileModules = {
@@ -224,7 +227,12 @@
     "17_external_intelligence_strategy_experiment.js": "strategyExperiment",
     "17_external_intelligence_phase19_validation.js": "phase19Validation",
     "17_external_intelligence_phase19_real_runtime_validation.js": "phase19RealRuntimeValidation",
-    "17_external_intelligence_phase19_android_validation.js": "phase19AndroidValidation"
+    "17_external_intelligence_phase19_android_validation.js": "phase19AndroidValidation",
+    "17_external_intelligence_capability_resilience.js": "capabilityResilience",
+    "17_external_intelligence_disaster_recovery.js": "disasterRecovery",
+    "17_external_intelligence_phase20_validation.js": "phase20Validation",
+    "17_external_intelligence_phase20_real_runtime_validation.js": "phase20RealRuntimeValidation",
+    "17_external_intelligence_phase20_android_validation.js": "phase20AndroidValidation"
   };
 
   const contractVersions = {
@@ -440,6 +448,13 @@
     gatewaySessionTokenPersistenceAllowed: false,
     runtimePackageInstallAllowed: false,
     blindRetryUnknownExecutionAllowed: false,
+    backupExistsEqualsRecoveryProven: false,
+    filesRestoredEqualsPlatformReady: false,
+    partialRecoveryEqualsFullRecovery: false,
+    restoredSessionRecordEqualsCurrentAuthentication: false,
+    evidenceBackupMayReconstructCredential: false,
+    recoveryGrantsBusinessAuthority: false,
+    orphanDetectionGrantsDeletionAuthority: false,
     remoteGatewayAllowed: false,
     socialPopularityEqualsTruth: false,
     sentimentEqualsFact: false,
@@ -856,7 +871,7 @@
 
   const gateway = {
     contractVersion: "1.0.0",
-    gatewayVersion: GATEWAY_PHASE6_VERSION,
+    gatewayVersion: GATEWAY_PHASE20_VERSION,
     defaultBaseUrl: "http://127.0.0.1:43110",
     loopbackOnly: true,
     defaultPort: 43110,
@@ -877,6 +892,12 @@
     evidenceReadEndpoint: "/v1/evidence/read",
     evidenceIntegrityEndpoint: "/v1/evidence/integrity",
     processingCheckpointEndpoint: "/v1/evidence/checkpoint",
+    recoveryCreateEndpoint: "/v1/recovery/create",
+    recoveryListEndpoint: "/v1/recovery/list",
+    recoveryValidateEndpoint: "/v1/recovery/validate",
+    recoveryRestoreEndpoint: "/v1/recovery/restore",
+    recoveryRebuildAssessmentEndpoint: "/v1/recovery/rebuild-assessment",
+    recoveryScope: "MANAGE_RECOVERY",
     localNetworkAddressSpace: "loopback",
     publicAcquisitionScope: "ACQUIRE_PUBLIC",
     governedAcquisitionScope: "ACQUIRE_EXTERNAL",
@@ -1282,8 +1303,8 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 19 Market Strategy Experiment / Backtest Readiness",
-      phase: 19,
+      implementationPhase: "Phase 20 Capability Resilience / Disaster Recovery",
+      phase: 20,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
       designFreezeVersion: "1.0.0",
@@ -1292,7 +1313,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 19 Market Strategy Experiment / Backtest Readiness Implementation"
+      status: "Phase 20 Capability Resilience / Disaster Recovery Implementation"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
@@ -1365,8 +1386,10 @@
       phase18Allowed: true,
       phase18Complete: true,
       phase19Allowed: true,
-      phase19Complete: false,
-      phase20Allowed: false,
+      phase19Complete: true,
+      phase20Allowed: true,
+      phase20Complete: false,
+      phase21Allowed: false,
       releaseAllowed: false,
       androidRealDeviceGateRequired: true,
       pcRealRuntimeGateRequiredWhereApplicable: true

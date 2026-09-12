@@ -1,0 +1,53 @@
+============================================================
+AI Prompt OS / EXTERNAL-010
+Phase 20 v1.19.0 - PC / Android Validation Instructions
+Date: 2026-09-12
+============================================================
+
+STATUS
+- Implementation: COMPLETE
+- Automated Functional: 28/28 PASS
+- Gateway Recovery Validation: 17/17 PASS
+- Project Owner PC Real Runtime Gate: PENDING
+- Project Owner Android Real Device Gate: PENDING
+- Formal Phase 20 Freeze: NOT YET
+
+1. APPLY
+Overlay the DIFF ZIP onto the current formal Phase 19 v1.18.1 AI_Prompt_OS baseline.
+Do not replace with an older project baseline.
+
+2. PC FUNCTIONAL VALIDATION
+Open AI Prompt OS on PC and use the Async Dev Console:
+
+await runExternalIntelligencePhase20Validation()
+
+Expected:
+passed = 28
+failed = 0
+health = 100
+releaseAllowed = true
+
+3. PC REAL RUNTIME VALIDATION
+Start AI Prompt OS with External Gateway. Confirm Gateway v1.5.0, then run:
+
+await runExternalIntelligencePhase20RealRuntimeValidation()
+
+Share the complete Result.
+
+4. ANDROID REAL DEVICE VALIDATION
+After the exact validated Phase 20 files are deployed to the Android-accessible build, run in Async Dev Console:
+
+await runExternalIntelligencePhase20AndroidValidation()
+
+Share the complete Result.
+
+5. FINAL GATE
+Only after Functional + PC Real Runtime + Android Real Device are all PASS with criticalFailed=0 should Phase 20 be considered Final Gate Ready. Project Owner acceptance remains separate.
+
+SAFETY
+Backup Exists != Recovery Proven
+Files Restored != Platform READY
+Restored Session Record != Valid Current Authentication
+Recovery != Business / Trading / Repository Authority
+Evidence / Backup Metadata != Credential Source
+============================================================

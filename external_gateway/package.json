@@ -1,8 +1,8 @@
 {
   "name": "external-010-local-gateway",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
-  "description": "AI Prompt OS EXTERNAL-010 Phase 02 security + Phase 04 acquisition + Phase 05 evidence persistence + Phase 06 secret/security gateway",
+  "description": "AI Prompt OS EXTERNAL-010 Local Gateway: acquisition, evidence persistence, security, capability resilience and disaster recovery",
   "main": "gateway.cjs",
   "type": "commonjs",
   "scripts": {
@@ -12,7 +12,8 @@
     "fixture:phase4": "node phase4_fixture.cjs",
     "validate:phase5": "node validate_phase5_persistence.cjs",
     "validate:phase6": "node validate_phase6_security.cjs",
-    "fixture:phase6": "node phase6_fixture.cjs"
+    "fixture:phase6": "node phase6_fixture.cjs",
+    "validate:phase20": "node validate_phase20_recovery.cjs"
   },
   "engines": {
     "node": ">=22.5.0"
