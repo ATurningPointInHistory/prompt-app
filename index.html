@@ -3,9 +3,9 @@
 <html lang="ja"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<meta name="ai-pro-script-manifest-hash" content="f3a2d0a9a50d404cafd6b6c0796aa1eb008fc1447a8ec62b7a6f67b211af75e0">
+<meta name="ai-pro-script-manifest-hash" content="85fd0c91dabdd4916e65899b14d8cc1c1a5f4eab689cbf0ce9b721f41ffb3d0a">
 <title>AIプロンプト生成Pro v7.0.0</title>
-<link href="./00_style.css?v=6.0.1" rel="stylesheet"/>
+<link href="./00_style.css?v=6.0.2" rel="stylesheet"/>
 </head>
 <body class="dark">
 <div class="card">
@@ -17,6 +17,10 @@
     </div>
 <div class="tab" id="repairPageTab" onclick="switchAppPage('repair')">
       修復モード
+
+    </div>
+<div class="tab" id="externalPageTab" onclick="switchAppPage('external')">
+      External Intelligence
 
     </div>
 </div>
@@ -192,6 +196,9 @@
 </div>
 <div class="diagnose-box" id="functionListBox" style="display:none;"></div>
 </div> 
+<div id="externalPage" style="display: none;">
+  <div id="externalIntelligenceConsoleRoot" class="external-console-root"></div>
+</div>
 <button class="btn-secondary" id="toolsBtn" onclick="toggleToolsMenu()">⚙</button>
 <div id="floatPanel" style="display: none; right: 18px; bottom: 40px;"></div>
 </div> 
@@ -218,7 +225,7 @@
 <!-- AI_PRO_SCRIPT_BLOCK_START -->
 <script src="./00_core.js?h=03cdc50b3874"></script>
 <script src="./01_task_manager.js?h=a4795193df6c"></script>
-<script src="./01_bootstrap.js?h=60f166e32009"></script>
+<script src="./01_bootstrap.js?h=4f428cdf4b94"></script>
 <script src="./01_function_reference.js?h=43e96f62f83a"></script>
 <script src="./01_project_config.js?h=e642ef557371"></script>
 <script src="./01_project_manager.js?h=ecac07839bb6"></script>
@@ -496,7 +503,7 @@
 <script src="./16_validation_engine.js?h=105c13151958"></script>
 <script src="./15_reasoning_engine.js?h=cf1ed1305563"></script>
 <script src="./16_workflow_engine.js?h=17dedd927e7f"></script>
-<script src="./17_external_intelligence_version_manifest.js?h=63c6aad12909"></script>
+<script src="./17_external_intelligence_version_manifest.js?h=01ef30bdba11"></script>
 <script src="./17_external_intelligence_core.js?h=98a01a5c9af5"></script>
 <script src="./17_external_intelligence_contracts.js?h=d347574d011f"></script>
 <script src="./17_external_intelligence_schema_registry.js?h=4d39c6c96594"></script>
@@ -516,7 +523,7 @@
 <script src="./17_external_intelligence_phase1_validation.js?h=d86cc1417555"></script>
 <script src="./17_external_intelligence_phase2_validation.js?h=00a0fe59ccd5"></script>
 <script src="./17_external_intelligence_phase3_validation.js?h=839f83963595"></script>
-<script src="./17_external_intelligence_phase4_validation.js?h=92388efbedf5"></script>
+<script src="./17_external_intelligence_phase4_validation.js?h=21356386e84a"></script>
 <script src="./17_external_intelligence_phase4_real_runtime_validation.js?h=730bdb841319"></script>
 <script src="./17_external_intelligence_phase4_android_validation.js?h=86566b2ed34b"></script>
 <script src="./17_external_intelligence_evidence_persistence.js?h=00b370e2b43b"></script>
@@ -612,5 +619,8 @@
 <script src="./17_external_intelligence_phase21_validation.js?h=ee8145794c5e"></script>
 <script src="./17_external_intelligence_phase21_real_runtime_validation.js?h=de62bfc773fb"></script>
 <script src="./17_external_intelligence_phase21_android_validation.js?h=40cfab489351"></script>
-<script src="./99_init.js?h=275899a3ea23"></script>
+<script src="./17_external_intelligence_conformance_repair.js?h=0b884fac587b"></script>
+<script src="./17_external_intelligence_conformance_validation.js?h=12a8d9d8c296"></script>
+<script src="./17_external_intelligence_console.js?h=f95260ba5d8d"></script>
+<script src="./99_init.js?h=de0ce6495428"></script>
 <!-- AI_PRO_SCRIPT_BLOCK_END --></body></html>

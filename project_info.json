@@ -2,9 +2,9 @@
   "manifestSchemaVersion": 1,
   "manifestType": "Project Package Build Manifest",
   "project": "AIプロンプト生成Pro",
-  "version": "1.20.0",
+  "version": "1.20.1",
   "entryFile": "index.html",
-  "savedAt": "2026-09-12T14:12:02.481805Z",
+  "savedAt": "2026-09-13T01:45:34.298099Z",
   "complete": true,
   "requestedFiles": [
     "00_core.js",
@@ -433,7 +433,13 @@
     "17_external_intelligence_phase20_android_validation.js",
     "17_external_intelligence_phase21_validation.js",
     "17_external_intelligence_phase21_real_runtime_validation.js",
-    "17_external_intelligence_phase21_android_validation.js"
+    "17_external_intelligence_phase21_android_validation.js",
+    "17_external_intelligence_conformance_repair.js",
+    "17_external_intelligence_conformance_validation.js",
+    "17_external_intelligence_console.js",
+    "EXTERNAL-010_USAGE_GUIDE_1.20.1.txt",
+    "EXTERNAL-010_REQUIREMENT_TRACEABILITY_1.0.0.json",
+    "EXTERNAL-010_CONFORMANCE_REPAIR_REPORT_1.20.1.json"
   ],
   "savedFiles": [
     "00_core.js",
@@ -863,24 +869,30 @@
     "17_external_intelligence_phase21_validation.js",
     "17_external_intelligence_phase21_real_runtime_validation.js",
     "17_external_intelligence_phase21_android_validation.js",
+    "17_external_intelligence_conformance_repair.js",
+    "17_external_intelligence_conformance_validation.js",
+    "17_external_intelligence_console.js",
+    "EXTERNAL-010_USAGE_GUIDE_1.20.1.txt",
+    "EXTERNAL-010_REQUIREMENT_TRACEABILITY_1.0.0.json",
+    "EXTERNAL-010_CONFORMANCE_REPAIR_REPORT_1.20.1.json",
     "project_info.json"
   ],
   "missingFiles": [],
   "externalFiles": [
     "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
   ],
-  "localFileCount": 428,
+  "localFileCount": 434,
   "externalFileCount": 1,
-  "fileCount": 429,
+  "fileCount": 435,
   "cleanIndex": true,
   "scriptManifestSource": "00_script_manifest.json",
-  "scriptManifestVersion": "1.20.0",
+  "scriptManifestVersion": "1.20.1",
   "scriptManifestSchemaVersion": "2.0.0",
-  "applicationReleaseVersion": "1.20.0",
+  "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "f3a2d0a9a50d404cafd6b6c0796aa1eb008fc1447a8ec62b7a6f67b211af75e0",
-  "scriptSetHash": "89e97ad044e62ae025cae0b60dbdb8c303efa8d034ae1e8b321f4736b6518826",
-  "scriptManifestCount": 397,
+  "scriptManifestHash": "85fd0c91dabdd4916e65899b14d8cc1c1a5f4eab689cbf0ce9b721f41ffb3d0a",
+  "scriptSetHash": "c6cba53bd5e736037f2f806af6a458a97a371672cbe9f6b040e2e7415eb2c072",
+  "scriptManifestCount": 400,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
     "runtimeLoader": false,
@@ -888,5 +900,8 @@
     "first": "00_core.js",
     "last": "99_init.js",
     "generatedAtSave": true
-  }
+  },
+  "releaseStatus": "CONFORMANCE_REPAIR_CANDIDATE",
+  "releaseAllowed": false,
+  "projectOwnerRevalidationRequired": true
 }

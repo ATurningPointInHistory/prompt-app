@@ -1,0 +1,89 @@
+{
+  "reportId": "EXTERNAL-010-CONFORMANCE-REPAIR-1.20.1-CANDIDATE",
+  "componentId": "EXTERNAL-010",
+  "version": "1.20.1",
+  "status": "CANDIDATE",
+  "generatedAt": "2026-09-13T01:45:26.449318Z",
+  "baseline": "1.20.0 FINAL_RELEASE / PC_ANDROID_READY",
+  "repairScopeDecisions": [
+    "030",
+    "032",
+    "035",
+    "038",
+    "039",
+    "040",
+    "041",
+    "042",
+    "051",
+    "053"
+  ],
+  "newRuntimeFiles": [
+    "17_external_intelligence_conformance_repair.js",
+    "17_external_intelligence_conformance_validation.js",
+    "17_external_intelligence_console.js"
+  ],
+  "modifiedRuntimeFiles": [
+    "00_style.css",
+    "01_bootstrap.js",
+    "17_external_intelligence_phase4_validation.js",
+    "17_external_intelligence_version_manifest.js",
+    "99_init.js",
+    "index.html",
+    "00_script_manifest.json",
+    "project_info.json"
+  ],
+  "validation": {
+    "targetedConformance": {
+      "passed": 45,
+      "failed": 0,
+      "total": 45,
+      "health": 100
+    },
+    "staticManifest": {
+      "scripts": 400,
+      "mismatchCount": 0
+    },
+    "javascriptParse": {
+      "scripts": 400,
+      "failed": 0
+    },
+    "gatewayValidation": {
+      "passed": 38,
+      "failed": 0,
+      "health": 100
+    },
+    "phase1To13Regression": "PASS observed in Node validation runner after repair; Phase 1-13 all 100%",
+    "phase17To20Regression": "PASS observed in Node validation runner; Phase 17 15/15, Phase18 20/20, Phase19 28/28, Phase20 28/28",
+    "browserHeadlessEnvironment": "UNAVAILABLE_FOR_APP_TEST: container Chromium blocks localhost/127.0.0.1 despite HTTP 200",
+    "pcRealBrowserRevalidationRequired": true,
+    "androidRealDeviceRevalidationRequired": true,
+    "gatewayPhase4PcRealRuntime": {
+      "passed": 14,
+      "failed": 0,
+      "health": 100
+    },
+    "gatewayPhase5Persistence": {
+      "passed": 22,
+      "failed": 0,
+      "health": 100
+    },
+    "gatewayPhase6Security": {
+      "passed": 15,
+      "failed": 0,
+      "health": 100
+    },
+    "gatewayPhase20Recovery": {
+      "passed": 17,
+      "failed": 0,
+      "health": 100
+    }
+  },
+  "traceability": {
+    "decisionCount": 54,
+    "explicitInitialImplementationRequirementCount": 810,
+    "catalog": "EXTERNAL-010_REQUIREMENT_TRACEABILITY_1.0.0.json",
+    "fullRequirementAuditComplete": false
+  },
+  "releaseAllowed": false,
+  "projectOwnerAcceptanceRequired": true
+}

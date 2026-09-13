@@ -1,0 +1,47 @@
+AI Prompt OS / EXTERNAL-010
+USAGE GUIDE 1.20.1 Conformance Repair Candidate
+
+1. 起動
+- Windowsでは Start_AI_Prompt_OS.bat を実行します。
+- External Intelligenceを使う場合はランチャーの「External Gateway付き起動 / Web + Canonical Gateway」を選びます。
+- Web Serverは http://localhost:8000/、Canonical Gatewayは既存設定のloopback runtimeを使用します。
+
+2. 専用画面
+- ブラウザ上部の「External Intelligence」タブを開きます。
+- 専用Control Centerで Component / Gateway / Session / Memo Conformance / Phase 21 / Data Counts を確認できます。
+
+3. 最初の確認順
+(1) 「Foundation初期化」
+(2) 「Gateway確認」
+(3) 「Gateway Session開始」
+(4) 「Memo準拠検証」
+(5) 必要に応じて「Phase 21検証」
+
+4. Gatewayを手動で起動する場合
+- external_gateway\start_external_gateway.bat
+  または external_gateway フォルダで npm start / node gateway.cjs を使用できます。
+- package.json上のNode要件は >=22.5.0 です。
+
+5. 現在の専用画面の役割
+- Runtime/Gateway/Sessionの状態確認
+- Memo既知Gap Repair Validationの実行
+- Phase 21 Validationの実行
+- EXTERNAL-010内部Record数の確認
+- Source→Acquisition→Evidence→Intelligence→Outcome の利用フロー表示
+
+6. 安全境界
+- Gateway SessionはBusiness Authorityではありません。
+- Validation PASSはProject Owner Approvalではありません。
+- PredictionはTrade Orderではありません。
+- Knowledge Candidateは自動Promotionされません。
+- Repository直接Mutation / Automatic Trading / Automatic Paid Authorityは許可されません。
+
+7. 現時点の制限
+- この1.20.1はConformance Repair Candidateです。
+- 専用画面はControl Centerであり、任意URLを入力して自動登録・取得するResearch Frontendまではまだ追加していません。
+- Sourceの登録/ActivationはUsage Policy / Authority / Budget等の既存Governanceを通す必要があり、簡易UIからそれを迂回しません。
+- PC Real Browser / Android Real Deviceでの最終再検証後にFinal扱いにします。
+
+8. Traceability
+- EXTERNAL-010_REQUIREMENT_TRACEABILITY_1.0.0.json にmemo_boxes_selected(4).jsonから抽出したInitial Implementation ScopeをRequirement ID化しています。
+- 未検証RequirementはUNVERIFIEDのまま保持し、テストが無い項目を自動PASSにはしません。

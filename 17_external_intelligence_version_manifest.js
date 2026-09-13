@@ -1,14 +1,14 @@
 /* ============================================================
    FILE: 17_external_intelligence_version_manifest.js
    EXTERNAL-010 External Intelligence Platform
-   Release: 1.20.0
+   Release: 1.20.1
    Phase 21: Integrated Validation / Release Gate / Handoff
    Design Freeze: EXTERNAL-010-DESIGN-FREEZE-1.0.0
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const RELEASE_VERSION = "1.20.0";
+  const RELEASE_VERSION = "1.20.1";
   const PHASE1_VERSION = "1.0.0";
   const PHASE2_VERSION = "1.1.0";
   const PHASE3_VERSION = "1.2.0";
@@ -29,7 +29,7 @@
   const PHASE18_VERSION = "1.17.1";
   const PHASE19_VERSION = "1.18.1";
   const PHASE20_VERSION = "1.19.0";
-  const PHASE21_VERSION = "1.20.0";
+  const PHASE21_VERSION = "1.20.1";
   const GATEWAY_PHASE4_VERSION = "1.2.0";
   const GATEWAY_PHASE5_VERSION = "1.3.0";
   const GATEWAY_PHASE6_VERSION = "1.4.0";
@@ -127,7 +127,8 @@
     marketFusion: PHASE18_VERSION, phase18Validation: PHASE18_VERSION, phase18RealRuntimeValidation: PHASE18_VERSION, phase18AndroidValidation: PHASE18_VERSION,
     strategyExperiment: PHASE19_VERSION, phase19Validation: PHASE19_VERSION, phase19RealRuntimeValidation: PHASE19_VERSION, phase19AndroidValidation: PHASE19_VERSION,
     capabilityResilience: PHASE20_VERSION, disasterRecovery: PHASE20_VERSION, phase20Validation: PHASE20_VERSION, phase20RealRuntimeValidation: PHASE20_VERSION, phase20AndroidValidation: PHASE20_VERSION,
-    phase21Validation: PHASE21_VERSION, phase21RealRuntimeValidation: PHASE21_VERSION, phase21AndroidValidation: PHASE21_VERSION
+    phase21Validation: PHASE21_VERSION, phase21RealRuntimeValidation: PHASE21_VERSION, phase21AndroidValidation: PHASE21_VERSION,
+    conformanceRepair: PHASE21_VERSION, conformanceValidation: PHASE21_VERSION, externalConsole: PHASE21_VERSION
   };
 
   const fileModules = {
@@ -245,7 +246,10 @@
     "17_external_intelligence_phase20_android_validation.js": "phase20AndroidValidation",
     "17_external_intelligence_phase21_validation.js": "phase21Validation",
     "17_external_intelligence_phase21_real_runtime_validation.js": "phase21RealRuntimeValidation",
-    "17_external_intelligence_phase21_android_validation.js": "phase21AndroidValidation"
+    "17_external_intelligence_phase21_android_validation.js": "phase21AndroidValidation",
+    "17_external_intelligence_conformance_repair.js": "conformanceRepair",
+    "17_external_intelligence_conformance_validation.js": "conformanceValidation",
+    "17_external_intelligence_console.js": "externalConsole"
   };
 
   const contractVersions = {
@@ -1316,7 +1320,7 @@
     versionArchitecture: "independent-version-v1",
     release: {
       version: RELEASE_VERSION,
-      implementationPhase: "Phase 21 Integrated Validation / Release Gate / Handoff",
+      implementationPhase: "Phase 21 Conformance Repair / Dedicated Control Center Candidate",
       phase: 21,
       phaseCount: 21,
       designFreezeId: "EXTERNAL-010-DESIGN-FREEZE-1.0.0",
@@ -1326,7 +1330,7 @@
       decisionRange: "EXTERNAL-010-DECISION-001..054",
       decisionCount: 54,
       architectureStatus: "DESIGN COMPLETE / FROZEN",
-      status: "Phase 21 Integrated Validation / Release Gate / Handoff Implementation"
+      status: "Phase 21 Conformance Repair Candidate - Project Owner Revalidation Required"
     },
     moduleVersions: moduleVersions,
     fileModules: fileModules,
