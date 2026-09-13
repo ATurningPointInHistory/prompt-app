@@ -35,6 +35,7 @@
   function getExternalIntelligenceConsoleSnapshot() {
     const gateway = gatewayState();
     const lastConformance = s.latestConformanceValidation ? i.clone(s.latestConformanceValidation) : null;
+    const lastGapRepair = s.latestInitialScopeCompletionValidation ? i.clone(s.latestInitialScopeCompletionValidation) : null;
     const lastPhase21 = s.latestPhase21Validation ? i.clone(s.latestPhase21Validation) : null;
     return {
       componentId: "EXTERNAL-010",
@@ -76,6 +77,14 @@
         health: lastConformance.health,
         validatedAt: lastConformance.validatedAt
       } : null,
+      latestInitialScopeCompletionValidation: lastGapRepair ? {
+        status: lastGapRepair.status,
+        passed: lastGapRepair.passed,
+        failed: lastGapRepair.failed,
+        total: lastGapRepair.total,
+        health: lastGapRepair.health,
+        validatedAt: lastGapRepair.validatedAt
+      } : null,
       latestPhase21Validation: lastPhase21 ? {
         status: lastPhase21.status,
         passed: lastPhase21.passed,
@@ -112,6 +121,7 @@
     const gateway = snapshot.gateway || {};
     const session = gateway.session || null;
     const conf = snapshot.latestConformanceValidation;
+    const gap = snapshot.latestInitialScopeCompletionValidation;
     const p21 = snapshot.latestPhase21Validation;
 
     root.innerHTML = '' +
@@ -126,6 +136,7 @@
         statusBadge("Gateway", gateway.healthState || "UNKNOWN") +
         statusBadge("Session", session && session.state || "INACTIVE", ["ACTIVE"]) +
         statusBadge("Repair Validation", conf ? (conf.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
+        statusBadge("Gap Repair 34", gap ? (gap.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
         statusBadge("Phase 21", p21 ? (p21.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
       '</section>' +
 
@@ -136,6 +147,7 @@
           '<button onclick="externalConsoleCheckGateway()">② Gateway確認</button>' +
           '<button onclick="externalConsoleOpenSession()">③ Gateway Session開始</button>' +
           '<button onclick="externalConsoleRunConformance()">Repair Validation 45項目</button>' +
+          '<button onclick="externalConsoleRunGapRepair()">Gap Repair 34項目</button>' +
           '<button onclick="externalConsoleRunPhase21()">Phase 21検証</button><button onclick="externalConsoleChooseFullMemoAudit()">Full Memo Audit</button><button class="btn-secondary" onclick="externalConsoleDownloadFullMemoAudit()">Audit JSON保存</button>' +
           '<button class="btn-secondary" onclick="externalConsoleRefresh()">状態更新</button>' +
         '</div>' +
@@ -227,6 +239,13 @@
     return withBusy("Repair Validation 45項目", async function () {
       if (typeof n.runExternalIntelligenceConformanceValidation !== "function") return { ok: false, code: "CONFORMANCE_VALIDATION_UNAVAILABLE" };
       return n.runExternalIntelligenceConformanceValidation();
+    });
+  }
+
+  function externalConsoleRunGapRepair() {
+    return withBusy("Gap Repair 34項目", async function () {
+      if (typeof n.runExternalIntelligenceInitialScopeCompletionValidation !== "function") return { ok: false, code: "INITIAL_SCOPE_COMPLETION_VALIDATION_UNAVAILABLE" };
+      return n.runExternalIntelligenceInitialScopeCompletionValidation();
     });
   }
 
@@ -356,6 +375,7 @@
     externalConsoleCheckGateway: externalConsoleCheckGateway,
     externalConsoleOpenSession: externalConsoleOpenSession,
     externalConsoleRunConformance: externalConsoleRunConformance,
+    externalConsoleRunGapRepair: externalConsoleRunGapRepair,
     externalConsoleChooseFullMemoAudit: externalConsoleChooseFullMemoAudit,
     externalConsoleHandleFullMemoAuditFile: externalConsoleHandleFullMemoAuditFile,
     externalConsoleDownloadFullMemoAudit: externalConsoleDownloadFullMemoAudit,

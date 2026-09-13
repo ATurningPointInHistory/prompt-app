@@ -1,0 +1,77 @@
+{
+  "id": "EXTERNAL-010-INITIAL-SCOPE-GAP-REPAIR-HF5",
+  "componentId": "EXTERNAL-010",
+  "version": "1.20.1",
+  "gatewayVersion": "1.5.0",
+  "baseline": "HF4 Decision-Scoped Full Memo Audit",
+  "confirmedImplementationGapCount": 34,
+  "implementationModule": "17_external_intelligence_initial_scope_completion.js",
+  "validationModule": "17_external_intelligence_initial_scope_completion_validation.js",
+  "traceabilityLinkedRequirementCount": 34,
+  "authorityNeutralByDefault": true,
+  "automaticRepositoryMutationAllowed": false,
+  "automaticTradingAllowed": false,
+  "automaticInstallAllowed": false,
+  "fullMemoBaselineRequirementCount": 803,
+  "deferredExcludedCount": 7,
+  "releaseAllowed": false,
+  "projectOwnerRevalidationRequired": true,
+  "createdAt": "2026-09-13T06:46:28.473471Z",
+  "validation": {
+    "initialScopeCompletion": {
+      "passed": 34,
+      "failed": 0,
+      "total": 34,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "conformanceRepair": {
+      "passed": 45,
+      "failed": 0,
+      "total": 45,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "phase21BrowserEquivalent": {
+      "passed": 31,
+      "failed": 0,
+      "total": 31,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "gateway": {
+      "validateGateway": "38/38 PASS",
+      "phase4Acquisition": "14/14 PASS",
+      "phase6Security": "15/15 PASS",
+      "phase20Recovery": "17/17 PASS"
+    },
+    "jsParse": {
+      "scriptCount": 403,
+      "parseErrors": 0
+    },
+    "staticIntegrity": {
+      "scriptCount": 403,
+      "hashMismatch": 0,
+      "byteSizeMismatch": 0,
+      "cacheKeyMismatch": 0,
+      "indexSequenceMatch": true,
+      "indexManifestHashMatch": true
+    }
+  },
+  "fullMemoAuditAfterRepair": {
+    "requirementCount": 803,
+    "counts": {
+      "VERIFIED": 0,
+      "TRACEABILITY_LINKED": 34,
+      "EVIDENCE_CANDIDATE": 546,
+      "IMPLEMENTATION_CANDIDATE": 53,
+      "VALIDATION_CANDIDATE": 53,
+      "UNVERIFIED": 117,
+      "SOURCE_MISMATCH": 0
+    },
+    "sourceMemoHashMatch": true,
+    "conformanceComplete": false,
+    "note": "34 confirmed implementation gaps are now explicitly linked to implementation + dedicated validation. Remaining requirements still require validation/traceability work."
+  },
+  "distributionState": "CANDIDATE_REVALIDATION_REQUIRED"
+}

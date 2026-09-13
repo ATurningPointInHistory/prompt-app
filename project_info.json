@@ -4,7 +4,7 @@
   "project": "AIプロンプト生成Pro",
   "version": "1.20.1",
   "entryFile": "index.html",
-  "savedAt": "2026-09-13T04:46:58.270066Z",
+  "savedAt": "2026-09-13T06:46:28.473471Z",
   "complete": true,
   "requestedFiles": [
     "00_core.js",
@@ -442,7 +442,10 @@
     "EXTERNAL-010_REQUIREMENT_TRACEABILITY_1.0.0.json",
     "EXTERNAL-010_CONFORMANCE_REPAIR_REPORT_1.20.1.json",
     "EXTERNAL-010_DECISION_AUDIT_SCOPE_1.0.0.json",
-    "EXTERNAL-010_FULL_MEMO_AUDIT_ENGINE_HF4_REPORT.json"
+    "EXTERNAL-010_FULL_MEMO_AUDIT_ENGINE_HF4_REPORT.json",
+    "17_external_intelligence_initial_scope_completion.js",
+    "17_external_intelligence_initial_scope_completion_validation.js",
+    "EXTERNAL-010_INITIAL_SCOPE_GAP_REPAIR_HF5_REPORT.json"
   ],
   "savedFiles": [
     "00_core.js",
@@ -881,24 +884,27 @@
     "EXTERNAL-010_CONFORMANCE_REPAIR_REPORT_1.20.1.json",
     "project_info.json",
     "EXTERNAL-010_DECISION_AUDIT_SCOPE_1.0.0.json",
-    "EXTERNAL-010_FULL_MEMO_AUDIT_ENGINE_HF4_REPORT.json"
+    "EXTERNAL-010_FULL_MEMO_AUDIT_ENGINE_HF4_REPORT.json",
+    "17_external_intelligence_initial_scope_completion.js",
+    "17_external_intelligence_initial_scope_completion_validation.js",
+    "EXTERNAL-010_INITIAL_SCOPE_GAP_REPAIR_HF5_REPORT.json"
   ],
   "missingFiles": [],
   "externalFiles": [
     "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
   ],
-  "localFileCount": 437,
+  "localFileCount": 440,
   "externalFileCount": 1,
-  "fileCount": 438,
+  "fileCount": 441,
   "cleanIndex": true,
   "scriptManifestSource": "00_script_manifest.json",
   "scriptManifestVersion": "1.20.1",
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "5a58763ddff093cc0157522525fd53cfe4d620841ad43456885b734a164b1eb6",
-  "scriptSetHash": "44d1d5d2c1801ba21e3431c10b10bec15657ecfdbdcd42dbad354c2314a1aca3",
-  "scriptManifestCount": 401,
+  "scriptManifestHash": "c0dcf919b54116cc541226b3180e4326162b2b7a50df3b14be804e14e36ef624",
+  "scriptSetHash": "5860d04d7d02a24bfd7f23f8e3d488cc1574261368e4c996ae5ae16df65c9dee",
+  "scriptManifestCount": 403,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
     "runtimeLoader": false,
@@ -907,7 +913,7 @@
     "last": "99_init.js",
     "generatedAtSave": true
   },
-  "releaseStatus": "CONFORMANCE_REPAIR_DECISION_SCOPED_FULL_MEMO_AUDIT_HF4_CANDIDATE",
+  "releaseStatus": "INITIAL_SCOPE_GAP_REPAIR_HF5_CANDIDATE",
   "releaseAllowed": false,
   "projectOwnerRevalidationRequired": true
 }

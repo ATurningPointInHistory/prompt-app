@@ -4,10 +4,10 @@
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "EXTERNAL-010 Phase 21 Conformance Repair + Decision-Scoped Full Memo Audit HF4 v1.20.1 Candidate - static script manifest",
+  "description": "EXTERNAL-010 Phase 21 Initial Scope Gap Repair HF5 v1.20.1 Candidate - 34 confirmed implementation gaps + dedicated validation",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-13T04:46:48.102Z",
+  "updatedAt": "2026-09-13T06:46:28.473471Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -289,7 +289,7 @@
     "./16_validation_engine.js?h=105c13151958",
     "./15_reasoning_engine.js?h=cf1ed1305563",
     "./16_workflow_engine.js?h=17dedd927e7f",
-    "./17_external_intelligence_version_manifest.js?h=575cd1a9b60d",
+    "./17_external_intelligence_version_manifest.js?h=c5913c9101b9",
     "./17_external_intelligence_core.js?h=98a01a5c9af5",
     "./17_external_intelligence_contracts.js?h=d347574d011f",
     "./17_external_intelligence_schema_registry.js?h=4d39c6c96594",
@@ -407,8 +407,10 @@
     "./17_external_intelligence_phase21_android_validation.js?h=40cfab489351",
     "./17_external_intelligence_conformance_repair.js?h=0b884fac587b",
     "./17_external_intelligence_conformance_validation.js?h=12a8d9d8c296",
+    "./17_external_intelligence_initial_scope_completion.js?h=2038e04beebf",
+    "./17_external_intelligence_initial_scope_completion_validation.js?h=800a2470f0d2",
     "./17_external_intelligence_full_memo_audit.js?h=b66ef9fb0aa3",
-    "./17_external_intelligence_console.js?h=f69fad17de97",
+    "./17_external_intelligence_console.js?h=166dc8537a77",
     "./99_init.js?h=de0ce6495428"
   ],
   "hashes": {
@@ -1813,9 +1815,9 @@
       "cacheKey": "17dedd927e7f"
     },
     "17_external_intelligence_version_manifest.js": {
-      "sha256": "575cd1a9b60d71b7647a4e3dce72ef87dc43e1711c5c68d8dd3f19cbd646e920",
-      "byteSize": 76305,
-      "cacheKey": "575cd1a9b60d"
+      "sha256": "c5913c9101b9d8ac84e134d456152023af258b7d6f2f8bb0c901046d89f19cfe",
+      "byteSize": 76590,
+      "cacheKey": "c5913c9101b9"
     },
     "17_external_intelligence_core.js": {
       "sha256": "98a01a5c9af5068208840c6d8dc434987d33a4153ba0c16a48efa8bc07c52838",
@@ -2402,15 +2404,25 @@
       "byteSize": 23977,
       "cacheKey": "12a8d9d8c296"
     },
+    "17_external_intelligence_initial_scope_completion.js": {
+      "sha256": "2038e04beebf13e953f58775f0c0ae644266db8b441b0139e8a9c8dab5e7b6cf",
+      "byteSize": 25634,
+      "cacheKey": "2038e04beebf"
+    },
+    "17_external_intelligence_initial_scope_completion_validation.js": {
+      "sha256": "800a2470f0d2d05d2a51ee4e9313efbdfbecca45bcaaba11e611616f406cb689",
+      "byteSize": 11267,
+      "cacheKey": "800a2470f0d2"
+    },
     "17_external_intelligence_full_memo_audit.js": {
       "sha256": "b66ef9fb0aa3f55536deda61ef2a6f9b75d0d3d2ebd7875595362b74e7621293",
       "byteSize": 13867,
       "cacheKey": "b66ef9fb0aa3"
     },
     "17_external_intelligence_console.js": {
-      "sha256": "f69fad17de9772db3c8559607944de629cac6f270936c7e6356f24d4bafe2875",
-      "byteSize": 18265,
-      "cacheKey": "f69fad17de97"
+      "sha256": "166dc8537a7744ce284fdf6b1913977fae520a2bf406d4eafa0421bd259c96c4",
+      "byteSize": 19383,
+      "cacheKey": "166dc8537a77"
     },
     "99_init.js": {
       "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
@@ -2418,7 +2430,7 @@
       "cacheKey": "de0ce6495428"
     }
   },
-  "scriptSetHash": "44d1d5d2c1801ba21e3431c10b10bec15657ecfdbdcd42dbad354c2314a1aca3",
+  "scriptSetHash": "5860d04d7d02a24bfd7f23f8e3d488cc1574261368e4c996ae5ae16df65c9dee",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -3821,9 +3833,9 @@
       "cacheKey": "17dedd927e7f"
     },
     "17_external_intelligence_version_manifest.js": {
-      "sha256": "575cd1a9b60d71b7647a4e3dce72ef87dc43e1711c5c68d8dd3f19cbd646e920",
-      "byteSize": 76305,
-      "cacheKey": "575cd1a9b60d"
+      "sha256": "c5913c9101b9d8ac84e134d456152023af258b7d6f2f8bb0c901046d89f19cfe",
+      "byteSize": 76590,
+      "cacheKey": "c5913c9101b9"
     },
     "17_external_intelligence_core.js": {
       "sha256": "98a01a5c9af5068208840c6d8dc434987d33a4153ba0c16a48efa8bc07c52838",
@@ -4410,15 +4422,25 @@
       "byteSize": 23977,
       "cacheKey": "12a8d9d8c296"
     },
+    "17_external_intelligence_initial_scope_completion.js": {
+      "sha256": "2038e04beebf13e953f58775f0c0ae644266db8b441b0139e8a9c8dab5e7b6cf",
+      "byteSize": 25634,
+      "cacheKey": "2038e04beebf"
+    },
+    "17_external_intelligence_initial_scope_completion_validation.js": {
+      "sha256": "800a2470f0d2d05d2a51ee4e9313efbdfbecca45bcaaba11e611616f406cb689",
+      "byteSize": 11267,
+      "cacheKey": "800a2470f0d2"
+    },
     "17_external_intelligence_full_memo_audit.js": {
       "sha256": "b66ef9fb0aa3f55536deda61ef2a6f9b75d0d3d2ebd7875595362b74e7621293",
       "byteSize": 13867,
       "cacheKey": "b66ef9fb0aa3"
     },
     "17_external_intelligence_console.js": {
-      "sha256": "f69fad17de9772db3c8559607944de629cac6f270936c7e6356f24d4bafe2875",
-      "byteSize": 18265,
-      "cacheKey": "f69fad17de97"
+      "sha256": "166dc8537a7744ce284fdf6b1913977fae520a2bf406d4eafa0421bd259c96c4",
+      "byteSize": 19383,
+      "cacheKey": "166dc8537a77"
     },
     "99_init.js": {
       "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
@@ -4426,5 +4448,5 @@
       "cacheKey": "de0ce6495428"
     }
   },
-  "manifestHash": "5a58763ddff093cc0157522525fd53cfe4d620841ad43456885b734a164b1eb6"
+  "manifestHash": "c0dcf919b54116cc541226b3180e4326162b2b7a50df3b14be804e14e36ef624"
 }
