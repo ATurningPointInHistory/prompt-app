@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 17_external_intelligence_openai_provider_ui.js
    EXTERNAL-010 / OpenAI API Integration UI Candidate
-   Decision: EXTERNAL-010-DECISION-055
+   Decisions: EXTERNAL-010-DECISION-055 / 056
    Scope: Cost / Risk aware configuration UI (no secret value input)
    ============================================================ */
 (function (global) {
@@ -32,7 +32,7 @@
   function secretMetadata(id) { return id&&typeof n.getExternalIntelligenceSecretMetadata==="function" ? n.getExternalIntelligenceSecretMetadata(id) : null; }
   function secretState(id) { if(!id||typeof n.validateExternalIntelligenceSecretReference!=="function")return null; return n.validateExternalIntelligenceSecretReference({secretReferenceId:id}); }
   function secretReferenceIds() {
-    const values=[]; const def=defaultSecretReferenceId(); if(def)values.push(def);
+    const values=["SECRET-OPENAI-LEGACY","SECRET-OPENAI-PRIMARY"]; const def=defaultSecretReferenceId(); if(def)values.push(def);
     if(typeof n.listExternalIntelligenceSecretMetadata==="function") n.listExternalIntelligenceSecretMetadata().forEach(function(m){
       if(!m||!m.secretReferenceId)return; const provider=String(m.provider||"").toUpperCase(); const type=String(m.secretType||"").toUpperCase();
       if((!provider||provider==="OPENAI"||provider==="LOCAL_GATEWAY")&&(type==="BEARER_TOKEN"||type==="API_KEY"||type==="CUSTOM_SECRET")) values.push(m.secretReferenceId);
@@ -81,7 +81,7 @@
         '<div><span>Tools / Stream</span><strong>OFF / OFF</strong></div>'+
       '</div>'+
       '<details class="openai-config-details" open><summary>簡単設定</summary><div class="openai-form-grid">'+
-        '<label>Secret Reference<select id="externalOpenAISecretReference">'+secretReferenceOptions(x)+'</select><small>APIキー本体ではなくGateway用の参照IDです。初期値は SECRET-OPENAI-PRIMARY。</small></label>'+
+        '<label>Secret Reference<select id="externalOpenAISecretReference">'+secretReferenceOptions(x)+'</select><small>APIキー本体ではなくGateway用の参照IDです。LauncherのAPI / Secret ManagerでLEGACY / PRIMARYを管理します。</small></label>'+
         '<label>モデル<select id="externalOpenAIModel">'+modelOptions(x)+'</select><small>モデル変更は料金と性能に影響します。</small></label>'+
         '<label>max_output_tokens<input id="externalOpenAIMaxOutput" type="number" min="1" max="128000" step="1" value="'+esc(x.draft.maxOutputTokens)+'" placeholder="例: 8000"><small>上げるほど1回の最大料金が増えます。</small></label>'+
         '<label>1回の最大許可額（USD）<input id="externalOpenAIPerRequestCap" type="number" min="0.000001" step="0.001" value="'+esc(x.draft.perRequestHardCapUsd)+'" placeholder="例: 0.10"><small>この値を超えるRequestは送信前に停止します。</small></label>'+

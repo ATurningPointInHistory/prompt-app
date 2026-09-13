@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AI Prompt OS Selectable Launcher v1.4.6
+AI Prompt OS Selectable Launcher v1.5.0
 
 Canonical Gateway Edition
 
@@ -39,6 +39,8 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
+
+import api_secret_manager as api_secrets
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 GATEWAY_DIR = PROJECT_ROOT / "external_gateway"
@@ -89,6 +91,8 @@ def load_state():
 
 def save_state(state):
     ensure_state_dir()
+    if not api_secrets.assert_no_secret_material_in_state(state):
+        raise RuntimeError("SECRET_MATERIAL_IN_LAUNCHER_STATE_BLOCKED")
     STATE_FILE.write_text(
         json.dumps(state, ensure_ascii=False, indent=2),
         encoding="utf-8",
@@ -519,6 +523,10 @@ def start_web_server():
 
 def start_gateway():
     state = cleanup_stale_state()
+    # Decision 056: known provider hosts are derived from loaded credential metadata.
+    # This replaces the user's need to type EXTERNAL010_ACQUISITION_ALLOWED_HOSTS manually
+    # for supported provider presets, while arbitrary hosts remain fail-closed.
+    api_secrets.apply_managed_gateway_environment(state)
 
     if port_open(GATEWAY_PORT):
         health = gateway_health()
@@ -637,6 +645,322 @@ def stop_gateway():
     return "already"
 
 
+class ApiSecretManagerDialog:
+    """Human-centered metadata + ephemeral secret manager.
+
+    Secret values are accepted into the Launcher process only and are cleared
+    from the input field immediately after use. Persistent state is metadata-only.
+    """
+
+    def __init__(self, parent, on_runtime_refresh=None):
+        self.parent = parent
+        self.on_runtime_refresh = on_runtime_refresh
+        self.restart_required = False
+        self.top = tk.Toplevel(parent)
+        self.top.title("API / Secret Manager v1")
+        self.top.geometry("1060x650")
+        self.top.minsize(920, 560)
+        self.top.transient(parent)
+        self.top.grab_set()
+
+        state = load_state()
+        state, changed = api_secrets.ensure_default_profiles(state)
+        if changed:
+            save_state(state)
+
+        self.status_text = tk.StringVar(value="Secret値は保存しません。Launcherプロセス内の一時設定です。")
+        self.provider_var = tk.StringVar(value="OPENAI")
+        self.alias_var = tk.StringVar(value="LEGACY")
+        self.reference_var = tk.StringVar(value="SECRET-OPENAI-LEGACY")
+        self.secret_type_var = tk.StringVar(value="BEARER_TOKEN")
+        self.lifecycle_var = tk.StringVar(value="ACTIVE")
+        self.billing_var = tk.StringVar(value="BILLING-OPENAI-LEGACY")
+        self.capability_var = tk.StringVar(value="OPENAI-RESPONSES-INITIAL")
+        self.secret_value_var = tk.StringVar(value="")
+
+        self._build_ui()
+        self.refresh_profiles(select_reference="SECRET-OPENAI-LEGACY")
+
+    def _build_ui(self):
+        outer = ttk.Frame(self.top, padding=(16, 14, 16, 14))
+        outer.pack(fill="both", expand=True)
+        outer.columnconfigure(0, weight=3)
+        outer.columnconfigure(1, weight=2)
+        outer.rowconfigure(1, weight=1)
+
+        ttk.Label(
+            outer,
+            text="API / Secret Manager v1",
+            font=("Yu Gothic UI", 17, "bold"),
+        ).grid(row=0, column=0, columnspan=2, sticky="w")
+        ttk.Label(
+            outer,
+            text="Decision 056 · APIキーはBAT / JSON / Browserへ保存しません。v1は一時Secretのみです。",
+            font=("Yu Gothic UI", 9),
+        ).grid(row=0, column=0, columnspan=2, sticky="e", pady=(6, 0))
+
+        list_frame = ttk.LabelFrame(outer, text="Credential Profiles", padding=(10, 10, 10, 10))
+        list_frame.grid(row=1, column=0, sticky="nsew", padx=(0, 10), pady=(12, 10))
+        list_frame.rowconfigure(0, weight=1)
+        list_frame.columnconfigure(0, weight=1)
+
+        columns = ("provider", "alias", "reference", "state", "loaded", "validation", "billing", "budget")
+        self.tree = ttk.Treeview(list_frame, columns=columns, show="headings", height=12)
+        headings = {
+            "provider": "Provider",
+            "alias": "Alias",
+            "reference": "Secret Reference",
+            "state": "State",
+            "loaded": "一時Key",
+            "validation": "Validation",
+            "billing": "Billing Profile",
+            "budget": "Budget",
+        }
+        widths = {"provider": 80, "alias": 75, "reference": 185, "state": 85, "loaded": 65, "validation": 105, "billing": 155, "budget": 100}
+        for key in columns:
+            self.tree.heading(key, text=headings[key])
+            self.tree.column(key, width=widths[key], anchor="w")
+        self.tree.grid(row=0, column=0, sticky="nsew")
+        scroll = ttk.Scrollbar(list_frame, orient="vertical", command=self.tree.yview)
+        scroll.grid(row=0, column=1, sticky="ns")
+        self.tree.configure(yscrollcommand=scroll.set)
+        self.tree.bind("<<TreeviewSelect>>", self.on_select)
+
+        right = ttk.LabelFrame(outer, text="選択Profile", padding=(12, 10, 12, 10))
+        right.grid(row=1, column=1, sticky="nsew", padx=(10, 0), pady=(12, 10))
+        right.columnconfigure(1, weight=1)
+
+        fields = [
+            ("Provider", self.provider_var, None),
+            ("Alias", self.alias_var, None),
+            ("Secret Reference", self.reference_var, None),
+            ("Secret Type", self.secret_type_var, api_secrets.SECRET_TYPES),
+            ("Lifecycle", self.lifecycle_var, api_secrets.PROFILE_STATES),
+            ("Billing Profile", self.billing_var, None),
+            ("Capability Profile", self.capability_var, None),
+        ]
+        for row, (label, variable, values) in enumerate(fields):
+            ttk.Label(right, text=label).grid(row=row, column=0, sticky="w", pady=4, padx=(0, 8))
+            if values:
+                widget = ttk.Combobox(right, textvariable=variable, values=values, state="readonly")
+            else:
+                widget = ttk.Entry(right, textvariable=variable)
+            widget.grid(row=row, column=1, sticky="ew", pady=4)
+
+        ttk.Label(right, text="API Key / Secret").grid(row=7, column=0, sticky="w", pady=(12, 4), padx=(0, 8))
+        self.secret_entry = ttk.Entry(right, textvariable=self.secret_value_var, show="*")
+        self.secret_entry.grid(row=7, column=1, sticky="ew", pady=(12, 4))
+        ttk.Label(
+            right,
+            text="入力値は保存・ログ出力しません。設定後に入力欄を消去します。\nローカル削除 ≠ Provider側Revoke。RevokeはProviderアカウント側の別操作です。",
+            font=("Yu Gothic UI", 8),
+        ).grid(row=8, column=0, columnspan=2, sticky="w", pady=(0, 8))
+
+        ttk.Button(right, text="Profile追加 / Metadata更新", command=self.save_profile_metadata).grid(row=9, column=0, columnspan=2, sticky="ew", pady=3)
+        ttk.Button(right, text="一時API Keyを設定", command=self.load_secret).grid(row=10, column=0, columnspan=2, sticky="ew", pady=3)
+
+        state_buttons = ttk.Frame(right)
+        state_buttons.grid(row=11, column=0, columnspan=2, sticky="ew", pady=(8, 2))
+        for col in range(4):
+            state_buttons.columnconfigure(col, weight=1)
+        ttk.Button(state_buttons, text="ACTIVE", command=lambda: self.set_lifecycle("ACTIVE")).grid(row=0, column=0, sticky="ew", padx=(0, 2))
+        ttk.Button(state_buttons, text="STANDBY", command=lambda: self.set_lifecycle("STANDBY")).grid(row=0, column=1, sticky="ew", padx=2)
+        ttk.Button(state_buttons, text="DISABLED", command=lambda: self.set_lifecycle("DISABLED")).grid(row=0, column=2, sticky="ew", padx=2)
+        ttk.Button(state_buttons, text="RETIRED", command=lambda: self.set_lifecycle("RETIRED")).grid(row=0, column=3, sticky="ew", padx=(2, 0))
+
+        ttk.Button(right, text="一時API Keyを削除", command=self.remove_secret).grid(row=12, column=0, columnspan=2, sticky="ew", pady=(8, 3))
+        ttk.Button(right, text="Gatewayへ反映（安全に再起動）", command=self.apply_gateway_restart).grid(row=13, column=0, columnspan=2, sticky="ew", pady=3)
+
+        ttk.Label(
+            outer,
+            textvariable=self.status_text,
+            font=("Yu Gothic UI", 9, "bold"),
+            wraplength=980,
+            justify="left",
+        ).grid(row=2, column=0, columnspan=2, sticky="ew", pady=(2, 8))
+
+        buttons = ttk.Frame(outer)
+        buttons.grid(row=3, column=0, columnspan=2, sticky="ew")
+        buttons.columnconfigure(0, weight=1)
+        buttons.columnconfigure(1, weight=1)
+        ttk.Button(buttons, text="一覧更新", command=self.refresh_profiles).grid(row=0, column=0, sticky="ew", padx=(0, 6))
+        ttk.Button(buttons, text="閉じる", command=self.top.destroy).grid(row=0, column=1, sticky="ew", padx=(6, 0))
+
+    def _state(self):
+        state = load_state()
+        state, changed = api_secrets.ensure_default_profiles(state)
+        if changed:
+            save_state(state)
+        return state
+
+    def _selected_reference(self):
+        selection = self.tree.selection()
+        if selection:
+            values = self.tree.item(selection[0], "values")
+            if len(values) >= 3:
+                return str(values[2])
+        return self.reference_var.get().strip().upper()
+
+    def refresh_profiles(self, select_reference=None):
+        state = self._state()
+        profiles = api_secrets.list_profiles(state)
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        target_item = None
+        for profile in profiles:
+            ref = profile["secretReferenceId"]
+            item = self.tree.insert(
+                "",
+                "end",
+                values=(
+                    profile.get("provider", ""),
+                    profile.get("alias", ""),
+                    ref,
+                    profile.get("lifecycleState", ""),
+                    "LOADED" if profile.get("secretLoadedInLauncherProcess") else "—",
+                    profile.get("lastValidationStatus", "NOT_VALIDATED"),
+                    profile.get("billingProfileId", "") or "—",
+                    profile.get("budgetId", "") or "—",
+                ),
+            )
+            if select_reference and ref == select_reference:
+                target_item = item
+        if target_item:
+            self.tree.selection_set(target_item)
+            self.tree.focus(target_item)
+            self.tree.see(target_item)
+            self.on_select()
+
+    def on_select(self, _event=None):
+        ref = self._selected_reference()
+        if not ref:
+            return
+        try:
+            profile = api_secrets.get_profile(self._state(), ref)
+        except Exception:
+            profile = None
+        if not profile:
+            return
+        self.provider_var.set(profile.get("provider", ""))
+        self.alias_var.set(profile.get("alias", ""))
+        self.reference_var.set(profile.get("secretReferenceId", ""))
+        self.secret_type_var.set(profile.get("secretType", "BEARER_TOKEN"))
+        self.lifecycle_var.set(profile.get("lifecycleState", "STANDBY"))
+        self.billing_var.set(profile.get("billingProfileId", "") or "")
+        self.capability_var.set(profile.get("capabilityProfileId", "") or "")
+        self.secret_value_var.set("")
+
+    def save_profile_metadata(self):
+        try:
+            state = self._state()
+            profile = api_secrets.upsert_profile_metadata(
+                state,
+                provider=self.provider_var.get(),
+                alias=self.alias_var.get(),
+                reference_id=self.reference_var.get(),
+                secret_type=self.secret_type_var.get(),
+                lifecycle_state=self.lifecycle_var.get(),
+                billing_profile_id=self.billing_var.get() or None,
+                capability_profile_id=self.capability_var.get() or None,
+            )
+            save_state(state)
+            self.status_text.set(f"Metadata保存: {profile['secretReferenceId']}（Secret値は保存していません）")
+            self.refresh_profiles(select_reference=profile["secretReferenceId"])
+        except Exception as exc:
+            messagebox.showerror("Profile Metadata", str(exc), parent=self.top)
+
+    def load_secret(self):
+        ref = self.reference_var.get().strip().upper()
+        value = self.secret_value_var.get()
+        if not value:
+            messagebox.showwarning("API Key", "API Key / Secretを入力してください。", parent=self.top)
+            return
+        try:
+            # Ensure metadata exists before loading secret material.
+            self.save_profile_metadata()
+            result = api_secrets.load_ephemeral_secret(ref, value)
+            self.secret_value_var.set("")
+            self.secret_entry.delete(0, "end")
+            self.restart_required = port_open(GATEWAY_PORT)
+            suffix = " Gateway再起動が必要です。" if self.restart_required else " 次回Gateway起動時に反映されます。"
+            self.status_text.set(f"一時Secret設定: {result['secretReferenceId']}.{suffix}")
+            self.refresh_profiles(select_reference=ref)
+        except Exception as exc:
+            self.secret_value_var.set("")
+            messagebox.showerror("API Key", str(exc), parent=self.top)
+
+    def set_lifecycle(self, lifecycle):
+        ref = self._selected_reference()
+        try:
+            state = self._state()
+            before = api_secrets.get_profile(state, ref)
+            if not before:
+                raise KeyError("PROFILE_NOT_FOUND")
+            lifecycle = api_secrets.normalize_lifecycle(lifecycle)
+            impact = (
+                f"Credential状態を変更します。\n\n"
+                f"Provider: {before.get('provider')}\n"
+                f"Alias: {before.get('alias')}\n"
+                f"Secret Reference: {ref}\n"
+                f"State: {before.get('lifecycleState')} → {lifecycle}\n"
+                f"Billing: {before.get('billingProfileId') or '未設定'}\n"
+                f"Budget: {before.get('budgetId') or '未設定'}\n\n"
+                "Paid Authority / Budget / Capabilityはこの操作では変更しません。"
+            )
+            if not messagebox.askyesno("Credential切替の影響確認", impact, parent=self.top):
+                return
+            profile = api_secrets.set_profile_lifecycle(state, ref, lifecycle)
+            save_state(state)
+            self.lifecycle_var.set(profile["lifecycleState"])
+            self.status_text.set(f"{ref}: {before.get('lifecycleState')} → {profile['lifecycleState']}。Paid Authorityは変更していません。")
+            self.refresh_profiles(select_reference=ref)
+        except Exception as exc:
+            messagebox.showerror("Credential State", str(exc), parent=self.top)
+
+    def remove_secret(self):
+        ref = self._selected_reference()
+        if not messagebox.askyesno(
+            "一時API Key削除",
+            f"{ref} のLauncherプロセス内Secretを削除しますか？\n\nProvider側API KeyのRevokeではありません。",
+            parent=self.top,
+        ):
+            return
+        try:
+            result = api_secrets.remove_ephemeral_secret(ref)
+            self.restart_required = port_open(GATEWAY_PORT)
+            suffix = " Gateway再起動で子プロセスからも除去されます。" if self.restart_required else ""
+            self.status_text.set(f"{result['code']}: {ref}.{suffix}")
+            self.refresh_profiles(select_reference=ref)
+        except Exception as exc:
+            messagebox.showerror("一時API Key削除", str(exc), parent=self.top)
+
+    def apply_gateway_restart(self):
+        if not port_open(GATEWAY_PORT):
+            self.restart_required = False
+            self.status_text.set("Gatewayは停止中です。次回『External Gateway付き起動』で現在の一時Secretを継承します。")
+            return
+        if not messagebox.askyesno(
+            "Gateway再起動",
+            "Secret変更をGatewayへ反映するためCanonical Gatewayを再起動します。\n現在のGateway Sessionは無効になります。続行しますか？",
+            parent=self.top,
+        ):
+            return
+        try:
+            stop_result = stop_gateway()
+            if stop_result not in ("stopped", "recovered_stopped", "already"):
+                raise RuntimeError(f"GATEWAY_STOP_FAILED:{stop_result}")
+            start_gateway()
+            ready, detail = wait_for_gateway_ready()
+            if not ready:
+                raise RuntimeError(f"GATEWAY_RESTART_NOT_READY:{detail.get('reason', 'UNKNOWN')}")
+            self.restart_required = False
+            self.status_text.set("Gateway再起動完了。Browser側ではGateway Sessionを再開始してください。")
+            if callable(self.on_runtime_refresh):
+                self.on_runtime_refresh()
+        except Exception as exc:
+            messagebox.showerror("Gateway再起動", str(exc), parent=self.top)
+
+
 class LauncherApp:
     def __init__(self, root):
         self.root = root
@@ -647,6 +971,11 @@ class LauncherApp:
         self.gateway_text = tk.StringVar()
         self.last_web_identity = None
         self.last_gateway_health = None
+
+        state = load_state()
+        state, changed = api_secrets.ensure_default_profiles(state)
+        if changed:
+            save_state(state)
 
         self.setup_style()
         self.build_ui()
@@ -693,7 +1022,7 @@ class LauncherApp:
 
         ttk.Label(
             header,
-            text="AI Prompt OS Launcher v1.4.4 / Canonical Gateway",
+            text="AI Prompt OS Launcher v1.5.0 / Canonical Gateway + API Secret Manager",
             style="SubTitle.TLabel",
             anchor="center",
         ).grid(row=1, column=0, sticky="ew", pady=(0, 12))
@@ -746,13 +1075,36 @@ class LauncherApp:
             anchor="center",
         ).grid(row=1, column=0, sticky="ew", pady=(8, 0))
 
+        secret_frame = ttk.LabelFrame(
+            self.main,
+            text="API / Secret Manager",
+            padding=(16, 12, 16, 10),
+            style="Group.TLabelframe",
+        )
+        secret_frame.grid(row=2, column=0, sticky="ew", pady=(0, 12))
+        secret_frame.columnconfigure(0, weight=1)
+        secret_frame.columnconfigure(1, weight=2)
+        ttk.Button(
+            secret_frame,
+            text="API / Secret Managerを開く",
+            style="Action.TButton",
+            command=self.open_api_secret_manager,
+        ).grid(row=0, column=0, sticky="ew", padx=(0, 12))
+        ttk.Label(
+            secret_frame,
+            text="OpenAI LEGACY / PRIMARYや将来の複数API資格情報を管理。\nAPI Keyはv1では一時設定のみで、BAT / JSON / Browserへ保存しません。",
+            style="Hint.TLabel",
+            justify="left",
+            anchor="w",
+        ).grid(row=0, column=1, sticky="ew")
+
         runtime_frame = ttk.LabelFrame(
             self.main,
             text="Runtime状態",
             padding=(16, 14, 16, 12),
             style="Group.TLabelframe",
         )
-        runtime_frame.grid(row=2, column=0, sticky="ew", pady=(0, 10))
+        runtime_frame.grid(row=3, column=0, sticky="ew", pady=(0, 10))
         runtime_frame.columnconfigure(0, weight=1)
 
         ttk.Label(
@@ -772,7 +1124,7 @@ class LauncherApp:
             textvariable=self.status_text,
             style="StatusMessage.TLabel",
             anchor="center",
-        ).grid(row=3, column=0, sticky="ew", pady=(6, 12))
+        ).grid(row=4, column=0, sticky="ew", pady=(6, 12))
 
         stop_frame = ttk.LabelFrame(
             self.main,
@@ -780,7 +1132,7 @@ class LauncherApp:
             padding=(16, 14, 16, 12),
             style="Group.TLabelframe",
         )
-        stop_frame.grid(row=4, column=0, sticky="ew", pady=(0, 12))
+        stop_frame.grid(row=5, column=0, sticky="ew", pady=(0, 12))
         for i in range(3):
             stop_frame.columnconfigure(i, weight=1)
 
@@ -806,7 +1158,7 @@ class LauncherApp:
         ).grid(row=0, column=2, sticky="ew", padx=(8, 0))
 
         utility_frame = ttk.Frame(self.main)
-        utility_frame.grid(row=5, column=0, sticky="ew", pady=(0, 10))
+        utility_frame.grid(row=6, column=0, sticky="ew", pady=(0, 10))
         for i in range(3):
             utility_frame.columnconfigure(i, weight=1)
 
@@ -842,7 +1194,13 @@ class LauncherApp:
             style="Hint.TLabel",
             justify="left",
             anchor="w",
-        ).grid(row=6, column=0, sticky="ew", pady=(2, 0))
+        ).grid(row=7, column=0, sticky="ew", pady=(2, 0))
+
+    def open_api_secret_manager(self):
+        ApiSecretManagerDialog(
+            self.root,
+            on_runtime_refresh=lambda: self.refresh_status(deep_check=True),
+        )
 
     def fit_window_to_content(self):
         self.root.update_idletasks()
@@ -1079,7 +1437,7 @@ class LauncherApp:
 
 def main():
     ensure_state_dir()
-    log(f"Launcher v1.4.6 opened PROJECT_ROOT={PROJECT_ROOT}")
+    log(f"Launcher v1.5.0 opened PROJECT_ROOT={PROJECT_ROOT}")
     root = tk.Tk()
     app = LauncherApp(root)
     root.after(150, app.fit_window_to_content)

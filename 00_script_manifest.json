@@ -4,10 +4,10 @@
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "EXTERNAL-010 v1.20.1 + OpenAI API Integration Phase 2 v0.2.3 Secret Setup UI Hotfix Candidate; Gateway Secret status to reference-only Browser metadata, no provider registration or paid request performed",
+  "description": "EXTERNAL-010 v1.20.1 + OpenAI API Integration Phase 2 v0.2.3 Secret Setup UI Hotfix Candidate; Gateway Secret status to reference-only Browser metadata, no provider registration or paid request performed + Decision 056 API / Secret Manager v1 Candidate",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-14T03:00:00+09:00",
+  "updatedAt": "2026-09-14T03:15:00+09:00",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -307,7 +307,7 @@
     "./17_external_intelligence_source_router.js?h=fb1eef1a3d35",
     "./17_external_intelligence_acquisition_queue.js?h=8d1954f4953a",
     "./17_external_intelligence_openai_provider_integration.js?h=7f64519527cf",
-    "./17_external_intelligence_openai_provider_ui.js?h=129c832c21b0",
+    "./17_external_intelligence_openai_provider_ui.js?h=6ad4cdc935aa",
     "./17_external_intelligence_phase1_validation.js?h=d86cc1417555",
     "./17_external_intelligence_phase2_validation.js?h=00a0fe59ccd5",
     "./17_external_intelligence_phase3_validation.js?h=839f83963595",
@@ -2467,12 +2467,12 @@
       "cacheKey": "7f64519527cf"
     },
     "17_external_intelligence_openai_provider_ui.js": {
-      "sha256": "129c832c21b09249abf38daba524639f18a78f570cb94c19065bbeccb7183640",
-      "byteSize": 19277,
-      "cacheKey": "129c832c21b0"
+      "sha256": "6ad4cdc935aa09afdd75c81010456c7baefb0c959da73c8f0448dd8fabd6b701",
+      "byteSize": 19364,
+      "cacheKey": "6ad4cdc935aa"
     }
   },
-  "scriptSetHash": "c7f1507bf6c10b40a01c931efc70441150811081bca917c3e6f74545840e9973",
+  "scriptSetHash": "ceac7bf8fbc67b0d0a66957779558b15e1de002b219b9a2af218f814dd6a7fed",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -4515,5 +4515,5 @@
       "cacheKey": "129c832c21b0"
     }
   },
-  "manifestHash": "4d6ac3edbadcca358382af371e52c0b43f849c55882a3843952934c3f2ef92af"
+  "manifestHash": "a4a1ac7810268e3b8ee6c21c76c7c6f7803705940a942c128b959384f8b03c8d"
 }
