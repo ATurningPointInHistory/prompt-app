@@ -13,7 +13,7 @@
   const STORAGE_KEY = "EXTERNAL010_OPENAI_UI_DRAFT_V1";
   function defaultSecretReferenceId() {
     const p=typeof n.getOpenAIProviderIntegrationProfile==="function"?n.getOpenAIProviderIntegrationProfile():null;
-    return p&&p.defaultSecretReferenceId||"SECRET-OPENAI-PRIMARY";
+    return p&&p.defaultSecretReferenceId||"SECRET-OPENAI-LEGACY";
   }
 
   function esc(value) {
@@ -94,7 +94,7 @@
       '</div><div class="external-actions openai-actions">'+
         '<button class="btn-secondary" onclick="externalOpenAIReviewSourceRegistration()">Source登録内容を確認</button>'+
         '<button class="btn-primary" onclick="externalOpenAIApproveSourceRegistration(event)"'+(src&&src.sourceId?' disabled':'')+'>Project OwnerとしてSource登録</button>'+
-      '</div><div class="external-note">Source登録承認は SOURCE-OPENAI のRegistry登録だけに限定します。Paid API有効化・Budget変更・Operation Contract登録・実API通信は行いません。</div>'+
+      '</div><div class="external-note">Source登録承認は SOURCE-OPENAI のRegistry登録だけに限定します。成功後は上部の「Provider」が REGISTERED に変わり、「現在のデータ」の Sources が 1 増えます。Paid API有効化・Budget変更・Operation Contract登録・実API通信は行いません。</div>'+
       '<div id="externalOpenAIImpact" class="external-note">変更前後を確認してから保存してください。保存は設定候補のみで、有料APIを自動有効化しません。</div></details>'+
       '<details class="openai-config-details"><summary>料金・利用量</summary><div class="external-boundary-grid">'+
         '<div>選択Budget<strong>'+esc(b?b.budgetId:'未選択')+'</strong></div><div>使用額<strong>'+esc(b?money(b.consumed):'—')+'</strong></div><div>Hard Limit<strong>'+esc(b?money(b.hardLimit):'—')+'</strong></div><div>1回Hard Cap<strong>'+esc(cap?money(cap):'未設定')+'</strong></div>'+
@@ -149,7 +149,13 @@
     if(!gatewayStatus||gatewayStatus.ok!==true){const result={ok:false,code:gatewayStatus&&gatewayStatus.code||"EXTERNAL010_OPENAI_GATEWAY_SECRET_NOT_READY",secretReferenceId,gatewayStatus:gatewayStatus||null,metadataRegistrationPerformed:false,secretValueRequested:false,nextRequiredAction:"SET_GATEWAY_SECRET_ENVIRONMENT_AND_RESTART_GATEWAY"};setImpact(result);if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();return result;}
     if(typeof n.registerExternalIntelligenceSecretMetadata!=="function"){const result={ok:false,code:"EXTERNAL010_SECRET_METADATA_REGISTRY_UNAVAILABLE",secretReferenceId,gatewayStatus,metadataRegistrationPerformed:false,secretValueRequested:false};setImpact(result);return result;}
     const registered=n.registerExternalIntelligenceSecretMetadata({secretReferenceId:secretReferenceId,secretType:"BEARER_TOKEN",provider:"OPENAI",status:"ACTIVE"});
-    const result={ok:Boolean(registered&&registered.ok===true),code:registered&&registered.code||"EXTERNAL010_OPENAI_SECRET_METADATA_REGISTRATION_FAILED",secretReferenceId,gatewayStatus,metadata:registered&&registered.data&&registered.data.secretMetadata||null,metadataRegistrationPerformed:Boolean(registered&&registered.ok===true),secretValueStored:false,secretValueRequested:false,nextRequiredAction:registered&&registered.ok===true?"SOURCE_REGISTRATION_AUTHORITY":"REVIEW_SECRET_METADATA_REGISTRATION"};
+    const registeredOk=Boolean(registered&&registered.ok===true);
+    if(registeredOk){
+      const persistedDraft=readDraft();
+      persistedDraft.secretReferenceId=secretReferenceId;
+      writeDraft(persistedDraft);
+    }
+    const result={ok:registeredOk,code:registered&&registered.code||"EXTERNAL010_OPENAI_SECRET_METADATA_REGISTRATION_FAILED",secretReferenceId,gatewayStatus,metadata:registered&&registered.data&&registered.data.secretMetadata||null,metadataRegistrationPerformed:registeredOk,secretSelectionPersisted:registeredOk,secretValueStored:false,secretValueRequested:false,nextRequiredAction:registeredOk?"SOURCE_REGISTRATION_AUTHORITY":"REVIEW_SECRET_METADATA_REGISTRATION"};
     if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();
     setImpact(result);
     return result;
