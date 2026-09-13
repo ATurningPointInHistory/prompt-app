@@ -1,0 +1,105 @@
+{
+  "reportId": "EXTERNAL-010-FULL-MEMO-AUDIT-ENGINE-HF4-REPORT-1.0.0",
+  "componentId": "EXTERNAL-010",
+  "version": "1.20.1",
+  "status": "AUDIT_ENGINE_CORRECTION_CANDIDATE",
+  "generatedAt": "2026-09-13T04:46:25.386443Z",
+  "sourceMemoFile": "memo_boxes_selected(4).json",
+  "corrections": [
+    {
+      "id": "HF4-CORRECTION-001",
+      "issue": "Decision 006 deferred items were incorrectly counted as Initial Implementation Requirements",
+      "previousInitialRequirementCount": 810,
+      "correctedInitialRequirementCount": 803,
+      "excludedDeferredRequirementCount": 7,
+      "excludedDeferredItems": [
+        "Automatic Tiering",
+        "Advanced Compression",
+        "Distributed Processing",
+        "NAS Integration",
+        "Cloud Storage",
+        "GPU Processing",
+        "Advanced Search Index"
+      ],
+      "basis": "Decision 006 explicitly places these items after the statement that they may be added later."
+    },
+    {
+      "id": "HF4-CORRECTION-002",
+      "issue": "HF3 searched all EXTERNAL-010 JavaScript files globally, allowing cross-Decision false evidence candidates",
+      "repair": "Candidate search is now restricted to Decision-specific implementationFiles and validationFiles defined in EXTERNAL-010_DECISION_AUDIT_SCOPE_1.0.0.json.",
+      "crossDecisionCandidateSearchAllowed": false
+    },
+    {
+      "id": "HF4-CORRECTION-003",
+      "issue": "HF3 excluded Local Gateway .cjs implementation/validation files from static evidence search",
+      "repair": "Decision scope now includes applicable external_gateway/*.cjs and external_gateway/lib/*.cjs files.",
+      "gatewaySourceIncluded": true
+    },
+    {
+      "id": "HF4-CORRECTION-004",
+      "issue": "HF3 token normalization missed camelCase/underscore forms and selected short technical tokens",
+      "repair": "Normalizer splits camelCase and underscores and recognizes selected technical short tokens."
+    }
+  ],
+  "provisionalDecisionScopedStaticEvidenceResult": {
+    "requirementCount": 803,
+    "VERIFIED": 0,
+    "TRACEABILITY_LINKED": 0,
+    "EVIDENCE_CANDIDATE": 539,
+    "IMPLEMENTATION_CANDIDATE": 56,
+    "VALIDATION_CANDIDATE": 55,
+    "UNVERIFIED": 153,
+    "SOURCE_MISMATCH": "not evaluated in this offline provisional count",
+    "warning": "These are static candidates only and are not PASS. Short/generic requirements are intentionally conservative and can remain UNVERIFIED until explicit traceability is curated."
+  },
+  "highConfidenceGapCandidates": [
+    {
+      "decisionId": "EXTERNAL-010-DECISION-019",
+      "requirements": [
+        "Activity Event Contract",
+        "Structured Diagnostic Logging",
+        "Basic Metrics",
+        "Health Metrics",
+        "Retention Class Hook"
+      ],
+      "assessment": "Current audit module implements Audit Event persistence/hash-chain but no explicit matching implementation was found in assigned Decision 019 sources during inspect."
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-024",
+      "requirements": [
+        "Cost Optimization Hook"
+      ],
+      "assessment": "Resource budget implementation covers hierarchy/check/usage/additional-budget proposal; no explicit cost optimization hook was found during inspect."
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-026",
+      "requirements": [
+        "EXTERNAL-020 Integration Hook"
+      ],
+      "assessment": "Reliability module names EXTERNAL-020 as final reliability authority, but no explicit Claim-to-EXTERNAL-020 integration hook was found in assigned Claim implementation."
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-033",
+      "requirements": [
+        "Confounder Hook",
+        "Prediction Link",
+        "Outcome Evaluation Hook",
+        "Dormant / Reopen Hook",
+        "Audit / Lineage Hook"
+      ],
+      "assessment": "Current hypothesis module covers research question, hypothesis identity, evidence/falsification/alternatives/state but these five explicit Initial Scope hooks were not found during inspect."
+    }
+  ],
+  "knownImplementedButHeuristicMayStillMarkUnverifiedExamples": [
+    "Decision 054 high-entropy session token and replay protection are implemented in Gateway .cjs.",
+    "Decision 012 Secret Resolver exists in external_gateway/lib/secret_store.cjs.",
+    "Decision 014 SQLite indexes exist in external_gateway/lib/evidence_store.cjs.",
+    "Decision 047 resampling lineage is implemented and validated in Phase 17."
+  ],
+  "releaseBoundary": {
+    "releaseAllowedByThisReport": false,
+    "projectOwnerRevalidationRequired": true,
+    "automaticAcceptancePerformed": false,
+    "automaticPromotionPerformed": false
+  }
+}

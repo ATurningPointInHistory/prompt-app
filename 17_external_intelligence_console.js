@@ -148,7 +148,7 @@
 
       '<section class="external-section">' +
         '<h4>Full Memo Audit</h4>' +
-        '<div class="external-help">PCにある memo_boxes_selected JSON を選択すると、EXTERNAL-010の810 Initial Implementation RequirementsをTraceability Catalogと照合します。MemoはBrowser内でのみ解析し、GatewayやRepositoryへ保存しません。EVIDENCE_CANDIDATEはPASSではありません。</div>' +
+        '<div class="external-help">PCにある memo_boxes_selected JSON を選択すると、EXTERNAL-010のInitial Implementation RequirementsをTraceability Catalogと照合します。Decision 006で「後から追加可能」と明記された7項目はInitial Requirementから除外し、現在のBaselineは803件です。候補探索はDecisionごとの担当Source/Validationだけに限定します。MemoはBrowser内でのみ解析し、GatewayやRepositoryへ保存しません。EVIDENCE_CANDIDATEはPASSではありません。</div>' +
         '<input id="externalFullMemoAuditFile" type="file" accept="application/json,.json" style="display:none" onchange="externalConsoleHandleFullMemoAuditFile(event)">' +
         '<div id="externalFullMemoAuditSummary" class="external-note">未実行</div>' +
       '</section>' +
@@ -243,7 +243,9 @@
       " / IMPLEMENTATION_CANDIDATE " + (c.IMPLEMENTATION_CANDIDATE || 0) +
       " / VALIDATION_CANDIDATE " + (c.VALIDATION_CANDIDATE || 0) +
       " / UNVERIFIED " + (c.UNVERIFIED || 0) +
-      " / SOURCE_MISMATCH " + (c.SOURCE_MISMATCH || 0);
+      " / SOURCE_MISMATCH " + (c.SOURCE_MISMATCH || 0) +
+      (report.catalogExcludedDeferredRequirementCount ? " / DEFERRED_EXCLUDED " + report.catalogExcludedDeferredRequirementCount : "") +
+      (report.auditScopeMethod ? " / " + report.auditScopeMethod : "");
   }
 
   function externalConsoleChooseFullMemoAudit() {
@@ -268,7 +270,7 @@
       renderExternalIntelligenceConsole();
       renderFullMemoAuditSummary(report);
       const summary = n.getExternal010FullMemoAuditSummary ? n.getExternal010FullMemoAuditSummary() : { id:report.id, requirementCount:report.requirementCount, counts:report.counts };
-      setOutput({ ok:true, status:"AUDIT_COMPLETE", summary:summary, note:"Full requirement details are kept in memory and can be saved with Audit JSON保存. Evidence candidates are not PASS." });
+      setOutput({ ok:true, status:"AUDIT_COMPLETE", summary:summary, note:"Full requirement details are kept in memory and can be saved with Audit JSON保存. Decision-scoped evidence candidates are not PASS. Deferred/Future items are excluded from Initial Requirement count." });
       return report;
     } catch (error) {
       const failed = { ok:false, status:"FAILED", action:"Full Memo Audit", error:error && error.message || String(error), failedAt:i.nowIso() };

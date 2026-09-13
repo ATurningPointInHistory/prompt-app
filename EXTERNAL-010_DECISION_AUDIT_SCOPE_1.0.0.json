@@ -1,0 +1,669 @@
+{
+  "scopeId": "EXTERNAL-010-DECISION-AUDIT-SCOPE-1.0.0",
+  "componentId": "EXTERNAL-010",
+  "scopeMethod": "DECISION_SCOPED_STATIC_EVIDENCE",
+  "crossDecisionCandidateSearchAllowed": false,
+  "gatewaySourceIncluded": true,
+  "note": "Candidate search is limited to files assigned to the source Decision. Candidates are not PASS.",
+  "generatedAt": "2026-09-13T04:41:47.648122Z",
+  "decisions": [
+    {
+      "decisionId": "EXTERNAL-010-DECISION-001",
+      "implementationFiles": [
+        "17_external_intelligence_core.js",
+        "17_external_intelligence_contracts.js",
+        "17_external_intelligence_version_manifest.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase1_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-002",
+      "implementationFiles": [
+        "17_external_intelligence_acquisition_contract.js",
+        "17_external_intelligence_source_router.js",
+        "17_external_intelligence_gateway_client.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase4_android_validation.js",
+        "17_external_intelligence_phase4_real_runtime_validation.js",
+        "17_external_intelligence_phase4_validation.js",
+        "external_gateway/validate_phase4_acquisition.cjs"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-003",
+      "implementationFiles": [
+        "17_external_intelligence_core.js",
+        "17_external_intelligence_gateway_client.js",
+        "17_external_intelligence_runtime_coordination.js",
+        "17_external_intelligence_capability_registry.js",
+        "external_gateway/gateway.cjs",
+        "external_gateway/lib/runtime.cjs"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase2_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-004",
+      "implementationFiles": [
+        "17_external_intelligence_source_registry.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase3_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-005",
+      "implementationFiles": [
+        "17_external_intelligence_evidence_persistence.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase5_android_validation.js",
+        "17_external_intelligence_phase5_real_runtime_validation.js",
+        "17_external_intelligence_phase5_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-006",
+      "implementationFiles": [
+        "17_external_intelligence_evidence_persistence.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase5_android_validation.js",
+        "17_external_intelligence_phase5_real_runtime_validation.js",
+        "17_external_intelligence_phase5_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-007",
+      "implementationFiles": [
+        "17_external_intelligence_acquisition_contract.js",
+        "17_external_intelligence_source_router.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase4_android_validation.js",
+        "17_external_intelligence_phase4_real_runtime_validation.js",
+        "17_external_intelligence_phase4_validation.js",
+        "external_gateway/validate_phase4_acquisition.cjs"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-008",
+      "implementationFiles": [
+        "17_external_intelligence_evidence_persistence.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase5_android_validation.js",
+        "17_external_intelligence_phase5_real_runtime_validation.js",
+        "17_external_intelligence_phase5_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-009",
+      "implementationFiles": [
+        "17_external_intelligence_temporal.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase7_android_validation.js",
+        "17_external_intelligence_phase7_real_runtime_validation.js",
+        "17_external_intelligence_phase7_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-010",
+      "implementationFiles": [
+        "17_external_intelligence_reliability_signals.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase10_android_validation.js",
+        "17_external_intelligence_phase10_real_runtime_validation.js",
+        "17_external_intelligence_phase10_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-011",
+      "implementationFiles": [
+        "17_external_intelligence_gateway_client.js",
+        "external_gateway/gateway.cjs",
+        "external_gateway/lib/config.cjs",
+        "external_gateway/lib/security.cjs"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase2_validation.js",
+        "external_gateway/validate_gateway.cjs"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-012",
+      "implementationFiles": [
+        "17_external_intelligence_secret_governance.js",
+        "external_gateway/lib/secret_store.cjs"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase6_android_validation.js",
+        "17_external_intelligence_phase6_real_runtime_validation.js",
+        "17_external_intelligence_phase6_validation.js",
+        "external_gateway/validate_phase6_security.cjs"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-013",
+      "implementationFiles": [
+        "17_external_intelligence_gateway_client.js",
+        "17_external_intelligence_capability_resilience.js",
+        "17_external_intelligence_runtime_coordination.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase20_android_validation.js",
+        "17_external_intelligence_phase20_real_runtime_validation.js",
+        "17_external_intelligence_phase20_validation.js",
+        "17_external_intelligence_phase2_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-014",
+      "implementationFiles": [
+        "17_external_intelligence_evidence_persistence.js",
+        "external_gateway/lib/evidence_store.cjs"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase5_android_validation.js",
+        "17_external_intelligence_phase5_real_runtime_validation.js",
+        "17_external_intelligence_phase5_validation.js",
+        "external_gateway/validate_phase5_persistence.cjs"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-015",
+      "implementationFiles": [
+        "17_external_intelligence_adapter_registry.js",
+        "17_external_intelligence_acquisition_contract.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase4_android_validation.js",
+        "17_external_intelligence_phase4_real_runtime_validation.js",
+        "17_external_intelligence_phase4_validation.js",
+        "external_gateway/validate_phase4_acquisition.cjs"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-016",
+      "implementationFiles": [
+        "17_external_intelligence_acquisition_queue.js",
+        "17_external_intelligence_acquisition_contract.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase4_android_validation.js",
+        "17_external_intelligence_phase4_real_runtime_validation.js",
+        "17_external_intelligence_phase4_validation.js",
+        "external_gateway/validate_phase4_acquisition.cjs"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-017",
+      "implementationFiles": [
+        "17_external_intelligence_external_content_security.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase6_android_validation.js",
+        "17_external_intelligence_phase6_real_runtime_validation.js",
+        "17_external_intelligence_phase6_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-018",
+      "implementationFiles": [
+        "17_external_intelligence_external_content_security.js",
+        "external_gateway/lib/security.cjs",
+        "external_gateway/lib/acquisition.cjs"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase6_android_validation.js",
+        "17_external_intelligence_phase6_real_runtime_validation.js",
+        "17_external_intelligence_phase6_validation.js",
+        "external_gateway/validate_phase6_security.cjs"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-019",
+      "implementationFiles": [
+        "17_external_intelligence_audit.js",
+        "17_external_intelligence_acquisition_contract.js",
+        "17_external_intelligence_acquisition_queue.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase1_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-020",
+      "implementationFiles": [
+        "17_external_intelligence_capability_resilience.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase20_android_validation.js",
+        "17_external_intelligence_phase20_real_runtime_validation.js",
+        "17_external_intelligence_phase20_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-021",
+      "implementationFiles": [
+        "17_external_intelligence_federated_read.js",
+        "17_external_intelligence_knowledge_boundary.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase14_android_validation.js",
+        "17_external_intelligence_phase14_real_runtime_validation.js",
+        "17_external_intelligence_phase14_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-022",
+      "implementationFiles": [
+        "17_external_intelligence_normalization.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase7_android_validation.js",
+        "17_external_intelligence_phase7_real_runtime_validation.js",
+        "17_external_intelligence_phase7_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-023",
+      "implementationFiles": [
+        "17_external_intelligence_source_discovery.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase3_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-024",
+      "implementationFiles": [
+        "17_external_intelligence_resource_budget.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase3_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-025",
+      "implementationFiles": [
+        "17_external_intelligence_usage_policy.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase3_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-026",
+      "implementationFiles": [
+        "17_external_intelligence_claim.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase7_android_validation.js",
+        "17_external_intelligence_phase7_real_runtime_validation.js",
+        "17_external_intelligence_phase7_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-027",
+      "implementationFiles": [
+        "17_external_intelligence_entity.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase7_android_validation.js",
+        "17_external_intelligence_phase7_real_runtime_validation.js",
+        "17_external_intelligence_phase7_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-028",
+      "implementationFiles": [
+        "17_external_intelligence_relation_graph.js",
+        "17_external_intelligence_event_graph.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase9_android_validation.js",
+        "17_external_intelligence_phase9_real_runtime_validation.js",
+        "17_external_intelligence_phase9_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-029",
+      "implementationFiles": [
+        "17_external_intelligence_impact_graph.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase9_android_validation.js",
+        "17_external_intelligence_phase9_real_runtime_validation.js",
+        "17_external_intelligence_phase9_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-030",
+      "implementationFiles": [
+        "17_external_intelligence_uncertainty.js",
+        "17_external_intelligence_conformance_repair.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_conformance_validation.js",
+        "17_external_intelligence_phase10_android_validation.js",
+        "17_external_intelligence_phase10_real_runtime_validation.js",
+        "17_external_intelligence_phase10_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-031",
+      "implementationFiles": [
+        "17_external_intelligence_outcome.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase10_android_validation.js",
+        "17_external_intelligence_phase10_real_runtime_validation.js",
+        "17_external_intelligence_phase10_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-032",
+      "implementationFiles": [
+        "17_external_intelligence_signal_detection.js",
+        "17_external_intelligence_conformance_repair.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_conformance_validation.js",
+        "17_external_intelligence_phase11_android_validation.js",
+        "17_external_intelligence_phase11_real_runtime_validation.js",
+        "17_external_intelligence_phase11_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-033",
+      "implementationFiles": [
+        "17_external_intelligence_hypothesis.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase11_android_validation.js",
+        "17_external_intelligence_phase11_real_runtime_validation.js",
+        "17_external_intelligence_phase11_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-034",
+      "implementationFiles": [
+        "17_external_intelligence_social_observation.js",
+        "17_external_intelligence_social_narrative.js",
+        "17_external_intelligence_social_influence.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase13_android_validation.js",
+        "17_external_intelligence_phase13_real_runtime_validation.js",
+        "17_external_intelligence_phase13_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-035",
+      "implementationFiles": [
+        "17_external_intelligence_research_priority.js",
+        "17_external_intelligence_conformance_repair.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_conformance_validation.js",
+        "17_external_intelligence_phase11_android_validation.js",
+        "17_external_intelligence_phase11_real_runtime_validation.js",
+        "17_external_intelligence_phase11_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-036",
+      "implementationFiles": [
+        "17_external_intelligence_capability_registry.js",
+        "17_external_intelligence_capability_routing.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase8_android_validation.js",
+        "17_external_intelligence_phase8_real_runtime_validation.js",
+        "17_external_intelligence_phase8_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-037",
+      "implementationFiles": [
+        "17_external_intelligence_lineage.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase8_android_validation.js",
+        "17_external_intelligence_phase8_real_runtime_validation.js",
+        "17_external_intelligence_phase8_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-038",
+      "implementationFiles": [
+        "17_external_intelligence_emergency_fast_path.js",
+        "17_external_intelligence_conformance_repair.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_conformance_validation.js",
+        "17_external_intelligence_phase12_android_validation.js",
+        "17_external_intelligence_phase12_real_runtime_validation.js",
+        "17_external_intelligence_phase12_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-039",
+      "implementationFiles": [
+        "17_external_intelligence_authority.js",
+        "17_external_intelligence_conformance_repair.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_conformance_validation.js",
+        "17_external_intelligence_phase1_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-040",
+      "implementationFiles": [
+        "17_external_intelligence_work_graph.js",
+        "17_external_intelligence_workflow_orchestration.js",
+        "17_external_intelligence_conformance_repair.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_conformance_validation.js",
+        "17_external_intelligence_phase12_android_validation.js",
+        "17_external_intelligence_phase12_real_runtime_validation.js",
+        "17_external_intelligence_phase12_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-041",
+      "implementationFiles": [
+        "17_external_intelligence_data_lifecycle.js",
+        "17_external_intelligence_conformance_repair.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_conformance_validation.js",
+        "17_external_intelligence_phase6_android_validation.js",
+        "17_external_intelligence_phase6_real_runtime_validation.js",
+        "17_external_intelligence_phase6_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-042",
+      "implementationFiles": [
+        "17_external_intelligence_schema_registry.js",
+        "17_external_intelligence_conformance_repair.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_conformance_validation.js",
+        "17_external_intelligence_phase1_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-043",
+      "implementationFiles": [
+        "17_external_intelligence_intelligence_package.js",
+        "17_external_intelligence_federated_read.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase14_android_validation.js",
+        "17_external_intelligence_phase14_real_runtime_validation.js",
+        "17_external_intelligence_phase14_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-044",
+      "implementationFiles": [
+        "17_external_intelligence_validation_framework.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase15_android_validation.js",
+        "17_external_intelligence_phase15_real_runtime_validation.js",
+        "17_external_intelligence_phase15_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-045",
+      "implementationFiles": [
+        "17_external_intelligence_monitoring_watch.js",
+        "17_external_intelligence_monitoring_change.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase16_android_validation.js",
+        "17_external_intelligence_phase16_real_runtime_validation.js",
+        "17_external_intelligence_phase16_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-046",
+      "implementationFiles": [
+        "17_external_intelligence_notification_governance.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase16_android_validation.js",
+        "17_external_intelligence_phase16_real_runtime_validation.js",
+        "17_external_intelligence_phase16_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-047",
+      "implementationFiles": [
+        "17_external_intelligence_market_identity.js",
+        "17_external_intelligence_market_timeseries.js",
+        "17_external_intelligence_technical_indicator.js",
+        "17_external_intelligence_technical_signal.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase17_android_validation.js",
+        "17_external_intelligence_phase17_real_runtime_validation.js",
+        "17_external_intelligence_phase17_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-048",
+      "implementationFiles": [
+        "17_external_intelligence_market_fusion.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase18_android_validation.js",
+        "17_external_intelligence_phase18_real_runtime_validation.js",
+        "17_external_intelligence_phase18_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-049",
+      "implementationFiles": [
+        "17_external_intelligence_strategy_experiment.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase19_android_validation.js",
+        "17_external_intelligence_phase19_real_runtime_validation.js",
+        "17_external_intelligence_phase19_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-050",
+      "implementationFiles": [
+        "17_external_intelligence_privacy_identity.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase6_android_validation.js",
+        "17_external_intelligence_phase6_real_runtime_validation.js",
+        "17_external_intelligence_phase6_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-051",
+      "implementationFiles": [
+        "17_external_intelligence_runtime_coordination.js",
+        "17_external_intelligence_conformance_repair.js",
+        "external_gateway/lib/runtime.cjs"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_conformance_validation.js",
+        "17_external_intelligence_phase20_android_validation.js",
+        "17_external_intelligence_phase20_real_runtime_validation.js",
+        "17_external_intelligence_phase20_validation.js",
+        "17_external_intelligence_phase2_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-052",
+      "implementationFiles": [
+        "17_external_intelligence_disaster_recovery.js",
+        "external_gateway/lib/recovery_store.cjs"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase20_android_validation.js",
+        "17_external_intelligence_phase20_real_runtime_validation.js",
+        "17_external_intelligence_phase20_validation.js",
+        "external_gateway/validate_phase20_recovery.cjs"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-053",
+      "implementationFiles": [
+        "17_external_intelligence_software_supply_chain.js",
+        "17_external_intelligence_conformance_repair.js"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_conformance_validation.js",
+        "17_external_intelligence_phase2_validation.js"
+      ]
+    },
+    {
+      "decisionId": "EXTERNAL-010-DECISION-054",
+      "implementationFiles": [
+        "17_external_intelligence_gateway_client.js",
+        "external_gateway/gateway.cjs",
+        "external_gateway/lib/config.cjs",
+        "external_gateway/lib/security.cjs",
+        "external_gateway/lib/session_store.cjs",
+        "external_gateway/lib/audit.cjs"
+      ],
+      "validationFiles": [
+        "17_external_intelligence_phase15_android_validation.js",
+        "17_external_intelligence_phase15_real_runtime_validation.js",
+        "17_external_intelligence_phase15_validation.js",
+        "17_external_intelligence_phase20_android_validation.js",
+        "17_external_intelligence_phase20_real_runtime_validation.js",
+        "17_external_intelligence_phase20_validation.js",
+        "17_external_intelligence_phase2_validation.js",
+        "17_external_intelligence_phase4_android_validation.js",
+        "17_external_intelligence_phase4_real_runtime_validation.js",
+        "17_external_intelligence_phase4_validation.js",
+        "17_external_intelligence_phase6_android_validation.js",
+        "17_external_intelligence_phase6_real_runtime_validation.js",
+        "17_external_intelligence_phase6_validation.js",
+        "external_gateway/validate_gateway.cjs",
+        "external_gateway/validate_phase20_recovery.cjs",
+        "external_gateway/validate_phase4_acquisition.cjs",
+        "external_gateway/validate_phase6_security.cjs"
+      ]
+    }
+  ]
+}

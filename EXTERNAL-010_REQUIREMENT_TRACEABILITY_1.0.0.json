@@ -5,9 +5,9 @@
   "sourceMemoSha256": "895f9e3742290d202a9f1781dd5da5749c970d0917cecaac5f8d062b19dbc2bb",
   "generatedAt": "2026-09-13T01:45:26.449318Z",
   "decisionCount": 54,
-  "explicitInitialImplementationRequirementCount": 810,
-  "status": "GENERATED_UNVERIFIED_BASELINE",
-  "rule": "A requirement is not PASS until implementationRefs and validationRefs are explicitly linked and verificationState is changed by a conformance audit.",
+  "explicitInitialImplementationRequirementCount": 803,
+  "status": "TRACEABILITY_BASELINE_CORRECTED_DEFERRED_SCOPE_EXCLUDED",
+  "rule": "Only bullets explicitly required by Initial Implementation Scope are counted. Deferred/future bullets are excluded. ImplementationRefs and validationRefs require explicit evidence; static candidates are not PASS.",
   "decisions": [
     {
       "decisionId": "EXTERNAL-010-DECISION-054",
@@ -6958,69 +6958,36 @@
           "verificationState": "UNVERIFIED",
           "implementationRefs": [],
           "validationRefs": []
-        },
+        }
+      ],
+      "excludedDeferredItems": [
         {
-          "requirementId": "EXTERNAL-010-REQ-006-INIT-09",
           "text": "Automatic Tiering",
-          "sourceDecisionId": "EXTERNAL-010-DECISION-006",
-          "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "reason": "Memo explicitly states: 以下は後から追加可能"
         },
         {
-          "requirementId": "EXTERNAL-010-REQ-006-INIT-10",
           "text": "Advanced Compression",
-          "sourceDecisionId": "EXTERNAL-010-DECISION-006",
-          "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "reason": "Memo explicitly states: 以下は後から追加可能"
         },
         {
-          "requirementId": "EXTERNAL-010-REQ-006-INIT-11",
           "text": "Distributed Processing",
-          "sourceDecisionId": "EXTERNAL-010-DECISION-006",
-          "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "reason": "Memo explicitly states: 以下は後から追加可能"
         },
         {
-          "requirementId": "EXTERNAL-010-REQ-006-INIT-12",
           "text": "NAS Integration",
-          "sourceDecisionId": "EXTERNAL-010-DECISION-006",
-          "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "reason": "Memo explicitly states: 以下は後から追加可能"
         },
         {
-          "requirementId": "EXTERNAL-010-REQ-006-INIT-13",
           "text": "Cloud Storage",
-          "sourceDecisionId": "EXTERNAL-010-DECISION-006",
-          "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "reason": "Memo explicitly states: 以下は後から追加可能"
         },
         {
-          "requirementId": "EXTERNAL-010-REQ-006-INIT-14",
           "text": "GPU Processing",
-          "sourceDecisionId": "EXTERNAL-010-DECISION-006",
-          "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "reason": "Memo explicitly states: 以下は後から追加可能"
         },
         {
-          "requirementId": "EXTERNAL-010-REQ-006-INIT-15",
           "text": "Advanced Search Index",
-          "sourceDecisionId": "EXTERNAL-010-DECISION-006",
-          "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "reason": "Memo explicitly states: 以下は後から追加可能"
         }
       ]
     },
@@ -7780,5 +7747,6 @@
         }
       ]
     }
-  ]
+  ],
+  "excludedDeferredRequirementCount": 7
 }

@@ -18,7 +18,7 @@
   const s = i.state;
 
   const CATALOG_URL = "./EXTERNAL-010_REQUIREMENT_TRACEABILITY_1.0.0.json";
-  const MANIFEST_URL = "./00_script_manifest.json";
+  const SCOPE_URL = "./EXTERNAL-010_DECISION_AUDIT_SCOPE_1.0.0.json";
   const STOP = new Set([
     "with","from","into","when","where","that","this","true","false","hook","record","state","profile","candidate","foundation","integration","validation","initial","implementation","external","intelligence","required","requirement","support","supports","supporting","and","the","for","are","not","may","use","using","only","current","existing","explicit","stable","basic","minimum","possible"
   ]);
@@ -27,21 +27,25 @@
   function clone(v) { try { return JSON.parse(JSON.stringify(v)); } catch (_) { return v; } }
   function normalize(v) {
     return String(v == null ? "" : v)
+      .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+      .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+      .replace(/_/g, " ")
       .normalize("NFKC")
       .toLowerCase()
-      .replace(/[・●○■□◆◇→↓↑≠=+\/\\|:;,.()\[\]{}<>"'`~!@#$%^&*?_-]+/g, " ")
+      .replace(/[・●○■□◆◇→↓↑≠=+\/\\|:;,.()\[\]{}<>"'`~!@#$%^&*?-]+/g, " ")
       .replace(/\s+/g, " ")
       .trim();
   }
   function compact(v) { return normalize(v).replace(/\s+/g, ""); }
+  const SHORT = new Set(["id","api","url","log","ui","os","ai","raw","sha","json","http","host","nas","gpu"]);
   function tokens(v) {
     const raw = normalize(v).split(" ").filter(Boolean);
     const unique = [];
     raw.forEach(function (w) {
-      if (w.length < 4 || STOP.has(w) || /^\d+$/.test(w)) return;
+      if ((w.length < 4 && !SHORT.has(w)) || STOP.has(w) || /^\d+$/.test(w)) return;
       if (!unique.includes(w)) unique.push(w);
     });
-    return unique.slice(0, 8);
+    return unique.slice(0, 10);
   }
   function decisionNumber(id) {
     const match = String(id || "").match(/DECISION-(\d{3})/i);
@@ -81,11 +85,6 @@
     if (!response.ok) throw new Error("FETCH_FAILED " + url + " HTTP " + response.status);
     return response.text();
   }
-  function scriptNameFromEntry(entry) {
-    const raw = String(entry || "");
-    const clean = raw.split("?")[0].replace(/^\.\//, "");
-    return clean;
-  }
   function evidenceScore(requirementText, sourceRecord) {
     const reqCompact = compact(requirementText);
     const srcCompact = sourceRecord && sourceRecord.compact || "";
@@ -101,15 +100,26 @@
     if (words.length >= 2 && ratio === 1) return 70;
     return Math.round(ratio * 60);
   }
-  async function buildStaticEvidenceIndex() {
-    const manifest = await fetchJson(MANIFEST_URL);
-    const scriptEntries = Array.isArray(manifest.scripts) ? manifest.scripts : [];
-    const names = scriptEntries.map(scriptNameFromEntry).filter(function (name) {
-      return /^17_external_intelligence_.*\.js$/i.test(name);
+  function scopeMapFromCatalog(scopeCatalog) {
+    const map = new Map();
+    (scopeCatalog && scopeCatalog.decisions || []).forEach(function (entry) {
+      map.set(String(entry.decisionId || "").toUpperCase(), {
+        implementationFiles: Array.isArray(entry.implementationFiles) ? entry.implementationFiles.slice() : [],
+        validationFiles: Array.isArray(entry.validationFiles) ? entry.validationFiles.slice() : []
+      });
     });
-    const unique = Array.from(new Set(names));
+    return map;
+  }
+  async function buildStaticEvidenceIndex(scopeCatalog) {
+    const fileNames = [];
+    (scopeCatalog && scopeCatalog.decisions || []).forEach(function (entry) {
+      (entry.implementationFiles || []).concat(entry.validationFiles || []).forEach(function (name) {
+        const clean = String(name || "").replace(/^\.\//, "");
+        if (clean && !fileNames.includes(clean)) fileNames.push(clean);
+      });
+    });
     const sourceMap = new Map();
-    await Promise.all(unique.map(async function (name) {
+    await Promise.all(fileNames.map(async function (name) {
       try {
         const raw = await fetchText("./" + name);
         sourceMap.set(name, { raw: raw, normalized: normalize(raw), compact: compact(raw) });
@@ -127,16 +137,21 @@
     const hits = words.filter(function (w) { return body.includes(w); }).length;
     return words.length <= 2 ? hits === words.length : hits / words.length >= 0.8;
   }
-  function findEvidenceCandidates(requirementText, sourceMap) {
-    const ranked = [];
-    sourceMap.forEach(function (sourceRecord, name) {
-      const score = evidenceScore(requirementText, sourceRecord);
-      if (score >= 70) ranked.push({ name: name, score: score, validation: /validation/i.test(name) });
-    });
-    ranked.sort(function (a, b) { return b.score - a.score || a.name.localeCompare(b.name); });
-    const implementationRefs = ranked.filter(function (x) { return !x.validation; }).slice(0, 5);
-    const validationRefs = ranked.filter(function (x) { return x.validation; }).slice(0, 5);
-    return { implementationRefs: implementationRefs, validationRefs: validationRefs };
+  function findEvidenceCandidates(requirementText, sourceMap, decisionScope) {
+    const implNames = decisionScope && decisionScope.implementationFiles || [];
+    const valNames = decisionScope && decisionScope.validationFiles || [];
+    function rank(names, validation) {
+      const ranked = [];
+      names.forEach(function (name) {
+        const sourceRecord = sourceMap.get(name);
+        if (!sourceRecord) return;
+        const score = evidenceScore(requirementText, sourceRecord);
+        if (score >= 70) ranked.push({ name: name, score: score, validation: validation === true });
+      });
+      ranked.sort(function (a, b) { return b.score - a.score || a.name.localeCompare(b.name); });
+      return ranked.slice(0, 5);
+    }
+    return { implementationRefs: rank(implNames, false), validationRefs: rank(valNames, true) };
   }
   function classifyRequirement(sourceMatched, catalogReq, evidence) {
     if (!sourceMatched) return "SOURCE_MISMATCH";
@@ -152,7 +167,9 @@
 
   async function auditExternal010MemoText(rawText, fileName) {
     const parsed = JSON.parse(rawText);
-    const [catalog, sourceMap] = await Promise.all([fetchJson(CATALOG_URL), buildStaticEvidenceIndex()]);
+    const [catalog, scopeCatalog] = await Promise.all([fetchJson(CATALOG_URL), fetchJson(SCOPE_URL)]);
+    const sourceMap = await buildStaticEvidenceIndex(scopeCatalog);
+    const decisionScopeMap = scopeMapFromCatalog(scopeCatalog);
     const memoSha256 = await sha256Hex(rawText);
     const decisionMap = extractDecisionRecords(parsed);
     const results = [];
@@ -169,7 +186,8 @@
       const localCounts = {};
       (decisionCatalog.requirements || []).forEach(function (req) {
         const sourceMatched = sourceContainsRequirement(memoDecision, req.text);
-        const evidence = findEvidenceCandidates(req.text, sourceMap);
+        const decisionScope = decisionScopeMap.get(decisionId) || { implementationFiles: [], validationFiles: [] };
+        const evidence = findEvidenceCandidates(req.text, sourceMap, decisionScope);
         const state = classifyRequirement(sourceMatched, req, evidence);
         counts[state] = (counts[state] || 0) + 1;
         localCounts[state] = (localCounts[state] || 0) + 1;
@@ -183,7 +201,9 @@
           curatedImplementationRefs: clone(req.implementationRefs || []),
           curatedValidationRefs: clone(req.validationRefs || []),
           implementationEvidenceCandidates: evidence.implementationRefs,
-          validationEvidenceCandidates: evidence.validationRefs
+          validationEvidenceCandidates: evidence.validationRefs,
+          auditedImplementationScopeFiles: clone((decisionScopeMap.get(decisionId) || {}).implementationFiles || []),
+          auditedValidationScopeFiles: clone((decisionScopeMap.get(decisionId) || {}).validationFiles || [])
         });
       });
       decisionSummary.push({
@@ -204,6 +224,10 @@
       version: m.release.version,
       gatewayVersion: m.gateway.gatewayVersion,
       auditType: "FULL_MEMO_TRACEABILITY_AUDIT",
+      auditScopeMethod: "DECISION_SCOPED_STATIC_EVIDENCE",
+      crossDecisionCandidateSearchAllowed: false,
+      gatewaySourceIncluded: true,
+      catalogExcludedDeferredRequirementCount: Number(catalog.excludedDeferredRequirementCount || 0),
       sourceMemoFileName: text(fileName, "user-selected-memo.json"),
       sourceMemoSha256: memoSha256,
       catalogSourceMemoSha256: catalog.sourceMemoSha256 || null,
@@ -219,7 +243,7 @@
       releaseAllowedByThisAudit: false,
       projectOwnerAcceptanceRequired: true,
       staticEvidenceCandidatesArePass: false,
-      note: "EVIDENCE_CANDIDATE is a static search lead, not a PASS. Only explicit verified traceability may become VERIFIED.",
+      note: "Candidates are searched only inside files assigned to the source Decision. EVIDENCE_CANDIDATE is not a PASS; explicit implementation + validation traceability is still required.",
       decisionSummary: decisionSummary,
       requirements: results,
       auditedAt: i.nowIso(),
@@ -265,6 +289,9 @@
     userSelectedFileOnly: true,
     memoPersistencePerformed: false,
     staticEvidenceCandidatesArePass: false,
+    decisionScopedCandidateSearch: true,
+    crossDecisionCandidateSearchAllowed: false,
+    gatewaySourceIncluded: true,
     authorityGranted: false,
     loadedAt: i.nowIso()
   };

@@ -4,7 +4,7 @@
   "project": "AIプロンプト生成Pro",
   "version": "1.20.1",
   "entryFile": "index.html",
-  "savedAt": "2026-09-13T04:19:47.865821Z",
+  "savedAt": "2026-09-13T04:46:58.270066Z",
   "complete": true,
   "requestedFiles": [
     "00_core.js",
@@ -440,7 +440,9 @@
     "17_external_intelligence_console.js",
     "EXTERNAL-010_USAGE_GUIDE_1.20.1.txt",
     "EXTERNAL-010_REQUIREMENT_TRACEABILITY_1.0.0.json",
-    "EXTERNAL-010_CONFORMANCE_REPAIR_REPORT_1.20.1.json"
+    "EXTERNAL-010_CONFORMANCE_REPAIR_REPORT_1.20.1.json",
+    "EXTERNAL-010_DECISION_AUDIT_SCOPE_1.0.0.json",
+    "EXTERNAL-010_FULL_MEMO_AUDIT_ENGINE_HF4_REPORT.json"
   ],
   "savedFiles": [
     "00_core.js",
@@ -877,23 +879,25 @@
     "EXTERNAL-010_USAGE_GUIDE_1.20.1.txt",
     "EXTERNAL-010_REQUIREMENT_TRACEABILITY_1.0.0.json",
     "EXTERNAL-010_CONFORMANCE_REPAIR_REPORT_1.20.1.json",
-    "project_info.json"
+    "project_info.json",
+    "EXTERNAL-010_DECISION_AUDIT_SCOPE_1.0.0.json",
+    "EXTERNAL-010_FULL_MEMO_AUDIT_ENGINE_HF4_REPORT.json"
   ],
   "missingFiles": [],
   "externalFiles": [
     "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
   ],
-  "localFileCount": 435,
+  "localFileCount": 437,
   "externalFileCount": 1,
-  "fileCount": 436,
+  "fileCount": 438,
   "cleanIndex": true,
   "scriptManifestSource": "00_script_manifest.json",
   "scriptManifestVersion": "1.20.1",
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "6df06b42540b5d412951cc4d81c006f38f694298959ca09644a857e4098d95bc",
-  "scriptSetHash": "179e12482d61cfad8b448eedfe6e76fa12cf5f75606e270c475fc3eaa5454e5d",
+  "scriptManifestHash": "5a58763ddff093cc0157522525fd53cfe4d620841ad43456885b734a164b1eb6",
+  "scriptSetHash": "44d1d5d2c1801ba21e3431c10b10bec15657ecfdbdcd42dbad354c2314a1aca3",
   "scriptManifestCount": 401,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
@@ -903,7 +907,7 @@
     "last": "99_init.js",
     "generatedAtSave": true
   },
-  "releaseStatus": "CONFORMANCE_REPAIR_FULL_MEMO_AUDIT_CANDIDATE",
+  "releaseStatus": "CONFORMANCE_REPAIR_DECISION_SCOPED_FULL_MEMO_AUDIT_HF4_CANDIDATE",
   "releaseAllowed": false,
   "projectOwnerRevalidationRequired": true
 }
