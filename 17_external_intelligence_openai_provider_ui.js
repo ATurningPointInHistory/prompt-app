@@ -28,6 +28,7 @@
     try { if(global.localStorage)global.localStorage.setItem(STORAGE_KEY,JSON.stringify(draft)); return true; } catch(_){ return false; }
   }
   function source() { return typeof n.getExternalIntelligenceSource==="function" ? n.getExternalIntelligenceSource("SOURCE-OPENAI") : null; }
+  function operationContract() { return typeof n.getExternalIntelligenceSourceOperationContract==="function" ? n.getExternalIntelligenceSourceOperationContract("SOURCE-OPENAI","INTERNAL_ANALYSIS") : null; }
   function budgets() { return typeof n.listExternalIntelligenceResourceBudgets==="function" ? n.listExternalIntelligenceResourceBudgets().filter(b=>b&&b.state==="ACTIVE"&&String(b.currency||"").toUpperCase()==="USD"&&b.limits&&b.limits.FINANCIAL_COST) : []; }
   function secretMetadata(id) { return id&&typeof n.getExternalIntelligenceSecretMetadata==="function" ? n.getExternalIntelligenceSecretMetadata(id) : null; }
   function secretState(id) { if(!id||typeof n.validateExternalIntelligenceSecretReference!=="function")return null; return n.validateExternalIntelligenceSecretReference({secretReferenceId:id}); }
@@ -44,7 +45,7 @@
     const lim=b.limits.FINANCIAL_COST||{}; return {budgetId:b.budgetId,currency:b.currency,consumed:Number(b.consumed&&b.consumed.FINANCIAL_COST||0),softLimit:lim.softLimit==null?null:Number(lim.softLimit),hardLimit:lim.hardLimit==null?null:Number(lim.hardLimit),period:i.clone(b.period||{})};
   }
   function getOpenAIProviderUiSnapshot() {
-    const src=source(), draft=readDraft(), profiles=typeof n.listOpenAIModelPricingProfiles==="function"?n.listOpenAIModelPricingProfiles():[], activation=src&&src.paidActivationPolicy||null;
+    const src=source(), op=operationContract(), draft=readDraft(), profiles=typeof n.listOpenAIModelPricingProfiles==="function"?n.listOpenAIModelPricingProfiles():[], activation=src&&src.paidActivationPolicy||null;
     const selectedBudget=draft.budgetId||activation&&activation.budgetIds&&activation.budgetIds[0]||"";
     const selectedSecretReferenceId=src&&src.secretReferenceId||draft.secretReferenceId||defaultSecretReferenceId();
     const metadata=secretMetadata(selectedSecretReferenceId), secret=metadata?secretState(selectedSecretReferenceId):null;
@@ -52,7 +53,7 @@
     let level="YELLOW",label="準備中",reason="Provider / Secret Reference / Budget / Authority の設定を確認してください。";
     if(src&&src.lifecycleState==="ACTIVE"&&secret&&secret.ok===true&&b){level="GREEN";label="通常利用範囲";reason="承認済み範囲内は毎回の人間承認なしで利用できます。";}
     if(src&&src.lifecycleState==="ACTIVE"&&(!secret||!secret.ok||!b)){level="RED";label="実行停止推奨";reason="Active Sourceに必要なSecretまたはUSD Budgetが確認できません。";}
-    return {source:src,draft,profiles,activeUsdBudgets:budgets(),selectedBudget:b,secret:secret,secretMetadata:metadata,selectedSecretReferenceId:selectedSecretReferenceId,secretReferenceIds:secretReferenceIds(),risk:{level,label,reason},activation:activation,externalTransmission:"TEXT_TO_OPENAI",toolsEnabled:false,streamingEnabled:false,backgroundEnabled:false,secretValueInputAllowed:false,capturedAt:i.nowIso()};
+    return {source:src,operationContract:op,draft,profiles,activeUsdBudgets:budgets(),selectedBudget:b,secret:secret,secretMetadata:metadata,selectedSecretReferenceId:selectedSecretReferenceId,secretReferenceIds:secretReferenceIds(),risk:{level,label,reason},activation:activation,externalTransmission:"TEXT_TO_OPENAI",toolsEnabled:false,streamingEnabled:false,backgroundEnabled:false,secretValueInputAllowed:false,capturedAt:i.nowIso()};
   }
   function modelOptions(snapshot) {
     return '<option value="">モデルを選択</option>'+snapshot.profiles.map(function(p){const selected=snapshot.draft.model===p.model?' selected':'';return '<option value="'+esc(p.model)+'"'+selected+'>'+esc(p.model)+' — 入力 '+esc(money(p.inputPerMTokUsd))+'/MTok / 出力 '+esc(money(p.outputPerMTokUsd))+'/MTok</option>';}).join('');
@@ -64,7 +65,7 @@
     return snapshot.secretReferenceIds.map(function(id){const selected=snapshot.selectedSecretReferenceId===id?' selected':'';const m=secretMetadata(id);const status=m?String(m.status||'REGISTERED'):'Metadata未登録';return '<option value="'+esc(id)+'"'+selected+'>'+esc(id)+' — '+esc(status)+'</option>';}).join('');
   }
   function renderOpenAIProviderIntegrationPanelHtml() {
-    const x=getOpenAIProviderUiSnapshot(), src=x.source||{}, b=x.selectedBudget, activation=x.activation||{};
+    const x=getOpenAIProviderUiSnapshot(), src=x.source||{}, op=x.operationContract||null, b=x.selectedBudget, activation=x.activation||{};
     const cap=x.draft.perRequestHardCapUsd||activation.perRequestHardCapUsd||"";
     const model=x.draft.model||"未選択";
     const max=x.draft.maxOutputTokens||"未設定";
@@ -73,6 +74,7 @@
       '<div class="external-help">'+esc(x.risk.reason)+' APIキー本体はこの画面に入力しません。Gateway側のSecret Referenceだけを使用します。</div>'+
       '<div class="openai-summary-grid">'+
         '<div><span>Provider</span><strong>'+esc(src.lifecycleState||'未登録')+'</strong></div>'+
+        '<div><span>Operation</span><strong>'+esc(op?'REGISTERED':'未登録')+'</strong></div>'+
         '<div><span>Secret Reference</span><strong>'+esc(x.selectedSecretReferenceId)+' / '+esc(x.secretMetadata?x.secretMetadata.status:'未準備')+'</strong></div>'+
         '<div><span>現在モデル</span><strong>'+esc(model)+'</strong></div>'+
         '<div><span>1回上限</span><strong>'+esc(cap?money(cap):'未設定')+'</strong></div>'+
@@ -95,6 +97,10 @@
         '<button class="btn-secondary" onclick="externalOpenAIReviewSourceRegistration()">Source登録内容を確認</button>'+
         '<button class="btn-primary" onclick="externalOpenAIApproveSourceRegistration(event)"'+(src&&src.sourceId?' disabled':'')+'>Project OwnerとしてSource登録</button>'+
       '</div><div class="external-note">Source登録承認は SOURCE-OPENAI のRegistry登録だけに限定します。成功後は上部の「Provider」が REGISTERED に変わり、「現在のデータ」の Sources が 1 増えます。Paid API有効化・Budget変更・Operation Contract登録・実API通信は行いません。</div>'+
+      '<div class="external-actions openai-actions">'+
+        '<button class="btn-secondary" onclick="externalOpenAIReviewOperationContractRegistration()"'+(!src||!src.sourceId?' disabled':'')+'>Operation登録内容を確認</button>'+
+        '<button class="btn-primary" onclick="externalOpenAIApproveOperationContractRegistration(event)"'+(!src||!src.sourceId||op?' disabled':'')+'>Project OwnerとしてOperation登録</button>'+
+      '</div><div class="external-note">Operation登録承認は EXTERNAL-010-OP-OPENAI-INTERNAL-ANALYSIS のContract登録だけに限定します。成功後は上部の「Operation」が REGISTERED に変わります。Source有効化・Paid API有効化・Budget変更・実API通信は行いません。</div>'+
       '<div id="externalOpenAIImpact" class="external-note">変更前後を確認してから保存してください。保存は設定候補のみで、有料APIを自動有効化しません。</div></details>'+
       '<details class="openai-config-details"><summary>料金・利用量</summary><div class="external-boundary-grid">'+
         '<div>選択Budget<strong>'+esc(b?b.budgetId:'未選択')+'</strong></div><div>使用額<strong>'+esc(b?money(b.consumed):'—')+'</strong></div><div>Hard Limit<strong>'+esc(b?money(b.hardLimit):'—')+'</strong></div><div>1回Hard Cap<strong>'+esc(cap?money(cap):'未設定')+'</strong></div>'+
@@ -207,6 +213,51 @@
     return result;
   }
 
+  function externalOpenAIReviewOperationContractRegistration() {
+    const src=source();
+    const existing=operationContract();
+    const candidate=typeof n.buildOpenAIResponsesOperationContract==="function"?n.buildOpenAIResponsesOperationContract({}):{ok:false,code:"OPENAI_PROVIDER_MODULE_UNAVAILABLE"};
+    const ready=Boolean(src&&src.lifecycleState==="REGISTERED"&&!existing&&candidate&&candidate.ok===true&&candidate.data&&candidate.data.operationContractCandidate);
+    const result={
+      ok:ready,
+      code:existing?"EXTERNAL010_OPENAI_OPERATION_CONTRACT_ALREADY_REGISTERED":!src?"EXTERNAL010_OPENAI_SOURCE_REGISTRATION_REQUIRED":ready?"EXTERNAL010_OPENAI_OPERATION_CONTRACT_REGISTRATION_REVIEW_READY":"EXTERNAL010_OPENAI_OPERATION_CONTRACT_REGISTRATION_NOT_READY",
+      operationContractCandidate:candidate&&candidate.data&&candidate.data.operationContractCandidate||null,
+      authority:{action:"REGISTER_SOURCE_OPERATION_CONTRACT",target:{type:"source-operation",id:"EXTERNAL-010-OP-OPENAI-INTERNAL-ANALYSIS"},purpose:"phase4-operation-contract",oneTime:true},
+      effects:{operationContractRegistration:true,sourceEnablement:false,paidActivation:false,budgetMutation:false,realApiRequest:false},
+      projectOwnerApprovalRequired:!existing
+    };
+    setImpact(result);return result;
+  }
+
+  async function externalOpenAIApproveOperationContractRegistration(event) {
+    if(!event||event.isTrusted!==true){const blocked={ok:false,code:"EXTERNAL010_TRUSTED_PROJECT_OWNER_UI_INTERACTION_REQUIRED",operationContractRegistrationPerformed:false,paidActivationPerformed:false};setImpact(blocked);return blocked;}
+    const review=externalOpenAIReviewOperationContractRegistration();
+    if(!review.ok){setImpact(review);return review;}
+    const c=review.operationContractCandidate||{};
+    const message=[
+      "OpenAI Responses API Operation Contractを登録します。",
+      "",
+      "Contract: "+String(c.operationContractId||""),
+      "Operation: "+String(c.operationId||""),
+      "Method: "+String(c.method||""),
+      "Endpoint: "+String(c.endpoint&&c.endpoint.exactUrl||""),
+      "store: false 固定",
+      "Retry: 最大1回",
+      "",
+      "この承認で行うのはOperation Contract登録のみです。",
+      "Source有効化・Paid API有効化・Budget変更・実API通信は行いません。",
+      "",
+      "Project Ownerとして承認しますか？"
+    ].join("\n");
+    if(typeof global.confirm!=="function"||global.confirm(message)!==true){const cancelled={ok:false,code:"EXTERNAL010_PROJECT_OWNER_OPERATION_CONTRACT_REGISTRATION_CANCELLED",operationContractRegistrationPerformed:false,paidActivationPerformed:false};setImpact(cancelled);return cancelled;}
+    if(typeof n.registerOpenAIResponsesOperationContractWithProjectOwnerApproval!=="function"){const unavailable={ok:false,code:"EXTERNAL010_OPENAI_OPERATION_CONTRACT_REGISTRATION_GATE_UNAVAILABLE",operationContractRegistrationPerformed:false};setImpact(unavailable);return unavailable;}
+    const evidenceId="OPENAI-OPERATION-CONTRACT-OWNER-"+Date.now().toString(36).toUpperCase();
+    const result=await n.registerOpenAIResponsesOperationContractWithProjectOwnerApproval({projectOwnerConfirmed:true,ownerInteractionTrusted:true,interactionEvidenceId:evidenceId});
+    if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();
+    setImpact(result);
+    return result;
+  }
+
   function externalOpenAIShowProviderCandidates() {
     const draft=currentForm(); const src=source();
     const secretReferenceId=src&&src.secretReferenceId||draft.secretReferenceId||defaultSecretReferenceId();
@@ -217,6 +268,6 @@
     const value={sourceCandidate,operationCandidate,secretReference:{secretReferenceId:secretReferenceId,metadataRegistered:Boolean(metadata),active:Boolean(validation&&validation.ok===true),nextRequiredAction:validation&&validation.ok===true?"SOURCE_REGISTRATION_AUTHORITY":"SET_GATEWAY_SECRET_AND_REGISTER_REFERENCE_METADATA"},draft,paidActivationPerformed:false,secretValueRequested:false};setImpact(value);return value;
   }
   Object.assign(n.api,{getOpenAIProviderUiSnapshot,renderOpenAIProviderIntegrationPanelHtml});Object.assign(n,n.api);
-  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIReviewSourceRegistration,externalOpenAIApproveSourceRegistration,externalOpenAIShowProviderCandidates});
+  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIReviewSourceRegistration,externalOpenAIApproveSourceRegistration,externalOpenAIReviewOperationContractRegistration,externalOpenAIApproveOperationContractRegistration,externalOpenAIShowProviderCandidates});
   n.modules.openaiProviderUi={id:"EXTERNAL-010-OPENAI-PROVIDER-UI",version:m.getModuleVersion("openaiProviderUi")||m.release.version,status:"Loaded",decision:"055",secretValueInputAllowed:false,automaticPaidActivationAllowed:false,loadedAt:i.nowIso()};
 })(typeof window!=="undefined"?window:globalThis);

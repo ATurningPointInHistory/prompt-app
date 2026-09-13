@@ -26,6 +26,8 @@
   const DEFAULT_SECRET_REFERENCE_ID = "SECRET-OPENAI-LEGACY";
   const SOURCE_REGISTRATION_ACTION = "REGISTER_EXTERNAL_SOURCE";
   const SOURCE_REGISTRATION_PURPOSE = "openai-provider-registration";
+  const OPERATION_REGISTRATION_ACTION = "REGISTER_SOURCE_OPERATION_CONTRACT";
+  const OPERATION_REGISTRATION_PURPOSE = "phase4-operation-contract";
   const ACTIVATION_ACTION = "ACTIVATE_GOVERNED_PAID_SOURCE";
   const ACTIVATION_PURPOSE = "paid-provider-activation";
   const PRICING_SOURCE = "https://platform.openai.com/docs/models";
@@ -297,6 +299,88 @@
     return internal.buildResult(true, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_CANDIDATE_READY", "Candidate", { operationContractCandidate: candidate, registrationPerformed: false });
   }
 
+  async function registerOpenAIResponsesOperationContractWithProjectOwnerApproval(input) {
+    const settings = internal.isPlainObject(input) ? input : {};
+    const existingSource = typeof namespace.getExternalIntelligenceSource === "function" ? namespace.getExternalIntelligenceSource(SOURCE_ID) : null;
+    if (!existingSource || existingSource.lifecycleState !== "REGISTERED") {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_SOURCE_REGISTRATION_REQUIRED", "Blocked", { sourceId: SOURCE_ID, operationContractRegistrationPerformed: false, nextRequiredAction: "SOURCE_REGISTRATION_AUTHORITY" });
+    }
+    const existingOperation = typeof namespace.getExternalIntelligenceSourceOperationContract === "function" ? namespace.getExternalIntelligenceSourceOperationContract(SOURCE_ID, OPERATION_ID) : null;
+    if (existingOperation) {
+      return internal.buildResult(true, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_ALREADY_REGISTERED", "Ready", { operationContract: existingOperation, operationContractRegistrationPerformed: false, paidActivationPerformed: false, nextRequiredAction: "USD_RESOURCE_BUDGET" });
+    }
+    const candidateResult = buildOpenAIResponsesOperationContract({});
+    const candidate = candidateResult && candidateResult.data && candidateResult.data.operationContractCandidate || null;
+    if (!candidateResult || candidateResult.ok !== true || !candidate) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_CANDIDATE_NOT_READY", "Blocked", { candidate: candidateResult || null, operationContractRegistrationPerformed: false });
+    }
+    if (settings.ownerInteractionTrusted !== true || settings.projectOwnerConfirmed !== true || !internal.text(settings.interactionEvidenceId, "")) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_PROJECT_OWNER_INTERACTION_REQUIRED", "Blocked", { operationContractId: candidate.operationContractId, operationContractRegistrationPerformed: false, authorityGranted: false });
+    }
+    const required = [
+      "setExternalIntelligenceAuthorityApprovalAdapter",
+      "createExternalIntelligenceAuthorityEnvelopeCandidate",
+      "activateExternalIntelligenceAuthorityEnvelope",
+      "revokeExternalIntelligenceAuthorityEnvelope",
+      "registerExternalIntelligenceSourceOperationContract"
+    ];
+    const missing = required.filter(function (name) { return typeof namespace[name] !== "function"; });
+    if (missing.length) return internal.buildResult(false, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_AUTHORITY_API_UNAVAILABLE", "Blocked", { missing: missing, operationContractRegistrationPerformed: false });
+
+    let authorityEnvelopeId = null;
+    let authorityActivated = false;
+    const interactionEvidenceId = internal.text(settings.interactionEvidenceId, "");
+    const adapter = {
+      adapterId: "EXTERNAL-010-OPENAI-OPERATION-CONTRACT-OWNER-APPROVAL",
+      requiresExplicitOwnerInteraction: true,
+      async verifyApproval(context) {
+        const envelope = context && context.envelope || {};
+        const approval = context && context.approvalInput || {};
+        const target = envelope.target || {};
+        const exactScope = envelope.action === OPERATION_REGISTRATION_ACTION && target.type === "source-operation" && target.id === candidate.operationContractId && envelope.purpose === OPERATION_REGISTRATION_PURPOSE;
+        const explicit = approval.projectOwnerConfirmed === true && approval.ownerInteractionTrusted === true && internal.text(approval.interactionEvidenceId, "") === interactionEvidenceId;
+        return { approved: exactScope && explicit, actorType: "Project Owner", interactionEvidenceId: exactScope && explicit ? interactionEvidenceId : "" };
+      }
+    };
+
+    try {
+      const adapterResult = namespace.setExternalIntelligenceAuthorityApprovalAdapter(adapter);
+      if (!adapterResult || adapterResult.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_APPROVAL_ADAPTER_FAILED", "Blocked", { adapter: adapterResult || null, operationContractRegistrationPerformed: false });
+
+      const authorityCandidate = namespace.createExternalIntelligenceAuthorityEnvelopeCandidate({
+        action: OPERATION_REGISTRATION_ACTION,
+        target: { type: "source-operation", id: candidate.operationContractId },
+        purpose: OPERATION_REGISTRATION_PURPOSE,
+        scope: { domain: "EXTERNAL-010", operation: OPERATION_REGISTRATION_ACTION, constraints: { sourceId: SOURCE_ID, operationId: OPERATION_ID, operationContractId: candidate.operationContractId, oneTimeRegistration: true } }
+      });
+      authorityEnvelopeId = authorityCandidate && authorityCandidate.data && authorityCandidate.data.envelope && authorityCandidate.data.envelope.authorityEnvelopeId || null;
+      if (!authorityCandidate || authorityCandidate.ok !== true || !authorityEnvelopeId) return internal.buildResult(false, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_AUTHORITY_CANDIDATE_FAILED", "Blocked", { authorityCandidate: authorityCandidate || null, operationContractRegistrationPerformed: false });
+
+      const activation = await namespace.activateExternalIntelligenceAuthorityEnvelope(authorityEnvelopeId, { projectOwnerConfirmed: true, ownerInteractionTrusted: true, interactionEvidenceId: interactionEvidenceId });
+      if (!activation || activation.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_AUTHORITY_ACTIVATION_FAILED", "Blocked", { activation: activation || null, operationContractRegistrationPerformed: false });
+      authorityActivated = true;
+
+      const registration = await namespace.registerExternalIntelligenceSourceOperationContract(candidate);
+      if (!registration || registration.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_REGISTRATION_FAILED", "Blocked", { registration: registration || null, authorityEnvelopeId: authorityEnvelopeId, operationContractRegistrationPerformed: false });
+
+      return internal.buildResult(true, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_REGISTERED_WITH_PROJECT_OWNER_APPROVAL", "Ready", {
+        operationContract: registration.data && registration.data.operationContract || null,
+        authorityEnvelopeId: authorityEnvelopeId,
+        approvalEvidenceId: interactionEvidenceId,
+        operationContractRegistrationPerformed: true,
+        paidActivationPerformed: false,
+        budgetMutationPerformed: false,
+        realApiRequestPerformed: false,
+        nextRequiredAction: "USD_RESOURCE_BUDGET"
+      });
+    } finally {
+      if (authorityEnvelopeId) {
+        try { namespace.revokeExternalIntelligenceAuthorityEnvelope(authorityEnvelopeId, authorityActivated ? "One-time OpenAI Operation Contract registration completed or ended" : "OpenAI Operation Contract approval flow ended"); } catch (_) {}
+      }
+      try { namespace.setExternalIntelligenceAuthorityApprovalAdapter(null); } catch (_) {}
+    }
+  }
+
   function prepareOpenAIResponsesRequest(input) {
     const settings = internal.isPlainObject(input) ? input : {};
     const body = internal.isPlainObject(settings.body) ? internal.clone(settings.body) : {};
@@ -448,6 +532,7 @@
     buildOpenAIProviderSourceRegistration: buildOpenAIProviderSourceRegistration,
     registerOpenAIProviderSourceWithProjectOwnerApproval: registerOpenAIProviderSourceWithProjectOwnerApproval,
     buildOpenAIResponsesOperationContract: buildOpenAIResponsesOperationContract,
+    registerOpenAIResponsesOperationContractWithProjectOwnerApproval: registerOpenAIResponsesOperationContractWithProjectOwnerApproval,
     prepareOpenAIResponsesRequest: prepareOpenAIResponsesRequest,
     activateOpenAIGovernedPaidSource: activateOpenAIGovernedPaidSource,
     reconcileOpenAIResponsesUsage: reconcileOpenAIResponsesUsage,
