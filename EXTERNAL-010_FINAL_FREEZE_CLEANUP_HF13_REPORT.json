@@ -1,0 +1,156 @@
+{
+  "id": "EXTERNAL-010-FINAL-FREEZE-CLEANUP-HF13",
+  "componentId": "EXTERNAL-010",
+  "version": "1.20.1",
+  "gatewayVersion": "1.5.0",
+  "implementationPhase": "Phase 21 Final Freeze Cleanup / Cross-Platform Package Identity Candidate",
+  "status": "PC_ANDROID_REVALIDATION_REQUIRED",
+  "scope": [
+    "Repository / Package becomes explicit source of truth for cross-platform identity.",
+    "PC and Android produce separate immutable validation evidence bound to the same Package Identity.",
+    "Stale baseline and same-parent divergence are detected without silent overwrite.",
+    "Current-platform Final Gate Evidence replaces separate PC/Android work-specific UI buttons.",
+    "Historical validation labels are clarified where v1.4.0 was a minimum compatibility baseline, not the current Gateway version.",
+    "Historical v1.20.0 Final Release record is marked historical/reopened; v1.20.1 remains candidate until Project Owner approval."
+  ],
+  "packageIdentity": {
+    "componentId": "EXTERNAL-010",
+    "packageId": "AI-PROMPT-OS-EXTERNAL-010-1.20.1-e3e267679363a417",
+    "version": "1.20.1",
+    "parentVersion": "1.20.0",
+    "manifestHash": "e3e267679363a4179ec6086c6d1e9ff7c9de8a3efd87da2b66b3566f49f130c2",
+    "scriptSetHash": "170e99620ef8d1c4a4de5cfdd3a27ebb72b9d6768ffa674d48b18f30443a390c",
+    "scriptCount": 408,
+    "packageCreatedAt": "2026-09-13T12:32:30.570735Z",
+    "createdByRuntime": "BUILD_ENVIRONMENT",
+    "sourceOfTruth": "REPOSITORY_OR_VALIDATED_PACKAGE",
+    "volatileRuntimeMemoryIsCanonical": false,
+    "immutable": true
+  },
+  "staticIntegrity": {
+    "scriptCount": 408,
+    "manifestHash": "e3e267679363a4179ec6086c6d1e9ff7c9de8a3efd87da2b66b3566f49f130c2",
+    "scriptSetHash": "170e99620ef8d1c4a4de5cfdd3a27ebb72b9d6768ffa674d48b18f30443a390c",
+    "manifestIntegrityValid": true,
+    "indexManifestHashMatches": true,
+    "indexScriptSequenceMatches": true,
+    "scriptHashMismatchCount": 0,
+    "scriptByteSizeMismatchCount": 0,
+    "scriptCacheKeyMismatchCount": 0,
+    "javascriptParseErrors": 0
+  },
+  "preflight": {
+    "semantic": {
+      "id": "EXTERNAL-010-SEMANTIC-VERIFICATION-MTZSOLE7-1811",
+      "passed": 803,
+      "failed": 0,
+      "total": 803,
+      "health": 100,
+      "criticalFailed": 0,
+      "semanticConformanceGranted": true
+    },
+    "fullMemoAuditAfterSemantic": {
+      "requirementCount": 803,
+      "counts": {
+        "VERIFIED": 803,
+        "TRACEABILITY_LINKED": 0,
+        "EVIDENCE_CANDIDATE": 0,
+        "IMPLEMENTATION_CANDIDATE": 0,
+        "VALIDATION_CANDIDATE": 0,
+        "UNVERIFIED": 0,
+        "SOURCE_MISMATCH": 0
+      },
+      "traceabilityComplete": true,
+      "semanticVerificationApplied": true,
+      "semanticVerifiedRequirementCount": 803,
+      "conformanceComplete": true,
+      "hashMatch": true
+    },
+    "crossPlatformFinalGateContract": {
+      "id": "EXTERNAL-010-CROSS-PLATFORM-FINAL-GATE-VALIDATION-MTZSOLSX-1814",
+      "status": "EXTERNAL-010 Cross-Platform Final Gate Validation PASS",
+      "passed": 11,
+      "failed": 0,
+      "total": 11,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "phase21Integrated": {
+      "id": "EXTERNAL-010-PHASE21-INTEGRATED-VALIDATION-MTZSOQTU-3490",
+      "status": "EXTERNAL-010 Phase 21 Integrated Validation PASS",
+      "passed": 31,
+      "failed": 0,
+      "total": 31,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "pcBrowserLikeRuntime": {
+      "projectOwnerEvidence": false,
+      "passed": 10,
+      "failed": 0,
+      "total": 10,
+      "health": 100,
+      "criticalFailed": 0,
+      "packageIdentity": {
+        "componentId": "EXTERNAL-010",
+        "packageId": "AI-PROMPT-OS-EXTERNAL-010-1.20.1-e3e267679363a417",
+        "version": "1.20.1",
+        "parentVersion": "1.20.0",
+        "manifestHash": "e3e267679363a4179ec6086c6d1e9ff7c9de8a3efd87da2b66b3566f49f130c2",
+        "scriptSetHash": "170e99620ef8d1c4a4de5cfdd3a27ebb72b9d6768ffa674d48b18f30443a390c",
+        "scriptCount": 408,
+        "packageCreatedAt": "2026-09-13T12:32:30.570735Z",
+        "createdByRuntime": "BUILD_ENVIRONMENT",
+        "sourceOfTruth": "REPOSITORY_OR_VALIDATED_PACKAGE",
+        "volatileRuntimeMemoryIsCanonical": false,
+        "immutable": true
+      }
+    },
+    "androidBrowserLikeRuntime": {
+      "projectOwnerEvidence": false,
+      "passed": 9,
+      "failed": 0,
+      "total": 9,
+      "health": 100,
+      "criticalFailed": 0,
+      "packageIdentity": {
+        "componentId": "EXTERNAL-010",
+        "packageId": "AI-PROMPT-OS-EXTERNAL-010-1.20.1-e3e267679363a417",
+        "version": "1.20.1",
+        "parentVersion": "1.20.0",
+        "manifestHash": "e3e267679363a4179ec6086c6d1e9ff7c9de8a3efd87da2b66b3566f49f130c2",
+        "scriptSetHash": "170e99620ef8d1c4a4de5cfdd3a27ebb72b9d6768ffa674d48b18f30443a390c",
+        "scriptCount": 408,
+        "packageCreatedAt": "2026-09-13T12:32:30.570735Z",
+        "createdByRuntime": "BUILD_ENVIRONMENT",
+        "sourceOfTruth": "REPOSITORY_OR_VALIDATED_PACKAGE",
+        "volatileRuntimeMemoryIsCanonical": false,
+        "immutable": true
+      }
+    }
+  },
+  "projectOwnerRevalidationRequired": {
+    "semanticOnHF13": true,
+    "pcFinalGateEvidence": true,
+    "androidFinalGateEvidence": true,
+    "samePackageIdentityRequired": true,
+    "finalApprovalRequired": true
+  },
+  "deferredToAndroidRuntime001": [
+    "Android local APK/WebView runtime",
+    "AI Prompt OS package import/apply",
+    "Android editing/build/export",
+    "PC/Android package transport",
+    "Merge UI/conflict editor",
+    "automatic synchronization"
+  ],
+  "authority": {
+    "finalReleaseAllowed": false,
+    "approvalGranted": false,
+    "releaseAuthorityGranted": false,
+    "automaticMergePerformed": false,
+    "automaticRepositoryMutation": false
+  },
+  "createdAt": "2026-09-13T12:34:35.310745Z",
+  "immutable": true
+}

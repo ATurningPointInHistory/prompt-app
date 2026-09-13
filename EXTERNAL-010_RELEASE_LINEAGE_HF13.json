@@ -1,0 +1,27 @@
+{
+  "id": "EXTERNAL-010-RELEASE-LINEAGE-HF13",
+  "componentId": "EXTERNAL-010",
+  "currentCandidateVersion": "1.20.1",
+  "gatewayVersion": "1.5.0",
+  "canonicalRoadmapId": "EXTERNAL-010-IMPLEMENTATION-ROADMAP-2.1.0",
+  "canonicalDecisionRange": "EXTERNAL-010-DECISION-001..054",
+  "canonicalDecisionCount": 54,
+  "historicalRelease": {
+    "version": "1.20.0",
+    "formerStatus": "FINAL_RELEASE / PC_ANDROID_READY",
+    "formerProjectOwnerApproved": true,
+    "currentUse": "HISTORICAL_ONLY",
+    "reopenedReason": "Detailed Initial Implementation Scope audit found that Decision-level coverage did not prove all 803 detailed requirements.",
+    "supersessionState": "REVALIDATION_OPENED_BY_1.20.1_CONFORMANCE_REPAIR"
+  },
+  "currentCandidate": {
+    "version": "1.20.1",
+    "status": "FINAL_FREEZE_CANDIDATE",
+    "finalReleaseAllowed": false,
+    "projectOwnerAcceptanceRequired": true,
+    "automaticAcceptancePerformed": false
+  },
+  "rule": "The historical v1.20.0 Final Release record must not be treated as the current canonical final state after the conformance audit was reopened.",
+  "createdAt": "2026-09-13T12:34:35.310745Z",
+  "immutable": true
+}

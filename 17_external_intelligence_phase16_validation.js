@@ -18,9 +18,9 @@
     function add(name, passed, detail, group, severity) { checks.push({ name: name, passed: passed === true, detail: detail == null ? "" : (typeof detail === "string" ? detail : internal.stableStringify(detail)), group: group || "Phase 16", severity: severity || "Critical" }); }
 
     add("Release is Phase 16 v1.15.0 compatible", VERSION_MANIFEST.isReleaseCompatibleFrom("1.15.0"), VERSION_MANIFEST.release.version, "Foundation");
-    add("Implementation Phase is Phase 16", VERSION_MANIFEST.release.phase >= 16, VERSION_MANIFEST.release.implementationPhase, "Foundation");
+    add("Implementation Phase is Phase 16 or later compatible", VERSION_MANIFEST.release.phase >= 16, VERSION_MANIFEST.release.implementationPhase, "Foundation");
     add("Phase 16 primary Decisions are 045 / 046", namespace.modules.monitoringWatch.decisions.includes("045") && namespace.modules.notificationGovernance.decisions.includes("046"), { monitoring: namespace.modules.monitoringWatch, notification: namespace.modules.notificationGovernance }, "Foundation");
-    add("Gateway remains unchanged at 1.4.0", VERSION_MANIFEST.isGatewayCompatibleFrom("1.4.0"), VERSION_MANIFEST.gateway.gatewayVersion, "Boundary");
+    add("Gateway remains compatible with Phase baseline (minimum v1.4.0)", VERSION_MANIFEST.isGatewayCompatibleFrom("1.4.0"), VERSION_MANIFEST.gateway.gatewayVersion, "Boundary");
     add("Phase 15 is marked complete and Phase 16 is allowed", VERSION_MANIFEST.implementation.phase15Complete === true && VERSION_MANIFEST.implementation.phase16Allowed === true, VERSION_MANIFEST.implementation, "Progression");
 
     const phase15 = await namespace.runExternalIntelligencePhase15Validation();

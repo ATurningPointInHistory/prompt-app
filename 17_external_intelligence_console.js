@@ -148,6 +148,7 @@
     const p21 = snapshot.latestPhase21Validation;
     const p21pc = snapshot.latestPhase21PcRealRuntimeValidation;
     const p21android = snapshot.latestPhase21AndroidValidation;
+    const platformEvidence = s.latestCrossPlatformPlatformEvidence || null;
     const latestAudit = s.latestFullMemoAudit || null;
     const semantic = s.latestSemanticVerification || null;
 
@@ -179,10 +180,10 @@
           '<div class="external-actions" style="margin-top:10px">' +
             '<button class="btn-secondary" onclick="externalConsoleRunSemanticVerification()"' + (latestAudit && latestAudit.traceabilityComplete === true && latestAudit.exactCatalogMemoHashMatch === true ? '' : ' disabled') + '>Semantic Verification' + (semantic ? ' [' + esc((semantic.verifiedRequirementCount || 0) + '/803') + ']' : '') + '</button>' +
             '<button class="btn-secondary" onclick="externalConsoleRunPhase21()">統合検証 (Phase 21)' + (p21 ? ' [' + esc(p21.failed === 0 ? "PASS" : "FAIL") + ']' : '') + '</button>' +
-            '<button class="btn-secondary" onclick="externalConsoleRunAndroidRealDevice()">Android Real Device Gate' + (p21android ? ' [' + esc(p21android.failed === 0 ? "PASS" : "FAIL") + ']' : '') + '</button>' +
+            '<button class="btn-secondary" onclick="externalConsoleRunCurrentRuntimeFinalGate()">Final Gate Evidence (この端末)' + (platformEvidence ? ' [' + esc((platformEvidence.platform || "?") + ' ' + (platformEvidence.validationPassed ? "PASS" : "FAIL")) + ']' : '') + '</button>' +
             '<button class="btn-secondary" onclick="externalConsoleDownloadFullMemoAudit()"' + (latestAudit ? '' : ' disabled') + '>Audit JSON保存</button>' +
           '</div>' +
-          '<div class="external-help">完了済みの Repair 45 / Gap Repair 34 / Validation Coverage 65 / Traceability 704 / PC Real Runtime Gate は作業専用のため非表示です。Semantic Verificationは再読込後の再証明用です。Android Real Device GateはAndroid実機確認用で、Gatewayや有料APIを必要としません。</div>' +
+          '<div class="external-help">完了済みの Repair 45 / Gap Repair 34 / Validation Coverage 65 / Traceability 704 の個別ボタンは非表示です。Semantic Verificationは再読込後の再証明用です。Final Gate EvidenceはPC/Androidの現在端末に対応する正式validatorを自動選択し、同じPackage Identityへ結び付けます。端末メモリ自体はSoTにしません。</div>' +
         '</details>' +
       '</section>' +
 
@@ -389,10 +390,10 @@
     });
   }
 
-  function externalConsoleRunAndroidRealDevice() {
-    return withBusy("Android Real Device Gate", async function () {
-      if (typeof n.runExternalIntelligencePhase21AndroidValidation !== "function") return { ok: false, code: "PHASE21_ANDROID_REAL_DEVICE_VALIDATION_UNAVAILABLE" };
-      return n.runExternalIntelligencePhase21AndroidValidation();
+  function externalConsoleRunCurrentRuntimeFinalGate() {
+    return withBusy("Final Gate Evidence (この端末)", async function () {
+      if (typeof n.runExternalIntelligenceCurrentRuntimeFinalGateEvidence !== "function") return { ok:false, code:"CROSS_PLATFORM_FINAL_GATE_UNAVAILABLE" };
+      return n.runExternalIntelligenceCurrentRuntimeFinalGateEvidence();
     });
   }
 
@@ -453,7 +454,7 @@
     externalConsoleDownloadFullMemoAudit: externalConsoleDownloadFullMemoAudit,
     externalConsoleRunSemanticVerification: externalConsoleRunSemanticVerification,
     externalConsoleRunPhase21: externalConsoleRunPhase21,
-    externalConsoleRunAndroidRealDevice: externalConsoleRunAndroidRealDevice,
+    externalConsoleRunCurrentRuntimeFinalGate: externalConsoleRunCurrentRuntimeFinalGate,
     externalConsoleRefresh: externalConsoleRefresh,
     externalConsoleCopyStatus: externalConsoleCopyStatus
   });

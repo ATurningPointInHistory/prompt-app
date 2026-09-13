@@ -37,9 +37,9 @@
     };
 
     add("Release is Phase 18 v1.17.1 compatible", VM.isReleaseCompatibleFrom("1.17.1"), VM.release.version, "Foundation");
-    add("Implementation Phase is Phase 18", VM.release.phase >= 18, VM.release.implementationPhase, "Foundation");
+    add("Implementation Phase is Phase 18 or later compatible", VM.release.phase >= 18, VM.release.implementationPhase, "Foundation");
     add("Primary Decision is 048", namespace.modules.marketFusion && namespace.modules.marketFusion.decisions.includes("048"), namespace.modules.marketFusion, "Foundation");
-    add("Gateway remains unchanged at 1.4.0", VM.isGatewayCompatibleFrom("1.4.0"), VM.gateway.gatewayVersion, "Boundary");
+    add("Gateway remains compatible with Phase baseline (minimum v1.4.0)", VM.isGatewayCompatibleFrom("1.4.0"), VM.gateway.gatewayVersion, "Boundary");
 
     const contractKeys = ["crossDomainMarketSignal", "compositeMarketHypothesis", "marketFusionPredictionCandidate", "marketFusionPackage", "marketFusionOutcomeEvaluation"];
     add("Phase 18 contracts are registered", contractKeys.every(function exists(key) { return !!namespace.getExternalIntelligenceContract(key); }), contractKeys, "Contract");

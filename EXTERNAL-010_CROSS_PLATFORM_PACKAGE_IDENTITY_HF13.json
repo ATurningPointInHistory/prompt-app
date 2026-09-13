@@ -1,0 +1,33 @@
+{
+  "id": "EXTERNAL-010-CROSS-PLATFORM-PACKAGE-IDENTITY-HF13",
+  "componentId": "EXTERNAL-010",
+  "version": "1.20.1",
+  "status": "FINAL_FREEZE_CANDIDATE",
+  "packageIdentity": {
+    "componentId": "EXTERNAL-010",
+    "packageId": "AI-PROMPT-OS-EXTERNAL-010-1.20.1-e3e267679363a417",
+    "version": "1.20.1",
+    "parentVersion": "1.20.0",
+    "manifestHash": "e3e267679363a4179ec6086c6d1e9ff7c9de8a3efd87da2b66b3566f49f130c2",
+    "scriptSetHash": "170e99620ef8d1c4a4de5cfdd3a27ebb72b9d6768ffa674d48b18f30443a390c",
+    "scriptCount": 408,
+    "packageCreatedAt": "2026-09-13T12:32:30.570735Z",
+    "createdByRuntime": "BUILD_ENVIRONMENT",
+    "sourceOfTruth": "REPOSITORY_OR_VALIDATED_PACKAGE",
+    "volatileRuntimeMemoryIsCanonical": false,
+    "immutable": true
+  },
+  "architecture": {
+    "sourceOfTruth": "REPOSITORY_OR_VALIDATED_PACKAGE",
+    "pcRole": "HEAVY_DEVELOPMENT_RUNTIME",
+    "androidRole": "EXECUTION_AND_FUTURE_LIGHTWEIGHT_DEVELOPMENT_RUNTIME",
+    "pcIsCanonicalMaster": false,
+    "androidIsExecutionOnly": false,
+    "volatileRuntimeMemoryCanonical": false,
+    "crossRuntimeTransferModel": "IMMUTABLE_VALIDATION_EVIDENCE_PLUS_PACKAGE_EXCHANGE",
+    "silentOverwriteAllowed": false,
+    "automaticMergeAllowed": false
+  },
+  "createdAt": "2026-09-13T12:34:35.310745Z",
+  "immutable": true
+}
