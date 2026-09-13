@@ -89,6 +89,7 @@
       '</div><div class="external-actions openai-actions">'+
         '<button class="btn-secondary" onclick="externalOpenAIPreviewConfiguration()">変更の影響を確認</button>'+
         '<button class="btn-secondary" onclick="externalOpenAISaveDraft()">設定候補を保存</button>'+
+        '<button class="btn-secondary" onclick="externalOpenAIPrepareSecretReference()">Secret準備確認</button>'+
         '<button class="btn-secondary" onclick="externalOpenAIShowProviderCandidates()">Provider候補を確認</button>'+
       '</div><div id="externalOpenAIImpact" class="external-note">変更前後を確認してから保存してください。保存は設定候補のみで、有料APIを自動有効化しません。</div></details>'+
       '<details class="openai-config-details"><summary>料金・利用量</summary><div class="external-boundary-grid">'+
@@ -134,6 +135,22 @@
     setImpact(result);
     return ok;
   }
+  async function externalOpenAIPrepareSecretReference() {
+    const draft=currentForm();
+    const src=source();
+    const secretReferenceId=src&&src.secretReferenceId||draft.secretReferenceId||defaultSecretReferenceId();
+    if(!secretReferenceId){const result={ok:false,code:"EXTERNAL010_OPENAI_SECRET_REFERENCE_REQUIRED",secretValueRequested:false};setImpact(result);return result;}
+    if(typeof n.getExternalIntelligenceGatewaySecretMetadataStatus!=="function"){const result={ok:false,code:"EXTERNAL010_GATEWAY_SECRET_STATUS_UNAVAILABLE",secretReferenceId,secretValueRequested:false};setImpact(result);return result;}
+    const gatewayStatus=await n.getExternalIntelligenceGatewaySecretMetadataStatus({secretReferenceId:secretReferenceId,secretType:"BEARER_TOKEN"});
+    if(!gatewayStatus||gatewayStatus.ok!==true){const result={ok:false,code:gatewayStatus&&gatewayStatus.code||"EXTERNAL010_OPENAI_GATEWAY_SECRET_NOT_READY",secretReferenceId,gatewayStatus:gatewayStatus||null,metadataRegistrationPerformed:false,secretValueRequested:false,nextRequiredAction:"SET_GATEWAY_SECRET_ENVIRONMENT_AND_RESTART_GATEWAY"};setImpact(result);if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();return result;}
+    if(typeof n.registerExternalIntelligenceSecretMetadata!=="function"){const result={ok:false,code:"EXTERNAL010_SECRET_METADATA_REGISTRY_UNAVAILABLE",secretReferenceId,gatewayStatus,metadataRegistrationPerformed:false,secretValueRequested:false};setImpact(result);return result;}
+    const registered=n.registerExternalIntelligenceSecretMetadata({secretReferenceId:secretReferenceId,secretType:"BEARER_TOKEN",provider:"OPENAI",status:"ACTIVE"});
+    const result={ok:Boolean(registered&&registered.ok===true),code:registered&&registered.code||"EXTERNAL010_OPENAI_SECRET_METADATA_REGISTRATION_FAILED",secretReferenceId,gatewayStatus,metadata:registered&&registered.data&&registered.data.secretMetadata||null,metadataRegistrationPerformed:Boolean(registered&&registered.ok===true),secretValueStored:false,secretValueRequested:false,nextRequiredAction:registered&&registered.ok===true?"SOURCE_REGISTRATION_AUTHORITY":"REVIEW_SECRET_METADATA_REGISTRATION"};
+    if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();
+    setImpact(result);
+    return result;
+  }
+
   function externalOpenAIShowProviderCandidates() {
     const draft=currentForm(); const src=source();
     const secretReferenceId=src&&src.secretReferenceId||draft.secretReferenceId||defaultSecretReferenceId();
@@ -144,6 +161,6 @@
     const value={sourceCandidate,operationCandidate,secretReference:{secretReferenceId:secretReferenceId,metadataRegistered:Boolean(metadata),active:Boolean(validation&&validation.ok===true),nextRequiredAction:validation&&validation.ok===true?"SOURCE_REGISTRATION_AUTHORITY":"SET_GATEWAY_SECRET_AND_REGISTER_REFERENCE_METADATA"},draft,paidActivationPerformed:false,secretValueRequested:false};setImpact(value);return value;
   }
   Object.assign(n.api,{getOpenAIProviderUiSnapshot,renderOpenAIProviderIntegrationPanelHtml});Object.assign(n,n.api);
-  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIShowProviderCandidates});
+  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIShowProviderCandidates});
   n.modules.openaiProviderUi={id:"EXTERNAL-010-OPENAI-PROVIDER-UI",version:m.getModuleVersion("openaiProviderUi")||m.release.version,status:"Loaded",decision:"055",secretValueInputAllowed:false,automaticPaidActivationAllowed:false,loadedAt:i.nowIso()};
 })(typeof window!=="undefined"?window:globalThis);
