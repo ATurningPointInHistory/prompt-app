@@ -121,16 +121,42 @@
     }
 
     const elapsed = Date.now() - startedAt;
+    let usageReconciliation = null;
     if (request.budgetIds.length && typeof namespace.recordExternalIntelligenceResourceUsage === "function") {
       const bytes = finalResponse && finalResponse.responseMetadata && Number(finalResponse.responseMetadata.responseSize) || 0;
-      await namespace.recordExternalIntelligenceResourceUsage({ budgetIds: request.budgetIds, sourceId: request.sourceId, operationId: request.operationId, goalId: request.researchGoalId, planId: request.acquisitionPlanId, estimatedUsage: internal.getExternalIntelligenceSourceOperationContract(request.sourceId, request.operationId).estimatedUsage, actualUsage: { REQUEST_COUNT: attempts, NETWORK_BYTES: bytes, PROCESSING_TIME: elapsed } });
+      const operationContract = internal.getExternalIntelligenceSourceOperationContract(request.sourceId, request.operationId);
+      const estimatedUsage = request.estimatedUsage && Object.keys(request.estimatedUsage).length ? internal.clone(request.estimatedUsage) : internal.clone(operationContract && operationContract.estimatedUsage || {});
+      const sourceSnapshot = state.sourceRegistry.get(request.sourceId);
+      const paid = Boolean(sourceSnapshot && sourceSnapshot.pricingMode !== "FREE");
+      const actualUsage = { REQUEST_COUNT: attempts, NETWORK_BYTES: bytes, PROCESSING_TIME: elapsed };
+      let reconciled = true;
+      let reconciliationState = paid ? "PROVIDER_USAGE_RECONCILED" : "NOT_APPLICABLE";
+      let providerReconciliation = null;
+      if (paid && typeof namespace.reconcileExternalIntelligenceProviderUsage === "function" && finalResponse) {
+        providerReconciliation = namespace.reconcileExternalIntelligenceProviderUsage({ sourceId: request.sourceId, operationId: request.operationId, payload: finalResponse.payload, model: request.body && request.body.model, estimatedUsage: estimatedUsage });
+        if (providerReconciliation && providerReconciliation.ok === true && providerReconciliation.data && providerReconciliation.data.actualUsage) {
+          Object.assign(actualUsage, internal.clone(providerReconciliation.data.actualUsage));
+        } else {
+          reconciled = false;
+          reconciliationState = "AMBIGUOUS_ESTIMATE_RESERVED";
+          if (Number.isFinite(Number(estimatedUsage.FINANCIAL_COST))) actualUsage.FINANCIAL_COST = Number(estimatedUsage.FINANCIAL_COST);
+          if (Number.isFinite(Number(estimatedUsage.AI_TOKEN_USAGE))) actualUsage.AI_TOKEN_USAGE = Number(estimatedUsage.AI_TOKEN_USAGE);
+        }
+      } else if (paid) {
+        reconciled = false;
+        reconciliationState = attempts > 0 ? "AMBIGUOUS_ESTIMATE_RESERVED" : "NOT_EXECUTED";
+        if (attempts > 0 && Number.isFinite(Number(estimatedUsage.FINANCIAL_COST))) actualUsage.FINANCIAL_COST = Number(estimatedUsage.FINANCIAL_COST);
+        if (attempts > 0 && Number.isFinite(Number(estimatedUsage.AI_TOKEN_USAGE))) actualUsage.AI_TOKEN_USAGE = Number(estimatedUsage.AI_TOKEN_USAGE);
+      }
+      const usageRecordResult = await namespace.recordExternalIntelligenceResourceUsage({ budgetIds: request.budgetIds, sourceId: request.sourceId, operationId: request.operationId, goalId: request.researchGoalId, planId: request.acquisitionPlanId, estimatedUsage: estimatedUsage, actualUsage: actualUsage, reconciled: reconciled, reconciliationState: reconciliationState });
+      usageReconciliation = { reconciled: reconciled, reconciliationState: reconciliationState, providerReconciliation: providerReconciliation, usageRecordResult: usageRecordResult, ambiguousPaidCostAssumedZero: false };
     }
     if (finalResponse) {
       if (typeof namespace.appendExternalIntelligenceAuditEvent === "function") await namespace.appendExternalIntelligenceAuditEvent({ eventType: "EXTERNAL_ACQUISITION_COMPLETED", actor: "Acquisition Execution Layer", outcome: "Completed", details: { requestId: request.requestId, responseId: finalResponse.responseId, attemptCount: attempts, knowledgePromotionPerformed: false, canonicalRepositoryMutationPerformed: false } });
-      return internal.buildResult(true, "EXTERNAL010_ACQUISITION_COMPLETED", "Completed", { requestId: request.requestId, response: finalResponse, attempts: namespace.getExternalIntelligenceAcquisitionAttempts(request.requestId), attemptCount: attempts, knowledgePromotionPerformed: false, canonicalRepositoryMutationPerformed: false });
+      return internal.buildResult(true, "EXTERNAL010_ACQUISITION_COMPLETED", "Completed", { requestId: request.requestId, response: finalResponse, attempts: namespace.getExternalIntelligenceAcquisitionAttempts(request.requestId), attemptCount: attempts, usageReconciliation: usageReconciliation, knowledgePromotionPerformed: false, canonicalRepositoryMutationPerformed: false });
     }
     if (typeof namespace.appendExternalIntelligenceAuditEvent === "function") await namespace.appendExternalIntelligenceAuditEvent({ eventType: "EXTERNAL_ACQUISITION_FAILED", actor: "Acquisition Execution Layer", outcome: "Failed", details: { requestId: request.requestId, errorId: finalError && finalError.errorId || null, attemptCount: attempts } });
-    return internal.buildResult(false, "EXTERNAL010_ACQUISITION_FAILED", "Failed", { requestId: request.requestId, error: finalError, attempts: namespace.getExternalIntelligenceAcquisitionAttempts(request.requestId), attemptCount: attempts });
+    return internal.buildResult(false, "EXTERNAL010_ACQUISITION_FAILED", "Failed", { requestId: request.requestId, error: finalError, attempts: namespace.getExternalIntelligenceAcquisitionAttempts(request.requestId), attemptCount: attempts, usageReconciliation: usageReconciliation });
   }
 
   async function enqueueExternalIntelligenceAcquisition(input) {

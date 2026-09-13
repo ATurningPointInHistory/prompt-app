@@ -4,10 +4,10 @@
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "EXTERNAL-010 v1.20.1 baseline + OpenAI API Integration Phase 1 POST JSON Candidate; not final release, no paid source auto-activation",
+  "description": "EXTERNAL-010 v1.20.1 + implemented OpenAI API Integration Phase 1 + Phase 2 Provider Governance / Cost-Risk UI Candidate; Decision 055 Accepted/Frozen; no live paid request performed",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-13T15:23:21.598037Z",
+  "updatedAt": "2026-09-14T01:15:00+09:00",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -289,23 +289,25 @@
     "./16_validation_engine.js?h=105c13151958",
     "./15_reasoning_engine.js?h=cf1ed1305563",
     "./16_workflow_engine.js?h=17dedd927e7f",
-    "./17_external_intelligence_version_manifest.js?h=87ac47dfe3bb",
+    "./17_external_intelligence_version_manifest.js?h=9a188124ff1d",
     "./17_external_intelligence_core.js?h=98a01a5c9af5",
-    "./17_external_intelligence_contracts.js?h=5eb73cc2dbef",
-    "./17_external_intelligence_schema_registry.js?h=8ca4ee9dff9a",
+    "./17_external_intelligence_contracts.js?h=1b09365994c6",
+    "./17_external_intelligence_schema_registry.js?h=4cbaaa8e9b16",
     "./17_external_intelligence_authority.js?h=102149846b07",
     "./17_external_intelligence_audit.js?h=d49c451cbb92",
     "./17_external_intelligence_runtime_coordination.js?h=b42665428345",
     "./17_external_intelligence_software_supply_chain.js?h=d728b9870535",
     "./17_external_intelligence_gateway_client.js?h=c425471482a7",
-    "./17_external_intelligence_source_registry.js?h=7e2f8c341d7b",
+    "./17_external_intelligence_source_registry.js?h=428b17a76bc2",
     "./17_external_intelligence_source_discovery.js?h=86316b1672d5",
-    "./17_external_intelligence_resource_budget.js?h=2926bc99492c",
+    "./17_external_intelligence_resource_budget.js?h=7c9fdb477feb",
     "./17_external_intelligence_usage_policy.js?h=a7c79a51e583",
-    "./17_external_intelligence_acquisition_contract.js?h=bd896e4d48f1",
+    "./17_external_intelligence_acquisition_contract.js?h=7f813c1dd35e",
     "./17_external_intelligence_adapter_registry.js?h=8211e5421e29",
     "./17_external_intelligence_source_router.js?h=fb1eef1a3d35",
-    "./17_external_intelligence_acquisition_queue.js?h=4236cc0b1342",
+    "./17_external_intelligence_acquisition_queue.js?h=8d1954f4953a",
+    "./17_external_intelligence_openai_provider_integration.js?h=57586789b692",
+    "./17_external_intelligence_openai_provider_ui.js?h=81e81a300b31",
     "./17_external_intelligence_phase1_validation.js?h=d86cc1417555",
     "./17_external_intelligence_phase2_validation.js?h=00a0fe59ccd5",
     "./17_external_intelligence_phase3_validation.js?h=839f83963595",
@@ -415,7 +417,7 @@
     "./17_external_intelligence_traceability_coverage.js?h=6fb9cffb1188",
     "./17_external_intelligence_semantic_verification.js?h=ff515c2efdce",
     "./17_external_intelligence_full_memo_audit.js?h=00a0da1f24f3",
-    "./17_external_intelligence_console.js?h=e19ad0cfbb3b",
+    "./17_external_intelligence_console.js?h=e4fb607d01fe",
     "./99_init.js?h=de0ce6495428"
   ],
   "hashes": {
@@ -1820,9 +1822,9 @@
       "cacheKey": "17dedd927e7f"
     },
     "17_external_intelligence_version_manifest.js": {
-      "sha256": "87ac47dfe3bbad7326055d34d82f2f007d74fc63c56333db673083bb7cfbaa27",
-      "byteSize": 77304,
-      "cacheKey": "87ac47dfe3bb"
+      "sha256": "9a188124ff1d099966fb40e6307a56828a511c6c9b1606f784a7cf42f43fc379",
+      "byteSize": 77703,
+      "cacheKey": "9a188124ff1d"
     },
     "17_external_intelligence_core.js": {
       "sha256": "98a01a5c9af5068208840c6d8dc434987d33a4153ba0c16a48efa8bc07c52838",
@@ -1830,14 +1832,14 @@
       "cacheKey": "98a01a5c9af5"
     },
     "17_external_intelligence_contracts.js": {
-      "sha256": "5eb73cc2dbefdffee42b14c85ef6666e2017124dff9742449dbe9aa055d63abb",
-      "byteSize": 159537,
-      "cacheKey": "5eb73cc2dbef"
+      "sha256": "1b09365994c6cb3ba3909f8e09e7eb509820ed083b13780284ee8bc380038968",
+      "byteSize": 159681,
+      "cacheKey": "1b09365994c6"
     },
     "17_external_intelligence_schema_registry.js": {
-      "sha256": "8ca4ee9dff9a1210dcdfedf0e256d87903ab323e840a693a47bc8667e11158f7",
-      "byteSize": 129999,
-      "cacheKey": "8ca4ee9dff9a"
+      "sha256": "4cbaaa8e9b16a9cc58afdaa569d20374eead3a2153dfbfe92ab8fe31d75f4083",
+      "byteSize": 130094,
+      "cacheKey": "4cbaaa8e9b16"
     },
     "17_external_intelligence_authority.js": {
       "sha256": "102149846b0784e50b315e7a8975b6698d9852a8f92c2e42a8c3bba07bf83814",
@@ -1865,9 +1867,9 @@
       "cacheKey": "c425471482a7"
     },
     "17_external_intelligence_source_registry.js": {
-      "sha256": "7e2f8c341d7ba897447be6dd120f7258671f73f7c0114fc02b19db4acc3dfc77",
-      "byteSize": 22408,
-      "cacheKey": "7e2f8c341d7b"
+      "sha256": "428b17a76bc2529a4dbce58aee9f19765b52d7a3d71f45c5c85244a5de1e76df",
+      "byteSize": 23286,
+      "cacheKey": "428b17a76bc2"
     },
     "17_external_intelligence_source_discovery.js": {
       "sha256": "86316b1672d559761d4f4c6c078f5cb8612d4632683ebe35eda2685e5d18a67a",
@@ -1875,9 +1877,9 @@
       "cacheKey": "86316b1672d5"
     },
     "17_external_intelligence_resource_budget.js": {
-      "sha256": "2926bc99492c59f57dd7b17487615ce0b16b9e5f3eba47e056f8ee81b37a58d7",
-      "byteSize": 21291,
-      "cacheKey": "2926bc99492c"
+      "sha256": "7c9fdb477feb01f751db980086b4420b3e266769c4382797d92867a72340bb6a",
+      "byteSize": 21557,
+      "cacheKey": "7c9fdb477feb"
     },
     "17_external_intelligence_usage_policy.js": {
       "sha256": "a7c79a51e5832949f301edf87e2d7883a4f83dd854eaf7a3885f3ff6af89b6e6",
@@ -1885,9 +1887,9 @@
       "cacheKey": "a7c79a51e583"
     },
     "17_external_intelligence_acquisition_contract.js": {
-      "sha256": "bd896e4d48f137b721cba35e3aa27de46b4588e96c4ae8937090321d6eac961c",
-      "byteSize": 28837,
-      "cacheKey": "bd896e4d48f1"
+      "sha256": "7f813c1dd35e2c98a1b5569b1bdfbcf4d795d658a86a912b93888e311d3596e6",
+      "byteSize": 29741,
+      "cacheKey": "7f813c1dd35e"
     },
     "17_external_intelligence_adapter_registry.js": {
       "sha256": "8211e5421e293b16df8e8f467c9c62a164416903cc45535ae9af403f7de1ef11",
@@ -1900,9 +1902,9 @@
       "cacheKey": "fb1eef1a3d35"
     },
     "17_external_intelligence_acquisition_queue.js": {
-      "sha256": "4236cc0b1342086eedc1e98bd36aac7dcbda3a93c2544e85b865689d8230effc",
-      "byteSize": 23849,
-      "cacheKey": "4236cc0b1342"
+      "sha256": "8d1954f4953aa7f7d6114a20647a4adc88931ab1503c7ae00963556e3dc8dd05",
+      "byteSize": 26359,
+      "cacheKey": "8d1954f4953a"
     },
     "17_external_intelligence_phase1_validation.js": {
       "sha256": "d86cc141755579727e1c532b0c38d534a0f0870a635c2e5cb7714d7352a056c8",
@@ -2450,17 +2452,27 @@
       "cacheKey": "00a0da1f24f3"
     },
     "17_external_intelligence_console.js": {
-      "sha256": "e19ad0cfbb3b1f1cf4c2bceb8a059e4dd9ab7eadf92c2baef85eb40b27ba6993",
-      "byteSize": 25824,
-      "cacheKey": "e19ad0cfbb3b"
+      "sha256": "e4fb607d01fedffc5dcca450da902271b91ff6fca888a2ed7e50f69e8f645c66",
+      "byteSize": 25952,
+      "cacheKey": "e4fb607d01fe"
     },
     "99_init.js": {
       "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
       "byteSize": 4742,
       "cacheKey": "de0ce6495428"
+    },
+    "17_external_intelligence_openai_provider_integration.js": {
+      "sha256": "57586789b692321d49011ec33355916859560d4d97a66a5b4d682bc3297c5097",
+      "byteSize": 24112,
+      "cacheKey": "57586789b692"
+    },
+    "17_external_intelligence_openai_provider_ui.js": {
+      "sha256": "81e81a300b31ce57656832c4a83cd13cd6ad78edc5e8d8c95c4b5dde028d0f8b",
+      "byteSize": 13728,
+      "cacheKey": "81e81a300b31"
     }
   },
-  "scriptSetHash": "cdfbd8f1d64a1a4f7c732ba1daaa13e34b986b5751353a1ef96ed3bdbbe51f89",
+  "scriptSetHash": "d18eb69efdc4b7628fe4d80f76d6db8403b04f1e777cc395fae160e77ce63129",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -3863,9 +3875,9 @@
       "cacheKey": "17dedd927e7f"
     },
     "17_external_intelligence_version_manifest.js": {
-      "sha256": "5091df1a684d583086db808eb7b7c683fc82965c9416444c2b5c770d752f9cab",
-      "byteSize": 76982,
-      "cacheKey": "5091df1a684d"
+      "sha256": "9a188124ff1d099966fb40e6307a56828a511c6c9b1606f784a7cf42f43fc379",
+      "byteSize": 77703,
+      "cacheKey": "9a188124ff1d"
     },
     "17_external_intelligence_core.js": {
       "sha256": "98a01a5c9af5068208840c6d8dc434987d33a4153ba0c16a48efa8bc07c52838",
@@ -3873,14 +3885,14 @@
       "cacheKey": "98a01a5c9af5"
     },
     "17_external_intelligence_contracts.js": {
-      "sha256": "5eb73cc2dbefdffee42b14c85ef6666e2017124dff9742449dbe9aa055d63abb",
-      "byteSize": 159537,
-      "cacheKey": "5eb73cc2dbef"
+      "sha256": "1b09365994c6cb3ba3909f8e09e7eb509820ed083b13780284ee8bc380038968",
+      "byteSize": 159681,
+      "cacheKey": "1b09365994c6"
     },
     "17_external_intelligence_schema_registry.js": {
-      "sha256": "8ca4ee9dff9a1210dcdfedf0e256d87903ab323e840a693a47bc8667e11158f7",
-      "byteSize": 129999,
-      "cacheKey": "8ca4ee9dff9a"
+      "sha256": "4cbaaa8e9b16a9cc58afdaa569d20374eead3a2153dfbfe92ab8fe31d75f4083",
+      "byteSize": 130094,
+      "cacheKey": "4cbaaa8e9b16"
     },
     "17_external_intelligence_authority.js": {
       "sha256": "102149846b0784e50b315e7a8975b6698d9852a8f92c2e42a8c3bba07bf83814",
@@ -3908,9 +3920,9 @@
       "cacheKey": "c425471482a7"
     },
     "17_external_intelligence_source_registry.js": {
-      "sha256": "7e2f8c341d7ba897447be6dd120f7258671f73f7c0114fc02b19db4acc3dfc77",
-      "byteSize": 22408,
-      "cacheKey": "7e2f8c341d7b"
+      "sha256": "428b17a76bc2529a4dbce58aee9f19765b52d7a3d71f45c5c85244a5de1e76df",
+      "byteSize": 23286,
+      "cacheKey": "428b17a76bc2"
     },
     "17_external_intelligence_source_discovery.js": {
       "sha256": "86316b1672d559761d4f4c6c078f5cb8612d4632683ebe35eda2685e5d18a67a",
@@ -3918,9 +3930,9 @@
       "cacheKey": "86316b1672d5"
     },
     "17_external_intelligence_resource_budget.js": {
-      "sha256": "2926bc99492c59f57dd7b17487615ce0b16b9e5f3eba47e056f8ee81b37a58d7",
-      "byteSize": 21291,
-      "cacheKey": "2926bc99492c"
+      "sha256": "7c9fdb477feb01f751db980086b4420b3e266769c4382797d92867a72340bb6a",
+      "byteSize": 21557,
+      "cacheKey": "7c9fdb477feb"
     },
     "17_external_intelligence_usage_policy.js": {
       "sha256": "a7c79a51e5832949f301edf87e2d7883a4f83dd854eaf7a3885f3ff6af89b6e6",
@@ -3928,9 +3940,9 @@
       "cacheKey": "a7c79a51e583"
     },
     "17_external_intelligence_acquisition_contract.js": {
-      "sha256": "bd896e4d48f137b721cba35e3aa27de46b4588e96c4ae8937090321d6eac961c",
-      "byteSize": 28837,
-      "cacheKey": "bd896e4d48f1"
+      "sha256": "7f813c1dd35e2c98a1b5569b1bdfbcf4d795d658a86a912b93888e311d3596e6",
+      "byteSize": 29741,
+      "cacheKey": "7f813c1dd35e"
     },
     "17_external_intelligence_adapter_registry.js": {
       "sha256": "8211e5421e293b16df8e8f467c9c62a164416903cc45535ae9af403f7de1ef11",
@@ -3943,9 +3955,9 @@
       "cacheKey": "fb1eef1a3d35"
     },
     "17_external_intelligence_acquisition_queue.js": {
-      "sha256": "4236cc0b1342086eedc1e98bd36aac7dcbda3a93c2544e85b865689d8230effc",
-      "byteSize": 23849,
-      "cacheKey": "4236cc0b1342"
+      "sha256": "8d1954f4953aa7f7d6114a20647a4adc88931ab1503c7ae00963556e3dc8dd05",
+      "byteSize": 26359,
+      "cacheKey": "8d1954f4953a"
     },
     "17_external_intelligence_phase1_validation.js": {
       "sha256": "d86cc141755579727e1c532b0c38d534a0f0870a635c2e5cb7714d7352a056c8",
@@ -4083,9 +4095,9 @@
       "cacheKey": "53b2e503be26"
     },
     "17_external_intelligence_phase8_validation.js": {
-      "sha256": "5ec9bf25b9d78007ade2de0d61b3f1b028fa2f53a738f60779253832a279cba1",
-      "byteSize": 22192,
-      "cacheKey": "5ec9bf25b9d7"
+      "sha256": "1ad8b924da688002ec378ff57b7ca66e13f7652876a3a858522056c59128f139",
+      "byteSize": 22221,
+      "cacheKey": "1ad8b924da68"
     },
     "17_external_intelligence_phase8_real_runtime_validation.js": {
       "sha256": "78728aef0baaa6bbe884d0a04089c551fffa32fade69f9d419434c10991979c3",
@@ -4113,9 +4125,9 @@
       "cacheKey": "2d8ac6db4c79"
     },
     "17_external_intelligence_phase9_validation.js": {
-      "sha256": "d66d621da876c701538591a436c09079f5beb09864e8096eca2bd12afa33121f",
-      "byteSize": 29410,
-      "cacheKey": "d66d621da876"
+      "sha256": "7c143c112d61cfe736e09e6fd04e4e6bc08aaa92a330aae4e2c04a2d04c597a6",
+      "byteSize": 29439,
+      "cacheKey": "7c143c112d61"
     },
     "17_external_intelligence_phase9_real_runtime_validation.js": {
       "sha256": "15c018b2b24ced295b682926e8191b4306350a8789338661fc3773afd75fde43",
@@ -4143,9 +4155,9 @@
       "cacheKey": "ffc5c91fe7d1"
     },
     "17_external_intelligence_phase10_validation.js": {
-      "sha256": "154c00faa25819fa6befb93e9fd4928d6b88e3d533851083b51824448afa681e",
-      "byteSize": 10901,
-      "cacheKey": "154c00faa258"
+      "sha256": "2a8e6691a658fd3b459748c067b056af4cd0557daa9c7bbdcf0f0e97c9ce81b8",
+      "byteSize": 10930,
+      "cacheKey": "2a8e6691a658"
     },
     "17_external_intelligence_phase10_real_runtime_validation.js": {
       "sha256": "c2bf60e4c4ef2d85ed897a15d4a515276795e32922a7a7032a9b2bcf1998b73d",
@@ -4173,9 +4185,9 @@
       "cacheKey": "263ca262be5b"
     },
     "17_external_intelligence_phase11_validation.js": {
-      "sha256": "fd2e78bde2df94b0ff79ed97bf2c4b10738c98f7558bdd52fc9319e457e01166",
-      "byteSize": 6856,
-      "cacheKey": "fd2e78bde2df"
+      "sha256": "3eaef68816931dc2202eee18d77986d66fe0f99bb78424150df9281f87117c0c",
+      "byteSize": 6885,
+      "cacheKey": "3eaef6881693"
     },
     "17_external_intelligence_phase11_real_runtime_validation.js": {
       "sha256": "80808e7a1ca423fb09c781c959a2ebe8c714b986e3a98fff480434c78e8d35d1",
@@ -4203,9 +4215,9 @@
       "cacheKey": "6b3fed9625e2"
     },
     "17_external_intelligence_phase12_validation.js": {
-      "sha256": "2d75a40607ba0905749687fa29ddc32e4e6715dc4d150e88df8d914339c823c0",
-      "byteSize": 7053,
-      "cacheKey": "2d75a40607ba"
+      "sha256": "aed4667afe29c23c94a5e8960d15c4fa81f88c056bb02cc17f1bb330677b8224",
+      "byteSize": 7082,
+      "cacheKey": "aed4667afe29"
     },
     "17_external_intelligence_phase12_real_runtime_validation.js": {
       "sha256": "c8d5e35b8b4041ed728ed3e851894e7828f7d39cd3530461fdb83ec61478138a",
@@ -4233,9 +4245,9 @@
       "cacheKey": "af6ba5a933de"
     },
     "17_external_intelligence_phase13_validation.js": {
-      "sha256": "e7081f753a8df27fce036edc52db5fcf9b1d21a0fb497ecec684374a6600d541",
-      "byteSize": 28441,
-      "cacheKey": "e7081f753a8d"
+      "sha256": "5c40f18d8aeca2b01dc3d15a62dcfa350575cc1474515943142fe4e17a719c81",
+      "byteSize": 28490,
+      "cacheKey": "5c40f18d8aec"
     },
     "17_external_intelligence_phase13_real_runtime_validation.js": {
       "sha256": "c1d6b5c9b29d09920a979627239fb41eeabda50f16b77ce22f7eda3637e047c1",
@@ -4263,14 +4275,14 @@
       "cacheKey": "0f0597e07a71"
     },
     "17_external_intelligence_phase14_validation.js": {
-      "sha256": "f39b39cc8c0a119b34657d6154d6f221315f2767c1a68699f56b6d683b1bf30d",
-      "byteSize": 13883,
-      "cacheKey": "f39b39cc8c0a"
+      "sha256": "e912abc0e11a9842a84c8e2534e1cf0cec9e2f79dbf7a2134a884ec57d1394f2",
+      "byteSize": 13933,
+      "cacheKey": "e912abc0e11a"
     },
     "17_external_intelligence_phase14_real_runtime_validation.js": {
-      "sha256": "a461726f43a7c70cbdc450abaa7611b73c2692a2bbc46efe2e0aba2024c2f6ee",
-      "byteSize": 2829,
-      "cacheKey": "a461726f43a7"
+      "sha256": "bf237c22ddd685372d1bc1aad08ba23df34db7df4bbbdcfb3f89e62d1bfaf70c",
+      "byteSize": 2858,
+      "cacheKey": "bf237c22ddd6"
     },
     "17_external_intelligence_phase14_android_validation.js": {
       "sha256": "d588cf23f2493695638340a3279ff586cff1e69e5c2dcf6e2b56e517ab152046",
@@ -4283,9 +4295,9 @@
       "cacheKey": "84e8152c21c4"
     },
     "17_external_intelligence_phase15_validation.js": {
-      "sha256": "5583b2df0bd989b41529bcc9e5014a0e2a50f10e8adee7a66bcc473b9a3ebe18",
-      "byteSize": 27058,
-      "cacheKey": "5583b2df0bd9"
+      "sha256": "57f4a75fd19e91a98ab02836102d4f09e5aa4f1e00ef5ce5283aa41da364efcf",
+      "byteSize": 27107,
+      "cacheKey": "57f4a75fd19e"
     },
     "17_external_intelligence_phase15_real_runtime_validation.js": {
       "sha256": "e9b1de31a7993c50dbe869e93f9dbb850bcffef229e678aa1df5ee7091cb0dac",
@@ -4313,9 +4325,9 @@
       "cacheKey": "a929614efdca"
     },
     "17_external_intelligence_phase16_validation.js": {
-      "sha256": "b66a57408f9f775cf2fd2d3a023e205fa0a5f821978e4de2eefd3b0debadb340",
-      "byteSize": 23346,
-      "cacheKey": "b66a57408f9f"
+      "sha256": "d39ca2ac9d1be78f51a6fd0b901bda7656f7e73295d780a024388ab3519a762e",
+      "byteSize": 23395,
+      "cacheKey": "d39ca2ac9d1b"
     },
     "17_external_intelligence_phase16_real_runtime_validation.js": {
       "sha256": "0657fa498dc8d3684ad2a135ed28702f4781116eb600098976c2ed462600a1ee",
@@ -4348,9 +4360,9 @@
       "cacheKey": "32caa3dab84c"
     },
     "17_external_intelligence_phase17_validation.js": {
-      "sha256": "3a6610f4ad390d62ce1a560999f934cbed955b643733ed8c1207657459c15c0d",
-      "byteSize": 6075,
-      "cacheKey": "3a6610f4ad39"
+      "sha256": "2028abfd947bd4a0874ae94b6c1845394c22fdc03c608133d0eaa5adbb8dbeab",
+      "byteSize": 6125,
+      "cacheKey": "2028abfd947b"
     },
     "17_external_intelligence_phase17_real_runtime_validation.js": {
       "sha256": "bdd5b84aef993f75d21e10a92b6c24b03f427cf0980062210fac4963b9a2583e",
@@ -4368,9 +4380,9 @@
       "cacheKey": "0992473c837b"
     },
     "17_external_intelligence_phase18_validation.js": {
-      "sha256": "12c0a3d434db60bf56bd1b168934247e16001595232e9cace398886781a242b2",
-      "byteSize": 14945,
-      "cacheKey": "12c0a3d434db"
+      "sha256": "f7b73172b79e32347a649d2c8eb855a58bb49f520996048bf03faea98ac8afd1",
+      "byteSize": 14994,
+      "cacheKey": "f7b73172b79e"
     },
     "17_external_intelligence_phase18_real_runtime_validation.js": {
       "sha256": "856cdd49d1be599c160cb704a704a66184ccc1c647e09790c17cb86003bceee4",
@@ -4388,9 +4400,9 @@
       "cacheKey": "c440e1fdd66f"
     },
     "17_external_intelligence_phase19_validation.js": {
-      "sha256": "cf44147c2265388d30e8133f1cb464dffa00494c2c659204266dbeb3ba9bb17f",
-      "byteSize": 27505,
-      "cacheKey": "cf44147c2265"
+      "sha256": "9e7a8e135f3855daf694c97daf7b4433a16d9dbc086a490e89f1534c460e724e",
+      "byteSize": 27554,
+      "cacheKey": "9e7a8e135f38"
     },
     "17_external_intelligence_phase19_real_runtime_validation.js": {
       "sha256": "7cd32ebd813e0646a0d3817a8e5bdeeb85a4532ff6894a35755092aacb4c975e",
@@ -4413,9 +4425,9 @@
       "cacheKey": "47005b49547c"
     },
     "17_external_intelligence_phase20_validation.js": {
-      "sha256": "33ec733c30871ac382d278aeddc4baecb81405cc99956a71e53988c6694b3a2f",
-      "byteSize": 15333,
-      "cacheKey": "33ec733c3087"
+      "sha256": "c494f9443a648ff1eb6a3e0cd8a2a15cbb30119fc39400f7969e8458f63db0dd",
+      "byteSize": 15353,
+      "cacheKey": "c494f9443a64"
     },
     "17_external_intelligence_phase20_real_runtime_validation.js": {
       "sha256": "090879b8c8bc8af76497ec1dadd79fa703a0ae134e8ff67250080fb7e1082752",
@@ -4483,15 +4495,25 @@
       "cacheKey": "00a0da1f24f3"
     },
     "17_external_intelligence_console.js": {
-      "sha256": "4d0e350d7f6a1026fd58996b1e36b01aa0327f790bc678e3ee63e0210b412ab9",
-      "byteSize": 25582,
-      "cacheKey": "4d0e350d7f6a"
+      "sha256": "e4fb607d01fedffc5dcca450da902271b91ff6fca888a2ed7e50f69e8f645c66",
+      "byteSize": 25952,
+      "cacheKey": "e4fb607d01fe"
     },
     "99_init.js": {
       "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
       "byteSize": 4742,
       "cacheKey": "de0ce6495428"
+    },
+    "17_external_intelligence_openai_provider_integration.js": {
+      "sha256": "57586789b692321d49011ec33355916859560d4d97a66a5b4d682bc3297c5097",
+      "byteSize": 24112,
+      "cacheKey": "57586789b692"
+    },
+    "17_external_intelligence_openai_provider_ui.js": {
+      "sha256": "81e81a300b31ce57656832c4a83cd13cd6ad78edc5e8d8c95c4b5dde028d0f8b",
+      "byteSize": 13728,
+      "cacheKey": "81e81a300b31"
     }
   },
-  "manifestHash": "818105c6177e97f7f7e311abadf95074a5f8c039a3b0dc090aa5c6d7bf8f0aea"
+  "manifestHash": "2c3d94b586e53ddd4795fc3667530be99a61003cbfb6d95dbabffcdede198c24"
 }

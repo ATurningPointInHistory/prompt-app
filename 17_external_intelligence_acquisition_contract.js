@@ -77,11 +77,12 @@
   function normalizeBodyPolicy(value, method) {
     const input = internal.isPlainObject(value) ? value : {};
     const normalizedMethod = upper(method, "GET");
-    if (normalizedMethod === "GET") return { mode: "NONE", required: [], optional: [], allowUnknown: false, maxSerializedBytes: 0 };
+    if (normalizedMethod === "GET") return { mode: "NONE", required: [], optional: [], fixedFields: {}, allowUnknown: false, maxSerializedBytes: 0 };
     return {
       mode: "JSON",
       required: internal.unique(input.required),
       optional: internal.unique(input.optional),
+      fixedFields: internal.isPlainObject(input.fixedFields) ? internal.clone(input.fixedFields) : {},
       allowUnknown: input.allowUnknown === true,
       maxSerializedBytes: Number.isInteger(input.maxSerializedBytes) ? Math.max(256, Math.min(input.maxSerializedBytes, 65536)) : 16384
     };
@@ -148,6 +149,7 @@
     if (!record.operationId) errors.push("OPERATION_ID_INVALID");
     if (!record.adapterId) errors.push("ADAPTER_ID_REQUIRED");
     if (source && !source.allowedOperations.includes(record.operationId)) errors.push("OPERATION_NOT_ALLOWED_BY_SOURCE");
+    if (source && Array.isArray(source.allowedMethods) && !source.allowedMethods.includes(record.method)) errors.push("HTTP_METHOD_NOT_ALLOWED_BY_SOURCE");
     if (source && source.adapterId && source.adapterId !== record.adapterId) errors.push("ADAPTER_BINDING_MISMATCH");
     errors.push.apply(errors, validateEndpoint(record, source));
     if (record.retryPolicy.maxAttempts > ACQ.maxRetryAttempts) errors.push("RETRY_LIMIT_INVALID");
@@ -213,6 +215,7 @@
       requestedBy: internal.text(source.requestedBy, "Project Owner / Application"),
       correlationId: internal.text(source.correlationId, "") || null,
       budgetIds: internal.unique(source.budgetIds),
+      estimatedUsage: internal.isPlainObject(source.estimatedUsage) ? internal.clone(source.estimatedUsage) : {},
       acquisitionPlanId: internal.text(source.acquisitionPlanId, "") || null,
       researchGoalId: internal.text(source.researchGoalId, "") || null,
       status: "CREATED",
@@ -223,14 +226,19 @@
   }
 
   function validateBody(operationContract, body) {
-    const policy = internal.isPlainObject(operationContract.bodyPolicy) ? operationContract.bodyPolicy : { mode: "NONE", required: [], optional: [], allowUnknown: false, maxSerializedBytes: 0 };
+    const policy = internal.isPlainObject(operationContract.bodyPolicy) ? operationContract.bodyPolicy : { mode: "NONE", required: [], optional: [], fixedFields: {}, allowUnknown: false, maxSerializedBytes: 0 };
     const value = internal.isPlainObject(body) ? body : {};
     const keys = Object.keys(value);
     if (operationContract.method === "GET") return keys.length ? { valid:false, errors:["GET_BODY_NOT_ALLOWED"] } : { valid:true, errors:[] };
     const errors = [];
     if (policy.mode !== "JSON") errors.push("POST_JSON_BODY_POLICY_REQUIRED");
     (policy.required || []).forEach(function(k){ if (!Object.prototype.hasOwnProperty.call(value,k)) errors.push("BODY_FIELD_REQUIRED:"+k); });
-    if (policy.allowUnknown !== true) { const allowed = new Set([].concat(policy.required||[],policy.optional||[])); keys.forEach(function(k){ if(!allowed.has(k)) errors.push("BODY_FIELD_UNKNOWN:"+k); }); }
+    const fixedFields = internal.isPlainObject(policy.fixedFields) ? policy.fixedFields : {};
+    Object.keys(fixedFields).forEach(function(k){
+      if (!Object.prototype.hasOwnProperty.call(value,k)) errors.push("BODY_FIXED_FIELD_REQUIRED:"+k);
+      else if (internal.stableStringify(value[k]) !== internal.stableStringify(fixedFields[k])) errors.push("BODY_FIXED_FIELD_MISMATCH:"+k);
+    });
+    if (policy.allowUnknown !== true) { const allowed = new Set([].concat(policy.required||[],policy.optional||[],Object.keys(fixedFields))); keys.forEach(function(k){ if(!allowed.has(k)) errors.push("BODY_FIELD_UNKNOWN:"+k); }); }
     let bytes=0; try { bytes = new TextEncoder().encode(JSON.stringify(value)).length; } catch (_) { errors.push("BODY_SERIALIZATION_FAILED"); }
     if (bytes > Number(policy.maxSerializedBytes || 0)) errors.push("BODY_SIZE_EXCEEDED");
     return { valid: errors.length === 0, errors: errors, serializedBytes: bytes };
@@ -281,7 +289,7 @@
     const bodyValidation = validateBody(operationContract, request.body);
     if (!bodyValidation.valid) return internal.buildResult(false, "EXTERNAL010_ACQUISITION_BODY_VALIDATION_FAILED", "Blocked", { requestId: request.requestId, errors: bodyValidation.errors, serializedBytes: bodyValidation.serializedBytes || 0 });
 
-    const budget = namespace.checkExternalIntelligenceResourceBudget({ budgetIds: request.budgetIds, sourceId: request.sourceId, goalId: request.researchGoalId, planId: request.acquisitionPlanId, requestId: request.requestId, pricingMode: state.sourceRegistry.get(request.sourceId).pricingMode, paidRequest: state.sourceRegistry.get(request.sourceId).pricingMode !== "FREE", estimatedUsage: operationContract.estimatedUsage });
+    const budget = namespace.checkExternalIntelligenceResourceBudget({ budgetIds: request.budgetIds, sourceId: request.sourceId, goalId: request.researchGoalId, planId: request.acquisitionPlanId, requestId: request.requestId, pricingMode: state.sourceRegistry.get(request.sourceId).pricingMode, paidRequest: state.sourceRegistry.get(request.sourceId).pricingMode !== "FREE", estimatedUsage: Object.keys(request.estimatedUsage || {}).length ? request.estimatedUsage : operationContract.estimatedUsage });
     if (!budget.ok) return internal.buildResult(false, "EXTERNAL010_ACQUISITION_BUDGET_VALIDATION_FAILED", "Blocked", { requestId: request.requestId, budget: budget });
 
     const authorityAction = internal.text(settings.authorityAction, "EXECUTE_EXTERNAL_ACQUISITION");

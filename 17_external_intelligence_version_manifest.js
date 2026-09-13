@@ -72,6 +72,8 @@
     softwareSupplyChain: PHASE2_VERSION,
     gatewayClient: PHASE4_VERSION,
     sourceRegistry: PHASE3_VERSION,
+    openaiProviderIntegration: PHASE21_VERSION,
+    openaiProviderUi: PHASE21_VERSION,
     sourceDiscovery: PHASE3_VERSION,
     resourceBudget: PHASE3_VERSION,
     usagePolicy: PHASE3_VERSION,
@@ -141,6 +143,8 @@
     "17_external_intelligence_software_supply_chain.js": "softwareSupplyChain",
     "17_external_intelligence_gateway_client.js": "gatewayClient",
     "17_external_intelligence_source_registry.js": "sourceRegistry",
+    "17_external_intelligence_openai_provider_integration.js": "openaiProviderIntegration",
+    "17_external_intelligence_openai_provider_ui.js": "openaiProviderUi",
     "17_external_intelligence_source_discovery.js": "sourceDiscovery",
     "17_external_intelligence_resource_budget.js": "resourceBudget",
     "17_external_intelligence_usage_policy.js": "usagePolicy",
@@ -952,6 +956,9 @@
     authenticationModes: ["NONE", "API_KEY", "BEARER_TOKEN", "OAUTH", "CUSTOM"],
     pricingModes: ["FREE", "FIXED_MONTHLY", "USAGE_BASED", "TIERED", "UNKNOWN"],
     initialAllowedHttpMethods: ["GET"],
+    governedPostAllowedHttpMethods: ["GET", "POST"],
+    governedPostSourceTypes: ["AI_SERVICE"],
+    governedPostAccessModes: ["LOCAL_GATEWAY"],
     secretValuesStoredInRegistry: false
   };
 

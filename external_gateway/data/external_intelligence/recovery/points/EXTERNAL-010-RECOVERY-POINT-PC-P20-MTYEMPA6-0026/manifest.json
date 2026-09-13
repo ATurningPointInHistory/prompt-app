@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "1.0.0",
+  "recoveryPointId": "EXTERNAL-010-RECOVERY-POINT-PC-P20-MTYEMPA6-0026",
+  "recoveryPointType": "CHECKPOINT",
+  "createdAt": "2026-09-12T13:12:01.686Z",
+  "recoveryPointState": "VALID",
+  "applicationConsistentSnapshot": true,
+  "metadataSnapshot": {
+    "reference": "metadata.sqlite",
+    "sha256": "1f7de3f23ba72557685665795cfac812af2ebb84730f5b5b6094037dce232689",
+    "sizeBytes": 61440,
+    "databaseSchemaVersion": "1.0.0"
+  },
+  "incrementalContentManifest": [
+    {
+      "contentHash": "3051d5c2272b21955ff61c03ce8b63496d1602ad9d67d3d03feca7f1ddd361e7",
+      "state": "VERIFIED",
+      "backupReference": "content/sha256/30/51/3051d5c2272b21955ff61c03ce8b63496d1602ad9d67d3d03feca7f1ddd361e7",
+      "reused": false
+    }
+  ],
+  "evidenceManifestEntries": [
+    {
+      "name": "EXTERNAL-010-EVIDENCE-MTRAUDA3-0578.json",
+      "sha256": "0d7f10ef8a23a1a62dcb6bd9fb5f8c9786c6abbf0f5a063616628316bc9fd39a",
+      "reference": "evidence-manifests/EXTERNAL-010-EVIDENCE-MTRAUDA3-0578.json"
+    }
+  ],
+  "currentIntegrityAtSnapshot": {
+    "valid": true,
+    "counts": {
+      "contentObjectCount": 1,
+      "rawEvidenceCount": 1,
+      "acquisitionEvidenceCount": 1,
+      "processingCheckpointCount": 0
+    },
+    "missing": [],
+    "corrupted": [],
+    "orphan": [],
+    "orphanAutomaticDeletionPerformed": false,
+    "databaseSchemaVersion": "1.0.0",
+    "metadataIndex": "SQLITE",
+    "contentStore": "CONTENT_ADDRESSED_FILE_STORE"
+  },
+  "metadataRebuildAssessment": {
+    "manifestCount": 1,
+    "rebuildableCount": 0,
+    "legacyInsufficientCount": 1,
+    "invalidManifestCount": 0,
+    "automaticRebuildPerformed": false,
+    "fullRebuildPossible": false
+  },
+  "runtimeProfile": {
+    "runtimeInstanceId": "EXTERNAL-010-GATEWAY-67e88780-e326-4fe0-a7a6-e70238e7ba8e",
+    "runtimeVersion": "1.5.0",
+    "startupEpoch": "MTYEM41O-d81aaffe-506a-4711-978b-5fe0de0f9a59",
+    "recoveryEpoch": "RECOVERY-EPOCH-0-b5a8bc1e-41a4-424e-99bf-f85804fda7ec",
+    "sessionRecordsIncluded": false,
+    "sessionCredentialsIncluded": false
+  },
+  "queueSnapshot": {
+    "capturedAt": "2026-09-12T13:12:01.683Z",
+    "items": [],
+    "restoredRunningWorkBecomesActive": false,
+    "blindRetryAllowed": false
+  },
+  "watchSnapshot": {
+    "capturedAt": "2026-09-12T13:12:01.683Z",
+    "items": [],
+    "overdueAutoCatchupAllowed": false,
+    "monitoringGapPreserved": true
+  },
+  "policyProfile": {
+    "state": "REQUIRES_RECONCILIATION_ON_RESTORE"
+  },
+  "retentionProfile": {
+    "state": "REQUIRES_RECONCILIATION_ON_RESTORE"
+  },
+  "privacyProfile": {
+    "state": "REQUIRES_RECONCILIATION_ON_RESTORE"
+  },
+  "secretValuesIncluded": false,
+  "gatewaySessionTokensIncluded": false,
+  "credentialMaterialPresent": false,
+  "filesRestoredEqualsPlatformReady": false,
+  "backupExistsEqualsRecoveryProven": false,
+  "immutable": true,
+  "manifestHash": "911d0ff702b3fbe6387f99d93527067021563b38c6659339ef1f9bcdcc3cde68"
+}

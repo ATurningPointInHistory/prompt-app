@@ -1,0 +1,46 @@
+"use strict";
+const fs=require("fs");
+const path=require("path");
+function clone(v){return v==null?v:JSON.parse(JSON.stringify(v));}
+function stable(v){if(v===null||typeof v!=="object")return JSON.stringify(v);if(Array.isArray(v))return "["+v.map(stable).join(",")+"]";return "{"+Object.keys(v).sort().map(k=>JSON.stringify(k)+":"+stable(v[k])).join(",")+"}";}
+const namespace={api:{},modules:{},__internal:{
+  isPlainObject:v=>Boolean(v&&typeof v==="object"&&!Array.isArray(v)),
+  text:(v,f="")=>String(v==null?f:v),clone,stableStringify:stable,nowIso:()=>new Date().toISOString(),
+  buildResult:(ok,code,status,data,error)=>({ok,code,status,data:data==null?null:data,error:error||null}),
+  unique:v=>Array.from(new Set(Array.isArray(v)?v:[])),deepFreeze:v=>v,
+  commitExternalIntelligenceSourceVersion:()=>null
+}};
+global.EXTERNAL010ExternalIntelligence=namespace;
+global.EXTERNAL010VersionManifest={getModuleVersion:()=>"1.20.1"};
+require("./17_external_intelligence_openai_provider_integration.js");
+require("./17_external_intelligence_openai_provider_ui.js");
+const {validateContext}=require("./external_gateway/lib/acquisition.cjs");
+const checks=[];
+function check(name,fn){try{const detail=fn();checks.push({name,passed:true,detail});}catch(e){checks.push({name,passed:false,detail:e&&e.message||String(e)});}}
+function expect(cond,msg){if(!cond)throw new Error(msg);}
+check("Provider profile is governed OpenAI AI_SERVICE",()=>{const p=namespace.getOpenAIProviderIntegrationProfile();expect(p.sourceId==="SOURCE-OPENAI","source");expect(p.accessMode==="LOCAL_GATEWAY","gateway");expect(p.authenticationMode==="BEARER_TOKEN","auth");return p;});
+check("Registered initial models are explicit",()=>{const x=namespace.listOpenAIModelPricingProfiles();expect(x.length===3,"model count");expect(x.every(v=>v.currency==="USD"),"currency");return x.map(v=>v.model);});
+check("store=true is blocked",()=>{const r=namespace.validateOpenAIResponsesBody({model:"gpt-5.6-luna",input:"x",store:true,max_output_tokens:100});expect(!r.ok,"must block");return r.data.errors;});
+check("tools are blocked in initial scope",()=>{const r=namespace.validateOpenAIResponsesBody({model:"gpt-5.6-luna",input:"x",store:false,max_output_tokens:100,tools:[]});expect(!r.ok,"must block");return r.data.errors;});
+check("Unknown model is blocked",()=>{const r=namespace.validateOpenAIResponsesBody({model:"unknown",input:"x",store:false,max_output_tokens:100});expect(!r.ok,"must block");return r.data.errors;});
+check("Valid text request body passes",()=>{const r=namespace.validateOpenAIResponsesBody({model:"gpt-5.6-luna",input:"hello",store:false,max_output_tokens:100});expect(r.ok,"valid body");return r.code;});
+check("Cost preflight yields nonzero USD maximum",()=>{const r=namespace.estimateOpenAIResponsesCost({body:{model:"gpt-5.6-luna",input:"hello",store:false,max_output_tokens:100}});expect(r.ok,"estimate");expect(r.data.maximumEstimatedCostUsd>0,"positive");return r.data;});
+check("Per-request hard cap blocks oversized request",()=>{const r=namespace.prepareOpenAIResponsesRequest({body:{model:"gpt-5.6-sol",input:"hello",store:false,max_output_tokens:128000},budgetIds:["BUDGET-USD"],perRequestHardCapUsd:0.01});expect(!r.ok,"must block");return r.code;});
+check("Source candidate stores reference only",()=>{const r=namespace.buildOpenAIProviderSourceRegistration({secretReferenceId:"SECRET-OPENAI-PRIMARY"});expect(r.ok,"candidate");const s=r.data.sourceCandidate;expect(s.secretReferenceId==="SECRET-OPENAI-PRIMARY","ref");expect(!("apiKey" in s),"no key");expect(s.allowedMethods.length===1&&s.allowedMethods[0]==="POST","post");return s;});
+check("Operation contract fixes store=false and maxAttempts=1",()=>{const r=namespace.buildOpenAIResponsesOperationContract({});expect(r.ok,"candidate");const o=r.data.operationContractCandidate;expect(o.bodyPolicy.fixedFields.store===false,"store");expect(o.retryPolicy.maxAttempts===1,"retry");return {fixed:o.bodyPolicy.fixedFields,retry:o.retryPolicy};});
+check("Prepared request carries request-scoped FINANCIAL_COST",()=>{const r=namespace.prepareOpenAIResponsesRequest({body:{model:"gpt-5.6-luna",input:"hello",store:false,max_output_tokens:100},budgetIds:["BUDGET-USD"],perRequestHardCapUsd:1});expect(r.ok,"prepare");expect(r.data.requestCandidate.estimatedUsage.FINANCIAL_COST>0,"cost");expect(r.data.requestCandidate.retryPolicy.maxAttempts===1,"retry");return r.data.requestCandidate.estimatedUsage;});
+check("Provider usage reconciles to financial cost",()=>{const r=namespace.reconcileOpenAIResponsesUsage({sourceId:"SOURCE-OPENAI",payload:{model:"gpt-5.6-luna",usage:{input_tokens:1000,output_tokens:100,total_tokens:1100,input_tokens_details:{cached_tokens:0}}}});expect(r.ok,"reconcile");expect(r.data.actualUsage.FINANCIAL_COST>0,"cost");return r.data.actualUsage;});
+check("Missing provider usage is explicitly ambiguous",()=>{const r=namespace.reconcileOpenAIResponsesUsage({sourceId:"SOURCE-OPENAI",payload:{model:"gpt-5.6-luna"}});expect(!r.ok,"must not reconcile");expect(r.data.ambiguousBillingState===true,"ambiguous");return r.code;});
+const config={acquisitionAllowedHosts:new Set(["api.openai.com"]),allowHttpAcquisition:false,maxBodyBytes:65536,acquisitionDefaultTimeoutMs:60000,acquisitionMaxTimeoutMs:120000};
+function gatewayContext(body){return {request:{requestId:"REQ-1",sourceId:"SOURCE-OPENAI",operationId:"INTERNAL_ANALYSIS",purpose:"test",parameters:{},body,timeoutPolicy:{timeoutMs:60000}},source:{sourceId:"SOURCE-OPENAI",enabled:true,lifecycleState:"ACTIVE",accessMode:"LOCAL_GATEWAY",authenticationMode:"BEARER_TOKEN",secretReferenceId:"SECRET-OPENAI-PRIMARY",allowedOperations:["INTERNAL_ANALYSIS"],adapterId:"EXTERNAL-010-ADAPTER-LOCAL-GATEWAY-001",endpointPolicy:{canonicalHost:"api.openai.com"}},operationContract:{operationContractId:"OP-1",sourceId:"SOURCE-OPENAI",operationId:"INTERNAL_ANALYSIS",method:"POST",adapterId:"EXTERNAL-010-ADAPTER-LOCAL-GATEWAY-001",endpoint:{exactUrl:"https://api.openai.com/v1/responses",canonicalHost:"api.openai.com",endpointReference:"OPENAI-RESPONSES-V1"},parameterPolicy:{required:[],optional:[],allowUnknown:false,maxParameterCount:1},bodyPolicy:{mode:"JSON",required:["model","input","store","max_output_tokens"],optional:["instructions","reasoning"],fixedFields:{store:false},allowUnknown:false,maxSerializedBytes:32768}},route:{sourceId:"SOURCE-OPENAI",operationId:"INTERNAL_ANALYSIS",runtimeTarget:"LOCAL_GATEWAY",adapterId:"EXTERNAL-010-ADAPTER-LOCAL-GATEWAY-001",operationContractId:"OP-1",endpointReference:"OPENAI-RESPONSES-V1"},authority:{action:"EXECUTE_EXTERNAL_ACQUISITION",allowed:true,authorityEnvelopeId:"AUTH-1"}};}
+check("Gateway accepts registered POST JSON with store=false",()=>{const c=validateContext(config,gatewayContext({model:"gpt-5.6-luna",input:"hello",store:false,max_output_tokens:100}),{allowAuthentication:true});expect(c.operation.method==="POST","post");return {method:c.operation.method,target:c.url.toString()};});
+check("Gateway rejects store=true fixed-field mismatch",()=>{let code=null;try{validateContext(config,gatewayContext({model:"gpt-5.6-luna",input:"hello",store:true,max_output_tokens:100}),{allowAuthentication:true});}catch(e){code=e.code;}expect(code==="BODY_FIXED_FIELD_MISMATCH","code="+code);return code;});
+check("Gateway rejects unregistered tool field",()=>{let code=null;try{validateContext(config,gatewayContext({model:"gpt-5.6-luna",input:"hello",store:false,max_output_tokens:100,tools:[]}),{allowAuthentication:true});}catch(e){code=e.code;}expect(code==="BODY_FIELD_UNKNOWN","code="+code);return code;});
+check("Generic ACTIVATE_PAID_API remains hard denied",()=>{const s=fs.readFileSync("17_external_intelligence_version_manifest.js","utf8");expect(s.includes('"ACTIVATE_PAID_API"'),"hard deny missing");return "preserved";});
+check("Source Registry POST is scoped to AI_SERVICE + LOCAL_GATEWAY",()=>{const s=fs.readFileSync("17_external_intelligence_source_registry.js","utf8");expect(s.includes("GOVERNED_POST_SOURCE_TYPES"),"type gate");expect(s.includes("GOVERNED_POST_ACCESS_MODES"),"access gate");return "scoped";});
+check("Cost / risk aware UI is present",()=>{const html=namespace.renderOpenAIProviderIntegrationPanelHtml();expect(html.includes("変更の影響を確認"),"impact preview");expect(html.includes("GREEN")||html.includes("YELLOW")||html.includes("RED"),"risk level");expect(html.includes("1回の最大許可額"),"cost cap");expect(html.includes("簡単設定")&&html.includes("料金・利用量")&&html.includes("詳細設定")&&html.includes("安全・権限"),"progressive disclosure");return "ui-present";});
+check("UI never asks for secret value",()=>{const html=namespace.renderOpenAIProviderIntegrationPanelHtml();expect(!/type=\"password\"/i.test(html),"password input");expect(!/APIキー[^<]*<input/i.test(html),"api key input");expect(html.includes("Secret Value入力<strong>禁止"),"explicit prohibition");return "reference-only";});
+const passed=checks.filter(x=>x.passed).length,failed=checks.length-passed;
+const result={id:"OPENAI-API-INTEGRATION-PHASE2-VALIDATION",candidateVersion:"0.2.0",decisionId:"EXTERNAL-010-DECISION-055",passed,failed,total:checks.length,health:Math.round(passed/checks.length*10000)/100,releaseAllowed:false,realPaidRequestPerformed:false,checks};
+console.log(JSON.stringify(result,null,2));
+process.exitCode=failed?1:0;

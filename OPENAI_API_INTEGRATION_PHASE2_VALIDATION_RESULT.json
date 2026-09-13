@@ -1,0 +1,267 @@
+{
+  "candidateId": "OPENAI-API-INTEGRATION-PHASE2-0.2.0-CANDIDATE",
+  "decisionId": "EXTERNAL-010-DECISION-055",
+  "parentCanonicalVersion": "1.20.1",
+  "phase1CandidateAlreadyImplemented": true,
+  "realPaidRequestPerformed": false,
+  "checks": {
+    "phase2Unit": {
+      "passed": 20,
+      "failed": 0,
+      "total": 20,
+      "health": 100
+    },
+    "gatewayBase": {
+      "passed": 38,
+      "failed": 0,
+      "total": 38,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "gatewayPhase4Acquisition": {
+      "passed": 14,
+      "failed": 0,
+      "total": 14,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "gatewayPhase6Security": {
+      "passed": 15,
+      "failed": 0,
+      "total": 15,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "scriptManifestIntegrity": {
+      "passed": true,
+      "scriptCount": 410,
+      "errors": []
+    }
+  },
+  "manifestHash": "2c3d94b586e53ddd4795fc3667530be99a61003cbfb6d95dbabffcdede198c24",
+  "scriptSetHash": "d18eb69efdc4b7628fe4d80f76d6db8403b04f1e777cc395fae160e77ce63129",
+  "phase2UnitDetails": [
+    {
+      "name": "Provider profile is governed OpenAI AI_SERVICE",
+      "passed": true,
+      "detail": {
+        "providerId": "OPENAI",
+        "sourceId": "SOURCE-OPENAI",
+        "sourceType": "AI_SERVICE",
+        "provider": "OPENAI",
+        "category": "AI_PROVIDER",
+        "accessMode": "LOCAL_GATEWAY",
+        "adapterId": "EXTERNAL-010-ADAPTER-LOCAL-GATEWAY-001",
+        "authenticationMode": "BEARER_TOKEN",
+        "pricingMode": "USAGE_BASED",
+        "costCurrency": "USD",
+        "operationId": "INTERNAL_ANALYSIS",
+        "method": "POST",
+        "endpoint": {
+          "exactUrl": "https://api.openai.com/v1/responses",
+          "canonicalHost": "api.openai.com",
+          "endpointReference": "OPENAI-RESPONSES-V1"
+        },
+        "initialCapability": {
+          "textInput": true,
+          "textOutput": true,
+          "streaming": false,
+          "background": false,
+          "tools": false,
+          "files": false,
+          "webSearch": false,
+          "computerUse": false
+        },
+        "storeRequiredValue": false,
+        "retryMaxAttempts": 1,
+        "pricingSource": "https://platform.openai.com/docs/models",
+        "pricingVerifiedAt": "2026-09-14T00:00:00+09:00",
+        "cachedInputAccounting": "STANDARD_INPUT_RATE_UNTIL_VERIFIED",
+        "noPerRequestHumanApprovalInsideApprovedScope": true,
+        "automaticPaidActivationAllowed": false,
+        "automaticBudgetExpansionAllowed": false,
+        "tradingAuthorityGranted": false,
+        "repositoryMutationAuthorityGranted": false
+      }
+    },
+    {
+      "name": "Registered initial models are explicit",
+      "passed": true,
+      "detail": [
+        "gpt-5.6-luna",
+        "gpt-5.6-sol",
+        "gpt-5.6-terra"
+      ]
+    },
+    {
+      "name": "store=true is blocked",
+      "passed": true,
+      "detail": [
+        "OPENAI_STORE_FALSE_REQUIRED"
+      ]
+    },
+    {
+      "name": "tools are blocked in initial scope",
+      "passed": true,
+      "detail": [
+        "OPENAI_BODY_FIELD_NOT_ALLOWED:tools",
+        "OPENAI_TOOLS_NOT_ALLOWED_INITIAL_SCOPE"
+      ]
+    },
+    {
+      "name": "Unknown model is blocked",
+      "passed": true,
+      "detail": [
+        "OPENAI_MODEL_NOT_REGISTERED"
+      ]
+    },
+    {
+      "name": "Valid text request body passes",
+      "passed": true,
+      "detail": "EXTERNAL010_OPENAI_BODY_VALID"
+    },
+    {
+      "name": "Cost preflight yields nonzero USD maximum",
+      "passed": true,
+      "detail": {
+        "model": "gpt-5.6-luna",
+        "estimatedInputTokens": 37,
+        "maxOutputTokens": 100,
+        "estimationMethod": "UTF8_BYTES_CONSERVATIVE_BOUND",
+        "estimatedUsage": {
+          "REQUEST_COUNT": 1,
+          "AI_TOKEN_USAGE": 137,
+          "FINANCIAL_COST": 0.0001274
+        },
+        "maximumEstimatedCostUsd": 0.0001274,
+        "currency": "USD",
+        "pricingProfile": {
+          "model": "gpt-5.6-luna",
+          "inputPerMTokUsd": 0.2,
+          "outputPerMTokUsd": 1.2,
+          "cachedInputPerMTokUsd": null,
+          "maxOutputTokens": 128000,
+          "currency": "USD",
+          "unit": "MILLION_TOKENS",
+          "effectiveFrom": "2026-09-14",
+          "verifiedAt": "2026-09-14T00:00:00+09:00",
+          "source": "https://platform.openai.com/docs/models",
+          "cachedInputAccounting": "STANDARD_INPUT_RATE_UNTIL_VERIFIED"
+        },
+        "exactBillingAmountKnownBeforeRequest": false,
+        "unknownPaidCostMayBeAssumedZero": false
+      }
+    },
+    {
+      "name": "Per-request hard cap blocks oversized request",
+      "passed": true,
+      "detail": "EXTERNAL010_OPENAI_PER_REQUEST_COST_CAP_EXCEEDED"
+    },
+    {
+      "name": "Source candidate stores reference only",
+      "passed": true,
+      "detail": {
+        "sourceId": "SOURCE-OPENAI",
+        "sourceName": "OpenAI Responses API",
+        "sourceType": "AI_SERVICE",
+        "provider": "OPENAI",
+        "category": "AI_PROVIDER",
+        "accessMode": "LOCAL_GATEWAY",
+        "adapterId": "EXTERNAL-010-ADAPTER-LOCAL-GATEWAY-001",
+        "endpointPolicy": {
+          "canonicalHost": "api.openai.com",
+          "endpointReference": "OPENAI-RESPONSES-V1",
+          "allowRedirects": false
+        },
+        "authenticationMode": "BEARER_TOKEN",
+        "secretReferenceId": "SECRET-OPENAI-PRIMARY",
+        "allowedOperations": [
+          "INTERNAL_ANALYSIS"
+        ],
+        "allowedMethods": [
+          "POST"
+        ],
+        "pricingMode": "USAGE_BASED",
+        "costCurrency": "USD",
+        "identityState": "VERIFIED",
+        "purpose": "openai-provider-registration"
+      }
+    },
+    {
+      "name": "Operation contract fixes store=false and maxAttempts=1",
+      "passed": true,
+      "detail": {
+        "fixed": {
+          "store": false
+        },
+        "retry": {
+          "maxAttempts": 1,
+          "initialDelayMs": 0,
+          "maxDelayMs": 0,
+          "backoffPolicy": "NONE",
+          "retryableCategories": []
+        }
+      }
+    },
+    {
+      "name": "Prepared request carries request-scoped FINANCIAL_COST",
+      "passed": true,
+      "detail": {
+        "REQUEST_COUNT": 1,
+        "AI_TOKEN_USAGE": 137,
+        "FINANCIAL_COST": 0.0001274
+      }
+    },
+    {
+      "name": "Provider usage reconciles to financial cost",
+      "passed": true,
+      "detail": {
+        "AI_TOKEN_USAGE": 1100,
+        "FINANCIAL_COST": 0.00032
+      }
+    },
+    {
+      "name": "Missing provider usage is explicitly ambiguous",
+      "passed": true,
+      "detail": "EXTERNAL010_OPENAI_USAGE_AMBIGUOUS"
+    },
+    {
+      "name": "Gateway accepts registered POST JSON with store=false",
+      "passed": true,
+      "detail": {
+        "method": "POST",
+        "target": "https://api.openai.com/v1/responses"
+      }
+    },
+    {
+      "name": "Gateway rejects store=true fixed-field mismatch",
+      "passed": true,
+      "detail": "BODY_FIXED_FIELD_MISMATCH"
+    },
+    {
+      "name": "Gateway rejects unregistered tool field",
+      "passed": true,
+      "detail": "BODY_FIELD_UNKNOWN"
+    },
+    {
+      "name": "Generic ACTIVATE_PAID_API remains hard denied",
+      "passed": true,
+      "detail": "preserved"
+    },
+    {
+      "name": "Source Registry POST is scoped to AI_SERVICE + LOCAL_GATEWAY",
+      "passed": true,
+      "detail": "scoped"
+    },
+    {
+      "name": "Cost / risk aware UI is present",
+      "passed": true,
+      "detail": "ui-present"
+    },
+    {
+      "name": "UI never asks for secret value",
+      "passed": true,
+      "detail": "reference-only"
+    }
+  ]
+}

@@ -256,7 +256,8 @@
       sourceId: settings.sourceId ? internal.text(settings.sourceId, "") : null,
       goalId: settings.goalId ? internal.text(settings.goalId, "") : null,
       planId: settings.planId ? internal.text(settings.planId, "") : null,
-      reconciled: true,
+      reconciled: settings.reconciled !== false,
+      reconciliationState: internal.text(settings.reconciliationState, settings.reconciled === false ? "AMBIGUOUS" : "RECONCILED"),
       createdAt: now,
       immutable: true
     });
@@ -277,7 +278,7 @@
     state.resourceBudgetLedger.push(internal.deepFreeze({ ledgerId: internal.nextId("EXTERNAL-010-BUDGET-LEDGER"), eventType: "RESOURCE_USAGE_RECORDED", budgetId: budgetIds[0] || null, usageRecordId: record.usageRecordId, createdAt: now, immutable: true }));
     if (typeof namespace.appendExternalIntelligenceAuditEvent === "function") await namespace.appendExternalIntelligenceAuditEvent({ eventType: "RESOURCE_USAGE_RECORDED", actor: "Resource Budget Registry", outcome: "Reconciled", details: { usageRecordId: record.usageRecordId, budgetIds: budgetIds, sourceId: record.sourceId, goalId: record.goalId, planId: record.planId } });
     internal.touch();
-    return internal.buildResult(true, "EXTERNAL010_RESOURCE_USAGE_RECORDED", "Reconciled", { usageRecord: internal.clone(record), automaticReallocationPerformed: false });
+    return internal.buildResult(true, "EXTERNAL010_RESOURCE_USAGE_RECORDED", record.reconciled ? "Reconciled" : "Recorded / Reconciliation Pending", { usageRecord: internal.clone(record), automaticReallocationPerformed: false, reconciliationPending: record.reconciled !== true });
   }
 
   function createExternalIntelligenceAdditionalBudgetProposal(input) {

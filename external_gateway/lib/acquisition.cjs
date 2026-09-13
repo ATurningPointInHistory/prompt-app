@@ -34,7 +34,7 @@ function validateContext(config, body, options) {
   if(settings.publicOnly===true && authMode!=="NONE") throw buildError("PHASE4_PUBLIC_ACQUISITION_ONLY","AUTHENTICATION_FAILED",403,false);
   if(settings.allowAuthentication===true && authMode!=="NONE" && !SECRET_REFERENCE.test(String(source.secretReferenceId||"").toUpperCase())) throw buildError("SECRET_REFERENCE_REQUIRED","AUTHENTICATION_FAILED",403,false);
   if(!Array.isArray(source.allowedOperations)||!source.allowedOperations.includes(operationId)) throw buildError("SOURCE_OPERATION_NOT_ALLOWED","BLOCKED",403,false);
-  if(operation.method!=="GET") throw buildError("PHASE6_GET_ONLY","BLOCKED",405,false);
+  if(!["GET","POST"].includes(operation.method)) throw buildError("HTTP_METHOD_NOT_ALLOWED","BLOCKED",405,false);
   if(!operation.endpoint||!operation.endpoint.exactUrl||!operation.endpoint.canonicalHost) throw buildError("REGISTERED_EXACT_ENDPOINT_REQUIRED","INVALID_REQUEST",400,false);
   if(route.endpointReference!==operation.endpoint.endpointReference) throw buildError("ENDPOINT_REFERENCE_MISMATCH","BLOCKED",409,false);
   if(route.operationContractId!==operation.operationContractId) throw buildError("OPERATION_CONTRACT_BINDING_MISMATCH","BLOCKED",409,false);
@@ -50,8 +50,23 @@ function validateContext(config, body, options) {
   for(const key of Array.isArray(policy.required)?policy.required:[]) if(!Object.prototype.hasOwnProperty.call(parameters,key)) throw buildError("PARAMETER_REQUIRED","INVALID_REQUEST",400,false,key);
   if(policy.allowUnknown!==true){const allowed=new Set([...(Array.isArray(policy.required)?policy.required:[]),...(Array.isArray(policy.optional)?policy.optional:[])]); for(const key of keys) if(!allowed.has(key)) throw buildError("PARAMETER_UNKNOWN","INVALID_REQUEST",400,false,key);}
   for(const key of keys.sort()){const value=parameters[key]; if(value!=null) url.searchParams.set(key,String(value));}
+  const bodyPolicy=isPlainObject(operation.bodyPolicy)?operation.bodyPolicy:{mode:"NONE",required:[],optional:[],fixedFields:{},allowUnknown:false,maxSerializedBytes:0};
+  const requestBody=isPlainObject(request.body)?request.body:{};
+  let serializedBody=null;
+  if(operation.method==="GET"){ if(Object.keys(requestBody).length) throw buildError("GET_BODY_NOT_ALLOWED","INVALID_REQUEST",400,false); }
+  else {
+    if(bodyPolicy.mode!=="JSON") throw buildError("POST_JSON_BODY_POLICY_REQUIRED","BLOCKED",400,false);
+    const bodyKeys=Object.keys(requestBody);
+    const fixedFields=isPlainObject(bodyPolicy.fixedFields)?bodyPolicy.fixedFields:{};
+    for(const key of Array.isArray(bodyPolicy.required)?bodyPolicy.required:[]) if(!Object.prototype.hasOwnProperty.call(requestBody,key)) throw buildError("BODY_FIELD_REQUIRED","INVALID_REQUEST",400,false,key);
+    for(const key of Object.keys(fixedFields)){if(!Object.prototype.hasOwnProperty.call(requestBody,key)) throw buildError("BODY_FIXED_FIELD_REQUIRED","INVALID_REQUEST",400,false,key);if(JSON.stringify(requestBody[key])!==JSON.stringify(fixedFields[key])) throw buildError("BODY_FIXED_FIELD_MISMATCH","BLOCKED",409,false,key);}
+    if(bodyPolicy.allowUnknown!==true){const allowed=new Set([...(Array.isArray(bodyPolicy.required)?bodyPolicy.required:[]),...(Array.isArray(bodyPolicy.optional)?bodyPolicy.optional:[]),...Object.keys(fixedFields)]); for(const key of bodyKeys) if(!allowed.has(key)) throw buildError("BODY_FIELD_UNKNOWN","INVALID_REQUEST",400,false,key);}
+    serializedBody=JSON.stringify(requestBody);
+    const maxBody=Math.min(Number(bodyPolicy.maxSerializedBytes)||16384,config.maxBodyBytes||65536);
+    if(Buffer.byteLength(serializedBody)>maxBody) throw buildError("BODY_SIZE_EXCEEDED","INVALID_REQUEST",413,false);
+  }
   const timeoutMs=Math.max(250,Math.min(Number(request.timeoutPolicy&&request.timeoutPolicy.timeoutMs)||config.acquisitionDefaultTimeoutMs,config.acquisitionMaxTimeoutMs));
-  return {request,source,operation,route,authority,url,timeoutMs,targetKey:exactTargetKey(url),authenticationMode:authMode};
+  return {request,source,operation,route,authority,url,timeoutMs,targetKey:exactTargetKey(url),authenticationMode:authMode,serializedBody};
 }
 
 async function readJsonResponse(config,response){const reader=response.body&&response.body.getReader?response.body.getReader():null;if(!reader){const text=await response.text();if(Buffer.byteLength(text)>config.acquisitionMaxResponseBytes)throw buildError("RESPONSE_TOO_LARGE","INVALID_RESPONSE",413,false,"Response exceeded limit",response.status);try{return{payload:text?JSON.parse(text):null,rawText:text,bytes:Buffer.byteLength(text)}}catch(_){throw buildError("INVALID_JSON_RESPONSE","INVALID_RESPONSE",502,false,"External response was not valid JSON",response.status)}}const chunks=[];let bytes=0;while(true){const{done,value}=await reader.read();if(done)break;bytes+=value.byteLength;if(bytes>config.acquisitionMaxResponseBytes){try{await reader.cancel()}catch(_){}throw buildError("RESPONSE_TOO_LARGE","INVALID_RESPONSE",413,false,"Response exceeded limit",response.status)}chunks.push(Buffer.from(value))}const text=Buffer.concat(chunks).toString("utf8");try{return{payload:text?JSON.parse(text):null,rawText:text,bytes}}catch(_){throw buildError("INVALID_JSON_RESPONSE","INVALID_RESPONSE",502,false,"External response was not valid JSON",response.status)}}
@@ -82,7 +97,10 @@ function createAcquisition(config,audit,secretStore){
     try{
       const auth=authMaterial(context);
       const headers={Accept:"application/json","User-Agent":`AI-Prompt-OS-EXTERNAL-010-Gateway/${config.gatewayVersion}`,...auth.headers};
-      const response=await fetch(context.url,{method:"GET",redirect:"error",cache:"no-store",credentials:"omit",signal:controller.signal,headers});
+      if(context.operation.method==="POST") headers["Content-Type"]="application/json";
+      const fetchOptions={method:context.operation.method,redirect:"error",cache:"no-store",credentials:"omit",signal:controller.signal,headers};
+      if(context.operation.method==="POST") fetchOptions.body=context.serializedBody;
+      const response=await fetch(context.url,fetchOptions);
       const parsedRaw=await readJsonResponse(config,response);
       const parsed={ payload:redactSecretValue(parsedRaw.payload,auth.secretValue), rawText:redactSecretValue(parsedRaw.rawText,auth.secretValue), bytes:Buffer.byteLength(redactSecretValue(parsedRaw.rawText,auth.secretValue)) };
       if(!response.ok){const category=response.status===429?"RATE_LIMITED":response.status>=500?"TEMPORARY_SOURCE_UNAVAILABLE":response.status===401||response.status===403?"AUTHENTICATION_FAILED":"INVALID_RESPONSE";throw buildError(`HTTP_${response.status}`,category,502,response.status===429||response.status>=500,`External HTTP ${response.status}`,response.status);}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "recoveryEpoch": "RECOVERY-EPOCH-0-b5a8bc1e-41a4-424e-99bf-f85804fda7ec",
+  "epochSequence": 0,
+  "points": [
+    {
+      "recoveryPointId": "EXTERNAL-010-RECOVERY-POINT-PC-P20-MTYEMPA6-0026",
+      "recoveryPointType": "CHECKPOINT",
+      "createdAt": "2026-09-12T13:12:01.686Z",
+      "recoveryPointState": "VALID",
+      "manifestHash": "911d0ff702b3fbe6387f99d93527067021563b38c6659339ef1f9bcdcc3cde68",
+      "credentialMaterialPresent": false
+    }
+  ],
+  "updatedAt": "2026-09-12T13:12:01.746Z",
+  "credentialMaterialPresent": false
+}

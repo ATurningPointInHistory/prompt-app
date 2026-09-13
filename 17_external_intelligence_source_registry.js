@@ -23,6 +23,9 @@
   const AUTH_MODES = VERSION_MANIFEST.sourceGovernance.authenticationModes.slice();
   const PRICING_MODES = VERSION_MANIFEST.sourceGovernance.pricingModes.slice();
   const INITIAL_METHODS = VERSION_MANIFEST.sourceGovernance.initialAllowedHttpMethods.slice();
+  const GOVERNED_METHODS = Object.freeze((VERSION_MANIFEST.sourceGovernance.governedPostAllowedHttpMethods || INITIAL_METHODS).slice());
+  const GOVERNED_POST_SOURCE_TYPES = Object.freeze((VERSION_MANIFEST.sourceGovernance.governedPostSourceTypes || []).slice());
+  const GOVERNED_POST_ACCESS_MODES = Object.freeze((VERSION_MANIFEST.sourceGovernance.governedPostAccessModes || []).slice());
   const SENSITIVE_KEY = /(password|api[_-]?key|bearer[_-]?token|access[_-]?token|refresh[_-]?token|private[_-]?key|authorization|secret(?!ReferenceId$))/i;
 
   function upper(value, fallback) {
@@ -91,7 +94,13 @@
     if (!AUTH_MODES.includes(normalized.authenticationMode)) errors.push("AUTHENTICATION_MODE_INVALID");
     if (!PRICING_MODES.includes(normalized.pricingMode)) errors.push("PRICING_MODE_INVALID");
     if (!normalized.allowedOperations.length) errors.push("ALLOWED_OPERATIONS_REQUIRED");
-    if (normalized.allowedMethods.some(function method(v) { return !INITIAL_METHODS.includes(v); })) errors.push("NON_READ_METHOD_NOT_ALLOWED_PHASE3");
+    const invalidMethods = normalized.allowedMethods.filter(function method(v) { return !GOVERNED_METHODS.includes(v); });
+    if (invalidMethods.length) errors.push("HTTP_METHOD_NOT_ALLOWED");
+    if (normalized.allowedMethods.includes("POST")) {
+      if (!GOVERNED_POST_SOURCE_TYPES.includes(normalized.sourceType)) errors.push("GOVERNED_POST_SOURCE_TYPE_NOT_ALLOWED");
+      if (!GOVERNED_POST_ACCESS_MODES.includes(normalized.accessMode)) errors.push("GOVERNED_POST_LOCAL_GATEWAY_REQUIRED");
+      if (!normalized.endpointPolicy || !normalized.endpointPolicy.canonicalHost) errors.push("GOVERNED_POST_CANONICAL_HOST_REQUIRED");
+    }
     if (normalized.authenticationMode !== "NONE" && !normalized.secretReferenceId) errors.push("SECRET_REFERENCE_REQUIRED");
     if (normalized.authenticationMode === "NONE" && normalized.secretReferenceId) errors.push("SECRET_REFERENCE_WITH_NONE_AUTH");
     if (normalized.accessMode !== "DISABLED" && !normalized.adapterId) errors.push("ADAPTER_REQUIRED");

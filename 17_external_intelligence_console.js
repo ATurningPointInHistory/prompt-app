@@ -187,6 +187,8 @@
         '</details>' +
       '</section>' +
 
+      (typeof n.renderOpenAIProviderIntegrationPanelHtml === "function" ? n.renderOpenAIProviderIntegrationPanelHtml() : '') +
+
       '<section class="external-section">' +
         '<h4>現在のデータ</h4><div class="external-grid external-count-grid">' + renderCounts(snapshot.counts) + '</div>' +
       '</section>' +

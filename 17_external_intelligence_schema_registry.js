@@ -125,7 +125,7 @@
       }),
     schema("EXTERNAL-010-SCHEMA-RESOURCE-USAGE-RECORD", "External Intelligence Resource Usage Record",
       ["usageRecordId", "operationId", "budgetIds", "estimatedUsage", "actualUsage", "reconciled", "createdAt", "immutable"], {
-        usageRecordId: { type: "string" }, operationId: { type: "string" }, budgetIds: { type: "array" }, estimatedUsage: { type: "object" }, actualUsage: { type: "object" }, sourceId: { type: ["string", "null"] }, goalId: { type: ["string", "null"] }, planId: { type: ["string", "null"] }, reconciled: { type: "boolean" }, createdAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
+        usageRecordId: { type: "string" }, operationId: { type: "string" }, budgetIds: { type: "array" }, estimatedUsage: { type: "object" }, actualUsage: { type: "object" }, sourceId: { type: ["string", "null"] }, goalId: { type: ["string", "null"] }, planId: { type: ["string", "null"] }, reconciled: { type: "boolean" }, reconciliationState: { type: "string" }, createdAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
       }),
     schema("EXTERNAL-010-SCHEMA-USAGE-POLICY", "External Intelligence Usage Policy",
       ["usagePolicyId", "sourceId", "policyVersion", "observedAt", "policyEvidenceIds", "analysisVersion", "status", "rights", "policyCompleteness", "interpretationConfidence", "aiInterpretationEqualsLegalAuthority", "policyChangeDetected", "createdAt", "updatedAt", "immutable"], {
@@ -142,10 +142,10 @@
         enabled: { type: "boolean" }, authorityGranted: { type: "boolean", enum: [false] }, createdAt: { type: "string" }, updatedAt: { type: "string" }, immutable: { type: "boolean", enum: [true] }
       }),
     schema("EXTERNAL-010-SCHEMA-ACQUISITION-REQUEST", "External Intelligence Unified Acquisition Request",
-      ["requestId", "sourceId", "operationId", "parameters", "body", "requestedAt", "priority", "executionPreference", "timeoutPolicy", "retryPolicy", "requestContext", "purpose", "requestedBy", "budgetIds", "status", "executionAuthorityGranted", "validationGrantsExecutionAuthority", "immutable"], {
+      ["requestId", "sourceId", "operationId", "parameters", "body", "requestedAt", "priority", "executionPreference", "timeoutPolicy", "retryPolicy", "requestContext", "purpose", "requestedBy", "budgetIds", "estimatedUsage", "status", "executionAuthorityGranted", "validationGrantsExecutionAuthority", "immutable"], {
         requestId: { type: "string" }, sourceId: { type: "string" }, operationId: { type: "string" }, parameters: { type: "object" }, body: { type: "object" }, requestedAt: { type: "string" }, priority: { type: "string" }, executionPreference: { type: "string" },
         timeoutPolicy: { type: "object" }, retryPolicy: { type: "object" }, idempotencyKey: { type: ["string", "null"] }, requestContext: { type: "object" }, purpose: { type: "string" }, requestedBy: { type: "string" },
-        correlationId: { type: ["string", "null"] }, budgetIds: { type: "array" }, acquisitionPlanId: { type: ["string", "null"] }, researchGoalId: { type: ["string", "null"] }, status: { type: "string" },
+        correlationId: { type: ["string", "null"] }, budgetIds: { type: "array" }, estimatedUsage: { type: "object" }, acquisitionPlanId: { type: ["string", "null"] }, researchGoalId: { type: ["string", "null"] }, status: { type: "string" },
         executionAuthorityGranted: { type: "boolean", enum: [false] }, validationGrantsExecutionAuthority: { type: "boolean", enum: [false] }, immutable: { type: "boolean", enum: [true] }
       }),
     schema("EXTERNAL-010-SCHEMA-ACQUISITION-ATTEMPT", "External Intelligence Acquisition Attempt",

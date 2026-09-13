@@ -1,0 +1,31 @@
+{
+  "scopeId": "EXTERNAL-010-DECISION-055-AUDIT-SCOPE-0.2.0-CANDIDATE",
+  "componentId": "EXTERNAL-010",
+  "decisionId": "EXTERNAL-010-DECISION-055",
+  "decisionStatus": "ACCEPTED_FROZEN",
+  "scopeMethod": "DECISION_SCOPED_STATIC_EVIDENCE",
+  "crossDecisionCandidateSearchAllowed": false,
+  "gatewaySourceIncluded": true,
+  "parentCanonicalVersion": "1.20.1",
+  "phase1CandidateAlreadyImplemented": true,
+  "implementationFiles": [
+    "00_style.css",
+    "17_external_intelligence_acquisition_contract.js",
+    "17_external_intelligence_acquisition_queue.js",
+    "17_external_intelligence_authority.js",
+    "17_external_intelligence_console.js",
+    "17_external_intelligence_openai_provider_integration.js",
+    "17_external_intelligence_openai_provider_ui.js",
+    "17_external_intelligence_resource_budget.js",
+    "17_external_intelligence_secret_governance.js",
+    "external_gateway/lib/acquisition.cjs",
+    "external_gateway/lib/secret_store.cjs",
+    "validate_openai_api_phase2.cjs"
+  ],
+  "validationFiles": [
+    "validate_openai_api_phase2.cjs",
+    "OPENAI_API_INTEGRATION_PHASE2_VALIDATION_RESULT.json"
+  ],
+  "note": "Derived candidate only. Does not mutate v1.20.1 FINAL_FREEZE. PC/Android and live paid OpenAI request remain promotion gates.",
+  "generatedAt": "2026-09-14T01:20:00+09:00"
+}

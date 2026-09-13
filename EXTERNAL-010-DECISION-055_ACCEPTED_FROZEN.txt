@@ -1,0 +1,516 @@
+============================================================
+AI Prompt OS / AIプロンプト生成Pro
+EXTERNAL-010 External Intelligence Platform
+Architecture Decision 055
+Governed External AI Provider Integration and Paid API Safety Boundary
+
+Decision ID:
+EXTERNAL-010-DECISION-055
+
+Title:
+Evidence-Grounded Governed External AI Provider Integration
+and Paid API Safety Boundary
+
+Status:
+Accepted / Frozen
+
+Date:
+2026-09-13
+
+Selected Option:
+C - EXTERNAL-010 Provider Integration Extension
+    + Governed POST JSON Contract
+    + Existing Gateway / Secret / Budget Reuse
+    + Explicit Paid Activation Gate
+    + Versioned Cost Reconciliation
+
+============================================================
+
+1. Context
+============================================================
+
+EXTERNAL-010 v1.20.1 is the formally frozen canonical baseline.
+
+EXTERNAL-010 already provides:
+
+・Governed Source Registry
+・Usage Policy
+・Resource Budget
+・Acquisition Contract
+・Adapter Registry
+・Source Router
+・Acquisition Queue
+・Local Gateway Client
+・Gateway Session / Request Integrity
+・Reference-only Browser Secret Governance
+・Gateway Secret Store
+・Authority Validation
+・Audit / Evidence / Lineage
+・Fail-Closed External Acquisition
+
+The first concrete external AI provider integration is OpenAI API.
+
+The current acquisition transport is intentionally GET-only.
+The current Source Registry intentionally blocks automatic activation
+of paid or unknown-cost sources.
+
+OpenAI Responses API requires a governed authenticated POST JSON request.
+Therefore the integration must extend the existing boundary without
+turning EXTERNAL-010 into a general-purpose arbitrary HTTP proxy and
+without weakening the existing paid-source safety boundary.
+
+============================================================
+
+2. Decision
+============================================================
+
+Adopt:
+
+C - EXTERNAL-010 Provider Integration Extension
+    + Governed POST JSON Contract
+    + Existing Gateway / Secret / Budget Reuse
+    + Explicit Paid Activation Gate
+    + Versioned Cost Reconciliation
+
+OpenAI API Integration SHALL be implemented as an EXTERNAL-010
+Provider Integration Extension.
+
+A second External Intelligence Core, Secret Store, Source Registry,
+Budget Engine, Usage Policy Engine, Acquisition Engine, or Gateway
+SHALL NOT be created for OpenAI integration.
+
+EXTERNAL-010 remains the authority-bearing integration boundary.
+
+============================================================
+
+3. Provider Integration Responsibility Boundary
+============================================================
+
+Provider-specific integration may define:
+
+・Provider Profile
+・Model Capability Profile
+・Registered Endpoints
+・Registered Operations
+・Request Body Schema / Body Policy
+・Authentication Profile
+・Usage Extraction Profile
+・Pricing Profile
+・Provider Error Mapping
+
+Provider-specific integration SHALL NOT independently own:
+
+・Secret Value Storage
+・Source Activation Authority
+・Budget Authority
+・Usage Policy Authority
+・Gateway Session Authority
+・Canonical Evidence Authority
+・Trading / Financial Execution Authority
+・Repository Mutation Authority
+
+============================================================
+
+4. Governed HTTP Method Extension
+============================================================
+
+Existing GET behavior SHALL remain backward compatible.
+
+POST SHALL NOT be globally enabled.
+
+POST is permitted only when all of the following are true:
+
+・Source is registered
+・Operation is registered
+・Operation Contract explicitly permits POST
+・Endpoint is exact-registered / allowlisted
+・Canonical Host is allowlisted
+・Content Type is application/json
+・Request Body passes registered Body Policy
+・Unknown Body Fields are rejected unless explicitly permitted
+・Body Size is within the configured hard limit
+・Secret-like Body injection is rejected
+・Gateway Session / Request Integrity is valid
+・Required Authority is valid
+・Usage Policy passes
+・Resource Budget passes when applicable
+
+Arbitrary HTTP methods, arbitrary endpoints, arbitrary hosts,
+arbitrary request bodies, and general-purpose proxy behavior
+remain prohibited.
+
+============================================================
+
+5. Secret Boundary
+============================================================
+
+Provider Secret values SHALL remain Gateway-only.
+
+Browser / Repository / Evidence / Source Registry SHALL store only
+secretReferenceId and non-secret metadata.
+
+Provider Secret values SHALL NOT be:
+
+・embedded in JavaScript
+・stored in Source Registry
+・stored in Evidence
+・stored in Browser persistence
+・returned to Browser
+・included in normal audit logs
+・included in request / response diagnostic dumps
+
+Existing EXTERNAL-010 Secret Governance and Gateway Secret Store
+remain the Single Source of Truth for this responsibility.
+
+Gateway Session Token and Provider Secret remain separate authorities.
+
+============================================================
+
+6. Paid API Activation Boundary
+============================================================
+
+Existing paid-source blocking SHALL NOT be deleted or bypassed.
+
+A dedicated governed Paid Source Activation path SHALL be introduced.
+
+Minimum required gates:
+
+Usage Policy PASS
+↓
+Known Pricing / Pricing Profile PASS
+↓
+Estimated FINANCIAL_COST available
+↓
+Active Resource Budget PASS
+↓
+Economic / Paid API Authority PASS
+↓
+Explicit Project Owner Approval
+↓
+Paid Source Activation
+
+Secret availability alone SHALL NOT authorize paid usage.
+
+Source registration alone SHALL NOT authorize paid usage.
+
+Valid Gateway Session alone SHALL NOT authorize paid usage.
+
+Model availability alone SHALL NOT authorize paid usage.
+
+Automatic unlimited paid-source activation remains prohibited.
+
+============================================================
+
+7. Cost Estimation and Reconciliation
+============================================================
+
+Paid API execution SHALL separate:
+
+Preflight Estimated Usage / Estimated Financial Cost
+
+from:
+
+Post-execution Actual Usage / Reconciled Financial Cost.
+
+Pricing SHALL be versioned metadata and SHALL NOT be treated as
+permanent hard-coded truth.
+
+A Pricing Profile should preserve at minimum:
+
+・provider
+・model
+・pricing version
+・effectiveFrom
+・input unit price
+・cached input unit price when applicable
+・output unit price
+・currency
+・source / provenance
+・verifiedAt
+
+Unknown paid cost SHALL remain Fail-Closed.
+
+Provider usage metadata SHALL be parsed after execution when available.
+
+Actual usage SHALL be reconciled into the existing Resource Budget
+ledger without silently assuming an unknown cost is zero.
+
+Timeout, retry, partial response, and ambiguous provider-completion
+states SHALL NOT automatically be interpreted as zero financial cost.
+
+============================================================
+
+8. OpenAI Initial Provider Scope
+============================================================
+
+Initial OpenAI integration scope:
+
+・OpenAI Responses API
+・Text Input → Text Output
+・POST JSON
+・Bearer Authentication
+・Non-Streaming
+・store = false
+・Registered Model only
+・Registered Host / Endpoint only
+・Explicit max output bound
+・Budget required for paid execution
+・Retry hard limit
+・Provider usage extraction
+・Cost reconciliation
+
+Initial scope excludes:
+
+・Streaming
+・Background Mode
+・Web Search Tool
+・File Search Tool
+・Computer Use
+・Arbitrary Function Calling
+・Arbitrary Tool Invocation
+・Automatic Model Escalation
+・Automatic Unlimited Retry
+・Automatic Paid Activation
+
+Excluded capabilities require later governed extension and validation.
+
+============================================================
+
+9. Core Independence / Degraded Mode
+============================================================
+
+OpenAI API SHALL NOT become a mandatory dependency of AI Prompt OS Core.
+
+OpenAI unavailable
+≠
+AI Prompt OS Core unavailable.
+
+Gateway unavailable
+≠
+AI Prompt OS Core unavailable.
+
+Budget denied
+≠
+Core failure.
+
+Secret unavailable
+≠
+Core failure.
+
+Provider integration must fail closed at the provider capability boundary
+while preserving existing local/core operation where possible.
+
+============================================================
+
+10. Data Transmission Boundary
+============================================================
+
+store=false does not mean that request content is not transmitted
+to the provider.
+
+Any content sent to an external AI provider crosses an external
+processing boundary.
+
+Future automatic context assembly SHALL therefore remain subject to
+explicit provider transmission policy.
+
+Secret values SHALL never be automatically included in provider context.
+
+Repository-wide automatic transmission is not authorized by this Decision.
+
+Personal, confidential, restricted, or policy-sensitive data handling
+requires the applicable existing or future governance checks.
+
+============================================================
+
+11. Retry / Failure Safety
+============================================================
+
+Paid API retries SHALL be bounded.
+
+Retry authority SHALL NOT bypass:
+
+・Budget hard limits
+・Paid API authority
+・Request identity / replay controls
+・Provider operation constraints
+
+A failed local response does not prove that provider-side processing
+or billing did not occur.
+
+Ambiguous completion SHALL be represented as ambiguous / unreconciled
+rather than silently recorded as zero usage.
+
+============================================================
+
+12. Backward Compatibility
+============================================================
+
+Existing EXTERNAL-010 GET acquisition behavior SHALL remain valid.
+
+Existing free-source activation behavior SHALL remain valid.
+
+Existing Secret Governance SHALL remain valid.
+
+Existing Gateway Session / Request Integrity SHALL remain valid.
+
+Existing Budget hard limits SHALL remain non-bypassable.
+
+Existing v1.20.1 Final Freeze remains the parent canonical baseline.
+
+Provider Integration Candidate SHALL NOT rewrite the v1.20.1 Final Freeze.
+
+============================================================
+
+13. Implementation Governance
+============================================================
+
+Implementation SHALL proceed from the v1.20.1 canonical package as a
+derived candidate.
+
+The already-created OpenAI API Phase 1 POST JSON Candidate is treated as
+pre-approval implementation evidence only.
+
+It SHALL NOT be promoted to a formal release until:
+
+・Decision 055 is accepted by Project Owner
+・Decision-to-code traceability is established
+・Regression validation passes
+・New provider integration validation passes
+・PC Real Runtime validation passes where required
+・Android Real Device validation passes where applicable
+・criticalFailed = 0
+・Release Gate allows promotion
+
+============================================================
+
+14. Initial Implementation Scope
+============================================================
+
+The initial implementation SHALL include:
+
+・Provider Integration Extension boundary
+・Governed POST JSON operation contract
+・Exact host / endpoint enforcement
+・Body Policy / Body Schema validation
+・Body size hard limit
+・Secret-like Body rejection
+・OpenAI Provider Profile
+・OpenAI Responses API operation profile
+・Bearer secretReference binding
+・store=false enforcement
+・Registered model enforcement
+・Explicit output bound
+・Paid Source Activation Gate
+・Versioned Pricing Profile foundation
+・Estimated FINANCIAL_COST preflight
+・Provider usage extraction
+・Actual usage / financial cost reconciliation
+・Retry hard limit
+・Ambiguous billing state representation
+・Audit / Evidence / Lineage integration
+・Backward compatibility validation
+・PC / Android applicable validation
+
+============================================================
+
+15. Explicit Non-Goals
+============================================================
+
+This Decision does not authorize:
+
+・General-purpose HTTP proxy capability
+・Arbitrary POST to arbitrary hosts
+・Browser-side API key storage
+・Unlimited paid API usage
+・Automatic Project Owner approval
+・Automatic budget expansion
+・Trading authority
+・Financial transaction authority
+・Repository mutation authority
+・OpenAI becoming mandatory for Core startup
+・All OpenAI tools being enabled in Phase 1
+
+
+============================================================
+
+16. Human-Centered Cost / Risk Configuration UI
+============================================================
+
+The provider integration UI is part of the safety boundary.
+
+Pre-approved scope SHALL NOT require per-request human approval.
+
+Normal requests inside an active approved scope may execute without
+repeated Project Owner confirmation.
+
+Human confirmation is required when a change expands a governed boundary,
+including budget expansion, materially higher per-request cost,
+new provider/model capability, new external transmission category,
+new tool capability, or authority expansion.
+
+Cost-affecting controls SHALL display their cost effect at the point of
+change.
+
+Risk-affecting controls SHALL display their risk effect at the point of
+change.
+
+The UI SHALL provide progressive disclosure:
+
+・Simple / normal-use settings
+・Cost / usage visibility
+・Advanced settings
+・Safety / authority settings
+
+The UI SHALL show before/after impact for material changes.
+
+Large budget increases and abnormal numeric changes SHALL receive
+stronger confirmation than safe-side reductions.
+
+The UI SHALL distinguish at minimum:
+
+GREEN  = within approved normal scope
+YELLOW = cost / transmission / capability caution
+RED    = authority, budget, or risk-boundary expansion requiring approval
+
+The normal-use surface SHOULD show at a glance:
+
+・Provider availability
+・Current model
+・Current-period financial usage / limit
+・Per-request hard cap
+・External transmission category
+・Enabled tool/capability state
+
+AI may recommend a budget increase but SHALL NOT approve or apply its own
+budget expansion.
+
+Safety controls SHALL be strong at irreversible/high-risk boundaries
+without unnecessarily reducing normal AI reasoning or workflow capability
+inside the approved scope.
+
+============================================================
+
+17. Decision Effect
+============================================================
+
+
+If accepted:
+
+EXTERNAL-010-DECISION-055 becomes the architecture authority for
+governed external AI provider integration and paid API safety.
+
+OpenAI becomes the first concrete provider implementation under this
+boundary.
+
+Future providers SHOULD reuse the same governed integration architecture
+unless a later Decision explicitly changes the boundary.
+
+============================================================
+
+Project Owner Approval:
+APPROVED
+
+Approval Date:
+2026-09-14
+============================================================

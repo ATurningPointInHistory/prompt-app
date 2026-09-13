@@ -2860,3 +2860,24 @@ body.zip-diff-open {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* EXTERNAL-010 Decision 055 / OpenAI Cost & Risk Aware UI Candidate */
+.openai-config-section { overflow: hidden; }
+.openai-risk { display:inline-flex; align-items:center; justify-content:center; min-height:28px; padding:4px 9px; border:1px solid currentColor; border-radius:999px; font-size:10px; font-weight:800; letter-spacing:.04em; }
+.openai-risk-green { color:#16784a; background:rgba(22,120,74,.08); }
+.openai-risk-yellow { color:#9a6700; background:rgba(154,103,0,.08); }
+.openai-risk-red { color:#b42318; background:rgba(180,35,24,.08); }
+.openai-summary-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; margin-top:10px; }
+.openai-summary-grid > div { display:flex; flex-direction:column; gap:4px; min-width:0; padding:9px; border:1px solid var(--border); border-radius:9px; }
+.openai-summary-grid span { font-size:9px; opacity:.7; }
+.openai-summary-grid strong { font-size:11px; overflow:hidden; text-overflow:ellipsis; }
+.openai-config-details { margin-top:10px; border:1px solid var(--border); border-radius:10px; padding:10px; }
+.openai-config-details > summary { cursor:pointer; font-weight:700; font-size:12px; }
+.openai-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:10px; }
+.openai-form-grid label { display:flex; flex-direction:column; gap:5px; font-size:10px; font-weight:700; }
+.openai-form-grid input,.openai-form-grid select { width:100%; min-height:40px; box-sizing:border-box; }
+.openai-form-grid small { font-size:9px; font-weight:500; line-height:1.45; opacity:.72; }
+.openai-actions { margin-top:10px; }
+@media (max-width:900px){ .openai-summary-grid{grid-template-columns:repeat(3,minmax(0,1fr));} }
+@media (max-width:600px){ .openai-summary-grid,.openai-form-grid{grid-template-columns:1fr 1fr;} }
+@media (max-width:420px){ .openai-summary-grid,.openai-form-grid{grid-template-columns:1fr;} }

@@ -405,6 +405,7 @@
         field("goalId", { required: false, type: ["string", "null"] }),
         field("planId", { required: false, type: ["string", "null"] }),
         field("reconciled", { required: true, type: "boolean" }),
+        field("reconciliationState", { required: false, type: "string" }),
         field("createdAt", { required: true, type: "string" }),
         field("immutable", { required: true, type: "boolean", enum: [true] })
       ]
@@ -509,6 +510,7 @@
         field("requestedBy", { required: true, type: "string" }),
         field("correlationId", { required: false, type: ["string", "null"] }),
         field("budgetIds", { required: true, type: "array" }),
+        field("estimatedUsage", { required: true, type: "object" }),
         field("acquisitionPlanId", { required: false, type: ["string", "null"] }),
         field("researchGoalId", { required: false, type: ["string", "null"] }),
         field("status", { required: true, type: "string" }),

@@ -1,0 +1,474 @@
+{
+  "componentId": "EXTERNAL-010",
+  "decisionId": "EXTERNAL-010-DECISION-055",
+  "decisionStatus": "ACCEPTED_FROZEN",
+  "projectOwnerApprovalDate": "2026-09-14",
+  "parentCanonicalVersion": "1.20.1",
+  "explicitInitialImplementationRequirementCount": 31,
+  "status": "PHASE2_IMPLEMENTATION_TRACEABILITY_CANDIDATE",
+  "requirements": [
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-01",
+      "text": "Provider Integration Extension boundary",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-02",
+      "text": "Governed POST JSON operation contract",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_acquisition_contract.js",
+        "external_gateway/lib/acquisition.cjs"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-03",
+      "text": "Exact host / endpoint enforcement",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js",
+        "external_gateway/lib/acquisition.cjs"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-04",
+      "text": "Body Policy / Body Schema validation",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_acquisition_contract.js",
+        "external_gateway/lib/acquisition.cjs"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-05",
+      "text": "Body size hard limit",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_acquisition_contract.js",
+        "external_gateway/lib/acquisition.cjs"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-06",
+      "text": "Secret-like Body rejection",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_acquisition_contract.js",
+        "external_gateway/lib/acquisition.cjs"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-07",
+      "text": "OpenAI Provider Profile",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-08",
+      "text": "OpenAI Responses API operation profile",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-09",
+      "text": "Bearer secretReference binding",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js",
+        "17_external_intelligence_secret_governance.js",
+        "external_gateway/lib/secret_store.cjs"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-10",
+      "text": "store=false enforcement",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js",
+        "17_external_intelligence_acquisition_contract.js",
+        "external_gateway/lib/acquisition.cjs"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-11",
+      "text": "Registered model enforcement",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-12",
+      "text": "Explicit output bound",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-13",
+      "text": "Paid Source Activation Gate",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js",
+        "17_external_intelligence_authority.js",
+        "17_external_intelligence_resource_budget.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-14",
+      "text": "Versioned Pricing Profile foundation",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-15",
+      "text": "Estimated FINANCIAL_COST preflight",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js",
+        "17_external_intelligence_acquisition_contract.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-16",
+      "text": "Provider usage extraction",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js",
+        "17_external_intelligence_acquisition_queue.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-17",
+      "text": "Actual usage / financial cost reconciliation",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js",
+        "17_external_intelligence_acquisition_queue.js",
+        "17_external_intelligence_resource_budget.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-18",
+      "text": "Retry hard limit",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-19",
+      "text": "Ambiguous billing state representation",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js",
+        "17_external_intelligence_acquisition_queue.js",
+        "17_external_intelligence_resource_budget.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-20",
+      "text": "Audit / Evidence / Lineage integration",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "PARTIAL",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js",
+        "17_external_intelligence_acquisition_contract.js"
+      ],
+      "validationRefs": [],
+      "implementationState": "PARTIAL"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-21",
+      "text": "Backward compatibility validation",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "PARTIAL",
+      "implementationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "PARTIAL"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-22",
+      "text": "PC / Android applicable validation",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Initial Implementation Scope",
+      "verificationState": "PENDING",
+      "implementationRefs": [],
+      "validationRefs": [],
+      "implementationState": "PENDING"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-23",
+      "text": "No Per-Request Human Approval for Pre-Approved Scope",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Human-Centered Cost / Risk Configuration UI",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-24",
+      "text": "Material Cost Change Impact Display",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Human-Centered Cost / Risk Configuration UI",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_ui.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-25",
+      "text": "Material Risk Change Impact Display",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Human-Centered Cost / Risk Configuration UI",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_ui.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-26",
+      "text": "Progressive Disclosure Configuration UI",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Human-Centered Cost / Risk Configuration UI",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_ui.js",
+        "17_external_intelligence_console.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-27",
+      "text": "Before / After Impact Preview",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Human-Centered Cost / Risk Configuration UI",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_ui.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-28",
+      "text": "Abnormal Budget Increase Confirmation",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Human-Centered Cost / Risk Configuration UI",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_ui.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-29",
+      "text": "GREEN / YELLOW / RED Risk Level Presentation",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Human-Centered Cost / Risk Configuration UI",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_ui.js",
+        "00_style.css"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-30",
+      "text": "At-a-Glance Provider / Model / Budget / Cap / Transmission / Tool Status",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Human-Centered Cost / Risk Configuration UI",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_ui.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    },
+    {
+      "requirementId": "EXTERNAL-010-REQ-055-INIT-31",
+      "text": "AI Budget Increase Recommendation Does Not Grant Budget Authority",
+      "sourceDecisionId": "EXTERNAL-010-DECISION-055",
+      "sourceSection": "Human-Centered Cost / Risk Configuration UI",
+      "verificationState": "STATIC_UNIT_PASS",
+      "implementationRefs": [
+        "17_external_intelligence_openai_provider_integration.js",
+        "17_external_intelligence_resource_budget.js"
+      ],
+      "validationRefs": [
+        "validate_openai_api_phase2.cjs"
+      ],
+      "implementationState": "IMPLEMENTED"
+    }
+  ],
+  "candidateVersion": "0.2.0",
+  "phase1CandidateAlreadyImplemented": true,
+  "phase2StaticUnitValidation": {
+    "passed": 20,
+    "failed": 0,
+    "total": 20,
+    "health": 100,
+    "realPaidRequestPerformed": false
+  },
+  "summary": {
+    "IMPLEMENTED": 28,
+    "PARTIAL": 2,
+    "PENDING": 1
+  }
+}
