@@ -248,6 +248,7 @@
         operationId: request.operationId,
         purpose: request.purpose,
         parameters: internal.clone(request.parameters || {}),
+        body: internal.clone(request.body || {}),
         timeoutPolicy: internal.clone(request.timeoutPolicy || {})
       },
       source: {
@@ -268,7 +269,8 @@
         method: operationContract.method,
         adapterId: operationContract.adapterId,
         endpoint: internal.clone(operationContract.endpoint || {}),
-        parameterPolicy: internal.clone(operationContract.parameterPolicy || {})
+        parameterPolicy: internal.clone(operationContract.parameterPolicy || {}),
+        bodyPolicy: internal.clone(operationContract.bodyPolicy || {})
       },
       route: {
         routeId: route.routeId,

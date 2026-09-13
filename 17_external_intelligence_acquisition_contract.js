@@ -73,6 +73,20 @@
     };
   }
 
+
+  function normalizeBodyPolicy(value, method) {
+    const input = internal.isPlainObject(value) ? value : {};
+    const normalizedMethod = upper(method, "GET");
+    if (normalizedMethod === "GET") return { mode: "NONE", required: [], optional: [], allowUnknown: false, maxSerializedBytes: 0 };
+    return {
+      mode: "JSON",
+      required: internal.unique(input.required),
+      optional: internal.unique(input.optional),
+      allowUnknown: input.allowUnknown === true,
+      maxSerializedBytes: Number.isInteger(input.maxSerializedBytes) ? Math.max(256, Math.min(input.maxSerializedBytes, 65536)) : 16384
+    };
+  }
+
   function normalizeOperationContract(input) {
     const source = internal.isPlainObject(input) ? input : {};
     const sourceId = normalizeSourceId(source.sourceId);
@@ -91,6 +105,7 @@
         endpointReference: internal.text(endpoint.endpointReference, "") || null
       },
       parameterPolicy: normalizeParameterPolicy(source.parameterPolicy),
+      bodyPolicy: normalizeBodyPolicy(source.bodyPolicy, source.method),
       timeoutPolicy: normalizeTimeoutPolicy(source.timeoutPolicy),
       retryPolicy: normalizeRetryPolicy(source.retryPolicy),
       responseMode: upper(source.responseMode, "JSON"),
@@ -111,7 +126,9 @@
 
   function validateEndpoint(operation, source) {
     const errors = [];
-    if (operation.method !== "GET") errors.push("PHASE4_READ_ONLY_METHOD_REQUIRED");
+    if (!["GET", "POST"].includes(operation.method)) errors.push("HTTP_METHOD_NOT_ALLOWED");
+    if (operation.method === "POST" && (!operation.bodyPolicy || operation.bodyPolicy.mode !== "JSON")) errors.push("POST_JSON_BODY_POLICY_REQUIRED");
+    if (operation.method === "GET" && operation.bodyPolicy && operation.bodyPolicy.mode !== "NONE") errors.push("GET_BODY_POLICY_MUST_BE_NONE");
     if (operation.endpoint.exactUrl) {
       let url;
       try { url = new URL(operation.endpoint.exactUrl); } catch (_) { url = null; }
@@ -184,6 +201,7 @@
       sourceId: normalizeSourceId(source.sourceId),
       operationId: normalizeOperationId(source.operationId),
       parameters: internal.isPlainObject(source.parameters) ? internal.clone(source.parameters) : {},
+      body: internal.isPlainObject(source.body) ? internal.clone(source.body) : {},
       requestedAt: internal.nowIso(),
       priority: ACQ.priorities.includes(upper(source.priority, "NORMAL")) ? upper(source.priority, "NORMAL") : "NORMAL",
       executionPreference: ACQ.executionPreferences.includes(upper(source.executionPreference, "AUTO")) ? upper(source.executionPreference, "AUTO") : "AUTO",
@@ -202,6 +220,20 @@
       validationGrantsExecutionAuthority: false,
       immutable: true
     };
+  }
+
+  function validateBody(operationContract, body) {
+    const policy = internal.isPlainObject(operationContract.bodyPolicy) ? operationContract.bodyPolicy : { mode: "NONE", required: [], optional: [], allowUnknown: false, maxSerializedBytes: 0 };
+    const value = internal.isPlainObject(body) ? body : {};
+    const keys = Object.keys(value);
+    if (operationContract.method === "GET") return keys.length ? { valid:false, errors:["GET_BODY_NOT_ALLOWED"] } : { valid:true, errors:[] };
+    const errors = [];
+    if (policy.mode !== "JSON") errors.push("POST_JSON_BODY_POLICY_REQUIRED");
+    (policy.required || []).forEach(function(k){ if (!Object.prototype.hasOwnProperty.call(value,k)) errors.push("BODY_FIELD_REQUIRED:"+k); });
+    if (policy.allowUnknown !== true) { const allowed = new Set([].concat(policy.required||[],policy.optional||[])); keys.forEach(function(k){ if(!allowed.has(k)) errors.push("BODY_FIELD_UNKNOWN:"+k); }); }
+    let bytes=0; try { bytes = new TextEncoder().encode(JSON.stringify(value)).length; } catch (_) { errors.push("BODY_SERIALIZATION_FAILED"); }
+    if (bytes > Number(policy.maxSerializedBytes || 0)) errors.push("BODY_SIZE_EXCEEDED");
+    return { valid: errors.length === 0, errors: errors, serializedBytes: bytes };
   }
 
   function createExternalIntelligenceAcquisitionRequest(input) {
@@ -246,6 +278,8 @@
     if (!operationContract || operationContract.enabled !== true) return internal.buildResult(false, "EXTERNAL010_ACQUISITION_OPERATION_CONTRACT_MISSING", "Blocked", { requestId: request.requestId, sourceId: request.sourceId, operationId: request.operationId });
     const parameterErrors = validateParameters(operationContract, request.parameters);
     if (parameterErrors.length) return internal.buildResult(false, "EXTERNAL010_ACQUISITION_PARAMETER_VALIDATION_FAILED", "Blocked", { requestId: request.requestId, errors: parameterErrors });
+    const bodyValidation = validateBody(operationContract, request.body);
+    if (!bodyValidation.valid) return internal.buildResult(false, "EXTERNAL010_ACQUISITION_BODY_VALIDATION_FAILED", "Blocked", { requestId: request.requestId, errors: bodyValidation.errors, serializedBytes: bodyValidation.serializedBytes || 0 });
 
     const budget = namespace.checkExternalIntelligenceResourceBudget({ budgetIds: request.budgetIds, sourceId: request.sourceId, goalId: request.researchGoalId, planId: request.acquisitionPlanId, requestId: request.requestId, pricingMode: state.sourceRegistry.get(request.sourceId).pricingMode, paidRequest: state.sourceRegistry.get(request.sourceId).pricingMode !== "FREE", estimatedUsage: operationContract.estimatedUsage });
     if (!budget.ok) return internal.buildResult(false, "EXTERNAL010_ACQUISITION_BUDGET_VALIDATION_FAILED", "Blocked", { requestId: request.requestId, budget: budget });
