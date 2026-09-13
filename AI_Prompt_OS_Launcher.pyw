@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AI Prompt OS Selectable Launcher v1.4.4
+AI Prompt OS Selectable Launcher v1.4.5
 
 Canonical Gateway Edition
 
@@ -46,6 +46,7 @@ GATEWAY_BAT = GATEWAY_DIR / "start_external_gateway.bat"
 WEB_URL = "http://localhost:8000/"
 WEB_PORT = 8000
 WEB_IDENTITY_FILE = "00_script_manifest.json"
+WEB_INDEX_FILE = "index.html"
 GATEWAY_PORT = 43110
 GATEWAY_HEALTH_URL = f"http://127.0.0.1:{GATEWAY_PORT}/health"
 GATEWAY_EXPECTED_COMPONENT = "EXTERNAL-010"
@@ -119,56 +120,122 @@ def sha256_bytes(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def current_web_build_identity():
+    manifest_path = PROJECT_ROOT / WEB_IDENTITY_FILE
+    version = "unknown"
+    manifest_hash = "unknown"
+    try:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        version = str(payload.get("version", "unknown")).strip() or "unknown"
+        manifest_hash = str(payload.get("manifestHash", "")).strip() or sha256_bytes(manifest_path.read_bytes())
+    except Exception:
+        if manifest_path.exists():
+            manifest_hash = sha256_bytes(manifest_path.read_bytes())
+    return {"version": version, "manifestHash": manifest_hash}
+
+
+def application_url():
+    identity = current_web_build_identity()
+    version = identity.get("version", "unknown")
+    manifest_hash = identity.get("manifestHash", "unknown")[:16]
+    return (
+        f"{WEB_URL}index.html?launcher_version={version}"
+        f"&manifest={manifest_hash}&fresh={time.time_ns()}"
+    )
+
+
+def open_application_browser():
+    url = application_url()
+    log(f"Opening application URL: {url}")
+    return webbrowser.open_new_tab(url)
+
+
+def _fetch_web_bytes(url, timeout=0.8):
+    request = urllib.request.Request(
+        url,
+        headers={
+            "Accept": "*/*",
+            "Cache-Control": "no-cache, no-store, max-age=0",
+            "Pragma": "no-cache",
+        },
+        method="GET",
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        if response.status != 200:
+            raise RuntimeError(f"HTTP_{response.status}")
+        return response.read()
+
+
 def web_server_identity():
     if not port_open(WEB_PORT):
         return {"ok": False, "state": "STOPPED", "reason": "PORT_CLOSED"}
 
     local_identity = PROJECT_ROOT / WEB_IDENTITY_FILE
+    local_index = PROJECT_ROOT / WEB_INDEX_FILE
     if not local_identity.exists():
         return {
             "ok": False,
             "state": "INVALID",
             "reason": "LOCAL_IDENTITY_FILE_MISSING",
         }
-
-    local_bytes = local_identity.read_bytes()
-    local_hash = sha256_bytes(local_bytes)
-    identity_url = f"{WEB_URL}{WEB_IDENTITY_FILE}?launcher_identity={time.time_ns()}"
-
-    try:
-        request = urllib.request.Request(
-            identity_url,
-            headers={"Accept": "application/json", "Cache-Control": "no-cache"},
-            method="GET",
-        )
-        with urllib.request.urlopen(request, timeout=0.8) as response:
-            if response.status != 200:
-                return {
-                    "ok": False,
-                    "state": "INVALID",
-                    "reason": f"HTTP_{response.status}",
-                    "localHash": local_hash,
-                }
-            remote_bytes = response.read()
-    except (OSError, urllib.error.URLError) as exc:
+    if not local_index.exists():
         return {
             "ok": False,
             "state": "INVALID",
-            "reason": type(exc).__name__,
-            "localHash": local_hash,
+            "reason": "LOCAL_INDEX_FILE_MISSING",
         }
 
-    remote_hash = sha256_bytes(remote_bytes)
-    ok = remote_hash == local_hash
+    local_manifest_bytes = local_identity.read_bytes()
+    local_index_bytes = local_index.read_bytes()
+    local_manifest_hash = sha256_bytes(local_manifest_bytes)
+    local_index_hash = sha256_bytes(local_index_bytes)
+    nonce = time.time_ns()
+
+    try:
+        remote_manifest_bytes = _fetch_web_bytes(
+            f"{WEB_URL}{WEB_IDENTITY_FILE}?launcher_identity={nonce}"
+        )
+        remote_index_bytes = _fetch_web_bytes(
+            f"{WEB_URL}{WEB_INDEX_FILE}?launcher_identity={nonce}"
+        )
+    except Exception as exc:
+        return {
+            "ok": False,
+            "state": "INVALID",
+            "reason": str(exc) or type(exc).__name__,
+            "localManifestHash": local_manifest_hash,
+            "localIndexHash": local_index_hash,
+        }
+
+    remote_manifest_hash = sha256_bytes(remote_manifest_bytes)
+    remote_index_hash = sha256_bytes(remote_index_bytes)
+    manifest_ok = remote_manifest_hash == local_manifest_hash
+    index_ok = remote_index_hash == local_index_hash
+    ok = manifest_ok and index_ok
+
+    if not manifest_ok:
+        reason = "PROJECT_MANIFEST_MISMATCH"
+    elif not index_ok:
+        reason = "PROJECT_INDEX_MISMATCH"
+    else:
+        reason = "PASS"
+
+    build = current_web_build_identity()
     return {
         "ok": ok,
         "state": "READY" if ok else "MISMATCH",
-        "reason": "PASS" if ok else "PROJECT_ROOT_MISMATCH",
-        "localHash": local_hash,
-        "remoteHash": remote_hash,
+        "reason": reason,
+        "localHash": local_manifest_hash,
+        "remoteHash": remote_manifest_hash,
+        "localManifestHash": local_manifest_hash,
+        "remoteManifestHash": remote_manifest_hash,
+        "localIndexHash": local_index_hash,
+        "remoteIndexHash": remote_index_hash,
         "identityFile": WEB_IDENTITY_FILE,
+        "indexFile": WEB_INDEX_FILE,
+        "version": build.get("version"),
+        "manifestHash": build.get("manifestHash"),
     }
-
 
 def wait_for_web_ready(timeout=STARTUP_TIMEOUT):
     deadline = time.time() + timeout
@@ -607,7 +674,7 @@ class LauncherApp:
             utility_frame,
             text="ブラウザを開く",
             style="Small.TButton",
-            command=lambda: webbrowser.open(WEB_URL),
+            command=open_application_browser,
         ).grid(row=0, column=0, sticky="ew", padx=(0, 8))
 
         ttk.Button(
@@ -695,7 +762,7 @@ class LauncherApp:
                 )
             elif identity.get("ok"):
                 self.web_text.set(
-                    f"Web Server : READY    port {WEB_PORT}   [{source} / Project MATCH]"
+                    f"Web Server : READY    port {WEB_PORT}   [{source} / Project+Index MATCH]"
                 )
             else:
                 self.web_text.set(
@@ -750,7 +817,7 @@ class LauncherApp:
                 self.last_web_identity = web_detail
                 self.root.after(0, lambda: self.refresh_status(deep_check=False))
                 self.root.after(0, lambda: self.status_text.set("通常モード READY"))
-                self.root.after(0, lambda: webbrowser.open(WEB_URL))
+                self.root.after(0, open_application_browser)
 
             except Exception as exc:
                 log(f"Normal start error: {exc!r}")
@@ -791,7 +858,7 @@ class LauncherApp:
                 self.last_gateway_health = gateway_detail
                 self.root.after(0, lambda: self.refresh_status(deep_check=False))
                 self.root.after(0, lambda: self.status_text.set("Canonical Gateway付きモード READY"))
-                self.root.after(0, lambda: webbrowser.open(WEB_URL))
+                self.root.after(0, open_application_browser)
 
             except Exception as exc:
                 log(f"External start error: {exc!r}")

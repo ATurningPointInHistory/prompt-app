@@ -1,0 +1,17 @@
+AI Prompt OS Launcher Hotfix 1.4.5
+Date: 2026-09-13
+
+Purpose:
+- Prevent an old/cached index.html from being shown after launching the current project.
+- Make Project Root verification cover both 00_script_manifest.json and index.html.
+
+Changes:
+1. Launcher verifies served 00_script_manifest.json SHA-256 against the local project file.
+2. Launcher verifies served index.html SHA-256 against the local project file.
+3. Browser opens index.html with current version + manifest identity + unique nonce query parameters.
+4. Browser opening uses a new-tab request instead of the bare http://localhost:8000/ URL.
+5. Launcher READY status now reports Project+Index MATCH.
+
+Boundary:
+- This hotfix does not change EXTERNAL-010 application contracts, authority, Gateway contracts, or component version.
+- It is an operational launcher/cache identity repair only.
