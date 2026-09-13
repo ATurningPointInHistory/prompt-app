@@ -217,7 +217,9 @@
     const total = results.length;
     const fullyVerified = counts.VERIFIED || 0;
     const traceabilityLinked = counts.TRACEABILITY_LINKED || 0;
-    const unresolved = total - fullyVerified - traceabilityLinked;
+    const traceabilityUnresolved = total - fullyVerified - traceabilityLinked;
+    const unverified = total - fullyVerified;
+    const traceabilityComplete = traceabilityUnresolved === 0 && counts.SOURCE_MISMATCH === 0;
     const report = i.deepFreeze({
       id: i.nextId("EXTERNAL-010-FULL-MEMO-AUDIT"),
       componentId: "EXTERNAL-010",
@@ -238,11 +240,16 @@
       counts: counts,
       fullyVerifiedRequirementCount: fullyVerified,
       traceabilityLinkedRequirementCount: traceabilityLinked,
-      unresolvedRequirementCount: unresolved,
-      conformanceComplete: unresolved === 0 && counts.SOURCE_MISMATCH === 0,
+      auditSemanticsVersion: "1.1.0",
+      traceabilityUnresolvedRequirementCount: traceabilityUnresolved,
+      unverifiedRequirementCount: unverified,
+      unresolvedRequirementCount: unverified,
+      traceabilityComplete: traceabilityComplete,
+      conformanceComplete: fullyVerified === total && counts.SOURCE_MISMATCH === 0,
       releaseAllowedByThisAudit: false,
       projectOwnerAcceptanceRequired: true,
       staticEvidenceCandidatesArePass: false,
+      traceabilityLinkedIsSemanticPass: false,
       note: "Candidates are searched only inside files assigned to the source Decision. EVIDENCE_CANDIDATE is not a PASS; explicit implementation + validation traceability is still required.",
       decisionSummary: decisionSummary,
       requirements: results,
@@ -266,7 +273,10 @@
       id: r.id,
       requirementCount: r.requirementCount,
       counts: clone(r.counts),
+      traceabilityUnresolvedRequirementCount: r.traceabilityUnresolvedRequirementCount,
+      unverifiedRequirementCount: r.unverifiedRequirementCount,
       unresolvedRequirementCount: r.unresolvedRequirementCount,
+      traceabilityComplete: r.traceabilityComplete,
       conformanceComplete: r.conformanceComplete,
       sourceMemoFileName: r.sourceMemoFileName,
       exactCatalogMemoHashMatch: r.exactCatalogMemoHashMatch,

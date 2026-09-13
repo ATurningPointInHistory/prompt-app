@@ -4,8 +4,8 @@
   "scopeMethod": "DECISION_SCOPED_STATIC_EVIDENCE",
   "crossDecisionCandidateSearchAllowed": false,
   "gatewaySourceIncluded": true,
-  "note": "HF6 Decision-scoped audit scope. Includes Initial Scope Validation Coverage for 65 requirements; cross-decision candidate search remains disabled.",
-  "generatedAt": "2026-09-13T07:20:00Z",
+  "note": "Decision-scoped audit source map. HF7 adds explicit integration source scopes for Decisions 013/020/044/054; cross-decision arbitrary candidate search remains prohibited.",
+  "generatedAt": "2026-09-13T07:30:00.000Z",
   "decisions": [
     {
       "decisionId": "EXTERNAL-010-DECISION-001",
@@ -161,7 +161,8 @@
       "implementationFiles": [
         "17_external_intelligence_gateway_client.js",
         "17_external_intelligence_capability_resilience.js",
-        "17_external_intelligence_runtime_coordination.js"
+        "17_external_intelligence_runtime_coordination.js",
+        "external_gateway/gateway.cjs"
       ],
       "validationFiles": [
         "17_external_intelligence_phase20_android_validation.js",
@@ -230,7 +231,8 @@
         "17_external_intelligence_external_content_security.js",
         "external_gateway/lib/security.cjs",
         "external_gateway/lib/acquisition.cjs",
-        "17_external_intelligence_initial_scope_completion.js"
+        "17_external_intelligence_initial_scope_completion.js",
+        "17_external_intelligence_evidence_persistence.js"
       ],
       "validationFiles": [
         "17_external_intelligence_phase6_android_validation.js",
@@ -258,7 +260,9 @@
     {
       "decisionId": "EXTERNAL-010-DECISION-020",
       "implementationFiles": [
-        "17_external_intelligence_capability_resilience.js"
+        "17_external_intelligence_capability_resilience.js",
+        "17_external_intelligence_disaster_recovery.js",
+        "17_external_intelligence_initial_scope_completion.js"
       ],
       "validationFiles": [
         "17_external_intelligence_phase20_android_validation.js",
@@ -570,7 +574,8 @@
     {
       "decisionId": "EXTERNAL-010-DECISION-044",
       "implementationFiles": [
-        "17_external_intelligence_validation_framework.js"
+        "17_external_intelligence_validation_framework.js",
+        "17_external_intelligence_capability_routing.js"
       ],
       "validationFiles": [
         "17_external_intelligence_phase15_android_validation.js",
@@ -708,7 +713,8 @@
         "external_gateway/lib/config.cjs",
         "external_gateway/lib/security.cjs",
         "external_gateway/lib/session_store.cjs",
-        "external_gateway/lib/audit.cjs"
+        "external_gateway/lib/audit.cjs",
+        "17_external_intelligence_validation_framework.js"
       ],
       "validationFiles": [
         "17_external_intelligence_phase15_android_validation.js",

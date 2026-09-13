@@ -41,7 +41,7 @@
   [
     "validationSuites", "validationSuiteVersions", "goldenValidationCases", "validationProfiles",
     "validationEvidenceRecords", "validationReleaseGates", "validationRuntimeHealthRecords",
-    "validationHistoricalReplayRecords", "validationDifferentialRecords"
+    "validationHistoricalReplayRecords", "validationDifferentialRecords", "validationRegressionRecords"
   ].forEach(function ensureMap(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
@@ -610,6 +610,38 @@
     return internal.buildResult(true, "EXTERNAL010_HISTORICAL_REPLAY_RECORDED", "Ready", { historicalReplay: clone(record) });
   }
 
+  function createRegressionValidationRecord(input) {
+    const source = internal.isPlainObject(input) ? input : {};
+    const baselineSuiteId = text(source.baselineSuiteId, "");
+    const baselineSuiteVersion = text(source.baselineSuiteVersion, "");
+    const candidateSuiteId = text(source.candidateSuiteId, baselineSuiteId);
+    const candidateSuiteVersion = text(source.candidateSuiteVersion, "");
+    if (!baselineSuiteId || !baselineSuiteVersion || !candidateSuiteId || !candidateSuiteVersion) {
+      return internal.buildResult(false, "EXTERNAL010_REGRESSION_VALIDATION_INPUT_REQUIRED", "Blocked", { baselineSuiteId, baselineSuiteVersion, candidateSuiteId, candidateSuiteVersion });
+    }
+    const changedCaseIds = unique(source.changedCaseIds);
+    const regressedCaseIds = unique(source.regressedCaseIds);
+    const criticalRegressionCount = Number.isFinite(Number(source.criticalRegressionCount)) ? Math.max(0, Number(source.criticalRegressionCount)) : 0;
+    const regressionDetected = regressedCaseIds.length > 0 || criticalRegressionCount > 0 || source.regressionDetected === true;
+    const record = internal.deepFreeze({
+      regressionValidationId: internal.nextId("EXTERNAL-010-REGRESSION-VALIDATION"),
+      baselineSuiteId, baselineSuiteVersion, candidateSuiteId, candidateSuiteVersion,
+      baselineValidationProfileIds: unique(source.baselineValidationProfileIds),
+      candidateValidationProfileIds: unique(source.candidateValidationProfileIds),
+      changedCaseIds, regressedCaseIds, criticalRegressionCount, regressionDetected,
+      regressionState: regressionDetected ? "REGRESSION_DETECTED" : "NO_REGRESSION_DETECTED",
+      historicalResultsRewritten: false,
+      automaticPromotionPerformed: false,
+      approvalGranted: false,
+      authorityGranted: false,
+      createdAt: nowIso(),
+      immutable: true
+    });
+    state.validationRegressionRecords.set(record.regressionValidationId, record);
+    internal.touch();
+    return internal.buildResult(true, "EXTERNAL010_REGRESSION_VALIDATION_RECORDED", regressionDetected ? "Blocked" : "Ready", { regressionValidation: clone(record) });
+  }
+
   function createDifferentialValidationRecord(input) {
     const source = internal.isPlainObject(input) ? input : {};
     const current = internal.isPlainObject(source.current) ? source.current : {};
@@ -772,6 +804,7 @@
     createExternalIntelligenceValidationEvidence: createValidationEvidence,
     createExternalIntelligenceRuntimeHealthValidation: createRuntimeHealthValidation,
     createExternalIntelligenceHistoricalReplayRecord: createHistoricalReplayRecord,
+    createExternalIntelligenceRegressionValidationRecord: createRegressionValidationRecord,
     createExternalIntelligenceDifferentialValidationRecord: createDifferentialValidationRecord,
     evaluateExternalIntelligenceGatewayRequestIntegrity: evaluateGatewayRequestIntegrity,
     createExternalIntelligenceReleaseGate: createReleaseGate,

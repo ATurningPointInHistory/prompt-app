@@ -1,0 +1,51 @@
+{
+  "id": "EXTERNAL-010-HF7-TRACEABILITY-REPORT-2026-09-13",
+  "componentId": "EXTERNAL-010",
+  "version": "1.20.1",
+  "gatewayVersion": "1.5.0",
+  "candidate": "HF7",
+  "confirmedImplementationGapTotal": 37,
+  "gapBreakdown": {
+    "HF5": 34,
+    "HF6_D020": 1,
+    "HF7_D036_D044": 2
+  },
+  "traceability": {
+    "explicitLinks": 704,
+    "linkIntegrityPassed": 704,
+    "linkIntegrityFailed": 0,
+    "targetedRuntimeChecksPassed": 2,
+    "targetedRuntimeChecksFailed": 0,
+    "validationTotal": 706
+  },
+  "regression": {
+    "repair45": "45/45 PASS",
+    "gapRepairHF5": "34/34 PASS",
+    "validationCoverageHF6": "65/65 PASS",
+    "phase21": "31/31 PASS"
+  },
+  "fullMemoAuditExpected": {
+    "requirementCount": 803,
+    "VERIFIED": 0,
+    "TRACEABILITY_LINKED": 803,
+    "traceabilityUnresolvedRequirementCount": 0,
+    "unverifiedRequirementCount": 803,
+    "traceabilityComplete": true,
+    "conformanceComplete": false,
+    "SOURCE_MISMATCH": 0
+  },
+  "auditSemanticsCorrection": "TRACEABILITY_LINKED is explicit link integrity only and is not Semantic VERIFIED. conformanceComplete requires VERIFIED == 803.",
+  "scriptIntegrity": {
+    "scriptCount": 405,
+    "scriptSetHash": "06617e0ea5a82214f4387ca273fdc490c7ad4c3b0b55be4255288e87775d38b5",
+    "computedScriptSetHash": "06617e0ea5a82214f4387ca273fdc490c7ad4c3b0b55be4255288e87775d38b5",
+    "manifestHash": "6c523fb615910f6c266841ac683e09301bce73341284532db0b0b4f8bfbe2169",
+    "computedManifestHash": "6c523fb615910f6c266841ac683e09301bce73341284532db0b0b4f8bfbe2169",
+    "indexManifestHash": "6c523fb615910f6c266841ac683e09301bce73341284532db0b0b4f8bfbe2169",
+    "allMatch": true
+  },
+  "releaseAllowed": false,
+  "projectOwnerAcceptanceRequired": true,
+  "pcRealRuntimeRevalidationRequired": true,
+  "androidRealDeviceRevalidationRequired": true
+}

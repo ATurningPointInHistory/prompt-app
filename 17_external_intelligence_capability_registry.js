@@ -19,7 +19,7 @@
   const state = internal.state;
   const MODULE_VERSION = VERSION_MANIFEST.getModuleVersion("capabilityRegistry");
 
-  ["analyticalCapabilities", "analyticalCapabilityVersions", "capabilityPerformanceProfiles", "analysisExecutionRecords", "capabilityFallbackRecords"].forEach(function ensure(key) {
+  ["analyticalCapabilities", "analyticalCapabilityVersions", "capabilityPerformanceProfiles", "analysisExecutionRecords", "capabilityFallbackRecords", "capabilityAuditLineageRecords"].forEach(function ensure(key) {
     if (!(state[key] instanceof Map)) state[key] = new Map();
   });
 
@@ -237,6 +237,54 @@
     return internal.buildResult(true, "EXTERNAL010_CAPABILITY_FALLBACK_RECORDED", "Ready", { fallbackRecord: internal.clone(record) });
   }
 
+  async function createExternalIntelligenceCapabilityAuditLineage(input) {
+    const x = internal.isPlainObject(input) ? input : {};
+    const capabilityId = internal.text(x.capabilityId, "");
+    const capability = state.analyticalCapabilities.get(capabilityId);
+    if (!capability) return internal.buildResult(false, "EXTERNAL010_CAPABILITY_NOT_FOUND", "Blocked", { capabilityId });
+    const analysisExecutionId = internal.text(x.analysisExecutionId, "") || null;
+    const inputReferenceIds = internal.unique(x.inputReferenceIds || []);
+    const outputReferenceIds = internal.unique(x.outputReferenceIds || []);
+    const record = internal.deepFreeze({
+      capabilityAuditLineageId: internal.nextId("EXTERNAL-010-CAPABILITY-AUDIT-LINEAGE"),
+      capabilityId,
+      capabilityRecordVersion: capability.recordVersion,
+      analysisExecutionId,
+      inputReferenceIds,
+      outputReferenceIds,
+      auditRequired: true,
+      lineageRequired: true,
+      automaticPromotionPerformed: false,
+      actionAuthorityGranted: false,
+      repositoryAuthorityGranted: false,
+      financialAuthorityGranted: false,
+      createdAt: internal.nowIso(),
+      immutable: true
+    });
+    state.capabilityAuditLineageRecords.set(record.capabilityAuditLineageId, record);
+    const lineageResults = [];
+    if (typeof namespace.createExternalIntelligenceLineageRecord === "function") {
+      inputReferenceIds.forEach(function (inputRef) {
+        outputReferenceIds.forEach(function (outputRef) {
+          const result = namespace.createExternalIntelligenceLineageRecord({ inputReferenceId: inputRef, outputReferenceId: outputRef, relationType: "DERIVED_FROM", lineageState: "ACTIVE" });
+          lineageResults.push(internal.clone(result));
+        });
+      });
+    }
+    let auditResult = null;
+    if (typeof namespace.appendExternalIntelligenceAuditEvent === "function") {
+      auditResult = await namespace.appendExternalIntelligenceAuditEvent({
+        eventType: "CAPABILITY_AUDIT_LINEAGE_RECORDED",
+        actor: "EXTERNAL-010-CAPABILITY-REGISTRY",
+        outcome: "Recorded",
+        references: [record.capabilityAuditLineageId, capabilityId].concat(inputReferenceIds, outputReferenceIds),
+        details: { capabilityId, analysisExecutionId, inputReferenceCount: inputReferenceIds.length, outputReferenceCount: outputReferenceIds.length, authorityGranted: false }
+      });
+    }
+    internal.touch();
+    return internal.buildResult(true, "EXTERNAL010_CAPABILITY_AUDIT_LINEAGE_RECORDED", "Ready", { capabilityAuditLineage: internal.clone(record), lineageResults, auditResult: auditResult ? internal.clone(auditResult) : null });
+  }
+
   function initializeExternalIntelligenceCapabilityRegistry() {
     namespace.modules.capabilityRegistry.status = "Ready";
     return internal.buildResult(true, "EXTERNAL010_CAPABILITY_REGISTRY_INITIALIZED", "Ready", {
@@ -254,7 +302,8 @@
     recordExternalIntelligenceCapabilityPerformanceProfile,
     listExternalIntelligenceCapabilityPerformanceProfiles,
     createExternalIntelligenceAnalysisExecutionRecord,
-    createExternalIntelligenceCapabilityFallbackRecord
+    createExternalIntelligenceCapabilityFallbackRecord,
+    createExternalIntelligenceCapabilityAuditLineage
   });
   Object.assign(namespace, namespace.api);
 

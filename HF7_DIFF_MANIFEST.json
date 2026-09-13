@@ -1,0 +1,21 @@
+{
+  "base": "HF6",
+  "target": "HF7",
+  "added": [
+    "17_external_intelligence_traceability_coverage.js",
+    "EXTERNAL-010_HF7_TRACEABILITY_REPORT_1.0.0.json",
+    "EXTERNAL-010_REQUIREMENT_TRACEABILITY_LINKS_1.1.0.json"
+  ],
+  "modified": [
+    "00_script_manifest.json",
+    "17_external_intelligence_capability_registry.js",
+    "17_external_intelligence_console.js",
+    "17_external_intelligence_full_memo_audit.js",
+    "17_external_intelligence_validation_framework.js",
+    "17_external_intelligence_version_manifest.js",
+    "EXTERNAL-010_DECISION_AUDIT_SCOPE_1.0.0.json",
+    "EXTERNAL-010_REQUIREMENT_TRACEABILITY_1.0.0.json",
+    "index.html"
+  ],
+  "deleted": []
+}

@@ -37,6 +37,7 @@
     const lastConformance = s.latestConformanceValidation ? i.clone(s.latestConformanceValidation) : null;
     const lastGapRepair = s.latestInitialScopeCompletionValidation ? i.clone(s.latestInitialScopeCompletionValidation) : null;
     const lastValidationCoverage = s.latestInitialScopeValidationCoverage ? i.clone(s.latestInitialScopeValidationCoverage) : null;
+    const lastTraceabilityCoverage = s.latestTraceabilityCoverage ? i.clone(s.latestTraceabilityCoverage) : null;
     const lastPhase21 = s.latestPhase21Validation ? i.clone(s.latestPhase21Validation) : null;
     return {
       componentId: "EXTERNAL-010",
@@ -90,6 +91,7 @@
         status: lastValidationCoverage.status, passed: lastValidationCoverage.passed, failed: lastValidationCoverage.failed,
         total: lastValidationCoverage.total, health: lastValidationCoverage.health, validatedAt: lastValidationCoverage.validatedAt
       } : null,
+      latestTraceabilityCoverage: lastTraceabilityCoverage ? { status:lastTraceabilityCoverage.status, passed:lastTraceabilityCoverage.passed, failed:lastTraceabilityCoverage.failed, total:lastTraceabilityCoverage.total, traceabilityPassed:lastTraceabilityCoverage.traceabilityPassed, traceabilityFailed:lastTraceabilityCoverage.traceabilityFailed, health:lastTraceabilityCoverage.health, validatedAt:lastTraceabilityCoverage.validatedAt } : null,
       latestPhase21Validation: lastPhase21 ? {
         status: lastPhase21.status,
         passed: lastPhase21.passed,
@@ -128,6 +130,7 @@
     const conf = snapshot.latestConformanceValidation;
     const gap = snapshot.latestInitialScopeCompletionValidation;
     const validationCoverage = snapshot.latestInitialScopeValidationCoverage;
+    const traceabilityCoverage = snapshot.latestTraceabilityCoverage;
     const p21 = snapshot.latestPhase21Validation;
 
     root.innerHTML = '' +
@@ -144,6 +147,7 @@
         statusBadge("Repair Validation", conf ? (conf.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
         statusBadge("Gap Repair 34", gap ? (gap.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
         statusBadge("Validation Coverage 65", validationCoverage ? (validationCoverage.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
+        statusBadge("Traceability 704", traceabilityCoverage ? (traceabilityCoverage.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
         statusBadge("Phase 21", p21 ? (p21.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
       '</section>' +
 
@@ -156,6 +160,7 @@
           '<button onclick="externalConsoleRunConformance()">Repair Validation 45項目</button>' +
           '<button onclick="externalConsoleRunGapRepair()">Gap Repair 34項目</button>' +
           '<button onclick="externalConsoleRunValidationCoverage()">Validation Coverage 65項目</button>' +
+          '<button onclick="externalConsoleRunTraceabilityCoverage()">Traceability 704項目</button>' +
           '<button onclick="externalConsoleRunPhase21()">Phase 21検証</button><button onclick="externalConsoleChooseFullMemoAudit()">Full Memo Audit</button><button class="btn-secondary" onclick="externalConsoleDownloadFullMemoAudit()">Audit JSON保存</button>' +
           '<button class="btn-secondary" onclick="externalConsoleRefresh()">状態更新</button>' +
         '</div>' +
@@ -168,7 +173,7 @@
 
       '<section class="external-section">' +
         '<h4>Full Memo Audit</h4>' +
-        '<div class="external-help">PCにある memo_boxes_selected JSON を選択すると、EXTERNAL-010のInitial Implementation RequirementsをTraceability Catalogと照合します。Decision 006で「後から追加可能」と明記された7項目はInitial Requirementから除外し、現在のBaselineは803件です。候補探索はDecisionごとの担当Source/Validationだけに限定します。MemoはBrowser内でのみ解析し、GatewayやRepositoryへ保存しません。EVIDENCE_CANDIDATEはPASSではありません。</div>' +
+        '<div class="external-help">PCにある memo_boxes_selected JSON を選択すると、EXTERNAL-010のInitial Implementation RequirementsをTraceability Catalogと照合します。Decision 006で「後から追加可能」と明記された7項目はInitial Requirementから除外し、現在のBaselineは803件です。候補探索はDecisionごとの担当Source/Validationだけに限定します。MemoはBrowser内でのみ解析し、GatewayやRepositoryへ保存しません。EVIDENCE_CANDIDATEはPASSではありません。TRACEABILITY_LINKEDもSemantic VERIFIEDではなく、実装RefとValidation Refの明示リンク済みを意味します。</div>' +
         '<input id="externalFullMemoAuditFile" type="file" accept="application/json,.json" style="display:none" onchange="externalConsoleHandleFullMemoAuditFile(event)">' +
         '<div id="externalFullMemoAuditSummary" class="external-note">未実行</div>' +
       '</section>' +
@@ -264,6 +269,13 @@
     });
   }
 
+  function externalConsoleRunTraceabilityCoverage() {
+    return withBusy("Traceability 704項目", async function () {
+      if (typeof n.runExternalIntelligenceTraceabilityCoverageValidation !== "function") return { ok:false, code:"TRACEABILITY_COVERAGE_VALIDATION_UNAVAILABLE" };
+      return n.runExternalIntelligenceTraceabilityCoverageValidation();
+    });
+  }
+
   function renderFullMemoAuditSummary(report) {
     const target = el("externalFullMemoAuditSummary");
     if (!target) return;
@@ -279,6 +291,9 @@
       " / UNVERIFIED " + (c.UNVERIFIED || 0) +
       " / SOURCE_MISMATCH " + (c.SOURCE_MISMATCH || 0) +
       (report.catalogExcludedDeferredRequirementCount ? " / DEFERRED_EXCLUDED " + report.catalogExcludedDeferredRequirementCount : "") +
+      (report.traceabilityUnresolvedRequirementCount != null ? " / TRACEABILITY_UNRESOLVED " + report.traceabilityUnresolvedRequirementCount : "") +
+      (report.unverifiedRequirementCount != null ? " / SEMANTIC_UNVERIFIED " + report.unverifiedRequirementCount : "") +
+      (report.traceabilityComplete === true ? " / TRACEABILITY_COMPLETE" : "") +
       (report.auditScopeMethod ? " / " + report.auditScopeMethod : "");
   }
 
@@ -304,7 +319,7 @@
       renderExternalIntelligenceConsole();
       renderFullMemoAuditSummary(report);
       const summary = n.getExternal010FullMemoAuditSummary ? n.getExternal010FullMemoAuditSummary() : { id:report.id, requirementCount:report.requirementCount, counts:report.counts };
-      setOutput({ ok:true, status:"AUDIT_COMPLETE", summary:summary, note:"Full requirement details are kept in memory and can be saved with Audit JSON保存. Decision-scoped evidence candidates are not PASS. Deferred/Future items are excluded from Initial Requirement count." });
+      setOutput({ ok:true, status:"AUDIT_COMPLETE", summary:summary, note:"Full requirement details are kept in memory and can be saved with Audit JSON保存. Decision-scoped evidence candidates are not PASS. TRACEABILITY_LINKED is not VERIFIED. Deferred/Future items are excluded from Initial Requirement count." });
       return report;
     } catch (error) {
       const failed = { ok:false, status:"FAILED", action:"Full Memo Audit", error:error && error.message || String(error), failedAt:i.nowIso() };
@@ -392,6 +407,7 @@
     externalConsoleRunConformance: externalConsoleRunConformance,
     externalConsoleRunGapRepair: externalConsoleRunGapRepair,
     externalConsoleRunValidationCoverage: externalConsoleRunValidationCoverage,
+    externalConsoleRunTraceabilityCoverage: externalConsoleRunTraceabilityCoverage,
     externalConsoleChooseFullMemoAudit: externalConsoleChooseFullMemoAudit,
     externalConsoleHandleFullMemoAuditFile: externalConsoleHandleFullMemoAuditFile,
     externalConsoleDownloadFullMemoAudit: externalConsoleDownloadFullMemoAudit,
