@@ -39,6 +39,8 @@
     const lastValidationCoverage = s.latestInitialScopeValidationCoverage ? i.clone(s.latestInitialScopeValidationCoverage) : null;
     const lastTraceabilityCoverage = s.latestTraceabilityCoverage ? i.clone(s.latestTraceabilityCoverage) : null;
     const lastPhase21 = s.latestPhase21Validation ? i.clone(s.latestPhase21Validation) : null;
+    const lastPhase21Pc = s.latestPhase21RealRuntimeValidation ? i.clone(s.latestPhase21RealRuntimeValidation) : null;
+    const lastPhase21Android = s.latestPhase21AndroidValidation ? i.clone(s.latestPhase21AndroidValidation) : null;
     return {
       componentId: "EXTERNAL-010",
       version: m.release.version,
@@ -100,6 +102,22 @@
         health: lastPhase21.health,
         validatedAt: lastPhase21.validatedAt
       } : null,
+      latestPhase21PcRealRuntimeValidation: lastPhase21Pc ? {
+        status: lastPhase21Pc.status,
+        passed: lastPhase21Pc.passed,
+        failed: lastPhase21Pc.failed,
+        total: lastPhase21Pc.total,
+        health: lastPhase21Pc.health,
+        validatedAt: lastPhase21Pc.validatedAt
+      } : null,
+      latestPhase21AndroidValidation: lastPhase21Android ? {
+        status: lastPhase21Android.status,
+        passed: lastPhase21Android.passed,
+        failed: lastPhase21Android.failed,
+        total: lastPhase21Android.total,
+        health: lastPhase21Android.health,
+        validatedAt: lastPhase21Android.validatedAt
+      } : null,
       capturedAt: i.nowIso()
     };
   }
@@ -128,7 +146,10 @@
     const gateway = snapshot.gateway || {};
     const session = gateway.session || null;
     const p21 = snapshot.latestPhase21Validation;
+    const p21pc = snapshot.latestPhase21PcRealRuntimeValidation;
+    const p21android = snapshot.latestPhase21AndroidValidation;
     const latestAudit = s.latestFullMemoAudit || null;
+    const semantic = s.latestSemanticVerification || null;
 
     root.innerHTML = '' +
       '<section class="external-hero">' +
@@ -152,14 +173,16 @@
           '<button onclick="externalConsoleChooseFullMemoAudit()">Full Memo Audit</button>' +
           '<button class="btn-secondary" onclick="externalConsoleRefresh()">状態更新</button>' +
         '</div>' +
-        '<div class="external-help">PCで外部Gatewayを使う場合は ①→②→③。AndroidやGatewayなしでは、Core / 保存済みEvidence / 分析系はGatewayなしでも利用可能です。</div>' +
+        '<div class="external-help">PCで外部Gatewayを使う場合は ①→②→③。AndroidやGatewayなしでは、Core / 保存済みEvidence / 分析系はGatewayなしでも利用可能です。Semantic Verificationは通常操作から外し、再読込後の再証明用として「検証・詳細」内にのみ残します。</div>' +
         '<details style="margin-top:10px">' +
           '<summary style="cursor:pointer;font-weight:600">検証・詳細</summary>' +
           '<div class="external-actions" style="margin-top:10px">' +
+            '<button class="btn-secondary" onclick="externalConsoleRunSemanticVerification()"' + (latestAudit && latestAudit.traceabilityComplete === true && latestAudit.exactCatalogMemoHashMatch === true ? '' : ' disabled') + '>Semantic Verification' + (semantic ? ' [' + esc((semantic.verifiedRequirementCount || 0) + '/803') + ']' : '') + '</button>' +
             '<button class="btn-secondary" onclick="externalConsoleRunPhase21()">統合検証 (Phase 21)' + (p21 ? ' [' + esc(p21.failed === 0 ? "PASS" : "FAIL") + ']' : '') + '</button>' +
+            '<button class="btn-secondary" onclick="externalConsoleRunAndroidRealDevice()">Android Real Device Gate' + (p21android ? ' [' + esc(p21android.failed === 0 ? "PASS" : "FAIL") + ']' : '') + '</button>' +
             '<button class="btn-secondary" onclick="externalConsoleDownloadFullMemoAudit()"' + (latestAudit ? '' : ' disabled') + '>Audit JSON保存</button>' +
           '</div>' +
-          '<div class="external-help">完了済みの Repair 45 / Gap Repair 34 / Validation Coverage 65 / Traceability 704 は作業専用のためメインUIから非表示にしました。検証ロジック自体は内部APIとして維持します。</div>' +
+          '<div class="external-help">完了済みの Repair 45 / Gap Repair 34 / Validation Coverage 65 / Traceability 704 / PC Real Runtime Gate は作業専用のため非表示です。Semantic Verificationは再読込後の再証明用です。Android Real Device GateはAndroid実機確認用で、Gatewayや有料APIを必要としません。</div>' +
         '</details>' +
       '</section>' +
 
@@ -172,6 +195,7 @@
         '<div class="external-help">PCにある memo_boxes_selected JSON を選択すると、EXTERNAL-010のInitial Implementation RequirementsをTraceability Catalogと照合します。Decision 006で「後から追加可能」と明記された7項目はInitial Requirementから除外し、現在のBaselineは803件です。候補探索はDecisionごとの担当Source/Validationだけに限定します。MemoはBrowser内でのみ解析し、GatewayやRepositoryへ保存しません。EVIDENCE_CANDIDATEはPASSではありません。TRACEABILITY_LINKEDもSemantic VERIFIEDではなく、実装RefとValidation Refの明示リンク済みを意味します。</div>' +
         '<input id="externalFullMemoAuditFile" type="file" accept="application/json,.json" style="display:none" onchange="externalConsoleHandleFullMemoAuditFile(event)">' +
         '<div id="externalFullMemoAuditSummary" class="external-note">未実行</div>' +
+        '<div class="external-note">Semantic Verification: ' + (semantic ? esc((semantic.verifiedRequirementCount || 0) + '/803 / ' + (semantic.semanticConformanceGranted ? 'PASS' : 'INCOMPLETE')) : '未実行') + '</div>' +
       '</section>' +
 
       '<section class="external-section">' +
@@ -345,10 +369,30 @@
     }
   }
 
+  function externalConsoleRunSemanticVerification() {
+    return withBusy("Semantic Verification 803項目", async function () {
+      if (typeof n.runExternalIntelligenceSemanticVerification !== "function") return { ok:false, code:"SEMANTIC_VERIFICATION_UNAVAILABLE" };
+      const result = await n.runExternalIntelligenceSemanticVerification();
+      return {
+        ok:result && result.semanticConformanceGranted === true,
+        status:result && result.semanticConformanceGranted === true ? "SEMANTIC_VERIFICATION_PASS" : (result && result.status || "SEMANTIC_VERIFICATION_INCOMPLETE"),
+        summary:n.getExternalIntelligenceSemanticVerificationSummary ? n.getExternalIntelligenceSemanticVerificationSummary() : result,
+        note:"PASS後に同じmemo_boxes_selected.jsonでFull Memo Auditを再実行すると、Semantic結果がVERIFIEDへ反映されます。Validation PASSはProject Owner ApprovalやRelease Authorityを付与しません。"
+      };
+    });
+  }
+
   function externalConsoleRunPhase21() {
     return withBusy("Phase 21検証", async function () {
       if (typeof n.runExternalIntelligencePhase21Validation !== "function") return { ok: false, code: "PHASE21_VALIDATION_UNAVAILABLE" };
       return n.runExternalIntelligencePhase21Validation();
+    });
+  }
+
+  function externalConsoleRunAndroidRealDevice() {
+    return withBusy("Android Real Device Gate", async function () {
+      if (typeof n.runExternalIntelligencePhase21AndroidValidation !== "function") return { ok: false, code: "PHASE21_ANDROID_REAL_DEVICE_VALIDATION_UNAVAILABLE" };
+      return n.runExternalIntelligencePhase21AndroidValidation();
     });
   }
 
@@ -407,7 +451,9 @@
     externalConsoleChooseFullMemoAudit: externalConsoleChooseFullMemoAudit,
     externalConsoleHandleFullMemoAuditFile: externalConsoleHandleFullMemoAuditFile,
     externalConsoleDownloadFullMemoAudit: externalConsoleDownloadFullMemoAudit,
+    externalConsoleRunSemanticVerification: externalConsoleRunSemanticVerification,
     externalConsoleRunPhase21: externalConsoleRunPhase21,
+    externalConsoleRunAndroidRealDevice: externalConsoleRunAndroidRealDevice,
     externalConsoleRefresh: externalConsoleRefresh,
     externalConsoleCopyStatus: externalConsoleCopyStatus
   });

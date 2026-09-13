@@ -1,0 +1,83 @@
+{
+  "id": "EXTERNAL-010-PC-REAL-RUNTIME-GATE-HF11",
+  "componentId": "EXTERNAL-010",
+  "version": "1.20.1",
+  "gatewayVersion": "1.5.0",
+  "scope": "Expose the existing Phase 21 PC Real Runtime validator in Validation/Details only; keep the main Control Center simple; validate local Browser-to-Gateway runtime path without paid/external API usage.",
+  "implementation": {
+    "validatorReused": "17_external_intelligence_phase21_real_runtime_validation.js",
+    "validatorApi": "runExternalIntelligencePhase21RealRuntimeValidation()",
+    "coreValidatorChanged": false,
+    "uiFileChanged": "17_external_intelligence_console.js",
+    "mainUiButtonAdded": false,
+    "detailButtonAdded": "PC Real Runtime Gate",
+    "completedWorkButtonsRemainHidden": [
+      "Repair 45",
+      "Gap Repair 34",
+      "Validation Coverage 65",
+      "Traceability 704"
+    ],
+    "paidApiUsed": false,
+    "externalAcquisitionAllowlistConfigured": false,
+    "externalAcquisitionDefault": "FAIL_CLOSED"
+  },
+  "preflightValidation": {
+    "javascript": {
+      "scriptCount": 406,
+      "parseErrors": 0
+    },
+    "manifest": {
+      "manifestIntegrityValid": true,
+      "scriptSetHashMatch": true,
+      "indexManifestHashUpdated": true
+    },
+    "pcRuntimeBrowserLikeLocalGateway": {
+      "validationId": "EXTERNAL-010-PHASE21-PC-REAL-RUNTIME-MTZMNLBF-1686",
+      "passed": 10,
+      "failed": 0,
+      "total": 10,
+      "health": 100,
+      "criticalFailed": 0,
+      "phase21PcRealRuntimeComplete": true,
+      "finalReleaseAllowed": false,
+      "androidRealDeviceRequired": true,
+      "note": "Preflight executed against a real local Gateway v1.5.0 and real HTTP endpoints using a browser-like runtime harness. Final PC Gate evidence must come from the Project Owner PC browser."
+    },
+    "gatewayRegression": {
+      "passed": 38,
+      "failed": 0,
+      "total": 38,
+      "health": 100
+    },
+    "gatewayRecoveryRegression": {
+      "passed": 17,
+      "failed": 0,
+      "total": 17,
+      "health": 100
+    }
+  },
+  "pcGateExpected": {
+    "passed": 10,
+    "failed": 0,
+    "total": 10,
+    "health": 100,
+    "criticalFailed": 0,
+    "phase21PcRealRuntimeComplete": true,
+    "finalReleaseAllowed": false,
+    "androidRealDeviceRequired": true
+  },
+  "safety": {
+    "automaticRepositoryMutation": false,
+    "automaticTrading": false,
+    "automaticDependencyInstall": false,
+    "validationEqualsApproval": false,
+    "paidApiActivation": false
+  },
+  "manifestHash": "6effc975dc2827c9caad32bef73133b4a5dcf685a19eac6333724a21485082a1",
+  "scriptSetHash": "2050a46b6c0e9f8b83400b0bfc5d3ebca123ac3f4ddfdd9184007c22907d355f",
+  "releaseAllowed": false,
+  "pcRealRuntimeProjectOwnerExecutionRequired": true,
+  "androidRealDeviceRevalidationRequired": true,
+  "projectOwnerAcceptanceRequired": true,
+  "createdAt": "2026-09-13T09:45:49.964187Z"
+}

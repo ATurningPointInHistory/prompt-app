@@ -1,0 +1,106 @@
+{
+  "id": "EXTERNAL-010-SEMANTIC-VERIFICATION-HF9-BROWSER-SIM-REPORT",
+  "componentId": "EXTERNAL-010",
+  "version": "1.20.1",
+  "auditBefore": {
+    "counts": {
+      "VERIFIED": 0,
+      "TRACEABILITY_LINKED": 803,
+      "EVIDENCE_CANDIDATE": 0,
+      "IMPLEMENTATION_CANDIDATE": 0,
+      "VALIDATION_CANDIDATE": 0,
+      "UNVERIFIED": 0,
+      "SOURCE_MISMATCH": 0
+    },
+    "traceabilityComplete": true,
+    "conformanceComplete": false,
+    "exactCatalogMemoHashMatch": true
+  },
+  "semantic": {
+    "id": "EXTERNAL-010-SEMANTIC-VERIFICATION-MTZJSVWW-1810",
+    "verifiedRequirementCount": 803,
+    "failed": 0,
+    "total": 803,
+    "health": 100,
+    "criticalFailed": 0,
+    "allValidationGatesPassed": true,
+    "semanticConformanceGranted": true,
+    "validationGates": {
+      "REPAIR_45": {
+        "id": "REPAIR_45",
+        "passed": true,
+        "expectedTotal": 45,
+        "actualTotal": 45,
+        "failed": 0,
+        "criticalFailed": 0,
+        "resultId": "EXTERNAL-010-CONFORMANCE-VALIDATION-MTZJSUMW-0042"
+      },
+      "GAP_REPAIR_34": {
+        "id": "GAP_REPAIR_34",
+        "passed": true,
+        "expectedTotal": 34,
+        "actualTotal": 34,
+        "failed": 0,
+        "criticalFailed": 0,
+        "resultId": "EXTERNAL-010-INITIAL-SCOPE-COMPLETION-VALIDATION-MTZJSUMZ-0079"
+      },
+      "VALIDATION_COVERAGE_65": {
+        "id": "VALIDATION_COVERAGE_65",
+        "passed": true,
+        "expectedTotal": 65,
+        "actualTotal": 65,
+        "failed": 0,
+        "criticalFailed": 0,
+        "resultId": "EXTERNAL-010-INITIAL-SCOPE-VALIDATION-COVERAGE-MTZJSUN2-0081"
+      },
+      "TRACEABILITY_706": {
+        "id": "TRACEABILITY_706",
+        "passed": true,
+        "expectedTotal": 706,
+        "actualTotal": 706,
+        "failed": 0,
+        "criticalFailed": 0,
+        "resultId": "EXTERNAL-010-TRACEABILITY-COVERAGE-VALIDATION-MTZJSUNW-0133"
+      },
+      "PHASE21_31": {
+        "id": "PHASE21_31",
+        "passed": true,
+        "expectedTotal": 31,
+        "actualTotal": 31,
+        "failed": 0,
+        "criticalFailed": 0,
+        "resultId": "EXTERNAL-010-PHASE21-INTEGRATED-VALIDATION-MTZJSVWD-1809"
+      }
+    }
+  },
+  "auditAfter": {
+    "counts": {
+      "VERIFIED": 803,
+      "TRACEABILITY_LINKED": 0,
+      "EVIDENCE_CANDIDATE": 0,
+      "IMPLEMENTATION_CANDIDATE": 0,
+      "VALIDATION_CANDIDATE": 0,
+      "UNVERIFIED": 0,
+      "SOURCE_MISMATCH": 0
+    },
+    "traceabilityUnresolvedRequirementCount": 0,
+    "unverifiedRequirementCount": 0,
+    "traceabilityComplete": true,
+    "semanticVerificationApplied": true,
+    "semanticVerifiedRequirementCount": 803,
+    "conformanceComplete": true,
+    "exactCatalogMemoHashMatch": true
+  },
+  "phase21": {
+    "passed": 31,
+    "failed": 0,
+    "total": 31,
+    "health": 100,
+    "criticalFailed": 0,
+    "scriptCount": 406,
+    "fetchFailure": 0,
+    "hashMismatch": 0
+  },
+  "generatedAt": "2026-09-13T08:24:34.774Z",
+  "immutable": true
+}

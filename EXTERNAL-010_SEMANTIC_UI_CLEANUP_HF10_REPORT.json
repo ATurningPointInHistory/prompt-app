@@ -1,0 +1,103 @@
+{
+  "id": "EXTERNAL-010-SEMANTIC-UI-CLEANUP-HF10",
+  "componentId": "EXTERNAL-010",
+  "version": "1.20.1",
+  "gatewayVersion": "1.5.0",
+  "scope": "Remove completed Semantic Verification from main Control Center actions while retaining it under Validation/Details because semantic attestation is memory-scoped and must be reproducible after reload; retain internal semantic verification API; revalidate Phase 21 integration and static integrity.",
+  "uiChanges": {
+    "removedMainUiButtons": [
+      "Semantic Verification"
+    ],
+    "retainedMainUiButtons": [
+      "Foundation初期化",
+      "Gateway確認",
+      "Gateway Session開始",
+      "Full Memo Audit",
+      "状態更新"
+    ],
+    "retainedDetailedButtons": [
+      "Semantic Verification",
+      "統合検証 (Phase 21)",
+      "Audit JSON保存"
+    ],
+    "semanticVerificationCoreApiRetained": true,
+    "semanticVerificationStatusDisplayRetained": true,
+    "completedWorkButtonsRemainHidden": [
+      "Repair 45",
+      "Gap Repair 34",
+      "Validation Coverage 65",
+      "Traceability 704"
+    ],
+    "semanticVerificationReasonForDetailedRetention": "Current semantic verification attestation is runtime-memory scoped; after page reload, rerun is required to restore VERIFIED 803 in Full Memo Audit."
+  },
+  "semanticConformanceBaseline": {
+    "requirementCount": 803,
+    "verifiedRequirementCount": 803,
+    "unresolvedRequirementCount": 0,
+    "traceabilityComplete": true,
+    "semanticVerificationApplied": true,
+    "conformanceComplete": true
+  },
+  "validation": {
+    "javascript": {
+      "scriptCount": 406,
+      "parseErrors": 0
+    },
+    "phase21Integrated": {
+      "passed": 31,
+      "failed": 0,
+      "total": 31,
+      "health": 100,
+      "criticalFailed": 0,
+      "validationId": "EXTERNAL-010-PHASE21-INTEGRATED-VALIDATION-MTZM7JW7-1678"
+    },
+    "staticIntegrity": {
+      "scriptCount": 406,
+      "fetchedScriptCount": 406,
+      "fetchFailureCount": 0,
+      "scriptHashMismatchCount": 0,
+      "scriptByteSizeMismatchCount": 0,
+      "scriptCacheKeyMismatchCount": 0,
+      "manifestIntegrityValid": true,
+      "indexScriptSequenceMatches": true,
+      "indexManifestHashMatches": true
+    },
+    "releaseGateCandidate": {
+      "passed": 30,
+      "failed": 0,
+      "criticalFailed": 0,
+      "health": 100,
+      "releaseAllowed": false,
+      "approvalGranted": false,
+      "authorityGranted": false
+    },
+    "uiRender": {
+      "mainButtons": [
+        "Foundation初期化",
+        "Gateway確認",
+        "Gateway Session開始",
+        "Full Memo Audit",
+        "状態更新"
+      ],
+      "detailButtons": [
+        "Semantic Verification",
+        "統合検証 (Phase 21)",
+        "Audit JSON保存"
+      ],
+      "completedWorkButtonsVisible": false
+    }
+  },
+  "safety": {
+    "automaticRepositoryMutation": false,
+    "automaticTrading": false,
+    "automaticDependencyInstall": false,
+    "validationEqualsApproval": false
+  },
+  "manifestHash": "566a3ff0ec7b6bc21f15785227d0578747013963df17a5f05f8b006be92511af",
+  "scriptSetHash": "4fdbfec16c92704b693684bc9a2eb84cfb61fc74f1ace46a6874a53b1cecd8a1",
+  "releaseAllowed": false,
+  "pcRealRuntimeRevalidationRequired": true,
+  "androidRealDeviceRevalidationRequired": true,
+  "projectOwnerAcceptanceRequired": true,
+  "createdAt": "2026-09-13T09:32:33.191Z"
+}

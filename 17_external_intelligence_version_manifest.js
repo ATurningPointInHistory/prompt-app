@@ -128,7 +128,7 @@
     strategyExperiment: PHASE19_VERSION, phase19Validation: PHASE19_VERSION, phase19RealRuntimeValidation: PHASE19_VERSION, phase19AndroidValidation: PHASE19_VERSION,
     capabilityResilience: PHASE20_VERSION, disasterRecovery: PHASE20_VERSION, phase20Validation: PHASE20_VERSION, phase20RealRuntimeValidation: PHASE20_VERSION, phase20AndroidValidation: PHASE20_VERSION,
     phase21Validation: PHASE21_VERSION, phase21RealRuntimeValidation: PHASE21_VERSION, phase21AndroidValidation: PHASE21_VERSION,
-    conformanceRepair: PHASE21_VERSION, conformanceValidation: PHASE21_VERSION, initialScopeCompletion: PHASE21_VERSION, initialScopeCompletionValidation: PHASE21_VERSION, initialScopeValidationCoverage: PHASE21_VERSION, traceabilityCoverage: PHASE21_VERSION, fullMemoAudit: PHASE21_VERSION, externalConsole: PHASE21_VERSION
+    conformanceRepair: PHASE21_VERSION, conformanceValidation: PHASE21_VERSION, initialScopeCompletion: PHASE21_VERSION, initialScopeCompletionValidation: PHASE21_VERSION, initialScopeValidationCoverage: PHASE21_VERSION, traceabilityCoverage: PHASE21_VERSION, semanticVerification: PHASE21_VERSION, fullMemoAudit: PHASE21_VERSION, externalConsole: PHASE21_VERSION
   };
 
   const fileModules = {
@@ -253,6 +253,7 @@
     "17_external_intelligence_initial_scope_completion_validation.js": "initialScopeCompletionValidation",
     "17_external_intelligence_initial_scope_validation_coverage.js": "initialScopeValidationCoverage",
     "17_external_intelligence_traceability_coverage.js": "traceabilityCoverage",
+    "17_external_intelligence_semantic_verification.js": "semanticVerification",
     "17_external_intelligence_full_memo_audit.js": "fullMemoAudit",
     "17_external_intelligence_console.js": "externalConsole"
   };

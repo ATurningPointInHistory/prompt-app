@@ -80,7 +80,7 @@
     const d036 = await targetedD036();
     checks.push({ requirementId:"EXTERNAL-010-REQ-036-INIT-20", decisionId:"EXTERNAL-010-DECISION-036", name:"D036 Audit / Lineage targeted runtime", passed:d036.passed, detail:d036.detail, group:"Corrected Implementation Gap Runtime", severity:"Critical" });
     const d044 = targetedD044();
-    checks.push({ requirementId:"EXTERNAL-010-REQ-044-INIT-16", decisionId:"EXTERNAL-010-DECISION-044", name:"D044 Regression Validation targeted runtime", passed:d044.passed, detail:d044.detail, group:"Corrected Implementation Gap Runtime", severity:"Critical" });
+    checks.push({ requirementId:"EXTERNAL-010-REQ-044-INIT-15", decisionId:"EXTERNAL-010-DECISION-044", name:"D044 Regression Validation targeted runtime", passed:d044.passed, detail:d044.detail, group:"Corrected Implementation Gap Runtime", severity:"Critical" });
 
     const linkChecks = checks.filter(function (x) { return x.group === "Explicit Requirement Traceability"; });
     const passed = checks.filter(function (x) { return x.passed; }).length;

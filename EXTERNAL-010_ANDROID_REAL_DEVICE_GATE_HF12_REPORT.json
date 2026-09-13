@@ -1,0 +1,109 @@
+{
+  "id": "EXTERNAL-010-ANDROID-REAL-DEVICE-GATE-HF12",
+  "componentId": "EXTERNAL-010",
+  "version": "1.20.1",
+  "gatewayVersion": "1.5.0",
+  "scope": "Expose the existing Phase 21 Android Real Device validator in Validation/Details only; remove the completed PC Real Runtime UI control while retaining its core validator; validate Android/mobile browser behavior without requiring Gateway or paid/external APIs.",
+  "implementation": {
+    "validatorReused": "17_external_intelligence_phase21_android_validation.js",
+    "validatorApi": "runExternalIntelligencePhase21AndroidValidation()",
+    "coreValidatorChanged": false,
+    "uiFileChanged": "17_external_intelligence_console.js",
+    "mainUiButtonAdded": false,
+    "detailButtonAdded": "Android Real Device Gate",
+    "completedPcGateUiRemoved": true,
+    "pcCoreValidatorRetained": "runExternalIntelligencePhase21RealRuntimeValidation()",
+    "completedWorkButtonsRemainHidden": [
+      "Repair 45",
+      "Gap Repair 34",
+      "Validation Coverage 65",
+      "Traceability 704",
+      "PC Real Runtime Gate"
+    ],
+    "semanticVerificationDetailOnly": true,
+    "gatewayRequiredForAndroidCore": false,
+    "paidApiUsed": false
+  },
+  "pcGateProjectOwnerEvidence": {
+    "validationId": "EXTERNAL-010-PHASE21-PC-REAL-RUNTIME-MTZMX9K2-1687",
+    "passed": 10,
+    "failed": 0,
+    "total": 10,
+    "health": 100,
+    "criticalFailed": 0,
+    "phase21PcRealRuntimeComplete": true,
+    "finalReleaseAllowed": false,
+    "androidRealDeviceRequired": true,
+    "validatedAt": "2026-09-13T09:51:57.602Z"
+  },
+  "preflightValidation": {
+    "javascript": {
+      "scriptCount": 406,
+      "parseErrors": 0
+    },
+    "manifest": {
+      "manifestIntegrityValid": true,
+      "indexScriptSequenceMatches": true,
+      "indexManifestHashMatches": true,
+      "scriptCount": 406,
+      "fetchedScriptCount": 406,
+      "fetchFailureCount": 0,
+      "scriptHashMismatchCount": 0,
+      "scriptByteSizeMismatchCount": 0,
+      "scriptCacheKeyMismatchCount": 0
+    },
+    "androidBrowserLikeHarness": {
+      "validationId": "EXTERNAL-010-PHASE21-ANDROID-REAL-DEVICE-MTZNXXPG-1682",
+      "passed": 9,
+      "failed": 0,
+      "total": 9,
+      "health": 100,
+      "criticalFailed": 0,
+      "phase21AndroidRealDeviceComplete": true,
+      "phase21FinalGateReady": true,
+      "gatewayRequiredForCore": false,
+      "staticIntegrityPassed": true,
+      "note": "Preflight uses an Android/mobile browser-like VM Realm with local static fetch. Final Android Gate evidence must come from the Project Owner Android real device."
+    },
+    "phase21RegressionInsideAndroidGate": {
+      "passed": 31,
+      "failed": 0,
+      "total": 31,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "ui": {
+      "mainVisibleActions": 5,
+      "androidGateInDetails": true,
+      "pcGateButtonVisible": false,
+      "semanticVerificationInDetails": true,
+      "phase21InDetails": true
+    }
+  },
+  "androidGateExpected": {
+    "passed": 9,
+    "failed": 0,
+    "total": 9,
+    "health": 100,
+    "criticalFailed": 0,
+    "phase21AndroidRealDeviceComplete": true,
+    "phase21FinalGateReady": true,
+    "gatewayRequiredForCore": false,
+    "staticIntegrityPassed": true,
+    "projectOwnerAcceptanceRequired": true
+  },
+  "safety": {
+    "automaticRepositoryMutation": false,
+    "automaticTrading": false,
+    "automaticDependencyInstall": false,
+    "validationEqualsApproval": false,
+    "paidApiActivation": false,
+    "gatewayRequiredOnAndroid": false
+  },
+  "manifestHash": "53aa6e4bebcdd8a5ba00fd8912c30856403973d7ff752f5c69e44e99f98570d7",
+  "scriptSetHash": "333cd9ea1b5e9e263290c5cac93610c35aa6189662cf422ce1adca55ef3d1e6f",
+  "releaseAllowed": false,
+  "androidRealDeviceProjectOwnerExecutionRequired": true,
+  "projectOwnerAcceptanceRequired": true,
+  "createdAt": "2026-09-13T10:21:13.980971Z"
+}

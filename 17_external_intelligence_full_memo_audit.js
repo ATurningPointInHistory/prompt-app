@@ -153,8 +153,9 @@
     }
     return { implementationRefs: rank(implNames, false), validationRefs: rank(valNames, true) };
   }
-  function classifyRequirement(sourceMatched, catalogReq, evidence) {
+  function classifyRequirement(sourceMatched, catalogReq, evidence, semanticVerified) {
     if (!sourceMatched) return "SOURCE_MISMATCH";
+    if (semanticVerified === true && Array.isArray(catalogReq.implementationRefs) && catalogReq.implementationRefs.length > 0 && Array.isArray(catalogReq.validationRefs) && catalogReq.validationRefs.length > 0) return "VERIFIED";
     const curatedImpl = Array.isArray(catalogReq.implementationRefs) && catalogReq.implementationRefs.length > 0;
     const curatedVal = Array.isArray(catalogReq.validationRefs) && catalogReq.validationRefs.length > 0;
     if (catalogReq.verificationState === "VERIFIED" && curatedImpl && curatedVal) return "VERIFIED";
@@ -171,6 +172,9 @@
     const sourceMap = await buildStaticEvidenceIndex(scopeCatalog);
     const decisionScopeMap = scopeMapFromCatalog(scopeCatalog);
     const memoSha256 = await sha256Hex(rawText);
+    const latestSemantic = s.latestSemanticVerification || null;
+    const semanticGateActive = Boolean(latestSemantic && latestSemantic.semanticConformanceGranted === true && latestSemantic.conformanceComplete === true && latestSemantic.failed === 0 && latestSemantic.verifiedRequirementCount === 803 && latestSemantic.sourceMemoSha256 === memoSha256 && Array.isArray(latestSemantic.verifiedRequirementIds));
+    const semanticVerifiedIds = new Set(semanticGateActive ? latestSemantic.verifiedRequirementIds : []);
     const decisionMap = extractDecisionRecords(parsed);
     const results = [];
     const decisionSummary = [];
@@ -188,7 +192,7 @@
         const sourceMatched = sourceContainsRequirement(memoDecision, req.text);
         const decisionScope = decisionScopeMap.get(decisionId) || { implementationFiles: [], validationFiles: [] };
         const evidence = findEvidenceCandidates(req.text, sourceMap, decisionScope);
-        const state = classifyRequirement(sourceMatched, req, evidence);
+        const state = classifyRequirement(sourceMatched, req, evidence, semanticGateActive && semanticVerifiedIds.has(req.requirementId));
         counts[state] = (counts[state] || 0) + 1;
         localCounts[state] = (localCounts[state] || 0) + 1;
         results.push({
@@ -245,6 +249,9 @@
       unverifiedRequirementCount: unverified,
       unresolvedRequirementCount: unverified,
       traceabilityComplete: traceabilityComplete,
+      semanticVerificationApplied: semanticGateActive,
+      semanticVerificationId: semanticGateActive && latestSemantic ? latestSemantic.id : null,
+      semanticVerifiedRequirementCount: fullyVerified,
       conformanceComplete: fullyVerified === total && counts.SOURCE_MISMATCH === 0,
       releaseAllowedByThisAudit: false,
       projectOwnerAcceptanceRequired: true,
@@ -277,6 +284,9 @@
       unverifiedRequirementCount: r.unverifiedRequirementCount,
       unresolvedRequirementCount: r.unresolvedRequirementCount,
       traceabilityComplete: r.traceabilityComplete,
+      semanticVerificationApplied: r.semanticVerificationApplied === true,
+      semanticVerificationId: r.semanticVerificationId || null,
+      semanticVerifiedRequirementCount: r.semanticVerifiedRequirementCount || 0,
       conformanceComplete: r.conformanceComplete,
       sourceMemoFileName: r.sourceMemoFileName,
       exactCatalogMemoHashMatch: r.exactCatalogMemoHashMatch,
