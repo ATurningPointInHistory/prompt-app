@@ -4,10 +4,10 @@
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "EXTERNAL-010 v1.20.1 + OpenAI API Integration Phase 2 v0.2.3 Secret Setup UI Hotfix Candidate; Gateway Secret status to reference-only Browser metadata, no provider registration or paid request performed + Decision 056 API / Secret Manager v1 Candidate",
+  "description": "EXTERNAL-010 v1.20.1 + OpenAI API Integration Phase 2 + Decision 056 API / Secret Manager v1 + OpenAI Source Registration Authority Gate v0.3.0 Candidate; Project Owner trusted-interaction one-time Source registration only, no paid activation or real API request",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-14T03:15:00+09:00",
+  "updatedAt": "2026-09-14T04:05:00+09:00",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -306,8 +306,8 @@
     "./17_external_intelligence_adapter_registry.js?h=8211e5421e29",
     "./17_external_intelligence_source_router.js?h=fb1eef1a3d35",
     "./17_external_intelligence_acquisition_queue.js?h=8d1954f4953a",
-    "./17_external_intelligence_openai_provider_integration.js?h=7f64519527cf",
-    "./17_external_intelligence_openai_provider_ui.js?h=6ad4cdc935aa",
+    "./17_external_intelligence_openai_provider_integration.js?h=7c55987299be",
+    "./17_external_intelligence_openai_provider_ui.js?h=5b9592e9cc79",
     "./17_external_intelligence_phase1_validation.js?h=d86cc1417555",
     "./17_external_intelligence_phase2_validation.js?h=00a0fe59ccd5",
     "./17_external_intelligence_phase3_validation.js?h=839f83963595",
@@ -2462,17 +2462,17 @@
       "cacheKey": "de0ce6495428"
     },
     "17_external_intelligence_openai_provider_integration.js": {
-      "sha256": "7f64519527cf1123df453ae43d11447fcc17dd99fd47a731f43e51d360570973",
-      "byteSize": 25138,
-      "cacheKey": "7f64519527cf"
+      "sha256": "7c55987299beb40ffd968dc5f82c541f968a1c0a58a2591c90b091df8f80498c",
+      "byteSize": 31411,
+      "cacheKey": "7c55987299be"
     },
     "17_external_intelligence_openai_provider_ui.js": {
-      "sha256": "6ad4cdc935aa09afdd75c81010456c7baefb0c959da73c8f0448dd8fabd6b701",
-      "byteSize": 19364,
-      "cacheKey": "6ad4cdc935aa"
+      "sha256": "5b9592e9cc7966c5c9adcf68542aa16deac0319dddfed50a40fdf785eb2ae12e",
+      "byteSize": 23284,
+      "cacheKey": "5b9592e9cc79"
     }
   },
-  "scriptSetHash": "ceac7bf8fbc67b0d0a66957779558b15e1de002b219b9a2af218f814dd6a7fed",
+  "scriptSetHash": "d0a6998e50bf29bd29a4aab1002768946703b07f0982233424aeefc6ff07f582",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -4515,5 +4515,5 @@
       "cacheKey": "129c832c21b0"
     }
   },
-  "manifestHash": "a4a1ac7810268e3b8ee6c21c76c7c6f7803705940a942c128b959384f8b03c8d"
+  "manifestHash": "c02282ead4232cdc2ba164450f4b1579fc1ecb060dad1727567384b55b97e10f"
 }

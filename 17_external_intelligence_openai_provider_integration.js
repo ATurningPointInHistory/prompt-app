@@ -24,6 +24,8 @@
   const CANONICAL_HOST = "api.openai.com";
   const ENDPOINT_REFERENCE = "OPENAI-RESPONSES-V1";
   const DEFAULT_SECRET_REFERENCE_ID = "SECRET-OPENAI-PRIMARY";
+  const SOURCE_REGISTRATION_ACTION = "REGISTER_EXTERNAL_SOURCE";
+  const SOURCE_REGISTRATION_PURPOSE = "openai-provider-registration";
   const ACTIVATION_ACTION = "ACTIVATE_GOVERNED_PAID_SOURCE";
   const ACTIVATION_PURPOSE = "paid-provider-activation";
   const PRICING_SOURCE = "https://platform.openai.com/docs/models";
@@ -188,6 +190,83 @@
       registrationPerformed: false,
       paidActivationPerformed: false
     });
+  }
+
+
+  async function registerOpenAIProviderSourceWithProjectOwnerApproval(input) {
+    const settings = internal.isPlainObject(input) ? input : {};
+    const existing = typeof namespace.getExternalIntelligenceSource === "function" ? namespace.getExternalIntelligenceSource(SOURCE_ID) : null;
+    if (existing) return internal.buildResult(true, "EXTERNAL010_OPENAI_SOURCE_ALREADY_REGISTERED", "Registered", { source: existing, registrationPerformed: false, paidActivationPerformed: false, nextRequiredAction: "REGISTER_SOURCE_OPERATION_CONTRACT_AUTHORITY" });
+
+    const candidateResult = buildOpenAIProviderSourceRegistration({ secretReferenceId: settings.secretReferenceId });
+    if (!candidateResult.ok || !candidateResult.data || candidateResult.data.sourceRegistrationReady !== true) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_SOURCE_REGISTRATION_NOT_READY", "Blocked", { candidate: candidateResult, registrationPerformed: false, paidActivationPerformed: false });
+    }
+    if (settings.ownerInteractionTrusted !== true || settings.projectOwnerConfirmed !== true || !internal.text(settings.interactionEvidenceId, "")) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_PROJECT_OWNER_INTERACTION_REQUIRED", "Blocked", { sourceId: SOURCE_ID, registrationPerformed: false, authorityGranted: false });
+    }
+    const required = [
+      "setExternalIntelligenceAuthorityApprovalAdapter",
+      "createExternalIntelligenceAuthorityEnvelopeCandidate",
+      "activateExternalIntelligenceAuthorityEnvelope",
+      "revokeExternalIntelligenceAuthorityEnvelope",
+      "registerExternalIntelligenceSource"
+    ];
+    const missing = required.filter(function (name) { return typeof namespace[name] !== "function"; });
+    if (missing.length) return internal.buildResult(false, "EXTERNAL010_OPENAI_SOURCE_REGISTRATION_AUTHORITY_API_UNAVAILABLE", "Blocked", { missing: missing, registrationPerformed: false });
+
+    let authorityEnvelopeId = null;
+    let authorityActivated = false;
+    const interactionEvidenceId = internal.text(settings.interactionEvidenceId, "");
+    const adapter = {
+      adapterId: "EXTERNAL-010-OPENAI-SOURCE-REGISTRATION-OWNER-APPROVAL",
+      requiresExplicitOwnerInteraction: true,
+      async verifyApproval(context) {
+        const envelope = context && context.envelope || {};
+        const approval = context && context.approvalInput || {};
+        const target = envelope.target || {};
+        const exactScope = envelope.action === SOURCE_REGISTRATION_ACTION && target.type === "source" && target.id === SOURCE_ID && envelope.purpose === SOURCE_REGISTRATION_PURPOSE;
+        const explicit = approval.projectOwnerConfirmed === true && approval.ownerInteractionTrusted === true && internal.text(approval.interactionEvidenceId, "") === interactionEvidenceId;
+        return { approved: exactScope && explicit, actorType: "Project Owner", interactionEvidenceId: exactScope && explicit ? interactionEvidenceId : "" };
+      }
+    };
+
+    try {
+      const adapterResult = namespace.setExternalIntelligenceAuthorityApprovalAdapter(adapter);
+      if (!adapterResult || adapterResult.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_SOURCE_REGISTRATION_APPROVAL_ADAPTER_FAILED", "Blocked", { adapter: adapterResult || null, registrationPerformed: false });
+
+      const authorityCandidate = namespace.createExternalIntelligenceAuthorityEnvelopeCandidate({
+        action: SOURCE_REGISTRATION_ACTION,
+        target: { type: "source", id: SOURCE_ID },
+        purpose: SOURCE_REGISTRATION_PURPOSE,
+        scope: { domain: "EXTERNAL-010", operation: SOURCE_REGISTRATION_ACTION, constraints: { sourceId: SOURCE_ID, provider: "OPENAI", oneTimeRegistration: true } }
+      });
+      authorityEnvelopeId = authorityCandidate && authorityCandidate.data && authorityCandidate.data.envelope && authorityCandidate.data.envelope.authorityEnvelopeId || null;
+      if (!authorityCandidate || authorityCandidate.ok !== true || !authorityEnvelopeId) return internal.buildResult(false, "EXTERNAL010_OPENAI_SOURCE_REGISTRATION_AUTHORITY_CANDIDATE_FAILED", "Blocked", { authorityCandidate: authorityCandidate || null, registrationPerformed: false });
+
+      const activation = await namespace.activateExternalIntelligenceAuthorityEnvelope(authorityEnvelopeId, { projectOwnerConfirmed: true, ownerInteractionTrusted: true, interactionEvidenceId: interactionEvidenceId });
+      if (!activation || activation.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_SOURCE_REGISTRATION_AUTHORITY_ACTIVATION_FAILED", "Blocked", { activation: activation || null, registrationPerformed: false });
+      authorityActivated = true;
+
+      const registration = await namespace.registerExternalIntelligenceSource(candidateResult.data.sourceCandidate);
+      if (!registration || registration.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_SOURCE_REGISTRATION_FAILED", "Blocked", { registration: registration || null, authorityEnvelopeId: authorityEnvelopeId, registrationPerformed: false });
+
+      return internal.buildResult(true, "EXTERNAL010_OPENAI_SOURCE_REGISTERED_WITH_PROJECT_OWNER_APPROVAL", "Registered", {
+        source: registration.data && registration.data.source || null,
+        authorityEnvelopeId: authorityEnvelopeId,
+        approvalEvidenceId: interactionEvidenceId,
+        registrationPerformed: true,
+        paidActivationPerformed: false,
+        budgetMutationPerformed: false,
+        operationContractRegistrationPerformed: false,
+        nextRequiredAction: "REGISTER_SOURCE_OPERATION_CONTRACT_AUTHORITY"
+      });
+    } finally {
+      if (authorityEnvelopeId) {
+        try { namespace.revokeExternalIntelligenceAuthorityEnvelope(authorityEnvelopeId, authorityActivated ? "One-time OpenAI Source registration completed or ended" : "OpenAI Source registration approval flow ended"); } catch (_) {}
+      }
+      try { namespace.setExternalIntelligenceAuthorityApprovalAdapter(null); } catch (_) {}
+    }
   }
 
   function buildOpenAIResponsesOperationContract(input) {
@@ -367,6 +446,7 @@
     validateOpenAIResponsesBody: validateOpenAIResponsesBody,
     estimateOpenAIResponsesCost: estimateOpenAIResponsesCost,
     buildOpenAIProviderSourceRegistration: buildOpenAIProviderSourceRegistration,
+    registerOpenAIProviderSourceWithProjectOwnerApproval: registerOpenAIProviderSourceWithProjectOwnerApproval,
     buildOpenAIResponsesOperationContract: buildOpenAIResponsesOperationContract,
     prepareOpenAIResponsesRequest: prepareOpenAIResponsesRequest,
     activateOpenAIGovernedPaidSource: activateOpenAIGovernedPaidSource,
@@ -380,7 +460,7 @@
     version: MODULE_VERSION,
     status: "Loaded",
     phase: "API-INTEGRATION-PHASE2-CANDIDATE",
-    decision: "055",
+    decision: "055 / 056",
     provider: "OPENAI",
     automaticPaidActivationAllowed: false,
     perRequestHumanApprovalRequiredInsideApprovedScope: false,

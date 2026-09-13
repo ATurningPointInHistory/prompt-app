@@ -91,7 +91,11 @@
         '<button class="btn-secondary" onclick="externalOpenAISaveDraft()">設定候補を保存</button>'+
         '<button class="btn-secondary" onclick="externalOpenAIPrepareSecretReference()">Secret準備確認</button>'+
         '<button class="btn-secondary" onclick="externalOpenAIShowProviderCandidates()">Provider候補を確認</button>'+
-      '</div><div id="externalOpenAIImpact" class="external-note">変更前後を確認してから保存してください。保存は設定候補のみで、有料APIを自動有効化しません。</div></details>'+
+      '</div><div class="external-actions openai-actions">'+
+        '<button class="btn-secondary" onclick="externalOpenAIReviewSourceRegistration()">Source登録内容を確認</button>'+
+        '<button class="btn-primary" onclick="externalOpenAIApproveSourceRegistration(event)"'+(src&&src.sourceId?' disabled':'')+'>Project OwnerとしてSource登録</button>'+
+      '</div><div class="external-note">Source登録承認は SOURCE-OPENAI のRegistry登録だけに限定します。Paid API有効化・Budget変更・Operation Contract登録・実API通信は行いません。</div>'+
+      '<div id="externalOpenAIImpact" class="external-note">変更前後を確認してから保存してください。保存は設定候補のみで、有料APIを自動有効化しません。</div></details>'+
       '<details class="openai-config-details"><summary>料金・利用量</summary><div class="external-boundary-grid">'+
         '<div>選択Budget<strong>'+esc(b?b.budgetId:'未選択')+'</strong></div><div>使用額<strong>'+esc(b?money(b.consumed):'—')+'</strong></div><div>Hard Limit<strong>'+esc(b?money(b.hardLimit):'—')+'</strong></div><div>1回Hard Cap<strong>'+esc(cap?money(cap):'未設定')+'</strong></div>'+
       '</div><div class="external-note">実Request送信前に入力量とmax_output_tokensからFINANCIAL_COSTを再見積りし、Budgetと1回上限の両方を確認します。料金ProfileはVersioned Metadataとして扱います。</div></details>'+
@@ -151,6 +155,52 @@
     return result;
   }
 
+
+  function externalOpenAIReviewSourceRegistration() {
+    const draft=currentForm();
+    const existing=source();
+    const candidate=typeof n.buildOpenAIProviderSourceRegistration==="function"?n.buildOpenAIProviderSourceRegistration({secretReferenceId:draft.secretReferenceId}):{ok:false,code:"OPENAI_PROVIDER_MODULE_UNAVAILABLE"};
+    const ready=Boolean(!existing&&candidate&&candidate.ok===true&&candidate.data&&candidate.data.sourceRegistrationReady===true);
+    const result={
+      ok:ready,
+      code:existing?"EXTERNAL010_OPENAI_SOURCE_ALREADY_REGISTERED":ready?"EXTERNAL010_OPENAI_SOURCE_REGISTRATION_REVIEW_READY":"EXTERNAL010_OPENAI_SOURCE_REGISTRATION_NOT_READY",
+      sourceCandidate:candidate&&candidate.data&&candidate.data.sourceCandidate||null,
+      secretReference:candidate&&candidate.data&&candidate.data.secretReference||null,
+      authority:{action:"REGISTER_EXTERNAL_SOURCE",target:{type:"source",id:"SOURCE-OPENAI"},purpose:"openai-provider-registration",oneTime:true},
+      effects:{sourceRegistration:true,operationContractRegistration:false,paidActivation:false,budgetMutation:false,realApiRequest:false},
+      projectOwnerApprovalRequired:!existing
+    };
+    setImpact(result);return result;
+  }
+
+  async function externalOpenAIApproveSourceRegistration(event) {
+    if(!event||event.isTrusted!==true){const blocked={ok:false,code:"EXTERNAL010_TRUSTED_PROJECT_OWNER_UI_INTERACTION_REQUIRED",registrationPerformed:false,paidActivationPerformed:false};setImpact(blocked);return blocked;}
+    const review=externalOpenAIReviewSourceRegistration();
+    if(!review.ok){setImpact(review);return review;}
+    const c=review.sourceCandidate||{};
+    const message=[
+      "OpenAI Sourceを登録します。",
+      "",
+      "Source: "+String(c.sourceId||"SOURCE-OPENAI"),
+      "Provider: "+String(c.provider||"OPENAI"),
+      "Secret Reference: "+String(c.secretReferenceId||""),
+      "Method: "+String((c.allowedMethods||[]).join(", ")),
+      "Pricing: "+String(c.pricingMode||"")+" / "+String(c.costCurrency||""),
+      "",
+      "この承認で行うのはSource Registry登録のみです。",
+      "Paid API有効化・Budget変更・実API通信は行いません。",
+      "",
+      "Project Ownerとして承認しますか？"
+    ].join("\n");
+    if(typeof global.confirm!=="function"||global.confirm(message)!==true){const cancelled={ok:false,code:"EXTERNAL010_PROJECT_OWNER_SOURCE_REGISTRATION_CANCELLED",registrationPerformed:false,paidActivationPerformed:false};setImpact(cancelled);return cancelled;}
+    if(typeof n.registerOpenAIProviderSourceWithProjectOwnerApproval!=="function"){const unavailable={ok:false,code:"EXTERNAL010_OPENAI_SOURCE_REGISTRATION_GATE_UNAVAILABLE",registrationPerformed:false};setImpact(unavailable);return unavailable;}
+    const evidenceId="OPENAI-SOURCE-REGISTRATION-OWNER-"+Date.now().toString(36).toUpperCase();
+    const result=await n.registerOpenAIProviderSourceWithProjectOwnerApproval({secretReferenceId:currentForm().secretReferenceId,projectOwnerConfirmed:true,ownerInteractionTrusted:true,interactionEvidenceId:evidenceId});
+    if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();
+    setImpact(result);
+    return result;
+  }
+
   function externalOpenAIShowProviderCandidates() {
     const draft=currentForm(); const src=source();
     const secretReferenceId=src&&src.secretReferenceId||draft.secretReferenceId||defaultSecretReferenceId();
@@ -161,6 +211,6 @@
     const value={sourceCandidate,operationCandidate,secretReference:{secretReferenceId:secretReferenceId,metadataRegistered:Boolean(metadata),active:Boolean(validation&&validation.ok===true),nextRequiredAction:validation&&validation.ok===true?"SOURCE_REGISTRATION_AUTHORITY":"SET_GATEWAY_SECRET_AND_REGISTER_REFERENCE_METADATA"},draft,paidActivationPerformed:false,secretValueRequested:false};setImpact(value);return value;
   }
   Object.assign(n.api,{getOpenAIProviderUiSnapshot,renderOpenAIProviderIntegrationPanelHtml});Object.assign(n,n.api);
-  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIShowProviderCandidates});
+  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIReviewSourceRegistration,externalOpenAIApproveSourceRegistration,externalOpenAIShowProviderCandidates});
   n.modules.openaiProviderUi={id:"EXTERNAL-010-OPENAI-PROVIDER-UI",version:m.getModuleVersion("openaiProviderUi")||m.release.version,status:"Loaded",decision:"055",secretValueInputAllowed:false,automaticPaidActivationAllowed:false,loadedAt:i.nowIso()};
 })(typeof window!=="undefined"?window:globalThis);
