@@ -125,7 +125,7 @@
         statusBadge("Foundation", snapshot.foundationInitialized ? "READY" : "NOT READY") +
         statusBadge("Gateway", gateway.healthState || "UNKNOWN") +
         statusBadge("Session", session && session.state || "INACTIVE", ["ACTIVE"]) +
-        statusBadge("Conformance", conf ? (conf.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
+        statusBadge("Repair Validation", conf ? (conf.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
         statusBadge("Phase 21", p21 ? (p21.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
       '</section>' +
 
@@ -135,8 +135,8 @@
           '<button onclick="externalConsoleInitialize()">① Foundation初期化</button>' +
           '<button onclick="externalConsoleCheckGateway()">② Gateway確認</button>' +
           '<button onclick="externalConsoleOpenSession()">③ Gateway Session開始</button>' +
-          '<button onclick="externalConsoleRunConformance()">Memo準拠検証</button>' +
-          '<button onclick="externalConsoleRunPhase21()">Phase 21検証</button>' +
+          '<button onclick="externalConsoleRunConformance()">Repair Validation 45項目</button>' +
+          '<button onclick="externalConsoleRunPhase21()">Phase 21検証</button><button onclick="externalConsoleChooseFullMemoAudit()">Full Memo Audit</button><button class="btn-secondary" onclick="externalConsoleDownloadFullMemoAudit()">Audit JSON保存</button>' +
           '<button class="btn-secondary" onclick="externalConsoleRefresh()">状態更新</button>' +
         '</div>' +
         '<div class="external-help">PCで外部Gatewayを使う場合は ①→②→③。AndroidやGatewayなしでは、Core / 保存済みEvidence / 分析系はGatewayなしでも利用可能です。</div>' +
@@ -144,6 +144,13 @@
 
       '<section class="external-section">' +
         '<h4>現在のデータ</h4><div class="external-grid external-count-grid">' + renderCounts(snapshot.counts) + '</div>' +
+      '</section>' +
+
+      '<section class="external-section">' +
+        '<h4>Full Memo Audit</h4>' +
+        '<div class="external-help">PCにある memo_boxes_selected JSON を選択すると、EXTERNAL-010の810 Initial Implementation RequirementsをTraceability Catalogと照合します。MemoはBrowser内でのみ解析し、GatewayやRepositoryへ保存しません。EVIDENCE_CANDIDATEはPASSではありません。</div>' +
+        '<input id="externalFullMemoAuditFile" type="file" accept="application/json,.json" style="display:none" onchange="externalConsoleHandleFullMemoAuditFile(event)">' +
+        '<div id="externalFullMemoAuditSummary" class="external-note">未実行</div>' +
       '</section>' +
 
       '<section class="external-section">' +
@@ -171,6 +178,7 @@
       '<section class="external-section">' +
         '<h4>実行結果</h4><pre id="externalConsoleOutput" class="external-output">' + esc(safeJson(snapshot)) + '</pre>' +
       '</section>';
+    renderFullMemoAuditSummary(s.latestFullMemoAudit || null);
     return true;
   }
 
@@ -216,10 +224,78 @@
   }
 
   function externalConsoleRunConformance() {
-    return withBusy("Memo準拠検証", async function () {
+    return withBusy("Repair Validation 45項目", async function () {
       if (typeof n.runExternalIntelligenceConformanceValidation !== "function") return { ok: false, code: "CONFORMANCE_VALIDATION_UNAVAILABLE" };
       return n.runExternalIntelligenceConformanceValidation();
     });
+  }
+
+  function renderFullMemoAuditSummary(report) {
+    const target = el("externalFullMemoAuditSummary");
+    if (!target) return;
+    if (!report) { target.textContent = "未実行"; return; }
+    const c = report.counts || {};
+    target.textContent =
+      "Requirements " + (report.requirementCount || 0) +
+      " / VERIFIED " + (c.VERIFIED || 0) +
+      " / TRACEABILITY_LINKED " + (c.TRACEABILITY_LINKED || 0) +
+      " / EVIDENCE_CANDIDATE " + (c.EVIDENCE_CANDIDATE || 0) +
+      " / IMPLEMENTATION_CANDIDATE " + (c.IMPLEMENTATION_CANDIDATE || 0) +
+      " / VALIDATION_CANDIDATE " + (c.VALIDATION_CANDIDATE || 0) +
+      " / UNVERIFIED " + (c.UNVERIFIED || 0) +
+      " / SOURCE_MISMATCH " + (c.SOURCE_MISMATCH || 0);
+  }
+
+  function externalConsoleChooseFullMemoAudit() {
+    const input = el("externalFullMemoAuditFile");
+    if (!input) { setOutput({ ok:false, code:"FULL_MEMO_AUDIT_FILE_INPUT_UNAVAILABLE" }); return false; }
+    input.value = "";
+    input.click();
+    return true;
+  }
+
+  async function externalConsoleHandleFullMemoAuditFile(event) {
+    const file = event && event.target && event.target.files && event.target.files[0];
+    if (!file) return false;
+    setOutput({ status:"RUNNING", action:"Full Memo Audit", fileName:file.name, startedAt:i.nowIso() });
+    try {
+      if (typeof n.auditExternal010MemoFile !== "function") {
+        const unavailable = { ok:false, code:"FULL_MEMO_AUDIT_UNAVAILABLE" };
+        setOutput(unavailable);
+        return unavailable;
+      }
+      const report = await n.auditExternal010MemoFile(file);
+      renderExternalIntelligenceConsole();
+      renderFullMemoAuditSummary(report);
+      const summary = n.getExternal010FullMemoAuditSummary ? n.getExternal010FullMemoAuditSummary() : { id:report.id, requirementCount:report.requirementCount, counts:report.counts };
+      setOutput({ ok:true, status:"AUDIT_COMPLETE", summary:summary, note:"Full requirement details are kept in memory and can be saved with Audit JSON保存. Evidence candidates are not PASS." });
+      return report;
+    } catch (error) {
+      const failed = { ok:false, status:"FAILED", action:"Full Memo Audit", error:error && error.message || String(error), failedAt:i.nowIso() };
+      setOutput(failed);
+      return failed;
+    }
+  }
+
+  function externalConsoleDownloadFullMemoAudit() {
+    const report = s.latestFullMemoAudit;
+    if (!report) { setOutput({ ok:false, code:"FULL_MEMO_AUDIT_NOT_RUN" }); return false; }
+    try {
+      const blob = new Blob([safeJson(report)], { type:"application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = global.document.createElement("a");
+      a.href = url;
+      a.download = "EXTERNAL-010_FULL_MEMO_AUDIT_" + String(report.auditedAt || i.nowIso()).replace(/[:.]/g,"-") + ".json";
+      global.document.body.appendChild(a);
+      a.click();
+      a.remove();
+      global.setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      setOutput({ ok:true, status:"AUDIT_JSON_SAVED", fileName:a.download });
+      return true;
+    } catch (error) {
+      setOutput({ ok:false, status:"AUDIT_JSON_SAVE_FAILED", error:error && error.message || String(error) });
+      return false;
+    }
   }
 
   function externalConsoleRunPhase21() {
@@ -278,6 +354,9 @@
     externalConsoleCheckGateway: externalConsoleCheckGateway,
     externalConsoleOpenSession: externalConsoleOpenSession,
     externalConsoleRunConformance: externalConsoleRunConformance,
+    externalConsoleChooseFullMemoAudit: externalConsoleChooseFullMemoAudit,
+    externalConsoleHandleFullMemoAuditFile: externalConsoleHandleFullMemoAuditFile,
+    externalConsoleDownloadFullMemoAudit: externalConsoleDownloadFullMemoAudit,
     externalConsoleRunPhase21: externalConsoleRunPhase21,
     externalConsoleRefresh: externalConsoleRefresh,
     externalConsoleCopyStatus: externalConsoleCopyStatus

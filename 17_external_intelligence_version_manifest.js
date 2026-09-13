@@ -128,7 +128,7 @@
     strategyExperiment: PHASE19_VERSION, phase19Validation: PHASE19_VERSION, phase19RealRuntimeValidation: PHASE19_VERSION, phase19AndroidValidation: PHASE19_VERSION,
     capabilityResilience: PHASE20_VERSION, disasterRecovery: PHASE20_VERSION, phase20Validation: PHASE20_VERSION, phase20RealRuntimeValidation: PHASE20_VERSION, phase20AndroidValidation: PHASE20_VERSION,
     phase21Validation: PHASE21_VERSION, phase21RealRuntimeValidation: PHASE21_VERSION, phase21AndroidValidation: PHASE21_VERSION,
-    conformanceRepair: PHASE21_VERSION, conformanceValidation: PHASE21_VERSION, externalConsole: PHASE21_VERSION
+    conformanceRepair: PHASE21_VERSION, conformanceValidation: PHASE21_VERSION, fullMemoAudit: PHASE21_VERSION, externalConsole: PHASE21_VERSION
   };
 
   const fileModules = {
@@ -249,6 +249,7 @@
     "17_external_intelligence_phase21_android_validation.js": "phase21AndroidValidation",
     "17_external_intelligence_conformance_repair.js": "conformanceRepair",
     "17_external_intelligence_conformance_validation.js": "conformanceValidation",
+    "17_external_intelligence_full_memo_audit.js": "fullMemoAudit",
     "17_external_intelligence_console.js": "externalConsole"
   };
 

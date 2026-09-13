@@ -4,7 +4,7 @@
   "project": "AIプロンプト生成Pro",
   "version": "1.20.1",
   "entryFile": "index.html",
-  "savedAt": "2026-09-13T01:45:34.298099Z",
+  "savedAt": "2026-09-13T04:19:47.865821Z",
   "complete": true,
   "requestedFiles": [
     "00_core.js",
@@ -436,6 +436,7 @@
     "17_external_intelligence_phase21_android_validation.js",
     "17_external_intelligence_conformance_repair.js",
     "17_external_intelligence_conformance_validation.js",
+    "17_external_intelligence_full_memo_audit.js",
     "17_external_intelligence_console.js",
     "EXTERNAL-010_USAGE_GUIDE_1.20.1.txt",
     "EXTERNAL-010_REQUIREMENT_TRACEABILITY_1.0.0.json",
@@ -871,6 +872,7 @@
     "17_external_intelligence_phase21_android_validation.js",
     "17_external_intelligence_conformance_repair.js",
     "17_external_intelligence_conformance_validation.js",
+    "17_external_intelligence_full_memo_audit.js",
     "17_external_intelligence_console.js",
     "EXTERNAL-010_USAGE_GUIDE_1.20.1.txt",
     "EXTERNAL-010_REQUIREMENT_TRACEABILITY_1.0.0.json",
@@ -881,18 +883,18 @@
   "externalFiles": [
     "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
   ],
-  "localFileCount": 434,
+  "localFileCount": 435,
   "externalFileCount": 1,
-  "fileCount": 435,
+  "fileCount": 436,
   "cleanIndex": true,
   "scriptManifestSource": "00_script_manifest.json",
   "scriptManifestVersion": "1.20.1",
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "93919f5ffc3174168c6090f77d47a500df3cf58b1643e8e36003ae388489a36f",
-  "scriptSetHash": "315fc9fbc6d03698d0f2fe317efead8b932b8a83ebd5f638b982530c60ea5e6c",
-  "scriptManifestCount": 400,
+  "scriptManifestHash": "6df06b42540b5d412951cc4d81c006f38f694298959ca09644a857e4098d95bc",
+  "scriptSetHash": "179e12482d61cfad8b448eedfe6e76fa12cf5f75606e270c475fc3eaa5454e5d",
+  "scriptManifestCount": 401,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
     "runtimeLoader": false,
@@ -901,7 +903,7 @@
     "last": "99_init.js",
     "generatedAtSave": true
   },
-  "releaseStatus": "CONFORMANCE_REPAIR_CANDIDATE",
+  "releaseStatus": "CONFORMANCE_REPAIR_FULL_MEMO_AUDIT_CANDIDATE",
   "releaseAllowed": false,
   "projectOwnerRevalidationRequired": true
 }
