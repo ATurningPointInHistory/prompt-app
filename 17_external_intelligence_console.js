@@ -127,11 +127,8 @@
     const snapshot = getExternalIntelligenceConsoleSnapshot();
     const gateway = snapshot.gateway || {};
     const session = gateway.session || null;
-    const conf = snapshot.latestConformanceValidation;
-    const gap = snapshot.latestInitialScopeCompletionValidation;
-    const validationCoverage = snapshot.latestInitialScopeValidationCoverage;
-    const traceabilityCoverage = snapshot.latestTraceabilityCoverage;
     const p21 = snapshot.latestPhase21Validation;
+    const latestAudit = s.latestFullMemoAudit || null;
 
     root.innerHTML = '' +
       '<section class="external-hero">' +
@@ -144,27 +141,26 @@
         statusBadge("Foundation", snapshot.foundationInitialized ? "READY" : "NOT READY") +
         statusBadge("Gateway", gateway.healthState || "UNKNOWN") +
         statusBadge("Session", session && session.state || "INACTIVE", ["ACTIVE"]) +
-        statusBadge("Repair Validation", conf ? (conf.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
-        statusBadge("Gap Repair 34", gap ? (gap.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
-        statusBadge("Validation Coverage 65", validationCoverage ? (validationCoverage.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
-        statusBadge("Traceability 704", traceabilityCoverage ? (traceabilityCoverage.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
-        statusBadge("Phase 21", p21 ? (p21.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
       '</section>' +
 
       '<section class="external-section">' +
-        '<h4>最初に使うボタン</h4>' +
+        '<h4>操作</h4>' +
         '<div class="external-actions">' +
           '<button onclick="externalConsoleInitialize()">① Foundation初期化</button>' +
           '<button onclick="externalConsoleCheckGateway()">② Gateway確認</button>' +
           '<button onclick="externalConsoleOpenSession()">③ Gateway Session開始</button>' +
-          '<button onclick="externalConsoleRunConformance()">Repair Validation 45項目</button>' +
-          '<button onclick="externalConsoleRunGapRepair()">Gap Repair 34項目</button>' +
-          '<button onclick="externalConsoleRunValidationCoverage()">Validation Coverage 65項目</button>' +
-          '<button onclick="externalConsoleRunTraceabilityCoverage()">Traceability 704項目</button>' +
-          '<button onclick="externalConsoleRunPhase21()">Phase 21検証</button><button onclick="externalConsoleChooseFullMemoAudit()">Full Memo Audit</button><button class="btn-secondary" onclick="externalConsoleDownloadFullMemoAudit()">Audit JSON保存</button>' +
+          '<button onclick="externalConsoleChooseFullMemoAudit()">Full Memo Audit</button>' +
           '<button class="btn-secondary" onclick="externalConsoleRefresh()">状態更新</button>' +
         '</div>' +
         '<div class="external-help">PCで外部Gatewayを使う場合は ①→②→③。AndroidやGatewayなしでは、Core / 保存済みEvidence / 分析系はGatewayなしでも利用可能です。</div>' +
+        '<details style="margin-top:10px">' +
+          '<summary style="cursor:pointer;font-weight:600">検証・詳細</summary>' +
+          '<div class="external-actions" style="margin-top:10px">' +
+            '<button class="btn-secondary" onclick="externalConsoleRunPhase21()">統合検証 (Phase 21)' + (p21 ? ' [' + esc(p21.failed === 0 ? "PASS" : "FAIL") + ']' : '') + '</button>' +
+            '<button class="btn-secondary" onclick="externalConsoleDownloadFullMemoAudit()"' + (latestAudit ? '' : ' disabled') + '>Audit JSON保存</button>' +
+          '</div>' +
+          '<div class="external-help">完了済みの Repair 45 / Gap Repair 34 / Validation Coverage 65 / Traceability 704 は作業専用のためメインUIから非表示にしました。検証ロジック自体は内部APIとして維持します。</div>' +
+        '</details>' +
       '</section>' +
 
       '<section class="external-section">' +

@@ -7,7 +7,7 @@
   "description": "EXTERNAL-010 Phase 21 Validation Coverage HF6 v1.20.1 Candidate - 35 total implementation gaps corrected; 65 requirement validation coverage linked",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-13T07:40:00Z",
+  "updatedAt": "2026-09-13T08:05:00Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -412,7 +412,7 @@
     "./17_external_intelligence_initial_scope_validation_coverage.js?h=8d2898237b05",
     "./17_external_intelligence_traceability_coverage.js?h=879d2089f468",
     "./17_external_intelligence_full_memo_audit.js?h=11f7d8198a2b",
-    "./17_external_intelligence_console.js?h=90dcaf1acb58",
+    "./17_external_intelligence_console.js?h=017fc5bd1c3c",
     "./99_init.js?h=de0ce6495428"
   ],
   "hashes": {
@@ -2432,9 +2432,9 @@
       "cacheKey": "11f7d8198a2b"
     },
     "17_external_intelligence_console.js": {
-      "sha256": "90dcaf1acb588d833e7cd3160c85480f270fce87dc6aeea397c35e7f9ac4c779",
-      "byteSize": 22469,
-      "cacheKey": "90dcaf1acb58"
+      "sha256": "017fc5bd1c3c8b6a541bc216f89bfd316aaad1e36faa21e77a8602cc924595f8",
+      "byteSize": 21971,
+      "cacheKey": "017fc5bd1c3c"
     },
     "99_init.js": {
       "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
@@ -2442,7 +2442,7 @@
       "cacheKey": "de0ce6495428"
     }
   },
-  "scriptSetHash": "06617e0ea5a82214f4387ca273fdc490c7ad4c3b0b55be4255288e87775d38b5",
+  "scriptSetHash": "9541c492e280e8d7a355ea3e0a27d25de877fba2952379bc340bfa79c6cd2e03",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -4460,9 +4460,9 @@
       "cacheKey": "11f7d8198a2b"
     },
     "17_external_intelligence_console.js": {
-      "sha256": "90dcaf1acb588d833e7cd3160c85480f270fce87dc6aeea397c35e7f9ac4c779",
-      "byteSize": 22469,
-      "cacheKey": "90dcaf1acb58"
+      "sha256": "017fc5bd1c3c8b6a541bc216f89bfd316aaad1e36faa21e77a8602cc924595f8",
+      "byteSize": 21971,
+      "cacheKey": "017fc5bd1c3c"
     },
     "99_init.js": {
       "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
@@ -4470,5 +4470,5 @@
       "cacheKey": "de0ce6495428"
     }
   },
-  "manifestHash": "6c523fb615910f6c266841ac683e09301bce73341284532db0b0b4f8bfbe2169"
+  "manifestHash": "359ca34f85185434d396c0df26bd51212a1910bd4b586ac5853590619275062d"
 }
