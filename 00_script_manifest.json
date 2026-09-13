@@ -4,10 +4,10 @@
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "EXTERNAL-010 v1.20.1 + implemented OpenAI API Integration Phase 1 + Phase 2 Provider Governance / Cost-Risk UI Candidate; Decision 055 Accepted/Frozen; no live paid request performed",
+  "description": "EXTERNAL-010 v1.20.1 + OpenAI API Integration Phase 2 v0.2.1 Session/UI Hotfix Candidate; no provider registration or paid request performed",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-14T01:15:00+09:00",
+  "updatedAt": "2026-09-14T01:54:00+09:00",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -297,7 +297,7 @@
     "./17_external_intelligence_audit.js?h=d49c451cbb92",
     "./17_external_intelligence_runtime_coordination.js?h=b42665428345",
     "./17_external_intelligence_software_supply_chain.js?h=d728b9870535",
-    "./17_external_intelligence_gateway_client.js?h=c425471482a7",
+    "./17_external_intelligence_gateway_client.js?h=8a80f30838e7",
     "./17_external_intelligence_source_registry.js?h=428b17a76bc2",
     "./17_external_intelligence_source_discovery.js?h=86316b1672d5",
     "./17_external_intelligence_resource_budget.js?h=7c9fdb477feb",
@@ -307,7 +307,7 @@
     "./17_external_intelligence_source_router.js?h=fb1eef1a3d35",
     "./17_external_intelligence_acquisition_queue.js?h=8d1954f4953a",
     "./17_external_intelligence_openai_provider_integration.js?h=57586789b692",
-    "./17_external_intelligence_openai_provider_ui.js?h=81e81a300b31",
+    "./17_external_intelligence_openai_provider_ui.js?h=a5e150889584",
     "./17_external_intelligence_phase1_validation.js?h=d86cc1417555",
     "./17_external_intelligence_phase2_validation.js?h=00a0fe59ccd5",
     "./17_external_intelligence_phase3_validation.js?h=839f83963595",
@@ -1862,9 +1862,9 @@
       "cacheKey": "d728b9870535"
     },
     "17_external_intelligence_gateway_client.js": {
-      "sha256": "c425471482a7c50868ceedfd4702ddced590f7c3664c00e9e88f59124137052e",
-      "byteSize": 33125,
-      "cacheKey": "c425471482a7"
+      "sha256": "8a80f30838e71068c99657fcc29c39af3341d650e715d976ea3e39be18a61f14",
+      "byteSize": 33372,
+      "cacheKey": "8a80f30838e7"
     },
     "17_external_intelligence_source_registry.js": {
       "sha256": "428b17a76bc2529a4dbce58aee9f19765b52d7a3d71f45c5c85244a5de1e76df",
@@ -2467,12 +2467,12 @@
       "cacheKey": "57586789b692"
     },
     "17_external_intelligence_openai_provider_ui.js": {
-      "sha256": "81e81a300b31ce57656832c4a83cd13cd6ad78edc5e8d8c95c4b5dde028d0f8b",
-      "byteSize": 13728,
-      "cacheKey": "81e81a300b31"
+      "sha256": "a5e150889584ad7ddc87ddc2e40362b06574da001b05863251b042e5cb79e1e4",
+      "byteSize": 13858,
+      "cacheKey": "a5e150889584"
     }
   },
-  "scriptSetHash": "d18eb69efdc4b7628fe4d80f76d6db8403b04f1e777cc395fae160e77ce63129",
+  "scriptSetHash": "d1b0c5b21859ec39348b96afe075bae3617f8977a0777f298c4180428cb2f841",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -3915,9 +3915,9 @@
       "cacheKey": "d728b9870535"
     },
     "17_external_intelligence_gateway_client.js": {
-      "sha256": "c425471482a7c50868ceedfd4702ddced590f7c3664c00e9e88f59124137052e",
-      "byteSize": 33125,
-      "cacheKey": "c425471482a7"
+      "sha256": "8a80f30838e71068c99657fcc29c39af3341d650e715d976ea3e39be18a61f14",
+      "byteSize": 33372,
+      "cacheKey": "8a80f30838e7"
     },
     "17_external_intelligence_source_registry.js": {
       "sha256": "428b17a76bc2529a4dbce58aee9f19765b52d7a3d71f45c5c85244a5de1e76df",
@@ -4510,10 +4510,10 @@
       "cacheKey": "57586789b692"
     },
     "17_external_intelligence_openai_provider_ui.js": {
-      "sha256": "81e81a300b31ce57656832c4a83cd13cd6ad78edc5e8d8c95c4b5dde028d0f8b",
-      "byteSize": 13728,
-      "cacheKey": "81e81a300b31"
+      "sha256": "a5e150889584ad7ddc87ddc2e40362b06574da001b05863251b042e5cb79e1e4",
+      "byteSize": 13858,
+      "cacheKey": "a5e150889584"
     }
   },
-  "manifestHash": "2c3d94b586e53ddd4795fc3667530be99a61003cbfb6d95dbabffcdede198c24"
+  "manifestHash": "9ca06280da7d075543b55e6d43af87f0412023e3ff80cfa0e9ebf375977ab213"
 }

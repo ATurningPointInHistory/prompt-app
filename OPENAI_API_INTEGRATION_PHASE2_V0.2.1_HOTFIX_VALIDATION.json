@@ -1,0 +1,57 @@
+{
+  "hotfix": {
+    "id": "OPENAI-API-INTEGRATION-PHASE2-HOTFIX-VALIDATION",
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "health": 100,
+    "realPaidRequestPerformed": false
+  },
+  "phase2": {
+    "id": "OPENAI-API-INTEGRATION-PHASE2-VALIDATION",
+    "passed": 20,
+    "failed": 0,
+    "total": 20,
+    "health": 100,
+    "releaseAllowed": false,
+    "realPaidRequestPerformed": false
+  },
+  "gateway": {
+    "id": "EXTERNAL-010-GATEWAY-VALIDATION-d26e3636-3031-461b-a6b9-83f93cd050e3",
+    "passed": 38,
+    "failed": 0,
+    "total": 38,
+    "health": 100,
+    "criticalFailed": 0,
+    "releaseAllowed": true
+  },
+  "phase4": {
+    "id": "EXTERNAL-010-PHASE4-PC-REAL-RUNTIME-4e94dba5-b3af-4483-a00b-1fbc4ec0fce8",
+    "passed": 14,
+    "failed": 0,
+    "total": 14,
+    "health": 100,
+    "criticalFailed": 0,
+    "releaseAllowed": true
+  },
+  "phase6": {
+    "id": "EXTERNAL-010-GATEWAY-PHASE6-115d07b3-3674-4047-b98c-495010e7967c",
+    "passed": 15,
+    "failed": 0,
+    "total": 15,
+    "health": 100,
+    "criticalFailed": 0,
+    "releaseAllowed": true
+  },
+  "candidateVersion": "0.2.1",
+  "decisionId": "EXTERNAL-010-DECISION-055",
+  "scope": "Session expiry state synchronization + OpenAI draft save immediate UI refresh",
+  "providerRegistrationPerformed": false,
+  "realPaidRequestPerformed": false,
+  "staticManifest": {
+    "scriptCount": 410,
+    "passed": true,
+    "manifestHash": "9ca06280da7d075543b55e6d43af87f0412023e3ff80cfa0e9ebf375977ab213",
+    "scriptSetHash": "d1b0c5b21859ec39348b96afe075bae3617f8977a0777f298c4180428cb2f841"
+  }
+}

@@ -44,6 +44,9 @@
   }
 
   function getClientState() {
+    // Keep public/UI state synchronized with the real session lifetime.
+    // Reading state must never continue to advertise an expired in-memory token as ACTIVE.
+    if (sessionMetadata && sessionMetadata.state === "ACTIVE") isSessionUsable();
     return internal.clone({
       baseUrl: baseUrl,
       healthState: state.gatewayClientState && state.gatewayClientState.healthState || "UNKNOWN",

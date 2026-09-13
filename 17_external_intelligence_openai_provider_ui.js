@@ -107,7 +107,11 @@
   function externalOpenAISaveDraft() {
     const before=readDraft(),after=currentForm(),impact=compareRisk(before,after);
     if(impact.level==="RED") { setImpact({saved:false,riskLevel:"RED",message:"大幅な費用境界の拡大を検出しました。ここでは自動保存しません。変更内容を確認し、Authority/Budget側で承認してください。",before,after,reasons:impact.reasons}); return false; }
-    const ok=writeDraft(after);setImpact({saved:ok,riskLevel:impact.level,before,after,reasons:impact.reasons,paidActivationPerformed:false,budgetMutationPerformed:false});return ok;
+    const ok=writeDraft(after);
+    const result={saved:ok,riskLevel:impact.level,before,after,reasons:impact.reasons,paidActivationPerformed:false,budgetMutationPerformed:false};
+    if(ok&&typeof global.externalConsoleRefresh==="function") global.externalConsoleRefresh();
+    setImpact(result);
+    return ok;
   }
   function externalOpenAIShowProviderCandidates() {
     const draft=currentForm(); const src=source();
