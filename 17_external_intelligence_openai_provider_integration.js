@@ -23,6 +23,7 @@
   const EXACT_URL = "https://api.openai.com/v1/responses";
   const CANONICAL_HOST = "api.openai.com";
   const ENDPOINT_REFERENCE = "OPENAI-RESPONSES-V1";
+  const DEFAULT_SECRET_REFERENCE_ID = "SECRET-OPENAI-PRIMARY";
   const ACTIVATION_ACTION = "ACTIVATE_GOVERNED_PAID_SOURCE";
   const ACTIVATION_PURPOSE = "paid-provider-activation";
   const PRICING_SOURCE = "https://platform.openai.com/docs/models";
@@ -45,6 +46,7 @@
     accessMode: "LOCAL_GATEWAY",
     adapterId: ADAPTER_ID,
     authenticationMode: "BEARER_TOKEN",
+    defaultSecretReferenceId: DEFAULT_SECRET_REFERENCE_ID,
     pricingMode: "USAGE_BASED",
     costCurrency: "USD",
     operationId: OPERATION_ID,
@@ -150,8 +152,11 @@
 
   function buildOpenAIProviderSourceRegistration(input) {
     const settings = internal.isPlainObject(input) ? input : {};
-    const secretReferenceId = internal.text(settings.secretReferenceId, "").toUpperCase();
+    const secretReferenceId = internal.text(settings.secretReferenceId, DEFAULT_SECRET_REFERENCE_ID).toUpperCase();
     if (!/^SECRET-[A-Z0-9-]+$/.test(secretReferenceId)) return internal.buildResult(false, "EXTERNAL010_OPENAI_SECRET_REFERENCE_REQUIRED", "Blocked", { secretValueAccepted: false });
+    const secretMetadata = typeof namespace.getExternalIntelligenceSecretMetadata === "function" ? namespace.getExternalIntelligenceSecretMetadata(secretReferenceId) : null;
+    const secretValidation = typeof namespace.validateExternalIntelligenceSecretReference === "function" && secretMetadata ? namespace.validateExternalIntelligenceSecretReference({ secretReferenceId: secretReferenceId }) : null;
+    const secretReady = Boolean(secretValidation && secretValidation.ok === true);
     const candidate = {
       sourceId: SOURCE_ID,
       sourceName: "OpenAI Responses API",
@@ -170,7 +175,19 @@
       identityState: "VERIFIED",
       purpose: "openai-provider-registration"
     };
-    return internal.buildResult(true, "EXTERNAL010_OPENAI_SOURCE_REGISTRATION_CANDIDATE_READY", "Candidate", { sourceCandidate: candidate, registrationPerformed: false, paidActivationPerformed: false });
+    return internal.buildResult(true, "EXTERNAL010_OPENAI_SOURCE_REGISTRATION_CANDIDATE_READY", "Candidate", {
+      sourceCandidate: candidate,
+      secretReference: {
+        secretReferenceId: secretReferenceId,
+        metadataRegistered: Boolean(secretMetadata),
+        active: secretReady,
+        secretValueAccepted: false,
+        nextRequiredAction: secretReady ? "SOURCE_REGISTRATION_AUTHORITY" : "SET_GATEWAY_SECRET_AND_REGISTER_REFERENCE_METADATA"
+      },
+      sourceRegistrationReady: secretReady,
+      registrationPerformed: false,
+      paidActivationPerformed: false
+    });
   }
 
   function buildOpenAIResponsesOperationContract(input) {

@@ -11,13 +11,17 @@
   if (!n || !n.__internal || !m) return;
   const i = n.__internal;
   const STORAGE_KEY = "EXTERNAL010_OPENAI_UI_DRAFT_V1";
+  function defaultSecretReferenceId() {
+    const p=typeof n.getOpenAIProviderIntegrationProfile==="function"?n.getOpenAIProviderIntegrationProfile():null;
+    return p&&p.defaultSecretReferenceId||"SECRET-OPENAI-PRIMARY";
+  }
 
   function esc(value) {
     return String(value == null ? "" : value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
   }
   function money(value) { const n=Number(value); return Number.isFinite(n) ? "$"+n.toFixed(n < 1 ? 4 : 2) : "—"; }
   function readDraft() {
-    const empty={model:"",maxOutputTokens:"",perRequestHardCapUsd:"",budgetId:""};
+    const empty={model:"",maxOutputTokens:"",perRequestHardCapUsd:"",budgetId:"",secretReferenceId:defaultSecretReferenceId()};
     try { const raw=global.localStorage && global.localStorage.getItem(STORAGE_KEY); if(!raw)return empty; return Object.assign(empty,JSON.parse(raw)||{}); } catch(_){ return empty; }
   }
   function writeDraft(draft) {
@@ -25,7 +29,16 @@
   }
   function source() { return typeof n.getExternalIntelligenceSource==="function" ? n.getExternalIntelligenceSource("SOURCE-OPENAI") : null; }
   function budgets() { return typeof n.listExternalIntelligenceResourceBudgets==="function" ? n.listExternalIntelligenceResourceBudgets().filter(b=>b&&b.state==="ACTIVE"&&String(b.currency||"").toUpperCase()==="USD"&&b.limits&&b.limits.FINANCIAL_COST) : []; }
-  function secretState(src) { if(!src||!src.secretReferenceId||typeof n.validateExternalIntelligenceSecretReference!=="function")return null; return n.validateExternalIntelligenceSecretReference({secretReferenceId:src.secretReferenceId}); }
+  function secretMetadata(id) { return id&&typeof n.getExternalIntelligenceSecretMetadata==="function" ? n.getExternalIntelligenceSecretMetadata(id) : null; }
+  function secretState(id) { if(!id||typeof n.validateExternalIntelligenceSecretReference!=="function")return null; return n.validateExternalIntelligenceSecretReference({secretReferenceId:id}); }
+  function secretReferenceIds() {
+    const values=[]; const def=defaultSecretReferenceId(); if(def)values.push(def);
+    if(typeof n.listExternalIntelligenceSecretMetadata==="function") n.listExternalIntelligenceSecretMetadata().forEach(function(m){
+      if(!m||!m.secretReferenceId)return; const provider=String(m.provider||"").toUpperCase(); const type=String(m.secretType||"").toUpperCase();
+      if((!provider||provider==="OPENAI"||provider==="LOCAL_GATEWAY")&&(type==="BEARER_TOKEN"||type==="API_KEY"||type==="CUSTOM_SECRET")) values.push(m.secretReferenceId);
+    });
+    return Array.from(new Set(values));
+  }
   function budgetSnapshot(id) {
     const b=budgets().find(x=>x.budgetId===id); if(!b)return null;
     const lim=b.limits.FINANCIAL_COST||{}; return {budgetId:b.budgetId,currency:b.currency,consumed:Number(b.consumed&&b.consumed.FINANCIAL_COST||0),softLimit:lim.softLimit==null?null:Number(lim.softLimit),hardLimit:lim.hardLimit==null?null:Number(lim.hardLimit),period:i.clone(b.period||{})};
@@ -33,17 +46,22 @@
   function getOpenAIProviderUiSnapshot() {
     const src=source(), draft=readDraft(), profiles=typeof n.listOpenAIModelPricingProfiles==="function"?n.listOpenAIModelPricingProfiles():[], activation=src&&src.paidActivationPolicy||null;
     const selectedBudget=draft.budgetId||activation&&activation.budgetIds&&activation.budgetIds[0]||"";
-    const b=budgetSnapshot(selectedBudget), secret=secretState(src);
-    let level="YELLOW",label="準備中",reason="Provider / Budget / Authority の設定を確認してください。";
+    const selectedSecretReferenceId=src&&src.secretReferenceId||draft.secretReferenceId||defaultSecretReferenceId();
+    const metadata=secretMetadata(selectedSecretReferenceId), secret=metadata?secretState(selectedSecretReferenceId):null;
+    const b=budgetSnapshot(selectedBudget);
+    let level="YELLOW",label="準備中",reason="Provider / Secret Reference / Budget / Authority の設定を確認してください。";
     if(src&&src.lifecycleState==="ACTIVE"&&secret&&secret.ok===true&&b){level="GREEN";label="通常利用範囲";reason="承認済み範囲内は毎回の人間承認なしで利用できます。";}
     if(src&&src.lifecycleState==="ACTIVE"&&(!secret||!secret.ok||!b)){level="RED";label="実行停止推奨";reason="Active Sourceに必要なSecretまたはUSD Budgetが確認できません。";}
-    return {source:src,draft,profiles,activeUsdBudgets:budgets(),selectedBudget:b,secret:secret,risk:{level,label,reason},activation:activation,externalTransmission:"TEXT_TO_OPENAI",toolsEnabled:false,streamingEnabled:false,backgroundEnabled:false,secretValueInputAllowed:false,capturedAt:i.nowIso()};
+    return {source:src,draft,profiles,activeUsdBudgets:budgets(),selectedBudget:b,secret:secret,secretMetadata:metadata,selectedSecretReferenceId:selectedSecretReferenceId,secretReferenceIds:secretReferenceIds(),risk:{level,label,reason},activation:activation,externalTransmission:"TEXT_TO_OPENAI",toolsEnabled:false,streamingEnabled:false,backgroundEnabled:false,secretValueInputAllowed:false,capturedAt:i.nowIso()};
   }
   function modelOptions(snapshot) {
     return '<option value="">モデルを選択</option>'+snapshot.profiles.map(function(p){const selected=snapshot.draft.model===p.model?' selected':'';return '<option value="'+esc(p.model)+'"'+selected+'>'+esc(p.model)+' — 入力 '+esc(money(p.inputPerMTokUsd))+'/MTok / 出力 '+esc(money(p.outputPerMTokUsd))+'/MTok</option>';}).join('');
   }
   function budgetOptions(snapshot) {
     return '<option value="">USD Budgetを選択</option>'+snapshot.activeUsdBudgets.map(function(b){const selected=snapshot.draft.budgetId===b.budgetId?' selected':'';const lim=b.limits&&b.limits.FINANCIAL_COST||{};return '<option value="'+esc(b.budgetId)+'"'+selected+'>'+esc(b.budgetId)+' — '+esc(money(b.consumed&&b.consumed.FINANCIAL_COST||0))+' / '+esc(money(lim.hardLimit))+'</option>';}).join('');
+  }
+  function secretReferenceOptions(snapshot) {
+    return snapshot.secretReferenceIds.map(function(id){const selected=snapshot.selectedSecretReferenceId===id?' selected':'';const m=secretMetadata(id);const status=m?String(m.status||'REGISTERED'):'Metadata未登録';return '<option value="'+esc(id)+'"'+selected+'>'+esc(id)+' — '+esc(status)+'</option>';}).join('');
   }
   function renderOpenAIProviderIntegrationPanelHtml() {
     const x=getOpenAIProviderUiSnapshot(), src=x.source||{}, b=x.selectedBudget, activation=x.activation||{};
@@ -55,6 +73,7 @@
       '<div class="external-help">'+esc(x.risk.reason)+' APIキー本体はこの画面に入力しません。Gateway側のSecret Referenceだけを使用します。</div>'+
       '<div class="openai-summary-grid">'+
         '<div><span>Provider</span><strong>'+esc(src.lifecycleState||'未登録')+'</strong></div>'+
+        '<div><span>Secret Reference</span><strong>'+esc(x.selectedSecretReferenceId)+' / '+esc(x.secretMetadata?x.secretMetadata.status:'未準備')+'</strong></div>'+
         '<div><span>現在モデル</span><strong>'+esc(model)+'</strong></div>'+
         '<div><span>1回上限</span><strong>'+esc(cap?money(cap):'未設定')+'</strong></div>'+
         '<div><span>USD Budget</span><strong>'+esc(b?money(b.consumed)+' / '+money(b.hardLimit):'未選択')+'</strong></div>'+
@@ -62,6 +81,7 @@
         '<div><span>Tools / Stream</span><strong>OFF / OFF</strong></div>'+
       '</div>'+
       '<details class="openai-config-details" open><summary>簡単設定</summary><div class="openai-form-grid">'+
+        '<label>Secret Reference<select id="externalOpenAISecretReference">'+secretReferenceOptions(x)+'</select><small>APIキー本体ではなくGateway用の参照IDです。初期値は SECRET-OPENAI-PRIMARY。</small></label>'+
         '<label>モデル<select id="externalOpenAIModel">'+modelOptions(x)+'</select><small>モデル変更は料金と性能に影響します。</small></label>'+
         '<label>max_output_tokens<input id="externalOpenAIMaxOutput" type="number" min="1" max="128000" step="1" value="'+esc(x.draft.maxOutputTokens)+'" placeholder="例: 8000"><small>上げるほど1回の最大料金が増えます。</small></label>'+
         '<label>1回の最大許可額（USD）<input id="externalOpenAIPerRequestCap" type="number" min="0.000001" step="0.001" value="'+esc(x.draft.perRequestHardCapUsd)+'" placeholder="例: 0.10"><small>この値を超えるRequestは送信前に停止します。</small></label>'+
@@ -84,7 +104,7 @@
   }
   function currentForm() {
     const get=id=>global.document&&global.document.getElementById(id);
-    return {model:get('externalOpenAIModel')&&get('externalOpenAIModel').value||'',maxOutputTokens:get('externalOpenAIMaxOutput')&&get('externalOpenAIMaxOutput').value||'',perRequestHardCapUsd:get('externalOpenAIPerRequestCap')&&get('externalOpenAIPerRequestCap').value||'',budgetId:get('externalOpenAIBudget')&&get('externalOpenAIBudget').value||''};
+    return {model:get('externalOpenAIModel')&&get('externalOpenAIModel').value||'',maxOutputTokens:get('externalOpenAIMaxOutput')&&get('externalOpenAIMaxOutput').value||'',perRequestHardCapUsd:get('externalOpenAIPerRequestCap')&&get('externalOpenAIPerRequestCap').value||'',budgetId:get('externalOpenAIBudget')&&get('externalOpenAIBudget').value||'',secretReferenceId:get('externalOpenAISecretReference')&&get('externalOpenAISecretReference').value||readDraft().secretReferenceId||defaultSecretReferenceId()};
   }
   function compareRisk(before,after) {
     const reasons=[];let level="GREEN";
@@ -94,6 +114,7 @@
     if(newCap>oldCap&&oldCap>0){level=newCap>=oldCap*4?"RED":"YELLOW";reasons.push("1回上限 "+money(oldCap)+" → "+money(newCap)+(newCap>=oldCap*4?"（4倍以上）":""));}
     const oldOut=Number(before.maxOutputTokens||0),newOut=Number(after.maxOutputTokens||0); if(newOut>oldOut&&oldOut>0){if(level!=="RED")level="YELLOW";reasons.push("最大出力Tokens増加 "+oldOut+" → "+newOut);}
     if(before.budgetId&&after.budgetId&&before.budgetId!==after.budgetId){if(level!=="RED")level="YELLOW";reasons.push("Budget変更");}
+    if(before.secretReferenceId&&after.secretReferenceId&&before.secretReferenceId!==after.secretReferenceId){if(level!=="RED")level="YELLOW";reasons.push("Secret Reference変更");}
     if(!reasons.length)reasons.push("費用・権限境界の拡大は検出されませんでした");
     return {level,reasons};
   }
@@ -115,9 +136,12 @@
   }
   function externalOpenAIShowProviderCandidates() {
     const draft=currentForm(); const src=source();
-    const sourceCandidate=typeof n.buildOpenAIProviderSourceRegistration==="function"&&src&&src.secretReferenceId?n.buildOpenAIProviderSourceRegistration({secretReferenceId:src.secretReferenceId}):{ok:false,code:"SECRET_REFERENCE_OR_REGISTERED_SOURCE_REQUIRED"};
+    const secretReferenceId=src&&src.secretReferenceId||draft.secretReferenceId||defaultSecretReferenceId();
+    const metadata=secretMetadata(secretReferenceId);
+    const validation=metadata?secretState(secretReferenceId):null;
+    const sourceCandidate=typeof n.buildOpenAIProviderSourceRegistration==="function"?n.buildOpenAIProviderSourceRegistration({secretReferenceId:secretReferenceId}):{ok:false,code:"OPENAI_PROVIDER_MODULE_UNAVAILABLE"};
     const operationCandidate=typeof n.buildOpenAIResponsesOperationContract==="function"?n.buildOpenAIResponsesOperationContract({}):{ok:false,code:"OPENAI_PROVIDER_MODULE_UNAVAILABLE"};
-    const value={sourceCandidate,operationCandidate,draft,paidActivationPerformed:false,secretValueRequested:false};setImpact(value);return value;
+    const value={sourceCandidate,operationCandidate,secretReference:{secretReferenceId:secretReferenceId,metadataRegistered:Boolean(metadata),active:Boolean(validation&&validation.ok===true),nextRequiredAction:validation&&validation.ok===true?"SOURCE_REGISTRATION_AUTHORITY":"SET_GATEWAY_SECRET_AND_REGISTER_REFERENCE_METADATA"},draft,paidActivationPerformed:false,secretValueRequested:false};setImpact(value);return value;
   }
   Object.assign(n.api,{getOpenAIProviderUiSnapshot,renderOpenAIProviderIntegrationPanelHtml});Object.assign(n,n.api);
   Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIShowProviderCandidates});
