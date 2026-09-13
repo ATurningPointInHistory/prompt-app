@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AI Prompt OS Selectable Launcher v1.4.5
+AI Prompt OS Selectable Launcher v1.4.6
 
 Canonical Gateway Edition
 
@@ -23,6 +23,7 @@ external_gateway\\start_phase6_pc_runtime.bat
 The normal launcher intentionally does NOT start the Phase 06 fixture.
 """
 
+import csv
 import hashlib
 import json
 import math
@@ -348,6 +349,119 @@ def kill_process_tree(pid):
     return result.returncode == 0
 
 
+def listening_pids(port):
+    """Return unique Windows PIDs that are LISTENING on the requested TCP port."""
+    try:
+        result = subprocess.run(
+            ["netstat", "-ano", "-p", "tcp"],
+            capture_output=True,
+            text=True,
+            creationflags=CREATE_NO_WINDOW,
+        )
+    except Exception:
+        return []
+
+    found = set()
+    suffix = f":{int(port)}"
+    for raw in result.stdout.splitlines():
+        parts = raw.split()
+        if len(parts) < 5 or parts[0].upper() != "TCP":
+            continue
+        local_endpoint = parts[1]
+        state = parts[3].upper()
+        if state != "LISTENING" or not local_endpoint.endswith(suffix):
+            continue
+        try:
+            found.add(int(parts[4]))
+        except (TypeError, ValueError):
+            continue
+    return sorted(found)
+
+
+def process_image_name(pid):
+    if not pid:
+        return None
+    try:
+        result = subprocess.run(
+            ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
+            capture_output=True,
+            text=True,
+            creationflags=CREATE_NO_WINDOW,
+        )
+        for row in csv.reader(result.stdout.splitlines()):
+            if len(row) >= 2 and str(pid) == row[1].strip():
+                return row[0].strip() or None
+    except Exception:
+        return None
+    return None
+
+
+def verified_external_listener(kind):
+    """
+    Fail-closed recovery for a runtime that is not owned by the current launcher state.
+
+    Web recovery requires exact manifest + index identity and a Python listener.
+    Gateway recovery requires the canonical /health contract and a Node listener.
+    """
+    normalized_kind = str(kind or "").strip().lower()
+    if normalized_kind == "web":
+        port = WEB_PORT
+        verification = web_server_identity()
+        allowed_images = {"python.exe", "pythonw.exe", "python3.exe", "py.exe"}
+        identity_label = "PROJECT_AND_INDEX_MATCH"
+    elif normalized_kind == "gateway":
+        port = GATEWAY_PORT
+        verification = gateway_health()
+        allowed_images = {"node.exe"}
+        identity_label = "CANONICAL_GATEWAY_HEALTH_MATCH"
+    else:
+        return {"ok": False, "reason": "RUNTIME_KIND_INVALID", "pid": None}
+
+    if not verification.get("ok"):
+        return {
+            "ok": False,
+            "reason": verification.get("reason", "IDENTITY_NOT_VERIFIED"),
+            "pid": None,
+        }
+
+    pids = listening_pids(port)
+    if len(pids) != 1:
+        return {
+            "ok": False,
+            "reason": "LISTENER_PID_NOT_UNIQUE",
+            "pids": pids,
+            "pid": None,
+        }
+
+    pid = pids[0]
+    image = process_image_name(pid)
+    if not image or image.lower() not in allowed_images:
+        return {
+            "ok": False,
+            "reason": "LISTENER_PROCESS_TYPE_UNEXPECTED",
+            "pid": pid,
+            "image": image,
+        }
+
+    return {
+        "ok": True,
+        "reason": "VERIFIED_EXTERNAL_RUNTIME",
+        "pid": pid,
+        "image": image,
+        "identity": identity_label,
+        "port": port,
+    }
+
+
+def wait_for_port_closed(port, timeout=2.5):
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if not port_open(port):
+            return True
+        time.sleep(0.15)
+    return not port_open(port)
+
+
 def cleanup_stale_state():
     state = load_state()
     changed = False
@@ -470,7 +584,20 @@ def stop_web_server():
         return "stopped" if ok else "failed"
 
     if port_open(WEB_PORT):
-        return "external"
+        recovery = verified_external_listener("web")
+        if not recovery.get("ok"):
+            log(f"Web Server external stop blocked: {recovery}")
+            return "external"
+        recovered_pid = recovery.get("pid")
+        log(
+            "Stopping verified external Web Server "
+            f"PID={recovered_pid} image={recovery.get('image')} identity={recovery.get('identity')}"
+        )
+        ok = kill_process_tree(recovered_pid)
+        closed = wait_for_port_closed(WEB_PORT) if ok else False
+        state.pop("web_pid", None)
+        save_state(state)
+        return "recovered_stopped" if ok and closed else "failed"
 
     state.pop("web_pid", None)
     save_state(state)
@@ -490,7 +617,20 @@ def stop_gateway():
         return "stopped" if ok else "failed"
 
     if port_open(GATEWAY_PORT):
-        return "external"
+        recovery = verified_external_listener("gateway")
+        if not recovery.get("ok"):
+            log(f"Gateway external stop blocked: {recovery}")
+            return "external"
+        recovered_pid = recovery.get("pid")
+        log(
+            "Stopping verified external Canonical Gateway "
+            f"PID={recovered_pid} image={recovery.get('image')} identity={recovery.get('identity')}"
+        )
+        ok = kill_process_tree(recovered_pid)
+        closed = wait_for_port_closed(GATEWAY_PORT) if ok else False
+        state.pop("gateway_pid", None)
+        save_state(state)
+        return "recovered_stopped" if ok and closed else "failed"
 
     state.pop("gateway_pid", None)
     save_state(state)
@@ -876,8 +1016,13 @@ class LauncherApp:
         if result == "external":
             messagebox.showinfo(
                 "Web Server停止",
-                "Web Serverはこのランチャー以外から起動されています。\n"
+                "Web Serverは外部起動中ですが、現在のAI Prompt OSとして安全に特定できません。\n"
                 "誤停止防止のため自動終了しません。",
+            )
+        elif result == "recovered_stopped":
+            messagebox.showinfo(
+                "Web Server停止",
+                "現在のAI Prompt OSとIdentity一致した外部Web Serverを確認し、安全に停止しました。",
             )
         elif result == "failed":
             messagebox.showwarning("Web Server停止", "Web Serverの終了処理に失敗しました。")
@@ -891,8 +1036,13 @@ class LauncherApp:
         if result == "external":
             messagebox.showinfo(
                 "Gateway停止",
-                "Gatewayはこのランチャー以外から起動されています。\n"
+                "Gatewayは外部起動中ですが、Canonical Gatewayとして安全に特定できません。\n"
                 "誤停止防止のため自動終了しません。",
+            )
+        elif result == "recovered_stopped":
+            messagebox.showinfo(
+                "Gateway停止",
+                "Health Contract一致したCanonical Gatewayを確認し、安全に停止しました。",
             )
         elif result == "failed":
             messagebox.showwarning("Gateway停止", "Gatewayの終了処理に失敗しました。")
@@ -903,8 +1053,8 @@ class LauncherApp:
     def stop_all_and_exit(self):
         if not messagebox.askyesno(
             "すべて終了",
-            "このランチャーが起動したWeb ServerとGatewayを停止して、\n"
-            "ランチャーも終了しますか？",
+            "Web ServerとGatewayを停止して、ランチャーも終了しますか？\n\n"
+            "Launcher管理外でも、現在のProject Identity / Canonical Gatewayと安全に一致したRuntimeだけ停止します。",
         ):
             return
 
@@ -929,7 +1079,7 @@ class LauncherApp:
 
 def main():
     ensure_state_dir()
-    log(f"Launcher v1.4.4 opened PROJECT_ROOT={PROJECT_ROOT}")
+    log(f"Launcher v1.4.6 opened PROJECT_ROOT={PROJECT_ROOT}")
     root = tk.Tk()
     app = LauncherApp(root)
     root.after(150, app.fit_window_to_content)

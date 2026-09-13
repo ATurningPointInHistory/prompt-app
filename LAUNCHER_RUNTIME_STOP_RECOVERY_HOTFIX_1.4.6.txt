@@ -1,0 +1,28 @@
+AI Prompt OS Launcher Runtime Stop Recovery Hotfix 1.4.6
+Date: 2026-09-14
+
+Purpose:
+- Allow the Launcher to safely stop a current-project Web Server or Canonical Gateway even when the current launcher instance does not own the original PID state.
+- Preserve fail-closed behavior for unknown or mismatched runtimes.
+
+Web Server recovery requirements:
+1. Port 8000 is listening.
+2. Served 00_script_manifest.json exactly matches the local project file.
+3. Served index.html exactly matches the local project file.
+4. Exactly one TCP LISTENING PID owns port 8000.
+5. Listener process image is an expected Python runtime.
+
+Gateway recovery requirements:
+1. Port 43110 is listening.
+2. /health matches EXTERNAL-010 Canonical Gateway contract.
+3. Gateway version exactly matches external_gateway/package.json.
+4. Exactly one TCP LISTENING PID owns port 43110.
+5. Listener process image is node.exe.
+
+Behavior:
+- Launcher-owned PID: existing stop behavior is unchanged.
+- Verified external runtime: listener process is stopped and the port must close.
+- Unverified/mismatched runtime: automatic stop remains blocked.
+- No repository, authority, OpenAI Provider, Budget, or trading behavior is changed.
+
+This hotfix is operational only and does not change EXTERNAL-010 v1.20.1 or OpenAI API Integration Phase 2 product semantics.
