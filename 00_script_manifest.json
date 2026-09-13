@@ -7,11 +7,11 @@
   "description": "EXTERNAL-010 Phase 21 Memo Conformance Repair + Dedicated Control Center v1.20.1 Candidate - static script manifest",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-13T01:38:53.933900Z",
+  "updatedAt": "2026-09-13T02:11:48.293314Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
-    "./01_bootstrap.js?h=4f428cdf4b94",
+    "./01_bootstrap.js?h=c746eb480f6d",
     "./01_function_reference.js?h=43e96f62f83a",
     "./01_project_config.js?h=e642ef557371",
     "./01_project_manager.js?h=ecac07839bb6",
@@ -422,9 +422,9 @@
       "cacheKey": "a4795193df6c"
     },
     "01_bootstrap.js": {
-      "sha256": "4f428cdf4b94db4a05b2648c98ec586df2d316198d2224beef0059c6a4bb1563",
-      "byteSize": 17706,
-      "cacheKey": "4f428cdf4b94"
+      "sha256": "c746eb480f6d22eb14061509808b82d6eea73c038fe89dc594240edfacf6447b",
+      "byteSize": 24847,
+      "cacheKey": "c746eb480f6d"
     },
     "01_function_reference.js": {
       "sha256": "43e96f62f83a1e8a1af8ff0ea5ddf5cedf0567c578b3b7c28a7c790ae5ee9476",
@@ -2412,7 +2412,7 @@
       "cacheKey": "de0ce6495428"
     }
   },
-  "scriptSetHash": "c6cba53bd5e736037f2f806af6a458a97a371672cbe9f6b040e2e7415eb2c072",
+  "scriptSetHash": "315fc9fbc6d03698d0f2fe317efead8b932b8a83ebd5f638b982530c60ea5e6c",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -2425,9 +2425,9 @@
       "cacheKey": "a4795193df6c"
     },
     "01_bootstrap.js": {
-      "sha256": "4f428cdf4b94db4a05b2648c98ec586df2d316198d2224beef0059c6a4bb1563",
-      "byteSize": 17706,
-      "cacheKey": "4f428cdf4b94"
+      "sha256": "c746eb480f6d22eb14061509808b82d6eea73c038fe89dc594240edfacf6447b",
+      "byteSize": 24847,
+      "cacheKey": "c746eb480f6d"
     },
     "01_function_reference.js": {
       "sha256": "43e96f62f83a1e8a1af8ff0ea5ddf5cedf0567c578b3b7c28a7c790ae5ee9476",
@@ -4415,5 +4415,5 @@
       "cacheKey": "de0ce6495428"
     }
   },
-  "manifestHash": "85fd0c91dabdd4916e65899b14d8cc1c1a5f4eab689cbf0ce9b721f41ffb3d0a"
+  "manifestHash": "93919f5ffc3174168c6090f77d47a500df3cf58b1643e8e36003ae388489a36f"
 }

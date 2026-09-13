@@ -890,8 +890,8 @@
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "85fd0c91dabdd4916e65899b14d8cc1c1a5f4eab689cbf0ce9b721f41ffb3d0a",
-  "scriptSetHash": "c6cba53bd5e736037f2f806af6a458a97a371672cbe9f6b040e2e7415eb2c072",
+  "scriptManifestHash": "93919f5ffc3174168c6090f77d47a500df3cf58b1643e8e36003ae388489a36f",
+  "scriptSetHash": "315fc9fbc6d03698d0f2fe317efead8b932b8a83ebd5f638b982530c60ea5e6c",
   "scriptManifestCount": 400,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",

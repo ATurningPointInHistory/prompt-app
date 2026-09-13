@@ -76,24 +76,496 @@ function switchAppPage(mode) {
   };
 
   Object.keys(pages).forEach(key => {
-    if (pages[key]) pages[key].style.display = mode === key ? "block" : "none";
+    if (pages[key]) {
+      pages[key].style.display =
+        mode === key
+          ? "block"
+          : "none";
+    }
   });
 
   Object.keys(tabs).forEach(key => {
-    if (tabs[key]) tabs[key].classList.toggle("active", mode === key);
+    if (tabs[key]) {
+      tabs[key].classList.toggle(
+        "active",
+        mode === key
+      );
+    }
   });
 
-  if (mode === "repair" && typeof resetRepairEditorView === "function") {
+  if (
+    mode === "repair" &&
+    typeof resetRepairEditorView === "function"
+  ) {
     resetRepairEditorView();
   }
 
-  if (mode === "external" && typeof renderExternalIntelligenceConsole === "function") {
+  if (
+    mode === "external" &&
+    typeof renderExternalIntelligenceConsole === "function"
+  ) {
     renderExternalIntelligenceConsole();
   }
 
   if (typeof updateRepairSearchQuickVisibility === "function") {
     updateRepairSearchQuickVisibility();
   }
+
+  if (typeof initRepairQuickFavoritePanel === "function") {
+    initRepairQuickFavoritePanel();
+  }
+
+  if (typeof updateRepairQuickFavoriteVisibility === "function") {
+    updateRepairQuickFavoriteVisibility();
+  }
+}
+
+function isRepairMode() {
+  const page =
+    get("repairPage");
+
+  if (!page) {
+    return false;
+  }
+
+  return page.style.display !== "none";
+}
+
+
+
+function buildRepairSearchQuickHtml() {
+
+  return `
+<div
+  id="repairSearchQuickPanel"
+  class="repair-search-quick-panel">
+
+  <button
+    id="repairSearchQuickToggle"
+    class="repair-search-quick-toggle"
+    onclick="toggleRepairSearchQuickPanel()">
+    ▶
+  </button>
+
+  <div class="macro-quick-title">
+    Macro
+  </div>
+
+  <div id="repairQuickMacroButtons">
+    ${
+      typeof buildRepairQuickMacroButtons === "function"
+        ? buildRepairQuickMacroButtons()
+        : ""
+    }
+  </div>
+
+</div>
+`;
+
+}
+
+function buildRepairQuickMacroButtons() {
+
+  const names =
+    getFavoriteMacroNames();
+
+  if (!names.length) {
+    return `
+<button
+  class="macro-quick-btn"
+  onclick="showMacroList()">
+  <span class="macro-quick-icon">▶</span>
+  <span class="macro-quick-label">Macro</span>
+</button>
+`;
+  }
+
+  return names.map(name => {
+
+    const item =
+      normalizeMacroItem(name);
+
+    return `
+<button
+  class="macro-quick-btn"
+  title="${escapeHtml(item.label)}"
+  onclick='runMacro(${JSON.stringify(name)})'
+  oncontextmenu='event.preventDefault(); openMacroFavoriteMenu(${JSON.stringify(name)});'>
+  <span class="macro-quick-icon">
+    ${escapeHtml(item.icon)}
+  </span>
+  <span class="macro-quick-label">
+    ${escapeHtml(item.label)}
+  </span>
+</button>
+`;
+
+  }).join("");
+
+}
+
+function refreshRepairQuickMacroButtons() {
+
+  const box =
+    get("repairQuickMacroButtons");
+
+  if (!box) {
+    return;
+  }
+
+  box.innerHTML =
+    buildRepairQuickMacroButtons();
+
+}
+
+function toggleRepairSearchQuickPanel() {
+
+  const panel =
+    get("repairSearchQuickPanel");
+
+  const toggle =
+    get("repairSearchQuickToggle");
+
+  if (!panel || !toggle) {
+    return;
+  }
+
+  const closed =
+    panel.classList.toggle(
+      "closed"
+    );
+
+  toggle.textContent =
+    closed
+      ? "◀"
+      : "▶";
+}
+
+function initRepairSearchQuickPanel() {
+
+  if (get("repairSearchQuickPanel")) {
+
+    updateRepairSearchQuickVisibility();
+
+    if (
+      typeof refreshRepairQuickMacroButtons ===
+      "function"
+    ) {
+      refreshRepairQuickMacroButtons();
+    }
+
+    return;
+  }
+
+  const wrap =
+    document.createElement("div");
+
+  wrap.innerHTML =
+    buildRepairSearchQuickHtml();
+
+  const panel =
+    wrap.firstElementChild;
+
+  if (!panel) {
+    return;
+  }
+
+  panel.style.display =
+    "none";
+
+  document.body.appendChild(
+    panel
+  );
+
+  updateRepairSearchQuickVisibility();
+
+  if (
+    typeof refreshRepairQuickMacroButtons ===
+    "function"
+  ) {
+    refreshRepairQuickMacroButtons();
+  }
+
+}
+
+function updateRepairSearchQuickVisibility() {
+
+  const panel =
+    get("repairSearchQuickPanel");
+
+  if (!panel) {
+    return;
+  }
+
+  panel.style.display =
+    isRepairMode()
+      ? "flex"
+      : "none";
+}
+
+function enableRepairSearchQuickDrag() {
+
+  const panel =
+    get("repairSearchQuickPanel");
+
+  const header =
+    get("repairSearchQuickHeader");
+
+  if (!panel || !header) {
+    return;
+  }
+
+  let dragging = false;
+  let startY = 0;
+  let startTop = 0;
+
+  function start(e) {
+
+    dragging = true;
+
+    startY =
+      e.touches
+        ? e.touches[0].clientY
+        : e.clientY;
+
+    startTop =
+      parseInt(
+        panel.style.top || "80",
+        10
+      );
+  }
+
+  function move(e) {
+
+    if (!dragging) {
+      return;
+    }
+
+    const y =
+      e.touches
+        ? e.touches[0].clientY
+        : e.clientY;
+
+    const nextTop =
+      startTop + (y - startY);
+
+    const minTop = 8;
+
+    const maxTop =
+      window.innerHeight -
+      panel.offsetHeight -
+      20;
+
+    panel.style.top =
+      Math.min(
+        Math.max(minTop, nextTop),
+        Math.max(minTop, maxTop)
+      ) + "px";
+  }
+
+  function end() {
+    dragging = false;
+  }
+
+  header.addEventListener("mousedown", start);
+  document.addEventListener("mousemove", move);
+  document.addEventListener("mouseup", end);
+
+  header.addEventListener("touchstart", start);
+  document.addEventListener("touchmove", move);
+  document.addEventListener("touchend", end);
+}
+
+function closeRepairPopups() {
+
+  [
+    "repairSearchPopup",
+    "repairReplacePopup"
+  ].forEach(id => {
+
+    const el =
+      get(id);
+
+    if (el) {
+      el.style.display =
+        "none";
+    }
+  });
+}
+function toggleRepairSearchPopup() {
+
+  let box =
+    get("repairSearchPopup");
+
+  if (box) {
+
+    const opening =
+      box.style.display === "none";
+
+    closeRepairPopups();
+
+    box.style.display =
+      opening
+        ? "block"
+        : "none";
+
+    return;
+  }
+
+  closeRepairPopups();
+
+  box =
+    document.createElement("div");
+
+  box.id =
+    "repairSearchPopup";
+
+  box.innerHTML = `
+  <div class="repair-search-toolbar">
+
+    <input
+      id="repairSearch"
+      placeholder="検索"
+      oninput="updateRepairSearchSuggestions()">
+
+    <button onclick="searchRepairText()">
+      検索
+    </button>
+
+    <button onclick="searchRepairNext()">
+      次へ
+    </button>
+
+  </div>
+
+  <div
+    id="repairSearchSuggestBox"
+    class="repair-search-suggest-box"
+    style="display:none;">
+  </div>
+
+  <div id="repairSearchPopupResult"></div>
+  `;
+
+  document.body.appendChild(box);
+
+  setTimeout(() => {
+
+    const input =
+      get("repairSearch");
+
+    if (!input) {
+      return;
+    }
+
+    input.focus();
+
+    if (
+      typeof updateRepairSearchSuggestions ===
+      "function"
+    ) {
+      updateRepairSearchSuggestions();
+    }
+
+  }, 50);
+
+}
+
+function toggleRepairReplacePopup() {
+
+  let box =
+    get("repairReplacePopup");
+
+  if (box) {
+
+    const opening =
+      box.style.display === "none";
+
+    closeRepairPopups();
+
+    box.style.display =
+      opening
+        ? "block"
+        : "none";
+
+    return;
+  }
+
+  closeRepairPopups();
+
+  box =
+    document.createElement("div");
+
+  box.id =
+    "repairReplacePopup";
+
+  box.innerHTML = `
+  <div class="repair-replace-toolbar">
+
+    <input
+      id="replaceFrom"
+      placeholder="検索">
+
+    <input
+      id="replaceTo"
+      placeholder="置換">
+
+    <div class="repair-replace-actions">
+
+      <button onclick="replaceRepairText()">
+        1件
+      </button>
+
+      <button onclick="replaceAllRepairText()">
+        全件
+      </button>
+
+    </div>
+
+  </div>
+  `;
+
+  document.body.appendChild(box);
+}
+
+function toggleToolsMenu() {
+
+  const panel =
+    get("floatPanel");
+
+  const btn =
+    get("toolsBtn");
+
+  if (!panel) {
+    return;
+  }
+
+  if (panel.style.display !== "none") {
+    closeFloatPanel();
+    return;
+  }
+
+  if (btn) {
+    btn.innerText = "×";
+  }
+
+  const repairMode =
+    isRepairMode();
+
+  const title =
+    repairMode
+      ? "修復ツール"
+      : "通常ツール";
+
+  const bodyHtml =
+    repairMode
+      ? buildRepairToolsHtml()
+      : buildNormalToolsHtml();
+
+  openFloatPanel(
+    title,
+    bodyHtml
+  );
 }
 
 function resetRepairEditorView() {

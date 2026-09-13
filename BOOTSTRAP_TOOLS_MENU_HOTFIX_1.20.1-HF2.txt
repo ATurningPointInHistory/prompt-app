@@ -1,0 +1,15 @@
+AI Prompt OS / EXTERNAL-010 v1.20.1 HF2
+
+Purpose:
+Restore canonical 01_bootstrap.js functionality accidentally truncated in v1.20.1 Candidate while preserving External Intelligence page navigation.
+
+Fix:
+- Restored canonical bootstrap baseline from AI_Prompt_OS(20260913-010855).zip.
+- Modified only switchAppPage() for External Intelligence page/tab support.
+- Preserved toggleToolsMenu(), repair quick panels, macro/favorite functions and remaining bootstrap functions.
+- Recomputed 00_script_manifest.json, index manifest marker and project_info static hashes.
+
+Expected:
+- toggleToolsMenu is defined.
+- External Intelligence tab remains available.
+- Existing App/Repair/Tools behavior remains backward compatible.
