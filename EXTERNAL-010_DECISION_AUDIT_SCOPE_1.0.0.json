@@ -4,8 +4,8 @@
   "scopeMethod": "DECISION_SCOPED_STATIC_EVIDENCE",
   "crossDecisionCandidateSearchAllowed": false,
   "gatewaySourceIncluded": true,
-  "note": "Candidate search is limited to files assigned to the source Decision. Candidates are not PASS.",
-  "generatedAt": "2026-09-13T04:41:47.648122Z",
+  "note": "HF6 Decision-scoped audit scope. Includes Initial Scope Validation Coverage for 65 requirements; cross-decision candidate search remains disabled.",
+  "generatedAt": "2026-09-13T07:20:00Z",
   "decisions": [
     {
       "decisionId": "EXTERNAL-010-DECISION-001",
@@ -65,7 +65,8 @@
         "17_external_intelligence_phase5_android_validation.js",
         "17_external_intelligence_phase5_real_runtime_validation.js",
         "17_external_intelligence_phase5_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -100,7 +101,8 @@
       "validationFiles": [
         "17_external_intelligence_phase5_android_validation.js",
         "17_external_intelligence_phase5_real_runtime_validation.js",
-        "17_external_intelligence_phase5_validation.js"
+        "17_external_intelligence_phase5_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -111,7 +113,8 @@
       "validationFiles": [
         "17_external_intelligence_phase7_android_validation.js",
         "17_external_intelligence_phase7_real_runtime_validation.js",
-        "17_external_intelligence_phase7_validation.js"
+        "17_external_intelligence_phase7_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -177,7 +180,8 @@
         "17_external_intelligence_phase5_android_validation.js",
         "17_external_intelligence_phase5_real_runtime_validation.js",
         "17_external_intelligence_phase5_validation.js",
-        "external_gateway/validate_phase5_persistence.cjs"
+        "external_gateway/validate_phase5_persistence.cjs",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -190,7 +194,8 @@
         "17_external_intelligence_phase4_android_validation.js",
         "17_external_intelligence_phase4_real_runtime_validation.js",
         "17_external_intelligence_phase4_validation.js",
-        "external_gateway/validate_phase4_acquisition.cjs"
+        "external_gateway/validate_phase4_acquisition.cjs",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -232,7 +237,8 @@
         "17_external_intelligence_phase6_real_runtime_validation.js",
         "17_external_intelligence_phase6_validation.js",
         "external_gateway/validate_phase6_security.cjs",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -245,7 +251,8 @@
       ],
       "validationFiles": [
         "17_external_intelligence_phase1_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -256,7 +263,8 @@
       "validationFiles": [
         "17_external_intelligence_phase20_android_validation.js",
         "17_external_intelligence_phase20_real_runtime_validation.js",
-        "17_external_intelligence_phase20_validation.js"
+        "17_external_intelligence_phase20_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -268,7 +276,8 @@
       "validationFiles": [
         "17_external_intelligence_phase14_android_validation.js",
         "17_external_intelligence_phase14_real_runtime_validation.js",
-        "17_external_intelligence_phase14_validation.js"
+        "17_external_intelligence_phase14_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -279,7 +288,8 @@
       "validationFiles": [
         "17_external_intelligence_phase7_android_validation.js",
         "17_external_intelligence_phase7_real_runtime_validation.js",
-        "17_external_intelligence_phase7_validation.js"
+        "17_external_intelligence_phase7_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -288,18 +298,21 @@
         "17_external_intelligence_source_discovery.js"
       ],
       "validationFiles": [
-        "17_external_intelligence_phase3_validation.js"
+        "17_external_intelligence_phase3_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
       "decisionId": "EXTERNAL-010-DECISION-024",
       "implementationFiles": [
         "17_external_intelligence_resource_budget.js",
-        "17_external_intelligence_initial_scope_completion.js"
+        "17_external_intelligence_initial_scope_completion.js",
+        "17_external_intelligence_version_manifest.js"
       ],
       "validationFiles": [
         "17_external_intelligence_phase3_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -321,7 +334,8 @@
         "17_external_intelligence_phase7_android_validation.js",
         "17_external_intelligence_phase7_real_runtime_validation.js",
         "17_external_intelligence_phase7_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -334,7 +348,8 @@
         "17_external_intelligence_phase7_android_validation.js",
         "17_external_intelligence_phase7_real_runtime_validation.js",
         "17_external_intelligence_phase7_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -346,7 +361,8 @@
       "validationFiles": [
         "17_external_intelligence_phase9_android_validation.js",
         "17_external_intelligence_phase9_real_runtime_validation.js",
-        "17_external_intelligence_phase9_validation.js"
+        "17_external_intelligence_phase9_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -370,7 +386,8 @@
         "17_external_intelligence_conformance_validation.js",
         "17_external_intelligence_phase10_android_validation.js",
         "17_external_intelligence_phase10_real_runtime_validation.js",
-        "17_external_intelligence_phase10_validation.js"
+        "17_external_intelligence_phase10_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -383,7 +400,8 @@
         "17_external_intelligence_phase10_android_validation.js",
         "17_external_intelligence_phase10_real_runtime_validation.js",
         "17_external_intelligence_phase10_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -396,7 +414,8 @@
         "17_external_intelligence_conformance_validation.js",
         "17_external_intelligence_phase11_android_validation.js",
         "17_external_intelligence_phase11_real_runtime_validation.js",
-        "17_external_intelligence_phase11_validation.js"
+        "17_external_intelligence_phase11_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -409,7 +428,8 @@
         "17_external_intelligence_phase11_android_validation.js",
         "17_external_intelligence_phase11_real_runtime_validation.js",
         "17_external_intelligence_phase11_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -435,7 +455,8 @@
         "17_external_intelligence_conformance_validation.js",
         "17_external_intelligence_phase11_android_validation.js",
         "17_external_intelligence_phase11_real_runtime_validation.js",
-        "17_external_intelligence_phase11_validation.js"
+        "17_external_intelligence_phase11_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -447,7 +468,8 @@
       "validationFiles": [
         "17_external_intelligence_phase8_android_validation.js",
         "17_external_intelligence_phase8_real_runtime_validation.js",
-        "17_external_intelligence_phase8_validation.js"
+        "17_external_intelligence_phase8_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -484,7 +506,8 @@
       "validationFiles": [
         "17_external_intelligence_conformance_validation.js",
         "17_external_intelligence_phase1_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -500,7 +523,8 @@
         "17_external_intelligence_phase12_android_validation.js",
         "17_external_intelligence_phase12_real_runtime_validation.js",
         "17_external_intelligence_phase12_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -515,7 +539,8 @@
         "17_external_intelligence_phase6_android_validation.js",
         "17_external_intelligence_phase6_real_runtime_validation.js",
         "17_external_intelligence_phase6_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -538,7 +563,8 @@
       "validationFiles": [
         "17_external_intelligence_phase14_android_validation.js",
         "17_external_intelligence_phase14_real_runtime_validation.js",
-        "17_external_intelligence_phase14_validation.js"
+        "17_external_intelligence_phase14_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -557,13 +583,15 @@
       "implementationFiles": [
         "17_external_intelligence_monitoring_watch.js",
         "17_external_intelligence_monitoring_change.js",
-        "17_external_intelligence_initial_scope_completion.js"
+        "17_external_intelligence_initial_scope_completion.js",
+        "17_external_intelligence_version_manifest.js"
       ],
       "validationFiles": [
         "17_external_intelligence_phase16_android_validation.js",
         "17_external_intelligence_phase16_real_runtime_validation.js",
         "17_external_intelligence_phase16_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -590,7 +618,8 @@
         "17_external_intelligence_phase17_android_validation.js",
         "17_external_intelligence_phase17_real_runtime_validation.js",
         "17_external_intelligence_phase17_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -601,7 +630,8 @@
       "validationFiles": [
         "17_external_intelligence_phase18_android_validation.js",
         "17_external_intelligence_phase18_real_runtime_validation.js",
-        "17_external_intelligence_phase18_validation.js"
+        "17_external_intelligence_phase18_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -625,7 +655,8 @@
         "17_external_intelligence_phase6_android_validation.js",
         "17_external_intelligence_phase6_real_runtime_validation.js",
         "17_external_intelligence_phase6_validation.js",
-        "17_external_intelligence_initial_scope_completion_validation.js"
+        "17_external_intelligence_initial_scope_completion_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -653,7 +684,8 @@
         "17_external_intelligence_phase20_android_validation.js",
         "17_external_intelligence_phase20_real_runtime_validation.js",
         "17_external_intelligence_phase20_validation.js",
-        "external_gateway/validate_phase20_recovery.cjs"
+        "external_gateway/validate_phase20_recovery.cjs",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {
@@ -664,7 +696,8 @@
       ],
       "validationFiles": [
         "17_external_intelligence_conformance_validation.js",
-        "17_external_intelligence_phase2_validation.js"
+        "17_external_intelligence_phase2_validation.js",
+        "17_external_intelligence_initial_scope_validation_coverage.js"
       ]
     },
     {

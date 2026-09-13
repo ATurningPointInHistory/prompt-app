@@ -237,6 +237,29 @@
     return internal.buildResult(success, success ? "EXTERNAL010_RECOVERY_ACTIVITY_VALIDATED" : "EXTERNAL010_RECOVERY_ACTIVITY_BLOCKED", next.state, { recoveryActivity: clone(next) });
   }
 
+  function detectExternalIntelligenceVersionMismatch(input) {
+    const x = internal.isPlainObject(input) ? input : {};
+    const componentId = internal.text(x.componentId, "UNKNOWN_COMPONENT");
+    const expectedVersion = internal.text(x.expectedVersion, "");
+    const actualVersion = internal.text(x.actualVersion, "");
+    if (!expectedVersion || !actualVersion) {
+      return internal.buildResult(false, "EXTERNAL010_VERSION_CHECK_INPUT_REQUIRED", "Blocked", { componentId, expectedVersion: expectedVersion || null, actualVersion: actualVersion || null });
+    }
+    const mismatchDetected = expectedVersion !== actualVersion;
+    const record = internal.deepFreeze({
+      versionCompatibilityRecordId: internal.nextId("EXTERNAL-010-VERSION-COMPATIBILITY"),
+      componentId, expectedVersion, actualVersion, mismatchDetected,
+      reasonCode: mismatchDetected ? "VERSION_MISMATCH" : "NONE",
+      healthState: mismatchDetected ? "BLOCKED" : "READY",
+      automaticDowngradeAllowed: false, authorityGranted: false,
+      checkedAt: internal.nowIso(), immutable: true
+    });
+    if (!(state.versionCompatibilityRecords instanceof Map)) state.versionCompatibilityRecords = new Map();
+    state.versionCompatibilityRecords.set(record.versionCompatibilityRecordId, record);
+    internal.touch();
+    return internal.buildResult(true, mismatchDetected ? "EXTERNAL010_VERSION_MISMATCH_DETECTED" : "EXTERNAL010_VERSION_MATCH", record.healthState, { versionCompatibility: clone(record) });
+  }
+
   function getExternalIntelligenceComponentHealth(componentId) {
     const record = latestComponentHealth(componentId);
     return record ? clone(record) : null;
@@ -284,7 +307,8 @@
     getExternalIntelligenceCapabilityHealth,
     listExternalIntelligenceComponentHealth,
     beginExternalIntelligenceRecoveryActivity,
-    completeExternalIntelligenceRecoveryActivity
+    completeExternalIntelligenceRecoveryActivity,
+    detectExternalIntelligenceVersionMismatch
   });
   Object.assign(namespace, namespace.api);
 

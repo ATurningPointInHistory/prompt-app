@@ -3,10 +3,10 @@
   "componentId": "EXTERNAL-010",
   "sourceMemoFile": "memo_boxes_selected(4).json",
   "sourceMemoSha256": "895f9e3742290d202a9f1781dd5da5749c970d0917cecaac5f8d062b19dbc2bb",
-  "generatedAt": "2026-09-13T01:45:26.449318Z",
+  "generatedAt": "2026-09-13T07:20:00Z",
   "decisionCount": 54,
   "explicitInitialImplementationRequirementCount": 803,
-  "status": "TRACEABILITY CATALOG - HF5 GAP IMPLEMENTATION LINKS ADDED; RUNTIME VERIFICATION REQUIRED",
+  "status": "HF6 TRACEABILITY PARTIAL - 34 implementation gap repairs + 65 validation coverage links; remaining requirements pending explicit traceability.",
   "rule": "Only bullets explicitly required by Initial Implementation Scope are counted. Deferred/future bullets are excluded. ImplementationRefs and validationRefs require explicit evidence; static candidates are not PASS.",
   "decisions": [
     {
@@ -489,9 +489,13 @@
           "text": "Controlled Update / Rollback Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-053",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_conformance_repair.js#controlled"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-053-INIT-15"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-053-INIT-16",
@@ -624,9 +628,13 @@
           "text": "Selective Recompute Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-052",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_disaster_recovery.js#selective"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-052-INIT-10"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-052-INIT-11",
@@ -912,45 +920,65 @@
           "text": "Data Minimization Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-050",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_privacy_identity.js#minimization"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-050-INIT-05"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-050-INIT-06",
           "text": "Account Cluster Candidate",
           "sourceDecisionId": "EXTERNAL-010-DECISION-050",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_privacy_identity.js#account"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-050-INIT-06"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-050-INIT-07",
           "text": "Bot / Coordination Candidate",
           "sourceDecisionId": "EXTERNAL-010-DECISION-050",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_privacy_identity.js#botCandidate"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-050-INIT-07"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-050-INIT-08",
           "text": "Uncertainty / Confidence",
           "sourceDecisionId": "EXTERNAL-010-DECISION-050",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_privacy_identity.js#confidence"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-050-INIT-08"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-050-INIT-09",
           "text": "Cross-Platform Linking Candidate Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-050",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_privacy_identity.js#crossPlatformLinkRequested"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-050-INIT-09"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-050-INIT-10",
@@ -1257,9 +1285,13 @@
           "text": "Regime Context Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-048",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_market_fusion.js#regime"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-048-INIT-06"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-048-INIT-07",
@@ -1374,18 +1406,26 @@
           "text": "Market Session Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-047",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_market_identity.js#market"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-047-INIT-03"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-047-INIT-04",
           "text": "Market Rule Profile Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-047",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_market_identity.js#market"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-047-INIT-04"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-047-INIT-05",
@@ -1419,27 +1459,39 @@
           "text": "Corporate Action Reference",
           "sourceDecisionId": "EXTERNAL-010-DECISION-047",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_market_timeseries.js#corporateActionRefs"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-047-INIT-08"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-047-INIT-09",
           "text": "Market Data Quality",
           "sourceDecisionId": "EXTERNAL-010-DECISION-047",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_market_timeseries.js#qualityState"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-047-INIT-09"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-047-INIT-10",
           "text": "Market Freshness",
           "sourceDecisionId": "EXTERNAL-010-DECISION-047",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_market_timeseries.js#market"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-047-INIT-10"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-047-INIT-11",
@@ -1455,9 +1507,13 @@
           "text": "Bar Finalization State",
           "sourceDecisionId": "EXTERNAL-010-DECISION-047",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_market_timeseries.js#finalizationState"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-047-INIT-12"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-047-INIT-13",
@@ -1633,9 +1689,13 @@
           "text": "Hybrid Monitoring Extension Point",
           "sourceDecisionId": "EXTERNAL-010-DECISION-045",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_version_manifest.js#HYBRID"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-045-INIT-09"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-045-INIT-10",
@@ -2114,9 +2174,13 @@
           "text": "Purpose Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-043",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_intelligence_package.js#purposeId"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-043-INIT-15"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-043-INIT-16",
@@ -2141,9 +2205,13 @@
           "text": "Package Lineage",
           "sourceDecisionId": "EXTERNAL-010-DECISION-043",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_intelligence_package.js#package"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-043-INIT-18"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-043-INIT-19",
@@ -2375,9 +2443,13 @@
           "text": "Data Classification",
           "sourceDecisionId": "EXTERNAL-010-DECISION-041",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_data_lifecycle.js#DATA_CLASSES"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-041-INIT-01"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-041-INIT-02",
@@ -2447,18 +2519,26 @@
           "text": "Long-Term Storage Control",
           "sourceDecisionId": "EXTERNAL-010-DECISION-041",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_data_lifecycle.js#long"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-041-INIT-09"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-041-INIT-10",
           "text": "Archive Control Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-041",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_data_lifecycle.js#ARCHIVING"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-041-INIT-10"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-041-INIT-11",
@@ -2474,18 +2554,26 @@
           "text": "External Model Transmission Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-041",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_data_lifecycle.js#model"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-041-INIT-12"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-041-INIT-13",
           "text": "Model Training Control Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-041",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_data_lifecycle.js#model"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-041-INIT-13"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-041-INIT-14",
@@ -2613,27 +2701,39 @@
           "text": "Work State",
           "sourceDecisionId": "EXTERNAL-010-DECISION-040",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_work_graph.js#state:i.text"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-040-INIT-05"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-040-INIT-06",
           "text": "Capability Assignment Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-040",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_conformance_repair.js#capability"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-040-INIT-06"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-040-INIT-07",
           "text": "Priority Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-040",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_conformance_repair.js#priority"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-040-INIT-07"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-040-INIT-08",
@@ -2694,9 +2794,13 @@
           "text": "Correlation ID",
           "sourceDecisionId": "EXTERNAL-010-DECISION-040",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_conformance_repair.js#correlation"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-040-INIT-14"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-040-INIT-15",
@@ -2873,9 +2977,13 @@
           "text": "Contextual Policy Decision Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-039",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_conformance_repair.js#contextual"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-039-INIT-11"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-039-INIT-12",
@@ -3362,18 +3470,26 @@
           "text": "Cost Profile Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-036",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_capability_registry.js#costProfile"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-036-INIT-08"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-036-INIT-09",
           "text": "Latency Profile Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-036",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_capability_registry.js#latencyProfile"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-036-INIT-09"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-036-INIT-10",
@@ -3515,9 +3631,13 @@
           "text": "Urgency",
           "sourceDecisionId": "EXTERNAL-010-DECISION-035",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_research_priority.js#urgency"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-035-INIT-04"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-035-INIT-05",
@@ -3938,9 +4058,13 @@
           "text": "Competing Hypothesis Relation",
           "sourceDecisionId": "EXTERNAL-010-DECISION-033",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_hypothesis.js#alternativeHypothesisIds"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-033-INIT-03"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-033-INIT-04",
@@ -4174,9 +4298,13 @@
           "text": "Novelty",
           "sourceDecisionId": "EXTERNAL-010-DECISION-032",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_signal_detection.js#novelty"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-032-INIT-11"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-032-INIT-12",
@@ -4327,18 +4455,26 @@
           "text": "Unit / Currency",
           "sourceDecisionId": "EXTERNAL-010-DECISION-031",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_outcome.js#unit"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-031-INIT-06"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-031-INIT-07",
           "text": "Event Completion Criteria Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-031",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_outcome.js#event"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-031-INIT-07"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-031-INIT-08",
@@ -4573,9 +4709,13 @@
           "text": "Calibration State",
           "sourceDecisionId": "EXTERNAL-010-DECISION-030",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_uncertainty.js#calibration"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-030-INIT-13"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-030-INIT-14",
@@ -4960,9 +5100,13 @@
           "text": "Impact Analysis Extension Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-028",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_relation_graph.js#impact"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-028-INIT-19"
+          ]
         }
       ]
     },
@@ -5032,9 +5176,13 @@
           "text": "Validity Period Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-027",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_entity.js#validity"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-027-INIT-07"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-027-INIT-08",
@@ -5247,9 +5395,13 @@
           "text": "Assertion / Target Time Hooks",
           "sourceDecisionId": "EXTERNAL-010-DECISION-026",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_claim.js#assertedAt"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-026-INIT-10"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-026-INIT-11",
@@ -5521,9 +5673,13 @@
           "text": "Storage Bytes",
           "sourceDecisionId": "EXTERNAL-010-DECISION-024",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_version_manifest.js#STORAGE_BYTES"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-024-INIT-09"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-024-INIT-10",
@@ -5732,9 +5888,13 @@
           "text": "AI Discovery Provenance",
           "sourceDecisionId": "EXTERNAL-010-DECISION-023",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_source_discovery.js#discovery"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-023-INIT-13"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-023-INIT-14",
@@ -5804,9 +5964,13 @@
           "text": "Normalization State",
           "sourceDecisionId": "EXTERNAL-010-DECISION-022",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_normalization.js#normalization"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-022-INIT-06"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-022-INIT-07",
@@ -5849,9 +6013,13 @@
           "text": "Derived Data Boundary",
           "sourceDecisionId": "EXTERNAL-010-DECISION-022",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_normalization.js#derived"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-022-INIT-11"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-022-INIT-12",
@@ -5867,9 +6035,13 @@
           "text": "Provenance Reference",
           "sourceDecisionId": "EXTERNAL-010-DECISION-022",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_normalization.js#provenance"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-022-INIT-13"
+          ]
         }
       ]
     },
@@ -5939,9 +6111,13 @@
           "text": "Reliability Assessment Reference Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-021",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_knowledge_boundary.js#reliability"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-021-INIT-07"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-021-INIT-08",
@@ -5975,9 +6151,13 @@
           "text": "Promotion Lineage Hook",
           "sourceDecisionId": "EXTERNAL-010-DECISION-021",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_knowledge_boundary.js#promotion"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-021-INIT-11"
+          ]
         }
       ]
     },
@@ -6074,18 +6254,26 @@
           "text": "Secret Missing / Expired State",
           "sourceDecisionId": "EXTERNAL-010-DECISION-020",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_capability_resilience.js#COMPONENT_HEALTH_MISSING"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-020-INIT-10"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-020-INIT-11",
           "text": "Version Mismatch Detection",
           "sourceDecisionId": "EXTERNAL-010-DECISION-020",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_capability_resilience.js#detectExternalIntelligenceVersionMismatch"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-020-INIT-11"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-020-INIT-12",
@@ -6137,9 +6325,13 @@
           "text": "QUARANTINED State",
           "sourceDecisionId": "EXTERNAL-010-DECISION-018",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_external_content_security.js#defaultPayloadState:\"QUARANTINED\""
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-018-INIT-01"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-018-INIT-02",
@@ -6173,9 +6365,13 @@
           "text": "Allowed Scheme Policy",
           "sourceDecisionId": "EXTERNAL-010-DECISION-018",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_external_content_security.js#javascript:"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-018-INIT-05"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-018-INIT-06",
@@ -6209,18 +6405,26 @@
           "text": "Archive Auto-Extract禁止",
           "sourceDecisionId": "EXTERNAL-010-DECISION-018",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_external_content_security.js#archiveAutoExtractAllowed:false"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-018-INIT-09"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-018-INIT-10",
           "text": "Executable Auto-Execute禁止",
           "sourceDecisionId": "EXTERNAL-010-DECISION-018",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_external_content_security.js#binaryAutoExecuteAllowed:false"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-018-INIT-10"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-018-INIT-11",
@@ -6303,18 +6507,26 @@
           "text": "Scanner Auto-Download禁止",
           "sourceDecisionId": "EXTERNAL-010-DECISION-018",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_external_content_security.js#automaticDownloadAllowed:false"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-018-INIT-19"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-018-INIT-20",
           "text": "Scanner Auto-Install禁止",
           "sourceDecisionId": "EXTERNAL-010-DECISION-018",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_external_content_security.js#automaticInstallAllowed:false"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-018-INIT-20"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-018-INIT-21",
@@ -6599,27 +6811,39 @@
           "text": "Response Metadata Normalization",
           "sourceDecisionId": "EXTERNAL-010-DECISION-015",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_adapter_registry.js#response"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-015-INIT-08"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-015-INIT-09",
           "text": "Temporal Metadata Extraction",
           "sourceDecisionId": "EXTERNAL-010-DECISION-015",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_adapter_registry.js#temporal"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-015-INIT-09"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-015-INIT-10",
           "text": "Sanitization",
           "sourceDecisionId": "EXTERNAL-010-DECISION-015",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_adapter_registry.js#sanitize"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-015-INIT-10"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-015-INIT-11",
@@ -6671,27 +6895,39 @@
           "text": "publishedAt",
           "sourceDecisionId": "EXTERNAL-010-DECISION-009",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_temporal.js#publishedat"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-009-INIT-01"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-009-INIT-02",
           "text": "availableAt",
           "sourceDecisionId": "EXTERNAL-010-DECISION-009",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_temporal.js#availableat"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-009-INIT-02"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-009-INIT-03",
           "text": "effectiveAt",
           "sourceDecisionId": "EXTERNAL-010-DECISION-009",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_temporal.js#effectiveat"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-009-INIT-03"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-009-INIT-04",
@@ -6914,9 +7150,13 @@
           "text": "Acquisition Timestamp",
           "sourceDecisionId": "EXTERNAL-010-DECISION-005",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_evidence_persistence.js#acquiredAt"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-005-INIT-04"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-005-INIT-05",
@@ -7178,9 +7418,13 @@
           "text": "Acquired At",
           "sourceDecisionId": "EXTERNAL-010-DECISION-008",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_evidence_persistence.js#acquired"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-008-INIT-08"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-008-INIT-09",
@@ -7214,9 +7458,13 @@
           "text": "Status",
           "sourceDecisionId": "EXTERNAL-010-DECISION-008",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_evidence_persistence.js#status: \"ACQUIRED\""
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-008-INIT-12"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-008-INIT-13",
@@ -7578,9 +7826,13 @@
           "text": "Basic Indexes",
           "sourceDecisionId": "EXTERNAL-010-DECISION-014",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "external_gateway/lib/evidence_store.cjs#CREATE INDEX IF NOT EXISTS"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-014-INIT-09"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-014-INIT-10",
@@ -7766,9 +8018,13 @@
           "text": "Correlation ID",
           "sourceDecisionId": "EXTERNAL-010-DECISION-019",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_acquisition_contract.js#correlation"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-019-INIT-04"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-019-INIT-05",
@@ -7784,9 +8040,13 @@
           "text": "Source / Adapter Version References",
           "sourceDecisionId": "EXTERNAL-010-DECISION-019",
           "sourceSection": "Initial Implementation Scope",
-          "verificationState": "UNVERIFIED",
-          "implementationRefs": [],
-          "validationRefs": []
+          "verificationState": "TRACEABILITY_LINKED",
+          "implementationRefs": [
+            "17_external_intelligence_acquisition_contract.js#source"
+          ],
+          "validationRefs": [
+            "17_external_intelligence_initial_scope_validation_coverage.js#EXTERNAL-010-REQ-019-INIT-06"
+          ]
         },
         {
           "requirementId": "EXTERNAL-010-REQ-019-INIT-07",

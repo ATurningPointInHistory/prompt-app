@@ -36,6 +36,7 @@
     const gateway = gatewayState();
     const lastConformance = s.latestConformanceValidation ? i.clone(s.latestConformanceValidation) : null;
     const lastGapRepair = s.latestInitialScopeCompletionValidation ? i.clone(s.latestInitialScopeCompletionValidation) : null;
+    const lastValidationCoverage = s.latestInitialScopeValidationCoverage ? i.clone(s.latestInitialScopeValidationCoverage) : null;
     const lastPhase21 = s.latestPhase21Validation ? i.clone(s.latestPhase21Validation) : null;
     return {
       componentId: "EXTERNAL-010",
@@ -85,6 +86,10 @@
         health: lastGapRepair.health,
         validatedAt: lastGapRepair.validatedAt
       } : null,
+      latestInitialScopeValidationCoverage: lastValidationCoverage ? {
+        status: lastValidationCoverage.status, passed: lastValidationCoverage.passed, failed: lastValidationCoverage.failed,
+        total: lastValidationCoverage.total, health: lastValidationCoverage.health, validatedAt: lastValidationCoverage.validatedAt
+      } : null,
       latestPhase21Validation: lastPhase21 ? {
         status: lastPhase21.status,
         passed: lastPhase21.passed,
@@ -122,6 +127,7 @@
     const session = gateway.session || null;
     const conf = snapshot.latestConformanceValidation;
     const gap = snapshot.latestInitialScopeCompletionValidation;
+    const validationCoverage = snapshot.latestInitialScopeValidationCoverage;
     const p21 = snapshot.latestPhase21Validation;
 
     root.innerHTML = '' +
@@ -137,6 +143,7 @@
         statusBadge("Session", session && session.state || "INACTIVE", ["ACTIVE"]) +
         statusBadge("Repair Validation", conf ? (conf.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
         statusBadge("Gap Repair 34", gap ? (gap.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
+        statusBadge("Validation Coverage 65", validationCoverage ? (validationCoverage.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
         statusBadge("Phase 21", p21 ? (p21.failed === 0 ? "PASS" : "FAIL") : "NOT RUN") +
       '</section>' +
 
@@ -148,6 +155,7 @@
           '<button onclick="externalConsoleOpenSession()">③ Gateway Session開始</button>' +
           '<button onclick="externalConsoleRunConformance()">Repair Validation 45項目</button>' +
           '<button onclick="externalConsoleRunGapRepair()">Gap Repair 34項目</button>' +
+          '<button onclick="externalConsoleRunValidationCoverage()">Validation Coverage 65項目</button>' +
           '<button onclick="externalConsoleRunPhase21()">Phase 21検証</button><button onclick="externalConsoleChooseFullMemoAudit()">Full Memo Audit</button><button class="btn-secondary" onclick="externalConsoleDownloadFullMemoAudit()">Audit JSON保存</button>' +
           '<button class="btn-secondary" onclick="externalConsoleRefresh()">状態更新</button>' +
         '</div>' +
@@ -246,6 +254,13 @@
     return withBusy("Gap Repair 34項目", async function () {
       if (typeof n.runExternalIntelligenceInitialScopeCompletionValidation !== "function") return { ok: false, code: "INITIAL_SCOPE_COMPLETION_VALIDATION_UNAVAILABLE" };
       return n.runExternalIntelligenceInitialScopeCompletionValidation();
+    });
+  }
+
+  function externalConsoleRunValidationCoverage() {
+    return withBusy("Validation Coverage 65項目", async function () {
+      if (typeof n.runExternalIntelligenceInitialScopeValidationCoverage !== "function") return { ok: false, code: "INITIAL_SCOPE_VALIDATION_COVERAGE_UNAVAILABLE" };
+      return n.runExternalIntelligenceInitialScopeValidationCoverage();
     });
   }
 
@@ -376,6 +391,7 @@
     externalConsoleOpenSession: externalConsoleOpenSession,
     externalConsoleRunConformance: externalConsoleRunConformance,
     externalConsoleRunGapRepair: externalConsoleRunGapRepair,
+    externalConsoleRunValidationCoverage: externalConsoleRunValidationCoverage,
     externalConsoleChooseFullMemoAudit: externalConsoleChooseFullMemoAudit,
     externalConsoleHandleFullMemoAuditFile: externalConsoleHandleFullMemoAuditFile,
     externalConsoleDownloadFullMemoAudit: externalConsoleDownloadFullMemoAudit,

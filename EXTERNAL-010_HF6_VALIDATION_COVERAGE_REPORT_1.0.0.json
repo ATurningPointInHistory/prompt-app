@@ -1,0 +1,31 @@
+{
+  "id": "EXTERNAL-010-HF6-VALIDATION-COVERAGE-REPORT-1.0.0",
+  "componentId": "EXTERNAL-010",
+  "version": "1.20.1",
+  "gatewayVersion": "1.5.0",
+  "status": "CANDIDATE_REVALIDATION_REQUIRED",
+  "summary": {
+    "priorImplementationGapCount": 34,
+    "correctedImplementationGapCount": 35,
+    "newlyDiscoveredImplementationGap": "EXTERNAL-010-REQ-020-INIT-11",
+    "validationCoverageRequirementCount": 65,
+    "validationCoveragePassed": 65,
+    "validationCoverageFailed": 0,
+    "repairValidationPassed": 45,
+    "gapRepairValidationPassed": 34,
+    "phase21ValidationPassed": 31,
+    "fullMemoRequirementCount": 803,
+    "traceabilityLinked": 99,
+    "unresolvedRequirementCount": 704,
+    "sourceMismatch": 0
+  },
+  "validationDesign": {
+    "structuralContractChecks": 64,
+    "targetedRuntimeChecks": 1,
+    "crossDecisionCandidateSearchAllowed": false
+  },
+  "releaseAllowed": false,
+  "projectOwnerAcceptanceRequired": true,
+  "pcRealRuntimeRevalidationRequired": true,
+  "androidRealDeviceRevalidationRequired": true
+}
