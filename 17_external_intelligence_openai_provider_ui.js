@@ -87,20 +87,22 @@
     const operationComplete=Boolean(x.operationContract);
     const budgetComplete=Boolean(x.selectedBudget);
     const usagePolicyComplete=Boolean(x.activeUsagePolicy&&x.activeUsagePolicy.status==="ACTIVE");
+    const paidActivationComplete=Boolean(x.source&&x.source.lifecycleState==="ACTIVE"&&x.source.enabled===true&&x.activation);
     let currentStep=1,nextAction="Gateway Sessionを開始してください";
     if(runtimeComplete){currentStep=2;nextAction="OpenAI設定 / Secret / Source登録";}
     if(runtimeComplete&&sourceComplete){currentStep=3;nextAction="Operation Contract登録";}
     if(runtimeComplete&&sourceComplete&&operationComplete){currentStep=4;nextAction="USD Resource Budget";}
     if(runtimeComplete&&sourceComplete&&operationComplete&&budgetComplete){currentStep=5;nextAction="Usage Policy";}
     if(runtimeComplete&&sourceComplete&&operationComplete&&budgetComplete&&usagePolicyComplete){currentStep=6;nextAction="Paid Source Activation";}
-    const completed={1:runtimeComplete,2:sourceComplete,3:operationComplete,4:budgetComplete,5:usagePolicyComplete,6:false,7:false,8:false};
-    return {currentStep:currentStep,nextAction:nextAction,runtimeComplete:runtimeComplete,completed:completed,steps:[
+    if(runtimeComplete&&sourceComplete&&operationComplete&&budgetComplete&&usagePolicyComplete&&paidActivationComplete){currentStep=7;nextAction="Real API Test";}
+    const completed={1:runtimeComplete,2:sourceComplete,3:operationComplete,4:budgetComplete,5:usagePolicyComplete,6:paidActivationComplete,7:false,8:false};
+    return {currentStep:currentStep,nextAction:nextAction,runtimeComplete:runtimeComplete,completed:completed,paidActivationComplete:paidActivationComplete,steps:[
       {step:1,label:"Runtime",complete:runtimeComplete},
       {step:2,label:"Provider / Secret",complete:sourceComplete},
       {step:3,label:"Operation",complete:operationComplete},
       {step:4,label:"USD Budget",complete:budgetComplete},
       {step:5,label:"Usage Policy",complete:usagePolicyComplete},
-      {step:6,label:"Paid Activation",complete:false},
+      {step:6,label:"Paid Activation",complete:paidActivationComplete},
       {step:7,label:"Real API Test",complete:false},
       {step:8,label:"Final Validation",complete:false}
     ]};
@@ -144,13 +146,15 @@
     const step3Body='<div class="external-boundary-grid"><div>Source<strong>'+esc(src.sourceId||'未登録')+'</strong></div><div>Operation<strong>'+esc(op?'REGISTERED':'未登録')+'</strong></div><div>Method<strong>POST JSON</strong></div><div>store<strong>false固定</strong></div></div><div class="external-actions openai-actions"><button class="btn-secondary" onclick="externalOpenAIReviewOperationContractRegistration()"'+(!src||!src.sourceId?' disabled':'')+'>Operation登録内容を確認</button><button class="btn-primary" onclick="externalOpenAIApproveOperationContractRegistration(event)"'+(!src||!src.sourceId||op?' disabled':'')+'>Project OwnerとしてOperation登録</button></div><div class="external-note">STEP 3はResponses APIのOperation Contract登録のみです。Source有効化・Paid API・Budget・実通信は行いません。</div>';
     const step4Body='<div class="external-boundary-grid"><div>選択Budget<strong>'+esc(b?b.budgetId:'未選択')+'</strong></div><div>使用額<strong>'+esc(b?money(b.consumed):'—')+'</strong></div><div>Hard Limit<strong>'+esc(b?money(b.hardLimit):'—')+'</strong></div><div>1回Hard Cap（STEP 2で変更）<strong>'+esc(cap?money(cap):'未設定')+'</strong></div><div>Budget Candidate<strong>'+esc(x.pendingBudgetCandidate?x.pendingBudgetCandidate.budgetId:'未作成')+'</strong></div><div>Candidate State<strong>'+esc(x.pendingBudgetCandidate?x.pendingBudgetCandidate.state:'—')+'</strong></div></div><div class="openai-form-grid"><label>警告ライン（USD）<input id="externalOpenAIBudgetSoftLimit" type="number" min="0" step="0.01" value="'+esc(x.draft.budgetSoftLimitUsd)+'" placeholder="空欄ならHard Limitの80%"><small>警告用です。Hard Limitまでは自動停止しません。</small></label><label>Budget Hard Limit（USD）<input id="externalOpenAIBudgetHardLimit" type="number" min="0.01" step="0.01" value="'+esc(x.draft.budgetHardLimitUsd)+'" placeholder="例: 5.00"><small>累積FINANCIAL_COST上限です。自動増額・自動チャージは行いません。</small></label></div><div class="external-actions openai-actions"><button class="btn-secondary" onclick="externalOpenAIReviewUsdBudget()"'+(!op?' disabled':'')+'>Budget内容を確認</button><button class="btn-secondary" onclick="externalOpenAICreateUsdBudgetCandidate()"'+(!op?' disabled':'')+'>Budget候補を作成</button><button class="btn-primary" onclick="externalOpenAIApproveUsdBudget(event)"'+(!x.pendingBudgetCandidate||x.pendingBudgetCandidate.state!=="CANDIDATE"?' disabled':'')+'>Project OwnerとしてBudget有効化</button></div><div class="external-note">STEP 4はUSDのFINANCIAL_COST境界のみを承認します。Current Allocationで、自動月次リセット・自動チャージはまだ行いません。</div>';
     const step5Body='<div class="external-boundary-grid"><div>Operation<strong>INTERNAL_ANALYSIS</strong></div><div>Active Policy<strong>'+esc(x.activeUsagePolicy?x.activeUsagePolicy.usagePolicyId:'未設定')+'</strong></div><div>Candidate<strong>'+esc(x.pendingUsagePolicyCandidate?x.pendingUsagePolicyCandidate.usagePolicyId:'未作成')+'</strong></div><div>Legal Authority<strong>NO</strong></div></div><div class="external-actions openai-actions"><button class="btn-secondary" onclick="externalOpenAIReviewUsagePolicy()"'+(!b||!op?' disabled':'')+'>Usage Policy内容を確認</button><button class="btn-secondary" onclick="externalOpenAICreateUsagePolicyCandidate()"'+(!b||!op||x.activeUsagePolicy?' disabled':'')+'>Usage Policy候補を作成</button><button class="btn-primary" onclick="externalOpenAIApproveUsagePolicy(event)"'+(!x.pendingUsagePolicyCandidate||!["CANDIDATE","REVIEW_REQUIRED"].includes(x.pendingUsagePolicyCandidate.status)||x.activeUsagePolicy?' disabled':'')+'>Project OwnerとしてUsage Policy有効化</button></div><div class="external-note">STEP 5はProject OwnerがINTERNAL_ANALYSIS用途を承認するPlatform Policyです。OpenAI規約を法的許可と断定せず、legalAuthorityGranted=falseを維持します。</div>';
-    const step6Body='<div class="external-boundary-grid"><div>Provider<strong>'+esc(src.lifecycleState||'未登録')+'</strong></div><div>Operation<strong>'+esc(op?'REGISTERED':'未登録')+'</strong></div><div>Budget<strong>'+esc(b?'ACTIVE':'未設定')+'</strong></div><div>Usage Policy<strong>'+esc(x.activeUsagePolicy?'ACTIVE':'未設定')+'</strong></div></div><div class="external-note">次工程は Paid Source Activation Authority です。このUI整理Candidateではまだ有効化ボタンを追加しません。Paid Activation・実OpenAI通信・課金は発生しません。</div>';
+    const step6Body='<div class="external-boundary-grid"><div>Provider<strong>'+esc(src.lifecycleState||'未登録')+'</strong></div><div>Credential<strong>'+esc(x.selectedSecretReferenceId||'未選択')+'</strong></div><div>Operation<strong>'+esc(op?'REGISTERED':'未登録')+'</strong></div><div>Budget<strong>'+esc(b?'ACTIVE':'未設定')+'</strong></div><div>Usage Policy<strong>'+esc(x.activeUsagePolicy?'ACTIVE':'未設定')+'</strong></div><div>1回Hard Cap<strong>'+esc(cap?money(cap):'未設定')+'</strong></div></div><div class="external-actions openai-actions"><button class="btn-secondary" onclick="externalOpenAIReviewPaidActivation()"'+(!op||!b||!x.activeUsagePolicy?' disabled':'')+'>Paid Activation内容を確認</button><button class="btn-primary" onclick="externalOpenAIApprovePaidActivation(event)"'+(!op||!b||!x.activeUsagePolicy||w.completed[6]?' disabled':'')+'>Project OwnerとしてPaid Source有効化</button></div><div class="external-note">STEP 6は登録済みOpenAI Sourceを承認済みBudget / Usage Policy / 1回Hard Capの範囲で有料実行可能にします。汎用 ACTIVATE_PAID_API Hard Denyは維持し、実OpenAI Request自体はまだ送信しません。承認済み範囲内では毎Requestの人間承認は行いません。</div>';
+    const step7Body='<div class="external-boundary-grid"><div>Provider<strong>'+esc(w.completed[6]?'ACTIVE':'未有効化')+'</strong></div><div>Budget<strong>'+esc(b?money(b.consumed)+' / '+money(b.hardLimit):'未設定')+'</strong></div><div>1回Hard Cap<strong>'+esc(cap?money(cap):'未設定')+'</strong></div><div>実API Request<strong>未実行</strong></div></div><div class="external-note">Paid Source Activationは完了しました。次は少額のReal API Testです。このv0.3.6 Candidateではまだ実Request送信ボタンを追加しません。</div>';
     let workflowHtml=workflowDetails(1,'Runtime',w.completed[1],w.currentStep===1,step1Body);
     if(w.runtimeComplete) workflowHtml+=workflowDetails(2,'Provider / Secret',w.completed[2],w.currentStep===2,step2Body);
     if(w.currentStep>=3) workflowHtml+=workflowDetails(3,'Operation Contract',w.completed[3],w.currentStep===3,step3Body);
     if(w.currentStep>=4) workflowHtml+=workflowDetails(4,'USD Resource Budget',w.completed[4],w.currentStep===4,step4Body);
     if(w.currentStep>=5) workflowHtml+=workflowDetails(5,'Usage Policy',w.completed[5],w.currentStep===5,step5Body);
-    if(w.currentStep>=6) workflowHtml+=workflowDetails(6,'Paid Source Activation',false,true,step6Body);
+    if(w.currentStep>=6) workflowHtml+=workflowDetails(6,'Paid Source Activation',w.completed[6],w.currentStep===6,step6Body);
+    if(w.currentStep>=7) workflowHtml+=workflowDetails(7,'Real API Test',false,w.currentStep===7,step7Body);
     return '<section class="external-section openai-config-section">'+
       '<div class="external-section-head"><h4>OpenAI API</h4><span class="openai-risk openai-risk-'+esc(x.risk.level.toLowerCase())+'">'+esc(x.risk.level)+' · '+esc(x.risk.label)+'</span></div>'+ 
       '<div class="external-help">'+esc(x.risk.reason)+' APIキー本体はこの画面に入力しません。Gateway側のSecret Referenceだけを使用します。</div>'+ 
@@ -408,6 +412,45 @@
     setImpact(result);return result;
   }
 
+
+  function externalOpenAIReviewPaidActivation() {
+    const d=readDraft();
+    const budgetId=d.budgetId||getOpenAIProviderUiSnapshot().selectedBudget&&getOpenAIProviderUiSnapshot().selectedBudget.budgetId||"";
+    const result=typeof n.buildOpenAIPaidSourceActivationReview==="function"?n.buildOpenAIPaidSourceActivationReview({budgetIds:budgetId?[budgetId]:[],perRequestHardCapUsd:d.perRequestHardCapUsd}):{ok:false,code:"EXTERNAL010_OPENAI_PAID_SOURCE_ACTIVATION_GATE_UNAVAILABLE"};
+    const wrapped={...result,projectOwnerApprovalRequired:true,realApiRequestPerformed:false};
+    setImpact(wrapped);return wrapped;
+  }
+
+  async function externalOpenAIApprovePaidActivation(event) {
+    if(!event||event.isTrusted!==true){const blocked={ok:false,code:"EXTERNAL010_TRUSTED_PROJECT_OWNER_UI_INTERACTION_REQUIRED",paidActivationPerformed:false,realApiRequestPerformed:false};setImpact(blocked);return blocked;}
+    const d=readDraft();const snap=getOpenAIProviderUiSnapshot();const budgetId=d.budgetId||snap.selectedBudget&&snap.selectedBudget.budgetId||"";
+    const review=typeof n.buildOpenAIPaidSourceActivationReview==="function"?n.buildOpenAIPaidSourceActivationReview({budgetIds:budgetId?[budgetId]:[],perRequestHardCapUsd:d.perRequestHardCapUsd}):null;
+    if(!review||review.ok!==true){const blocked=review||{ok:false,code:"EXTERNAL010_OPENAI_PAID_SOURCE_ACTIVATION_REVIEW_REQUIRED",paidActivationPerformed:false};setImpact(blocked);return blocked;}
+    if(review.code==="EXTERNAL010_OPENAI_PAID_SOURCE_ALREADY_ACTIVE"){setImpact(review);if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();return review;}
+    const r=review.data||{};
+    const message=[
+      "OpenAI Paid Sourceを有効化します。",
+      "",
+      "Source: SOURCE-OPENAI",
+      "Credential: "+String(r.secretReferenceId||snap.selectedSecretReferenceId||""),
+      "Operation: INTERNAL_ANALYSIS",
+      "Budget: "+String((r.budgetIds||[]).join(", ")),
+      "1回Hard Cap: "+money(r.perRequestHardCapUsd),
+      "",
+      "この承認後、承認済みBudget / Usage Policy / 1回Hard Capの範囲内では毎Requestの人間承認なしでOpenAI APIを利用可能になります。",
+      "汎用 ACTIVATE_PAID_API Hard Deny、自動Budget増額、自動チャージ、自動Credential切替は維持します。",
+      "この操作自体ではOpenAIへ実Requestを送信しません。",
+      "",
+      "Project Ownerとして有効化しますか？"
+    ].join("\n");
+    if(typeof global.confirm!=="function"||global.confirm(message)!==true){const cancelled={ok:false,code:"EXTERNAL010_PROJECT_OWNER_PAID_SOURCE_ACTIVATION_CANCELLED",paidActivationPerformed:false,realApiRequestPerformed:false};setImpact(cancelled);return cancelled;}
+    if(typeof n.activateOpenAIPaidSourceWithProjectOwnerApproval!=="function"){const unavailable={ok:false,code:"EXTERNAL010_OPENAI_PAID_SOURCE_ACTIVATION_GATE_UNAVAILABLE",paidActivationPerformed:false};setImpact(unavailable);return unavailable;}
+    const evidenceId="OPENAI-PAID-SOURCE-OWNER-"+Date.now().toString(36).toUpperCase();
+    const result=await n.activateOpenAIPaidSourceWithProjectOwnerApproval({budgetIds:r.budgetIds||[],perRequestHardCapUsd:r.perRequestHardCapUsd,projectOwnerConfirmed:true,ownerInteractionTrusted:true,interactionEvidenceId:evidenceId});
+    if(result&&result.ok===true&&typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();
+    setImpact(result);return result;
+  }
+
   function externalOpenAIShowProviderCandidates() {
     const draft=currentForm(); const src=source();
     const secretReferenceId=src&&src.secretReferenceId||draft.secretReferenceId||defaultSecretReferenceId();
@@ -418,6 +461,6 @@
     const value={sourceCandidate,operationCandidate,secretReference:{secretReferenceId:secretReferenceId,metadataRegistered:Boolean(metadata),active:Boolean(validation&&validation.ok===true),nextRequiredAction:validation&&validation.ok===true?"SOURCE_REGISTRATION_AUTHORITY":"SET_GATEWAY_SECRET_AND_REGISTER_REFERENCE_METADATA"},draft,paidActivationPerformed:false,secretValueRequested:false};setImpact(value);return value;
   }
   Object.assign(n.api,{getOpenAIProviderUiSnapshot,getOpenAISetupWorkflowState,renderOpenAIProviderIntegrationPanelHtml});Object.assign(n,n.api);
-  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIReviewSourceRegistration,externalOpenAIApproveSourceRegistration,externalOpenAIReviewOperationContractRegistration,externalOpenAIApproveOperationContractRegistration,externalOpenAIReviewUsdBudget,externalOpenAICreateUsdBudgetCandidate,externalOpenAIApproveUsdBudget,externalOpenAIReviewUsagePolicy,externalOpenAICreateUsagePolicyCandidate,externalOpenAIApproveUsagePolicy,externalOpenAIShowProviderCandidates});
+  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIReviewSourceRegistration,externalOpenAIApproveSourceRegistration,externalOpenAIReviewOperationContractRegistration,externalOpenAIApproveOperationContractRegistration,externalOpenAIReviewUsdBudget,externalOpenAICreateUsdBudgetCandidate,externalOpenAIApproveUsdBudget,externalOpenAIReviewUsagePolicy,externalOpenAICreateUsagePolicyCandidate,externalOpenAIApproveUsagePolicy,externalOpenAIReviewPaidActivation,externalOpenAIApprovePaidActivation,externalOpenAIShowProviderCandidates});
   n.modules.openaiProviderUi={id:"EXTERNAL-010-OPENAI-PROVIDER-UI",version:m.getModuleVersion("openaiProviderUi")||m.release.version,status:"Loaded",decision:"055",secretValueInputAllowed:false,automaticPaidActivationAllowed:false,loadedAt:i.nowIso()};
 })(typeof window!=="undefined"?window:globalThis);
