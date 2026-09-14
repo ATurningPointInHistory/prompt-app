@@ -10,6 +10,7 @@ const namespace={api:{},modules:{},__internal:{
   unique:v=>Array.from(new Set(Array.isArray(v)?v:[])),deepFreeze:v=>v,
   commitExternalIntelligenceSourceVersion:()=>null
 }};
+namespace.getExternalIntelligenceGatewayClientState=()=>({healthState:"READY",session:{state:"ACTIVE",expiresAt:new Date(Date.now()+60000).toISOString()},sessionTokenPresentInMemory:true});
 global.EXTERNAL010ExternalIntelligence=namespace;
 global.EXTERNAL010VersionManifest={getModuleVersion:()=>"1.20.1"};
 require("./17_external_intelligence_openai_provider_integration.js");
@@ -38,7 +39,7 @@ check("Gateway rejects store=true fixed-field mismatch",()=>{let code=null;try{v
 check("Gateway rejects unregistered tool field",()=>{let code=null;try{validateContext(config,gatewayContext({model:"gpt-5.6-luna",input:"hello",store:false,max_output_tokens:100,tools:[]}),{allowAuthentication:true});}catch(e){code=e.code;}expect(code==="BODY_FIELD_UNKNOWN","code="+code);return code;});
 check("Generic ACTIVATE_PAID_API remains hard denied",()=>{const s=fs.readFileSync("17_external_intelligence_version_manifest.js","utf8");expect(s.includes('"ACTIVATE_PAID_API"'),"hard deny missing");return "preserved";});
 check("Source Registry POST is scoped to AI_SERVICE + LOCAL_GATEWAY",()=>{const s=fs.readFileSync("17_external_intelligence_source_registry.js","utf8");expect(s.includes("GOVERNED_POST_SOURCE_TYPES"),"type gate");expect(s.includes("GOVERNED_POST_ACCESS_MODES"),"access gate");return "scoped";});
-check("Cost / risk aware UI is present",()=>{const html=namespace.renderOpenAIProviderIntegrationPanelHtml();expect(html.includes("変更の影響を確認"),"impact preview");expect(html.includes("GREEN")||html.includes("YELLOW")||html.includes("RED"),"risk level");expect(html.includes("1回の最大許可額"),"cost cap");expect(html.includes("簡単設定")&&html.includes("料金・利用量")&&html.includes("詳細設定")&&html.includes("安全・権限"),"progressive disclosure");return "ui-present";});
+check("Cost / risk aware UI is present",()=>{const html=namespace.renderOpenAIProviderIntegrationPanelHtml();expect(html.includes("変更の影響を確認"),"impact preview");expect(html.includes("GREEN")||html.includes("YELLOW")||html.includes("RED"),"risk level");expect(html.includes("1回の最大許可額"),"cost cap");expect(html.includes("STEP 2")&&html.includes("Provider / Secret")&&html.includes("詳細設定")&&html.includes("安全・権限")&&html.includes("NEXT ACTION"),"progressive workflow disclosure");return "ui-present";});
 check("UI never asks for secret value",()=>{const html=namespace.renderOpenAIProviderIntegrationPanelHtml();expect(!/type=\"password\"/i.test(html),"password input");expect(!/APIキー[^<]*<input/i.test(html),"api key input");expect(html.includes("Secret Value入力<strong>禁止"),"explicit prohibition");return "reference-only";});
 const passed=checks.filter(x=>x.passed).length,failed=checks.length-passed;
 const result={id:"OPENAI-API-INTEGRATION-PHASE2-VALIDATION",candidateVersion:"0.2.0",decisionId:"EXTERNAL-010-DECISION-055",passed,failed,total:checks.length,health:Math.round(passed/checks.length*10000)/100,releaseAllowed:false,realPaidRequestPerformed:false,checks};

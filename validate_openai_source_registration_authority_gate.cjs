@@ -7,7 +7,8 @@ const secretRef="SECRET-OPENAI-LEGACY";
 let approvalAdapter=null, authorityActive=false, authorityRevoked=false, sourceRecord=null, registrationCalls=0, refreshCalls=0, confirmCalls=0, paidCalls=0, budgetCalls=0, networkCalls=0;
 const state={sourceRegistry:new Map()};
 const ns={api:{},modules:{},__internal:{state,isPlainObject:v=>Boolean(v&&typeof v==='object'&&!Array.isArray(v)),text:(v,f='')=>String(v==null?f:v),clone,stableStringify:stable,nowIso:()=>new Date().toISOString(),unique:v=>Array.from(new Set(Array.isArray(v)?v:[])),deepFreeze:v=>v,buildResult:(ok,code,status,data,error)=>({ok,code,status,data:data==null?null:data,error:error||null})},
- getExternalIntelligenceSecretMetadata:id=>id===secretRef?{secretReferenceId:id,secretType:"BEARER_TOKEN",provider:"OPENAI",status:"ACTIVE"}:null,
+ getExternalIntelligenceGatewayClientState:()=>({healthState:"READY",session:{state:"ACTIVE",expiresAt:new Date(Date.now()+60000).toISOString()},sessionTokenPresentInMemory:true}),
+  getExternalIntelligenceSecretMetadata:id=>id===secretRef?{secretReferenceId:id,secretType:"BEARER_TOKEN",provider:"OPENAI",status:"ACTIVE"}:null,
  listExternalIntelligenceSecretMetadata:()=>[{secretReferenceId:secretRef,secretType:"BEARER_TOKEN",provider:"OPENAI",status:"ACTIVE"}],
  validateExternalIntelligenceSecretReference:({secretReferenceId})=>({ok:secretReferenceId===secretRef,code:"EXTERNAL010_SECRET_REFERENCE_ACTIVE",data:{secretValueReturned:false}}),
  getExternalIntelligenceSource:id=>id==="SOURCE-OPENAI"?clone(sourceRecord):null,

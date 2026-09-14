@@ -8,7 +8,8 @@ const op={operationContractId:"EXTERNAL-010-OP-OPENAI-INTERNAL-ANALYSIS",sourceI
 const budget={budgetId:"EXTERNAL-010-BUDGET-OPENAI-LEGACY-TEST",scopeType:"SOURCE",scopeId:"SOURCE-OPENAI",period:{type:"CURRENT_ALLOCATION"},currency:"USD",limits:{FINANCIAL_COST:{softLimit:3,hardLimit:5}},consumed:{FINANCIAL_COST:0},state:"ACTIVE",version:2,immutable:true};
 const policies=new Map();let activePolicyId=null,approvalAdapter=null,authorityActive=false,authorityRevoked=false,policyCreateCalls=0,policyActivateCalls=0,paidCalls=0,networkCalls=0,refreshCalls=0;
 const ns={api:{},modules:{},__internal:{state:{},isPlainObject:v=>Boolean(v&&typeof v==='object'&&!Array.isArray(v)),text:(v,f='')=>String(v==null?f:v),clone,stableStringify:stable,nowIso:()=>new Date().toISOString(),unique:v=>Array.from(new Set(Array.isArray(v)?v:[])),deepFreeze:v=>v,buildResult:(ok,code,status,data,error)=>({ok,code,status,data:data==null?null:data,error:error||null})},
- getExternalIntelligenceSource:id=>id==="SOURCE-OPENAI"?clone(source):null,
+ getExternalIntelligenceGatewayClientState:()=>({healthState:"READY",session:{state:"ACTIVE",expiresAt:new Date(Date.now()+60000).toISOString()},sessionTokenPresentInMemory:true}),
+  getExternalIntelligenceSource:id=>id==="SOURCE-OPENAI"?clone(source):null,
  getExternalIntelligenceSourceOperationContract:(sid,oid)=>sid==="SOURCE-OPENAI"&&oid==="INTERNAL_ANALYSIS"?clone(op):null,
  getExternalIntelligenceSecretMetadata:id=>id==="SECRET-OPENAI-LEGACY"?{secretReferenceId:id,secretType:"BEARER_TOKEN",provider:"OPENAI",status:"ACTIVE"}:null,
  listExternalIntelligenceSecretMetadata:()=>[{secretReferenceId:"SECRET-OPENAI-LEGACY",secretType:"BEARER_TOKEN",provider:"OPENAI",status:"ACTIVE"}],
@@ -33,7 +34,7 @@ for(const f of ["17_external_intelligence_openai_provider_integration.js","17_ex
 (async()=>{
  const html=ns.renderOpenAIProviderIntegrationPanelHtml();
  check("Usage Policy controls are visible",html.includes("Usage Policy内容を確認")&&html.includes("Usage Policy候補を作成")&&html.includes("Project OwnerとしてUsage Policy有効化"),"controls-present");
- check("Per-request cap clearly says it is changed in Simple Settings",html.includes("1回Hard Cap（簡単設定で変更）"),"cap-edit-location-visible");
+ check("Per-request cap clearly says it is changed in Simple Settings",html.includes("1回Hard Cap（STEP 2で変更）"),"cap-edit-location-visible");
  const review=context.externalOpenAIReviewUsagePolicy();
  check("Usage Policy review is mutation-free",review.ok===true&&policyCreateCalls===0&&review.data&&review.data.operationId==="INTERNAL_ANALYSIS",review);
  check("Review keeps legal authority false and provider terms external",review.data&&review.data.legalAuthorityGranted===false&&review.data.providerTermsIndependentlyVerified===false&&review.data.proposedRight.state==="ALLOWED_WITH_CONDITIONS",review.data);
