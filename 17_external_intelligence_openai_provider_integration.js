@@ -1007,6 +1007,17 @@
     const session = gateway && gateway.session || null;
     const gatewayReady = Boolean(gateway && String(gateway.healthState || "").toUpperCase() === "READY" && session && String(session.state || "").toUpperCase() === "ACTIVE" && gateway.sessionTokenPresentInMemory === true);
     if (!gatewayReady) return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_GATEWAY_SESSION_REQUIRED", "Blocked", { gatewayReady: false, realApiRequestPerformed: false, nextRequiredAction: "GATEWAY_SESSION" });
+    const bridge = typeof namespace.enableExternalIntelligenceGatewayAcquisitionBridge === "function" ? namespace.enableExternalIntelligenceGatewayAcquisitionBridge() : null;
+    if (!bridge || bridge.ok !== true) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_GATEWAY_ACQUISITION_BRIDGE_REQUIRED", "Blocked", {
+        gatewayReady: true,
+        acquisitionBridge: bridge || null,
+        realApiRequestAttempted: false,
+        providerNetworkCallPerformed: false,
+        realApiRequestPerformed: false,
+        nextRequiredAction: "GATEWAY_ACQUISITION_BRIDGE"
+      });
+    }
     return internal.buildResult(true, "EXTERNAL010_OPENAI_REAL_API_TEST_REVIEW_READY", "Review Ready", {
       sourceId: SOURCE_ID,
       operationId: OPERATION_ID,
@@ -1025,6 +1036,9 @@
       retryMaxAttempts: 1,
       projectOwnerApprovalRequired: true,
       paidSourceAlreadyActive: true,
+      gatewayAcquisitionBridgeReady: true,
+      realApiRequestAttempted: false,
+      providerNetworkCallPerformed: false,
       realApiRequestPerformed: false,
       nextRequiredAction: "PROJECT_OWNER_REAL_API_TEST_APPROVAL"
     });
@@ -1102,10 +1116,21 @@
 
       const execution = await namespace.submitExternalIntelligenceAcquisition(requestInput);
       if (!execution || execution.ok !== true) {
+        const route = execution && execution.data && execution.data.route || null;
+        const routeData = route && route.data || null;
+        const routeCode = String(routeData && routeData.code || route && route.code || "").toUpperCase();
+        const definitelyPreNetwork = [
+          "LOCAL_GATEWAY_ACQUISITION_EXECUTOR_UNAVAILABLE",
+          "LOCAL_GATEWAY_ADAPTER_REQUIRED",
+          "SOURCE_ACCESS_MODE_DISABLED",
+          "AUTO_ROUTE_NO_POLICY_COMPLIANT_RUNTIME"
+        ].includes(routeCode) || String(execution && execution.code || "").toUpperCase().includes("PREEXECUTION");
         return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_REQUEST_FAILED", "Failed", {
           requestId: requestId,
           execution: execution || null,
-          realApiRequestPerformed: true,
+          realApiRequestAttempted: true,
+          providerNetworkCallPerformed: definitelyPreNetwork ? false : null,
+          realApiRequestPerformed: definitelyPreNetwork ? false : null,
           testPassed: false,
           nextRequiredAction: "REVIEW_REAL_API_TEST_FAILURE"
         });
@@ -1172,6 +1197,8 @@
         validation: validation,
         authorityEnvelopeId: authorityEnvelopeId,
         approvalEvidenceId: interactionEvidenceId,
+        realApiRequestAttempted: true,
+        providerNetworkCallPerformed: true,
         realApiRequestPerformed: true,
         usageReconciled: true,
         actualUsage: actualUsage,

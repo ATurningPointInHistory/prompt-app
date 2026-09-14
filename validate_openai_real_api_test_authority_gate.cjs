@@ -11,7 +11,8 @@ let approvalAdapter=null,authorityEnvelope=null,authorityRevoked=false,submitCal
 let seq=0;
 const internal={state:{},isPlainObject:v=>Boolean(v&&typeof v==='object'&&!Array.isArray(v)),text:(v,f='')=>String(v==null?f:v),clone,stableStringify:stable,nowIso:()=>new Date().toISOString(),unique:v=>Array.from(new Set(Array.isArray(v)?v:[])),deepFreeze:v=>v,nextId:p=>`${p}-TEST-${++seq}`,buildResult:(ok,code,status,data,error)=>({ok,code,status,data:data==null?null:data,error:error||null}),commitExternalIntelligenceSourceVersion:(id,patch)=>{if(id!=="SOURCE-OPENAI")return null;commitCalls++;source={...source,...clone(patch),version:(source.version||1)+1,updatedAt:new Date().toISOString()};return clone(source);}};
 const ns={api:{},modules:{},__internal:internal,
- getExternalIntelligenceGatewayClientState:()=>({healthState:"READY",session:{state:"ACTIVE",expiresAt:new Date(Date.now()+60000).toISOString()},sessionTokenPresentInMemory:true}),
+ getExternalIntelligenceGatewayClientState:()=>({healthState:"READY",session:{state:"ACTIVE",expiresAt:new Date(Date.now()+60000).toISOString()},sessionTokenPresentInMemory:true,acquisitionBridgeEnabled:true}),
+ enableExternalIntelligenceGatewayAcquisitionBridge:()=>({ok:true,code:"EXTERNAL010_GATEWAY_ACQUISITION_BRIDGE_ENABLED",status:"Ready",data:{enabled:true}}),
  getExternalIntelligenceSource:id=>id==="SOURCE-OPENAI"?clone(source):null,
  getExternalIntelligenceSourceOperationContract:(sid,oid)=>sid==="SOURCE-OPENAI"&&oid==="INTERNAL_ANALYSIS"?clone(op):null,
  getExternalIntelligenceSecretMetadata:id=>id==="SECRET-OPENAI-LEGACY"?{secretReferenceId:id,secretType:"BEARER_TOKEN",provider:"OPENAI",status:"ACTIVE"}:null,
@@ -39,6 +40,7 @@ for(const f of ["17_external_intelligence_openai_provider_integration.js","17_ex
  check("STEP 7 exposes review and one-time real request controls",html.includes("Real API Test内容を確認")&&html.includes("Project Ownerとして1回テスト送信"),"controls-present");
  const review=context.externalOpenAIReviewRealApiTest();
  check("Real API Test review is mutation/network free",review.ok===true&&review.code==="EXTERNAL010_OPENAI_REAL_API_TEST_REVIEW_READY"&&submitCalls===0&&commitCalls===0,review);
+ check("Real API Test review confirms Gateway acquisition bridge readiness",review.data&&review.data.gatewayAcquisitionBridgeReady===true,review.data&&review.data.gatewayAcquisitionBridgeReady);
  check("Test transmission is fixed non-project text with store=false",review.data&&review.data.fixedTestInput==="Reply exactly with: OK"&&review.data.testInputContainsProjectData===false&&review.data.testBody.store===false,review.data);
  check("Cost preflight is nonzero and below $0.01 hard cap",review.data&&review.data.costEstimate.maximumEstimatedCostUsd>0&&review.data.costEstimate.maximumEstimatedCostUsd<0.01&&review.data.perRequestHardCapUsd===0.01,review.data&&review.data.costEstimate);
  check("Real API Test max output is bounded to 64",review.data&&review.data.testBody.max_output_tokens===64,review.data&&review.data.testBody);
@@ -47,7 +49,7 @@ for(const f of ["17_external_intelligence_openai_provider_integration.js","17_ex
  const direct=await ns.runOpenAIRealApiTestWithProjectOwnerApproval({model:"gpt-5.6-luna",maxOutputTokens:64,perRequestHardCapUsd:0.01,budgetIds:[budget.budgetId],projectOwnerConfirmed:true,ownerInteractionTrusted:false,interactionEvidenceId:"TEST"});
  check("Integration gate independently requires trusted Project Owner interaction",direct.ok===false&&direct.code==="EXTERNAL010_OPENAI_REAL_API_TEST_PROJECT_OWNER_INTERACTION_REQUIRED"&&submitCalls===0,direct);
  const result=await context.externalOpenAIApproveRealApiTest({isTrusted:true});
- check("Trusted Project Owner sends exactly one governed request",result.ok===true&&submitCalls===1&&result.data&&result.data.realApiRequestPerformed===true,{result,submitCalls});
+ check("Trusted Project Owner sends exactly one governed request",result.ok===true&&submitCalls===1&&result.data&&result.data.realApiRequestPerformed===true&&result.data.realApiRequestAttempted===true&&result.data.providerNetworkCallPerformed===true,{result,submitCalls});
  check("Request uses fixed text, store=false, no tools, maxAttempts=1",lastRequest&&lastRequest.body&&lastRequest.body.input==="Reply exactly with: OK"&&lastRequest.body.store===false&&!Object.prototype.hasOwnProperty.call(lastRequest.body,"tools")&&lastRequest.retryPolicy.maxAttempts===1,lastRequest);
  check("Provider usage is reconciled to nonzero actual financial cost",result.data&&result.data.usageReconciled===true&&result.data.actualUsage&&result.data.actualUsage.FINANCIAL_COST>0,result.data&&result.data.actualUsage);
  check("Snapshot model IDs resolve to canonical pricing",result.data&&result.data.validation&&result.data.validation.modelReported==="gpt-5.6-luna-2026-09-01"&&result.data.actualUsage.FINANCIAL_COST===0.0000036,result.data&&result.data.validation);

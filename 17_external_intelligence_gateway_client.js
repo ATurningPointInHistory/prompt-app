@@ -53,6 +53,7 @@
       session: sessionMetadata ? internal.clone(sessionMetadata) : null,
       sessionTokenPresentInMemory: Boolean(sessionToken),
       sessionTokenPersisted: false,
+      acquisitionBridgeEnabled: typeof state.gatewayAcquisitionExecutor === "function",
       lastError: state.gatewayClientState && state.gatewayClientState.lastError || null,
       lastCheckedAt: state.gatewayClientState && state.gatewayClientState.lastCheckedAt || null
     });
@@ -167,7 +168,18 @@
         clearSessionLocal("INVALID_METADATA");
         return internal.buildResult(false, "EXTERNAL010_GATEWAY_SESSION_METADATA_INVALID", "Blocked", { validation: validation });
       }
-      return internal.buildResult(true, "EXTERNAL010_GATEWAY_SESSION_CREATED", "Active", { session: internal.clone(sessionMetadata), sessionTokenPersisted: false, tokenReturnedToCaller: false });
+      // Runtime bridge activation must happen after all browser modules are loaded.
+      // The Gateway Client script is loaded before Adapter Registry, so module-load activation
+      // would race the dependency. A successful user session is the canonical runtime hook.
+      const acquisitionBridge = enableGatewayAcquisitionBridge();
+      updateClientState({ acquisitionBridgeEnabled: acquisitionBridge && acquisitionBridge.ok === true });
+      return internal.buildResult(true, "EXTERNAL010_GATEWAY_SESSION_CREATED", "Active", {
+        session: internal.clone(sessionMetadata),
+        sessionTokenPersisted: false,
+        tokenReturnedToCaller: false,
+        acquisitionBridge: acquisitionBridge,
+        acquisitionBridgeEnabled: acquisitionBridge && acquisitionBridge.ok === true
+      });
     } catch (error) {
       clearSessionLocal("HANDSHAKE_EXCEPTION");
       return internal.buildResult(false, "EXTERNAL010_GATEWAY_SESSION_UNAVAILABLE", "Unavailable", null, { error: { message: error && error.message || String(error), category: "Gateway Session" } });
@@ -341,7 +353,8 @@
       requiredScope: VERSION_MANIFEST.gateway.publicAcquisitionScope || "ACQUIRE_PUBLIC",
       arbitraryUrlProxyEnabled: false,
       authorityRevalidationRequired: true,
-      gatewayTargetAllowlistRequired: true
+      gatewayTargetAllowlistRequired: true,
+      enabled: configured.ok === true
     });
   }
 
