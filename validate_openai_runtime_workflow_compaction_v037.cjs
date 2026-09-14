@@ -1,0 +1,20 @@
+"use strict";
+const fs=require("fs"), vm=require("vm"), path=require("path");
+const root=__dirname;
+const uiCode=fs.readFileSync(path.join(root,"17_external_intelligence_openai_provider_ui.js"),"utf8");
+const consoleCode=fs.readFileSync(path.join(root,"17_external_intelligence_console.js"),"utf8");
+const checks=[];
+function check(name,passed,detail){checks.push({name,passed:Boolean(passed),detail});}
+check("Legacy top-level 操作 heading is removed",!consoleCode.includes('<h4>操作</h4>'),"top-operation-block-removed");
+check("Top-level 状態更新 remains available",consoleCode.includes('onclick="externalConsoleRefresh()">状態更新</button>'),"refresh-retained");
+check("Full Memo Audit moved under 検証・詳細",consoleCode.indexOf('検証・詳細')>=0&&consoleCode.indexOf('externalConsoleChooseFullMemoAudit()')>consoleCode.indexOf('検証・詳細'),"audit-under-validation-details");
+check("STEP 1 contains Foundation button",uiCode.includes('onclick="externalConsoleInitialize()">① Foundation初期化</button>'),"foundation-in-step1");
+check("STEP 1 contains Gateway check button",uiCode.includes('onclick="externalConsoleCheckGateway()">② Gateway確認</button>'),"gateway-check-in-step1");
+check("STEP 1 contains Gateway Session button",uiCode.includes('onclick="externalConsoleOpenSession()">③ Gateway Session開始</button>'),"session-in-step1");
+check("STEP 1 explains auto-collapse after ACTIVE",uiCode.includes('SessionがACTIVEになるとSTEP 1は自動的に畳まれ、STEP 2が開きます。'),"auto-collapse-note");
+check("Runtime controls are no longer described as top Control Center actions",!uiCode.includes('上部の ① Foundation初期化'),"old-top-instruction-removed");
+check("Raw JSON remains collapsed in OpenAI details",uiCode.includes('<summary>実行詳細 / JSON</summary>'),"openai-json-collapsed");
+check("Paid activation remains separate from UI compaction",uiCode.includes('STEP 6 ·')||uiCode.includes("workflowDetails(6,'Paid Source Activation'"),"paid-step-preserved");
+const failed=checks.filter(x=>!x.passed).length;
+const result={id:"OPENAI-API-RUNTIME-WORKFLOW-COMPACTION-V0.3.7-VALIDATION",candidateVersion:"0.3.7",decisionIds:["EXTERNAL-010-DECISION-055","EXTERNAL-010-DECISION-056"],passed:checks.length-failed,failed,total:checks.length,health:Math.round(((checks.length-failed)/checks.length)*1000)/10,paidActivationLogicChanged:false,realApiRequestPerformed:false,checks};
+console.log(JSON.stringify(result,null,2)); process.exitCode=failed?1:0;

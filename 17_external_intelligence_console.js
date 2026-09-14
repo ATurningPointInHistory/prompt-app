@@ -165,25 +165,21 @@
         statusBadge("Session", session && session.state || "INACTIVE", ["ACTIVE"]) +
       '</section>' +
 
-      '<section class="external-section">' +
-        '<h4>操作</h4>' +
-        '<div class="external-actions">' +
-          '<button onclick="externalConsoleInitialize()">① Foundation初期化</button>' +
-          '<button onclick="externalConsoleCheckGateway()">② Gateway確認</button>' +
-          '<button onclick="externalConsoleOpenSession()">③ Gateway Session開始</button>' +
-          '<button onclick="externalConsoleChooseFullMemoAudit()">Full Memo Audit</button>' +
+      '<section class="external-section" style="padding-top:8px;padding-bottom:8px">' +
+        '<div class="external-section-head">' +
+          '<div class="external-help" style="margin:0">Runtime操作はOpenAI Setup WorkflowのSTEP 1に集約しました。</div>' +
           '<button class="btn-secondary" onclick="externalConsoleRefresh()">状態更新</button>' +
         '</div>' +
-        '<div class="external-help">PCで外部Gatewayを使う場合は ①→②→③。AndroidやGatewayなしでは、Core / 保存済みEvidence / 分析系はGatewayなしでも利用可能です。Semantic Verificationは通常操作から外し、再読込後の再証明用として「検証・詳細」内にのみ残します。</div>' +
-        '<details style="margin-top:10px">' +
+        '<details style="margin-top:8px">' +
           '<summary style="cursor:pointer;font-weight:600">検証・詳細</summary>' +
           '<div class="external-actions" style="margin-top:10px">' +
+            '<button class="btn-secondary" onclick="externalConsoleChooseFullMemoAudit()">Full Memo Audit</button>' +
             '<button class="btn-secondary" onclick="externalConsoleRunSemanticVerification()"' + (latestAudit && latestAudit.traceabilityComplete === true && latestAudit.exactCatalogMemoHashMatch === true ? '' : ' disabled') + '>Semantic Verification' + (semantic ? ' [' + esc((semantic.verifiedRequirementCount || 0) + '/803') + ']' : '') + '</button>' +
             '<button class="btn-secondary" onclick="externalConsoleRunPhase21()">統合検証 (Phase 21)' + (p21 ? ' [' + esc(p21.failed === 0 ? "PASS" : "FAIL") + ']' : '') + '</button>' +
             '<button class="btn-secondary" onclick="externalConsoleRunCurrentRuntimeFinalGate()">Final Gate Evidence (この端末)' + (platformEvidence ? ' [' + esc((platformEvidence.platform || "?") + ' ' + (platformEvidence.validationPassed ? "PASS" : "FAIL")) + ']' : '') + '</button>' +
             '<button class="btn-secondary" onclick="externalConsoleDownloadFullMemoAudit()"' + (latestAudit ? '' : ' disabled') + '>Audit JSON保存</button>' +
           '</div>' +
-          '<div class="external-help">完了済みの Repair 45 / Gap Repair 34 / Validation Coverage 65 / Traceability 704 の個別ボタンは非表示です。Semantic Verificationは再読込後の再証明用です。Final Gate EvidenceはPC/Androidの現在端末に対応する正式validatorを自動選択し、同じPackage Identityへ結び付けます。端末メモリ自体はSoTにしません。</div>' +
+          '<div class="external-help">Full Memo Audit / Semantic Verification / Final Gate Evidenceは通常Setupから分離しています。完了済みの Repair 45 / Gap Repair 34 / Validation Coverage 65 / Traceability 704 の個別ボタンは非表示です。端末メモリ自体はSoTにしません。</div>' +
         '</details>' +
       '</section>' +
 

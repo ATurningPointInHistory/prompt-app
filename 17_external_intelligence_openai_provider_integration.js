@@ -34,6 +34,10 @@
   const USAGE_POLICY_PURPOSE = "openai-internal-analysis-usage-policy";
   const ACTIVATION_ACTION = "ACTIVATE_GOVERNED_PAID_SOURCE";
   const ACTIVATION_PURPOSE = "paid-provider-activation";
+  const REAL_API_TEST_ACTION = "EXECUTE_EXTERNAL_ACQUISITION";
+  const REAL_API_TEST_PURPOSE = "openai-real-api-test";
+  const REAL_API_TEST_INPUT = "Reply exactly with: OK";
+  const REAL_API_TEST_MAX_OUTPUT_TOKENS = 64;
   const PRICING_SOURCE = "https://platform.openai.com/docs/models";
   const VERIFIED_AT = "2026-09-14T00:00:00+09:00";
   const MAX_MODEL_OUTPUT_TOKENS = 128000;
@@ -108,8 +112,15 @@
     return Object.keys(MODEL_PRICING).sort().map(function (model) { return clonePricing(MODEL_PRICING[model]); });
   }
 
+  function resolveOpenAIModelPricing(model) {
+    const requested = String(model || "").trim();
+    if (MODEL_PRICING[requested]) return MODEL_PRICING[requested];
+    const base = Object.keys(MODEL_PRICING).find(function (id) { return requested.indexOf(id + "-") === 0; });
+    return base ? MODEL_PRICING[base] : null;
+  }
+
   function getOpenAIModelPricingProfile(model) {
-    return clonePricing(MODEL_PRICING[String(model || "").trim()]);
+    return clonePricing(resolveOpenAIModelPricing(model));
   }
 
   function validateOpenAIResponsesBody(body) {
@@ -943,13 +954,246 @@
     return internal.buildResult(true, "EXTERNAL010_OPENAI_GOVERNED_PAID_SOURCE_ACTIVATED", "Active", { source: next, authority: authority, budget: budget.data, noPerRequestHumanApprovalInsideApprovedScope: true, genericActivatePaidApiHardDenyPreserved: true });
   }
 
+  function extractOpenAIResponseText(payload) {
+    const response = internal.isPlainObject(payload) ? payload : {};
+    if (typeof response.output_text === "string" && response.output_text.trim()) return response.output_text.trim();
+    const output = Array.isArray(response.output) ? response.output : [];
+    const parts = [];
+    output.forEach(function (item) {
+      const content = item && Array.isArray(item.content) ? item.content : [];
+      content.forEach(function (entry) {
+        if (entry && typeof entry.text === "string") parts.push(entry.text);
+        else if (entry && typeof entry.output_text === "string") parts.push(entry.output_text);
+      });
+    });
+    return parts.join("\n").trim();
+  }
+
+  function getOpenAIRealApiTestValidation() {
+    const source = typeof namespace.getExternalIntelligenceSource === "function" ? namespace.getExternalIntelligenceSource(SOURCE_ID) : null;
+    return source && internal.isPlainObject(source.realApiTestValidation) ? internal.clone(source.realApiTestValidation) : null;
+  }
+
+  function buildOpenAIRealApiTestReview(input) {
+    const settings = internal.isPlainObject(input) ? input : {};
+    const source = typeof namespace.getExternalIntelligenceSource === "function" ? namespace.getExternalIntelligenceSource(SOURCE_ID) : null;
+    if (!source || source.lifecycleState !== "ACTIVE" || source.enabled !== true || !source.paidActivationPolicy) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_PAID_SOURCE_ACTIVE_REQUIRED", "Blocked", { realApiRequestPerformed: false, nextRequiredAction: "PAID_SOURCE_ACTIVATION_AUTHORITY" });
+    }
+    const existing = getOpenAIRealApiTestValidation();
+    if (existing && existing.passed === true) {
+      return internal.buildResult(true, "EXTERNAL010_OPENAI_REAL_API_TEST_ALREADY_PASSED", "Passed", { validation: existing, realApiRequestPerformed: false, nextRequiredAction: "FINAL_VALIDATION" });
+    }
+    const operation = typeof namespace.getExternalIntelligenceSourceOperationContract === "function" ? namespace.getExternalIntelligenceSourceOperationContract(SOURCE_ID, OPERATION_ID) : null;
+    if (!operation || operation.method !== "POST" || !operation.bodyPolicy || !operation.bodyPolicy.fixedFields || operation.bodyPolicy.fixedFields.store !== false) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_NOT_READY", "Blocked", { realApiRequestPerformed: false });
+    }
+    const secret = typeof namespace.validateExternalIntelligenceSecretReference === "function" ? namespace.validateExternalIntelligenceSecretReference({ secretReferenceId: source.secretReferenceId }) : null;
+    if (!secret || secret.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_SECRET_REFERENCE_NOT_READY", "Blocked", { secretValueReturned: false, realApiRequestPerformed: false });
+    const policy = typeof namespace.checkExternalIntelligenceUsagePolicy === "function" ? namespace.checkExternalIntelligenceUsagePolicy({ sourceId: SOURCE_ID, operation: OPERATION_ID }) : null;
+    if (!policy || policy.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_USAGE_POLICY_BLOCKED", "Blocked", { policy: policy || null, realApiRequestPerformed: false });
+    const model = internal.text(settings.model, "");
+    if (!MODEL_PRICING[model]) return internal.buildResult(false, "EXTERNAL010_OPENAI_MODEL_NOT_REGISTERED", "Blocked", { model: model || null, realApiRequestPerformed: false });
+    const configuredMax = Number(settings.maxOutputTokens);
+    const testMaxOutputTokens = Math.max(1, Math.min(Number.isInteger(configuredMax) && configuredMax > 0 ? configuredMax : REAL_API_TEST_MAX_OUTPUT_TOKENS, REAL_API_TEST_MAX_OUTPUT_TOKENS));
+    const perRequestHardCapUsd = finitePositive(settings.perRequestHardCapUsd || source.paidActivationPolicy.perRequestHardCapUsd);
+    const budgetIds = internal.unique(settings.budgetIds && settings.budgetIds.length ? settings.budgetIds : source.paidActivationPolicy.budgetIds || []);
+    const body = { model: model, input: REAL_API_TEST_INPUT, store: false, max_output_tokens: testMaxOutputTokens };
+    const prepared = prepareOpenAIResponsesRequest({ body: body, perRequestHardCapUsd: perRequestHardCapUsd, budgetIds: budgetIds, purpose: REAL_API_TEST_PURPOSE, requestedBy: "Project Owner / OpenAI Real API Test" });
+    if (!prepared || prepared.ok !== true) return prepared;
+    const budgetCheck = validateUsdBudgets(budgetIds, prepared.data.costEstimate.maximumEstimatedCostUsd);
+    if (!budgetCheck || budgetCheck.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_BUDGET_BLOCKED", "Blocked", { budget: budgetCheck || null, realApiRequestPerformed: false });
+    const gateway = typeof namespace.getExternalIntelligenceGatewayClientState === "function" ? namespace.getExternalIntelligenceGatewayClientState() : null;
+    const session = gateway && gateway.session || null;
+    const gatewayReady = Boolean(gateway && String(gateway.healthState || "").toUpperCase() === "READY" && session && String(session.state || "").toUpperCase() === "ACTIVE" && gateway.sessionTokenPresentInMemory === true);
+    if (!gatewayReady) return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_GATEWAY_SESSION_REQUIRED", "Blocked", { gatewayReady: false, realApiRequestPerformed: false, nextRequiredAction: "GATEWAY_SESSION" });
+    return internal.buildResult(true, "EXTERNAL010_OPENAI_REAL_API_TEST_REVIEW_READY", "Review Ready", {
+      sourceId: SOURCE_ID,
+      operationId: OPERATION_ID,
+      secretReferenceId: source.secretReferenceId,
+      model: model,
+      testBody: body,
+      fixedTestInput: REAL_API_TEST_INPUT,
+      testInputContainsProjectData: false,
+      externalTransmission: "FIXED_TEST_TEXT_ONLY",
+      budgetIds: budgetIds,
+      perRequestHardCapUsd: perRequestHardCapUsd,
+      costEstimate: prepared.data.costEstimate,
+      requestCandidate: prepared.data.requestCandidate,
+      usagePolicyId: policy.data && policy.data.usagePolicyId || null,
+      storeFalseEnforced: true,
+      retryMaxAttempts: 1,
+      projectOwnerApprovalRequired: true,
+      paidSourceAlreadyActive: true,
+      realApiRequestPerformed: false,
+      nextRequiredAction: "PROJECT_OWNER_REAL_API_TEST_APPROVAL"
+    });
+  }
+
+  async function runOpenAIRealApiTestWithProjectOwnerApproval(input) {
+    const settings = internal.isPlainObject(input) ? input : {};
+    const review = buildOpenAIRealApiTestReview(settings);
+    if (!review || review.ok !== true) return review;
+    if (review.code === "EXTERNAL010_OPENAI_REAL_API_TEST_ALREADY_PASSED") return review;
+    if (settings.ownerInteractionTrusted !== true || settings.projectOwnerConfirmed !== true || !internal.text(settings.interactionEvidenceId, "")) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_PROJECT_OWNER_INTERACTION_REQUIRED", "Blocked", { realApiRequestPerformed: false });
+    }
+    const required = [
+      "setExternalIntelligenceAuthorityApprovalAdapter",
+      "createExternalIntelligenceAuthorityEnvelopeCandidate",
+      "activateExternalIntelligenceAuthorityEnvelope",
+      "revokeExternalIntelligenceAuthorityEnvelope",
+      "submitExternalIntelligenceAcquisition"
+    ];
+    const missing = required.filter(function (name) { return typeof namespace[name] !== "function"; });
+    if (missing.length) return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_DEPENDENCY_UNAVAILABLE", "Blocked", { missing: missing, realApiRequestPerformed: false });
+
+    const interactionEvidenceId = internal.text(settings.interactionEvidenceId, "");
+    const requestId = internal.nextId("EXTERNAL-010-OPENAI-REAL-TEST");
+    const requestInput = Object.assign({}, internal.clone(review.data.requestCandidate), {
+      requestId: requestId,
+      purpose: REAL_API_TEST_PURPOSE,
+      requestedBy: "Project Owner / OpenAI Real API Test",
+      executionPreference: "IMMEDIATE",
+      idempotencyKey: null
+    });
+    let authorityEnvelopeId = null;
+    let authorityActivated = false;
+    const adapter = {
+      adapterId: "EXTERNAL-010-OPENAI-REAL-API-TEST-OWNER-APPROVAL",
+      requiresExplicitOwnerInteraction: true,
+      async verifyApproval(context) {
+        const envelope = context && context.envelope || {};
+        const approval = context && context.approvalInput || {};
+        const target = envelope.target || {};
+        const exactScope = envelope.action === REAL_API_TEST_ACTION && target.type === "external-acquisition" && target.id === requestId && envelope.purpose === REAL_API_TEST_PURPOSE;
+        const explicit = approval.projectOwnerConfirmed === true && approval.ownerInteractionTrusted === true && internal.text(approval.interactionEvidenceId, "") === interactionEvidenceId;
+        return { approved: exactScope && explicit, actorType: "Project Owner", interactionEvidenceId: exactScope && explicit ? interactionEvidenceId : "" };
+      }
+    };
+
+    try {
+      const adapterResult = namespace.setExternalIntelligenceAuthorityApprovalAdapter(adapter);
+      if (!adapterResult || adapterResult.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_APPROVAL_ADAPTER_FAILED", "Blocked", { realApiRequestPerformed: false });
+      const candidate = namespace.createExternalIntelligenceAuthorityEnvelopeCandidate({
+        action: REAL_API_TEST_ACTION,
+        target: { type: "external-acquisition", id: requestId },
+        purpose: REAL_API_TEST_PURPOSE,
+        scope: {
+          domain: "EXTERNAL-010",
+          operation: OPERATION_ID,
+          constraints: {
+            sourceId: SOURCE_ID,
+            requestId: requestId,
+            model: review.data.model,
+            budgetIds: internal.clone(review.data.budgetIds),
+            maximumEstimatedCostUsd: review.data.costEstimate.maximumEstimatedCostUsd,
+            perRequestHardCapUsd: review.data.perRequestHardCapUsd,
+            fixedTestInputOnly: true,
+            oneTimeRealApiTest: true
+          }
+        }
+      });
+      authorityEnvelopeId = candidate && candidate.data && candidate.data.envelope && candidate.data.envelope.authorityEnvelopeId || null;
+      if (!candidate || candidate.ok !== true || !authorityEnvelopeId) return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_AUTHORITY_CANDIDATE_FAILED", "Blocked", { authorityCandidate: candidate || null, realApiRequestPerformed: false });
+      const activation = await namespace.activateExternalIntelligenceAuthorityEnvelope(authorityEnvelopeId, { projectOwnerConfirmed: true, ownerInteractionTrusted: true, interactionEvidenceId: interactionEvidenceId });
+      if (!activation || activation.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_AUTHORITY_ACTIVATION_FAILED", "Blocked", { activation: activation || null, realApiRequestPerformed: false });
+      authorityActivated = true;
+
+      const execution = await namespace.submitExternalIntelligenceAcquisition(requestInput);
+      if (!execution || execution.ok !== true) {
+        return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_REQUEST_FAILED", "Failed", {
+          requestId: requestId,
+          execution: execution || null,
+          realApiRequestPerformed: true,
+          testPassed: false,
+          nextRequiredAction: "REVIEW_REAL_API_TEST_FAILURE"
+        });
+      }
+      const reconciliation = execution.data && execution.data.usageReconciliation || null;
+      const providerReconciliation = reconciliation && reconciliation.providerReconciliation || null;
+      const usageRecordResult = reconciliation && reconciliation.usageRecordResult || null;
+      if (!reconciliation || reconciliation.reconciled !== true || !providerReconciliation || providerReconciliation.ok !== true || !usageRecordResult || usageRecordResult.ok !== true) {
+        return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_USAGE_RECONCILIATION_REQUIRED", "Reconciliation Pending", {
+          requestId: requestId,
+          execution: execution.data || null,
+          realApiRequestPerformed: true,
+          usageReconciled: false,
+          ambiguousPaidCostAssumedZero: false,
+          testPassed: false,
+          nextRequiredAction: "REVIEW_USAGE_RECONCILIATION"
+        });
+      }
+      const response = execution.data && execution.data.response || {};
+      const payload = internal.isPlainObject(response.payload) ? response.payload : {};
+      const outputText = extractOpenAIResponseText(payload);
+      const outputMatchedExpected = outputText.trim().toUpperCase() === "OK";
+      if (!outputMatchedExpected) {
+        return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_OUTPUT_MISMATCH", "Failed", {
+          requestId: requestId,
+          providerResponseId: internal.text(payload.id, "") || null,
+          outputMatchedExpected: false,
+          realApiRequestPerformed: true,
+          usageReconciled: true,
+          actualUsage: providerReconciliation.data && providerReconciliation.data.actualUsage || null,
+          testPassed: false,
+          nextRequiredAction: "REVIEW_MODEL_OUTPUT"
+        });
+      }
+      if (typeof internal.commitExternalIntelligenceSourceVersion !== "function") return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_SOURCE_COMMIT_UNAVAILABLE", "Failed", { realApiRequestPerformed: true, usageReconciled: true });
+      const actualUsage = internal.clone(providerReconciliation.data.actualUsage || {});
+      const completedAt = internal.nowIso();
+      const validation = {
+        passed: true,
+        requestId: requestId,
+        responseId: response.responseId || null,
+        providerResponseId: internal.text(payload.id, "") || null,
+        providerRequestId: response.responseMetadata && response.responseMetadata.providerRequestId || null,
+        modelRequested: review.data.model,
+        modelReported: internal.text(payload.model, "") || review.data.model,
+        budgetIds: internal.clone(review.data.budgetIds),
+        estimatedMaximumCostUsd: review.data.costEstimate.maximumEstimatedCostUsd,
+        actualUsage: actualUsage,
+        outputMatchedExpected: true,
+        fixedTestInputOnly: true,
+        projectDataTransmitted: false,
+        store: false,
+        toolsEnabled: false,
+        streamingEnabled: false,
+        retryMaxAttempts: 1,
+        secretValueReturned: false,
+        completedAt: completedAt
+      };
+      const next = internal.commitExternalIntelligenceSourceVersion(SOURCE_ID, { realApiTestValidation: validation });
+      if (!next) return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_VALIDATION_COMMIT_FAILED", "Failed", { realApiRequestPerformed: true, usageReconciled: true });
+      if (typeof namespace.appendExternalIntelligenceAuditEvent === "function") await namespace.appendExternalIntelligenceAuditEvent({ eventType: "OPENAI_REAL_API_TEST_PASSED", actor: "OpenAI Provider Integration", outcome: "Passed", details: { sourceId: SOURCE_ID, requestId: requestId, providerResponseId: validation.providerResponseId, model: validation.modelReported, budgetIds: validation.budgetIds, actualUsage: actualUsage, outputMatchedExpected: true, projectDataTransmitted: false, secretValueLogged: false } });
+      return internal.buildResult(true, "EXTERNAL010_OPENAI_REAL_API_TEST_PASSED", "Passed", {
+        source: next,
+        validation: validation,
+        authorityEnvelopeId: authorityEnvelopeId,
+        approvalEvidenceId: interactionEvidenceId,
+        realApiRequestPerformed: true,
+        usageReconciled: true,
+        actualUsage: actualUsage,
+        budgetUsageRecordId: usageRecordResult.data && usageRecordResult.data.usageRecord && usageRecordResult.data.usageRecord.usageRecordId || null,
+        testPassed: true,
+        nextRequiredAction: "FINAL_VALIDATION"
+      });
+    } finally {
+      if (authorityEnvelopeId) {
+        try { namespace.revokeExternalIntelligenceAuthorityEnvelope(authorityEnvelopeId, authorityActivated ? "One-time OpenAI Real API Test completed or ended" : "OpenAI Real API Test approval flow ended"); } catch (_) {}
+      }
+      try { namespace.setExternalIntelligenceAuthorityApprovalAdapter(null); } catch (_) {}
+    }
+  }
+
   function reconcileOpenAIResponsesUsage(input) {
     const settings = internal.isPlainObject(input) ? input : {};
     if (String(settings.sourceId || "").toUpperCase() !== SOURCE_ID) return internal.buildResult(false, "EXTERNAL010_PROVIDER_USAGE_RECONCILIATION_NOT_APPLICABLE", "Skipped", null);
     const payload = internal.isPlainObject(settings.payload) ? settings.payload : {};
     const usage = internal.isPlainObject(payload.usage) ? payload.usage : null;
     const model = String(payload.model || settings.model || "").trim();
-    const pricing = MODEL_PRICING[model];
+    const pricing = resolveOpenAIModelPricing(model);
     if (!usage || !pricing) return internal.buildResult(false, "EXTERNAL010_OPENAI_USAGE_AMBIGUOUS", "Reconciliation Pending", { model: model || null, usagePresent: Boolean(usage), pricingProfilePresent: Boolean(pricing), ambiguousBillingState: true });
     const inputTokens = Number(usage.input_tokens);
     const outputTokens = Number(usage.output_tokens);
@@ -1012,6 +1256,9 @@
     activateOpenAIPaidSourceWithProjectOwnerApproval: activateOpenAIPaidSourceWithProjectOwnerApproval,
     prepareOpenAIResponsesRequest: prepareOpenAIResponsesRequest,
     activateOpenAIGovernedPaidSource: activateOpenAIGovernedPaidSource,
+    buildOpenAIRealApiTestReview: buildOpenAIRealApiTestReview,
+    runOpenAIRealApiTestWithProjectOwnerApproval: runOpenAIRealApiTestWithProjectOwnerApproval,
+    getOpenAIRealApiTestValidation: getOpenAIRealApiTestValidation,
     reconcileOpenAIResponsesUsage: reconcileOpenAIResponsesUsage,
     reconcileExternalIntelligenceProviderUsage: reconcileExternalIntelligenceProviderUsage
   });
