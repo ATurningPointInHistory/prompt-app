@@ -21,7 +21,7 @@
   }
   function money(value) { const n=Number(value); return Number.isFinite(n) ? "$"+n.toFixed(n < 1 ? 4 : 2) : "—"; }
   function readDraft() {
-    const empty={model:"",maxOutputTokens:"",perRequestHardCapUsd:"",budgetId:"",secretReferenceId:defaultSecretReferenceId()};
+    const empty={model:"",maxOutputTokens:"",perRequestHardCapUsd:"",budgetId:"",budgetCandidateId:"",budgetSoftLimitUsd:"",budgetHardLimitUsd:"",usagePolicyCandidateId:"",secretReferenceId:defaultSecretReferenceId()};
     try { const raw=global.localStorage && global.localStorage.getItem(STORAGE_KEY); if(!raw)return empty; return Object.assign(empty,JSON.parse(raw)||{}); } catch(_){ return empty; }
   }
   function writeDraft(draft) {
@@ -44,16 +44,24 @@
     const b=budgets().find(x=>x.budgetId===id); if(!b)return null;
     const lim=b.limits.FINANCIAL_COST||{}; return {budgetId:b.budgetId,currency:b.currency,consumed:Number(b.consumed&&b.consumed.FINANCIAL_COST||0),softLimit:lim.softLimit==null?null:Number(lim.softLimit),hardLimit:lim.hardLimit==null?null:Number(lim.hardLimit),period:i.clone(b.period||{})};
   }
+  function budgetRecord(id) { return id&&typeof n.getExternalIntelligenceResourceBudget==="function" ? n.getExternalIntelligenceResourceBudget(id) : null; }
+  function budgetRecordSnapshot(id) {
+    const b=budgetRecord(id); if(!b||!b.limits||!b.limits.FINANCIAL_COST)return null;
+    const lim=b.limits.FINANCIAL_COST; return {budgetId:b.budgetId,state:b.state,currency:b.currency,consumed:Number(b.consumed&&b.consumed.FINANCIAL_COST||0),softLimit:lim.softLimit==null?null:Number(lim.softLimit),hardLimit:lim.hardLimit==null?null:Number(lim.hardLimit),period:i.clone(b.period||{})};
+  }
   function getOpenAIProviderUiSnapshot() {
     const src=source(), op=operationContract(), draft=readDraft(), profiles=typeof n.listOpenAIModelPricingProfiles==="function"?n.listOpenAIModelPricingProfiles():[], activation=src&&src.paidActivationPolicy||null;
     const selectedBudget=draft.budgetId||activation&&activation.budgetIds&&activation.budgetIds[0]||"";
     const selectedSecretReferenceId=src&&src.secretReferenceId||draft.secretReferenceId||defaultSecretReferenceId();
     const metadata=secretMetadata(selectedSecretReferenceId), secret=metadata?secretState(selectedSecretReferenceId):null;
     const b=budgetSnapshot(selectedBudget);
+    const pendingBudget=budgetRecordSnapshot(draft.budgetCandidateId||"");
+    const activeUsagePolicy=typeof n.getActiveExternalIntelligenceUsagePolicyForSource==="function"?n.getActiveExternalIntelligenceUsagePolicyForSource("SOURCE-OPENAI"):null;
+    const pendingUsagePolicy=draft.usagePolicyCandidateId&&typeof n.getExternalIntelligenceUsagePolicy==="function"?n.getExternalIntelligenceUsagePolicy(draft.usagePolicyCandidateId):null;
     let level="YELLOW",label="準備中",reason="Provider / Secret Reference / Budget / Authority の設定を確認してください。";
     if(src&&src.lifecycleState==="ACTIVE"&&secret&&secret.ok===true&&b){level="GREEN";label="通常利用範囲";reason="承認済み範囲内は毎回の人間承認なしで利用できます。";}
     if(src&&src.lifecycleState==="ACTIVE"&&(!secret||!secret.ok||!b)){level="RED";label="実行停止推奨";reason="Active Sourceに必要なSecretまたはUSD Budgetが確認できません。";}
-    return {source:src,operationContract:op,draft,profiles,activeUsdBudgets:budgets(),selectedBudget:b,secret:secret,secretMetadata:metadata,selectedSecretReferenceId:selectedSecretReferenceId,secretReferenceIds:secretReferenceIds(),risk:{level,label,reason},activation:activation,externalTransmission:"TEXT_TO_OPENAI",toolsEnabled:false,streamingEnabled:false,backgroundEnabled:false,secretValueInputAllowed:false,capturedAt:i.nowIso()};
+    return {source:src,operationContract:op,draft,profiles,activeUsdBudgets:budgets(),selectedBudget:b,pendingBudgetCandidate:pendingBudget,activeUsagePolicy:activeUsagePolicy,pendingUsagePolicyCandidate:pendingUsagePolicy,secret:secret,secretMetadata:metadata,selectedSecretReferenceId:selectedSecretReferenceId,secretReferenceIds:secretReferenceIds(),risk:{level,label,reason},activation:activation,externalTransmission:"TEXT_TO_OPENAI",toolsEnabled:false,streamingEnabled:false,backgroundEnabled:false,secretValueInputAllowed:false,capturedAt:i.nowIso()};
   }
   function modelOptions(snapshot) {
     return '<option value="">モデルを選択</option>'+snapshot.profiles.map(function(p){const selected=snapshot.draft.model===p.model?' selected':'';return '<option value="'+esc(p.model)+'"'+selected+'>'+esc(p.model)+' — 入力 '+esc(money(p.inputPerMTokUsd))+'/MTok / 出力 '+esc(money(p.outputPerMTokUsd))+'/MTok</option>';}).join('');
@@ -79,6 +87,7 @@
         '<div><span>現在モデル</span><strong>'+esc(model)+'</strong></div>'+
         '<div><span>1回上限</span><strong>'+esc(cap?money(cap):'未設定')+'</strong></div>'+
         '<div><span>USD Budget</span><strong>'+esc(b?money(b.consumed)+' / '+money(b.hardLimit):'未選択')+'</strong></div>'+
+        '<div><span>Usage Policy</span><strong>'+esc(x.activeUsagePolicy?'ACTIVE':x.pendingUsagePolicyCandidate?x.pendingUsagePolicyCandidate.status:'未設定')+'</strong></div>'+
         '<div><span>外部送信</span><strong>Text only</strong></div>'+
         '<div><span>Tools / Stream</span><strong>OFF / OFF</strong></div>'+
       '</div>'+
@@ -102,9 +111,25 @@
         '<button class="btn-primary" onclick="externalOpenAIApproveOperationContractRegistration(event)"'+(!src||!src.sourceId||op?' disabled':'')+'>Project OwnerとしてOperation登録</button>'+
       '</div><div class="external-note">Operation登録承認は EXTERNAL-010-OP-OPENAI-INTERNAL-ANALYSIS のContract登録だけに限定します。成功後は上部の「Operation」が REGISTERED に変わります。Source有効化・Paid API有効化・Budget変更・実API通信は行いません。</div>'+
       '<div id="externalOpenAIImpact" class="external-note">変更前後を確認してから保存してください。保存は設定候補のみで、有料APIを自動有効化しません。</div></details>'+
-      '<details class="openai-config-details"><summary>料金・利用量</summary><div class="external-boundary-grid">'+
-        '<div>選択Budget<strong>'+esc(b?b.budgetId:'未選択')+'</strong></div><div>使用額<strong>'+esc(b?money(b.consumed):'—')+'</strong></div><div>Hard Limit<strong>'+esc(b?money(b.hardLimit):'—')+'</strong></div><div>1回Hard Cap<strong>'+esc(cap?money(cap):'未設定')+'</strong></div>'+
-      '</div><div class="external-note">実Request送信前に入力量とmax_output_tokensからFINANCIAL_COSTを再見積りし、Budgetと1回上限の両方を確認します。料金ProfileはVersioned Metadataとして扱います。</div></details>'+
+      '<details class="openai-config-details" open><summary>料金・利用量</summary><div class="external-boundary-grid">'+
+        '<div>選択Budget<strong>'+esc(b?b.budgetId:'未選択')+'</strong></div><div>使用額<strong>'+esc(b?money(b.consumed):'—')+'</strong></div><div>Hard Limit<strong>'+esc(b?money(b.hardLimit):'—')+'</strong></div><div>1回Hard Cap（簡単設定で変更）<strong>'+esc(cap?money(cap):'未設定')+'</strong></div>'+
+        '<div>Budget Candidate<strong>'+esc(x.pendingBudgetCandidate?x.pendingBudgetCandidate.budgetId:'未作成')+'</strong></div><div>Candidate State<strong>'+esc(x.pendingBudgetCandidate?x.pendingBudgetCandidate.state:'—')+'</strong></div>'+
+      '</div><div class="openai-form-grid">'+
+        '<label>警告ライン（USD）<input id="externalOpenAIBudgetSoftLimit" type="number" min="0" step="0.01" value="'+esc(x.draft.budgetSoftLimitUsd)+'" placeholder="空欄ならHard Limitの80%"><small>警告用です。超過してもHard Limitまでは自動停止しません。</small></label>'+
+        '<label>Budget Hard Limit（USD）<input id="externalOpenAIBudgetHardLimit" type="number" min="0.01" step="0.01" value="'+esc(x.draft.budgetHardLimitUsd)+'" placeholder="例: 5.00"><small>このBudgetの累積FINANCIAL_COST上限です。自動増額・自動チャージは行いません。</small></label>'+
+      '</div><div class="external-actions openai-actions">'+
+        '<button class="btn-secondary" onclick="externalOpenAIReviewUsdBudget()"'+(!op?' disabled':'')+'>Budget内容を確認</button>'+
+        '<button class="btn-secondary" onclick="externalOpenAICreateUsdBudgetCandidate()"'+(!op?' disabled':'')+'>Budget候補を作成</button>'+
+        '<button class="btn-primary" onclick="externalOpenAIApproveUsdBudget(event)"'+(!x.pendingBudgetCandidate||x.pendingBudgetCandidate.state!=="CANDIDATE"?' disabled':'')+'>Project OwnerとしてBudget有効化</button>'+
+      '</div><div class="external-note">Budget候補の作成だけでは有料APIは有効になりません。Budget有効化はUSDのFINANCIAL_COST境界だけを承認します。期間は現行Budget Engine上のCurrent Allocationで、自動月次リセットや自動チャージはまだ行いません。</div>'+ 
+      '<div class="external-note">実Request送信前に入力量とmax_output_tokensからFINANCIAL_COSTを再見積りし、Budgetと1回上限の両方を確認します。料金ProfileはVersioned Metadataとして扱います。1回Hard Capを変更する場合は上の「簡単設定」で変更してください。</div></details>'+
+      '<details class="openai-config-details" open><summary>Usage Policy</summary><div class="external-boundary-grid">'+
+        '<div>Operation<strong>INTERNAL_ANALYSIS</strong></div><div>Active Policy<strong>'+esc(x.activeUsagePolicy?x.activeUsagePolicy.usagePolicyId:'未設定')+'</strong></div><div>Candidate<strong>'+esc(x.pendingUsagePolicyCandidate?x.pendingUsagePolicyCandidate.usagePolicyId:'未作成')+'</strong></div><div>Legal Authority<strong>NO</strong></div>'+
+      '</div><div class="external-actions openai-actions">'+
+        '<button class="btn-secondary" onclick="externalOpenAIReviewUsagePolicy()"'+(!b||!op?' disabled':'')+'>Usage Policy内容を確認</button>'+
+        '<button class="btn-secondary" onclick="externalOpenAICreateUsagePolicyCandidate()"'+(!b||!op||x.activeUsagePolicy?' disabled':'')+'>Usage Policy候補を作成</button>'+
+        '<button class="btn-primary" onclick="externalOpenAIApproveUsagePolicy(event)"'+(!x.pendingUsagePolicyCandidate||!["CANDIDATE","REVIEW_REQUIRED"].includes(x.pendingUsagePolicyCandidate.status)||x.activeUsagePolicy?' disabled':'')+'>Project OwnerとしてUsage Policy有効化</button>'+
+      '</div><div class="external-note">これはAIがOpenAI利用規約を法的許可と断定するGateではありません。Project Ownerが登録済みAPIを INTERNAL_ANALYSIS 用途で運用することを承認するPlatform Policyです。Provider規約・Account義務は外部義務として残り、legalAuthorityGranted=falseを維持します。</div></details>'+
       '<details class="openai-config-details"><summary>詳細設定</summary><div class="external-boundary-grid">'+
         '<div>Endpoint<strong>/v1/responses</strong></div><div>Method<strong>POST JSON</strong></div><div>Retry<strong>最大1回</strong></div><div>Max Output<strong>'+esc(max)+'</strong></div>'+
       '</div><div class="external-note">初期ScopeではStreaming / Background / Tools / Files / Web Search / Computer Useは無効です。これらを追加する場合はCapability境界変更として扱います。</div></details>'+
@@ -115,7 +140,7 @@
   }
   function currentForm() {
     const get=id=>global.document&&global.document.getElementById(id);
-    return {model:get('externalOpenAIModel')&&get('externalOpenAIModel').value||'',maxOutputTokens:get('externalOpenAIMaxOutput')&&get('externalOpenAIMaxOutput').value||'',perRequestHardCapUsd:get('externalOpenAIPerRequestCap')&&get('externalOpenAIPerRequestCap').value||'',budgetId:get('externalOpenAIBudget')&&get('externalOpenAIBudget').value||'',secretReferenceId:get('externalOpenAISecretReference')&&get('externalOpenAISecretReference').value||readDraft().secretReferenceId||defaultSecretReferenceId()};
+    return {model:get('externalOpenAIModel')&&get('externalOpenAIModel').value||'',maxOutputTokens:get('externalOpenAIMaxOutput')&&get('externalOpenAIMaxOutput').value||'',perRequestHardCapUsd:get('externalOpenAIPerRequestCap')&&get('externalOpenAIPerRequestCap').value||'',budgetId:get('externalOpenAIBudget')&&get('externalOpenAIBudget').value||'',budgetCandidateId:readDraft().budgetCandidateId||'',budgetSoftLimitUsd:get('externalOpenAIBudgetSoftLimit')&&get('externalOpenAIBudgetSoftLimit').value||readDraft().budgetSoftLimitUsd||'',budgetHardLimitUsd:get('externalOpenAIBudgetHardLimit')&&get('externalOpenAIBudgetHardLimit').value||readDraft().budgetHardLimitUsd||'',usagePolicyCandidateId:readDraft().usagePolicyCandidateId||'',secretReferenceId:get('externalOpenAISecretReference')&&get('externalOpenAISecretReference').value||readDraft().secretReferenceId||defaultSecretReferenceId()};
   }
   function compareRisk(before,after) {
     const reasons=[];let level="GREEN";
@@ -258,6 +283,96 @@
     return result;
   }
 
+
+  function externalOpenAIReviewUsdBudget() {
+    const form=currentForm();
+    const result=typeof n.buildOpenAIUsdResourceBudgetReview==="function"?n.buildOpenAIUsdResourceBudgetReview({secretReferenceId:form.secretReferenceId,softLimitUsd:form.budgetSoftLimitUsd,hardLimitUsd:form.budgetHardLimitUsd,perRequestHardCapUsd:form.perRequestHardCapUsd}):{ok:false,code:"EXTERNAL010_OPENAI_USD_BUDGET_GATE_UNAVAILABLE"};
+    const wrapped={...result,projectOwnerApprovalRequired:true,paidActivationPerformed:false,realApiRequestPerformed:false};
+    setImpact(wrapped);return wrapped;
+  }
+
+  function externalOpenAICreateUsdBudgetCandidate() {
+    const form=currentForm();
+    const review=externalOpenAIReviewUsdBudget();
+    if(!review||review.ok!==true)return review;
+    if(typeof n.createOpenAIUsdResourceBudgetCandidate!=="function"){const unavailable={ok:false,code:"EXTERNAL010_OPENAI_USD_BUDGET_CANDIDATE_GATE_UNAVAILABLE",budgetMutationPerformed:false};setImpact(unavailable);return unavailable;}
+    const result=n.createOpenAIUsdResourceBudgetCandidate({secretReferenceId:form.secretReferenceId,softLimitUsd:form.budgetSoftLimitUsd,hardLimitUsd:form.budgetHardLimitUsd,perRequestHardCapUsd:form.perRequestHardCapUsd});
+    if(result&&result.ok===true&&result.data&&result.data.budgetId){const d=readDraft();d.budgetCandidateId=result.data.budgetId;d.budgetSoftLimitUsd=String(result.data.budget&&result.data.budget.limits&&result.data.budget.limits.FINANCIAL_COST&&result.data.budget.limits.FINANCIAL_COST.softLimit!=null?result.data.budget.limits.FINANCIAL_COST.softLimit:form.budgetSoftLimitUsd||"");d.budgetHardLimitUsd=String(result.data.budget&&result.data.budget.limits&&result.data.budget.limits.FINANCIAL_COST&&result.data.budget.limits.FINANCIAL_COST.hardLimit!=null?result.data.budget.limits.FINANCIAL_COST.hardLimit:form.budgetHardLimitUsd||"");writeDraft(d);if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();}
+    setImpact(result);return result;
+  }
+
+  async function externalOpenAIApproveUsdBudget(event) {
+    if(!event||event.isTrusted!==true){const blocked={ok:false,code:"EXTERNAL010_TRUSTED_PROJECT_OWNER_UI_INTERACTION_REQUIRED",budgetActivated:false,paidActivationPerformed:false};setImpact(blocked);return blocked;}
+    const d=readDraft();const budget=d.budgetCandidateId&&typeof n.getExternalIntelligenceResourceBudget==="function"?n.getExternalIntelligenceResourceBudget(d.budgetCandidateId):null;
+    if(!budget||budget.state!=="CANDIDATE"){const blocked={ok:false,code:"EXTERNAL010_OPENAI_USD_BUDGET_CANDIDATE_REQUIRED",budgetId:d.budgetCandidateId||null,budgetActivated:false};setImpact(blocked);return blocked;}
+    const lim=budget.limits&&budget.limits.FINANCIAL_COST||{};const message=[
+      "OpenAI USD Resource Budgetを有効化します。",
+      "",
+      "Budget: "+String(budget.budgetId||""),
+      "Source: "+String(budget.scopeId||"SOURCE-OPENAI"),
+      "通貨: USD",
+      "警告ライン: "+money(lim.softLimit),
+      "Hard Limit: "+money(lim.hardLimit),
+      "1回Hard Cap: "+money(d.perRequestHardCapUsd),
+      "",
+      "この承認はFINANCIAL_COST Budgetだけを有効化します。",
+      "OpenAI Paid Source有効化・実API通信・自動チャージ・Budget自動増額は行いません。",
+      "",
+      "Project Ownerとして承認しますか？"
+    ].join("\n");
+    if(typeof global.confirm!=="function"||global.confirm(message)!==true){const cancelled={ok:false,code:"EXTERNAL010_PROJECT_OWNER_USD_BUDGET_ACTIVATION_CANCELLED",budgetActivated:false,paidActivationPerformed:false};setImpact(cancelled);return cancelled;}
+    if(typeof n.activateOpenAIUsdResourceBudgetWithProjectOwnerApproval!=="function"){const unavailable={ok:false,code:"EXTERNAL010_OPENAI_USD_BUDGET_ACTIVATION_GATE_UNAVAILABLE",budgetActivated:false};setImpact(unavailable);return unavailable;}
+    const evidenceId="OPENAI-USD-BUDGET-OWNER-"+Date.now().toString(36).toUpperCase();
+    const result=await n.activateOpenAIUsdResourceBudgetWithProjectOwnerApproval({budgetId:budget.budgetId,secretReferenceId:d.secretReferenceId,perRequestHardCapUsd:d.perRequestHardCapUsd,projectOwnerConfirmed:true,ownerInteractionTrusted:true,interactionEvidenceId:evidenceId});
+    if(result&&result.ok===true&&result.data&&result.data.budgetId){const next=readDraft();next.budgetId=result.data.budgetId;next.budgetCandidateId="";writeDraft(next);if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();}
+    setImpact(result);return result;
+  }
+
+  function externalOpenAIReviewUsagePolicy() {
+    const d=readDraft();
+    const result=typeof n.buildOpenAIUsagePolicyReview==="function"?n.buildOpenAIUsagePolicyReview({budgetId:d.budgetId}):{ok:false,code:"EXTERNAL010_OPENAI_USAGE_POLICY_GATE_UNAVAILABLE"};
+    const wrapped={...result,projectOwnerApprovalRequired:true,legalAuthorityGranted:false,paidActivationPerformed:false,realApiRequestPerformed:false};
+    setImpact(wrapped);return wrapped;
+  }
+
+  function externalOpenAICreateUsagePolicyCandidate() {
+    const d=readDraft();
+    const review=externalOpenAIReviewUsagePolicy();
+    if(!review||review.ok!==true)return review;
+    if(review.code==="EXTERNAL010_OPENAI_USAGE_POLICY_ALREADY_ACTIVE")return review;
+    if(typeof n.createOpenAIUsagePolicyCandidate!=="function"){const unavailable={ok:false,code:"EXTERNAL010_OPENAI_USAGE_POLICY_CANDIDATE_GATE_UNAVAILABLE",policyMutationPerformed:false};setImpact(unavailable);return unavailable;}
+    const result=n.createOpenAIUsagePolicyCandidate({budgetId:d.budgetId});
+    if(result&&result.ok===true&&result.data&&result.data.usagePolicyId){const next=readDraft();next.usagePolicyCandidateId=result.data.usagePolicyId;writeDraft(next);if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();}
+    setImpact(result);return result;
+  }
+
+  async function externalOpenAIApproveUsagePolicy(event) {
+    if(!event||event.isTrusted!==true){const blocked={ok:false,code:"EXTERNAL010_TRUSTED_PROJECT_OWNER_UI_INTERACTION_REQUIRED",policyActivated:false,paidActivationPerformed:false};setImpact(blocked);return blocked;}
+    const d=readDraft();const policy=d.usagePolicyCandidateId&&typeof n.getExternalIntelligenceUsagePolicy==="function"?n.getExternalIntelligenceUsagePolicy(d.usagePolicyCandidateId):null;
+    if(!policy||!["CANDIDATE","REVIEW_REQUIRED"].includes(policy.status)){const blocked={ok:false,code:"EXTERNAL010_OPENAI_USAGE_POLICY_CANDIDATE_REQUIRED",usagePolicyId:d.usagePolicyCandidateId||null,policyActivated:false};setImpact(blocked);return blocked;}
+    const right=policy.rights&&policy.rights.INTERNAL_ANALYSIS||{};
+    const message=[
+      "OpenAI Usage Policyを有効化します。",
+      "",
+      "Policy: "+String(policy.usagePolicyId||""),
+      "Source: SOURCE-OPENAI",
+      "Operation: INTERNAL_ANALYSIS",
+      "Right: "+String(right.state||"UNKNOWN"),
+      "",
+      "この承認は登録済みOpenAI APIをINTERNAL_ANALYSIS用途で使うPlatform Policyを有効化します。",
+      "OpenAI利用規約を法的許可と断定するものではなく、legalAuthorityGranted=falseのままです。",
+      "Paid Source有効化・実API通信はまだ行いません。",
+      "",
+      "Project Ownerとして承認しますか？"
+    ].join("\n");
+    if(typeof global.confirm!=="function"||global.confirm(message)!==true){const cancelled={ok:false,code:"EXTERNAL010_PROJECT_OWNER_USAGE_POLICY_ACTIVATION_CANCELLED",policyActivated:false,paidActivationPerformed:false};setImpact(cancelled);return cancelled;}
+    if(typeof n.activateOpenAIUsagePolicyWithProjectOwnerApproval!=="function"){const unavailable={ok:false,code:"EXTERNAL010_OPENAI_USAGE_POLICY_ACTIVATION_GATE_UNAVAILABLE",policyActivated:false};setImpact(unavailable);return unavailable;}
+    const evidenceId="OPENAI-USAGE-POLICY-OWNER-"+Date.now().toString(36).toUpperCase();
+    const result=await n.activateOpenAIUsagePolicyWithProjectOwnerApproval({usagePolicyId:policy.usagePolicyId,projectOwnerConfirmed:true,ownerInteractionTrusted:true,interactionEvidenceId:evidenceId});
+    if(result&&result.ok===true){const next=readDraft();next.usagePolicyCandidateId="";writeDraft(next);if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();}
+    setImpact(result);return result;
+  }
+
   function externalOpenAIShowProviderCandidates() {
     const draft=currentForm(); const src=source();
     const secretReferenceId=src&&src.secretReferenceId||draft.secretReferenceId||defaultSecretReferenceId();
@@ -268,6 +383,6 @@
     const value={sourceCandidate,operationCandidate,secretReference:{secretReferenceId:secretReferenceId,metadataRegistered:Boolean(metadata),active:Boolean(validation&&validation.ok===true),nextRequiredAction:validation&&validation.ok===true?"SOURCE_REGISTRATION_AUTHORITY":"SET_GATEWAY_SECRET_AND_REGISTER_REFERENCE_METADATA"},draft,paidActivationPerformed:false,secretValueRequested:false};setImpact(value);return value;
   }
   Object.assign(n.api,{getOpenAIProviderUiSnapshot,renderOpenAIProviderIntegrationPanelHtml});Object.assign(n,n.api);
-  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIReviewSourceRegistration,externalOpenAIApproveSourceRegistration,externalOpenAIReviewOperationContractRegistration,externalOpenAIApproveOperationContractRegistration,externalOpenAIShowProviderCandidates});
+  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIReviewSourceRegistration,externalOpenAIApproveSourceRegistration,externalOpenAIReviewOperationContractRegistration,externalOpenAIApproveOperationContractRegistration,externalOpenAIReviewUsdBudget,externalOpenAICreateUsdBudgetCandidate,externalOpenAIApproveUsdBudget,externalOpenAIReviewUsagePolicy,externalOpenAICreateUsagePolicyCandidate,externalOpenAIApproveUsagePolicy,externalOpenAIShowProviderCandidates});
   n.modules.openaiProviderUi={id:"EXTERNAL-010-OPENAI-PROVIDER-UI",version:m.getModuleVersion("openaiProviderUi")||m.release.version,status:"Loaded",decision:"055",secretValueInputAllowed:false,automaticPaidActivationAllowed:false,loadedAt:i.nowIso()};
 })(typeof window!=="undefined"?window:globalThis);

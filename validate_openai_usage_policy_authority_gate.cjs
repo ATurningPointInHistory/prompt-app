@@ -1,0 +1,62 @@
+"use strict";
+const fs=require("node:fs"),vm=require("node:vm"),path=require("node:path");
+const checks=[];const check=(name,passed,detail)=>checks.push({name,passed:Boolean(passed),detail});
+function clone(v){return v==null?v:JSON.parse(JSON.stringify(v));}
+function stable(v){if(v===null||typeof v!=="object")return JSON.stringify(v);if(Array.isArray(v))return "["+v.map(stable).join(",")+"]";return "{"+Object.keys(v).sort().map(k=>JSON.stringify(k)+":"+stable(v[k])).join(",")+"}";}
+const source={sourceId:"SOURCE-OPENAI",sourceName:"OpenAI Responses API",sourceType:"AI_SERVICE",provider:"OPENAI",category:"AI_PROVIDER",accessMode:"LOCAL_GATEWAY",adapterId:"EXTERNAL-010-ADAPTER-LOCAL-GATEWAY-001",endpointPolicy:{canonicalHost:"api.openai.com",endpointReference:"OPENAI-RESPONSES-V1",allowRedirects:false},authenticationMode:"BEARER_TOKEN",secretReferenceId:"SECRET-OPENAI-LEGACY",allowedOperations:["INTERNAL_ANALYSIS"],allowedMethods:["POST"],pricingMode:"USAGE_BASED",costCurrency:"USD",enabled:false,lifecycleState:"REGISTERED",version:1,identityState:"VERIFIED",reliabilityState:"UNASSESSED",authorityGranted:false,immutable:true};
+const op={operationContractId:"EXTERNAL-010-OP-OPENAI-INTERNAL-ANALYSIS",sourceId:"SOURCE-OPENAI",operationId:"INTERNAL_ANALYSIS",adapterId:"EXTERNAL-010-ADAPTER-LOCAL-GATEWAY-001",method:"POST",endpoint:{exactUrl:"https://api.openai.com/v1/responses",canonicalHost:"api.openai.com",endpointReference:"OPENAI-RESPONSES-V1"},bodyPolicy:{mode:"JSON",fixedFields:{store:false}},retryPolicy:{maxAttempts:1},enabled:true,authorityGranted:false,immutable:true};
+const budget={budgetId:"EXTERNAL-010-BUDGET-OPENAI-LEGACY-TEST",scopeType:"SOURCE",scopeId:"SOURCE-OPENAI",period:{type:"CURRENT_ALLOCATION"},currency:"USD",limits:{FINANCIAL_COST:{softLimit:3,hardLimit:5}},consumed:{FINANCIAL_COST:0},state:"ACTIVE",version:2,immutable:true};
+const policies=new Map();let activePolicyId=null,approvalAdapter=null,authorityActive=false,authorityRevoked=false,policyCreateCalls=0,policyActivateCalls=0,paidCalls=0,networkCalls=0,refreshCalls=0;
+const ns={api:{},modules:{},__internal:{state:{},isPlainObject:v=>Boolean(v&&typeof v==='object'&&!Array.isArray(v)),text:(v,f='')=>String(v==null?f:v),clone,stableStringify:stable,nowIso:()=>new Date().toISOString(),unique:v=>Array.from(new Set(Array.isArray(v)?v:[])),deepFreeze:v=>v,buildResult:(ok,code,status,data,error)=>({ok,code,status,data:data==null?null:data,error:error||null})},
+ getExternalIntelligenceSource:id=>id==="SOURCE-OPENAI"?clone(source):null,
+ getExternalIntelligenceSourceOperationContract:(sid,oid)=>sid==="SOURCE-OPENAI"&&oid==="INTERNAL_ANALYSIS"?clone(op):null,
+ getExternalIntelligenceSecretMetadata:id=>id==="SECRET-OPENAI-LEGACY"?{secretReferenceId:id,secretType:"BEARER_TOKEN",provider:"OPENAI",status:"ACTIVE"}:null,
+ listExternalIntelligenceSecretMetadata:()=>[{secretReferenceId:"SECRET-OPENAI-LEGACY",secretType:"BEARER_TOKEN",provider:"OPENAI",status:"ACTIVE"}],
+ validateExternalIntelligenceSecretReference:()=>({ok:true,code:"ACTIVE"}),
+ listExternalIntelligenceResourceBudgets:()=>[clone(budget)],
+ getExternalIntelligenceResourceBudget:id=>id===budget.budgetId?clone(budget):null,
+ createExternalIntelligenceUsagePolicyCandidate:input=>{policyCreateCalls++;const id="EXTERNAL-010-USAGE-POLICY-OPENAI-TEST";const rec={usagePolicyId:id,sourceId:input.sourceId,policyVersion:input.policyVersion,status:input.status||"REVIEW_REQUIRED",rights:clone(input.rights),policyCompleteness:input.policyCompleteness,interpretationConfidence:input.interpretationConfidence,aiInterpretationEqualsLegalAuthority:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),immutable:true};policies.set(id,rec);return {ok:true,code:"EXTERNAL010_USAGE_POLICY_CANDIDATE_CREATED",data:{usagePolicy:clone(rec)}};},
+ getExternalIntelligenceUsagePolicy:id=>policies.has(id)?clone(policies.get(id)):null,
+ getActiveExternalIntelligenceUsagePolicyForSource:()=>activePolicyId?clone(policies.get(activePolicyId)):null,
+ setExternalIntelligenceAuthorityApprovalAdapter:adapter=>{approvalAdapter=adapter;return {ok:true,code:adapter?"SET":"RESET"};},
+ createExternalIntelligenceAuthorityEnvelopeCandidate:input=>({ok:true,code:"CANDIDATE",data:{envelope:{authorityEnvelopeId:"AUTH-USAGE-ONE",action:input.action,target:clone(input.target),purpose:input.purpose,state:"CANDIDATE"}}}),
+ activateExternalIntelligenceAuthorityEnvelope:async(id,approvalInput)=>{if(!approvalAdapter)return {ok:false,code:"NO_ADAPTER"};const pid=Array.from(policies.keys())[0];const envelope={authorityEnvelopeId:id,action:"ACTIVATE_USAGE_POLICY",target:{type:"usage-policy",id:pid},purpose:"openai-internal-analysis-usage-policy"};const v=await approvalAdapter.verifyApproval({envelope,approvalInput});authorityActive=Boolean(v&&v.approved);return authorityActive?{ok:true,code:"ACTIVE",data:{envelope:{...envelope,state:"ACTIVE",approvalEvidenceId:v.interactionEvidenceId}}}:{ok:false,code:"DENIED"};},
+ revokeExternalIntelligenceAuthorityEnvelope:()=>{authorityRevoked=true;authorityActive=false;return {ok:true,code:"REVOKED"};},
+ activateExternalIntelligenceUsagePolicy:async input=>{policyActivateCalls++;if(!authorityActive)return {ok:false,code:"AUTH_DENIED"};const p=policies.get(input.usagePolicyId);if(!p)return {ok:false,code:"NOT_FOUND"};const next={...p,status:"ACTIVE",updatedAt:new Date().toISOString()};policies.set(next.usagePolicyId,next);activePolicyId=next.usagePolicyId;return {ok:true,code:"EXTERNAL010_USAGE_POLICY_ACTIVATED",data:{usagePolicy:clone(next),authority:{authorityEnvelopeId:"AUTH-USAGE-ONE"},legalAuthorityGranted:false}};},
+ checkExternalIntelligenceUsagePolicy:input=>{const p=activePolicyId?policies.get(activePolicyId):null;const r=p&&p.rights&&p.rights[input.operation];const ok=Boolean(p&&p.status==="ACTIVE"&&r&&["ALLOWED","ALLOWED_WITH_CONDITIONS"].includes(r.state));return {ok,code:ok?"EXTERNAL010_USAGE_POLICY_OPERATION_ALLOWED":"EXTERNAL010_USAGE_POLICY_OPERATION_BLOCKED",data:{usagePolicyId:p&&p.usagePolicyId||null,allowed:ok,right:clone(r||{state:"UNKNOWN"}),legalAuthorityGranted:false}};},
+ activateOpenAIGovernedPaidSource:()=>{paidCalls++;return {ok:false}},prepareOpenAIResponsesRequest:()=>{networkCalls++;return {ok:false}}
+};
+const elements={externalOpenAISecretReference:{value:"SECRET-OPENAI-LEGACY"},externalOpenAIModel:{value:"gpt-5.6-luna"},externalOpenAIMaxOutput:{value:"100"},externalOpenAIPerRequestCap:{value:"0.01"},externalOpenAIBudget:{value:budget.budgetId},externalOpenAIBudgetSoftLimit:{value:"3"},externalOpenAIBudgetHardLimit:{value:"5"},externalOpenAIImpact:{textContent:""}};
+const store=new Map();store.set("EXTERNAL010_OPENAI_UI_DRAFT_V1",JSON.stringify({model:"gpt-5.6-luna",maxOutputTokens:"100",perRequestHardCapUsd:"0.01",budgetId:budget.budgetId,budgetCandidateId:"",budgetSoftLimitUsd:"3",budgetHardLimitUsd:"5",usagePolicyCandidateId:"",secretReferenceId:"SECRET-OPENAI-LEGACY"}));
+const context={window:null,globalThis:null,EXTERNAL010ExternalIntelligence:ns,EXTERNAL010VersionManifest:{release:{version:"1.20.1"},getModuleVersion:()=>"0.3.4"},TextEncoder,document:{getElementById:id=>elements[id]||null},localStorage:{getItem:k=>store.has(k)?store.get(k):null,setItem:(k,v)=>store.set(k,String(v))},externalConsoleRefresh:()=>{refreshCalls++;},confirm:()=>true,setTimeout,clearTimeout,Date};context.window=context;context.globalThis=context;vm.createContext(context);
+for(const f of ["17_external_intelligence_openai_provider_integration.js","17_external_intelligence_openai_provider_ui.js"]){vm.runInContext(fs.readFileSync(path.join(__dirname,f),"utf8"),context,{filename:f});}
+(async()=>{
+ const html=ns.renderOpenAIProviderIntegrationPanelHtml();
+ check("Usage Policy controls are visible",html.includes("Usage Policy内容を確認")&&html.includes("Usage Policy候補を作成")&&html.includes("Project OwnerとしてUsage Policy有効化"),"controls-present");
+ check("Per-request cap clearly says it is changed in Simple Settings",html.includes("1回Hard Cap（簡単設定で変更）"),"cap-edit-location-visible");
+ const review=context.externalOpenAIReviewUsagePolicy();
+ check("Usage Policy review is mutation-free",review.ok===true&&policyCreateCalls===0&&review.data&&review.data.operationId==="INTERNAL_ANALYSIS",review);
+ check("Review keeps legal authority false and provider terms external",review.data&&review.data.legalAuthorityGranted===false&&review.data.providerTermsIndependentlyVerified===false&&review.data.proposedRight.state==="ALLOWED_WITH_CONDITIONS",review.data);
+ const missingBudget=ns.buildOpenAIUsagePolicyReview({budgetId:"MISSING"});
+ check("Active USD Budget is required before Usage Policy",missingBudget.ok===false&&missingBudget.code==="EXTERNAL010_OPENAI_ACTIVE_USD_BUDGET_REQUIRED",missingBudget);
+ const created=context.externalOpenAICreateUsagePolicyCandidate();
+ check("Usage Policy Candidate is REVIEW_REQUIRED and does not activate paid API",created.ok===true&&created.data&&created.data.usagePolicy&&created.data.usagePolicy.status==="REVIEW_REQUIRED"&&created.data.paidActivationPerformed===false&&policyCreateCalls===1,created);
+ const draft=JSON.parse(store.get("EXTERNAL010_OPENAI_UI_DRAFT_V1"));
+ check("Usage Policy Candidate ID is retained in UI draft",Boolean(draft.usagePolicyCandidateId),draft.usagePolicyCandidateId);
+ const untrusted=await context.externalOpenAIApproveUsagePolicy({isTrusted:false});
+ check("Programmatic/untrusted Usage Policy activation is rejected",untrusted.ok===false&&untrusted.code==="EXTERNAL010_TRUSTED_PROJECT_OWNER_UI_INTERACTION_REQUIRED"&&policyActivateCalls===0,untrusted);
+ const direct=await ns.activateOpenAIUsagePolicyWithProjectOwnerApproval({usagePolicyId:draft.usagePolicyCandidateId,projectOwnerConfirmed:true,ownerInteractionTrusted:false,interactionEvidenceId:"TEST"});
+ check("Integration gate independently requires trusted Project Owner interaction",direct.ok===false&&direct.code==="EXTERNAL010_OPENAI_USAGE_POLICY_PROJECT_OWNER_INTERACTION_REQUIRED"&&policyActivateCalls===0,direct);
+ const active=await context.externalOpenAIApproveUsagePolicy({isTrusted:true});
+ check("Trusted Project Owner activation makes Usage Policy ACTIVE",active.ok===true&&active.data&&active.data.policyActivated===true&&active.data.usagePolicy&&active.data.usagePolicy.status==="ACTIVE"&&policyActivateCalls===1,active);
+ check("Activated policy allows only registered INTERNAL_ANALYSIS check",active.data&&active.data.policyCheck&&active.data.policyCheck.ok===true&&active.data.policyCheck.data.allowed===true,active.data&&active.data.policyCheck);
+ check("Usage Policy activation authority is one-time and revoked",authorityRevoked===true&&authorityActive===false&&approvalAdapter===null,{authorityRevoked,authorityActive,approvalAdapterReset:approvalAdapter===null});
+ check("Usage Policy keeps legal authority false",active.data&&active.data.legalAuthorityGranted===false&&active.data.aiInterpretationEqualsLegalAuthority===false,active.data);
+ check("Usage Policy activation performs no Paid Source activation or real API request",paidCalls===0&&networkCalls===0&&active.data.paidActivationPerformed===false&&active.data.realApiRequestPerformed===false,{paidCalls,networkCalls});
+ check("Next action is Paid Source Activation Authority",active.data.nextRequiredAction==="PAID_SOURCE_ACTIVATION_AUTHORITY",active.data.nextRequiredAction);
+ const draftAfter=JSON.parse(store.get("EXTERNAL010_OPENAI_UI_DRAFT_V1"));
+ check("Activated Usage Policy clears Candidate pointer",draftAfter.usagePolicyCandidateId==="",draftAfter);
+ const htmlAfter=ns.renderOpenAIProviderIntegrationPanelHtml();
+ check("UI displays ACTIVE Usage Policy",htmlAfter.includes("Usage Policy</span><strong>ACTIVE")&&htmlAfter.includes(active.data.usagePolicyId),"active-policy-visible");
+ const failed=checks.filter(x=>!x.passed);const result={id:"OPENAI-API-INTEGRATION-USAGE-POLICY-AUTHORITY-GATE-VALIDATION",candidateVersion:"0.3.4",decisionIds:["EXTERNAL-010-DECISION-055","EXTERNAL-010-DECISION-056"],passed:checks.length-failed.length,failed:failed.length,total:checks.length,health:Math.round((checks.length-failed.length)/checks.length*100),criticalFailed:failed.length,usagePolicyCandidateCreated:policyCreateCalls>0,usagePolicyActivationPerformed:policyActivateCalls>0,paidActivationPerformed:false,realPaidRequestPerformed:false,legalAuthorityGranted:false,checks};console.log(JSON.stringify(result,null,2));process.exitCode=failed.length?1:0;
+})().catch(e=>{console.error(e);process.exitCode=1;});

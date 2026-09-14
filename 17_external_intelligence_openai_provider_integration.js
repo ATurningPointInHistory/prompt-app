@@ -28,6 +28,10 @@
   const SOURCE_REGISTRATION_PURPOSE = "openai-provider-registration";
   const OPERATION_REGISTRATION_ACTION = "REGISTER_SOURCE_OPERATION_CONTRACT";
   const OPERATION_REGISTRATION_PURPOSE = "phase4-operation-contract";
+  const BUDGET_ACTIVATION_ACTION = "ACTIVATE_RESOURCE_BUDGET";
+  const BUDGET_ACTIVATION_PURPOSE = "openai-usd-resource-budget";
+  const USAGE_POLICY_ACTIVATION_ACTION = "ACTIVATE_USAGE_POLICY";
+  const USAGE_POLICY_PURPOSE = "openai-internal-analysis-usage-policy";
   const ACTIVATION_ACTION = "ACTIVATE_GOVERNED_PAID_SOURCE";
   const ACTIVATION_PURPOSE = "paid-provider-activation";
   const PRICING_SOURCE = "https://platform.openai.com/docs/models";
@@ -381,6 +385,323 @@
     }
   }
 
+
+  function openAICredentialAlias(secretReferenceId) {
+    const raw = internal.text(secretReferenceId || DEFAULT_SECRET_REFERENCE_ID, DEFAULT_SECRET_REFERENCE_ID).toUpperCase();
+    const prefix = "SECRET-OPENAI-";
+    const suffix = raw.indexOf(prefix) === 0 ? raw.slice(prefix.length) : raw.replace(/[^A-Z0-9]+/g, "-");
+    return suffix || "PRIMARY";
+  }
+
+  function openAIBillingProfileId(secretReferenceId) {
+    return "BILLING-OPENAI-" + openAICredentialAlias(secretReferenceId);
+  }
+
+  function buildOpenAIUsdResourceBudgetReview(input) {
+    const settings = internal.isPlainObject(input) ? input : {};
+    const source = typeof namespace.getExternalIntelligenceSource === "function" ? namespace.getExternalIntelligenceSource(SOURCE_ID) : null;
+    const operation = typeof namespace.getExternalIntelligenceSourceOperationContract === "function" ? namespace.getExternalIntelligenceSourceOperationContract(SOURCE_ID, OPERATION_ID) : null;
+    if (!source || source.lifecycleState !== "REGISTERED") return internal.buildResult(false, "EXTERNAL010_OPENAI_SOURCE_REGISTRATION_REQUIRED", "Blocked", { nextRequiredAction: "SOURCE_REGISTRATION_AUTHORITY", budgetMutationPerformed: false });
+    if (!operation) return internal.buildResult(false, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_REGISTRATION_REQUIRED", "Blocked", { nextRequiredAction: "REGISTER_SOURCE_OPERATION_CONTRACT_AUTHORITY", budgetMutationPerformed: false });
+
+    const secretReferenceId = internal.text(settings.secretReferenceId || source.secretReferenceId || DEFAULT_SECRET_REFERENCE_ID, DEFAULT_SECRET_REFERENCE_ID).toUpperCase();
+    if (secretReferenceId !== internal.text(source.secretReferenceId, "").toUpperCase()) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_BUDGET_SECRET_SOURCE_BINDING_MISMATCH", "Blocked", { sourceSecretReferenceId: source.secretReferenceId, requestedSecretReferenceId: secretReferenceId, budgetMutationPerformed: false });
+    }
+    const metadata = typeof namespace.getExternalIntelligenceSecretMetadata === "function" ? namespace.getExternalIntelligenceSecretMetadata(secretReferenceId) : null;
+    const secret = metadata && typeof namespace.validateExternalIntelligenceSecretReference === "function" ? namespace.validateExternalIntelligenceSecretReference({ secretReferenceId: secretReferenceId }) : null;
+    if (!metadata || !secret || secret.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_SECRET_REFERENCE_NOT_READY", "Blocked", { secretReferenceId: secretReferenceId, budgetMutationPerformed: false });
+
+    const hardLimitUsd = finitePositive(settings.hardLimitUsd);
+    if (hardLimitUsd == null) return internal.buildResult(false, "EXTERNAL010_OPENAI_USD_BUDGET_HARD_LIMIT_REQUIRED", "Blocked", { currency: "USD", budgetMutationPerformed: false });
+    let softLimitUsd = settings.softLimitUsd == null || settings.softLimitUsd === "" ? roundUsd(hardLimitUsd * 0.8) : Number(settings.softLimitUsd);
+    if (!Number.isFinite(softLimitUsd) || softLimitUsd < 0 || softLimitUsd > hardLimitUsd) return internal.buildResult(false, "EXTERNAL010_OPENAI_USD_BUDGET_SOFT_LIMIT_INVALID", "Blocked", { softLimitUsd: settings.softLimitUsd, hardLimitUsd: hardLimitUsd, budgetMutationPerformed: false });
+    const perRequestHardCapUsd = finitePositive(settings.perRequestHardCapUsd);
+    if (perRequestHardCapUsd == null) return internal.buildResult(false, "EXTERNAL010_OPENAI_PER_REQUEST_COST_CAP_REQUIRED", "Blocked", { currency: "USD", budgetMutationPerformed: false });
+    if (perRequestHardCapUsd > hardLimitUsd) return internal.buildResult(false, "EXTERNAL010_OPENAI_PER_REQUEST_CAP_EXCEEDS_BUDGET", "Blocked", { perRequestHardCapUsd: perRequestHardCapUsd, hardLimitUsd: hardLimitUsd, budgetMutationPerformed: false });
+
+    const alias = openAICredentialAlias(secretReferenceId);
+    const billingProfileId = openAIBillingProfileId(secretReferenceId);
+    const review = {
+      sourceId: SOURCE_ID,
+      operationId: OPERATION_ID,
+      secretReferenceId: secretReferenceId,
+      credentialAlias: alias,
+      billingProfileId: billingProfileId,
+      scopeType: "SOURCE",
+      scopeId: SOURCE_ID,
+      currency: "USD",
+      period: { type: "CURRENT_ALLOCATION", startsAt: null, endsAt: null },
+      limits: { FINANCIAL_COST: { softLimit: softLimitUsd, hardLimit: hardLimitUsd } },
+      perRequestHardCapUsd: perRequestHardCapUsd,
+      automaticBudgetExpansionAllowed: false,
+      automaticRechargeAllowed: false,
+      riskLevel: "RED",
+      riskReason: "Paid API financial authority boundary is being created",
+      projectOwnerApprovalRequiredForActivation: true,
+      paidActivationPerformed: false,
+      realApiRequestPerformed: false
+    };
+    return internal.buildResult(true, "EXTERNAL010_OPENAI_USD_BUDGET_REVIEW_READY", "Review Ready", review);
+  }
+
+  function createOpenAIUsdResourceBudgetCandidate(input) {
+    const review = buildOpenAIUsdResourceBudgetReview(input);
+    if (!review || review.ok !== true) return review;
+    if (typeof namespace.createExternalIntelligenceResourceBudgetCandidate !== "function") return internal.buildResult(false, "EXTERNAL010_RESOURCE_BUDGET_API_UNAVAILABLE", "Blocked", { budgetMutationPerformed: false });
+    const r = review.data;
+    const budgetId = "EXTERNAL-010-BUDGET-OPENAI-" + r.credentialAlias + "-" + Date.now().toString(36).toUpperCase();
+    const created = namespace.createExternalIntelligenceResourceBudgetCandidate({
+      budgetId: budgetId,
+      scopeType: r.scopeType,
+      scopeId: r.scopeId,
+      period: r.period,
+      currency: r.currency,
+      limits: r.limits
+    });
+    if (!created || created.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_USD_BUDGET_CANDIDATE_CREATE_FAILED", "Blocked", { createResult: created || null, budgetMutationPerformed: false });
+    return internal.buildResult(true, "EXTERNAL010_OPENAI_USD_BUDGET_CANDIDATE_CREATED", "Candidate", {
+      budget: created.data && created.data.budget || null,
+      budgetId: budgetId,
+      secretReferenceId: r.secretReferenceId,
+      credentialAlias: r.credentialAlias,
+      billingProfileId: r.billingProfileId,
+      perRequestHardCapUsd: r.perRequestHardCapUsd,
+      automaticBudgetExpansionAllowed: false,
+      automaticRechargeAllowed: false,
+      budgetMutationPerformed: true,
+      budgetActivated: false,
+      paidActivationPerformed: false,
+      realApiRequestPerformed: false,
+      nextRequiredAction: "ACTIVATE_RESOURCE_BUDGET_AUTHORITY"
+    });
+  }
+
+  async function activateOpenAIUsdResourceBudgetWithProjectOwnerApproval(input) {
+    const settings = internal.isPlainObject(input) ? input : {};
+    const budgetId = internal.text(settings.budgetId, "");
+    const budget = budgetId && typeof namespace.getExternalIntelligenceResourceBudget === "function" ? namespace.getExternalIntelligenceResourceBudget(budgetId) : null;
+    if (!budget) return internal.buildResult(false, "EXTERNAL010_OPENAI_USD_BUDGET_NOT_FOUND", "Blocked", { budgetId: budgetId || null, budgetActivated: false });
+    if (budget.state === "ACTIVE") return internal.buildResult(true, "EXTERNAL010_OPENAI_USD_BUDGET_ALREADY_ACTIVE", "Active", { budget: budget, budgetId: budgetId, budgetActivated: false, nextRequiredAction: "USAGE_POLICY" });
+    if (budget.state !== "CANDIDATE" || budget.scopeType !== "SOURCE" || budget.scopeId !== SOURCE_ID || String(budget.currency || "").toUpperCase() !== "USD" || !budget.limits || !budget.limits.FINANCIAL_COST) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_USD_BUDGET_SCOPE_INVALID", "Blocked", { budgetId: budgetId, state: budget.state, budgetActivated: false });
+    }
+    const hardLimitUsd = Number(budget.limits.FINANCIAL_COST.hardLimit);
+    const perRequestHardCapUsd = finitePositive(settings.perRequestHardCapUsd);
+    if (!Number.isFinite(hardLimitUsd) || hardLimitUsd <= 0 || perRequestHardCapUsd == null || perRequestHardCapUsd > hardLimitUsd) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_USD_BUDGET_LIMITS_INVALID", "Blocked", { hardLimitUsd: hardLimitUsd, perRequestHardCapUsd: settings.perRequestHardCapUsd, budgetActivated: false });
+    }
+    if (settings.ownerInteractionTrusted !== true || settings.projectOwnerConfirmed !== true || !internal.text(settings.interactionEvidenceId, "")) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_BUDGET_PROJECT_OWNER_INTERACTION_REQUIRED", "Blocked", { budgetId: budgetId, budgetActivated: false, authorityGranted: false });
+    }
+    const required = [
+      "setExternalIntelligenceAuthorityApprovalAdapter",
+      "createExternalIntelligenceAuthorityEnvelopeCandidate",
+      "activateExternalIntelligenceAuthorityEnvelope",
+      "revokeExternalIntelligenceAuthorityEnvelope",
+      "activateExternalIntelligenceResourceBudget"
+    ];
+    const missing = required.filter(function (name) { return typeof namespace[name] !== "function"; });
+    if (missing.length) return internal.buildResult(false, "EXTERNAL010_OPENAI_BUDGET_AUTHORITY_API_UNAVAILABLE", "Blocked", { missing: missing, budgetActivated: false });
+
+    let authorityEnvelopeId = null;
+    let authorityActivated = false;
+    const interactionEvidenceId = internal.text(settings.interactionEvidenceId, "");
+    const adapter = {
+      adapterId: "EXTERNAL-010-OPENAI-BUDGET-OWNER-APPROVAL",
+      requiresExplicitOwnerInteraction: true,
+      async verifyApproval(context) {
+        const envelope = context && context.envelope || {};
+        const approval = context && context.approvalInput || {};
+        const target = envelope.target || {};
+        const exactScope = envelope.action === BUDGET_ACTIVATION_ACTION && target.type === "resource-budget" && target.id === budgetId && envelope.purpose === BUDGET_ACTIVATION_PURPOSE;
+        const explicit = approval.projectOwnerConfirmed === true && approval.ownerInteractionTrusted === true && internal.text(approval.interactionEvidenceId, "") === interactionEvidenceId;
+        return { approved: exactScope && explicit, actorType: "Project Owner", interactionEvidenceId: exactScope && explicit ? interactionEvidenceId : "" };
+      }
+    };
+
+    try {
+      const adapterResult = namespace.setExternalIntelligenceAuthorityApprovalAdapter(adapter);
+      if (!adapterResult || adapterResult.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_BUDGET_APPROVAL_ADAPTER_FAILED", "Blocked", { budgetActivated: false });
+      const authorityCandidate = namespace.createExternalIntelligenceAuthorityEnvelopeCandidate({
+        action: BUDGET_ACTIVATION_ACTION,
+        target: { type: "resource-budget", id: budgetId },
+        purpose: BUDGET_ACTIVATION_PURPOSE,
+        scope: { domain: "EXTERNAL-010", operation: BUDGET_ACTIVATION_ACTION, constraints: { sourceId: SOURCE_ID, budgetId: budgetId, currency: "USD", hardLimitUsd: hardLimitUsd, oneTimeActivation: true } }
+      });
+      authorityEnvelopeId = authorityCandidate && authorityCandidate.data && authorityCandidate.data.envelope && authorityCandidate.data.envelope.authorityEnvelopeId || null;
+      if (!authorityCandidate || authorityCandidate.ok !== true || !authorityEnvelopeId) return internal.buildResult(false, "EXTERNAL010_OPENAI_BUDGET_AUTHORITY_CANDIDATE_FAILED", "Blocked", { authorityCandidate: authorityCandidate || null, budgetActivated: false });
+      const activation = await namespace.activateExternalIntelligenceAuthorityEnvelope(authorityEnvelopeId, { projectOwnerConfirmed: true, ownerInteractionTrusted: true, interactionEvidenceId: interactionEvidenceId });
+      if (!activation || activation.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_BUDGET_AUTHORITY_ACTIVATION_FAILED", "Blocked", { activation: activation || null, budgetActivated: false });
+      authorityActivated = true;
+      const activated = await namespace.activateExternalIntelligenceResourceBudget({ budgetId: budgetId, purpose: BUDGET_ACTIVATION_PURPOSE });
+      if (!activated || activated.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_USD_BUDGET_ACTIVATION_FAILED", "Blocked", { activationResult: activated || null, budgetActivated: false });
+      const secretReferenceId = internal.text(settings.secretReferenceId || (typeof namespace.getExternalIntelligenceSource === "function" && namespace.getExternalIntelligenceSource(SOURCE_ID) || {}).secretReferenceId || DEFAULT_SECRET_REFERENCE_ID, DEFAULT_SECRET_REFERENCE_ID).toUpperCase();
+      return internal.buildResult(true, "EXTERNAL010_OPENAI_USD_BUDGET_ACTIVATED_WITH_PROJECT_OWNER_APPROVAL", "Active", {
+        budget: activated.data && activated.data.budget || null,
+        budgetId: budgetId,
+        authorityEnvelopeId: authorityEnvelopeId,
+        approvalEvidenceId: interactionEvidenceId,
+        secretReferenceId: secretReferenceId,
+        credentialAlias: openAICredentialAlias(secretReferenceId),
+        billingProfileId: openAIBillingProfileId(secretReferenceId),
+        perRequestHardCapUsd: perRequestHardCapUsd,
+        budgetActivated: true,
+        automaticBudgetExpansionPerformed: false,
+        automaticRechargePerformed: false,
+        paidActivationPerformed: false,
+        realApiRequestPerformed: false,
+        nextRequiredAction: "USAGE_POLICY"
+      });
+    } finally {
+      if (authorityEnvelopeId) {
+        try { namespace.revokeExternalIntelligenceAuthorityEnvelope(authorityEnvelopeId, authorityActivated ? "One-time OpenAI USD Budget activation completed or ended" : "OpenAI USD Budget approval flow ended"); } catch (_) {}
+      }
+      try { namespace.setExternalIntelligenceAuthorityApprovalAdapter(null); } catch (_) {}
+    }
+  }
+
+  function buildOpenAIUsagePolicyReview(input) {
+    const settings = internal.isPlainObject(input) ? input : {};
+    const source = typeof namespace.getExternalIntelligenceSource === "function" ? namespace.getExternalIntelligenceSource(SOURCE_ID) : null;
+    const operation = typeof namespace.getExternalIntelligenceSourceOperationContract === "function" ? namespace.getExternalIntelligenceSourceOperationContract(SOURCE_ID, OPERATION_ID) : null;
+    if (!source || source.lifecycleState !== "REGISTERED") return internal.buildResult(false, "EXTERNAL010_OPENAI_SOURCE_REGISTRATION_REQUIRED", "Blocked", { nextRequiredAction: "SOURCE_REGISTRATION_AUTHORITY", policyMutationPerformed: false });
+    if (!operation) return internal.buildResult(false, "EXTERNAL010_OPENAI_OPERATION_CONTRACT_REGISTRATION_REQUIRED", "Blocked", { nextRequiredAction: "REGISTER_SOURCE_OPERATION_CONTRACT_AUTHORITY", policyMutationPerformed: false });
+    const budgetId = internal.text(settings.budgetId, "");
+    const budget = budgetId && typeof namespace.getExternalIntelligenceResourceBudget === "function" ? namespace.getExternalIntelligenceResourceBudget(budgetId) : null;
+    if (!budget || budget.state !== "ACTIVE" || budget.scopeType !== "SOURCE" || budget.scopeId !== SOURCE_ID || String(budget.currency || "").toUpperCase() !== "USD") {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_ACTIVE_USD_BUDGET_REQUIRED", "Blocked", { budgetId: budgetId || null, nextRequiredAction: "USD_RESOURCE_BUDGET", policyMutationPerformed: false });
+    }
+    const active = typeof namespace.getActiveExternalIntelligenceUsagePolicyForSource === "function" ? namespace.getActiveExternalIntelligenceUsagePolicyForSource(SOURCE_ID) : null;
+    if (active) return internal.buildResult(true, "EXTERNAL010_OPENAI_USAGE_POLICY_ALREADY_ACTIVE", "Active", { usagePolicy: active, policyMutationPerformed: false, nextRequiredAction: "PAID_SOURCE_ACTIVATION_AUTHORITY" });
+    const review = {
+      sourceId: SOURCE_ID,
+      operationId: OPERATION_ID,
+      budgetId: budgetId,
+      proposedRight: {
+        state: "ALLOWED_WITH_CONDITIONS",
+        conditions: [
+          "Project Owner authorizes this configured OpenAI API credential for INTERNAL_ANALYSIS within the registered Responses API scope",
+          "Provider terms and account obligations remain externally applicable",
+          "No capability expansion beyond the registered initial scope",
+          "Paid execution remains subject to active USD Budget and separate Paid Source Activation authority"
+        ],
+        evidenceIds: [],
+        clauseReference: "PROJECT_OWNER_OPERATIONAL_AUTHORIZATION",
+        confidence: "MEDIUM"
+      },
+      policyCompleteness: "PARTIAL",
+      interpretationConfidence: "MEDIUM",
+      providerTermsIndependentlyVerified: false,
+      aiInterpretationEqualsLegalAuthority: false,
+      legalAuthorityGranted: false,
+      projectOwnerOperationalAuthorizationRequired: true,
+      paidActivationPerformed: false,
+      realApiRequestPerformed: false
+    };
+    return internal.buildResult(true, "EXTERNAL010_OPENAI_USAGE_POLICY_REVIEW_READY", "Review Ready", review);
+  }
+
+  function createOpenAIUsagePolicyCandidate(input) {
+    const review = buildOpenAIUsagePolicyReview(input);
+    if (!review || review.ok !== true) return review;
+    if (review.code === "EXTERNAL010_OPENAI_USAGE_POLICY_ALREADY_ACTIVE") return review;
+    if (typeof namespace.createExternalIntelligenceUsagePolicyCandidate !== "function") return internal.buildResult(false, "EXTERNAL010_USAGE_POLICY_API_UNAVAILABLE", "Blocked", { policyMutationPerformed: false });
+    const r = review.data;
+    const created = namespace.createExternalIntelligenceUsagePolicyCandidate({
+      sourceId: SOURCE_ID,
+      policyVersion: "openai-internal-analysis-v1",
+      status: "REVIEW_REQUIRED",
+      rights: { INTERNAL_ANALYSIS: r.proposedRight },
+      policyCompleteness: r.policyCompleteness,
+      interpretationConfidence: r.interpretationConfidence,
+      analysisStatus: "SUCCESS",
+      analysisVersion: "EXTERNAL-010-OPENAI-USAGE-POLICY-V1",
+      policyEvidenceIds: []
+    });
+    if (!created || created.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_USAGE_POLICY_CANDIDATE_CREATE_FAILED", "Blocked", { createResult: created || null, policyMutationPerformed: false });
+    return internal.buildResult(true, "EXTERNAL010_OPENAI_USAGE_POLICY_CANDIDATE_CREATED", "Review Required", {
+      usagePolicy: created.data && created.data.usagePolicy || null,
+      usagePolicyId: created.data && created.data.usagePolicy && created.data.usagePolicy.usagePolicyId || null,
+      budgetId: r.budgetId,
+      policyMutationPerformed: true,
+      policyActivated: false,
+      legalAuthorityGranted: false,
+      paidActivationPerformed: false,
+      realApiRequestPerformed: false,
+      nextRequiredAction: "ACTIVATE_USAGE_POLICY_AUTHORITY"
+    });
+  }
+
+  async function activateOpenAIUsagePolicyWithProjectOwnerApproval(input) {
+    const settings = internal.isPlainObject(input) ? input : {};
+    const usagePolicyId = internal.text(settings.usagePolicyId, "");
+    const policy = usagePolicyId && typeof namespace.getExternalIntelligenceUsagePolicy === "function" ? namespace.getExternalIntelligenceUsagePolicy(usagePolicyId) : null;
+    if (!policy) return internal.buildResult(false, "EXTERNAL010_OPENAI_USAGE_POLICY_NOT_FOUND", "Blocked", { usagePolicyId: usagePolicyId || null, policyActivated: false });
+    if (policy.status === "ACTIVE") return internal.buildResult(true, "EXTERNAL010_OPENAI_USAGE_POLICY_ALREADY_ACTIVE", "Active", { usagePolicy: policy, policyActivated: false, nextRequiredAction: "PAID_SOURCE_ACTIVATION_AUTHORITY" });
+    if (!["CANDIDATE", "REVIEW_REQUIRED"].includes(policy.status) || policy.sourceId !== SOURCE_ID || !policy.rights || !policy.rights[OPERATION_ID] || policy.rights[OPERATION_ID].state !== "ALLOWED_WITH_CONDITIONS") {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_USAGE_POLICY_SCOPE_INVALID", "Blocked", { usagePolicyId: usagePolicyId, status: policy.status, policyActivated: false });
+    }
+    if (settings.ownerInteractionTrusted !== true || settings.projectOwnerConfirmed !== true || !internal.text(settings.interactionEvidenceId, "")) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_USAGE_POLICY_PROJECT_OWNER_INTERACTION_REQUIRED", "Blocked", { usagePolicyId: usagePolicyId, policyActivated: false, legalAuthorityGranted: false });
+    }
+    const required = ["setExternalIntelligenceAuthorityApprovalAdapter","createExternalIntelligenceAuthorityEnvelopeCandidate","activateExternalIntelligenceAuthorityEnvelope","revokeExternalIntelligenceAuthorityEnvelope","activateExternalIntelligenceUsagePolicy"];
+    const missing = required.filter(function (name) { return typeof namespace[name] !== "function"; });
+    if (missing.length) return internal.buildResult(false, "EXTERNAL010_OPENAI_USAGE_POLICY_AUTHORITY_API_UNAVAILABLE", "Blocked", { missing: missing, policyActivated: false });
+    let authorityEnvelopeId = null;
+    let authorityActivated = false;
+    const interactionEvidenceId = internal.text(settings.interactionEvidenceId, "");
+    const adapter = {
+      adapterId: "EXTERNAL-010-OPENAI-USAGE-POLICY-OWNER-APPROVAL",
+      requiresExplicitOwnerInteraction: true,
+      async verifyApproval(context) {
+        const envelope = context && context.envelope || {};
+        const approval = context && context.approvalInput || {};
+        const target = envelope.target || {};
+        const exactScope = envelope.action === USAGE_POLICY_ACTIVATION_ACTION && target.type === "usage-policy" && target.id === usagePolicyId && envelope.purpose === USAGE_POLICY_PURPOSE;
+        const explicit = approval.projectOwnerConfirmed === true && approval.ownerInteractionTrusted === true && internal.text(approval.interactionEvidenceId, "") === interactionEvidenceId;
+        return { approved: exactScope && explicit, actorType: "Project Owner", interactionEvidenceId: exactScope && explicit ? interactionEvidenceId : "" };
+      }
+    };
+    try {
+      const adapterResult = namespace.setExternalIntelligenceAuthorityApprovalAdapter(adapter);
+      if (!adapterResult || adapterResult.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_USAGE_POLICY_APPROVAL_ADAPTER_FAILED", "Blocked", { adapter: adapterResult || null, policyActivated: false });
+      const candidate = namespace.createExternalIntelligenceAuthorityEnvelopeCandidate({
+        action: USAGE_POLICY_ACTIVATION_ACTION,
+        target: { type: "usage-policy", id: usagePolicyId },
+        purpose: USAGE_POLICY_PURPOSE,
+        scope: { domain: "EXTERNAL-010", operation: USAGE_POLICY_ACTIVATION_ACTION, constraints: { sourceId: SOURCE_ID, operationId: OPERATION_ID, oneTimeActivation: true } }
+      });
+      authorityEnvelopeId = candidate && candidate.data && candidate.data.envelope && candidate.data.envelope.authorityEnvelopeId || null;
+      if (!candidate || candidate.ok !== true || !authorityEnvelopeId) return internal.buildResult(false, "EXTERNAL010_OPENAI_USAGE_POLICY_AUTHORITY_CANDIDATE_FAILED", "Blocked", { authorityCandidate: candidate || null, policyActivated: false });
+      const activation = await namespace.activateExternalIntelligenceAuthorityEnvelope(authorityEnvelopeId, { projectOwnerConfirmed: true, ownerInteractionTrusted: true, interactionEvidenceId: interactionEvidenceId });
+      if (!activation || activation.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_USAGE_POLICY_AUTHORITY_ACTIVATION_FAILED", "Blocked", { activation: activation || null, policyActivated: false });
+      authorityActivated = true;
+      const activated = await namespace.activateExternalIntelligenceUsagePolicy({ usagePolicyId: usagePolicyId, purpose: USAGE_POLICY_PURPOSE });
+      if (!activated || activated.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_USAGE_POLICY_ACTIVATION_FAILED", "Blocked", { activationResult: activated || null, policyActivated: false });
+      const check = typeof namespace.checkExternalIntelligenceUsagePolicy === "function" ? namespace.checkExternalIntelligenceUsagePolicy({ sourceId: SOURCE_ID, operation: OPERATION_ID }) : null;
+      if (!check || check.ok !== true) return internal.buildResult(false, "EXTERNAL010_OPENAI_USAGE_POLICY_POST_ACTIVATION_CHECK_FAILED", "Blocked", { policyCheck: check || null, policyActivated: false });
+      return internal.buildResult(true, "EXTERNAL010_OPENAI_USAGE_POLICY_ACTIVATED_WITH_PROJECT_OWNER_APPROVAL", "Active", {
+        usagePolicy: activated.data && activated.data.usagePolicy || null,
+        usagePolicyId: usagePolicyId,
+        authorityEnvelopeId: authorityEnvelopeId,
+        approvalEvidenceId: interactionEvidenceId,
+        policyActivated: true,
+        policyCheck: check,
+        aiInterpretationEqualsLegalAuthority: false,
+        legalAuthorityGranted: false,
+        paidActivationPerformed: false,
+        realApiRequestPerformed: false,
+        nextRequiredAction: "PAID_SOURCE_ACTIVATION_AUTHORITY"
+      });
+    } finally {
+      if (authorityEnvelopeId) {
+        try { namespace.revokeExternalIntelligenceAuthorityEnvelope(authorityEnvelopeId, authorityActivated ? "One-time OpenAI Usage Policy activation completed or ended" : "OpenAI Usage Policy approval flow ended"); } catch (_) {}
+      }
+      try { namespace.setExternalIntelligenceAuthorityApprovalAdapter(null); } catch (_) {}
+    }
+  }
+
   function prepareOpenAIResponsesRequest(input) {
     const settings = internal.isPlainObject(input) ? input : {};
     const body = internal.isPlainObject(settings.body) ? internal.clone(settings.body) : {};
@@ -533,6 +854,12 @@
     registerOpenAIProviderSourceWithProjectOwnerApproval: registerOpenAIProviderSourceWithProjectOwnerApproval,
     buildOpenAIResponsesOperationContract: buildOpenAIResponsesOperationContract,
     registerOpenAIResponsesOperationContractWithProjectOwnerApproval: registerOpenAIResponsesOperationContractWithProjectOwnerApproval,
+    buildOpenAIUsdResourceBudgetReview: buildOpenAIUsdResourceBudgetReview,
+    createOpenAIUsdResourceBudgetCandidate: createOpenAIUsdResourceBudgetCandidate,
+    activateOpenAIUsdResourceBudgetWithProjectOwnerApproval: activateOpenAIUsdResourceBudgetWithProjectOwnerApproval,
+    buildOpenAIUsagePolicyReview: buildOpenAIUsagePolicyReview,
+    createOpenAIUsagePolicyCandidate: createOpenAIUsagePolicyCandidate,
+    activateOpenAIUsagePolicyWithProjectOwnerApproval: activateOpenAIUsagePolicyWithProjectOwnerApproval,
     prepareOpenAIResponsesRequest: prepareOpenAIResponsesRequest,
     activateOpenAIGovernedPaidSource: activateOpenAIGovernedPaidSource,
     reconcileOpenAIResponsesUsage: reconcileOpenAIResponsesUsage,
