@@ -7,7 +7,7 @@
   "description": "EXTERNAL-010 v1.20.1 frozen baseline + OpenAI API Integration v0.3.11 FINAL_VALIDATED + Decision 058 Self-Development Environment Phase 1 v0.1.0 Accepted/Frozen + Phase 2 v0.2.0 Candidate; read-only repository inspection, evidence integrity, deterministic detection, independent-validation readiness, bounded local evidence persistence, no provider call, and no canonical repository mutation",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-15T03:20:27.958687Z",
+  "updatedAt": "2026-09-15T09:26:29.771932Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -436,6 +436,15 @@
     "./18_self_development_phase2_traceability.js?h=df11be6da889",
     "./18_self_development_phase2_dashboard.js?h=c285b011134d",
     "./18_self_development_phase2_validation.js?h=e93ef6865fa8",
+    "./18_self_development_phase3_version_manifest.js?h=978ec2f927ed",
+    "./18_self_development_phase3_approval_policy.js?h=a6e8d143c991",
+    "./18_self_development_phase3_approval_bridge.js?h=427515981fa9",
+    "./18_self_development_phase3_patch_fixture.js?h=9447d79d5fac",
+    "./18_self_development_phase3_patch_adapter.js?h=7a04db50900b",
+    "./18_self_development_phase3_independent_validation.js?h=b5131110c5f0",
+    "./18_self_development_phase3_traceability.js?h=f646a9df3c67",
+    "./18_self_development_phase3_dashboard.js?h=826e5fd1716b",
+    "./18_self_development_phase3_validation.js?h=27d4c1bbfb78",
     "./99_init.js?h=de0ce6495428"
   ],
   "hashes": {
@@ -2578,9 +2587,54 @@
       "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
       "byteSize": 4742,
       "cacheKey": "de0ce6495428"
+    },
+    "18_self_development_phase3_version_manifest.js": {
+      "sha256": "978ec2f927ed2d4b8af5bca9bd5b8b52e5a6b0ccf03641433f619f40a22a68ef",
+      "byteSize": 3301,
+      "cacheKey": "978ec2f927ed"
+    },
+    "18_self_development_phase3_approval_policy.js": {
+      "sha256": "a6e8d143c991f7870076302856836775c80cb06e526334a9f9815a7f6f277b88",
+      "byteSize": 5524,
+      "cacheKey": "a6e8d143c991"
+    },
+    "18_self_development_phase3_approval_bridge.js": {
+      "sha256": "427515981fa9b33f358fa9ffddfc14f0e08914a889d45f324d40779bb5b6461d",
+      "byteSize": 5927,
+      "cacheKey": "427515981fa9"
+    },
+    "18_self_development_phase3_patch_fixture.js": {
+      "sha256": "9447d79d5facd66947cb46eb42f520525b1a529e8f4f87a134714a5d4041e592",
+      "byteSize": 2460,
+      "cacheKey": "9447d79d5fac"
+    },
+    "18_self_development_phase3_patch_adapter.js": {
+      "sha256": "7a04db50900b9683486dff08bfaacd11ba6cde3cba85d9a35ee8a6f036646ab8",
+      "byteSize": 5364,
+      "cacheKey": "7a04db50900b"
+    },
+    "18_self_development_phase3_independent_validation.js": {
+      "sha256": "b5131110c5f02c3b451520b4973b5d241c030583f368cd0835035672858e0a7e",
+      "byteSize": 2373,
+      "cacheKey": "b5131110c5f0"
+    },
+    "18_self_development_phase3_traceability.js": {
+      "sha256": "f646a9df3c6741867ee98fe55b94c5701a1616f962dca8df30d95e19d2747340",
+      "byteSize": 3827,
+      "cacheKey": "f646a9df3c67"
+    },
+    "18_self_development_phase3_dashboard.js": {
+      "sha256": "826e5fd1716b7571496dc6f966292583c3d00dabab23bb41e511dc97e12f8259",
+      "byteSize": 2040,
+      "cacheKey": "826e5fd1716b"
+    },
+    "18_self_development_phase3_validation.js": {
+      "sha256": "27d4c1bbfb78e5ca4811291e50f58ca2ae20e2a4581b856a754f82bc6c21a478",
+      "byteSize": 11126,
+      "cacheKey": "27d4c1bbfb78"
     }
   },
-  "scriptSetHash": "2c4f5eb8f6d73baa67dacf4118b66c9fe9df84a66b4a4592b9a1b1e1000b79cd",
+  "scriptSetHash": "b8c4e206188886348f3cdd63c1f363bba7a16748c159165732e052457fe7be89",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -4721,7 +4775,52 @@
       "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
       "byteSize": 4742,
       "cacheKey": "de0ce6495428"
+    },
+    "18_self_development_phase3_version_manifest.js": {
+      "sha256": "978ec2f927ed2d4b8af5bca9bd5b8b52e5a6b0ccf03641433f619f40a22a68ef",
+      "byteSize": 3301,
+      "cacheKey": "978ec2f927ed"
+    },
+    "18_self_development_phase3_approval_policy.js": {
+      "sha256": "a6e8d143c991f7870076302856836775c80cb06e526334a9f9815a7f6f277b88",
+      "byteSize": 5524,
+      "cacheKey": "a6e8d143c991"
+    },
+    "18_self_development_phase3_approval_bridge.js": {
+      "sha256": "427515981fa9b33f358fa9ffddfc14f0e08914a889d45f324d40779bb5b6461d",
+      "byteSize": 5927,
+      "cacheKey": "427515981fa9"
+    },
+    "18_self_development_phase3_patch_fixture.js": {
+      "sha256": "9447d79d5facd66947cb46eb42f520525b1a529e8f4f87a134714a5d4041e592",
+      "byteSize": 2460,
+      "cacheKey": "9447d79d5fac"
+    },
+    "18_self_development_phase3_patch_adapter.js": {
+      "sha256": "7a04db50900b9683486dff08bfaacd11ba6cde3cba85d9a35ee8a6f036646ab8",
+      "byteSize": 5364,
+      "cacheKey": "7a04db50900b"
+    },
+    "18_self_development_phase3_independent_validation.js": {
+      "sha256": "b5131110c5f02c3b451520b4973b5d241c030583f368cd0835035672858e0a7e",
+      "byteSize": 2373,
+      "cacheKey": "b5131110c5f0"
+    },
+    "18_self_development_phase3_traceability.js": {
+      "sha256": "f646a9df3c6741867ee98fe55b94c5701a1616f962dca8df30d95e19d2747340",
+      "byteSize": 3827,
+      "cacheKey": "f646a9df3c67"
+    },
+    "18_self_development_phase3_dashboard.js": {
+      "sha256": "826e5fd1716b7571496dc6f966292583c3d00dabab23bb41e511dc97e12f8259",
+      "byteSize": 2040,
+      "cacheKey": "826e5fd1716b"
+    },
+    "18_self_development_phase3_validation.js": {
+      "sha256": "27d4c1bbfb78e5ca4811291e50f58ca2ae20e2a4581b856a754f82bc6c21a478",
+      "byteSize": 11126,
+      "cacheKey": "27d4c1bbfb78"
     }
   },
-  "manifestHash": "2103340187e93469d15c571b529596b9d98dfb7e3f46eab18cae32e9f692e958"
+  "manifestHash": "5cec0149a60301af3a141976dca15986ea7ae934f7838494e83b5854c99d1937"
 }
