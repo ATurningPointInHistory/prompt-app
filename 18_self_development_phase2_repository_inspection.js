@@ -56,6 +56,42 @@
     const selected = paths.filter(function (p) { return focus.test(String(p)); });
     return selected.slice(0, Math.max(1, Number(maxFiles) || 64));
   }
+  function countDeferredMarkersInComments(code) {
+    const text = String(code || "");
+    let n = 0, pos = 0, state = "code", quote = "", escaped = false;
+    let commentText = "";
+    while (pos < text.length) {
+      const ch = text[pos], next = text[pos + 1] || "";
+      if (state === "code") {
+        if (ch === "'" || ch === '"' || ch === "`") { state = "string"; quote = ch; escaped = false; pos += 1; continue; }
+        if (ch === "/" && next === "/") { state = "line-comment"; commentText = ""; pos += 2; continue; }
+        if (ch === "/" && next === "*") { state = "block-comment"; commentText = ""; pos += 2; continue; }
+        pos += 1; continue;
+      }
+      if (state === "string") {
+        if (escaped) { escaped = false; pos += 1; continue; }
+        if (ch === "\\") { escaped = true; pos += 1; continue; }
+        if (ch === quote) { state = "code"; quote = ""; pos += 1; continue; }
+        pos += 1; continue;
+      }
+      if (state === "line-comment") {
+        if (ch === "\n" || ch === "\r") {
+          n += (commentText.match(/\b(?:TODO|FIXME|HACK)\b/g) || []).length;
+          state = "code"; commentText = ""; pos += 1; continue;
+        }
+        commentText += ch; pos += 1; continue;
+      }
+      if (state === "block-comment") {
+        if (ch === "*" && next === "/") {
+          n += (commentText.match(/\b(?:TODO|FIXME|HACK)\b/g) || []).length;
+          state = "code"; commentText = ""; pos += 2; continue;
+        }
+        commentText += ch; pos += 1; continue;
+      }
+    }
+    if (state === "line-comment" || state === "block-comment") n += (commentText.match(/\b(?:TODO|FIXME|HACK)\b/g) || []).length;
+    return n;
+  }
   function analyzeFiles(files) {
     const inventory = [];
     let todoCount = 0, largeFileCount = 0, emptyFileCount = 0;
@@ -66,7 +102,7 @@
       const hash = fnv1a32(code);
       const byteSize = typeof TextEncoder === "function" ? new TextEncoder().encode(code).length : code.length;
       const lineCount = code ? code.split(/\r?\n/).length : 0;
-      const markers = (code.match(/\b(?:TODO|FIXME|HACK)\b/g) || []).length;
+      const markers = countDeferredMarkersInComments(code);
       todoCount += markers;
       if (byteSize >= 100000) largeFileCount += 1;
       if (!code.trim()) emptyFileCount += 1;

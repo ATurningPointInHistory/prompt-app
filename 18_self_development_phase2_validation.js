@@ -24,6 +24,8 @@
     const inspection = inspectionResult && inspectionResult.data && inspectionResult.data.inspection;
     const evidence = inspectionResult && inspectionResult.data && inspectionResult.data.evidence;
     check("REQ-058-002 Read-only repository/source inspection completes", inspectionResult && inspectionResult.ok === true && inspection && inspection.readOnly === true && inspection.canonicalMutationPerformed === false && inspection.sourceCodePersisted === false, inspection, "Inspection", "Critical");
+    const inspectorSelf = inspection && Array.isArray(inspection.inspectedFiles) ? inspection.inspectedFiles.find(function (f) { return f.path === "18_self_development_phase2_repository_inspection.js"; }) : null;
+    check("REQ-058-003 Detector literals do not self-trigger TODO/FIXME/HACK findings", inspectorSelf && inspectorSelf.markerCount === 0, inspectorSelf, "Detection", "Critical");
     check("REQ-058-017 Repository inspection produces immutable baseline-bound evidence", evidence && evidence.immutable === true && evidence.baselineIdentityId === baseline.baselineIdentityId && evidence.persistable === true && evidence.sourceCodePersisted === false, evidence, "Evidence", "Critical");
 
     const missingIntegrity = namespace.validateSelfDevelopmentEvidenceRefs({ baselineIdentity: baseline, evidenceRefs: ["SELFDEV058-MISSING-EVIDENCE"] });

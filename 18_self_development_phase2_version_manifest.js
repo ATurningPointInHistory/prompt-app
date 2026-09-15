@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 18_self_development_phase2_version_manifest.js
    EXTERNAL-010 Decision 058 / Self-Development Environment
-   Candidate Release: 0.2.0
+   Candidate Release: 0.2.1
    Phase 2: Evidence-Grounded Inspection / Detection / Validation Readiness
    Phase 1 v0.1.0 remains Accepted / Frozen and is not rewritten here.
    ============================================================ */
@@ -15,7 +15,7 @@
   const manifest = deepFreeze({
     componentId: "SELF-DEVELOPMENT-058",
     decisionId: "EXTERNAL-010-DECISION-058",
-    version: "0.2.0",
+    version: "0.2.1",
     status: "IMPLEMENTATION_PHASE2_CANDIDATE",
     phase: 2,
     phaseName: "Evidence-Grounded Inspection / Detection / Validation Readiness",
