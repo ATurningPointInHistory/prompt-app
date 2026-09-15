@@ -59,11 +59,13 @@
     const activeUsagePolicy=typeof n.getActiveExternalIntelligenceUsagePolicyForSource==="function"?n.getActiveExternalIntelligenceUsagePolicyForSource("SOURCE-OPENAI"):null;
     const pendingUsagePolicy=draft.usagePolicyCandidateId&&typeof n.getExternalIntelligenceUsagePolicy==="function"?n.getExternalIntelligenceUsagePolicy(draft.usagePolicyCandidateId):null;
     const realApiTestValidation=typeof n.getOpenAIRealApiTestValidation==="function"?n.getOpenAIRealApiTestValidation():(src&&src.realApiTestValidation||null);
+    const finalValidation=typeof n.getOpenAIFinalValidation==="function"?n.getOpenAIFinalValidation():(src&&src.openAIFinalValidation||null);
     let level="YELLOW",label="準備中",reason="Provider / Secret Reference / Budget / Authority の設定を確認してください。";
     if(src&&src.lifecycleState==="ACTIVE"&&secret&&secret.ok===true&&b){level="GREEN";label="通常利用範囲";reason="承認済み範囲内は毎回の人間承認なしで利用できます。";}
     if(src&&src.lifecycleState==="ACTIVE"&&(!secret||!secret.ok||!b)){level="RED";label="実行停止推奨";reason="Active Sourceに必要なSecretまたはUSD Budgetが確認できません。";}
     const gatewayClientState=typeof n.getExternalIntelligenceGatewayClientState==="function"?n.getExternalIntelligenceGatewayClientState():null;
-    return {source:src,operationContract:op,draft,profiles,activeUsdBudgets:budgets(),selectedBudget:b,pendingBudgetCandidate:pendingBudget,activeUsagePolicy:activeUsagePolicy,pendingUsagePolicyCandidate:pendingUsagePolicy,realApiTestValidation:realApiTestValidation,secret:secret,secretMetadata:metadata,selectedSecretReferenceId:selectedSecretReferenceId,secretReferenceIds:secretReferenceIds(),risk:{level,label,reason},activation:activation,gatewayClientState:gatewayClientState,externalTransmission:"TEXT_TO_OPENAI",toolsEnabled:false,streamingEnabled:false,backgroundEnabled:false,secretValueInputAllowed:false,capturedAt:i.nowIso()};
+    if(finalValidation&&finalValidation.passed===true){level="GREEN";label="FINAL VALIDATED";reason="OpenAI API Integrationの最終検証が完了しています。通常利用は承認済み範囲内に限定されます。";}
+    return {source:src,operationContract:op,draft,profiles,activeUsdBudgets:budgets(),selectedBudget:b,pendingBudgetCandidate:pendingBudget,activeUsagePolicy:activeUsagePolicy,pendingUsagePolicyCandidate:pendingUsagePolicy,realApiTestValidation:realApiTestValidation,finalValidation:finalValidation,secret:secret,secretMetadata:metadata,selectedSecretReferenceId:selectedSecretReferenceId,secretReferenceIds:secretReferenceIds(),risk:{level,label,reason},activation:activation,gatewayClientState:gatewayClientState,externalTransmission:"TEXT_TO_OPENAI",toolsEnabled:false,streamingEnabled:false,backgroundEnabled:false,secretValueInputAllowed:false,capturedAt:i.nowIso()};
   }
   function modelOptions(snapshot) {
     return '<option value="">モデルを選択</option>'+snapshot.profiles.map(function(p){const selected=snapshot.draft.model===p.model?' selected':'';return '<option value="'+esc(p.model)+'"'+selected+'>'+esc(p.model)+' — 入力 '+esc(money(p.inputPerMTokUsd))+'/MTok / 出力 '+esc(money(p.outputPerMTokUsd))+'/MTok</option>';}).join('');
@@ -90,6 +92,7 @@
     const usagePolicyComplete=Boolean(x.activeUsagePolicy&&x.activeUsagePolicy.status==="ACTIVE");
     const paidActivationComplete=Boolean(x.source&&x.source.lifecycleState==="ACTIVE"&&x.source.enabled===true&&x.activation);
     const realApiTestComplete=Boolean(x.realApiTestValidation&&x.realApiTestValidation.passed===true);
+    const finalValidationComplete=Boolean(x.finalValidation&&x.finalValidation.passed===true&&x.finalValidation.state==="FINAL_VALIDATED");
     let currentStep=1,nextAction="Gateway Sessionを開始してください";
     if(runtimeComplete){currentStep=2;nextAction="OpenAI設定 / Secret / Source登録";}
     if(runtimeComplete&&sourceComplete){currentStep=3;nextAction="Operation Contract登録";}
@@ -97,9 +100,9 @@
     if(runtimeComplete&&sourceComplete&&operationComplete&&budgetComplete){currentStep=5;nextAction="Usage Policy";}
     if(runtimeComplete&&sourceComplete&&operationComplete&&budgetComplete&&usagePolicyComplete){currentStep=6;nextAction="Paid Source Activation";}
     if(runtimeComplete&&sourceComplete&&operationComplete&&budgetComplete&&usagePolicyComplete&&paidActivationComplete){currentStep=7;nextAction="Real API Test";}
-    if(runtimeComplete&&sourceComplete&&operationComplete&&budgetComplete&&usagePolicyComplete&&paidActivationComplete&&realApiTestComplete){currentStep=8;nextAction="Final Validation";}
-    const completed={1:runtimeComplete,2:sourceComplete,3:operationComplete,4:budgetComplete,5:usagePolicyComplete,6:paidActivationComplete,7:realApiTestComplete,8:false};
-    return {currentStep:currentStep,nextAction:nextAction,runtimeComplete:runtimeComplete,completed:completed,paidActivationComplete:paidActivationComplete,realApiTestComplete:realApiTestComplete,steps:[
+    if(runtimeComplete&&sourceComplete&&operationComplete&&budgetComplete&&usagePolicyComplete&&paidActivationComplete&&realApiTestComplete){currentStep=8;nextAction=finalValidationComplete?"OpenAI API Integration Ready":"Final Validation";}
+    const completed={1:runtimeComplete,2:sourceComplete,3:operationComplete,4:budgetComplete,5:usagePolicyComplete,6:paidActivationComplete,7:realApiTestComplete,8:finalValidationComplete};
+    return {currentStep:currentStep,nextAction:nextAction,runtimeComplete:runtimeComplete,completed:completed,paidActivationComplete:paidActivationComplete,realApiTestComplete:realApiTestComplete,finalValidationComplete:finalValidationComplete,steps:[
       {step:1,label:"Runtime",complete:runtimeComplete},
       {step:2,label:"Provider / Secret",complete:sourceComplete},
       {step:3,label:"Operation",complete:operationComplete},
@@ -107,7 +110,7 @@
       {step:5,label:"Usage Policy",complete:usagePolicyComplete},
       {step:6,label:"Paid Activation",complete:paidActivationComplete},
       {step:7,label:"Real API Test",complete:realApiTestComplete},
-      {step:8,label:"Final Validation",complete:false}
+      {step:8,label:"Final Validation",complete:finalValidationComplete}
     ]};
   }
   function workflowChip(step,workflow) {
@@ -161,7 +164,11 @@
     if(w.currentStep>=5) workflowHtml+=workflowDetails(5,'Usage Policy',w.completed[5],w.currentStep===5,step5Body);
     if(w.currentStep>=6) workflowHtml+=workflowDetails(6,'Paid Source Activation',w.completed[6],w.currentStep===6,step6Body);
     if(w.currentStep>=7) workflowHtml+=workflowDetails(7,'Real API Test',w.completed[7],w.currentStep===7,step7Body);
-    if(w.currentStep>=8) workflowHtml+=workflowDetails(8,'Final Validation',false,w.currentStep===8,'<div class="external-note">Real API TestはPASSしました。次はPC/Androidを含むFinal Validation / Release Gateです。このv0.3.8 CandidateではまだFinal Gateを自動実行しません。</div>');
+    if(w.currentStep>=8){
+      const fv=x.finalValidation||null;
+      const finalBody='<div class="external-boundary-grid"><div>Real API Test<strong>'+esc(w.completed[7]?'PASS':'未完了')+'</strong></div><div>Usage Reconciliation<strong>'+esc(realTest&&realTest.actualUsage?'PASS':'未確認')+'</strong></div><div>Gateway Bridge<strong>'+esc(bridgeReady?'READY':'未接続')+'</strong></div><div>Final State<strong>'+esc(fv&&fv.passed?'FINAL_VALIDATED':'未実行')+'</strong></div><div>Provider Network Call<strong>追加なし</strong></div><div>Authority拡大<strong>なし</strong></div><div>Repository自動変更<strong>なし</strong></div><div>Validation = Approval<strong>NO</strong></div></div><div class="external-actions openai-actions"><button class="btn-secondary" onclick="externalOpenAIReviewFinalValidation()"'+(w.completed[8]?' disabled':'')+'>Final Validation内容を確認</button><button class="btn-primary" onclick="externalOpenAIApproveFinalValidation(event)"'+(w.completed[8]?' disabled':'')+'>Project OwnerとしてFinal Validation確定</button></div><div class="external-note">STEP 8はSTEP 1〜7の状態、安全境界、Budget / Usage、Gateway / Secret、Real API Test結果をまとめて最終確認します。新しいOpenAI通信・課金・Authority拡大・Budget増額・Repository変更は行いません。FINAL_VALIDATEDは検証済みを意味し、ValidationをApprovalとして扱いません。</div>';
+      workflowHtml+=workflowDetails(8,'Final Validation',w.completed[8],w.currentStep===8&&!w.completed[8],finalBody);
+    }
     return '<section class="external-section openai-config-section">'+
       '<div class="external-section-head"><h4>OpenAI API</h4><span class="openai-risk openai-risk-'+esc(x.risk.level.toLowerCase())+'">'+esc(x.risk.level)+' · '+esc(x.risk.label)+'</span></div>'+ 
       '<div class="external-help">'+esc(x.risk.reason)+' APIキー本体はこの画面に入力しません。Gateway側のSecret Referenceだけを使用します。</div>'+ 
@@ -218,6 +225,7 @@
     else if(code.includes('SECRET')){title='Secret準備に問題があります';summary='必要なSecret Referenceが利用可能な状態ではありません。';recommended='LauncherのAPI / Secret Managerで対象Credentialを確認し、Secret本体をBrowserへ出さずにReferenceを準備します。';}
     else if(code.includes('GATEWAY')||code.includes('RUNTIME')){title='Gateway / Runtimeに問題があります';summary='GatewayまたはRuntimeの前提条件を満たしていません。';recommended='Gateway状態・Session・Bridgeを確認し、必要なRuntime接続だけを再確立します。';}
     else if(code.includes('BUDGET')||code.includes('COST')){title='Budget / Cost境界に問題があります';summary='現在の費用境界では安全に続行できません。';recommended='Budgetまたは1回Hard Capを確認し、必要な範囲だけProject Owner承認候補として変更します。';}
+    else if(code.includes('FINAL_VALIDATION')){title='Final Validationで未解決項目があります';summary='STEP 1〜7または安全境界の一部が最終Gateを満たしていません。';recommended='失敗したCheckだけを確認し、必要な前提条件を再確立してからFinal Validationを再実行します。';}
     else if(risk==='RED'||risk==='YELLOW'){title='設定変更の影響を検出しました';summary=Array.isArray(value.reasons)?value.reasons.join(' / '):'費用または権限境界への影響があります。';recommended='影響範囲を確認し、必要な変更だけを修正候補として了承してください。';}
     return {
       context:String(context||'REVIEW'),code:code||null,severity:risk||((value.ok===false)?'RED':'YELLOW'),title,summary,recommendedChange:recommended,
@@ -556,6 +564,43 @@
     setImpact(result);if(!result||result.ok!==true)maybeShowReviewFeedback(result||{ok:false,code:'EXTERNAL010_OPENAI_REAL_API_TEST_FAILED'},'REAL_API_TEST_RESULT');return result;
   }
 
+  function externalOpenAIReviewFinalValidation() {
+    const result=typeof n.buildOpenAIFinalValidationReview==="function"?n.buildOpenAIFinalValidationReview():{ok:false,code:"EXTERNAL010_OPENAI_FINAL_VALIDATION_GATE_UNAVAILABLE",finalValidationPerformed:false};
+    setImpact(result);
+    if(!result||result.ok!==true)maybeShowReviewFeedback(result||{ok:false,code:"EXTERNAL010_OPENAI_FINAL_VALIDATION_REVIEW_FAILED"},'FINAL_VALIDATION_REVIEW');
+    return result;
+  }
+
+  async function externalOpenAIApproveFinalValidation(event) {
+    if(!event||event.isTrusted!==true){const blocked={ok:false,code:"EXTERNAL010_TRUSTED_PROJECT_OWNER_UI_INTERACTION_REQUIRED",finalValidationPerformed:false,providerNetworkCallPerformed:false};setImpact(blocked);return blocked;}
+    const review=typeof n.buildOpenAIFinalValidationReview==="function"?n.buildOpenAIFinalValidationReview():null;
+    if(!review||review.ok!==true){const blocked=review||{ok:false,code:"EXTERNAL010_OPENAI_FINAL_VALIDATION_REVIEW_REQUIRED",finalValidationPerformed:false};setImpact(blocked);maybeShowReviewFeedback(blocked,'FINAL_VALIDATION_REVIEW');return blocked;}
+    if(review.code==="EXTERNAL010_OPENAI_FINAL_VALIDATION_ALREADY_PASSED"){setImpact(review);if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();return review;}
+    const d=review.data||{};
+    const message=[
+      "OpenAI API IntegrationのFinal Validationを確定します。",
+      "",
+      "Checks: "+String(d.passed||0)+" / "+String(d.total||0)+" PASS",
+      "Critical Failed: "+String(d.criticalFailed||0),
+      "Providerへの追加通信: なし",
+      "追加課金: なし",
+      "Authority拡大: なし",
+      "Budget自動増額: なし",
+      "Repository自動変更: なし",
+      "Validation = Approval: NO",
+      "",
+      "FINAL_VALIDATEDは検証済み状態を記録するだけで、新しい権限を付与しません。",
+      "",
+      "Project OwnerとしてFinal Validationを確定しますか？"
+    ].join("\n");
+    if(typeof global.confirm!=="function"||global.confirm(message)!==true){const cancelled={ok:false,code:"EXTERNAL010_PROJECT_OWNER_FINAL_VALIDATION_CANCELLED",finalValidationPerformed:false,providerNetworkCallPerformed:false};setImpact(cancelled);return cancelled;}
+    if(typeof n.finalizeOpenAIApiIntegrationWithProjectOwnerConfirmation!=="function"){const unavailable={ok:false,code:"EXTERNAL010_OPENAI_FINAL_VALIDATION_GATE_UNAVAILABLE",finalValidationPerformed:false};setImpact(unavailable);return unavailable;}
+    const evidenceId="OPENAI-FINAL-VALIDATION-OWNER-"+Date.now().toString(36).toUpperCase();
+    const result=await n.finalizeOpenAIApiIntegrationWithProjectOwnerConfirmation({projectOwnerConfirmed:true,ownerInteractionTrusted:true,interactionEvidenceId:evidenceId});
+    if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();
+    setImpact(result);if(!result||result.ok!==true)maybeShowReviewFeedback(result||{ok:false,code:"EXTERNAL010_OPENAI_FINAL_VALIDATION_FAILED"},'FINAL_VALIDATION_RESULT');return result;
+  }
+
   function externalOpenAIShowProviderCandidates() {
     const draft=currentForm(); const src=source();
     const secretReferenceId=src&&src.secretReferenceId||draft.secretReferenceId||defaultSecretReferenceId();
@@ -566,6 +611,6 @@
     const value={sourceCandidate,operationCandidate,secretReference:{secretReferenceId:secretReferenceId,metadataRegistered:Boolean(metadata),active:Boolean(validation&&validation.ok===true),nextRequiredAction:validation&&validation.ok===true?"SOURCE_REGISTRATION_AUTHORITY":"SET_GATEWAY_SECRET_AND_REGISTER_REFERENCE_METADATA"},draft,paidActivationPerformed:false,secretValueRequested:false};setImpact(value);return value;
   }
   Object.assign(n.api,{getOpenAIProviderUiSnapshot,getOpenAISetupWorkflowState,renderOpenAIProviderIntegrationPanelHtml});Object.assign(n,n.api);
-  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIReviewSourceRegistration,externalOpenAIApproveSourceRegistration,externalOpenAIReviewOperationContractRegistration,externalOpenAIApproveOperationContractRegistration,externalOpenAIReviewUsdBudget,externalOpenAICreateUsdBudgetCandidate,externalOpenAIApproveUsdBudget,externalOpenAIReviewUsagePolicy,externalOpenAICreateUsagePolicyCandidate,externalOpenAIApproveUsagePolicy,externalOpenAIReviewPaidActivation,externalOpenAIApprovePaidActivation,externalOpenAIReviewRealApiTest,externalOpenAIApproveRealApiTest,externalOpenAIShowProviderCandidates,externalOpenAIReviewFeedbackAction});
+  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIReviewSourceRegistration,externalOpenAIApproveSourceRegistration,externalOpenAIReviewOperationContractRegistration,externalOpenAIApproveOperationContractRegistration,externalOpenAIReviewUsdBudget,externalOpenAICreateUsdBudgetCandidate,externalOpenAIApproveUsdBudget,externalOpenAIReviewUsagePolicy,externalOpenAICreateUsagePolicyCandidate,externalOpenAIApproveUsagePolicy,externalOpenAIReviewPaidActivation,externalOpenAIApprovePaidActivation,externalOpenAIReviewRealApiTest,externalOpenAIApproveRealApiTest,externalOpenAIReviewFinalValidation,externalOpenAIApproveFinalValidation,externalOpenAIShowProviderCandidates,externalOpenAIReviewFeedbackAction});
   n.modules.openaiProviderUi={id:"EXTERNAL-010-OPENAI-PROVIDER-UI",version:m.getModuleVersion("openaiProviderUi")||m.release.version,status:"Loaded",decision:"055",secretValueInputAllowed:false,automaticPaidActivationAllowed:false,loadedAt:i.nowIso()};
 })(typeof window!=="undefined"?window:globalThis);

@@ -1216,6 +1216,116 @@
     }
   }
 
+  function getOpenAIFinalValidation() {
+    const source = typeof namespace.getExternalIntelligenceSource === "function" ? namespace.getExternalIntelligenceSource(SOURCE_ID) : null;
+    return source && internal.isPlainObject(source.openAIFinalValidation) ? internal.clone(source.openAIFinalValidation) : null;
+  }
+
+  function openAIFinalValidationCheck(name, passed, detail, severity) {
+    return { name: name, passed: passed === true, detail: internal.clone(detail == null ? null : detail), severity: severity || "Critical" };
+  }
+
+  function buildOpenAIFinalValidationReview() {
+    const source = typeof namespace.getExternalIntelligenceSource === "function" ? namespace.getExternalIntelligenceSource(SOURCE_ID) : null;
+    const existing = getOpenAIFinalValidation();
+    if (existing && existing.passed === true) {
+      return internal.buildResult(true, "EXTERNAL010_OPENAI_FINAL_VALIDATION_ALREADY_PASSED", "Final Validated", { validation: existing, finalValidationPerformed: false, providerNetworkCallPerformed: false, nextRequiredAction: "OPENAI_API_INTEGRATION_READY" });
+    }
+    const operation = typeof namespace.getExternalIntelligenceSourceOperationContract === "function" ? namespace.getExternalIntelligenceSourceOperationContract(SOURCE_ID, OPERATION_ID) : null;
+    const secret = source && typeof namespace.validateExternalIntelligenceSecretReference === "function" ? namespace.validateExternalIntelligenceSecretReference({ secretReferenceId: source.secretReferenceId }) : null;
+    const policy = typeof namespace.checkExternalIntelligenceUsagePolicy === "function" ? namespace.checkExternalIntelligenceUsagePolicy({ sourceId: SOURCE_ID, operation: OPERATION_ID }) : null;
+    const gateway = typeof namespace.getExternalIntelligenceGatewayClientState === "function" ? namespace.getExternalIntelligenceGatewayClientState() : null;
+    const realTest = getOpenAIRealApiTestValidation();
+    const budgetIds = source && source.paidActivationPolicy && Array.isArray(source.paidActivationPolicy.budgetIds) ? internal.unique(source.paidActivationPolicy.budgetIds) : [];
+    const budgets = budgetIds.map(function (id) { return typeof namespace.getExternalIntelligenceResourceBudget === "function" ? namespace.getExternalIntelligenceResourceBudget(id) : null; }).filter(Boolean);
+    const usageRecords = typeof namespace.listExternalIntelligenceResourceUsageRecords === "function" ? namespace.listExternalIntelligenceResourceUsageRecords() : [];
+    const usageRecord = realTest && realTest.requestId ? usageRecords.slice().reverse().find(function (r) { return r && r.sourceId === SOURCE_ID && r.operationId === OPERATION_ID && r.reconciled === true; }) || null : null;
+    const hardDenied = VERSION_MANIFEST.authorityPolicy && Array.isArray(VERSION_MANIFEST.authorityPolicy.hardDeniedActions) ? VERSION_MANIFEST.authorityPolicy.hardDeniedActions : [];
+    const session = gateway && gateway.session || null;
+    const sessionUnexpired = Boolean(session && String(session.state || "").toUpperCase() === "ACTIVE" && (!session.expiresAt || !Number.isFinite(Date.parse(session.expiresAt)) || Date.now() < Date.parse(session.expiresAt)));
+    const actualCost = realTest && realTest.actualUsage ? Number(realTest.actualUsage.FINANCIAL_COST) : NaN;
+    const actualTokens = realTest && realTest.actualUsage ? Number(realTest.actualUsage.AI_TOKEN_USAGE) : NaN;
+    const checks = [
+      openAIFinalValidationCheck("OpenAI Source is ACTIVE and Local Gateway governed", Boolean(source && source.provider === "OPENAI" && source.sourceType === "AI_SERVICE" && source.accessMode === "LOCAL_GATEWAY" && source.lifecycleState === "ACTIVE" && source.enabled === true), source && { sourceId: source.sourceId, lifecycleState: source.lifecycleState, enabled: source.enabled, accessMode: source.accessMode }),
+      openAIFinalValidationCheck("Secret Reference is ACTIVE and value is not returned", Boolean(secret && secret.ok === true && secret.data && secret.data.secretValueReturned === false), secret && { code: secret.code, secretValueReturned: secret.data && secret.data.secretValueReturned }),
+      openAIFinalValidationCheck("Responses Operation Contract is fixed POST JSON /v1/responses", Boolean(operation && operation.method === "POST" && operation.endpoint && operation.endpoint.exactUrl === EXACT_URL && operation.bodyPolicy && operation.bodyPolicy.fixedFields && operation.bodyPolicy.fixedFields.store === false && operation.retryPolicy && operation.retryPolicy.maxAttempts === 1), operation && { operationContractId: operation.operationContractId, method: operation.method, endpoint: operation.endpoint, store: operation.bodyPolicy && operation.bodyPolicy.fixedFields && operation.bodyPolicy.fixedFields.store, retryMaxAttempts: operation.retryPolicy && operation.retryPolicy.maxAttempts }),
+      openAIFinalValidationCheck("Usage Policy allows INTERNAL_ANALYSIS without legal-authority escalation", Boolean(policy && policy.ok === true && policy.data && policy.data.allowed === true && policy.data.legalAuthorityGranted === false), policy && { code: policy.code, usagePolicyId: policy.data && policy.data.usagePolicyId, right: policy.data && policy.data.right, legalAuthorityGranted: policy.data && policy.data.legalAuthorityGranted }),
+      openAIFinalValidationCheck("Paid Source activation is bounded by USD Budget and per-request Hard Cap", Boolean(source && source.paidActivationPolicy && budgetIds.length && finitePositive(source.paidActivationPolicy.perRequestHardCapUsd) != null && source.paidActivationPolicy.currency === "USD" && source.paidActivationPolicy.automaticBudgetExpansionAllowed === false), source && source.paidActivationPolicy),
+      openAIFinalValidationCheck("All bound USD Budgets remain ACTIVE and below hard limit", Boolean(budgetIds.length && budgets.length === budgetIds.length && budgets.every(function (b) { const lim=b&&b.limits&&b.limits.FINANCIAL_COST; const consumed=Number(b&&b.consumed&&b.consumed.FINANCIAL_COST||0); return b.state === "ACTIVE" && String(b.currency||"").toUpperCase() === "USD" && lim && Number.isFinite(Number(lim.hardLimit)) && consumed < Number(lim.hardLimit); })), budgets.map(function (b) { return { budgetId:b.budgetId,state:b.state,currency:b.currency,consumed:b.consumed&&b.consumed.FINANCIAL_COST,hardLimit:b.limits&&b.limits.FINANCIAL_COST&&b.limits.FINANCIAL_COST.hardLimit }; })),
+      openAIFinalValidationCheck("Real API Test passed with fixed text and no project data", Boolean(realTest && realTest.passed === true && realTest.outputMatchedExpected === true && realTest.fixedTestInputOnly === true && realTest.projectDataTransmitted === false), realTest && { requestId: realTest.requestId, providerRequestId: realTest.providerRequestId, outputMatchedExpected: realTest.outputMatchedExpected, projectDataTransmitted: realTest.projectDataTransmitted }),
+      openAIFinalValidationCheck("Real API Test preserved store=false, no tools/streaming, single attempt", Boolean(realTest && realTest.store === false && realTest.toolsEnabled === false && realTest.streamingEnabled === false && realTest.retryMaxAttempts === 1 && realTest.secretValueReturned === false), realTest && { store:realTest.store,toolsEnabled:realTest.toolsEnabled,streamingEnabled:realTest.streamingEnabled,retryMaxAttempts:realTest.retryMaxAttempts,secretValueReturned:realTest.secretValueReturned }),
+      openAIFinalValidationCheck("Provider Usage is reconciled to nonzero actual tokens and cost", Boolean(realTest && Number.isFinite(actualTokens) && actualTokens > 0 && Number.isFinite(actualCost) && actualCost > 0 && usageRecord && usageRecord.reconciled === true), { actualTokens:Number.isFinite(actualTokens)?actualTokens:null, actualCostUsd:Number.isFinite(actualCost)?actualCost:null, usageRecordId:usageRecord&&usageRecord.usageRecordId||null, reconciliationState:usageRecord&&usageRecord.reconciliationState||null }),
+      openAIFinalValidationCheck("Gateway runtime and Acquisition Bridge are READY", Boolean(gateway && String(gateway.healthState||"").toUpperCase() === "READY" && sessionUnexpired && gateway.sessionTokenPresentInMemory === true && gateway.acquisitionBridgeEnabled === true), gateway && { healthState:gateway.healthState, sessionState:session&&session.state, sessionExpiresAt:session&&session.expiresAt, sessionTokenPresentInMemory:gateway.sessionTokenPresentInMemory, acquisitionBridgeEnabled:gateway.acquisitionBridgeEnabled }),
+      openAIFinalValidationCheck("Generic paid activation and trading Hard Denies remain preserved", hardDenied.includes("ACTIVATE_PAID_API") && hardDenied.includes("EXECUTE_TRADE") && hardDenied.includes("DIRECT_REPOSITORY_MUTATION") && hardDenied.includes("AUTOMATIC_KNOWLEDGE_PROMOTION"), hardDenied.slice()),
+      openAIFinalValidationCheck("Final Validation performs no new provider call or authority expansion", true, { providerNetworkCallPerformed:false, realApiRequestPerformed:false, authorityExpansionPerformed:false, directRepositoryMutationPerformed:false, automaticBudgetExpansionPerformed:false, automaticRechargePerformed:false, validationEqualsApproval:false })
+    ];
+    const failed = checks.filter(function (c) { return c.passed !== true; });
+    return internal.buildResult(failed.length === 0, failed.length ? "EXTERNAL010_OPENAI_FINAL_VALIDATION_REVIEW_BLOCKED" : "EXTERNAL010_OPENAI_FINAL_VALIDATION_REVIEW_READY", failed.length ? "Blocked" : "Review Ready", {
+      checks: checks,
+      passed: checks.length - failed.length,
+      failed: failed.length,
+      total: checks.length,
+      health: Math.round((checks.length - failed.length) / checks.length * 100),
+      criticalFailed: failed.length,
+      providerNetworkCallPerformed: false,
+      realApiRequestPerformed: false,
+      authorityExpansionPerformed: false,
+      directRepositoryMutationPerformed: false,
+      validationEqualsApproval: false,
+      projectOwnerConfirmationRequiredToRecordFinalState: true,
+      nextRequiredAction: failed.length ? "REVIEW_FINAL_VALIDATION_FAILURE" : "PROJECT_OWNER_FINAL_VALIDATION_CONFIRMATION"
+    });
+  }
+
+  async function finalizeOpenAIApiIntegrationWithProjectOwnerConfirmation(input) {
+    const settings = internal.isPlainObject(input) ? input : {};
+    const review = buildOpenAIFinalValidationReview();
+    if (!review || review.ok !== true) return review;
+    if (review.code === "EXTERNAL010_OPENAI_FINAL_VALIDATION_ALREADY_PASSED") return review;
+    if (settings.ownerInteractionTrusted !== true || settings.projectOwnerConfirmed !== true || !internal.text(settings.interactionEvidenceId, "")) {
+      return internal.buildResult(false, "EXTERNAL010_OPENAI_FINAL_VALIDATION_PROJECT_OWNER_INTERACTION_REQUIRED", "Blocked", { finalValidationPerformed:false, validationEqualsApproval:false, providerNetworkCallPerformed:false });
+    }
+    const completedAt = internal.nowIso();
+    const validation = {
+      passed: true,
+      state: "FINAL_VALIDATED",
+      readiness: "OPENAI_API_INTEGRATION_READY",
+      decisionIds: ["EXTERNAL-010-DECISION-055", "EXTERNAL-010-DECISION-056"],
+      checks: internal.clone(review.data.checks || []),
+      passedChecks: Number(review.data.passed || 0),
+      failedChecks: 0,
+      totalChecks: Number(review.data.total || 0),
+      health: 100,
+      criticalFailed: 0,
+      approvalEvidenceId: internal.text(settings.interactionEvidenceId, ""),
+      providerNetworkCallPerformed: false,
+      realApiRequestPerformed: false,
+      authorityExpansionPerformed: false,
+      directRepositoryMutationPerformed: false,
+      automaticBudgetExpansionPerformed: false,
+      automaticRechargePerformed: false,
+      automaticCredentialFailoverPerformed: false,
+      validationEqualsApproval: false,
+      androidDirectSecretExecutionPromoted: false,
+      completedAt: completedAt
+    };
+    if (typeof internal.commitExternalIntelligenceSourceVersion !== "function") return internal.buildResult(false, "EXTERNAL010_OPENAI_FINAL_VALIDATION_COMMIT_UNAVAILABLE", "Failed", { finalValidationPerformed:false });
+    const next = internal.commitExternalIntelligenceSourceVersion(SOURCE_ID, { openAIFinalValidation: validation });
+    if (!next) return internal.buildResult(false, "EXTERNAL010_OPENAI_FINAL_VALIDATION_COMMIT_FAILED", "Failed", { finalValidationPerformed:false });
+    if (typeof namespace.appendExternalIntelligenceAuditEvent === "function") await namespace.appendExternalIntelligenceAuditEvent({ eventType:"OPENAI_API_INTEGRATION_FINAL_VALIDATED", actor:"OpenAI Provider Integration", outcome:"Final Validated", details:{ sourceId:SOURCE_ID, approvalEvidenceId:validation.approvalEvidenceId, health:100, totalChecks:validation.totalChecks, providerNetworkCallPerformed:false, authorityExpansionPerformed:false, validationEqualsApproval:false } });
+    return internal.buildResult(true, "EXTERNAL010_OPENAI_API_INTEGRATION_FINAL_VALIDATED", "Final Validated", {
+      source: next,
+      validation: validation,
+      finalValidationPerformed: true,
+      providerNetworkCallPerformed: false,
+      realApiRequestPerformed: false,
+      authorityExpansionPerformed: false,
+      directRepositoryMutationPerformed: false,
+      validationEqualsApproval: false,
+      nextRequiredAction: "OPENAI_API_INTEGRATION_READY"
+    });
+  }
+
   function reconcileOpenAIResponsesUsage(input) {
     const settings = internal.isPlainObject(input) ? input : {};
     if (String(settings.sourceId || "").toUpperCase() !== SOURCE_ID) return internal.buildResult(false, "EXTERNAL010_PROVIDER_USAGE_RECONCILIATION_NOT_APPLICABLE", "Skipped", null);
@@ -1288,6 +1398,9 @@
     buildOpenAIRealApiTestReview: buildOpenAIRealApiTestReview,
     runOpenAIRealApiTestWithProjectOwnerApproval: runOpenAIRealApiTestWithProjectOwnerApproval,
     getOpenAIRealApiTestValidation: getOpenAIRealApiTestValidation,
+    getOpenAIFinalValidation: getOpenAIFinalValidation,
+    buildOpenAIFinalValidationReview: buildOpenAIFinalValidationReview,
+    finalizeOpenAIApiIntegrationWithProjectOwnerConfirmation: finalizeOpenAIApiIntegrationWithProjectOwnerConfirmation,
     reconcileOpenAIResponsesUsage: reconcileOpenAIResponsesUsage,
     reconcileExternalIntelligenceProviderUsage: reconcileExternalIntelligenceProviderUsage
   });

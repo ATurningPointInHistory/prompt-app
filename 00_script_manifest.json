@@ -4,10 +4,10 @@
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "EXTERNAL-010 v1.20.1 baseline + OpenAI API Integration v0.3.10 Usage Reconciliation and Human-Centered Review Feedback Hotfix Candidate; preserves numeric provider usage metrics while keeping credential tokens redacted, adds review feedback modal and API runtime usage visibility",
+  "description": "EXTERNAL-010 v1.20.1 frozen baseline + OpenAI API Integration v0.3.11 FINAL_VALIDATED + Decision 058 Self-Development Environment v0.1.0 Phase 1 Candidate; read-only orchestration foundation, requirement traceability, and no canonical repository mutation",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-15T10:35:09+09:00",
+  "updatedAt": "2026-09-15T11:42:00+09:00",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -306,8 +306,8 @@
     "./17_external_intelligence_adapter_registry.js?h=8211e5421e29",
     "./17_external_intelligence_source_router.js?h=fb1eef1a3d35",
     "./17_external_intelligence_acquisition_queue.js?h=8d1954f4953a",
-    "./17_external_intelligence_openai_provider_integration.js?h=7c766f6e1486",
-    "./17_external_intelligence_openai_provider_ui.js?h=5a48afdb5a6d",
+    "./17_external_intelligence_openai_provider_integration.js?h=0107b4838b2b",
+    "./17_external_intelligence_openai_provider_ui.js?h=1ee0d94d7d5d",
     "./17_external_intelligence_phase1_validation.js?h=d86cc1417555",
     "./17_external_intelligence_phase2_validation.js?h=00a0fe59ccd5",
     "./17_external_intelligence_phase3_validation.js?h=839f83963595",
@@ -418,6 +418,14 @@
     "./17_external_intelligence_semantic_verification.js?h=ff515c2efdce",
     "./17_external_intelligence_full_memo_audit.js?h=00a0da1f24f3",
     "./17_external_intelligence_console.js?h=d41c050055dc",
+    "./18_self_development_version_manifest.js?h=85212e46389a",
+    "./18_self_development_core.js?h=1fefbfc970a5",
+    "./18_self_development_baseline_identity.js?h=576aa7144410",
+    "./18_self_development_adapter.js?h=dff9273d5234",
+    "./18_self_development_candidate.js?h=06f466cd13aa",
+    "./18_self_development_traceability.js?h=754a62f36c5e",
+    "./18_self_development_dashboard.js?h=7758b20bd1b1",
+    "./18_self_development_phase1_validation.js?h=1fa2cd44bb5f",
     "./99_init.js?h=de0ce6495428"
   ],
   "hashes": {
@@ -2462,17 +2470,57 @@
       "cacheKey": "de0ce6495428"
     },
     "17_external_intelligence_openai_provider_integration.js": {
-      "sha256": "7c766f6e148638ad095256317f695b30ed2dd99a8722ba5c59214215635809f3",
-      "byteSize": 94050,
-      "cacheKey": "7c766f6e1486"
+      "sha256": "0107b4838b2bef35daa8e700a4be47766738948f351620903a20323dc8dcb891",
+      "byteSize": 107539,
+      "cacheKey": "0107b4838b2b"
     },
     "17_external_intelligence_openai_provider_ui.js": {
-      "sha256": "5a48afdb5a6d075e1d6cdaf8eb54ff82d0a0f4f7fdbca7b7cf3cdadfef45b8d3",
-      "byteSize": 65168,
-      "cacheKey": "5a48afdb5a6d"
+      "sha256": "1ee0d94d7d5d3786ee13a68989acdb74b3813dd7d9482fbd8d153f555cebdd87",
+      "byteSize": 70621,
+      "cacheKey": "1ee0d94d7d5d"
+    },
+    "18_self_development_version_manifest.js": {
+      "sha256": "85212e46389a1bf1c9893bfaa49e9f4dc93cb805bb83554689483298cf325022",
+      "byteSize": 4846,
+      "cacheKey": "85212e46389a"
+    },
+    "18_self_development_core.js": {
+      "sha256": "1fefbfc970a5e3f13bce1bb9543855e3a55319d777298690b1695c3163ed63a3",
+      "byteSize": 5491,
+      "cacheKey": "1fefbfc970a5"
+    },
+    "18_self_development_baseline_identity.js": {
+      "sha256": "576aa7144410da8db0577aedca49be28252a7cf39ad6108c798b5828600db829",
+      "byteSize": 5057,
+      "cacheKey": "576aa7144410"
+    },
+    "18_self_development_adapter.js": {
+      "sha256": "dff9273d523476ddbf37badc697dec0f59b65320acc81e2ccad2145421f0e03d",
+      "byteSize": 3455,
+      "cacheKey": "dff9273d5234"
+    },
+    "18_self_development_candidate.js": {
+      "sha256": "06f466cd13aaadd4229729269d5b3b950839d1fb6e35b8741f78b37d3c594733",
+      "byteSize": 7651,
+      "cacheKey": "06f466cd13aa"
+    },
+    "18_self_development_traceability.js": {
+      "sha256": "754a62f36c5eee2c15f924a8d823d324a5e2a97bc44fcbca5d29489db571a913",
+      "byteSize": 3708,
+      "cacheKey": "754a62f36c5e"
+    },
+    "18_self_development_dashboard.js": {
+      "sha256": "7758b20bd1b13dc692a392e690b383099ab5ea7b00f65932112fba1d14641afb",
+      "byteSize": 3214,
+      "cacheKey": "7758b20bd1b1"
+    },
+    "18_self_development_phase1_validation.js": {
+      "sha256": "1fa2cd44bb5f58781000ec848e884a741dd2c6764beabc0359b13325dc36d381",
+      "byteSize": 7984,
+      "cacheKey": "1fa2cd44bb5f"
     }
   },
-  "scriptSetHash": "02cc6b90994ac87902a890c2241fa9b3a6caea4acff9bed251a4c275ed03baa7",
+  "scriptSetHash": "3d1a9271c52601db9f00e08cc42c7a0421845a92100acdcfa70083c0c30cbc85",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -4515,5 +4563,5 @@
       "cacheKey": "173cc15cb70c"
     }
   },
-  "manifestHash": "e903e33e79e5f0ddd94d82bfead4df70d24621045fb22e6441a923a19913f2b9"
+  "manifestHash": "e9078b59a5844783712b21145e0f83e53495ae45a3f67936741ce12b9fa62b02"
 }

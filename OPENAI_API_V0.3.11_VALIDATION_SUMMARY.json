@@ -1,0 +1,27 @@
+{
+  "candidateVersion": "0.3.11",
+  "criticalFailed": 0,
+  "manifestHash": "1cf9690fd44876ca47c6ef95d7a1a496fdc65a2f0be18cdf387d5d28111b04bf",
+  "scriptSetHash": "d0702d1ccbe3110dd108e5776b1a6c2e094573a8c127a1a6f827315e74bfa4c9",
+  "scriptCount": 410,
+  "results": {
+    "finalValidationGate": "23/23 PASS",
+    "realApiTestGate": "20/20 PASS",
+    "usageReconciliation": "8/8 PASS",
+    "humanCenteredReview": "8/8 PASS",
+    "apiRuntimeUsageUi": "7/7 PASS",
+    "gatewayAcquisitionBridge": "9/9 PASS",
+    "paidSourceActivation": "18/18 PASS",
+    "usagePolicy": "17/17 PASS",
+    "usdResourceBudget": "16/16 PASS",
+    "operationContract": "9/9 PASS",
+    "sourceRegistration": "8/8 PASS",
+    "openAiPhase2": "20/20 PASS",
+    "setupWorkflow": "11/11 PASS",
+    "runtimeWorkflow": "10/10 PASS",
+    "gateway": "38/38 PASS",
+    "phase4Acquisition": "14/14 PASS",
+    "phase6Security": "15/15 PASS",
+    "manifestIntegrity": "8/8 PASS"
+  }
+}

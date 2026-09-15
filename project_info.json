@@ -4,7 +4,7 @@
   "project": "AIプロンプト生成Pro",
   "version": "1.20.1",
   "entryFile": "index.html",
-  "savedAt": "2026-09-13T10:21:13.980971Z",
+  "savedAt": "2026-09-15T02:42:00Z",
   "complete": true,
   "requestedFiles": [
     "#U8d77#U52d5#U7528/README.txt",
@@ -487,7 +487,20 @@
     "external_gateway/validate_phase6_security.cjs",
     "index.html",
     "EXTERNAL-010_PC_REAL_RUNTIME_GATE_HF11_REPORT.json",
-    "EXTERNAL-010_ANDROID_REAL_DEVICE_GATE_HF12_REPORT.json"
+    "EXTERNAL-010_ANDROID_REAL_DEVICE_GATE_HF12_REPORT.json",
+    "17_external_intelligence_openai_provider_integration.js",
+    "17_external_intelligence_openai_provider_ui.js",
+    "17_external_intelligence_cross_platform_final_gate.js",
+    "17_external_intelligence_cross_platform_final_gate_validation.js",
+    "18_self_development_version_manifest.js",
+    "18_self_development_core.js",
+    "18_self_development_baseline_identity.js",
+    "18_self_development_adapter.js",
+    "18_self_development_candidate.js",
+    "18_self_development_traceability.js",
+    "18_self_development_dashboard.js",
+    "18_self_development_phase1_validation.js",
+    "validate_self_development_058_phase1.cjs"
   ],
   "savedFiles": [
     "#U8d77#U52d5#U7528/README.txt",
@@ -971,24 +984,37 @@
     "index.html",
     "project_info.json",
     "EXTERNAL-010_PC_REAL_RUNTIME_GATE_HF11_REPORT.json",
-    "EXTERNAL-010_ANDROID_REAL_DEVICE_GATE_HF12_REPORT.json"
+    "EXTERNAL-010_ANDROID_REAL_DEVICE_GATE_HF12_REPORT.json",
+    "17_external_intelligence_openai_provider_integration.js",
+    "17_external_intelligence_openai_provider_ui.js",
+    "17_external_intelligence_cross_platform_final_gate.js",
+    "17_external_intelligence_cross_platform_final_gate_validation.js",
+    "18_self_development_version_manifest.js",
+    "18_self_development_core.js",
+    "18_self_development_baseline_identity.js",
+    "18_self_development_adapter.js",
+    "18_self_development_candidate.js",
+    "18_self_development_traceability.js",
+    "18_self_development_dashboard.js",
+    "18_self_development_phase1_validation.js",
+    "validate_self_development_058_phase1.cjs"
   ],
   "missingFiles": [],
   "externalFiles": [
     "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
   ],
-  "localFileCount": 482,
+  "localFileCount": 495,
   "externalFileCount": 1,
-  "fileCount": 483,
+  "fileCount": 496,
   "cleanIndex": true,
   "scriptManifestSource": "00_script_manifest.json",
   "scriptManifestVersion": "1.20.1",
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "53aa6e4bebcdd8a5ba00fd8912c30856403973d7ff752f5c69e44e99f98570d7",
-  "scriptSetHash": "333cd9ea1b5e9e263290c5cac93610c35aa6189662cf422ce1adca55ef3d1e6f",
-  "scriptManifestCount": 406,
+  "scriptManifestHash": "e9078b59a5844783712b21145e0f83e53495ae45a3f67936741ce12b9fa62b02",
+  "scriptSetHash": "3d1a9271c52601db9f00e08cc42c7a0421845a92100acdcfa70083c0c30cbc85",
+  "scriptManifestCount": 418,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
     "runtimeLoader": false,
@@ -997,7 +1023,11 @@
     "last": "99_init.js",
     "generatedAtSave": true
   },
-  "releaseStatus": "ANDROID_REAL_DEVICE_GATE_HF12_CANDIDATE",
+  "releaseStatus": "SELF_DEVELOPMENT_058_PHASE1_CANDIDATE",
   "releaseAllowed": false,
-  "projectOwnerRevalidationRequired": true
+  "projectOwnerRevalidationRequired": true,
+  "decision058CandidateVersion": "0.1.0",
+  "decision058Phase": 1,
+  "decision058CanonicalMutationImplemented": false,
+  "decision058ValidationIsApproval": false
 }
