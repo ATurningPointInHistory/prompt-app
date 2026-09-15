@@ -200,16 +200,73 @@
     if(!reasons.length)reasons.push("費用・権限境界の拡大は検出されませんでした");
     return {level,reasons};
   }
+  let pendingReviewFeedback=null;
   function setImpact(value) { const e=global.document&&global.document.getElementById('externalOpenAIImpact'); if(e)e.textContent=typeof value==='string'?value:JSON.stringify(value,null,2); }
+  function reviewFeedbackDescriptor(result,context) {
+    const value=result&&typeof result==='object'?result:null;
+    if(!value)return null;
+    const code=String(value.code||'');
+    const risk=String(value.riskLevel||value.risk&&value.risk.level||'').toUpperCase();
+    const status=String(value.status||'').toUpperCase();
+    if(code.includes('ALREADY_')||code.includes('_CANCELLED'))return null;
+    const hasProblem=value.ok===false||risk==='RED'||risk==='YELLOW'||status.includes('PENDING')||status.includes('BLOCKED')||status.includes('FAILED');
+    if(!hasProblem)return null;
+    let title='確認結果に対応が必要です';
+    let summary=code||'設定または実行結果に確認が必要な項目があります。';
+    let recommended='詳細を確認し、必要な設定だけを修正候補として扱います。';
+    if(code.includes('USAGE_RECONCILIATION')){title='Usage / Cost照合に問題があります';summary='Provider通信後のToken Usageまたは実コストを確定できません。';recommended='Usage MetricとSecret情報を分離し、実Token数からBudgetを照合できるようにします。';}
+    else if(code.includes('SECRET')){title='Secret準備に問題があります';summary='必要なSecret Referenceが利用可能な状態ではありません。';recommended='LauncherのAPI / Secret Managerで対象Credentialを確認し、Secret本体をBrowserへ出さずにReferenceを準備します。';}
+    else if(code.includes('GATEWAY')||code.includes('RUNTIME')){title='Gateway / Runtimeに問題があります';summary='GatewayまたはRuntimeの前提条件を満たしていません。';recommended='Gateway状態・Session・Bridgeを確認し、必要なRuntime接続だけを再確立します。';}
+    else if(code.includes('BUDGET')||code.includes('COST')){title='Budget / Cost境界に問題があります';summary='現在の費用境界では安全に続行できません。';recommended='Budgetまたは1回Hard Capを確認し、必要な範囲だけProject Owner承認候補として変更します。';}
+    else if(risk==='RED'||risk==='YELLOW'){title='設定変更の影響を検出しました';summary=Array.isArray(value.reasons)?value.reasons.join(' / '):'費用または権限境界への影響があります。';recommended='影響範囲を確認し、必要な変更だけを修正候補として了承してください。';}
+    return {
+      context:String(context||'REVIEW'),code:code||null,severity:risk||((value.ok===false)?'RED':'YELLOW'),title,summary,recommendedChange:recommended,
+      impacts:['Repository自動変更なし','Authority自動拡大なし','Budget自動増額なし','Secret ValueはBrowserへ出さない'],
+      approvalEffect:'修正候補への了承のみ。自動でプログラムやRepositoryを書き換えません。',automaticRepositoryMutationPerformed:false
+    };
+  }
+  function ensureReviewFeedbackModal() {
+    if(!global.document||typeof global.document.createElement!=='function'||!global.document.body)return null;
+    let modal=global.document.getElementById('externalOpenAIReviewFeedbackModal');
+    if(modal)return modal;
+    modal=global.document.createElement('div');
+    modal.id='externalOpenAIReviewFeedbackModal';
+    modal.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.58);display:none;align-items:center;justify-content:center;padding:18px';
+    modal.innerHTML='<div style="width:min(620px,100%);max-height:82vh;overflow:auto;background:var(--panel,#fff);color:var(--text,#111);border:1px solid var(--border,#999);border-radius:14px;padding:16px;box-shadow:0 18px 50px rgba(0,0,0,.35)"><div id="externalOpenAIReviewFeedbackTitle" style="font-weight:700;font-size:16px;margin-bottom:8px"></div><div id="externalOpenAIReviewFeedbackSummary" style="line-height:1.55;margin-bottom:10px"></div><div style="font-size:12px;opacity:.78;margin-bottom:4px">推奨変更</div><div id="externalOpenAIReviewFeedbackRecommendation" style="line-height:1.55;margin-bottom:10px"></div><div style="font-size:12px;opacity:.78;margin-bottom:4px">影響・安全境界</div><div id="externalOpenAIReviewFeedbackImpacts" style="line-height:1.55;margin-bottom:12px"></div><div class="external-actions" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-secondary" onclick="externalOpenAIReviewFeedbackAction(\'dismiss\')">変更しない</button><button class="btn-secondary" onclick="externalOpenAIReviewFeedbackAction(\'details\')">詳細を見る</button><button class="btn-primary" onclick="externalOpenAIReviewFeedbackAction(\'approve\')">修正候補を了承</button></div></div>';
+    global.document.body.appendChild(modal);
+    return modal;
+  }
+  function maybeShowReviewFeedback(result,context) {
+    const feedback=reviewFeedbackDescriptor(result,context);
+    if(!feedback)return null;
+    pendingReviewFeedback=feedback;
+    const modal=ensureReviewFeedbackModal();
+    if(!modal)return feedback;
+    const set=(id,text)=>{const e=global.document.getElementById(id);if(e)e.textContent=text;};
+    set('externalOpenAIReviewFeedbackTitle','⚠ '+feedback.title);
+    set('externalOpenAIReviewFeedbackSummary',feedback.summary);
+    set('externalOpenAIReviewFeedbackRecommendation',feedback.recommendedChange);
+    set('externalOpenAIReviewFeedbackImpacts',feedback.impacts.join(' / ')+'。'+feedback.approvalEffect);
+    modal.style.display='flex';
+    return feedback;
+  }
+  function externalOpenAIReviewFeedbackAction(action) {
+    const modal=global.document&&global.document.getElementById('externalOpenAIReviewFeedbackModal');
+    const feedback=pendingReviewFeedback?Object.assign({},pendingReviewFeedback):null;
+    if(modal)modal.style.display='none';
+    if(action==='details'){const detail=global.document&&global.document.querySelector&&global.document.querySelector('.openai-config-details:last-of-type');if(detail)detail.open=true;return feedback;}
+    if(action==='approve'&&feedback){const result={ok:true,code:'EXTERNAL010_OPENAI_REVIEW_CHANGE_CANDIDATE_APPROVED',status:'Candidate Approved',data:{reviewFeedback:feedback,projectOwnerAcknowledged:true,automaticRepositoryMutationPerformed:false,directRepositoryMutationAllowed:false}};setImpact(result);pendingReviewFeedback=null;return result;}
+    pendingReviewFeedback=null;return {ok:true,code:'EXTERNAL010_OPENAI_REVIEW_CHANGE_NOT_APPROVED',automaticRepositoryMutationPerformed:false};
+  }
   function externalOpenAIPreviewConfiguration() {
     const before=readDraft(),after=currentForm(),impact=compareRisk(before,after),p=typeof n.getOpenAIModelPricingProfile==="function"?n.getOpenAIModelPricingProfile(after.model):null;
     const outputOnly=p&&Number(after.maxOutputTokens)>0 ? Number(after.maxOutputTokens)/1000000*p.outputPerMTokUsd : null;
     const result={riskLevel:impact.level,reasons:impact.reasons,before,after,modelPricing:p,outputOnlyMaximumCostUsd:outputOnly==null?null:Math.round(outputOnly*1e8)/1e8,note:"実Requestでは入力Tokensも含め、送信前にFINANCIAL_COSTを再計算します。"};
-    setImpact(result);return result;
+    setImpact(result);maybeShowReviewFeedback(result,'CONFIGURATION_IMPACT');return result;
   }
   function externalOpenAISaveDraft() {
     const before=readDraft(),after=currentForm(),impact=compareRisk(before,after);
-    if(impact.level==="RED") { setImpact({saved:false,riskLevel:"RED",message:"大幅な費用境界の拡大を検出しました。ここでは自動保存しません。変更内容を確認し、Authority/Budget側で承認してください。",before,after,reasons:impact.reasons}); return false; }
+    if(impact.level==="RED") { const blocked={saved:false,riskLevel:"RED",message:"大幅な費用境界の拡大を検出しました。ここでは自動保存しません。変更内容を確認し、Authority/Budget側で承認してください。",before,after,reasons:impact.reasons}; setImpact(blocked); maybeShowReviewFeedback(blocked,'CONFIGURATION_SAVE'); return false; }
     const ok=writeDraft(after);
     const result={saved:ok,riskLevel:impact.level,before,after,reasons:impact.reasons,paidActivationPerformed:false,budgetMutationPerformed:false};
     if(ok&&typeof global.externalConsoleRefresh==="function") global.externalConsoleRefresh();
@@ -253,7 +310,7 @@
       effects:{sourceRegistration:true,operationContractRegistration:false,paidActivation:false,budgetMutation:false,realApiRequest:false},
       projectOwnerApprovalRequired:!existing
     };
-    setImpact(result);return result;
+    setImpact(result);maybeShowReviewFeedback(result,'SOURCE_REGISTRATION_REVIEW');return result;
   }
 
   async function externalOpenAIApproveSourceRegistration(event) {
@@ -297,7 +354,7 @@
       effects:{operationContractRegistration:true,sourceEnablement:false,paidActivation:false,budgetMutation:false,realApiRequest:false},
       projectOwnerApprovalRequired:!existing
     };
-    setImpact(result);return result;
+    setImpact(result);maybeShowReviewFeedback(result,'OPERATION_CONTRACT_REVIEW');return result;
   }
 
   async function externalOpenAIApproveOperationContractRegistration(event) {
@@ -334,7 +391,7 @@
     const form=currentForm();
     const result=typeof n.buildOpenAIUsdResourceBudgetReview==="function"?n.buildOpenAIUsdResourceBudgetReview({secretReferenceId:form.secretReferenceId,softLimitUsd:form.budgetSoftLimitUsd,hardLimitUsd:form.budgetHardLimitUsd,perRequestHardCapUsd:form.perRequestHardCapUsd}):{ok:false,code:"EXTERNAL010_OPENAI_USD_BUDGET_GATE_UNAVAILABLE"};
     const wrapped={...result,projectOwnerApprovalRequired:true,paidActivationPerformed:false,realApiRequestPerformed:false};
-    setImpact(wrapped);return wrapped;
+    setImpact(wrapped);maybeShowReviewFeedback(wrapped,'USD_BUDGET_REVIEW');return wrapped;
   }
 
   function externalOpenAICreateUsdBudgetCandidate() {
@@ -378,7 +435,7 @@
     const d=readDraft();
     const result=typeof n.buildOpenAIUsagePolicyReview==="function"?n.buildOpenAIUsagePolicyReview({budgetId:d.budgetId}):{ok:false,code:"EXTERNAL010_OPENAI_USAGE_POLICY_GATE_UNAVAILABLE"};
     const wrapped={...result,projectOwnerApprovalRequired:true,legalAuthorityGranted:false,paidActivationPerformed:false,realApiRequestPerformed:false};
-    setImpact(wrapped);return wrapped;
+    setImpact(wrapped);maybeShowReviewFeedback(wrapped,'USAGE_POLICY_REVIEW');return wrapped;
   }
 
   function externalOpenAICreateUsagePolicyCandidate() {
@@ -425,7 +482,7 @@
     const budgetId=d.budgetId||getOpenAIProviderUiSnapshot().selectedBudget&&getOpenAIProviderUiSnapshot().selectedBudget.budgetId||"";
     const result=typeof n.buildOpenAIPaidSourceActivationReview==="function"?n.buildOpenAIPaidSourceActivationReview({budgetIds:budgetId?[budgetId]:[],perRequestHardCapUsd:d.perRequestHardCapUsd}):{ok:false,code:"EXTERNAL010_OPENAI_PAID_SOURCE_ACTIVATION_GATE_UNAVAILABLE"};
     const wrapped={...result,projectOwnerApprovalRequired:true,realApiRequestPerformed:false};
-    setImpact(wrapped);return wrapped;
+    setImpact(wrapped);maybeShowReviewFeedback(wrapped,'PAID_ACTIVATION_REVIEW');return wrapped;
   }
 
   async function externalOpenAIApprovePaidActivation(event) {
@@ -463,7 +520,7 @@
     const snap=getOpenAIProviderUiSnapshot();
     const budgetId=d.budgetId||snap.selectedBudget&&snap.selectedBudget.budgetId||"";
     const result=typeof n.buildOpenAIRealApiTestReview==="function"?n.buildOpenAIRealApiTestReview({model:d.model,maxOutputTokens:d.maxOutputTokens,perRequestHardCapUsd:d.perRequestHardCapUsd,budgetIds:budgetId?[budgetId]:[]}):{ok:false,code:"EXTERNAL010_OPENAI_REAL_API_TEST_GATE_UNAVAILABLE",realApiRequestPerformed:false};
-    setImpact(result);return result;
+    setImpact(result);maybeShowReviewFeedback(result,'REAL_API_TEST_REVIEW');return result;
   }
 
   async function externalOpenAIApproveRealApiTest(event) {
@@ -496,7 +553,7 @@
     const evidenceId="OPENAI-REAL-API-TEST-OWNER-"+Date.now().toString(36).toUpperCase();
     const result=await n.runOpenAIRealApiTestWithProjectOwnerApproval({model:r.model||d.model,maxOutputTokens:r.testBody&&r.testBody.max_output_tokens||d.maxOutputTokens,perRequestHardCapUsd:r.perRequestHardCapUsd||d.perRequestHardCapUsd,budgetIds:r.budgetIds||[],projectOwnerConfirmed:true,ownerInteractionTrusted:true,interactionEvidenceId:evidenceId});
     if(typeof global.externalConsoleRefresh==="function")global.externalConsoleRefresh();
-    setImpact(result);return result;
+    setImpact(result);if(!result||result.ok!==true)maybeShowReviewFeedback(result||{ok:false,code:'EXTERNAL010_OPENAI_REAL_API_TEST_FAILED'},'REAL_API_TEST_RESULT');return result;
   }
 
   function externalOpenAIShowProviderCandidates() {
@@ -509,6 +566,6 @@
     const value={sourceCandidate,operationCandidate,secretReference:{secretReferenceId:secretReferenceId,metadataRegistered:Boolean(metadata),active:Boolean(validation&&validation.ok===true),nextRequiredAction:validation&&validation.ok===true?"SOURCE_REGISTRATION_AUTHORITY":"SET_GATEWAY_SECRET_AND_REGISTER_REFERENCE_METADATA"},draft,paidActivationPerformed:false,secretValueRequested:false};setImpact(value);return value;
   }
   Object.assign(n.api,{getOpenAIProviderUiSnapshot,getOpenAISetupWorkflowState,renderOpenAIProviderIntegrationPanelHtml});Object.assign(n,n.api);
-  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIReviewSourceRegistration,externalOpenAIApproveSourceRegistration,externalOpenAIReviewOperationContractRegistration,externalOpenAIApproveOperationContractRegistration,externalOpenAIReviewUsdBudget,externalOpenAICreateUsdBudgetCandidate,externalOpenAIApproveUsdBudget,externalOpenAIReviewUsagePolicy,externalOpenAICreateUsagePolicyCandidate,externalOpenAIApproveUsagePolicy,externalOpenAIReviewPaidActivation,externalOpenAIApprovePaidActivation,externalOpenAIReviewRealApiTest,externalOpenAIApproveRealApiTest,externalOpenAIShowProviderCandidates});
+  Object.assign(global,{externalOpenAIPreviewConfiguration,externalOpenAISaveDraft,externalOpenAIPrepareSecretReference,externalOpenAIReviewSourceRegistration,externalOpenAIApproveSourceRegistration,externalOpenAIReviewOperationContractRegistration,externalOpenAIApproveOperationContractRegistration,externalOpenAIReviewUsdBudget,externalOpenAICreateUsdBudgetCandidate,externalOpenAIApproveUsdBudget,externalOpenAIReviewUsagePolicy,externalOpenAICreateUsagePolicyCandidate,externalOpenAIApproveUsagePolicy,externalOpenAIReviewPaidActivation,externalOpenAIApprovePaidActivation,externalOpenAIReviewRealApiTest,externalOpenAIApproveRealApiTest,externalOpenAIShowProviderCandidates,externalOpenAIReviewFeedbackAction});
   n.modules.openaiProviderUi={id:"EXTERNAL-010-OPENAI-PROVIDER-UI",version:m.getModuleVersion("openaiProviderUi")||m.release.version,status:"Loaded",decision:"055",secretValueInputAllowed:false,automaticPaidActivationAllowed:false,loadedAt:i.nowIso()};
 })(typeof window!=="undefined"?window:globalThis);

@@ -1,0 +1,20 @@
+"use strict";
+const fs=require("node:fs"),vm=require("node:vm"),path=require("node:path");
+const checks=[];const check=(name,passed,detail)=>checks.push({name,passed:Boolean(passed),detail});
+const manifest={componentId:"EXTERNAL-010",componentName:"External Intelligence",release:{version:"1.20.1",implementationPhase:"API Integration",designFreezeId:"TEST",decisionRange:"001-056",decisionCount:56},getModuleVersion:()=>"0.3.10"};
+const context={window:null,globalThis:null,EXTERNAL010VersionManifest:manifest,console,TextEncoder,Date,setTimeout,clearTimeout};context.window=context;context.globalThis=context;vm.createContext(context);
+for(const f of ["17_external_intelligence_core.js","17_external_intelligence_openai_provider_integration.js"]){vm.runInContext(fs.readFileSync(path.join(__dirname,f),"utf8"),context,{filename:f});}
+const n=context.EXTERNAL010ExternalIntelligence,i=n.__internal;
+const sample={usage:{input_tokens:11,input_tokens_details:{cache_write_tokens:0,cached_tokens:0},output_tokens:5,output_tokens_details:{reasoning_tokens:0},total_tokens:16},access_token:"SECRET",bearer_token:"SECRET2",custom_token:"SHOULD_HIDE",max_output_tokens:64};
+const redacted=i.redactSensitive(sample);
+check("Known numeric OpenAI usage counters survive redaction",redacted.usage.input_tokens===11&&redacted.usage.output_tokens===5&&redacted.usage.total_tokens===16,redacted.usage);
+check("Usage detail counters survive redaction",redacted.usage.input_tokens_details.cached_tokens===0&&redacted.usage.output_tokens_details.reasoning_tokens===0,redacted.usage);
+check("Actual credential/token strings remain redacted",redacted.access_token==="[REDACTED]"&&redacted.bearer_token==="[REDACTED]"&&redacted.custom_token==="[REDACTED]",{access_token:redacted.access_token,bearer_token:redacted.bearer_token,custom_token:redacted.custom_token});
+const badMetric=i.redactSensitive({input_tokens:"11",output_tokens:{value:5}});
+check("Usage whitelist is type constrained; non-numeric token-like values are redacted",badMetric.input_tokens==="[REDACTED]"&&badMetric.output_tokens==="[REDACTED]",badMetric);
+const rec=n.reconcileOpenAIResponsesUsage({sourceId:"SOURCE-OPENAI",operationId:"INTERNAL_ANALYSIS",payload:{model:"gpt-5.6-luna",usage:redacted.usage}});
+check("Provider usage reconciles after safe redaction",rec.ok===true&&rec.code==="EXTERNAL010_OPENAI_USAGE_RECONCILED",rec);
+check("Reconciliation records actual 16 tokens",rec.data&&rec.data.actualUsage&&rec.data.actualUsage.AI_TOKEN_USAGE===16,rec.data&&rec.data.actualUsage);
+check("Reconciliation computes actual gpt-5.6-luna cost from 11 input + 5 output tokens",rec.data&&rec.data.actualUsage&&rec.data.actualUsage.FINANCIAL_COST===0.0000082,rec.data&&rec.data.actualUsage);
+check("Provider usage returned for audit contains counters, not credential values",rec.data&&rec.data.providerUsage&&rec.data.providerUsage.input_tokens===11&&!JSON.stringify(rec).includes("SECRET"),rec.data&&rec.data.providerUsage);
+const failed=checks.filter(x=>!x.passed);console.log(JSON.stringify({id:"OPENAI-USAGE-RECONCILIATION-HOTFIX-V0.3.10",candidateVersion:"0.3.10",passed:checks.length-failed.length,failed:failed.length,total:checks.length,health:Math.round((checks.length-failed.length)/checks.length*100),criticalFailed:failed.length,realProviderNetworkCallPerformed:false,checks},null,2));process.exitCode=failed.length?1:0;

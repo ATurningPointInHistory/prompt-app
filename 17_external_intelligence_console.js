@@ -31,6 +31,36 @@
   }
 
   function countMap(key) { return s[key] instanceof Map ? s[key].size : 0; }
+  function mapValues(key) { return s[key] instanceof Map ? Array.from(s[key].values()) : []; }
+  function newestRecord(records) {
+    return (Array.isArray(records) ? records.slice() : []).sort(function (a,b) {
+      const at=Date.parse(a&&a.createdAt||a&&a.updatedAt||0)||0;
+      const bt=Date.parse(b&&b.createdAt||b&&b.updatedAt||0)||0;
+      return bt-at;
+    })[0] || null;
+  }
+  function getOpenAIApiRuntimeSnapshot() {
+    const requests=mapValues("acquisitionRequests").filter(function (r) { return r&&r.sourceId==="SOURCE-OPENAI"; });
+    const responses=mapValues("acquisitionResponses").filter(function (r) { return r&&r.sourceId==="SOURCE-OPENAI"; });
+    const usageRecords=mapValues("resourceUsageRecords").filter(function (r) { return r&&r.sourceId==="SOURCE-OPENAI"; });
+    const latestResponse=newestRecord(responses);
+    const latestUsage=newestRecord(usageRecords);
+    const source=typeof n.getExternalIntelligenceSource==="function"?n.getExternalIntelligenceSource("SOURCE-OPENAI"):null;
+    const validation=source&&source.realApiTestValidation||null;
+    let lastTest="未実行";
+    if(validation&&validation.passed===true) lastTest="PASS";
+    else if(latestUsage&&latestUsage.reconciled===false) lastTest="RECONCILIATION PENDING";
+    else if(latestResponse&&String(latestResponse.status||"").toUpperCase()==="SUCCESS") lastTest="PROVIDER SUCCESS";
+    return {
+      apiRequests: requests.length,
+      providerResponse: latestResponse?String(latestResponse.status||"UNKNOWN"):"未実行",
+      lastApiTest: lastTest,
+      actualTokens: latestUsage&&latestUsage.reconciled===true&&latestUsage.actualUsage?Number(latestUsage.actualUsage.AI_TOKEN_USAGE):null,
+      actualCostUsd: latestUsage&&latestUsage.reconciled===true&&latestUsage.actualUsage?Number(latestUsage.actualUsage.FINANCIAL_COST):null,
+      budgetReconciled: latestUsage?latestUsage.reconciled===true:null,
+      reconciliationState: latestUsage&&latestUsage.reconciliationState||null
+    };
+  }
 
   function getExternalIntelligenceConsoleSnapshot() {
     const gateway = gatewayState();
@@ -49,6 +79,7 @@
       foundationInitialized: s.initialized === true,
       moduleCount: Object.keys(n.modules || {}).length,
       gateway: gateway,
+      openaiApiRuntime: getOpenAIApiRuntimeSnapshot(),
       counts: {
         sources: countMap("sourceRegistry"),
         acquisitionRequests: countMap("acquisitionRequests"),
@@ -129,7 +160,7 @@
 
   function renderCounts(counts) {
     const labels = {
-      sources: "Sources", rawEvidence: "Raw Evidence", acquisitionEvidence: "Evidence", normalizedRecords: "Normalized",
+      sources: "Sources", acquisitionRequests: "Acquisition Requests", rawEvidence: "Raw Evidence", acquisitionEvidence: "Evidence", normalizedRecords: "Normalized",
       claims: "Claims", entities: "Entities", signals: "Signals", hypotheses: "Hypotheses",
       predictions: "Predictions", outcomes: "Outcomes", watches: "Watches", notifications: "Notifications",
       marketBars: "Market Bars", strategyExperiments: "Experiments"
@@ -137,6 +168,13 @@
     return Object.keys(labels).map(function (key) {
       return '<div class="external-count-card"><span>' + esc(labels[key]) + '</span><strong>' + esc(counts[key] || 0) + '</strong></div>';
     }).join("");
+  }
+
+  function renderApiRuntime(api) {
+    const a=api||{};
+    const money=function(v){const n=Number(v);return Number.isFinite(n)?"$"+n.toFixed(n<1?8:4):"—";};
+    const cell=function(label,value){return '<div class="external-count-card"><span>'+esc(label)+'</span><strong>'+esc(value==null?'—':value)+'</strong></div>';};
+    return cell("API Requests",a.apiRequests||0)+cell("Provider Response",a.providerResponse||"未実行")+cell("Last API Test",a.lastApiTest||"未実行")+cell("Actual Tokens",Number.isFinite(a.actualTokens)?a.actualTokens:"—")+cell("Actual Cost",Number.isFinite(a.actualCostUsd)?money(a.actualCostUsd):"—")+cell("Budget Reconciled",a.budgetReconciled===true?"YES":a.budgetReconciled===false?"NO":"—");
   }
 
   function renderExternalIntelligenceConsole() {
@@ -187,6 +225,11 @@
 
       '<section class="external-section">' +
         '<h4>現在のデータ</h4><div class="external-grid external-count-grid">' + renderCounts(snapshot.counts) + '</div>' +
+      '</section>' +
+
+      '<section class="external-section">' +
+        '<h4>API Runtime / Usage</h4><div class="external-grid external-count-grid">' + renderApiRuntime(snapshot.openaiApiRuntime) + '</div>' +
+        '<div class="external-help">Provider Response成功とEvidence永続化は別です。Real API TestではRepository / Knowledgeへの自動Promotionを行わず、UsageとBudget照合だけを確認します。</div>' +
       '</section>' +
 
       '<section class="external-section">' +

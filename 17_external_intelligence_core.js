@@ -216,9 +216,32 @@
     "secretValueStored", "secretValueRedactionApplied", "secretValueFieldDetected",
     "secretValueApiAvailable"
   ]);
+  // Token usage counters are accounting metrics, not credentials.
+  // Preserve only exact known keys when their values are finite non-negative numbers.
+  // Unknown token-like keys and any string/object secret material remain redacted.
+  const SAFE_TOKEN_USAGE_METRIC_KEYS = new Set([
+    "input_tokens", "output_tokens", "total_tokens", "cached_tokens",
+    "reasoning_tokens", "cache_write_tokens", "image_tokens", "text_tokens"
+  ]);
+  const SAFE_TOKEN_USAGE_DETAIL_KEYS = new Set([
+    "input_tokens_details", "output_tokens_details"
+  ]);
+
+  function isSafeTokenUsageMetric(key, value) {
+    if (!SAFE_TOKEN_USAGE_METRIC_KEYS.has(key)) return false;
+    return typeof value === "number" && Number.isFinite(value) && value >= 0;
+  }
 
   function redactSensitive(value, keyHint) {
     const safeKey = text(keyHint, "");
+    if (isSafeTokenUsageMetric(safeKey, value)) return value;
+    if (SAFE_TOKEN_USAGE_DETAIL_KEYS.has(safeKey) && isPlainObject(value)) {
+      const detailOutput = {};
+      Object.keys(value).forEach(function redactUsageDetail(key) {
+        detailOutput[key] = redactSensitive(value[key], key);
+      });
+      return detailOutput;
+    }
     if (SENSITIVE_KEY_PATTERN.test(safeKey) && !SAFE_SECRET_METADATA_KEYS.has(safeKey)) return "[REDACTED]";
     if (Array.isArray(value)) return value.map(function redactArray(item) { return redactSensitive(item, ""); });
     if (!isPlainObject(value)) return value;

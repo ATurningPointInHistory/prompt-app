@@ -1,0 +1,12 @@
+"use strict";
+const fs=require("node:fs"),path=require("node:path");
+const checks=[];const check=(name,passed,detail)=>checks.push({name,passed:Boolean(passed),detail});
+const src=fs.readFileSync(path.join(__dirname,"17_external_intelligence_console.js"),"utf8");
+check("Current Data includes Acquisition Requests count",src.includes('acquisitionRequests: "Acquisition Requests"'),"acquisition-count-visible");
+check("Dedicated API Runtime / Usage section is rendered",src.includes("API Runtime / Usage")&&src.includes("renderApiRuntime(snapshot.openaiApiRuntime)"),"api-runtime-section");
+check("API status exposes request and provider response state",src.includes('cell("API Requests"')&&src.includes('cell("Provider Response"'),"request-response-status");
+check("API status exposes Last API Test and actual token/cost fields",src.includes('cell("Last API Test"')&&src.includes('cell("Actual Tokens"')&&src.includes('cell("Actual Cost"'),"usage-status");
+check("Budget reconciliation state is visible",src.includes('cell("Budget Reconciled"'),"budget-reconciled-status");
+check("Unreconciled estimates are not mislabeled as actual token/cost",src.includes('latestUsage.reconciled===true&&latestUsage.actualUsage')&&src.includes('budgetReconciled: latestUsage?latestUsage.reconciled===true:null'),"actual-only-when-reconciled");
+check("UI explains provider success is separate from Evidence promotion",src.includes("Provider Response成功とEvidence永続化は別です")&&src.includes("自動Promotionを行わず"),"boundary-explained");
+const failed=checks.filter(x=>!x.passed);console.log(JSON.stringify({id:"OPENAI-API-RUNTIME-USAGE-UI-V0.3.10",candidateVersion:"0.3.10",passed:checks.length-failed.length,failed:failed.length,total:checks.length,health:Math.round((checks.length-failed.length)/checks.length*100),criticalFailed:failed.length,checks},null,2));process.exitCode=failed.length?1:0;

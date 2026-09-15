@@ -1142,6 +1142,8 @@
         return internal.buildResult(false, "EXTERNAL010_OPENAI_REAL_API_TEST_USAGE_RECONCILIATION_REQUIRED", "Reconciliation Pending", {
           requestId: requestId,
           execution: execution.data || null,
+          realApiRequestAttempted: true,
+          providerNetworkCallPerformed: true,
           realApiRequestPerformed: true,
           usageReconciled: false,
           ambiguousPaidCostAssumedZero: false,
