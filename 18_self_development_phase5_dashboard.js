@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 18_self_development_phase5_dashboard.js
    Decision 058 Phase 5A / Controlled Live Trial UI
-   Candidate Hotfix: 0.5.2
+   Candidate Hotfix: 0.5.3
    - Replaces the prior read-only-only Phase 5 dashboard behavior.
    - Reuses REPOSITORY-010; does not implement a second mutation engine.
    - Persistent reflection / baseline promotion remain unavailable.
@@ -95,7 +95,7 @@
     const writeStatus = readiness && readiness.restrictedWriteAdapterStatus || {};
     return {
       id: "SELF-DEVELOPMENT-058",
-      version: "0.5.2",
+      version: "0.5.3",
       phase: 5,
       status: "Candidate / Local Trial Lineage UI",
       readOnlyDashboard: false,
@@ -171,6 +171,7 @@
     ].join("");
 
     const btnLocalLineage = panel && panel.querySelector('[data-p5="local-lineage"]');
+    const btnLocalLineageReceive = panel && panel.querySelector('[data-p5="local-lineage-receive"]');
     const btnAndroidVerify = panel && panel.querySelector('[data-p5="android-verify"]');
     const btnArm = panel && panel.querySelector('[data-p5="arm"]');
     const btnPrepare = panel && panel.querySelector('[data-p5="prepare"]');
@@ -179,6 +180,7 @@
     const active = arm.armed === true;
     const isAndroid = /Android/i.test(global.navigator && global.navigator.userAgent || "");
     if (btnLocalLineage) btnLocalLineage.disabled = isAndroid || active;
+    if (btnLocalLineageReceive) btnLocalLineageReceive.disabled = isAndroid || active;
     if (btnAndroidVerify) btnAndroidVerify.disabled = !isAndroid || active;
     if (btnArm) btnArm.disabled = isAndroid || !(line.preparationReady && d.repositoryDirectorySelected) || active;
     if (btnPrepare) btnPrepare.disabled = !(active && line.preparationReady);
@@ -214,10 +216,11 @@
       ' <div class="selfdev058-p5-card selfdev058-p5-status" id="selfdev058-phase5-status"></div>',
       ' <div class="selfdev058-p5-card">',
       '  <b>Phase 5A Safety Boundary</b>',
-      '  <p class="selfdev058-p5-note">専用Fixture 1関数だけを一時変更し、Readback後に必ずRollbackします。Phase 5AのPC TrialはAndroid Sync不要です。Android照合は必要時だけ別ボタンでPackage生成します。Persistent ReflectionとCanonical PromotionはこのUIから実行できません。</p>',
+      '  <p class="selfdev058-p5-note">専用Fixture 1関数だけを一時変更し、Readback後に必ずRollbackします。Phase 5AのPC TrialはAndroid Sync不要です。Frozen V2境界を守るため、PCローカル検証Packageを一度保存し、その同じJSONをユーザーが選択して再読込します。Android照合は必要時だけ別ボタンでPackage生成します。Persistent ReflectionとCanonical PromotionはこのUIから実行できません。</p>',
       '  <div class="selfdev058-p5-actions">',
       '   <button type="button" data-p5="refresh">① Readiness更新</button>',
-      '   <button type="button" data-p5="local-lineage">② PC Local Trial Lineage準備</button>',
+      '   <button type="button" data-p5="local-lineage">②A PC検証Packageを作成</button>',
+      '   <button type="button" data-p5="local-lineage-receive">②B 作成したPackageを読み込む</button>',
       '   <button type="button" data-p5="directory">③ 書込対象フォルダ選択（同じAI_Prompt_OS）</button>',
       '   <button type="button" class="primary" data-p5="arm">④ Controlled TrialをArm</button>',
       '   <button type="button" data-p5="prepare">⑤ Safe Mutation準備</button>',
@@ -245,9 +248,18 @@
     });
 
     panel.querySelector('[data-p5="local-lineage"]').addEventListener("click", function () {
-      return run("PC Local Trial Lineage準備", async function () {
-        if (typeof namespace.prepareSelfDevelopmentPhase5LocalTrialLineage !== "function") return { ok: false, status: "Blocked", message: "PC Local Trial Lineage API is unavailable." };
+      return run("PC検証Packageを作成", async function () {
+        if (typeof namespace.prepareSelfDevelopmentPhase5LocalTrialLineage !== "function") return { ok: false, status: "Blocked", message: "PC Local Trial Lineage export API is unavailable." };
         const result = await namespace.prepareSelfDevelopmentPhase5LocalTrialLineage();
+        session.localLineage = result && result.data ? clone(result.data) : null;
+        return result;
+      });
+    });
+
+    panel.querySelector('[data-p5="local-lineage-receive"]').addEventListener("click", function () {
+      return run("PC検証Packageを読み込む", async function () {
+        if (typeof namespace.receiveSelfDevelopmentPhase5LocalTrialLineage !== "function") return { ok: false, status: "Blocked", message: "PC Local Trial Lineage receive API is unavailable." };
+        const result = await namespace.receiveSelfDevelopmentPhase5LocalTrialLineage();
         if (result && result.ok === true && result.data) session.localLineage = clone(result.data);
         return result;
       });

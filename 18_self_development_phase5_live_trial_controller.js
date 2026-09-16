@@ -10,6 +10,7 @@
   if (!namespace || !namespace.__internal) return;
   const i = namespace.__internal;
   let arm = null;
+  let localLineagePending = null;
   function policy() { return namespace.getSelfDevelopmentPhase5LiveTrialPolicy(); }
   function repo() { return global.REPOSITORY010LocalFirstRepository || null; }
   function result(ok, code, status, data) { return { ok: ok === true, code: code, status: status, data: data || null, at: new Date().toISOString() }; }
@@ -162,7 +163,7 @@
   namespace.prepareSelfDevelopmentPhase5LocalTrialLineage = async function () {
     const r = repo();
     if (!r || !r.__internal || !r.__internal.state) return result(false, "SELFDEV058_PHASE5_REPOSITORY_UNAVAILABLE", "Blocked", { localLineagePrepared: false });
-    const required = ["initializeLocalFirstRepositoryPersistence", "listPersistedLocalFirstRepositoryRecords", "stageOfflineRepositoryWork", "prepareLocalSyncCandidate", "prepareLocalTransferPackage", "buildV2TransferEnvelope", "receiveV2TransferEnvelope", "evaluateV3BaseRevision", "evaluateV4TargetEnvironment", "persistLocalFirstRepositoryRecord"];
+    const required = ["initializeLocalFirstRepositoryPersistence", "listPersistedLocalFirstRepositoryRecords", "stageOfflineRepositoryWork", "prepareLocalSyncCandidate", "prepareLocalTransferPackage", "downloadV2TransferEnvelope"];
     const missing = required.filter(function (name) { return typeof r[name] !== "function"; });
     if (missing.length) return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_API_UNAVAILABLE", "Blocked", { missing: missing, localLineagePrepared: false });
 
@@ -212,53 +213,112 @@
     if (!transferResult || transferResult.ok !== true) return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_TRANSFER_BLOCKED", "Blocked", { repositoryResult: transferResult, localLineagePrepared: false });
     const transferPackage = transferResult.data && transferResult.data.transferPackage;
 
-    const envelopeResult = await r.buildV2TransferEnvelope(transferPackage, {
+    const exported = await r.downloadV2TransferEnvelope(transferPackage, {
       sourceNodeId: replicaNodeId,
       userAgent: "SELF-DEVELOPMENT-058 PC Local Trial",
-      platform: "PC_LOCAL_LOOPBACK",
+      platform: "PC_LOCAL_USER_SELECTED_LOOPBACK",
       origin: global.location && global.location.origin || "local",
       realDeviceClaim: "pc-local-trial"
     });
-    if (!envelopeResult || envelopeResult.ok !== true) return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_ENVELOPE_BLOCKED", "Blocked", { repositoryResult: envelopeResult, localLineagePrepared: false });
-    const envelope = envelopeResult.data && envelopeResult.data.envelope;
-    const received = await r.receiveV2TransferEnvelope(envelope, { requireAndroidSender: false, receivedViaUserSelection: false, fileName: "SELFDEV058_PC_LOCAL_TRIAL_LOOPBACK.json" });
+    if (!exported || exported.ok !== true) return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_EXPORT_BLOCKED", "Blocked", { repositoryResult: exported, localLineagePrepared: false });
+
+    localLineagePending = Object.freeze({
+      baseline: cloneValue(baseline),
+      scan: cloneValue(scan),
+      stagingId: stagingId,
+      syncCandidateId: candidate && candidate.syncCandidateId || null,
+      transferPackageId: transferPackage && transferPackage.transferPackageId || null,
+      expectedPackageHash: transferPackage && transferPackage.packageHash || null,
+      exportedFilename: exported.data && exported.data.filename || null,
+      preparedAt: new Date().toISOString()
+    });
+    return result(true, "SELFDEV058_PHASE5_PC_LOCAL_TRIAL_PACKAGE_EXPORTED", "Awaiting User Selection", {
+      lineageMode: "PC_LOCAL_USER_SELECTED_LOOPBACK",
+      localOnly: true,
+      androidSyncRequired: false,
+      physicalCrossDeviceTransferPerformed: false,
+      v2UserSelectionRequired: true,
+      exportedFilename: localLineagePending.exportedFilename,
+      baselineId: baseline.canonicalBaselineDescriptorId || null,
+      canonicalRevisionId: baseline.canonicalRevisionId,
+      transferPackageId: localLineagePending.transferPackageId,
+      localLineagePrepared: false,
+      nextAction: "Select the exported JSON with ②B to satisfy the frozen V2 user-selection boundary.",
+      validationIsApproval: false,
+      mutationAuthorityGranted: false,
+      canonicalMutationPerformed: false
+    });
+  };
+
+  namespace.receiveSelfDevelopmentPhase5LocalTrialLineage = async function () {
+    const r = repo();
+    if (!localLineagePending) return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_EXPORT_REQUIRED", "Blocked", { localLineagePrepared: false });
+    const required = ["receiveV2TransferFile", "evaluateV3BaseRevision", "evaluateV4TargetEnvironment", "persistLocalFirstRepositoryRecord"];
+    const missing = required.filter(function (name) { return !r || typeof r[name] !== "function"; });
+    if (missing.length) return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_RECEIVE_API_UNAVAILABLE", "Blocked", { missing: missing, localLineagePrepared: false });
+    if (typeof global.showOpenFilePicker !== "function") return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_FILE_PICKER_UNAVAILABLE", "Blocked", { localLineagePrepared: false });
+
+    let file;
+    try {
+      const handles = await global.showOpenFilePicker({ multiple: false, types: [{ description: "SELF-DEVELOPMENT-058 PC Local Trial V2 Package", accept: { "application/json": [".json"] } }] });
+      if (!handles || !handles[0]) return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_FILE_SELECTION_REQUIRED", "Blocked", { localLineagePrepared: false });
+      file = await handles[0].getFile();
+    } catch (error) {
+      return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_FILE_SELECTION_CANCELLED", "Blocked", { localLineagePrepared: false, message: error && error.message ? error.message : String(error) });
+    }
+
+    const received = await r.receiveV2TransferFile(file, { requireAndroidSender: false });
     if (!received || received.ok !== true) return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_V2_BLOCKED", "Blocked", { repositoryResult: received, localLineagePrepared: false });
     const receipt = received.data && received.data.receipt;
-    if (receipt) await r.persistLocalFirstRepositoryRecord("v2TransferReceipt", receipt);
+    const receivedPackage = received.data && received.data.transferPackage;
+    if (!receivedPackage || receivedPackage.transferPackageId !== localLineagePending.transferPackageId || receivedPackage.packageHash !== localLineagePending.expectedPackageHash) {
+      return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_SELECTED_PACKAGE_MISMATCH", "Blocked", {
+        expectedTransferPackageId: localLineagePending.transferPackageId,
+        actualTransferPackageId: receivedPackage && receivedPackage.transferPackageId || null,
+        localLineagePrepared: false
+      });
+    }
+    if (!receipt || receipt.receivedViaUserSelection !== true) return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_USER_SELECTION_PROOF_REQUIRED", "Blocked", { receipt: receipt || null, localLineagePrepared: false });
+    await r.persistLocalFirstRepositoryRecord("v2TransferReceipt", receipt);
 
-    const v3 = r.evaluateV3BaseRevision(receipt, baseline, { conflictEvidenceId: "SELFDEV058-PC-LOCAL-TRIAL-V3-" + stamp, v3GateId: "SELFDEV058-PC-LOCAL-TRIAL-V3-GATE-" + stamp });
+    const baseline = cloneValue(localLineagePending.baseline);
+    const v3 = r.evaluateV3BaseRevision(receipt, baseline, { conflictEvidenceId: "SELFDEV058-PC-LOCAL-TRIAL-V3-" + Date.now(), v3GateId: "SELFDEV058-PC-LOCAL-TRIAL-V3-GATE-" + Date.now() });
     if (!v3 || v3.ok !== true || !v3.data || v3.data.blockingConflict === true) return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_V3_BLOCKED", "Blocked", { repositoryResult: v3, localLineagePrepared: false });
     if (v3.data.evidence) await r.persistLocalFirstRepositoryRecord("v3ConflictEvidence", v3.data.evidence);
 
-    let freshScan = scan;
+    let freshScan = localLineagePending.scan;
     if (typeof r.scanDesktopRepositoryDirectory === "function") {
       const rescanned = await r.scanDesktopRepositoryDirectory();
       if (rescanned && rescanned.ok === true) freshScan = rescanned.data;
     }
     if (!pcScanMatchesBaseline(freshScan, baseline)) return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_FRESH_SCAN_BLOCKED", "Blocked", { baseline: baseline, scan: freshScan, localLineagePrepared: false });
+    const stamp = String(Date.now());
     const v4 = r.evaluateV4TargetEnvironment(v3.data.evidence, baseline, freshScan, { v4EvidenceId: "SELFDEV058-PC-LOCAL-TRIAL-V4-" + stamp, v4GateId: "SELFDEV058-PC-LOCAL-TRIAL-V4-GATE-" + stamp });
     if (!v4 || v4.ok !== true || !v4.data || v4.data.v4TargetEnvironmentValidated !== true || v4.data.blockingTargetDrift === true) return result(false, "SELFDEV058_PHASE5_LOCAL_LINEAGE_V4_BLOCKED", "Blocked", { repositoryResult: v4, localLineagePrepared: false });
     if (v4.data.evidence) await r.persistLocalFirstRepositoryRecord("v4TargetValidationEvidence", v4.data.evidence);
 
     r.__internal.state.lastCanonicalBaseline = cloneValue(baseline);
-    return result(true, "SELFDEV058_PHASE5_PC_LOCAL_TRIAL_LINEAGE_READY", "Ready", {
-      lineageMode: "PC_LOCAL_LOOPBACK",
+    const ready = {
+      lineageMode: "PC_LOCAL_USER_SELECTED_LOOPBACK",
       localOnly: true,
       androidSyncRequired: false,
       physicalCrossDeviceTransferPerformed: false,
+      v2UserSelectionVerified: true,
       baselineId: baseline.canonicalBaselineDescriptorId || null,
       canonicalRevisionId: baseline.canonicalRevisionId,
-      stagingId: stagingId,
-      syncCandidateId: candidate && candidate.syncCandidateId || null,
-      transferPackageId: transferPackage && transferPackage.transferPackageId || null,
-      receiptId: receipt && receipt.receiptId || null,
+      stagingId: localLineagePending.stagingId,
+      syncCandidateId: localLineagePending.syncCandidateId,
+      transferPackageId: receivedPackage.transferPackageId,
+      receiptId: receipt.receiptId,
       v3EvidenceId: v3.data.evidence && v3.data.evidence.conflictEvidenceId || null,
       v4EvidenceId: v4.data.evidence && v4.data.evidence.v4EvidenceId || null,
       localLineagePrepared: true,
       validationIsApproval: false,
       mutationAuthorityGranted: false,
       canonicalMutationPerformed: false
-    });
+    };
+    localLineagePending = null;
+    return result(true, "SELFDEV058_PHASE5_PC_LOCAL_TRIAL_LINEAGE_READY", "Ready", ready);
   };
 
   namespace.exportSelfDevelopmentPhase5AndroidPcVerificationPackage = async function () {

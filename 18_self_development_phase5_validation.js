@@ -27,7 +27,7 @@
     check("Live mutation preparation requires explicit active arm", typeof namespace.prepareSelfDevelopmentPhase5SafeMutationPackage === "function", { available: true }, "Execution Boundary");
     check("Real Acceptance Token bridge exists but validation does not call it", typeof namespace.issueSelfDevelopmentPhase5TrialAcceptanceToken === "function", { called: false }, "Execution Boundary");
     check("Real Controlled Trial bridge exists but validation does not call it", typeof namespace.executeSelfDevelopmentPhase5ControlledTrial === "function", { called: false }, "Execution Boundary");
-    check("PC Local Trial Lineage can be prepared without Android Sync", typeof namespace.prepareSelfDevelopmentPhase5LocalTrialLineage === "function", { available: true, androidSyncRequiredForPhase5ATrial: false, called: false }, "Lineage Boundary");
+    check("PC Local Trial Lineage can be prepared without Android Sync", typeof namespace.prepareSelfDevelopmentPhase5LocalTrialLineage === "function" && typeof namespace.receiveSelfDevelopmentPhase5LocalTrialLineage === "function", { available: true, androidSyncRequiredForPhase5ATrial: false, userSelectedV2Required: true, called: false }, "Lineage Boundary");
     check("Optional Android PC-verification Package exporter exists without Android live write", typeof namespace.exportSelfDevelopmentPhase5AndroidPcVerificationPackage === "function" && P5.hardBoundaries.androidLiveWriteAllowed === false, { available: true, androidLiveWriteAllowed: false, called: false }, "Cross Device Boundary");
     const audit = namespace.recordSelfDevelopmentPhase5TrialAudit({ eventType: "PHASE5A_NO_WRITE_VALIDATION" });
     const auditStatus = namespace.getSelfDevelopmentPhase5TrialAuditStatus();
@@ -42,7 +42,7 @@
     const failed = checks.filter(function (x) { return !x.passed; });
     const criticalFailed = failed.filter(function (x) { return x.severity === "Critical"; }).length;
     const report = Object.freeze({
-      validationId: namespace.__internal.nextId("SELFDEV058-PHASE5-VALIDATION"), componentId: "SELF-DEVELOPMENT-058", decisionId: "EXTERNAL-010-DECISION-058", version: "0.5.2", phase: 5,
+      validationId: namespace.__internal.nextId("SELFDEV058-PHASE5-VALIDATION"), componentId: "SELF-DEVELOPMENT-058", decisionId: "EXTERNAL-010-DECISION-058", version: "0.5.3", phase: 5,
       passed: checks.length - failed.length, failed: failed.length, total: checks.length, health: checks.length ? Math.round(((checks.length - failed.length) / checks.length) * 10000) / 100 : 100, criticalFailed: criticalFailed,
       releaseAllowed: false, phase5ImplementationComplete: true, phase5TechnicalGateReady: failed.length === 0, phase5Accepted: false, implementationPhase6Allowed: false, projectOwnerAcceptanceRequired: true,
       validationIsApproval: false, liveTrialExecutedByValidation: false, repository010AcceptanceTokenIssuedByValidation: false, physicalWritePerformedByValidation: false, persistentReflectionPerformed: false, baselinePromotionPerformed: false, canonicalMutationPerformed: false,

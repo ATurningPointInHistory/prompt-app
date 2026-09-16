@@ -1064,8 +1064,8 @@
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "c1bd00b9b3af104d91cca40fba2c72cb6f3e3c9b3a0352d297c91b7471f9207f",
-  "scriptSetHash": "d45fa571ab4676616bc292d2a2c918d62d1c454f1383ae6d1079d84963924f0d",
+  "scriptManifestHash": "f731fa7c33751d46dda7a2d082548e85794a2cfaa801ac8b9ad2ab6e9a50c8d9",
+  "scriptSetHash": "2092e27ed888459e6f8f9443af19d0c88c6afc84c95e4f1d0265ea0cca304672",
   "scriptManifestCount": 455,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
@@ -1075,10 +1075,10 @@
     "last": "99_init.js",
     "generatedAtSave": true
   },
-  "releaseStatus": "SELF_DEVELOPMENT_058_PHASE5A_LOCAL_TRIAL_LINEAGE_UI_CANDIDATE",
+  "releaseStatus": "SELF_DEVELOPMENT_058_PHASE5A_USER_SELECTED_LOCAL_LINEAGE_UI_CANDIDATE",
   "releaseAllowed": false,
   "projectOwnerRevalidationRequired": true,
-  "decision058CandidateVersion": "0.5.1",
+  "decision058CandidateVersion": "0.5.3",
   "decision058Phase": 5,
   "decision058CanonicalMutationImplemented": false,
   "decision058ValidationIsApproval": false,
@@ -1093,7 +1093,7 @@
   "decision058Phase3ApprovalPolicyRelaxationMapImplemented": true,
   "decision058Phase3SelfApprovalAllowed": false,
   "decision058Phase3AdoptionImplemented": false,
-  "updatedAt": "2026-09-16T08:35:00.000000Z",
+  "updatedAt": "2026-09-16T03:15:00.000000Z",
   "decision058Phase3Status": "PROJECT_OWNER_ACCEPTED_FROZEN",
   "decision058Phase3Version": "0.3.0",
   "decision058AdoptionContractImplemented": true,
@@ -1120,5 +1120,6 @@
   "decision058Phase5LocalTrialLineageImplemented": true,
   "decision058Phase5AndroidSyncRequiredForTrial": false,
   "decision058Phase5AndroidPcVerificationPackageUiImplemented": true,
-  "decision058Phase5AndroidPcVerificationOptional": true
+  "decision058Phase5AndroidPcVerificationOptional": true,
+  "decision058Phase5LocalTrialUserSelectedV2Required": true
 }
