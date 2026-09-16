@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 18_self_development_phase5_dashboard.js
    Decision 058 Phase 5A / Controlled Live Trial UI
-   Candidate Hotfix: 0.5.3
+   Candidate Hotfix: 0.5.4
    - Replaces the prior read-only-only Phase 5 dashboard behavior.
    - Reuses REPOSITORY-010; does not implement a second mutation engine.
    - Persistent reflection / baseline promotion remain unavailable.
@@ -95,7 +95,7 @@
     const writeStatus = readiness && readiness.restrictedWriteAdapterStatus || {};
     return {
       id: "SELF-DEVELOPMENT-058",
-      version: "0.5.3",
+      version: "0.5.4",
       phase: 5,
       status: "Candidate / Local Trial Lineage UI",
       readOnlyDashboard: false,

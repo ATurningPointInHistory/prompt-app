@@ -4,10 +4,9 @@
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "EXTERNAL-010 v1.20.1 frozen baseline + OpenAI API Integration v0.3.11 FINAL_VALIDATED + Decision 058 Self-Development Environment Phases 1-4 Accepted/Frozen + Phase 5A v0.5.3 User-Selected Local Trial Lineage UI Candidate; PC-only user-selected loopback V2/V3/V4 lineage for controlled trial without Android Sync prerequisite, optional Android PC-verification package export, exactly-one safe function patch, mandatory readback+rollback restoration proof, no persistent reflection or baseline promotion",
+  "description": "EXTERNAL-010 v1.20.1 frozen baseline + OpenAI API Integration v0.3.11 FINAL_VALIDATED + Decision 058 Self-Development Environment Phases 1-4 Accepted/Frozen + Phase 5A v0.5.4 Traceability Consistency Hotfix Candidate; PC-only user-selected loopback V2/V3/V4 lineage for controlled trial without Android Sync prerequisite, optional Android PC-verification package export, exactly-one safe function patch, mandatory readback+rollback restoration proof, no persistent reflection or baseline promotion",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
-  "updatedAt": "2026-09-16T03:15:00.000000Z",
   "scripts": [
     "./00_core.js?h=03cdc50b3874",
     "./01_task_manager.js?h=a4795193df6c",
@@ -454,15 +453,15 @@
     "./18_self_development_phase4_traceability.js?h=7516284014a0",
     "./18_self_development_phase4_dashboard.js?h=ea8a91b71534",
     "./18_self_development_phase4_validation.js?h=4ae2c51ee993",
-    "./18_self_development_phase5_version_manifest.js?h=0041a88a2504",
+    "./18_self_development_phase5_version_manifest.js?h=122db1301695",
     "./18_self_development_phase5_live_trial_policy.js?h=81318ce84841",
     "./18_self_development_phase5_trial_fixture.js?h=fc7abaf96991",
     "./18_self_development_phase5_live_trial_bridge.js?h=1767a104c00c",
     "./18_self_development_phase5_live_trial_controller.js?h=e9c96d73f77f",
     "./18_self_development_phase5_live_trial_audit.js?h=e3ed19604009",
-    "./18_self_development_phase5_traceability.js?h=9368c3602baa",
-    "./18_self_development_phase5_dashboard.js?h=8c9457a7355d",
-    "./18_self_development_phase5_validation.js?h=f2ae7d9f4f28",
+    "./18_self_development_phase5_traceability.js?h=2d4cfc240e00",
+    "./18_self_development_phase5_dashboard.js?h=d4f337e5f71e",
+    "./18_self_development_phase5_validation.js?h=038110c719df",
     "./99_init.js?h=de0ce6495428"
   ],
   "hashes": {
@@ -2697,9 +2696,9 @@
       "cacheKey": "4ae2c51ee993"
     },
     "18_self_development_phase5_version_manifest.js": {
-      "sha256": "0041a88a2504d7653c2e4aafb2c5b05a7eeab1ae0435450bc2e0b90bb70962e3",
-      "byteSize": 3676,
-      "cacheKey": "0041a88a2504"
+      "sha256": "122db1301695d0baa504b0044a48d7eafdf17dc435d53d3ebffb641f57196e7f",
+      "byteSize": 3677,
+      "cacheKey": "122db1301695"
     },
     "18_self_development_phase5_live_trial_policy.js": {
       "sha256": "81318ce84841feba2a9a4038da2c575ffc302e717cd11f28b7917bff64685fe0",
@@ -2727,22 +2726,22 @@
       "cacheKey": "e3ed19604009"
     },
     "18_self_development_phase5_traceability.js": {
-      "sha256": "9368c3602baac90496f0259f2fa15cb873bf98f9682c80940dde839c44c83e11",
+      "sha256": "2d4cfc240e00144cefda944c4520d922a920489fc0d9bdc0fb0e1600effa83ad",
       "byteSize": 1576,
-      "cacheKey": "9368c3602baa"
+      "cacheKey": "2d4cfc240e00"
     },
     "18_self_development_phase5_dashboard.js": {
-      "sha256": "8c9457a7355d7ec713e655b9e7cb546f7d99a77484cbe51d8e4a023f294b0428",
+      "sha256": "d4f337e5f71e08298fa8df30cfd15b362d9a4528204bd924f149ade362880bf2",
       "byteSize": 24518,
-      "cacheKey": "8c9457a7355d"
+      "cacheKey": "d4f337e5f71e"
     },
     "18_self_development_phase5_validation.js": {
-      "sha256": "f2ae7d9f4f289a4b6ea7ad3aeda73eeb28f4a296bba437f5c58b9e9e0e549cec",
-      "byteSize": 7807,
-      "cacheKey": "f2ae7d9f4f28"
+      "sha256": "038110c719dfce35a7731db5e636a79dc5a271ddd505d001d3798fa6b02e429d",
+      "byteSize": 8033,
+      "cacheKey": "038110c719df"
     }
   },
-  "scriptSetHash": "2092e27ed888459e6f8f9443af19d0c88c6afc84c95e4f1d0265ea0cca304672",
+  "scriptSetHash": "5aa2d06f3e48de1141653f081dcc3ce51255cff268669431c0410c423892f6ec",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -5020,5 +5019,6 @@
       "cacheKey": "ae3ebf6311a5"
     }
   },
-  "manifestHash": "f731fa7c33751d46dda7a2d082548e85794a2cfaa801ac8b9ad2ab6e9a50c8d9"
+  "manifestHash": "d84640eef40eb41bb7a34099fff5d6a3cd52f54fe63d4b91373b80cab0505e80",
+  "updatedAt": "2026-09-16T03:30:00.000Z"
 }

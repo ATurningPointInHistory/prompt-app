@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 18_self_development_phase5_version_manifest.js
    EXTERNAL-010 Decision 058 / Self-Development Environment
-   Candidate Hotfix Release: 0.5.3
+   Candidate Hotfix Release: 0.5.4
    Phase 5A: Controlled Live Trial / Mandatory Restoration Proof
    Phases 1-4 remain Project Owner Accepted / Frozen.
    ============================================================ */
@@ -15,8 +15,8 @@
   const manifest = deepFreeze({
     componentId: "SELF-DEVELOPMENT-058",
     decisionId: "EXTERNAL-010-DECISION-058",
-    version: "0.5.3",
-    status: "IMPLEMENTATION_PHASE5A_USER_SELECTED_LOCAL_LINEAGE_UI_CANDIDATE",
+    version: "0.5.4",
+    status: "IMPLEMENTATION_PHASE5A_TRACEABILITY_CONSISTENCY_HOTFIX_CANDIDATE",
     phase: 5,
     phaseName: "Controlled Live Trial / Mandatory Restoration Proof",
     parentPhases: [
