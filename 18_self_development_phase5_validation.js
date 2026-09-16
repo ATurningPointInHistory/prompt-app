@@ -35,7 +35,7 @@
     check("No-write audit grants no persistent reflection or canonical mutation", audit.data.record.persistentReflectionPerformed === false && audit.data.record.canonicalMutationPerformed === false, audit.data.record, "Audit");
     const coverage = namespace.getSelfDevelopmentPhase5Coverage();
     check("Decision 058 traceability preserves live-evidence-pending state", coverage.totalDecisionRequirements === 18 && coverage.phase5ScopeComplete === true && coverage.allDecisionRequirementsComplete === false && coverage.liveTrialExecutionEvidenceRequiredForRequirementClosure === true, coverage, "Traceability");
-    check("Phase 5A traceability version matches candidate version", coverage.phase5Version === P5.version && P5.version === "0.5.4", { coverageVersion: coverage.phase5Version, candidateVersion: P5.version }, "Traceability");
+    check("Phase 5A traceability version matches candidate version", coverage.phase5Version === P5.version && P5.version === "0.5.5", { coverageVersion: coverage.phase5Version, candidateVersion: P5.version }, "Traceability");
     const dashboard = namespace.getSelfDevelopmentPhase5Dashboard();
     check("Phase 5A UI exposes only bounded Controlled Trial actions", dashboard.readOnlyDashboard === false && dashboard.controlledTrialActionsAvailable === true && dashboard.androidSyncRequiredForPhase5ATrial === false && dashboard.persistentReflectionActionsAvailable === false && dashboard.baselinePromotionActionsAvailable === false, dashboard, "UI");
     const h = P5.hardBoundaries;
@@ -43,7 +43,7 @@
     const failed = checks.filter(function (x) { return !x.passed; });
     const criticalFailed = failed.filter(function (x) { return x.severity === "Critical"; }).length;
     const report = Object.freeze({
-      validationId: namespace.__internal.nextId("SELFDEV058-PHASE5-VALIDATION"), componentId: "SELF-DEVELOPMENT-058", decisionId: "EXTERNAL-010-DECISION-058", version: "0.5.4", phase: 5,
+      validationId: namespace.__internal.nextId("SELFDEV058-PHASE5-VALIDATION"), componentId: "SELF-DEVELOPMENT-058", decisionId: "EXTERNAL-010-DECISION-058", version: "0.5.5", phase: 5,
       passed: checks.length - failed.length, failed: failed.length, total: checks.length, health: checks.length ? Math.round(((checks.length - failed.length) / checks.length) * 10000) / 100 : 100, criticalFailed: criticalFailed,
       releaseAllowed: false, phase5ImplementationComplete: true, phase5TechnicalGateReady: failed.length === 0, phase5Accepted: false, implementationPhase6Allowed: false, projectOwnerAcceptanceRequired: true,
       validationIsApproval: false, liveTrialExecutedByValidation: false, repository010AcceptanceTokenIssuedByValidation: false, physicalWritePerformedByValidation: false, persistentReflectionPerformed: false, baselinePromotionPerformed: false, canonicalMutationPerformed: false,

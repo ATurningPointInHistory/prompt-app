@@ -273,6 +273,7 @@
     "./13_local_first_repository_phase12_validation.js?h=02b2431045b5",
     "./13_local_first_repository_guided_operations.js?h=17831b44f956",
     "./13_local_first_repository_guided_operations_ui.js?h=bb8d13780d14",
+    "./13_local_first_repository_development_release_builder.js?h=ea347c2ae5c2",
     "./13_local_first_repository_phase18_validation.js?h=77b767c7d32a",
     "./13_project_report.js?h=d636cb6a6766",
     "./13_project_handoff.js?h=a073ff86a1eb",
@@ -453,15 +454,15 @@
     "./18_self_development_phase4_traceability.js?h=7516284014a0",
     "./18_self_development_phase4_dashboard.js?h=ea8a91b71534",
     "./18_self_development_phase4_validation.js?h=4ae2c51ee993",
-    "./18_self_development_phase5_version_manifest.js?h=122db1301695",
+    "./18_self_development_phase5_version_manifest.js?h=d2df99069756",
     "./18_self_development_phase5_live_trial_policy.js?h=81318ce84841",
     "./18_self_development_phase5_trial_fixture.js?h=fc7abaf96991",
     "./18_self_development_phase5_live_trial_bridge.js?h=1767a104c00c",
     "./18_self_development_phase5_live_trial_controller.js?h=e9c96d73f77f",
     "./18_self_development_phase5_live_trial_audit.js?h=e3ed19604009",
-    "./18_self_development_phase5_traceability.js?h=2d4cfc240e00",
-    "./18_self_development_phase5_dashboard.js?h=d4f337e5f71e",
-    "./18_self_development_phase5_validation.js?h=038110c719df",
+    "./18_self_development_phase5_traceability.js?h=ac2bb1c9b185",
+    "./18_self_development_phase5_dashboard.js?h=ad68bade84dc",
+    "./18_self_development_phase5_validation.js?h=75e443a93dcb",
     "./99_init.js?h=de0ce6495428"
   ],
   "hashes": {
@@ -2696,9 +2697,9 @@
       "cacheKey": "4ae2c51ee993"
     },
     "18_self_development_phase5_version_manifest.js": {
-      "sha256": "122db1301695d0baa504b0044a48d7eafdf17dc435d53d3ebffb641f57196e7f",
-      "byteSize": 3677,
-      "cacheKey": "122db1301695"
+      "sha256": "d2df99069756bb2016f24ce959614026ad72748519fb23675d561569d6b492d7",
+      "byteSize": 3673,
+      "cacheKey": "d2df99069756"
     },
     "18_self_development_phase5_live_trial_policy.js": {
       "sha256": "81318ce84841feba2a9a4038da2c575ffc302e717cd11f28b7917bff64685fe0",
@@ -2726,22 +2727,27 @@
       "cacheKey": "e3ed19604009"
     },
     "18_self_development_phase5_traceability.js": {
-      "sha256": "2d4cfc240e00144cefda944c4520d922a920489fc0d9bdc0fb0e1600effa83ad",
+      "sha256": "ac2bb1c9b185c4428b982b456e45371b7b040c35f23b6b879d573c970333c158",
       "byteSize": 1576,
-      "cacheKey": "2d4cfc240e00"
+      "cacheKey": "ac2bb1c9b185"
     },
     "18_self_development_phase5_dashboard.js": {
-      "sha256": "d4f337e5f71e08298fa8df30cfd15b362d9a4528204bd924f149ade362880bf2",
+      "sha256": "ad68bade84dc7a04c49c4a88412f2fc5141d06e401efb5f4840878196f881292",
       "byteSize": 24518,
-      "cacheKey": "d4f337e5f71e"
+      "cacheKey": "ad68bade84dc"
     },
     "18_self_development_phase5_validation.js": {
-      "sha256": "038110c719dfce35a7731db5e636a79dc5a271ddd505d001d3798fa6b02e429d",
+      "sha256": "75e443a93dcb0d6b773a722a505b01ab5aaf4d10b8f578024d9f012e2a584f2a",
       "byteSize": 8033,
-      "cacheKey": "038110c719df"
+      "cacheKey": "75e443a93dcb"
+    },
+    "13_local_first_repository_development_release_builder.js": {
+      "sha256": "ea347c2ae5c24c61800023daa8a47a3851a527d0eb4d04d2df0c3455e12e2744",
+      "byteSize": 22306,
+      "cacheKey": "ea347c2ae5c2"
     }
   },
-  "scriptSetHash": "5aa2d06f3e48de1141653f081dcc3ce51255cff268669431c0410c423892f6ec",
+  "scriptSetHash": "f2ceade0530da0f681fc048c4f3708bbc3a96fda32d1cbc83c07256eb87eb58a",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -4974,9 +4980,9 @@
       "cacheKey": "4ae2c51ee993"
     },
     "18_self_development_phase5_version_manifest.js": {
-      "sha256": "079f27406be9b0eac7a2c6f9c739ed503648b462736b98dfe1e1c283686baa65",
-      "byteSize": 3632,
-      "cacheKey": "079f27406be9"
+      "sha256": "d2df99069756bb2016f24ce959614026ad72748519fb23675d561569d6b492d7",
+      "byteSize": 3673,
+      "cacheKey": "d2df99069756"
     },
     "18_self_development_phase5_live_trial_policy.js": {
       "sha256": "81318ce84841feba2a9a4038da2c575ffc302e717cd11f28b7917bff64685fe0",
@@ -5004,21 +5010,26 @@
       "cacheKey": "e3ed19604009"
     },
     "18_self_development_phase5_traceability.js": {
-      "sha256": "78f217ef264c0c30a8eab8523465e5b9b7a63411cf2f7e2ae3d9126dc4ca443d",
+      "sha256": "ac2bb1c9b185c4428b982b456e45371b7b040c35f23b6b879d573c970333c158",
       "byteSize": 1576,
-      "cacheKey": "78f217ef264c"
+      "cacheKey": "ac2bb1c9b185"
     },
     "18_self_development_phase5_dashboard.js": {
-      "sha256": "78cbf53ea4701820810d955a19a22f30b4be8299a399cc46c8218b26f7d93dd3",
-      "byteSize": 21041,
-      "cacheKey": "78cbf53ea470"
+      "sha256": "ad68bade84dc7a04c49c4a88412f2fc5141d06e401efb5f4840878196f881292",
+      "byteSize": 24518,
+      "cacheKey": "ad68bade84dc"
     },
     "18_self_development_phase5_validation.js": {
-      "sha256": "ae3ebf6311a5fe2edb42fa653a4cc6938a3609e0668226bf89cf18a268fdfc80",
-      "byteSize": 7051,
-      "cacheKey": "ae3ebf6311a5"
+      "sha256": "75e443a93dcb0d6b773a722a505b01ab5aaf4d10b8f578024d9f012e2a584f2a",
+      "byteSize": 8033,
+      "cacheKey": "75e443a93dcb"
+    },
+    "13_local_first_repository_development_release_builder.js": {
+      "sha256": "ea347c2ae5c24c61800023daa8a47a3851a527d0eb4d04d2df0c3455e12e2744",
+      "byteSize": 22306,
+      "cacheKey": "ea347c2ae5c2"
     }
   },
-  "manifestHash": "d84640eef40eb41bb7a34099fff5d6a3cd52f54fe63d4b91373b80cab0505e80",
-  "updatedAt": "2026-09-16T03:30:00.000Z"
+  "manifestHash": "83ced752820e9a4e8d8ef30a63c6730481072c1569f122685a3e6717ed6b8c33",
+  "updatedAt": "2026-09-16T03:40:00.000Z"
 }

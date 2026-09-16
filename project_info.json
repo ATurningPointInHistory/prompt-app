@@ -1049,7 +1049,8 @@
     "18_self_development_phase5_traceability.js",
     "18_self_development_phase5_dashboard.js",
     "18_self_development_phase5_validation.js",
-    "validate_self_development_058_phase5.cjs"
+    "validate_self_development_058_phase5.cjs",
+    "13_local_first_repository_development_release_builder.js"
   ],
   "missingFiles": [],
   "externalFiles": [
@@ -1064,9 +1065,9 @@
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "d84640eef40eb41bb7a34099fff5d6a3cd52f54fe63d4b91373b80cab0505e80",
-  "scriptSetHash": "5aa2d06f3e48de1141653f081dcc3ce51255cff268669431c0410c423892f6ec",
-  "scriptManifestCount": 455,
+  "scriptManifestHash": "83ced752820e9a4e8d8ef30a63c6730481072c1569f122685a3e6717ed6b8c33",
+  "scriptSetHash": "f2ceade0530da0f681fc048c4f3708bbc3a96fda32d1cbc83c07256eb87eb58a",
+  "scriptManifestCount": 456,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
     "runtimeLoader": false,
@@ -1078,7 +1079,7 @@
   "releaseStatus": "SELF_DEVELOPMENT_058_PHASE5A_USER_SELECTED_LOCAL_LINEAGE_UI_CANDIDATE",
   "releaseAllowed": false,
   "projectOwnerRevalidationRequired": true,
-  "decision058CandidateVersion": "0.5.4",
+  "decision058CandidateVersion": "0.5.5",
   "decision058Phase": 5,
   "decision058CanonicalMutationImplemented": false,
   "decision058ValidationIsApproval": false,
@@ -1121,5 +1122,9 @@
   "decision058Phase5AndroidSyncRequiredForTrial": false,
   "decision058Phase5AndroidPcVerificationPackageUiImplemented": true,
   "decision058Phase5AndroidPcVerificationOptional": true,
-  "decision058Phase5LocalTrialUserSelectedV2Required": true
+  "decision058Phase5LocalTrialUserSelectedV2Required": true,
+  "repository010DevelopmentReleasePackageBuilderImplemented": true,
+  "repository010DevelopmentReleasePackageBuilderAutomaticApprovalAllowed": false,
+  "repository010DevelopmentReleasePackageBuilderAutomaticPromotionAllowed": false,
+  "repository010DevelopmentReleasePackageBuilderCanonicalSourceWriteAllowed": false
 }
