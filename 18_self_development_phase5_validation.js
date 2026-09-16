@@ -27,6 +27,8 @@
     check("Live mutation preparation requires explicit active arm", typeof namespace.prepareSelfDevelopmentPhase5SafeMutationPackage === "function", { available: true }, "Execution Boundary");
     check("Real Acceptance Token bridge exists but validation does not call it", typeof namespace.issueSelfDevelopmentPhase5TrialAcceptanceToken === "function", { called: false }, "Execution Boundary");
     check("Real Controlled Trial bridge exists but validation does not call it", typeof namespace.executeSelfDevelopmentPhase5ControlledTrial === "function", { called: false }, "Execution Boundary");
+    check("PC Local Trial Lineage can be prepared without Android Sync", typeof namespace.prepareSelfDevelopmentPhase5LocalTrialLineage === "function", { available: true, androidSyncRequiredForPhase5ATrial: false, called: false }, "Lineage Boundary");
+    check("Optional Android PC-verification Package exporter exists without Android live write", typeof namespace.exportSelfDevelopmentPhase5AndroidPcVerificationPackage === "function" && P5.hardBoundaries.androidLiveWriteAllowed === false, { available: true, androidLiveWriteAllowed: false, called: false }, "Cross Device Boundary");
     const audit = namespace.recordSelfDevelopmentPhase5TrialAudit({ eventType: "PHASE5A_NO_WRITE_VALIDATION" });
     const auditStatus = namespace.getSelfDevelopmentPhase5TrialAuditStatus();
     check("Phase 5A audit is bounded and stores no source/secrets", audit.ok === true && auditStatus.bounded === true && auditStatus.sourceCodePersisted === false && auditStatus.secretPersisted === false, { audit: audit, status: auditStatus }, "Audit");
@@ -34,13 +36,13 @@
     const coverage = namespace.getSelfDevelopmentPhase5Coverage();
     check("Decision 058 traceability preserves live-evidence-pending state", coverage.totalDecisionRequirements === 18 && coverage.phase5ScopeComplete === true && coverage.allDecisionRequirementsComplete === false && coverage.liveTrialExecutionEvidenceRequiredForRequirementClosure === true, coverage, "Traceability");
     const dashboard = namespace.getSelfDevelopmentPhase5Dashboard();
-    check("Read-only dashboard exposes no persistent reflection or promotion action", dashboard.readOnlyDashboard === true && dashboard.persistentReflectionActionsAvailable === false && dashboard.baselinePromotionActionsAvailable === false, dashboard, "UI");
+    check("Phase 5A UI exposes only bounded Controlled Trial actions", dashboard.readOnlyDashboard === false && dashboard.controlledTrialActionsAvailable === true && dashboard.androidSyncRequiredForPhase5ATrial === false && dashboard.persistentReflectionActionsAvailable === false && dashboard.baselinePromotionActionsAvailable === false, dashboard, "UI");
     const h = P5.hardBoundaries;
     check("Phase 5A hard boundaries remain fail-closed", h.validationEqualsApproval === false && h.acceptanceTokenEqualsMutationAuthority === false && h.persistentReflectionAllowedInPhase5A === false && h.baselinePromotionAllowedInPhase5A === false && h.phase5ValidationMayExecuteLiveWrite === false && h.androidLiveWriteAllowed === false && h.secondMutationEngineAllowed === false, h, "Safety");
     const failed = checks.filter(function (x) { return !x.passed; });
     const criticalFailed = failed.filter(function (x) { return x.severity === "Critical"; }).length;
     const report = Object.freeze({
-      validationId: namespace.__internal.nextId("SELFDEV058-PHASE5-VALIDATION"), componentId: "SELF-DEVELOPMENT-058", decisionId: "EXTERNAL-010-DECISION-058", version: "0.5.0", phase: 5,
+      validationId: namespace.__internal.nextId("SELFDEV058-PHASE5-VALIDATION"), componentId: "SELF-DEVELOPMENT-058", decisionId: "EXTERNAL-010-DECISION-058", version: "0.5.2", phase: 5,
       passed: checks.length - failed.length, failed: failed.length, total: checks.length, health: checks.length ? Math.round(((checks.length - failed.length) / checks.length) * 10000) / 100 : 100, criticalFailed: criticalFailed,
       releaseAllowed: false, phase5ImplementationComplete: true, phase5TechnicalGateReady: failed.length === 0, phase5Accepted: false, implementationPhase6Allowed: false, projectOwnerAcceptanceRequired: true,
       validationIsApproval: false, liveTrialExecutedByValidation: false, repository010AcceptanceTokenIssuedByValidation: false, physicalWritePerformedByValidation: false, persistentReflectionPerformed: false, baselinePromotionPerformed: false, canonicalMutationPerformed: false,

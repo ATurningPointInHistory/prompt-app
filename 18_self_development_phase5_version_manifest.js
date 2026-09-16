@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 18_self_development_phase5_version_manifest.js
    EXTERNAL-010 Decision 058 / Self-Development Environment
-   Candidate Release: 0.5.0
+   Candidate Hotfix Release: 0.5.2
    Phase 5A: Controlled Live Trial / Mandatory Restoration Proof
    Phases 1-4 remain Project Owner Accepted / Frozen.
    ============================================================ */
@@ -15,8 +15,8 @@
   const manifest = deepFreeze({
     componentId: "SELF-DEVELOPMENT-058",
     decisionId: "EXTERNAL-010-DECISION-058",
-    version: "0.5.0",
-    status: "IMPLEMENTATION_PHASE5A_CANDIDATE",
+    version: "0.5.2",
+    status: "IMPLEMENTATION_PHASE5A_LOCAL_TRIAL_LINEAGE_UI_CANDIDATE",
     phase: 5,
     phaseName: "Controlled Live Trial / Mandatory Restoration Proof",
     parentPhases: [
@@ -26,14 +26,14 @@
       { phase: 4, version: "0.4.0", status: "PROJECT_OWNER_ACCEPTED_FROZEN", sourceRewriteAllowed: false }
     ],
     scope: [
-      { scopeId: "P5-058-001", title: "Live Runtime Readiness / Lineage Gate", requirements: ["REQ-058-014", "REQ-058-015", "REQ-058-017"] },
+      { scopeId: "P5-058-001", title: "PC Local Trial Runtime Readiness / Lineage Gate", requirements: ["REQ-058-014", "REQ-058-015", "REQ-058-017"] },
       { scopeId: "P5-058-002", title: "Explicit Trial Execution Confirmation", requirements: ["REQ-058-014", "REQ-058-018"] },
       { scopeId: "P5-058-003", title: "Real REPOSITORY-010 Acceptance Token Lifecycle Bridge", requirements: ["REQ-058-014", "REQ-058-015"] },
       { scopeId: "P5-058-004", title: "Single Safe Function Controlled Transaction Trial", requirements: ["REQ-058-008", "REQ-058-009", "REQ-058-015"] },
       { scopeId: "P5-058-005", title: "Readback + Mandatory Exact Rollback", requirements: ["REQ-058-010", "REQ-058-011", "REQ-058-016"] },
       { scopeId: "P5-058-006", title: "Live Trial Audit / Evidence / Lineage", requirements: ["REQ-058-017"] },
       { scopeId: "P5-058-007", title: "Persistent Reflection Separate Authorization Boundary", requirements: ["REQ-058-014", "REQ-058-015", "REQ-058-016", "REQ-058-018"] },
-      { scopeId: "P5-058-008", title: "PC Live Trial / Android No-Write Validation", requirements: ["REQ-058-010", "REQ-058-011", "REQ-058-015", "REQ-058-016", "REQ-058-017"] }
+      { scopeId: "P5-058-008", title: "PC Live Trial / Optional Android PC-Verification Package", requirements: ["REQ-058-010", "REQ-058-011", "REQ-058-015", "REQ-058-016", "REQ-058-017"] }
     ],
     hardBoundaries: {
       selfApprovalAllowed: false,

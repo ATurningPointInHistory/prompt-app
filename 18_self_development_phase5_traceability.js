@@ -9,7 +9,7 @@
   namespace.getSelfDevelopmentPhase5Coverage = function () {
     return {
       decisionId: "EXTERNAL-010-DECISION-058",
-      phase5Version: "0.5.0",
+      phase5Version: "0.5.2",
       totalDecisionRequirements: 18,
       fullyImplementedDecisionRequirements: 14,
       allDecisionRequirementsComplete: false,

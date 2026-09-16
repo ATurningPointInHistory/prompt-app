@@ -1064,8 +1064,8 @@
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "215cb0710295cba7bfb38962ee7a712c3e9c95a8cf6f80e49fbe11f35e5a0504",
-  "scriptSetHash": "7db6c8ca4bf1ebf35586a2c09a9dc06220af95ff72a5f279d51dc406bac4852d",
+  "scriptManifestHash": "c1bd00b9b3af104d91cca40fba2c72cb6f3e3c9b3a0352d297c91b7471f9207f",
+  "scriptSetHash": "d45fa571ab4676616bc292d2a2c918d62d1c454f1383ae6d1079d84963924f0d",
   "scriptManifestCount": 455,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
@@ -1075,10 +1075,10 @@
     "last": "99_init.js",
     "generatedAtSave": true
   },
-  "releaseStatus": "SELF_DEVELOPMENT_058_PHASE5A_CANDIDATE",
+  "releaseStatus": "SELF_DEVELOPMENT_058_PHASE5A_LOCAL_TRIAL_LINEAGE_UI_CANDIDATE",
   "releaseAllowed": false,
   "projectOwnerRevalidationRequired": true,
-  "decision058CandidateVersion": "0.5.0",
+  "decision058CandidateVersion": "0.5.1",
   "decision058Phase": 5,
   "decision058CanonicalMutationImplemented": false,
   "decision058ValidationIsApproval": false,
@@ -1093,7 +1093,7 @@
   "decision058Phase3ApprovalPolicyRelaxationMapImplemented": true,
   "decision058Phase3SelfApprovalAllowed": false,
   "decision058Phase3AdoptionImplemented": false,
-  "updatedAt": "2026-09-15T23:42:18.283382Z",
+  "updatedAt": "2026-09-16T08:35:00.000000Z",
   "decision058Phase3Status": "PROJECT_OWNER_ACCEPTED_FROZEN",
   "decision058Phase3Version": "0.3.0",
   "decision058AdoptionContractImplemented": true,
@@ -1114,5 +1114,11 @@
   "decision058Phase5RepositoryRestored": false,
   "decision058Phase5PersistentReflectionPerformed": false,
   "decision058Phase5BaselinePromotionPerformed": false,
-  "decision058Phase5AndroidLiveWriteAllowed": false
+  "decision058Phase5AndroidLiveWriteAllowed": false,
+  "decision058Phase5ControlledTrialUiImplemented": true,
+  "decision058Phase5ConsolePasteRequiredForLiveTrial": false,
+  "decision058Phase5LocalTrialLineageImplemented": true,
+  "decision058Phase5AndroidSyncRequiredForTrial": false,
+  "decision058Phase5AndroidPcVerificationPackageUiImplemented": true,
+  "decision058Phase5AndroidPcVerificationOptional": true
 }
