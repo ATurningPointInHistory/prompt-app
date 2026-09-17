@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 18_self_development_phase5_version_manifest.js
    EXTERNAL-010 Decision 058 / Self-Development Environment
-   Candidate Hotfix Release: 0.5.6
+   Candidate Hotfix Release: 0.5.7
    Phase 5A: Controlled Live Trial / Mandatory Restoration Proof
    Phases 1-4 remain Project Owner Accepted / Frozen.
    ============================================================ */
@@ -15,8 +15,8 @@
   const manifest = deepFreeze({
     componentId: "SELF-DEVELOPMENT-058",
     decisionId: "EXTERNAL-010-DECISION-058",
-    version: "0.5.6",
-    status: "IMPLEMENTATION_PHASE5A_LIVE_EVIDENCE_CLOSURE_CANDIDATE",
+    version: "0.5.7",
+    status: "IMPLEMENTATION_PHASE5A_EVIDENCE_PERSISTENCE_RECOVERY_CANDIDATE",
     phase: 5,
     phaseName: "Controlled Live Trial / Mandatory Restoration Proof",
     parentPhases: [
@@ -31,7 +31,7 @@
       { scopeId: "P5-058-003", title: "Real REPOSITORY-010 Acceptance Token Lifecycle Bridge", requirements: ["REQ-058-014", "REQ-058-015"] },
       { scopeId: "P5-058-004", title: "Single Safe Function Controlled Transaction Trial", requirements: ["REQ-058-008", "REQ-058-009", "REQ-058-015"] },
       { scopeId: "P5-058-005", title: "Readback + Mandatory Exact Rollback", requirements: ["REQ-058-010", "REQ-058-011", "REQ-058-016"] },
-      { scopeId: "P5-058-006", title: "Live Trial Audit / Evidence / Lineage", requirements: ["REQ-058-017"] },
+      { scopeId: "P5-058-006", title: "Live Trial Audit / Persisted Evidence Recovery / Lineage", requirements: ["REQ-058-014", "REQ-058-015", "REQ-058-016", "REQ-058-017"] },
       { scopeId: "P5-058-007", title: "Persistent Reflection Separate Authorization Boundary", requirements: ["REQ-058-014", "REQ-058-015", "REQ-058-016", "REQ-058-018"] },
       { scopeId: "P5-058-008", title: "PC Live Trial / Optional Android PC-Verification Package", requirements: ["REQ-058-010", "REQ-058-011", "REQ-058-015", "REQ-058-016", "REQ-058-017"] }
     ],

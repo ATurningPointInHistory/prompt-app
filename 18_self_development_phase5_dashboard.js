@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 18_self_development_phase5_dashboard.js
    Decision 058 Phase 5A / Controlled Live Trial UI
-   Candidate Hotfix: 0.5.6
+   Candidate Hotfix: 0.5.7 / Persisted Evidence Recovery
    - Replaces the prior read-only-only Phase 5 dashboard behavior.
    - Reuses REPOSITORY-010; does not implement a second mutation engine.
    - Persistent reflection / baseline promotion remain unavailable.
@@ -95,9 +95,9 @@
     const writeStatus = readiness && readiness.restrictedWriteAdapterStatus || {};
     return {
       id: "SELF-DEVELOPMENT-058",
-      version: "0.5.6",
+      version: "0.5.7",
       phase: 5,
-      status: "Candidate / Live Evidence Closure UI",
+      status: "Candidate / Live Evidence Persistence Recovery UI",
       readOnlyDashboard: false,
       controlledTrialActionsAvailable: true,
       trialMode: "MANDATORY_ROLLBACK_ONLY",
@@ -171,6 +171,7 @@
       "<br><b>Acceptance token:</b> " + esc(d.session.acceptanceTokenId || "未発行"),
       "<br><b>Controlled Trial:</b> " + (coverage.phase5LiveTrialComplete ? "PASS / VERIFIED / RESTORED" : "PENDING"),
       "<br><b>Phase 5A:</b> " + esc(coverage.phase5CompletionStatus || "LIVE_EVIDENCE_PENDING"),
+      "<br><b>Evidence Recovery:</b> " + (coverage.liveEvidence && coverage.liveEvidence.persistedEvidenceRecovered ? "RECOVERED FROM REPOSITORY JOURNAL" : "NOT RECOVERED / CURRENT SESSION"),
       "<br><b>Persistent Reflection:</b> DISABLED",
       "<br><b>Baseline Promotion:</b> DISABLED"
     ].join("");
@@ -257,8 +258,10 @@
     panel.addEventListener("click", function (event) { if (event.target === panel) panel.classList.remove("open"); });
 
     panel.querySelector('[data-p5="refresh"]').addEventListener("click", function () {
-      writeLog("Readiness", namespace.getSelfDevelopmentPhase5Dashboard());
-      render();
+      return run("Readiness", async function () {
+        const recovery = typeof namespace.recoverSelfDevelopmentPhase5LiveEvidence === "function" ? await namespace.recoverSelfDevelopmentPhase5LiveEvidence() : null;
+        return { recovery: recovery, dashboard: namespace.getSelfDevelopmentPhase5Dashboard() };
+      });
     });
 
     panel.querySelector('[data-p5="local-lineage"]').addEventListener("click", function () {
@@ -358,13 +361,16 @@
     });
 
     panel.querySelector('[data-p5="audit"]').addEventListener("click", function () {
-      writeLog("Phase 5A Evidence", {
-        dashboard: namespace.getSelfDevelopmentPhase5Dashboard(),
-        audit: namespace.getSelfDevelopmentPhase5TrialAuditStatus(),
-        liveEvidenceClosure: typeof namespace.getSelfDevelopmentPhase5LiveEvidenceClosure === "function" ? namespace.getSelfDevelopmentPhase5LiveEvidenceClosure() : null,
-        coverage: namespace.getSelfDevelopmentPhase5Coverage()
+      return run("Phase 5A Evidence", async function () {
+        const recovery = typeof namespace.recoverSelfDevelopmentPhase5LiveEvidence === "function" ? await namespace.recoverSelfDevelopmentPhase5LiveEvidence() : null;
+        return {
+          recovery: recovery,
+          dashboard: namespace.getSelfDevelopmentPhase5Dashboard(),
+          audit: namespace.getSelfDevelopmentPhase5TrialAuditStatus(),
+          liveEvidenceClosure: typeof namespace.getSelfDevelopmentPhase5LiveEvidenceClosure === "function" ? namespace.getSelfDevelopmentPhase5LiveEvidenceClosure() : null,
+          coverage: namespace.getSelfDevelopmentPhase5Coverage()
+        };
       });
-      render();
     });
   }
 
@@ -381,9 +387,13 @@
     statusNode = document.getElementById("selfdev058-phase5-status");
     logNode = document.getElementById("selfdev058-phase5-log");
     bind();
-    launcher.addEventListener("click", function () {
+    launcher.addEventListener("click", async function () {
       panel.classList.add("open");
-      writeLog("Phase 5A", namespace.getSelfDevelopmentPhase5Dashboard());
+      let recovery = null;
+      if (typeof namespace.recoverSelfDevelopmentPhase5LiveEvidence === "function") {
+        try { recovery = await namespace.recoverSelfDevelopmentPhase5LiveEvidence(); } catch (error) { recovery = { ok: false, status: "Blocked", message: error && error.message ? error.message : String(error) }; }
+      }
+      writeLog("Phase 5A", { recovery: recovery, dashboard: namespace.getSelfDevelopmentPhase5Dashboard() });
       render();
     });
     mounted = true;
