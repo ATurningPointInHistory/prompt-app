@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 18_self_development_phase5_dashboard.js
    Decision 058 Phase 5A / Controlled Live Trial UI
-   Candidate Hotfix: 0.5.5
+   Candidate Hotfix: 0.5.6
    - Replaces the prior read-only-only Phase 5 dashboard behavior.
    - Reuses REPOSITORY-010; does not implement a second mutation engine.
    - Persistent reflection / baseline promotion remain unavailable.
@@ -95,9 +95,9 @@
     const writeStatus = readiness && readiness.restrictedWriteAdapterStatus || {};
     return {
       id: "SELF-DEVELOPMENT-058",
-      version: "0.5.5",
+      version: "0.5.6",
       phase: 5,
-      status: "Candidate / Local Trial Lineage UI",
+      status: "Candidate / Live Evidence Closure UI",
       readOnlyDashboard: false,
       controlledTrialActionsAvailable: true,
       trialMode: "MANDATORY_ROLLBACK_ONLY",
@@ -156,6 +156,8 @@
     const arm = d.armStatus || {};
     const line = d.lineage || {};
     const ready = d.readiness || {};
+    const policy = typeof namespace.getSelfDevelopmentPhase5LiveTrialPolicy === "function" ? namespace.getSelfDevelopmentPhase5LiveTrialPolicy() : {};
+    const coverage = d.coverage || {};
     statusNode.innerHTML = [
       "<b>Mode:</b> MANDATORY ROLLBACK ONLY",
       "<br><b>Platform:</b> " + esc(ready.platform || "-"),
@@ -164,14 +166,22 @@
       "<br><b>IDE-150 target bridge:</b> " + (line.bridgeReady ? "READY" : "PENDING (Mutation準備後)"),
       "<br><b>Repository folder:</b> " + (d.repositoryDirectorySelected ? "SELECTED" : "NOT SELECTED"),
       "<br><b>Arm:</b> " + (arm.armed ? "ACTIVE" : "OFF"),
+      "<br><b>Arm Phrase:</b> <code>" + esc(policy.armPhrase || "-") + "</code>",
       "<br><b>Mutation package:</b> " + esc(d.session.mutationPackageId || "未作成"),
       "<br><b>Acceptance token:</b> " + esc(d.session.acceptanceTokenId || "未発行"),
+      "<br><b>Controlled Trial:</b> " + (coverage.phase5LiveTrialComplete ? "PASS / VERIFIED / RESTORED" : "PENDING"),
+      "<br><b>Phase 5A:</b> " + esc(coverage.phase5CompletionStatus || "LIVE_EVIDENCE_PENDING"),
       "<br><b>Persistent Reflection:</b> DISABLED",
       "<br><b>Baseline Promotion:</b> DISABLED"
     ].join("");
+    const armPhraseNode = panel && panel.querySelector("#selfdev058-phase5-arm-phrase");
+    if (armPhraseNode) armPhraseNode.textContent = policy.armPhrase || "-";
 
     const btnLocalLineage = panel && panel.querySelector('[data-p5="local-lineage"]');
     const btnLocalLineageReceive = panel && panel.querySelector('[data-p5="local-lineage-receive"]');
+    const btnRefresh = panel && panel.querySelector('[data-p5="refresh"]');
+    const btnDirectory = panel && panel.querySelector('[data-p5="directory"]');
+    const btnAudit = panel && panel.querySelector('[data-p5="audit"]');
     const btnAndroidVerify = panel && panel.querySelector('[data-p5="android-verify"]');
     const btnArm = panel && panel.querySelector('[data-p5="arm"]');
     const btnPrepare = panel && panel.querySelector('[data-p5="prepare"]');
@@ -179,6 +189,9 @@
     const btnExecute = panel && panel.querySelector('[data-p5="execute"]');
     const active = arm.armed === true;
     const isAndroid = /Android/i.test(global.navigator && global.navigator.userAgent || "");
+    if (btnRefresh) btnRefresh.disabled = false;
+    if (btnDirectory) btnDirectory.disabled = isAndroid || active;
+    if (btnAudit) btnAudit.disabled = false;
     if (btnLocalLineage) btnLocalLineage.disabled = isAndroid || active;
     if (btnLocalLineageReceive) btnLocalLineageReceive.disabled = isAndroid || active;
     if (btnAndroidVerify) btnAndroidVerify.disabled = !isAndroid || active;
@@ -217,6 +230,7 @@
       ' <div class="selfdev058-p5-card">',
       '  <b>Phase 5A Safety Boundary</b>',
       '  <p class="selfdev058-p5-note">専用Fixture 1関数だけを一時変更し、Readback後に必ずRollbackします。Phase 5AのPC TrialはAndroid Sync不要です。Frozen V2境界を守るため、PCローカル検証Packageを一度保存し、その同じJSONをユーザーが選択して再読込します。Android照合は必要時だけ別ボタンでPackage生成します。Persistent ReflectionとCanonical PromotionはこのUIから実行できません。</p>',
+      '  <p class="selfdev058-p5-note"><b>Arm Phrase:</b> <code id="selfdev058-phase5-arm-phrase">Policyから読込</code></p>',
       '  <div class="selfdev058-p5-actions">',
       '   <button type="button" data-p5="refresh">① Readiness更新</button>',
       '   <button type="button" data-p5="local-lineage">②A PC検証Packageを作成</button>',
@@ -286,7 +300,9 @@
     });
 
     panel.querySelector('[data-p5="arm"]').addEventListener("click", function () {
-      const phrase = global.prompt("Controlled TrialをArmします。次の確認文字列を入力してください。\n\nAUTHORIZE_PHASE5A_CONTROLLED_TRIAL", "");
+      const policy = typeof namespace.getSelfDevelopmentPhase5LiveTrialPolicy === "function" ? namespace.getSelfDevelopmentPhase5LiveTrialPolicy() : {};
+      const armPhrase = String(policy.armPhrase || "");
+      const phrase = global.prompt("Controlled TrialをArmします。次の確認文字列を入力してください。\n\n" + armPhrase, "");
       if (phrase == null) { writeLog("Arm", { ok: false, status: "Cancelled" }); return; }
       const result = namespace.armSelfDevelopmentPhase5LiveTrial({ actorRole: "Project Owner", explicitProjectOwnerAction: true, confirmationPhrase: phrase });
       if (result && result.ok === true) {
@@ -344,7 +360,9 @@
     panel.querySelector('[data-p5="audit"]').addEventListener("click", function () {
       writeLog("Phase 5A Evidence", {
         dashboard: namespace.getSelfDevelopmentPhase5Dashboard(),
-        audit: namespace.getSelfDevelopmentPhase5TrialAuditStatus()
+        audit: namespace.getSelfDevelopmentPhase5TrialAuditStatus(),
+        liveEvidenceClosure: typeof namespace.getSelfDevelopmentPhase5LiveEvidenceClosure === "function" ? namespace.getSelfDevelopmentPhase5LiveEvidenceClosure() : null,
+        coverage: namespace.getSelfDevelopmentPhase5Coverage()
       });
       render();
     });

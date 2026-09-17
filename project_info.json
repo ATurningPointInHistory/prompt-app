@@ -1065,8 +1065,8 @@
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "83ced752820e9a4e8d8ef30a63c6730481072c1569f122685a3e6717ed6b8c33",
-  "scriptSetHash": "f2ceade0530da0f681fc048c4f3708bbc3a96fda32d1cbc83c07256eb87eb58a",
+  "scriptManifestHash": "2ebdba55d9784b0361d14c84b1261fb7a4408a79586fb04f6862e2408c69bb7d",
+  "scriptSetHash": "943344dcf3b1d3e84fc6d76a86cab69e60deede8be12c99cdbff52f0d2ec6ea0",
   "scriptManifestCount": 456,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
@@ -1126,5 +1126,11 @@
   "repository010DevelopmentReleasePackageBuilderImplemented": true,
   "repository010DevelopmentReleasePackageBuilderAutomaticApprovalAllowed": false,
   "repository010DevelopmentReleasePackageBuilderAutomaticPromotionAllowed": false,
-  "repository010DevelopmentReleasePackageBuilderCanonicalSourceWriteAllowed": false
+  "repository010DevelopmentReleasePackageBuilderCanonicalSourceWriteAllowed": false,
+  "decision058Phase5Version": "0.5.6",
+  "decision058Phase5UiReenableHotfixImplemented": true,
+  "decision058Phase5ArmPhrasePolicyDisplayImplemented": true,
+  "decision058Phase5LiveEvidenceClosureImplemented": true,
+  "decision058Phase5LiveEvidenceRequirementProjectionImplemented": true,
+  "decision058Phase5CompletionStatusDynamic": true
 }

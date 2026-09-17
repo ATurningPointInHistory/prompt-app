@@ -4,7 +4,7 @@
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "EXTERNAL-010 v1.20.1 frozen baseline + OpenAI API Integration v0.3.11 FINAL_VALIDATED + Decision 058 Self-Development Environment Phases 1-4 Accepted/Frozen + Phase 5A v0.5.4 Traceability Consistency Hotfix Candidate; PC-only user-selected loopback V2/V3/V4 lineage for controlled trial without Android Sync prerequisite, optional Android PC-verification package export, exactly-one safe function patch, mandatory readback+rollback restoration proof, no persistent reflection or baseline promotion",
+  "description": "EXTERNAL-010 v1.20.1 frozen baseline + OpenAI API Integration v0.3.11 FINAL_VALIDATED + Decision 058 Self-Development Environment Phases 1-4 Accepted/Frozen + Phase 5A v0.5.6 Live Evidence Closure Hotfix Candidate; UI control re-enable fix, policy-driven Arm Phrase display, controlled-trial PASS display, REQ-058-014/015/016 live-evidence projection, Phase 5A completion state, no persistent reflection or baseline promotion",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
   "scripts": [
@@ -454,15 +454,15 @@
     "./18_self_development_phase4_traceability.js?h=7516284014a0",
     "./18_self_development_phase4_dashboard.js?h=ea8a91b71534",
     "./18_self_development_phase4_validation.js?h=4ae2c51ee993",
-    "./18_self_development_phase5_version_manifest.js?h=d2df99069756",
+    "./18_self_development_phase5_version_manifest.js?h=3f5642a0765b",
     "./18_self_development_phase5_live_trial_policy.js?h=81318ce84841",
     "./18_self_development_phase5_trial_fixture.js?h=fc7abaf96991",
     "./18_self_development_phase5_live_trial_bridge.js?h=1767a104c00c",
     "./18_self_development_phase5_live_trial_controller.js?h=e9c96d73f77f",
     "./18_self_development_phase5_live_trial_audit.js?h=e3ed19604009",
-    "./18_self_development_phase5_traceability.js?h=ac2bb1c9b185",
-    "./18_self_development_phase5_dashboard.js?h=ad68bade84dc",
-    "./18_self_development_phase5_validation.js?h=75e443a93dcb",
+    "./18_self_development_phase5_traceability.js?h=95750b4ed2e4",
+    "./18_self_development_phase5_dashboard.js?h=946304b78f7b",
+    "./18_self_development_phase5_validation.js?h=e9af72396515",
     "./99_init.js?h=de0ce6495428"
   ],
   "hashes": {
@@ -1791,6 +1791,11 @@
       "byteSize": 18008,
       "cacheKey": "bb8d13780d14"
     },
+    "13_local_first_repository_development_release_builder.js": {
+      "sha256": "ea347c2ae5c24c61800023daa8a47a3851a527d0eb4d04d2df0c3455e12e2744",
+      "byteSize": 22306,
+      "cacheKey": "ea347c2ae5c2"
+    },
     "13_local_first_repository_phase18_validation.js": {
       "sha256": "77b767c7d32a12bcb5ec28e57a3d145eab9f3390a97185112dbeec16cbe34014",
       "byteSize": 8202,
@@ -2601,11 +2606,6 @@
       "byteSize": 11120,
       "cacheKey": "e93ef6865fa8"
     },
-    "99_init.js": {
-      "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
-      "byteSize": 4742,
-      "cacheKey": "de0ce6495428"
-    },
     "18_self_development_phase3_version_manifest.js": {
       "sha256": "978ec2f927ed2d4b8af5bca9bd5b8b52e5a6b0ccf03641433f619f40a22a68ef",
       "byteSize": 3301,
@@ -2697,9 +2697,9 @@
       "cacheKey": "4ae2c51ee993"
     },
     "18_self_development_phase5_version_manifest.js": {
-      "sha256": "d2df99069756bb2016f24ce959614026ad72748519fb23675d561569d6b492d7",
-      "byteSize": 3673,
-      "cacheKey": "d2df99069756"
+      "sha256": "3f5642a0765b9584c94ded840fb69d2597e210a24e6746c81b2f220ae6976e52",
+      "byteSize": 3667,
+      "cacheKey": "3f5642a0765b"
     },
     "18_self_development_phase5_live_trial_policy.js": {
       "sha256": "81318ce84841feba2a9a4038da2c575ffc302e717cd11f28b7917bff64685fe0",
@@ -2727,27 +2727,27 @@
       "cacheKey": "e3ed19604009"
     },
     "18_self_development_phase5_traceability.js": {
-      "sha256": "ac2bb1c9b185c4428b982b456e45371b7b040c35f23b6b879d573c970333c158",
-      "byteSize": 1576,
-      "cacheKey": "ac2bb1c9b185"
+      "sha256": "95750b4ed2e4f4cba97d6e7d836b0e476231a1cbbb55699e6c8663e862070225",
+      "byteSize": 5180,
+      "cacheKey": "95750b4ed2e4"
     },
     "18_self_development_phase5_dashboard.js": {
-      "sha256": "ad68bade84dc7a04c49c4a88412f2fc5141d06e401efb5f4840878196f881292",
-      "byteSize": 24518,
-      "cacheKey": "ad68bade84dc"
+      "sha256": "946304b78f7bbe9827c57baf4e9354cac413e865875e211b4188c5ed6eac9a50",
+      "byteSize": 26114,
+      "cacheKey": "946304b78f7b"
     },
     "18_self_development_phase5_validation.js": {
-      "sha256": "75e443a93dcb0d6b773a722a505b01ab5aaf4d10b8f578024d9f012e2a584f2a",
-      "byteSize": 8033,
-      "cacheKey": "75e443a93dcb"
+      "sha256": "e9af723965155a32a42669f1fa1aeb37282f9e514368c3db8aea5099f6668f88",
+      "byteSize": 9076,
+      "cacheKey": "e9af72396515"
     },
-    "13_local_first_repository_development_release_builder.js": {
-      "sha256": "ea347c2ae5c24c61800023daa8a47a3851a527d0eb4d04d2df0c3455e12e2744",
-      "byteSize": 22306,
-      "cacheKey": "ea347c2ae5c2"
+    "99_init.js": {
+      "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
+      "byteSize": 4742,
+      "cacheKey": "de0ce6495428"
     }
   },
-  "scriptSetHash": "f2ceade0530da0f681fc048c4f3708bbc3a96fda32d1cbc83c07256eb87eb58a",
+  "scriptSetHash": "943344dcf3b1d3e84fc6d76a86cab69e60deede8be12c99cdbff52f0d2ec6ea0",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -5030,6 +5030,6 @@
       "cacheKey": "ea347c2ae5c2"
     }
   },
-  "manifestHash": "83ced752820e9a4e8d8ef30a63c6730481072c1569f122685a3e6717ed6b8c33",
-  "updatedAt": "2026-09-16T03:40:00.000Z"
+  "manifestHash": "2ebdba55d9784b0361d14c84b1261fb7a4408a79586fb04f6862e2408c69bb7d",
+  "updatedAt": "2026-09-17T02:20:00.000Z"
 }
