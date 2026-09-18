@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 19_trust_evidence_phase2_version_manifest.js
    EXTERNAL-020 Trust / Evidence Intelligence
-   Decision 001 / Candidate Release: 0.2.0
+   Decision 001 / Candidate Release: 0.2.1
    Phase 2: Multi-Dimensional Reliability Profile + Revision
    ============================================================ */
 (function (global) {
@@ -10,8 +10,8 @@
   const manifest=deepFreeze({
     componentId:"EXTERNAL-020",
     decisionId:"EXTERNAL-020-DECISION-001",
-    version:"0.2.0",
-    status:"IMPLEMENTATION_PHASE2_CANDIDATE",
+    version:"0.2.1",
+    status:"IMPLEMENTATION_PHASE2_ANDROID_VALIDATION_CANDIDATE",
     phase:2,
     phaseName:"Multi-Dimensional Reliability Profile and Versioned Revision",
     parentPhase1:{

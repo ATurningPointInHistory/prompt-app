@@ -1,0 +1,88 @@
+============================================================
+AI Prompt OS / AIプロンプト生成Pro
+EXTERNAL-020 Trust / Evidence Intelligence
+Phase 2 v0.2.1 Android Validation Candidate Handoff
+============================================================
+
+Parent:
+Phase 1 v0.1.1 PROJECT_OWNER_ACCEPTED_FROZEN
+
+Phase 2 Prior Candidate:
+v0.2.0
+PC Real Runtime: 21 / 21 PASS
+Validation ID: EXTERNAL020-PHASE2-VALIDATION-MU6TOR6V-0038
+
+IMPORTANT:
+The v0.2.0 PC result is preserved as lineage only.
+Because v0.2.1 has a new package identity, PC validation must be rerun.
+
+Candidate Version:
+0.2.1
+
+Purpose:
+Add Phase 2 Android Real Device Validation only.
+
+Phase 2 Core Logic Changes:
+NONE
+
+Unchanged Phase 2 Core Files:
+- 19_trust_evidence_dimensions.js
+- 19_trust_evidence_independence.js
+- 19_trust_evidence_reliability_profile.js
+- 19_trust_evidence_reliability_revision.js
+- 19_trust_evidence_phase2_traceability.js
+- 19_trust_evidence_phase2_validation.js
+
+Added:
+19_trust_evidence_phase2_android_validation.js
+
+Candidate Identity:
+Script Count: 479
+Manifest Hash: 200a3f7191f11d7523ad2e721dddde35a4a0d3b4512bfe6c2f7fcfcf76114084
+Script Set Hash: 9cd116d990e97864c8866abdf7c00e631f275bd6f74c8e6d31aa84a2961f6d03
+
+Pre-Distribution Validation:
+JS Syntax: 479 / 479 PASS
+Static / Package / Fixture: 16 / 16 PASS
+Android Validation Fixture: 21 / 21 PASS
+Decision 058 Phase 6 Regression: 28 / 28 PASS
+health = 100
+criticalFailed = 0
+
+Decision 001:
+16 / 18 candidate-complete
+Remaining:
+REQ-020-008 Historical Outcome-Grounded Evaluation
+REQ-020-015 External AI Governance Reuse
+Decision001Complete = false
+
+Safety:
+No universal trust score
+No automatic conflict winner
+No truth confirmation
+No Raw Evidence mutation
+No automatic Knowledge promotion
+No Canonical mutation
+No external transmission
+No paid API execution
+No IDE-170 Confidence overwrite
+
+Next Gate:
+1. Apply v0.2.1 Candidate / DIFF.
+2. PC:
+   runExternal020Phase2Validation()
+   Expected: 21/21 PASS, failed=0, criticalFailed=0, health=100, version=0.2.1.
+3. Android:
+   runExternal020Phase2AndroidValidation()
+   No await required.
+   Expected: 21/21 PASS, failed=0, criticalFailed=0, health=100,
+   phase2AndroidRealDeviceComplete=true,
+   phase2ProjectOwnerGateReady=true.
+4. Only after both real-device gates PASS may Project Owner Acceptance / Freeze be considered.
+
+releaseAllowed = false
+validationIsApproval = false
+automaticAcceptance = false
+============================================================
+END
+============================================================

@@ -1,0 +1,101 @@
+{
+  "id": "EXTERNAL-020-PHASE2-V0.2.1-ANDROID-VALIDATION-CANDIDATE-EVIDENCE",
+  "componentId": "EXTERNAL-020",
+  "decisionId": "EXTERNAL-020-DECISION-001",
+  "phase": 2,
+  "version": "0.2.1",
+  "status": "ANDROID_VALIDATION_CANDIDATE",
+  "canonicalParentRevision": "REPOSITORY010-CANONICAL-REVISION-0023",
+  "candidateIdentity": {
+    "scriptCount": 479,
+    "manifestHash": "200a3f7191f11d7523ad2e721dddde35a4a0d3b4512bfe6c2f7fcfcf76114084",
+    "scriptSetHash": "9cd116d990e97864c8866abdf7c00e631f275bd6f74c8e6d31aa84a2961f6d03"
+  },
+  "lineage": {
+    "phase1Version": "0.1.1",
+    "phase1Status": "PROJECT_OWNER_ACCEPTED_FROZEN",
+    "phase2PriorCandidateVersion": "0.2.0",
+    "phase2PriorPcEvidence": {
+      "validationId": "EXTERNAL020-PHASE2-VALIDATION-MU6TOR6V-0038",
+      "version": "0.2.0",
+      "passed": 21,
+      "failed": 0,
+      "total": 21,
+      "health": 100,
+      "criticalFailed": 0,
+      "validatedAt": "2026-09-18T10:35:41.095Z",
+      "phase2ImplementationComplete": true,
+      "phase2TechnicalGateReady": true,
+      "decision001RequirementsComplete": 16,
+      "decision001RequirementsTotal": 18,
+      "canonicalMutationPerformed": false,
+      "externalTransmissionPerformed": false,
+      "paidApiExecutionPerformed": false,
+      "note": "Preserved as v0.2.0 PC real-device/runtime evidence only. Not automatically transferred to v0.2.1 package identity."
+    }
+  },
+  "staticPackageValidation": {
+    "passed": 16,
+    "failed": 0,
+    "total": 16,
+    "health": 100,
+    "criticalFailed": 0
+  },
+  "javascriptSyntax": {
+    "passed": 479,
+    "failed": 0,
+    "total": 479
+  },
+  "androidValidationFixture": {
+    "passed": 21,
+    "failed": 0,
+    "total": 21,
+    "health": 100,
+    "criticalFailed": 0,
+    "phase2AndroidRealDeviceComplete": true,
+    "phase2ProjectOwnerGateReady": true,
+    "decision001RequirementsComplete": 16,
+    "decision001RequirementsTotal": 18,
+    "releaseAllowed": false,
+    "projectOwnerAcceptanceRequired": true,
+    "validationIsApproval": false,
+    "canonicalMutationPerformed": false,
+    "externalTransmissionPerformed": false,
+    "paidApiExecutionPerformed": false
+  },
+  "decision058Phase6Regression": {
+    "passed": 28,
+    "failed": 0,
+    "total": 28,
+    "health": 100,
+    "criticalFailed": 0
+  },
+  "frozenPhase1SourceVerified": true,
+  "phase2CoreLogicUnchangedFromV020": true,
+  "canonical0023ParentVerified": true,
+  "decision001RequirementsComplete": 16,
+  "decision001RequirementsTotal": 18,
+  "decision001Complete": false,
+  "remainingRequirementIds": [
+    "REQ-020-008",
+    "REQ-020-015"
+  ],
+  "safety": {
+    "universalTrustScoreImplemented": false,
+    "automaticConflictWinnerImplemented": false,
+    "truthConfirmationImplemented": false,
+    "rawEvidenceMutationPerformed": false,
+    "automaticKnowledgePromotionPerformed": false,
+    "canonicalMutationPerformed": false,
+    "externalTransmissionPerformed": false,
+    "paidApiExecutionPerformed": false,
+    "ide170ConfidenceOverwritten": false
+  },
+  "realDeviceGate": {
+    "pcV021Required": true,
+    "androidV021Required": true,
+    "projectOwnerAcceptanceRequired": true,
+    "releaseAllowed": false
+  },
+  "generatedAt": "2026-09-18T10:40:30.581Z"
+}

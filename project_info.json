@@ -923,6 +923,7 @@
     "17_external_intelligence_version_manifest.js",
     "17_external_intelligence_work_graph.js",
     "17_external_intelligence_workflow_orchestration.js",
+    "19_trust_evidence_phase2_android_validation.js",
     "99_init.js",
     "AI_Prompt_OS_Launcher.pyw",
     "BOOTSTRAP_TOOLS_MENU_HOTFIX_1.20.1-HF2.txt",
@@ -1098,9 +1099,9 @@
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "a7958269d54fc14317afbfd1ec892bf5abdd5e79b5ce981626b005c5cf0e85df",
-  "scriptSetHash": "9640eaefb1e911b3d08e117be594716bd6651cf78e70af7721507736a6373a89",
-  "scriptManifestCount": 478,
+  "scriptManifestHash": "200a3f7191f11d7523ad2e721dddde35a4a0d3b4512bfe6c2f7fcfcf76114084",
+  "scriptSetHash": "9cd116d990e97864c8866abdf7c00e631f275bd6f74c8e6d31aa84a2961f6d03",
+  "scriptManifestCount": 479,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
     "runtimeLoader": false,
@@ -1109,7 +1110,7 @@
     "last": "99_init.js",
     "generatedAtSave": true
   },
-  "releaseStatus": "EXTERNAL_020_PHASE2_CANDIDATE",
+  "releaseStatus": "EXTERNAL_020_PHASE2_ANDROID_VALIDATION_CANDIDATE",
   "releaseAllowed": false,
   "projectOwnerRevalidationRequired": true,
   "decision058CandidateVersion": "0.6.0",
@@ -1208,8 +1209,8 @@
   "external020Phase1AndroidValidationImplemented": true,
   "external020Phase1AndroidValidationFunction": "runExternal020Phase1AndroidValidation",
   "external020Phase1FreezeRecordSha256": "9eed497455e653aca5e0140b43adfbbc4bd5e6b7128a9080e4cacf3974cfb2d4",
-  "external020Phase2Version": "0.2.0",
-  "external020Phase2Status": "IMPLEMENTATION_PHASE2_CANDIDATE",
+  "external020Phase2Version": "0.2.1",
+  "external020Phase2Status": "IMPLEMENTATION_PHASE2_ANDROID_VALIDATION_CANDIDATE",
   "external020Phase2MultiDimensionalProfileImplemented": true,
   "external020Phase2IndependenceAssessmentImplemented": true,
   "external020Phase2VersionedRevisionImplemented": true,
@@ -1217,5 +1218,7 @@
   "external020Phase2ExternalAiReliabilityReasoningImplemented": false,
   "external020Decision001RequirementsImplementedCandidateCount": 16,
   "external020Decision001RequirementCount": 18,
-  "external020Decision001Complete": false
+  "external020Decision001Complete": false,
+  "external020Phase2AndroidValidationImplemented": true,
+  "external020Phase2AndroidValidationFunction": "runExternal020Phase2AndroidValidation"
 }
