@@ -1,0 +1,119 @@
+{
+  "id": "SELF-DEVELOPMENT-058-CONTROL-CENTER-V0.1.2-VALIDATION-EVIDENCE",
+  "decisionId": "EXTERNAL-010-DECISION-058",
+  "version": "0.1.2",
+  "status": "TECHNICAL_CANDIDATE",
+  "purpose": "Intent-grounded Relevant Scope Resolver for Form-first Self-Development Workspace",
+  "candidateIdentity": {
+    "scriptCount": 493,
+    "manifestHash": "ae6dc52c02367f6140cdc676378c161ba34f01bc91b02122951796191809800f",
+    "scriptSetHash": "914827b31929018888694bfabc4d0e0438f0bfbd789c97ae69777b9f96c5cf3b",
+    "parentFrozenScriptCount": 492,
+    "parentFrozenScriptSetHash": "891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30"
+  },
+  "implemented": {
+    "relevantScopeResolver": true,
+    "projectSearchReuse": true,
+    "architectureSearchReuse": true,
+    "repositoryInspectionReuse": true,
+    "intentProfileClassification": true,
+    "genericRepositoryFindingSeparation": true,
+    "boundedScopeEvidence": true,
+    "formFirstWorkspace": true,
+    "formalFreezeOperationalReadinessSeparation": true
+  },
+  "representativeIntent": {
+    "input": "自己改善プログラムをもっと使いやすくして、改善前後の違いが分かるようにしたい",
+    "primaryComponent": "SELF-DEVELOPMENT-058",
+    "scopeConfidence": "HIGH",
+    "scopeConfidenceScore": 0.92,
+    "selectedFiles": [
+      "18_self_development_control_center.js",
+      "18_self_development_dashboard.js",
+      "18_self_development_phase5_dashboard.js",
+      "18_self_development_phase2_repository_inspection.js",
+      "18_self_development_phase2_candidate_detection.js",
+      "18_self_development_phase3_approval_policy.js",
+      "18_self_development_phase4_adoption_policy.js",
+      "18_self_development_phase6_dashboard.js"
+    ],
+    "relatedFunctions": [
+      {
+        "id": "function:openSelfDevelopment058ControlCenter",
+        "name": "openSelfDevelopment058ControlCenter",
+        "file": "18_self_development_control_center.js",
+        "line": 900,
+        "summary": "Self-Development Workspace UI",
+        "score": 90,
+        "query": "control center"
+      },
+      {
+        "id": "function:getSelfDevelopmentDashboardStatus",
+        "name": "getSelfDevelopmentDashboardStatus",
+        "file": "18_self_development_dashboard.js",
+        "line": 1,
+        "summary": "Self Development dashboard",
+        "score": 70,
+        "query": "dashboard"
+      }
+    ],
+    "genericRepositoryFindings": [
+      {
+        "type": "LARGE_SOURCE_FILE",
+        "severity": "MEDIUM",
+        "summary": "OpenAI provider file exceeds threshold",
+        "files": [
+          "17_external_intelligence_openai_provider_integration.js"
+        ]
+      }
+    ]
+  },
+  "hardBoundaries": {
+    "resolverExternalTransmission": false,
+    "resolverProviderExecution": false,
+    "resolverCanonicalMutation": false,
+    "automaticApproval": false,
+    "automaticAdoption": false,
+    "automaticCanonicalMutation": false,
+    "automaticExternalTransmission": false,
+    "projectOwnerExternalTransmissionApprovalRequired": true
+  },
+  "validation": {
+    "jsSyntax": {
+      "passed": 493,
+      "failed": 0,
+      "total": 493
+    },
+    "staticFunctionalGate": {
+      "passed": 25,
+      "failed": 0,
+      "total": 25,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "runtimeControlCenterGate": {
+      "passed": 18,
+      "failed": 0,
+      "total": 18,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "decision058Regression": {
+      "passed": 28,
+      "failed": 0,
+      "total": 28,
+      "health": 100,
+      "criticalFailed": 0,
+      "decision058Technical18Of18": true
+    },
+    "localIntentAnalysisProviderExecutionCalls": 0
+  },
+  "manualGateRequired": {
+    "pcUiVisualCheck": true,
+    "pcRelevantScopeWorkflowCheck": true,
+    "androidUiCheck": true,
+    "projectOwnerAcceptanceFreeze": true
+  },
+  "releaseAllowed": false,
+  "validationIsApproval": false
+}

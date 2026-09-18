@@ -1,0 +1,109 @@
+============================================================
+AI Prompt OS / AIプロンプト生成Pro
+SELF-DEVELOPMENT-058
+Self-Development Workspace v0.1.2
+Relevant Scope Resolver Candidate
+============================================================
+
+STATUS
+------
+TECHNICAL_CANDIDATE
+Project Owner Acceptance / Freeze: NOT PERFORMED
+
+PURPOSE
+-------
+Connect Project Owner intent to the correct implementation scope before
+External AI analysis.
+
+User-facing flow:
+Intent -> Local Relevant Scope -> Bounded Context -> AI Proposal -> Review
+
+KEY CHANGE FROM v0.1.1
+----------------------
+v0.1.1 could perform Repository Inspect but a generic repository finding
+could dominate the displayed improvement target.
+
+v0.1.2 adds a local Relevant Scope Resolver that reuses:
+- existing Project Search
+- existing Architecture Search
+- existing read-only Repository Inspection
+
+Generic findings that do not match the Project Owner intent are kept as
+reference findings and are not promoted into the selected improvement scope.
+
+REPRESENTATIVE RESULT
+---------------------
+Intent:
+自己改善プログラムをもっと使いやすくして、改善前後の違いが分かるようにしたい
+
+Primary Component:
+SELF-DEVELOPMENT-058
+
+Scope Confidence:
+HIGH (0.92)
+
+Top selected file:
+18_self_development_control_center.js
+
+Unrelated OpenAI >100KB finding:
+Separated as generic repository finding = true
+
+CANDIDATE IDENTITY
+------------------
+Script Count: 493
+Manifest Hash:
+ae6dc52c02367f6140cdc676378c161ba34f01bc91b02122951796191809800f
+
+Script Set Hash:
+914827b31929018888694bfabc4d0e0438f0bfbd789c97ae69777b9f96c5cf3b
+
+Frozen EXTERNAL-020 parent runtime:
+492 scripts / byte-order identical
+Parent Script Set Hash:
+891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30
+
+VALIDATION
+----------
+493 / 493 JS Syntax PASS
+Static / Functional: 25 / 25 PASS
+Runtime Control Center: 18 / 18 PASS
+Decision 058 Regression: 28 / 28 PASS
+health = 100
+criticalFailed = 0
+
+SAFETY
+------
+Relevant Scope Resolver external transmission = false
+Relevant Scope Resolver provider execution = false
+Relevant Scope Resolver Canonical mutation = false
+Automatic approval = false
+Automatic adoption = false
+Automatic Canonical mutation = false
+Automatic external transmission = false
+External AI execution still requires explicit Project Owner approval
+
+PC REAL GATE
+------------
+1. Apply v0.1.2 DIFF over v0.1.1.
+2. Open:
+   openSelfDevelopment058ControlCenter()
+3. Validate:
+   validateSelfDevelopment058ControlCenter()
+   Expected: 18/18 PASS / health 100 / criticalFailed 0
+4. Enter:
+   自己改善プログラムをもっと使いやすくして、改善前後の違いが分かるようにしたい
+5. Press 現状を分析.
+6. Expected main scope:
+   Primary Component = SELF-DEVELOPMENT-058
+   Confidence = HIGH
+   First related file = 18_self_development_control_center.js
+   OpenAI large-source finding remains generic/reference only.
+
+NEXT
+----
+After PC visual/workflow PASS, verify Android UI layout and scope result.
+Do not Freeze automatically.
+
+============================================================
+END
+============================================================

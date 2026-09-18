@@ -1,13 +1,13 @@
 /* ============================================================
    FILE: 18_self_development_control_center.js
-   SELF-DEVELOPMENT-058 / Self-Development Workspace v0.1.1
+   SELF-DEVELOPMENT-058 / Self-Development Workspace v0.1.2
    Form-first UI over existing Decision 058 backend.
    No new mutation/adoption/provider authority.
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const VERSION = "0.1.1";
+  const VERSION = "0.1.2";
   const COMPONENT_ID = "SELF-DEVELOPMENT-058-CONTROL-CENTER";
   const namespace = global.SELFDEVELOPMENT058Environment;
   if (!namespace || !namespace.__internal) return;
@@ -63,6 +63,9 @@
       candidateResult: null,
       proposalResult: null,
       selectedFiles: [],
+      relatedFunctions: [],
+      architectureRefs: [],
+      scopeResult: null,
       evidenceItems: [],
       analyzedAt: null,
       updatedAt: new Date().toISOString()
@@ -223,26 +226,231 @@
     return text.length > limit ? text.slice(0, limit) + "…" : text;
   }
 
+  const INTENT_SCOPE_PROFILES = Object.freeze([
+    Object.freeze({
+      id: "SELF_DEVELOPMENT",
+      componentId: "SELF-DEVELOPMENT-058",
+      keywords: ["自己改善", "自己修復", "改善プログラム", "self development", "self-development", "sd center", "sd trial", "workspace", "control center"],
+      searchTerms: ["self development", "control center", "workspace", "candidate", "proposal", "controlled trial", "validation"],
+      preferredFiles: [
+        "18_self_development_control_center.js",
+        "18_self_development_dashboard.js",
+        "18_self_development_phase2_repository_inspection.js",
+        "18_self_development_phase2_candidate_detection.js",
+        "18_self_development_phase3_approval_policy.js",
+        "18_self_development_phase4_adoption_policy.js",
+        "18_self_development_phase5_dashboard.js",
+        "18_self_development_phase6_context_policy.js",
+        "18_self_development_phase6_external_ai_governance.js"
+      ]
+    }),
+    Object.freeze({
+      id: "UI_UX",
+      componentId: "PRESENTATION",
+      keywords: ["使いやす", "見やす", "ui", "ux", "画面", "表示", "フォーム", "操作", "見た目", "before", "after", "改善前後", "違い", "比較", "workspace", "dashboard"],
+      searchTerms: ["control center", "workspace", "dashboard", "render", "show", "ui"],
+      preferredFiles: [
+        "18_self_development_control_center.js",
+        "18_self_development_dashboard.js",
+        "18_self_development_phase5_dashboard.js",
+        "18_self_development_phase6_dashboard.js"
+      ]
+    }),
+    Object.freeze({
+      id: "EXTERNAL_AI",
+      componentId: "EXTERNAL-010/SELF-DEVELOPMENT-058",
+      keywords: ["openai", "api", "外部ai", "外部 ai", "external ai", "provider", "モデル"],
+      searchTerms: ["openai", "provider", "external ai", "context policy", "governance"],
+      preferredFiles: [
+        "18_self_development_phase6_context_policy.js",
+        "18_self_development_phase6_external_ai_governance.js",
+        "17_external_intelligence_openai_provider_integration.js"
+      ]
+    }),
+    Object.freeze({
+      id: "MARKET_INTELLIGENCE",
+      componentId: "EXTERNAL-010-MARKET",
+      keywords: ["株", "株式", "投資", "市場", "market", "stock", "technical", "backtest", "strategy", "ローソク"],
+      searchTerms: ["market", "timeseries", "technical", "strategy", "backtest", "fusion"],
+      preferredFiles: [
+        "17_external_intelligence_market_timeseries.js",
+        "17_external_intelligence_market_technical.js",
+        "17_external_intelligence_market_fusion.js",
+        "17_external_intelligence_market_backtest.js"
+      ]
+    }),
+    Object.freeze({
+      id: "REPOSITORY",
+      componentId: "REPOSITORY-010",
+      keywords: ["repository", "リポジトリ", "canonical", "ファイル", "保存", "rollback", "ロールバック", "反映"],
+      searchTerms: ["repository", "canonical", "rollback", "reflection", "mutation"],
+      preferredFiles: [
+        "13_local_first_repository_version_manifest.js",
+        "13_local_first_repository_guided_operations.js",
+        "13_local_first_repository_controlled_transaction.js"
+      ]
+    }),
+    Object.freeze({
+      id: "PROMPT_APPLICATION",
+      componentId: "AI-PROMPT-GENERATOR-PRO",
+      keywords: ["プロンプト生成", "prompt", "ラフ", "変換モード", "生成結果", "プリセット"],
+      searchTerms: ["prompt", "preset", "convert", "generate"],
+      preferredFiles: ["02_prompt.js", "03_data.js", "04_tools.js"]
+    })
+  ]);
+
+  function normalizeIntentText(value) {
+    return String(value == null ? "" : value).toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  }
+
   function fileKeywords(intent) {
-    const text = String(intent || "").toLowerCase();
+    const text = normalizeIntentText(intent);
     const explicitFiles = text.match(/[a-z0-9_./-]+\.(?:js|json|html|css|cjs|py|txt|md)/g) || [];
     const words = text.split(/[^a-z0-9_]+/).filter(function (word) { return word.length >= 4; });
     return Array.from(new Set(explicitFiles.concat(words))).slice(0, 24);
   }
 
-  function selectRelevantFiles(intent, inspection) {
-    const files = inspection && Array.isArray(inspection.inspectedFiles) ? inspection.inspectedFiles : [];
-    const keys = fileKeywords(intent);
-    const selected = [];
-    files.forEach(function (file) {
-      const path = String(file && file.path || "").toLowerCase();
-      if (!path) return;
-      if (keys.some(function (key) { return path.indexOf(key) >= 0 || key.indexOf(path) >= 0; })) selected.push(file.path);
-    });
-    return Array.from(new Set(selected)).slice(0, 8);
+  function matchIntentProfiles(intent) {
+    const text = normalizeIntentText(intent);
+    return INTENT_SCOPE_PROFILES.map(function (profile) {
+      const signals = profile.keywords.filter(function (keyword) { return text.indexOf(String(keyword).toLowerCase()) >= 0; });
+      return signals.length ? { id: profile.id, componentId: profile.componentId, signals: signals, searchTerms: profile.searchTerms, preferredFiles: profile.preferredFiles } : null;
+    }).filter(Boolean);
   }
 
-  function buildWorkspaceEvidence(intent, inspectionResult, p5, p6) {
+  function lightweightProjectSearch(terms) {
+    if (typeof global.searchProject !== "function") return [];
+    const rows = [];
+    const seen = new Set();
+    terms.slice(0, 12).forEach(function (term) {
+      let results = [];
+      try { results = global.searchProject(term, { limit: 12 }) || []; } catch (_) { results = []; }
+      results.forEach(function (row) {
+        const key = String(row && (row.id || row.name || row.file) || "");
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        rows.push({
+          id: row.id || null,
+          name: row.name || null,
+          file: row.file || null,
+          line: Number(row.line || 0),
+          summary: shortText(row.summary || row.role || "", 320),
+          score: Number(row.score || 0),
+          query: term
+        });
+      });
+    });
+    return rows.slice(0, 40);
+  }
+
+  function lightweightArchitectureSearch(terms) {
+    if (typeof global.searchArchitectureObjects !== "function") return [];
+    const rows = [];
+    const seen = new Set();
+    terms.slice(0, 10).forEach(function (term) {
+      let results = [];
+      try { results = global.searchArchitectureObjects(term, { limit: 8 }) || []; } catch (_) { results = []; }
+      results.forEach(function (row) {
+        const key = String(row && (row.id || row.objectId || row.name || row.title) || "");
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        rows.push({
+          id: row.id || row.objectId || null,
+          name: row.name || row.title || null,
+          type: row.type || row.objectType || null,
+          layer: row.layer || null,
+          file: row.file || row.path || row.sourceFile || null,
+          query: term
+        });
+      });
+    });
+    return rows.slice(0, 24);
+  }
+
+  function resolveRelevantScope(intent, inspectionResult) {
+    const text = normalizeIntentText(intent);
+    const inspection = inspectionResult && inspectionResult.data && inspectionResult.data.inspection || inspectionResult || {};
+    const inspectedFiles = Array.isArray(inspection.inspectedFiles) ? inspection.inspectedFiles : [];
+    const findings = Array.isArray(inspection.findings) ? inspection.findings : [];
+    const explicitFiles = fileKeywords(intent).filter(function (token) { return /\.[a-z0-9]+$/i.test(token); });
+    const matchedProfiles = matchIntentProfiles(intent);
+    const searchTerms = [];
+    matchedProfiles.forEach(function (profile) { profile.searchTerms.forEach(function (term) { if (!searchTerms.includes(term)) searchTerms.push(term); }); });
+    fileKeywords(intent).filter(function (token) { return !/\.[a-z0-9]+$/i.test(token); }).slice(0, 8).forEach(function (term) { if (!searchTerms.includes(term)) searchTerms.push(term); });
+    const projectMatches = lightweightProjectSearch(searchTerms);
+    const architectureMatches = lightweightArchitectureSearch(searchTerms);
+    const knownFiles = new Set(inspectedFiles.map(function (file) { return String(file && file.path || ""); }).filter(Boolean));
+    projectMatches.forEach(function (row) { if (row.file) knownFiles.add(String(row.file)); });
+    architectureMatches.forEach(function (row) { if (row.file) knownFiles.add(String(row.file)); });
+    knownFiles.add("18_self_development_control_center.js");
+    const scores = new Map();
+    function addFile(file, score, reason) {
+      const path = String(file || "").trim();
+      if (!path || !/\.(?:js|json|html|css|cjs|py|md|txt)$/i.test(path)) return;
+      const current = scores.get(path) || { file: path, score: 0, reasons: [] };
+      current.score += Number(score || 0);
+      if (reason && !current.reasons.includes(reason)) current.reasons.push(reason);
+      scores.set(path, current);
+    }
+    explicitFiles.forEach(function (file) { addFile(file, 160, "Explicit file named in Project Owner intent"); });
+    matchedProfiles.forEach(function (profile, profileIndex) {
+      profile.preferredFiles.forEach(function (file, index) {
+        if (knownFiles.has(file)) addFile(file, Math.max(26, 90 - profileIndex * 8 - index * 4), "Intent profile: " + profile.id);
+      });
+    });
+    projectMatches.forEach(function (row, index) {
+      if (row.file) addFile(row.file, Math.max(12, 52 - index), "Project Search match: " + row.query);
+    });
+    architectureMatches.forEach(function (row, index) {
+      if (row.file) addFile(row.file, Math.max(10, 36 - index), "Architecture match: " + row.query);
+    });
+    const keys = fileKeywords(intent);
+    inspectedFiles.forEach(function (file) {
+      const path = String(file && file.path || "");
+      const lower = path.toLowerCase();
+      if (keys.some(function (key) { return lower.indexOf(key) >= 0; })) addFile(path, 28, "Repository filename matches intent token");
+    });
+    findings.forEach(function (finding) {
+      (Array.isArray(finding.files) ? finding.files : []).forEach(function (file) {
+        if (scores.has(file)) addFile(file, 12, "Repository finding reinforces selected scope");
+      });
+    });
+    if (/自己改善|self development|self-development|workspace|control center/i.test(text)) addFile("18_self_development_control_center.js", 120, "Direct Self-Development Workspace intent");
+    if (/使いやす|ui|ux|画面|表示|フォーム|操作|改善前後|before|after|比較|違い/i.test(text)) addFile("18_self_development_control_center.js", 80, "UI/UX or Before/After intent");
+    const rankedFiles = Array.from(scores.values()).sort(function (a, b) { return b.score - a.score || a.file.localeCompare(b.file); });
+    const selectedFileRows = rankedFiles.slice(0, 8);
+    const selectedFiles = selectedFileRows.map(function (row) { return row.file; });
+    const relatedFunctions = projectMatches.filter(function (row) { return row.file && selectedFiles.includes(row.file); }).slice(0, 12);
+    const primaryProfile = matchedProfiles[0] || null;
+    const confidenceScore = selectedFileRows.length ? Math.min(0.99, 0.52 + Math.min(0.30, selectedFileRows[0].score / 500) + Math.min(0.14, matchedProfiles.length * 0.05)) : 0.25;
+    const confidence = confidenceScore >= 0.82 ? "HIGH" : confidenceScore >= 0.60 ? "MEDIUM" : "LOW";
+    const genericFindings = findings.filter(function (finding) {
+      const files = Array.isArray(finding.files) ? finding.files : [];
+      return !files.some(function (file) { return selectedFiles.includes(file); });
+    }).slice(0, 8);
+    return Object.freeze({
+      resolverId: "SDCC-RELEVANT-SCOPE-" + Date.now().toString(36).toUpperCase(),
+      resolverVersion: "0.1.2",
+      userIntent: String(intent || ""),
+      primaryComponent: primaryProfile ? primaryProfile.componentId : "AI-PROMPT-OS",
+      matchedProfiles: matchedProfiles.map(function (profile) { return { id: profile.id, componentId: profile.componentId, signals: profile.signals }; }),
+      selectedFiles: selectedFiles,
+      selectedFileRows: selectedFileRows,
+      relatedFunctions: relatedFunctions,
+      architectureRefs: architectureMatches.slice(0, 12),
+      genericRepositoryFindings: genericFindings,
+      confidence: confidence,
+      confidenceScore: Math.round(confidenceScore * 100) / 100,
+      projectSearchUsed: typeof global.searchProject === "function",
+      architectureSearchUsed: typeof global.searchArchitectureObjects === "function",
+      externalTransmissionPerformed: false,
+      providerNetworkCallPerformed: false,
+      canonicalMutationPerformed: false,
+      immutable: true
+    });
+  }
+
+  function buildWorkspaceEvidence(intent, inspectionResult, p5, p6, scopeResult) {
     const inspection = inspectionResult && inspectionResult.data && inspectionResult.data.inspection || {};
     const findings = Array.isArray(inspection.findings) ? inspection.findings : [];
     const findingSummary = findings.slice(0, 6).map(function (f) {
@@ -275,7 +483,16 @@
         readiness: p6 && p6.readiness && (p6.readiness.readiness || p6.readiness.status) || "UNKNOWN"
       }
     });
+    const scopeExcerpt = JSON.stringify({
+      primaryComponent: scopeResult && scopeResult.primaryComponent || null,
+      matchedProfiles: scopeResult && scopeResult.matchedProfiles || [],
+      selectedFiles: scopeResult && scopeResult.selectedFiles || [],
+      relatedFunctions: scopeResult && scopeResult.relatedFunctions || [],
+      architectureRefs: scopeResult && scopeResult.architectureRefs || [],
+      confidence: scopeResult && scopeResult.confidence || "LOW"
+    });
     return [
+      { evidenceId: "SDCC-WORKSPACE-SCOPE", evidenceType: "ARCHITECTURE", sourceId: "SDCC-RELEVANT-SCOPE-RESOLVER", excerpt: shortText(scopeExcerpt, 2600), selectionReason: "Intent-grounded relevant scope selected locally before any External AI transmission." },
       { evidenceId: "SDCC-WORKSPACE-REPOSITORY", evidenceType: "RUNTIME_EVIDENCE", sourceId: "SELFDEV058-REPOSITORY-INSPECTION", excerpt: shortText(repositoryExcerpt, 2200), selectionReason: "Current repository inspection summary for requested improvement." },
       { evidenceId: "SDCC-WORKSPACE-FREEZE", evidenceType: "ARCHITECTURE", sourceId: FORMAL_DECISION058_FREEZE.evidenceSource, excerpt: shortText(freezeExcerpt, 1600), selectionReason: "Formal Decision 058 boundary and completion state." },
       { evidenceId: "SDCC-WORKSPACE-READINESS", evidenceType: "RUNTIME_EVIDENCE", sourceId: "SELFDEV058-OPERATIONAL-READINESS", excerpt: shortText(operationalExcerpt, 1600), selectionReason: "Current operational readiness; distinct from formal freeze status." }
@@ -299,6 +516,7 @@
     const candidate = workspace.candidateResult && workspace.candidateResult.data && workspace.candidateResult.data.candidate || null;
     const proposal = workspace.proposalResult && workspace.proposalResult.data && workspace.proposalResult.data.proposal || null;
     const findings = inspection && Array.isArray(inspection.findings) ? inspection.findings : [];
+    const scope = workspace.scopeResult || {};
     const currentSummary = inspection ? ("Repository " + (inspection.inventoryCount || "?") + " items / inspected " + (inspection.inspectedFileCount || "?") + " files / findings " + findings.length) : "まだ現状分析していません";
     const expected = aiOutput ? shortText(aiOutput, 1600) : "外部AI分析はまだ実行していません。現時点では変更結果を確定せず、現状Evidenceと改善Candidateだけを扱います。";
     const next = proposal ? "Proposal登録済み。Controlled Trial / Reviewへ進めます（Adoptionではありません）。" : candidate ? "Candidate登録済み。Proposal作成またはAI分析結果をレビューしてください。" : workspace.state === "ANALYZED" ? "AI分析または改善候補登録へ進めます。" : "改善したいことを入力して「現状を分析」を押してください。";
@@ -306,7 +524,8 @@
       '<div class="sdcc-work-grid">',
       '<div class="sdcc-work-card"><span>あなたの目的</span><b>' + esc(shortText(intent, 500)) + '</b></div>',
       '<div class="sdcc-work-card"><span>現在</span><b>' + esc(currentSummary) + '</b><small>Formal FreezeとOperational Readinessは分離して判定</small></div>',
-      '<div class="sdcc-work-card"><span>関連ファイル候補</span><b>' + esc(workspace.selectedFiles.length ? workspace.selectedFiles.join(", ") : "未特定 / Architecture Review") + '</b></div>',
+      '<div class="sdcc-work-card"><span>Intent Scope</span><b>' + esc(scope.primaryComponent || "未判定") + '</b><small>Confidence: ' + esc(scope.confidence || "-") + ' / 一般Repository findingとは分離</small></div>',
+      '<div class="sdcc-work-card"><span>関連ファイル候補</span><b>' + esc(workspace.selectedFiles.length ? workspace.selectedFiles.join(", ") : "未特定 / Architecture Review") + '</b><small>Functions: ' + esc((workspace.relatedFunctions || []).slice(0,4).map(function(row){return row.name || row.id || "";}).filter(Boolean).join(", ") || "未特定") + '</small></div>',
       '<div class="sdcc-work-card"><span>External AI</span><b>' + esc(readiness.readiness || "未確認") + '</b><small>自動送信なし。実行時はProject Owner明示確認</small></div>',
       '</div>',
       '<div class="sdcc-result"><h4>変更したらどうなるか（予測候補）</h4><div>' + esc(expected) + '</div><p>※ AI出力はProposal Candidateのみ。Validation前の予測であり、Truth/Approval/Adoptionではありません。</p></div>',
@@ -341,7 +560,7 @@
       const progress = row.implemented != null && row.total ? Math.round(row.implemented / row.total * 100) : null;
       return '<div class="sdcc-phase"><div><b>Phase ' + row.phase + '</b><span>v' + esc(row.version) + '</span></div>' +
         '<strong class="' + statusWord(row).toLowerCase() + '">' + esc(statusWord(row)) + '</strong>' +
-        '<small>' + esc(row.status) + (progress != null ? ' / runtime ' + progress + '%' : '') + '</small></div>';
+        '<small>' + esc(row.status) + (progress != null ? ' / operational coverage ' + progress + '%' : '') + '</small></div>';
     }).join("");
 
     workflowNode.innerHTML = [
@@ -429,8 +648,9 @@
     const p6 = safeCall("getSelfDevelopmentPhase6Dashboard", null);
     const readiness = typeof namespace.inspectSelfDevelopmentPhase6ExternalAiReadiness === "function" ? namespace.inspectSelfDevelopmentPhase6ExternalAiReadiness() : { readiness: "UNAVAILABLE" };
     const inspection = inspectionResult.data && inspectionResult.data.inspection || {};
-    const selectedFiles = selectRelevantFiles(userIntent, inspection);
-    const evidenceItems = buildWorkspaceEvidence(userIntent, inspectionResult, p5, p6);
+    const scopeResult = resolveRelevantScope(userIntent, inspectionResult);
+    const selectedFiles = scopeResult.selectedFiles || [];
+    const evidenceItems = buildWorkspaceEvidence(userIntent, inspectionResult, p5, p6, scopeResult);
     let contextResult = null;
     if (typeof namespace.buildSelfDevelopmentPhase6ContextPackage === "function") contextResult = await namespace.buildSelfDevelopmentPhase6ContextPackage({ userIntent: userIntent, evidenceItems: evidenceItems });
     workspace = Object.assign(createEmptyWorkspace(), {
@@ -440,7 +660,10 @@
       inspectionResult: clone(inspectionResult),
       contextResult: clone(contextResult),
       readiness: clone(readiness),
+      scopeResult: clone(scopeResult),
       selectedFiles: selectedFiles,
+      relatedFunctions: clone(scopeResult.relatedFunctions || []),
+      architectureRefs: clone(scopeResult.architectureRefs || []),
       evidenceItems: clone(evidenceItems),
       analyzedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -453,7 +676,13 @@
         userIntent: userIntent,
         baselineIdentityId: baselineResult.data && baselineResult.data.baselineIdentity && baselineResult.data.baselineIdentity.baselineIdentityId || null,
         inspectionId: inspection.inspectionId || null,
+        primaryComponent: scopeResult.primaryComponent,
+        scopeConfidence: scopeResult.confidence,
+        scopeConfidenceScore: scopeResult.confidenceScore,
         selectedFiles: selectedFiles,
+        relatedFunctions: scopeResult.relatedFunctions || [],
+        architectureRefs: scopeResult.architectureRefs || [],
+        genericRepositoryFindings: scopeResult.genericRepositoryFindings || [],
         findings: inspection.findings || [],
         boundedContextReady: Boolean(contextResult && contextResult.ok === true),
         externalAiReadiness: readiness && readiness.readiness || "UNKNOWN",
@@ -758,6 +987,11 @@
     check("External AI preparation API exists", typeof namespace.prepareSelfDevelopmentPhase6ExternalAiReasoning === "function", typeof namespace.prepareSelfDevelopmentPhase6ExternalAiReasoning);
     check("External AI execution remains explicit Project Owner interaction only", typeof namespace.executeSelfDevelopmentPhase6ExternalAiReasoning === "function" && s.hardBoundaries.externalTransmissionAutomatic === false && s.hardBoundaries.explicitProjectOwnerExternalTransmissionApprovalRequired === true, s.hardBoundaries);
     check("Candidate / Proposal registration APIs exist", typeof namespace.createSelfDevelopmentCandidate === "function" && typeof namespace.createSelfDevelopmentProposal === "function", { candidate: typeof namespace.createSelfDevelopmentCandidate, proposal: typeof namespace.createSelfDevelopmentProposal });
+    const resolverProbe = resolveRelevantScope("自己改善プログラムをもっと使いやすくして改善前後を比較したい", { data: { inspection: { inspectedFiles: [{ path: "18_self_development_control_center.js" }, { path: "17_external_intelligence_openai_provider_integration.js" }], findings: [{ type: "LARGE_SOURCE_FILE", files: ["17_external_intelligence_openai_provider_integration.js"] }] } } });
+    check("Relevant Scope Resolver API exists", typeof resolveRelevantScope === "function", typeof resolveRelevantScope);
+    check("Intent scope selects Self-Development Workspace ahead of unrelated generic findings", resolverProbe.primaryComponent === "SELF-DEVELOPMENT-058" && resolverProbe.selectedFiles[0] === "18_self_development_control_center.js", resolverProbe);
+    check("Relevant Scope Resolver is local-only and performs no provider call", resolverProbe.externalTransmissionPerformed === false && resolverProbe.providerNetworkCallPerformed === false && resolverProbe.canonicalMutationPerformed === false, { externalTransmissionPerformed: resolverProbe.externalTransmissionPerformed, providerNetworkCallPerformed: resolverProbe.providerNetworkCallPerformed, canonicalMutationPerformed: resolverProbe.canonicalMutationPerformed });
+    check("Intent scope exposes bounded file/function/architecture references", Array.isArray(resolverProbe.selectedFiles) && Array.isArray(resolverProbe.relatedFunctions) && Array.isArray(resolverProbe.architectureRefs), { selectedFiles: resolverProbe.selectedFiles, relatedFunctions: resolverProbe.relatedFunctions, architectureRefs: resolverProbe.architectureRefs });
     check("Phase 5 Controlled Trial UI bridge exists", typeof namespace.openSelfDevelopmentPhase5TrialUI === "function" || typeof global.openSelfDevelopmentPhase5TrialUI === "function", typeof namespace.openSelfDevelopmentPhase5TrialUI);
     check("Control Center does not expose automatic approval", s.hardBoundaries.automaticCandidateApproval === false, s.hardBoundaries.automaticCandidateApproval);
     check("Control Center does not expose automatic adoption", s.hardBoundaries.automaticAdoption === false, s.hardBoundaries.automaticAdoption);
@@ -787,6 +1021,7 @@
     getSelfDevelopment058ControlCenterSnapshot: snapshot,
     getSelfDevelopment058FormalFreezeStatus: function () { return clone(FORMAL_DECISION058_FREEZE); },
     getSelfDevelopment058WorkspaceState: function () { return clone(workspace); },
+    resolveSelfDevelopment058RelevantScope: resolveRelevantScope,
     analyzeSelfDevelopment058WorkspaceIntent: analyzeWorkspaceIntent,
     prepareSelfDevelopment058WorkspaceExternalAi: prepareWorkspaceExternalAi,
     executeSelfDevelopment058WorkspaceExternalAi: executeWorkspaceExternalAi,
@@ -799,6 +1034,7 @@
   global.openSelfDevelopment058ControlCenter = openControlCenter;
   global.closeSelfDevelopment058ControlCenter = closeControlCenter;
   global.validateSelfDevelopment058ControlCenter = validateControlCenter;
+  global.resolveSelfDevelopment058RelevantScope = resolveRelevantScope;
   global.analyzeSelfDevelopment058WorkspaceIntent = analyzeWorkspaceIntent;
 
   if (global.document) {
