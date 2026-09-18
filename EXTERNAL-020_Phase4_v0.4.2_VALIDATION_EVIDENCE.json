@@ -1,0 +1,80 @@
+{
+  "id": "EXTERNAL-020-PHASE4-V0.4.2-VALIDATION-EVIDENCE",
+  "componentId": "EXTERNAL-020",
+  "decisionId": "EXTERNAL-020-DECISION-001",
+  "phase": 4,
+  "version": "0.4.2",
+  "status": "IMPLEMENTATION_PHASE4_CANDIDATE",
+  "hotfix": {
+    "id": "PHASE4-TECHNICAL-GATE-LIVE-READINESS-SEPARATION",
+    "rootCause": "Phase 4 technical validator incorrectly required current LIVE OpenAI Source/Secret/Budget/Final Validation readiness. In an otherwise safe runtime, that caused readiness failure and cascaded request-preparation/body checks even though EXTERNAL-010 governance capability was correctly integrated.",
+    "scope": "VALIDATOR_ONLY",
+    "frozenPhase1To3ScriptsModified": false,
+    "providerExecutionPathModified": false,
+    "technicalValidationRequiresLiveProviderReadiness": false,
+    "liveExecutionStillRequiresGovernedReadiness": true,
+    "safeNotReadyIsFailClosed": true
+  },
+  "candidateIdentity": {
+    "scriptCount": 491,
+    "manifestHash": "ac73baa0e2c85fc3018836697c7a60b803572fff6f901f1de52d8c9a53443443",
+    "scriptSetHash": "c805b4dbf814f154046ad9fe26f5ee23db1c18c88b073b26d7932d445237f088"
+  },
+  "validation": {
+    "javascriptSyntax": {
+      "passed": 491,
+      "failed": 0,
+      "total": 491
+    },
+    "staticPackage": {
+      "passed": 14,
+      "failed": 0,
+      "total": 14,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "phase4LiveNotReadyTechnicalGate": {
+      "passed": 20,
+      "failed": 0,
+      "total": 20,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "phase4LiveReadyTechnicalGate": {
+      "passed": 20,
+      "failed": 0,
+      "total": 20,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "sameSessionRerun": {
+      "passed": 20,
+      "failed": 0,
+      "total": 20
+    },
+    "decision058Phase6Regression": {
+      "passed": 28,
+      "failed": 0,
+      "total": 28,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "providerExecutionCallsDuringValidation": 0,
+    "authorityActivationCallsDuringValidation": 0
+  },
+  "decision001": {
+    "requirementsCompleteCandidate": 18,
+    "requirementsTotal": 18,
+    "candidateComplete": true,
+    "projectOwnerAcceptancePerformed": false,
+    "releaseAllowed": false
+  },
+  "safety": {
+    "providerNetworkCallPerformed": false,
+    "externalTransmissionPerformed": false,
+    "paidApiExecutionPerformed": false,
+    "canonicalMutationPerformed": false,
+    "validationIsApproval": false
+  },
+  "nextGate": "Apply v0.4.2 and rerun runExternal020Phase4Validation() on PC. Expected 20/20 PASS whether the live OpenAI runtime is currently READY or safely NOT_READY. Do not proceed to Android unless PC 20/20 PASS."
+}

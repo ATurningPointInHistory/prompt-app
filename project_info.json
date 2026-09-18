@@ -1105,23 +1105,26 @@
     "EXTERNAL-020_Phase4_v0.4.0_HANDOFF.txt",
     "validate_external020_phase4_v041.cjs",
     "EXTERNAL-020_Phase4_v0.4.1_VALIDATION_EVIDENCE.json",
-    "EXTERNAL-020_Phase4_v0.4.1_HANDOFF.txt"
+    "EXTERNAL-020_Phase4_v0.4.1_HANDOFF.txt",
+    "validate_external020_phase4_v042.cjs",
+    "EXTERNAL-020_Phase4_v0.4.2_VALIDATION_EVIDENCE.json",
+    "EXTERNAL-020_Phase4_v0.4.2_HANDOFF.txt"
   ],
   "missingFiles": [],
   "externalFiles": [
     "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
   ],
-  "localFileCount": 548,
+  "localFileCount": 551,
   "externalFileCount": 1,
-  "fileCount": 549,
+  "fileCount": 552,
   "cleanIndex": true,
   "scriptManifestSource": "00_script_manifest.json",
   "scriptManifestVersion": "1.20.1",
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "ff15b6b5f5dde8dd4f9b8462299f4f1e329d7b3bb226b1d53f95154a706f9fe9",
-  "scriptSetHash": "c11f098d80d09d03ee1a08d8c2a114e966aeb1492e0b8df389008a3a13aa8df6",
+  "scriptManifestHash": "ac73baa0e2c85fc3018836697c7a60b803572fff6f901f1de52d8c9a53443443",
+  "scriptSetHash": "c805b4dbf814f154046ad9fe26f5ee23db1c18c88b073b26d7932d445237f088",
   "scriptManifestCount": 491,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
@@ -1251,7 +1254,7 @@
   "external020Phase3AndroidValidationImplemented": true,
   "external020Phase3AndroidValidationFunction": "runExternal020Phase3AndroidValidation",
   "external020Phase3FreezeRecordSha256": "ffd0af69f5adc5f2a8ef690db0a5d0759f4179ed8239d81a98919d5b135eb339",
-  "external020Phase4Version": "0.4.1",
+  "external020Phase4Version": "0.4.2",
   "external020Phase4Status": "IMPLEMENTATION_PHASE4_CANDIDATE",
   "external020Phase4ExternalAiGovernanceReuseImplemented": true,
   "external020Phase4ValidationFunction": "runExternal020Phase4Validation",
@@ -1263,7 +1266,10 @@
   "external020ExternalAiAutomaticProfileRevisionAllowed": false,
   "external020ExternalAiAutomaticKnowledgePromotionAllowed": false,
   "external020ExternalAiTruthAuthorityGranted": false,
-  "external020Phase4HotfixId": "PHASE4-VALIDATION-RERUN-IDEMPOTENCY",
+  "external020Phase4HotfixId": "PHASE4-TECHNICAL-GATE-LIVE-READINESS-SEPARATION",
   "external020Phase4ValidationRerunIdempotencyFixed": true,
-  "external020Phase4FrozenPhase1To3ScriptsModifiedByHotfix": false
+  "external020Phase4FrozenPhase1To3ScriptsModifiedByHotfix": false,
+  "external020Phase4TechnicalValidationRequiresLiveProviderReadiness": false,
+  "external020Phase4LiveExecutionStillRequiresGovernedReadiness": true,
+  "external020Phase4ProviderExecutionPathModifiedByHotfix": false
 }

@@ -1,0 +1,68 @@
+============================================================
+AI Prompt OS / AIプロンプト生成Pro
+EXTERNAL-020 Trust / Evidence Intelligence
+Phase 4 v0.4.2 Technical Gate / Live Readiness Separation Hotfix
+============================================================
+
+Status:
+IMPLEMENTATION_PHASE4_CANDIDATE
+
+Root Cause:
+Phase 4 Technical Validation incorrectly required the current PC runtime
+to have OpenAI Source / Secret / Budget / Final Validation in LIVE READY state.
+This mixed implementation conformance with environment/account activation.
+
+Fix:
+- Frozen Phase 1-3 scripts unchanged.
+- Provider execution path unchanged.
+- Phase 4 validator now validates EXTERNAL-010 governance capability separately
+  from current LIVE provider readiness.
+- LIVE READY: request preparation path must succeed without execution.
+- LIVE NOT READY: EXTERNAL-020 live preparation must fail closed with
+  EXTERNAL020_PHASE4_EXTERNAL_AI_NOT_READY and no network/paid execution.
+- EXTERNAL-010 non-executing request-preparation contract is validated directly.
+- store=false and no tools/files/web/computer remain mandatory.
+
+Candidate Identity:
+Script Count: 491
+Manifest Hash:
+ac73baa0e2c85fc3018836697c7a60b803572fff6f901f1de52d8c9a53443443
+Script Set Hash:
+c805b4dbf814f154046ad9fe26f5ee23db1c18c88b073b26d7932d445237f088
+
+Validation:
+491 / 491 JavaScript syntax PASS
+Static / Package: 14 / 14 PASS
+Phase 4 LIVE NOT READY fixture: 20 / 20 PASS
+Phase 4 same-session rerun: 20 / 20 PASS
+Phase 4 LIVE READY fixture: 20 / 20 PASS
+Decision 058 Phase 6 Regression: 28 / 28 PASS
+Provider execution calls during validation: 0
+Authority activation calls during validation: 0
+
+Decision 001 Candidate Coverage:
+18 / 18
+Project Owner Acceptance: NOT PERFORMED
+Release Allowed: false
+
+Next PC Gate:
+runExternal020Phase4Validation().then(console.log)
+
+Expected:
+version = 0.4.2
+passed = 20
+failed = 0
+criticalFailed = 0
+health = 100
+phase4ImplementationComplete = true
+phase4TechnicalGateReady = true
+decision001RequirementsComplete = 18
+decision001Complete = true
+releaseAllowed = false
+
+Do NOT require current LIVE OpenAI activation for the Technical Gate.
+Actual provider execution still requires governed LIVE readiness plus explicit
+Project Owner external-transmission approval.
+============================================================
+END
+============================================================
