@@ -1,0 +1,95 @@
+{
+  "id": "EXTERNAL-020-PHASE2-V0.2.0-VALIDATION-EVIDENCE",
+  "componentId": "EXTERNAL-020",
+  "decisionId": "EXTERNAL-020-DECISION-001",
+  "phase": 2,
+  "version": "0.2.0",
+  "status": "TECHNICAL_CANDIDATE_VALIDATED_PROJECT_OWNER_RUNTIME_GATE_PENDING",
+  "parentPhase1": {
+    "version": "0.1.1",
+    "status": "PROJECT_OWNER_ACCEPTED_FROZEN",
+    "freezeRecordSha256": "9eed497455e653aca5e0140b43adfbbc4bd5e6b7128a9080e4cacf3974cfb2d4"
+  },
+  "canonicalParent": {
+    "revisionId": "REPOSITORY010-CANONICAL-REVISION-0023",
+    "scriptCount": 462,
+    "manifestHash": "0673af6e0cff8332cd9322d62b582eea312b549f9f3660f28222a87957c4160b",
+    "scriptSetHash": "d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3"
+  },
+  "candidateIdentity": {
+    "scriptCount": 478,
+    "manifestHash": "a7958269d54fc14317afbfd1ec892bf5abdd5e79b5ce981626b005c5cf0e85df",
+    "scriptSetHash": "9640eaefb1e911b3d08e117be594716bd6651cf78e70af7721507736a6373a89"
+  },
+  "validation": {
+    "javascriptSyntax": {
+      "passed": 478,
+      "failed": 0,
+      "total": 478
+    },
+    "staticFunctional": {
+      "passed": 18,
+      "failed": 0,
+      "total": 18,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "phase1Regression": {
+      "passed": 17,
+      "failed": 0,
+      "total": 17,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "decision058Phase6Regression": {
+      "passed": 28,
+      "failed": 0,
+      "total": 28,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "phase2FunctionalFixture": {
+      "passed": 21,
+      "failed": 0,
+      "total": 21,
+      "health": 100,
+      "criticalFailed": 0
+    }
+  },
+  "decision001RequirementStatus": {
+    "implemented": 16,
+    "total": 18,
+    "complete": false,
+    "remaining": [
+      "REQ-020-008",
+      "REQ-020-015"
+    ]
+  },
+  "phase2Scope": {
+    "multiDimensionalReliabilityProfileImplemented": true,
+    "subjectSeparationImplemented": true,
+    "contextSpecificProfilesImplemented": true,
+    "independentConfirmationAssessmentImplemented": true,
+    "versionedReliabilityRevisionImplemented": true,
+    "historicalOutcomeGroundedEvaluationImplemented": false,
+    "externalAiReliabilityReasoningImplemented": false
+  },
+  "safety": {
+    "universalTrustScoreImplemented": false,
+    "automaticConflictResolutionAllowed": false,
+    "truthConfirmationAllowed": false,
+    "rawEvidenceMutationAllowed": false,
+    "automaticKnowledgePromotionAllowed": false,
+    "canonicalRepositoryMutationAllowed": false,
+    "externalTransmissionPerformedByValidation": false,
+    "paidApiExecutionPerformedByValidation": false,
+    "ide170ConfidenceOverwritten": false,
+    "validationEqualsApproval": false
+  },
+  "runtimeGate": {
+    "pcRealRuntimeRequired": true,
+    "androidRealDeviceValidationImplemented": false,
+    "projectOwnerAcceptanceRequired": true,
+    "releaseAllowed": false
+  }
+}
