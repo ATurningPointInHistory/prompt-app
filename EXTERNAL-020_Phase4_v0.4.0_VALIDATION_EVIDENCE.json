@@ -1,0 +1,1914 @@
+{
+  "id": "EXTERNAL-020-PHASE4-V0.4.0-VALIDATION-EVIDENCE",
+  "componentId": "EXTERNAL-020",
+  "decisionId": "EXTERNAL-020-DECISION-001",
+  "version": "0.4.0",
+  "phase": 4,
+  "status": "IMPLEMENTATION_PHASE4_CANDIDATE",
+  "purpose": "REQ-020-015 External AI Governance Reuse",
+  "candidateIdentity": {
+    "scriptCount": 491,
+    "manifestHash": "a41256344c3eb472f12c930897d8a81eee6536dc46f709ef38ff14e903f9f66b",
+    "scriptSetHash": "734b2cc142482b97aad0962fe62d9cdf748c3df8b1250037505cf5a8dcb390e8"
+  },
+  "validation": {
+    "javascriptSyntax": {
+      "passed": 491,
+      "failed": 0,
+      "total": 491
+    },
+    "staticPackageFunctional": {
+      "passed": 16,
+      "failed": 0,
+      "total": 16,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "phase4FunctionalFixture": {
+      "passed": 20,
+      "failed": 0,
+      "total": 20
+    },
+    "decision058Phase6Regression": {
+      "passed": 28,
+      "failed": 0,
+      "total": 28,
+      "health": 100,
+      "criticalFailed": 0,
+      "req058013Closed": true,
+      "decision058Technical18Of18": true
+    }
+  },
+  "frozenParent": {
+    "phase3Version": "0.3.1",
+    "scriptCount": 485,
+    "scriptSetHash": "69ea6a918db8a26702a0b3cfaffe0002d3247ac468a25ee485905fab247d7954",
+    "freezeRecordSha256": "ffd0af69f5adc5f2a8ef690db0a5d0759f4179ed8239d81a98919d5b135eb339",
+    "verifiedByteOrderIdentical": true
+  },
+  "canonicalParent": {
+    "revisionId": "REPOSITORY010-CANONICAL-REVISION-0023",
+    "scriptCount": 462,
+    "scriptSetHash": "d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3",
+    "verifiedByteOrderIdentical": true
+  },
+  "decision001": {
+    "requirementsCompleteCandidate": 18,
+    "requirementsTotal": 18,
+    "candidateComplete": true,
+    "projectOwnerAcceptanceRequired": true,
+    "releaseAllowed": false
+  },
+  "governanceReuse": {
+    "providerOwner": "EXTERNAL-010",
+    "provider": "OPENAI",
+    "sourceId": "SOURCE-OPENAI",
+    "operationId": "INTERNAL_ANALYSIS",
+    "requiredReadiness": "OPENAI_API_INTEGRATION_READY",
+    "secondProviderEngineCreated": false,
+    "secondSecretStoreCreated": false,
+    "secondBudgetEngineCreated": false,
+    "secondGatewayCreated": false
+  },
+  "validationSideEffects": {
+    "providerNetworkCallPerformed": false,
+    "externalTransmissionPerformed": false,
+    "paidApiExecutionPerformed": false,
+    "authorityActivationPerformed": false,
+    "canonicalMutationPerformed": false
+  },
+  "safety": {
+    "explicitProjectOwnerExternalTransmissionApprovalRequired": true,
+    "providerOutputClassification": "AI_RELIABILITY_REASONING_CANDIDATE_ONLY",
+    "truthAuthorityGranted": false,
+    "automaticConflictResolutionPerformed": false,
+    "automaticProfileRevisionPerformed": false,
+    "automaticKnowledgePromotionPerformed": false,
+    "actionAuthorityGranted": false,
+    "tradingAuthorityGranted": false,
+    "financialAuthorityGranted": false,
+    "businessAuthorityGranted": false,
+    "ide170ConfidenceOverwritten": false
+  },
+  "checks": [
+    {
+      "name": "All 491 manifest script hashes and byte sizes match",
+      "passed": true,
+      "detail": {
+        "verified": 491,
+        "total": 491,
+        "missing": []
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "All manifest cache keys match",
+      "passed": true,
+      "detail": {
+        "verified": 491,
+        "total": 491
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "Script Set Hash verifies",
+      "passed": true,
+      "detail": {
+        "computed": "734b2cc142482b97aad0962fe62d9cdf748c3df8b1250037505cf5a8dcb390e8",
+        "stored": "734b2cc142482b97aad0962fe62d9cdf748c3df8b1250037505cf5a8dcb390e8"
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "Manifest Hash verifies",
+      "passed": true,
+      "detail": {
+        "computed": "a41256344c3eb472f12c930897d8a81eee6536dc46f709ef38ff14e903f9f66b",
+        "stored": "a41256344c3eb472f12c930897d8a81eee6536dc46f709ef38ff14e903f9f66b"
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "index manifest hash marker matches",
+      "passed": true,
+      "detail": {
+        "index": "a41256344c3eb472f12c930897d8a81eee6536dc46f709ef38ff14e903f9f66b",
+        "manifest": "a41256344c3eb472f12c930897d8a81eee6536dc46f709ef38ff14e903f9f66b"
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "index script sequence matches manifest",
+      "passed": true,
+      "detail": {
+        "indexCount": 491,
+        "manifestCount": 491
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "Phase 4 files are contiguous after Frozen Phase 3 and before 99_init",
+      "passed": true,
+      "detail": {
+        "p3Android": 483,
+        "p4Start": 484,
+        "p4End": 489,
+        "initPos": 490
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "Frozen Phase 3 v0.3.1 parent script set remains byte/order identical",
+      "passed": true,
+      "detail": {
+        "parentScriptCount": 485,
+        "parentScriptSetHash": "69ea6a918db8a26702a0b3cfaffe0002d3247ac468a25ee485905fab247d7954"
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "Canonical 0023 parent script set remains byte/order identical",
+      "passed": true,
+      "detail": {
+        "parentScriptCount": 462,
+        "parentScriptSetHash": "d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3"
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "project_info identity matches Phase 4 v0.4.0 candidate",
+      "passed": true,
+      "detail": {
+        "count": 491,
+        "releaseStatus": "EXTERNAL_020_PHASE4_CANDIDATE",
+        "phase4Version": "0.4.0",
+        "phase4Status": "IMPLEMENTATION_PHASE4_CANDIDATE",
+        "requirements": 18,
+        "decisionComplete": true,
+        "releaseAllowed": false
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "project_info savedFiles covers every manifest script",
+      "passed": true,
+      "detail": {
+        "savedCount": 589,
+        "manifestCount": 491
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "Phase 4 Version Manifest reports v0.4.0 candidate",
+      "passed": true,
+      "detail": {
+        "componentId": "EXTERNAL-020",
+        "decisionId": "EXTERNAL-020-DECISION-001",
+        "version": "0.4.0",
+        "status": "IMPLEMENTATION_PHASE4_CANDIDATE",
+        "phase": 4,
+        "phaseName": "Governed External AI Reliability Reasoning Reuse",
+        "parentPhase3": {
+          "version": "0.3.1",
+          "status": "PROJECT_OWNER_ACCEPTED_FROZEN",
+          "scriptCount": 485,
+          "manifestHash": "351d70ffd05c3312867582ee1ff272f179da69da77e3b8583c38e803918b6476",
+          "scriptSetHash": "69ea6a918db8a26702a0b3cfaffe0002d3247ac468a25ee485905fab247d7954",
+          "freezeRecordSha256": "ffd0af69f5adc5f2a8ef690db0a5d0759f4179ed8239d81a98919d5b135eb339"
+        },
+        "canonicalParent": {
+          "revisionId": "REPOSITORY010-CANONICAL-REVISION-0023",
+          "applicationVersion": "1.20.1",
+          "scriptCount": 462,
+          "manifestHash": "0673af6e0cff8332cd9322d62b582eea312b549f9f3660f28222a87957c4160b",
+          "scriptSetHash": "d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3"
+        },
+        "completionTargets": [
+          "REQ-020-015"
+        ],
+        "governanceReuse": {
+          "providerComponent": "EXTERNAL-010",
+          "provider": "OPENAI",
+          "sourceId": "SOURCE-OPENAI",
+          "operationId": "INTERNAL_ANALYSIS",
+          "requiredProviderReadiness": "OPENAI_API_INTEGRATION_READY",
+          "reusedAuthorities": [
+            "EXTERNAL_INTELLIGENCE_AUTHORITY_ENVELOPE",
+            "PROJECT_OWNER_EXPLICIT_EXTERNAL_TRANSMISSION_APPROVAL"
+          ],
+          "reusedBoundaries": [
+            "OPENAI_SOURCE_REGISTRY",
+            "OPENAI_OPERATION_CONTRACT",
+            "OPENAI_SECRET_REFERENCE",
+            "USD_RESOURCE_BUDGET",
+            "USAGE_POLICY",
+            "LOCAL_GATEWAY",
+            "PROVIDER_USAGE_RECONCILIATION"
+          ],
+          "secondProviderEngineCreated": false,
+          "secondSecretStoreCreated": false,
+          "secondBudgetEngineCreated": false,
+          "secondGatewayCreated": false
+        },
+        "safety": {
+          "externalAiReliabilityReasoningImplemented": true,
+          "explicitProjectOwnerExternalTransmissionApprovalRequired": true,
+          "validationMayExecuteProviderNetworkCall": false,
+          "validationMayTransmitExternally": false,
+          "validationMayConsumePaidApi": false,
+          "providerOutputClassification": "AI_RELIABILITY_REASONING_CANDIDATE_ONLY",
+          "providerOutputMayConfirmTruth": false,
+          "providerOutputMayResolveConflictAutomatically": false,
+          "providerOutputMayReviseReliabilityProfileAutomatically": false,
+          "providerOutputMayPromoteKnowledgeAutomatically": false,
+          "providerOutputMayGrantActionAuthority": false,
+          "providerOutputMayGrantTradingAuthority": false,
+          "providerOutputMayGrantFinancialAuthority": false,
+          "providerOutputMayGrantBusinessAuthority": false,
+          "providerOutputMayMutateCanonicalRepository": false,
+          "universalTrustScoreImplemented": false,
+          "permanentGlobalSourceRankingImplemented": false,
+          "rawEvidenceMutationAllowed": false,
+          "automaticKnowledgePromotionAllowed": false,
+          "canonicalRepositoryMutationAllowed": false,
+          "externalTransmissionAutomaticallyAllowed": false,
+          "paidApiExecutionAutomaticallyAllowed": false,
+          "selfGrantedAuthorityAllowed": false,
+          "reliabilityEqualsTruth": false,
+          "reliabilityEqualsActionAuthority": false,
+          "ide170ConfidenceOverwriteAllowed": false
+        }
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "Phase 4 functional fixture passes 20/20",
+      "passed": true,
+      "detail": {
+        "validationId": "EXTERNAL020-PHASE4-VALIDATION-MU6VYMBH-0047",
+        "componentId": "EXTERNAL-020",
+        "decisionId": "EXTERNAL-020-DECISION-001",
+        "version": "0.4.0",
+        "phase": 4,
+        "passed": 20,
+        "failed": 0,
+        "total": 20,
+        "health": 100,
+        "criticalFailed": 0,
+        "phase4ImplementationComplete": true,
+        "phase4TechnicalGateReady": true,
+        "decision001RequirementsComplete": 18,
+        "decision001RequirementsTotal": 18,
+        "decision001Complete": true,
+        "releaseAllowed": false,
+        "projectOwnerAcceptanceRequired": true,
+        "validationIsApproval": false,
+        "canonicalMutationPerformed": false,
+        "externalTransmissionPerformed": false,
+        "providerNetworkCallPerformed": false,
+        "paidApiExecutionPerformed": false,
+        "historicalOutcomeGroundedEvaluationPerformed": true,
+        "externalAiReliabilityReasoningImplemented": true,
+        "externalAiReliabilityReasoningPerformed": false,
+        "checks": [
+          {
+            "name": "Frozen Phase 3 functional foundation remains PASS",
+            "passed": true,
+            "detail": {
+              "validationId": "EXTERNAL020-PHASE3-VALIDATION-MU6VYMBC-0043",
+              "version": "0.3.1",
+              "passed": 21,
+              "failed": 0,
+              "decision001RequirementsComplete": 17
+            },
+            "group": "Regression",
+            "severity": "Critical"
+          },
+          {
+            "name": "REQ-020-015 reuses EXTERNAL-010 OpenAI governance and final readiness",
+            "passed": true,
+            "detail": {
+              "external010Available": true,
+              "openAIFinalValidated": true,
+              "sourceReady": true,
+              "operationReady": true,
+              "usagePolicyReady": true,
+              "secretReferenceReady": true,
+              "sourceId": "SOURCE-OPENAI",
+              "operationId": "INTERNAL_ANALYSIS",
+              "provider": "OPENAI",
+              "storeFalseEnforced": true,
+              "toolsAllowed": false,
+              "filesAllowed": false,
+              "webSearchAllowed": false,
+              "computerUseAllowed": false,
+              "noPerRequestHumanApprovalInsideProviderScope": true,
+              "external020StillRequiresExplicitExternalTransmissionApproval": true,
+              "repositoryWideAutomaticExternalTransmissionAllowed": false,
+              "secondProviderEngineCreated": false,
+              "secondSecretStoreCreated": false,
+              "secondBudgetEngineCreated": false,
+              "secondGatewayCreated": false,
+              "providerNetworkCallPerformed": false,
+              "externalTransmissionPerformed": false,
+              "paidApiExecutionPerformed": false,
+              "authorityExpansionPerformed": false,
+              "canonicalMutationPerformed": false,
+              "readiness": "EXTERNAL020_EXTERNAL_AI_READY",
+              "inspectedAt": "2026-09-18T11:39:20.569Z",
+              "immutable": true
+            },
+            "group": "Integration",
+            "severity": "Critical"
+          },
+          {
+            "name": "No second Provider / Secret / Budget / Gateway engine is created",
+            "passed": true,
+            "detail": {
+              "external010Available": true,
+              "openAIFinalValidated": true,
+              "sourceReady": true,
+              "operationReady": true,
+              "usagePolicyReady": true,
+              "secretReferenceReady": true,
+              "sourceId": "SOURCE-OPENAI",
+              "operationId": "INTERNAL_ANALYSIS",
+              "provider": "OPENAI",
+              "storeFalseEnforced": true,
+              "toolsAllowed": false,
+              "filesAllowed": false,
+              "webSearchAllowed": false,
+              "computerUseAllowed": false,
+              "noPerRequestHumanApprovalInsideProviderScope": true,
+              "external020StillRequiresExplicitExternalTransmissionApproval": true,
+              "repositoryWideAutomaticExternalTransmissionAllowed": false,
+              "secondProviderEngineCreated": false,
+              "secondSecretStoreCreated": false,
+              "secondBudgetEngineCreated": false,
+              "secondGatewayCreated": false,
+              "providerNetworkCallPerformed": false,
+              "externalTransmissionPerformed": false,
+              "paidApiExecutionPerformed": false,
+              "authorityExpansionPerformed": false,
+              "canonicalMutationPerformed": false,
+              "readiness": "EXTERNAL020_EXTERNAL_AI_READY",
+              "inspectedAt": "2026-09-18T11:39:20.569Z",
+              "immutable": true
+            },
+            "group": "Architecture",
+            "severity": "Critical"
+          },
+          {
+            "name": "External AI context is bounded and explicit-evidence only",
+            "passed": true,
+            "detail": {
+              "policyId": "EXTERNAL020-PHASE4-EXTERNAL-AI-CONTEXT-POLICY",
+              "policyVersion": "1.0.0",
+              "provider": "OPENAI",
+              "sourceId": "SOURCE-OPENAI",
+              "operationId": "INTERNAL_ANALYSIS",
+              "purpose": "external020-governed-reliability-reasoning",
+              "defaultModel": "gpt-5.6-luna",
+              "maxQuestionChars": 4000,
+              "maxEvidenceItems": 8,
+              "maxEvidenceExcerptChars": 2400,
+              "maxTotalEvidenceChars": 12000,
+              "maxPromptChars": 18000,
+              "maxOutputTokens": 4096,
+              "allowedEvidenceTypes": [
+                "RELIABILITY_PROFILE",
+                "HISTORICAL_ASSESSMENT",
+                "EVIDENCE",
+                "CLAIM",
+                "SOURCE_METADATA",
+                "USER_SUPPLIED"
+              ],
+              "prohibitedTopLevelFields": [
+                "repositorySnapshot",
+                "allRepositoryFiles",
+                "rawRepository",
+                "secretValue",
+                "apiKey",
+                "password",
+                "credential"
+              ],
+              "storeRequiredValue": false,
+              "toolsAllowed": false,
+              "filesAllowed": false,
+              "webSearchAllowed": false,
+              "computerUseAllowed": false,
+              "automaticProfileRevisionAllowed": false,
+              "automaticKnowledgePromotionAllowed": false,
+              "automaticRepositoryMutationAllowed": false,
+              "repositoryWideAutomaticTransmissionAllowed": false,
+              "explicitProjectOwnerTransmissionApprovalRequired": true
+            },
+            "group": "Context",
+            "severity": "Critical"
+          },
+          {
+            "name": "Bounded context package can be built without transmission",
+            "passed": true,
+            "detail": {
+              "ok": true,
+              "code": "EXTERNAL020_PHASE4_CONTEXT_READY",
+              "status": "Ready",
+              "data": {
+                "contextPackage": {
+                  "contextPackageId": "EXTERNAL020-PHASE4-CONTEXT-MU6VYMBG-0044",
+                  "contextHash": "632e2e3c25ac93634c4df26f32c215a60eb6d2e1077c329349438675c5180ba5",
+                  "contextHashAlgorithm": "SHA-256",
+                  "purpose": "external020-governed-reliability-reasoning",
+                  "question": "Assess the reliability implications without deciding truth.",
+                  "evidenceItems": [
+                    {
+                      "evidenceId": "P4-E1",
+                      "evidenceType": "RELIABILITY_PROFILE",
+                      "sourceRef": "EXTERNAL020-PROFILE-TEST",
+                      "locator": null,
+                      "excerpt": "Profile remains context-specific with reliabilityScore null.",
+                      "excerptChars": 60
+                    },
+                    {
+                      "evidenceId": "P4-E2",
+                      "evidenceType": "HISTORICAL_ASSESSMENT",
+                      "sourceRef": "EXTERNAL020-HISTORICAL-TEST",
+                      "locator": null,
+                      "excerpt": "Historical grounding state is OUTCOME_GROUNDED but truthConfirmed remains false.",
+                      "excerptChars": 80
+                    }
+                  ],
+                  "evidenceLineage": [
+                    {
+                      "evidenceId": "P4-E1",
+                      "evidenceType": "RELIABILITY_PROFILE",
+                      "sourceRef": "EXTERNAL020-PROFILE-TEST",
+                      "locator": null,
+                      "excerptChars": 60
+                    },
+                    {
+                      "evidenceId": "P4-E2",
+                      "evidenceType": "HISTORICAL_ASSESSMENT",
+                      "sourceRef": "EXTERNAL020-HISTORICAL-TEST",
+                      "locator": null,
+                      "excerptChars": 80
+                    }
+                  ],
+                  "evidenceItemCount": 2,
+                  "totalEvidenceChars": 140,
+                  "promptText": "EXTERNAL-020 governed reliability reasoning request.\nUse only the supplied evidence and reliability context.\nTreat your answer as a non-authoritative proposal candidate.\nDo not confirm truth, resolve contradictions automatically, assign execution authority, promote Knowledge, revise a Reliability Profile, mutate a repository, or infer missing evidence.\nDistinguish FACT / DERIVED / UNKNOWN / PROPOSAL.\nIf evidence is insufficient or conflicted, say so explicitly.\n\nQUESTION:\nAssess the reliability implications without deciding truth.\n\nEVIDENCE:\n[1] RELIABILITY_PROFILE | EXTERNAL020-PROFILE-TEST\nProfile remains context-specific with reliabilityScore null.\n[2] HISTORICAL_ASSESSMENT | EXTERNAL020-HISTORICAL-TEST\nHistorical grounding state is OUTCOME_GROUNDED but truthConfirmed remains false.",
+                  "promptChars": 796,
+                  "explicitEvidenceBounded": true,
+                  "repositoryWideTransmission": false,
+                  "secretValueIncluded": false,
+                  "externalTransmissionPerformed": false,
+                  "providerNetworkCallPerformed": false,
+                  "canonicalMutationPerformed": false,
+                  "profileRevisionPerformed": false,
+                  "knowledgePromotionPerformed": false,
+                  "createdAt": "2026-09-18T11:39:20.572Z",
+                  "immutable": true
+                },
+                "externalTransmissionPerformed": false,
+                "providerNetworkCallPerformed": false,
+                "authorityEffect": "none"
+              },
+              "at": "2026-09-18T11:39:20.572Z"
+            },
+            "group": "Context",
+            "severity": "Critical"
+          },
+          {
+            "name": "Secret-like evidence is blocked before provider preparation",
+            "passed": true,
+            "detail": {
+              "ok": false,
+              "code": "EXTERNAL020_PHASE4_CONTEXT_BLOCKED",
+              "status": "Blocked",
+              "data": {
+                "errors": [
+                  "SECRET_LIKE_VALUE_IN_EVIDENCE:P4-SECRET"
+                ],
+                "externalTransmissionPerformed": false,
+                "secretValueTransmitted": false
+              },
+              "at": "2026-09-18T11:39:20.572Z"
+            },
+            "group": "Negative",
+            "severity": "Critical"
+          },
+          {
+            "name": "Provider request preparation reuses bounded USD budget and EXTERNAL-010 request preparation",
+            "passed": true,
+            "detail": {
+              "ok": true,
+              "code": "EXTERNAL020_PHASE4_EXTERNAL_AI_REQUEST_READY",
+              "status": "Review Ready",
+              "data": {
+                "contextPackage": {
+                  "contextPackageId": "EXTERNAL020-PHASE4-CONTEXT-MU6VYMBG-0045",
+                  "contextHash": "181b55cff34a7546ba6c5c20df46f0894101136d69d4ba75a3252653fc0d176d",
+                  "contextHashAlgorithm": "SHA-256",
+                  "purpose": "external020-governed-reliability-reasoning",
+                  "question": "Assess reliability and preserve uncertainty.",
+                  "evidenceItems": [
+                    {
+                      "evidenceId": "P4-E1",
+                      "evidenceType": "RELIABILITY_PROFILE",
+                      "sourceRef": null,
+                      "locator": null,
+                      "excerpt": "Context-specific profile; no universal score.",
+                      "excerptChars": 45
+                    }
+                  ],
+                  "evidenceLineage": [
+                    {
+                      "evidenceId": "P4-E1",
+                      "evidenceType": "RELIABILITY_PROFILE",
+                      "sourceRef": null,
+                      "locator": null,
+                      "excerptChars": 45
+                    }
+                  ],
+                  "evidenceItemCount": 1,
+                  "totalEvidenceChars": 45,
+                  "promptText": "EXTERNAL-020 governed reliability reasoning request.\nUse only the supplied evidence and reliability context.\nTreat your answer as a non-authoritative proposal candidate.\nDo not confirm truth, resolve contradictions automatically, assign execution authority, promote Knowledge, revise a Reliability Profile, mutate a repository, or infer missing evidence.\nDistinguish FACT / DERIVED / UNKNOWN / PROPOSAL.\nIf evidence is insufficient or conflicted, say so explicitly.\n\nQUESTION:\nAssess reliability and preserve uncertainty.\n\nEVIDENCE:\n[1] RELIABILITY_PROFILE | UNSPECIFIED\nContext-specific profile; no universal score.",
+                  "promptChars": 616,
+                  "explicitEvidenceBounded": true,
+                  "repositoryWideTransmission": false,
+                  "secretValueIncluded": false,
+                  "externalTransmissionPerformed": false,
+                  "providerNetworkCallPerformed": false,
+                  "canonicalMutationPerformed": false,
+                  "profileRevisionPerformed": false,
+                  "knowledgePromotionPerformed": false,
+                  "createdAt": "2026-09-18T11:39:20.572Z",
+                  "immutable": true
+                },
+                "requestCandidate": {
+                  "sourceId": "SOURCE-OPENAI",
+                  "operationId": "INTERNAL_ANALYSIS",
+                  "body": {
+                    "model": "gpt-5.6-luna",
+                    "input": "EXTERNAL-020 governed reliability reasoning request.\nUse only the supplied evidence and reliability context.\nTreat your answer as a non-authoritative proposal candidate.\nDo not confirm truth, resolve contradictions automatically, assign execution authority, promote Knowledge, revise a Reliability Profile, mutate a repository, or infer missing evidence.\nDistinguish FACT / DERIVED / UNKNOWN / PROPOSAL.\nIf evidence is insufficient or conflicted, say so explicitly.\n\nQUESTION:\nAssess reliability and preserve uncertainty.\n\nEVIDENCE:\n[1] RELIABILITY_PROFILE | UNSPECIFIED\nContext-specific profile; no universal score.",
+                    "store": false,
+                    "max_output_tokens": 2048,
+                    "instructions": "Provide evidence-grounded reliability analysis only. Output is a proposal candidate. Do not claim truth, approval, profile revision, Knowledge promotion, repository mutation, budget, secret, trading, financial, business, or execution authority. Preserve uncertainty and contradictions."
+                  },
+                  "budgetIds": [
+                    "BUDGET-P4"
+                  ],
+                  "estimatedUsage": {
+                    "FINANCIAL_COST": 0.001
+                  },
+                  "retryPolicy": {
+                    "maxAttempts": 1
+                  },
+                  "timeoutPolicy": {
+                    "timeoutMs": 60000
+                  }
+                },
+                "costEstimate": {
+                  "maximumEstimatedCostUsd": 0.001,
+                  "estimatedUsage": {
+                    "FINANCIAL_COST": 0.001
+                  }
+                },
+                "model": "gpt-5.6-luna",
+                "budgetIds": [
+                  "BUDGET-P4"
+                ],
+                "perRequestHardCapUsd": 0.05,
+                "explicitProjectOwnerTransmissionApprovalRequired": true,
+                "externalTransmissionPerformed": false,
+                "providerNetworkCallPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "secretValueTransmittedByExternal020": false,
+                "budgetExpansionPerformed": false,
+                "profileRevisionPerformed": false,
+                "knowledgePromotionPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "authorityEffect": "none"
+              },
+              "at": "2026-09-18T11:39:20.572Z"
+            },
+            "group": "Integration",
+            "severity": "Critical"
+          },
+          {
+            "name": "Provider request keeps store=false and no tool/file/web/computer capability",
+            "passed": true,
+            "detail": {
+              "bodyKeys": [
+                "model",
+                "input",
+                "store",
+                "max_output_tokens",
+                "instructions"
+              ],
+              "readiness": {
+                "external010Available": true,
+                "openAIFinalValidated": true,
+                "sourceReady": true,
+                "operationReady": true,
+                "usagePolicyReady": true,
+                "secretReferenceReady": true,
+                "sourceId": "SOURCE-OPENAI",
+                "operationId": "INTERNAL_ANALYSIS",
+                "provider": "OPENAI",
+                "storeFalseEnforced": true,
+                "toolsAllowed": false,
+                "filesAllowed": false,
+                "webSearchAllowed": false,
+                "computerUseAllowed": false,
+                "noPerRequestHumanApprovalInsideProviderScope": true,
+                "external020StillRequiresExplicitExternalTransmissionApproval": true,
+                "repositoryWideAutomaticExternalTransmissionAllowed": false,
+                "secondProviderEngineCreated": false,
+                "secondSecretStoreCreated": false,
+                "secondBudgetEngineCreated": false,
+                "secondGatewayCreated": false,
+                "providerNetworkCallPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "authorityExpansionPerformed": false,
+                "canonicalMutationPerformed": false,
+                "readiness": "EXTERNAL020_EXTERNAL_AI_READY",
+                "inspectedAt": "2026-09-18T11:39:20.569Z",
+                "immutable": true
+              }
+            },
+            "group": "Safety",
+            "severity": "Critical"
+          },
+          {
+            "name": "Provider execution is blocked without explicit Project Owner external-transmission approval",
+            "passed": true,
+            "detail": {
+              "ok": false,
+              "code": "EXTERNAL020_PHASE4_EXTERNAL_TRANSMISSION_PROJECT_OWNER_APPROVAL_REQUIRED",
+              "status": "Blocked",
+              "data": {
+                "externalTransmissionPerformed": false,
+                "providerNetworkCallPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "authorityGranted": false
+              },
+              "at": "2026-09-18T11:39:20.573Z"
+            },
+            "group": "Authority",
+            "severity": "Critical"
+          },
+          {
+            "name": "Provider output normalizes only as a non-authoritative reliability reasoning candidate",
+            "passed": true,
+            "detail": {
+              "ok": true,
+              "code": "EXTERNAL020_PHASE4_REASONING_CANDIDATE_NORMALIZED",
+              "status": "Candidate",
+              "data": {
+                "reasoningCandidate": {
+                  "reasoningCandidateId": "EXTERNAL020-PHASE4-REASONING-CANDIDATE-MU6VYMBH-0046",
+                  "requestId": "P4-REQ",
+                  "contextPackageId": "P4-CTX",
+                  "contextHash": "P4-HASH",
+                  "providerResponseId": "resp_fixture",
+                  "modelReported": "gpt-5.6-luna",
+                  "outputText": "Evidence supports a candidate assessment; truth remains unresolved.",
+                  "outputClassification": "AI_RELIABILITY_REASONING_CANDIDATE_ONLY",
+                  "reliabilityAssessmentProposalOnly": true,
+                  "truthConfirmed": false,
+                  "conflictWinner": null,
+                  "automaticConflictResolutionPerformed": false,
+                  "reliabilityScore": null,
+                  "authorityScore": null,
+                  "profileRevisionCandidateOnly": true,
+                  "profileRevisionPerformed": false,
+                  "knowledgePromotionPerformed": false,
+                  "actionAuthorityGranted": false,
+                  "tradingAuthorityGranted": false,
+                  "financialAuthorityGranted": false,
+                  "businessAuthorityGranted": false,
+                  "canonicalRepositoryMutationPerformed": false,
+                  "ide170ConfidenceOverwritten": false,
+                  "providerNetworkCallPerformed": true,
+                  "externalTransmissionPerformed": true,
+                  "paidApiExecutionPerformed": true,
+                  "usageReconciliation": {
+                    "reconciled": true
+                  },
+                  "createdAt": "2026-09-18T11:39:20.573Z",
+                  "immutable": true
+                }
+              },
+              "at": "2026-09-18T11:39:20.573Z"
+            },
+            "group": "Reasoning",
+            "severity": "Critical"
+          },
+          {
+            "name": "External AI output cannot auto-resolve conflicts, revise Profile, promote Knowledge, or grant authority",
+            "passed": true,
+            "detail": {
+              "reasoningCandidateId": "EXTERNAL020-PHASE4-REASONING-CANDIDATE-MU6VYMBH-0046",
+              "requestId": "P4-REQ",
+              "contextPackageId": "P4-CTX",
+              "contextHash": "P4-HASH",
+              "providerResponseId": "resp_fixture",
+              "modelReported": "gpt-5.6-luna",
+              "outputText": "Evidence supports a candidate assessment; truth remains unresolved.",
+              "outputClassification": "AI_RELIABILITY_REASONING_CANDIDATE_ONLY",
+              "reliabilityAssessmentProposalOnly": true,
+              "truthConfirmed": false,
+              "conflictWinner": null,
+              "automaticConflictResolutionPerformed": false,
+              "reliabilityScore": null,
+              "authorityScore": null,
+              "profileRevisionCandidateOnly": true,
+              "profileRevisionPerformed": false,
+              "knowledgePromotionPerformed": false,
+              "actionAuthorityGranted": false,
+              "tradingAuthorityGranted": false,
+              "financialAuthorityGranted": false,
+              "businessAuthorityGranted": false,
+              "canonicalRepositoryMutationPerformed": false,
+              "ide170ConfidenceOverwritten": false,
+              "providerNetworkCallPerformed": true,
+              "externalTransmissionPerformed": true,
+              "paidApiExecutionPerformed": true,
+              "usageReconciliation": {
+                "reconciled": true
+              },
+              "createdAt": "2026-09-18T11:39:20.573Z",
+              "immutable": true
+            },
+            "group": "Authority",
+            "severity": "Critical"
+          },
+          {
+            "name": "IDE-170 Confidence remains untouched",
+            "passed": true,
+            "detail": {
+              "reasoningCandidateId": "EXTERNAL020-PHASE4-REASONING-CANDIDATE-MU6VYMBH-0046",
+              "requestId": "P4-REQ",
+              "contextPackageId": "P4-CTX",
+              "contextHash": "P4-HASH",
+              "providerResponseId": "resp_fixture",
+              "modelReported": "gpt-5.6-luna",
+              "outputText": "Evidence supports a candidate assessment; truth remains unresolved.",
+              "outputClassification": "AI_RELIABILITY_REASONING_CANDIDATE_ONLY",
+              "reliabilityAssessmentProposalOnly": true,
+              "truthConfirmed": false,
+              "conflictWinner": null,
+              "automaticConflictResolutionPerformed": false,
+              "reliabilityScore": null,
+              "authorityScore": null,
+              "profileRevisionCandidateOnly": true,
+              "profileRevisionPerformed": false,
+              "knowledgePromotionPerformed": false,
+              "actionAuthorityGranted": false,
+              "tradingAuthorityGranted": false,
+              "financialAuthorityGranted": false,
+              "businessAuthorityGranted": false,
+              "canonicalRepositoryMutationPerformed": false,
+              "ide170ConfidenceOverwritten": false,
+              "providerNetworkCallPerformed": true,
+              "externalTransmissionPerformed": true,
+              "paidApiExecutionPerformed": true,
+              "usageReconciliation": {
+                "reconciled": true
+              },
+              "createdAt": "2026-09-18T11:39:20.573Z",
+              "immutable": true
+            },
+            "group": "Safety",
+            "severity": "Critical"
+          },
+          {
+            "name": "Validation performs no provider network call, external transmission, or paid API execution",
+            "passed": true,
+            "detail": {
+              "providerNetworkCallPerformed": false,
+              "externalTransmissionPerformed": false,
+              "paidApiExecutionPerformed": false
+            },
+            "group": "Safety",
+            "severity": "Critical"
+          },
+          {
+            "name": "External AI reuse does not enable universal Trust Score or global source ranking",
+            "passed": true,
+            "detail": {
+              "externalAiReliabilityReasoningImplemented": true,
+              "explicitProjectOwnerExternalTransmissionApprovalRequired": true,
+              "validationMayExecuteProviderNetworkCall": false,
+              "validationMayTransmitExternally": false,
+              "validationMayConsumePaidApi": false,
+              "providerOutputClassification": "AI_RELIABILITY_REASONING_CANDIDATE_ONLY",
+              "providerOutputMayConfirmTruth": false,
+              "providerOutputMayResolveConflictAutomatically": false,
+              "providerOutputMayReviseReliabilityProfileAutomatically": false,
+              "providerOutputMayPromoteKnowledgeAutomatically": false,
+              "providerOutputMayGrantActionAuthority": false,
+              "providerOutputMayGrantTradingAuthority": false,
+              "providerOutputMayGrantFinancialAuthority": false,
+              "providerOutputMayGrantBusinessAuthority": false,
+              "providerOutputMayMutateCanonicalRepository": false,
+              "universalTrustScoreImplemented": false,
+              "permanentGlobalSourceRankingImplemented": false,
+              "rawEvidenceMutationAllowed": false,
+              "automaticKnowledgePromotionAllowed": false,
+              "canonicalRepositoryMutationAllowed": false,
+              "externalTransmissionAutomaticallyAllowed": false,
+              "paidApiExecutionAutomaticallyAllowed": false,
+              "selfGrantedAuthorityAllowed": false,
+              "reliabilityEqualsTruth": false,
+              "reliabilityEqualsActionAuthority": false,
+              "ide170ConfidenceOverwriteAllowed": false
+            },
+            "group": "Safety",
+            "severity": "Critical"
+          },
+          {
+            "name": "Backward compatibility keeps Frozen Phase 3 coverage at 17/18",
+            "passed": true,
+            "detail": {
+              "decisionId": "EXTERNAL-020-DECISION-001",
+              "phase": 3,
+              "version": "0.3.1",
+              "totalDecisionRequirements": 18,
+              "decisionRequirementsFullyImplemented": 17,
+              "allDecisionRequirementsComplete": false,
+              "remainingRequirementIds": [
+                "REQ-020-015"
+              ],
+              "expectedRemaining": [
+                "REQ-020-015"
+              ],
+              "falseFullDecisionCompletionClaimed": false,
+              "rows": [
+                {
+                  "requirementId": "REQ-020-001",
+                  "title": "Canonical Baseline Identity",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_version_manifest.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-001"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-002",
+                  "title": "EXTERNAL-010 Reliability Input Reuse",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_external010_adapter.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-002"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-003",
+                  "title": "Source / Evidence / Claim Reliability Separation",
+                  "verificationState": "IMPLEMENTED_PHASE2",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_context.js",
+                    "19_trust_evidence_reliability_profile.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-003",
+                    "19_trust_evidence_phase2_validation.js#REQ-020-003"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-004",
+                  "title": "Context-Specific Reliability",
+                  "verificationState": "IMPLEMENTED_PHASE2",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_context.js",
+                    "19_trust_evidence_evaluation_candidate.js",
+                    "19_trust_evidence_reliability_profile.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-004",
+                    "19_trust_evidence_phase2_validation.js#REQ-020-004"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-005",
+                  "title": "Multi-Dimensional Reliability Model",
+                  "verificationState": "IMPLEMENTED_PHASE2",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js",
+                    "19_trust_evidence_dimensions.js",
+                    "19_trust_evidence_reliability_profile.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-005",
+                    "19_trust_evidence_phase2_validation.js#REQ-020-005"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-006",
+                  "title": "Contradiction Preservation",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-006"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-007",
+                  "title": "Independent Confirmation Assessment",
+                  "verificationState": "IMPLEMENTED_PHASE2",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js",
+                    "19_trust_evidence_independence.js",
+                    "19_trust_evidence_reliability_profile.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-007",
+                    "19_trust_evidence_phase2_validation.js#REQ-020-007"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-008",
+                  "title": "Historical Outcome-Grounded Evaluation",
+                  "verificationState": "IMPLEMENTED_PHASE3",
+                  "implementationRefs": [
+                    "19_trust_evidence_historical_outcome_adapter.js",
+                    "19_trust_evidence_historical_outcome_assessment.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-008",
+                    "19_trust_evidence_phase3_validation.js#REQ-020-008"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-009",
+                  "title": "Versioned Reliability Revision",
+                  "verificationState": "IMPLEMENTED_PHASE2",
+                  "implementationRefs": [
+                    "19_trust_evidence_reliability_revision.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-009",
+                    "19_trust_evidence_phase2_validation.js#REQ-020-009"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-010",
+                  "title": "Explicit Uncertainty / Abstention",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-010"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-011",
+                  "title": "False Precision Prevention",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-011"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-012",
+                  "title": "IDE-170 Confidence Separation",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_version_manifest.js",
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-012"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-013",
+                  "title": "Evidence Authority / Action Authority Separation",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-013"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-014",
+                  "title": "Reliability Explanation / Lineage",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_lineage.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-014"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-015",
+                  "title": "External AI Governance Reuse",
+                  "verificationState": "DEFERRED_LATER_PHASE",
+                  "implementationRefs": [],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-015"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-016",
+                  "title": "No Raw Evidence Mutation",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_external010_adapter.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-016"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-017",
+                  "title": "No Automatic Knowledge Promotion",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-017"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-018",
+                  "title": "No Self-Granted / Execution Authority",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_version_manifest.js",
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-018"
+                  ]
+                }
+              ]
+            },
+            "group": "Regression",
+            "severity": "Critical"
+          },
+          {
+            "name": "Decision 001 traceability reaches 18/18 only through REQ-020-015 implementation",
+            "passed": true,
+            "detail": {
+              "decisionId": "EXTERNAL-020-DECISION-001",
+              "phase": 4,
+              "version": "0.4.0",
+              "totalDecisionRequirements": 18,
+              "decisionRequirementsFullyImplemented": 18,
+              "allDecisionRequirementsComplete": true,
+              "remainingRequirementIds": [],
+              "falseFullDecisionCompletionClaimed": false,
+              "rows": [
+                {
+                  "requirementId": "REQ-020-001",
+                  "title": "Canonical Baseline Identity",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_version_manifest.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-001"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-002",
+                  "title": "EXTERNAL-010 Reliability Input Reuse",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_external010_adapter.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-002"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-003",
+                  "title": "Source / Evidence / Claim Reliability Separation",
+                  "verificationState": "IMPLEMENTED_PHASE2",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_context.js",
+                    "19_trust_evidence_reliability_profile.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-003",
+                    "19_trust_evidence_phase2_validation.js#REQ-020-003"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-004",
+                  "title": "Context-Specific Reliability",
+                  "verificationState": "IMPLEMENTED_PHASE2",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_context.js",
+                    "19_trust_evidence_evaluation_candidate.js",
+                    "19_trust_evidence_reliability_profile.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-004",
+                    "19_trust_evidence_phase2_validation.js#REQ-020-004"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-005",
+                  "title": "Multi-Dimensional Reliability Model",
+                  "verificationState": "IMPLEMENTED_PHASE2",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js",
+                    "19_trust_evidence_dimensions.js",
+                    "19_trust_evidence_reliability_profile.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-005",
+                    "19_trust_evidence_phase2_validation.js#REQ-020-005"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-006",
+                  "title": "Contradiction Preservation",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-006"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-007",
+                  "title": "Independent Confirmation Assessment",
+                  "verificationState": "IMPLEMENTED_PHASE2",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js",
+                    "19_trust_evidence_independence.js",
+                    "19_trust_evidence_reliability_profile.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-007",
+                    "19_trust_evidence_phase2_validation.js#REQ-020-007"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-008",
+                  "title": "Historical Outcome-Grounded Evaluation",
+                  "verificationState": "IMPLEMENTED_PHASE3",
+                  "implementationRefs": [
+                    "19_trust_evidence_historical_outcome_adapter.js",
+                    "19_trust_evidence_historical_outcome_assessment.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-008",
+                    "19_trust_evidence_phase3_validation.js#REQ-020-008"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-009",
+                  "title": "Versioned Reliability Revision",
+                  "verificationState": "IMPLEMENTED_PHASE2",
+                  "implementationRefs": [
+                    "19_trust_evidence_reliability_revision.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-009",
+                    "19_trust_evidence_phase2_validation.js#REQ-020-009"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-010",
+                  "title": "Explicit Uncertainty / Abstention",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-010"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-011",
+                  "title": "False Precision Prevention",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-011"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-012",
+                  "title": "IDE-170 Confidence Separation",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_version_manifest.js",
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-012"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-013",
+                  "title": "Evidence Authority / Action Authority Separation",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-013"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-014",
+                  "title": "Reliability Explanation / Lineage",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_lineage.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-014"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-015",
+                  "title": "External AI Governance Reuse",
+                  "verificationState": "IMPLEMENTED_PHASE4",
+                  "implementationRefs": [
+                    "19_trust_evidence_external_ai_context_policy.js",
+                    "19_trust_evidence_external_ai_governance_adapter.js",
+                    "19_trust_evidence_external_ai_reasoning.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-015",
+                    "19_trust_evidence_phase4_validation.js#REQ-020-015"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-016",
+                  "title": "No Raw Evidence Mutation",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_external010_adapter.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-016"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-017",
+                  "title": "No Automatic Knowledge Promotion",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-017"
+                  ]
+                },
+                {
+                  "requirementId": "REQ-020-018",
+                  "title": "No Self-Granted / Execution Authority",
+                  "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                  "implementationRefs": [
+                    "19_trust_evidence_version_manifest.js",
+                    "19_trust_evidence_evaluation_candidate.js"
+                  ],
+                  "validationRefs": [
+                    "19_trust_evidence_phase1_validation.js#REQ-020-018"
+                  ]
+                }
+              ]
+            },
+            "group": "Traceability",
+            "severity": "Critical"
+          },
+          {
+            "name": "Decision 001 completion does not equal Project Owner acceptance or release",
+            "passed": true,
+            "detail": {
+              "decisionComplete": true,
+              "projectOwnerAcceptanceRequired": true,
+              "releaseAllowed": false
+            },
+            "group": "Authority",
+            "severity": "Critical"
+          },
+          {
+            "name": "External AI reasoning output does not equal Truth",
+            "passed": true,
+            "detail": {
+              "externalAiReliabilityReasoningImplemented": true,
+              "explicitProjectOwnerExternalTransmissionApprovalRequired": true,
+              "validationMayExecuteProviderNetworkCall": false,
+              "validationMayTransmitExternally": false,
+              "validationMayConsumePaidApi": false,
+              "providerOutputClassification": "AI_RELIABILITY_REASONING_CANDIDATE_ONLY",
+              "providerOutputMayConfirmTruth": false,
+              "providerOutputMayResolveConflictAutomatically": false,
+              "providerOutputMayReviseReliabilityProfileAutomatically": false,
+              "providerOutputMayPromoteKnowledgeAutomatically": false,
+              "providerOutputMayGrantActionAuthority": false,
+              "providerOutputMayGrantTradingAuthority": false,
+              "providerOutputMayGrantFinancialAuthority": false,
+              "providerOutputMayGrantBusinessAuthority": false,
+              "providerOutputMayMutateCanonicalRepository": false,
+              "universalTrustScoreImplemented": false,
+              "permanentGlobalSourceRankingImplemented": false,
+              "rawEvidenceMutationAllowed": false,
+              "automaticKnowledgePromotionAllowed": false,
+              "canonicalRepositoryMutationAllowed": false,
+              "externalTransmissionAutomaticallyAllowed": false,
+              "paidApiExecutionAutomaticallyAllowed": false,
+              "selfGrantedAuthorityAllowed": false,
+              "reliabilityEqualsTruth": false,
+              "reliabilityEqualsActionAuthority": false,
+              "ide170ConfidenceOverwriteAllowed": false
+            },
+            "group": "Authority",
+            "severity": "Critical"
+          },
+          {
+            "name": "External AI reasoning output does not equal action authority",
+            "passed": true,
+            "detail": {
+              "externalAiReliabilityReasoningImplemented": true,
+              "explicitProjectOwnerExternalTransmissionApprovalRequired": true,
+              "validationMayExecuteProviderNetworkCall": false,
+              "validationMayTransmitExternally": false,
+              "validationMayConsumePaidApi": false,
+              "providerOutputClassification": "AI_RELIABILITY_REASONING_CANDIDATE_ONLY",
+              "providerOutputMayConfirmTruth": false,
+              "providerOutputMayResolveConflictAutomatically": false,
+              "providerOutputMayReviseReliabilityProfileAutomatically": false,
+              "providerOutputMayPromoteKnowledgeAutomatically": false,
+              "providerOutputMayGrantActionAuthority": false,
+              "providerOutputMayGrantTradingAuthority": false,
+              "providerOutputMayGrantFinancialAuthority": false,
+              "providerOutputMayGrantBusinessAuthority": false,
+              "providerOutputMayMutateCanonicalRepository": false,
+              "universalTrustScoreImplemented": false,
+              "permanentGlobalSourceRankingImplemented": false,
+              "rawEvidenceMutationAllowed": false,
+              "automaticKnowledgePromotionAllowed": false,
+              "canonicalRepositoryMutationAllowed": false,
+              "externalTransmissionAutomaticallyAllowed": false,
+              "paidApiExecutionAutomaticallyAllowed": false,
+              "selfGrantedAuthorityAllowed": false,
+              "reliabilityEqualsTruth": false,
+              "reliabilityEqualsActionAuthority": false,
+              "ide170ConfidenceOverwriteAllowed": false
+            },
+            "group": "Authority",
+            "severity": "Critical"
+          },
+          {
+            "name": "Validation does not equal Project Owner approval",
+            "passed": true,
+            "detail": {
+              "validationEqualsApproval": false
+            },
+            "group": "Authority",
+            "severity": "Critical"
+          }
+        ],
+        "validatedAt": "2026-09-18T11:39:20.573Z",
+        "immutable": true
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "Phase 4 validation invoked no provider execution or execution authority",
+      "passed": true,
+      "detail": {
+        "submitCalls": 0,
+        "authorityCalls": 0
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "Backward compatibility keeps Frozen Phase 3 coverage at 17/18",
+      "passed": true,
+      "detail": {
+        "decisionId": "EXTERNAL-020-DECISION-001",
+        "phase": 3,
+        "version": "0.3.1",
+        "totalDecisionRequirements": 18,
+        "decisionRequirementsFullyImplemented": 17,
+        "allDecisionRequirementsComplete": false,
+        "remainingRequirementIds": [
+          "REQ-020-015"
+        ],
+        "expectedRemaining": [
+          "REQ-020-015"
+        ],
+        "falseFullDecisionCompletionClaimed": false,
+        "rows": [
+          {
+            "requirementId": "REQ-020-001",
+            "title": "Canonical Baseline Identity",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_version_manifest.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-001"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-002",
+            "title": "EXTERNAL-010 Reliability Input Reuse",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_external010_adapter.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-002"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-003",
+            "title": "Source / Evidence / Claim Reliability Separation",
+            "verificationState": "IMPLEMENTED_PHASE2",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_context.js",
+              "19_trust_evidence_reliability_profile.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-003",
+              "19_trust_evidence_phase2_validation.js#REQ-020-003"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-004",
+            "title": "Context-Specific Reliability",
+            "verificationState": "IMPLEMENTED_PHASE2",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_context.js",
+              "19_trust_evidence_evaluation_candidate.js",
+              "19_trust_evidence_reliability_profile.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-004",
+              "19_trust_evidence_phase2_validation.js#REQ-020-004"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-005",
+            "title": "Multi-Dimensional Reliability Model",
+            "verificationState": "IMPLEMENTED_PHASE2",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js",
+              "19_trust_evidence_dimensions.js",
+              "19_trust_evidence_reliability_profile.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-005",
+              "19_trust_evidence_phase2_validation.js#REQ-020-005"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-006",
+            "title": "Contradiction Preservation",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-006"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-007",
+            "title": "Independent Confirmation Assessment",
+            "verificationState": "IMPLEMENTED_PHASE2",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js",
+              "19_trust_evidence_independence.js",
+              "19_trust_evidence_reliability_profile.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-007",
+              "19_trust_evidence_phase2_validation.js#REQ-020-007"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-008",
+            "title": "Historical Outcome-Grounded Evaluation",
+            "verificationState": "IMPLEMENTED_PHASE3",
+            "implementationRefs": [
+              "19_trust_evidence_historical_outcome_adapter.js",
+              "19_trust_evidence_historical_outcome_assessment.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-008",
+              "19_trust_evidence_phase3_validation.js#REQ-020-008"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-009",
+            "title": "Versioned Reliability Revision",
+            "verificationState": "IMPLEMENTED_PHASE2",
+            "implementationRefs": [
+              "19_trust_evidence_reliability_revision.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-009",
+              "19_trust_evidence_phase2_validation.js#REQ-020-009"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-010",
+            "title": "Explicit Uncertainty / Abstention",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-010"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-011",
+            "title": "False Precision Prevention",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-011"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-012",
+            "title": "IDE-170 Confidence Separation",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_version_manifest.js",
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-012"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-013",
+            "title": "Evidence Authority / Action Authority Separation",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-013"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-014",
+            "title": "Reliability Explanation / Lineage",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_lineage.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-014"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-015",
+            "title": "External AI Governance Reuse",
+            "verificationState": "DEFERRED_LATER_PHASE",
+            "implementationRefs": [],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-015"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-016",
+            "title": "No Raw Evidence Mutation",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_external010_adapter.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-016"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-017",
+            "title": "No Automatic Knowledge Promotion",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-017"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-018",
+            "title": "No Self-Granted / Execution Authority",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_version_manifest.js",
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-018"
+            ]
+          }
+        ]
+      },
+      "severity": "Critical"
+    },
+    {
+      "name": "Phase 4 candidate coverage is 18/18 without release/approval",
+      "passed": true,
+      "detail": {
+        "decisionId": "EXTERNAL-020-DECISION-001",
+        "phase": 4,
+        "version": "0.4.0",
+        "totalDecisionRequirements": 18,
+        "decisionRequirementsFullyImplemented": 18,
+        "allDecisionRequirementsComplete": true,
+        "remainingRequirementIds": [],
+        "falseFullDecisionCompletionClaimed": false,
+        "rows": [
+          {
+            "requirementId": "REQ-020-001",
+            "title": "Canonical Baseline Identity",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_version_manifest.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-001"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-002",
+            "title": "EXTERNAL-010 Reliability Input Reuse",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_external010_adapter.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-002"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-003",
+            "title": "Source / Evidence / Claim Reliability Separation",
+            "verificationState": "IMPLEMENTED_PHASE2",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_context.js",
+              "19_trust_evidence_reliability_profile.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-003",
+              "19_trust_evidence_phase2_validation.js#REQ-020-003"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-004",
+            "title": "Context-Specific Reliability",
+            "verificationState": "IMPLEMENTED_PHASE2",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_context.js",
+              "19_trust_evidence_evaluation_candidate.js",
+              "19_trust_evidence_reliability_profile.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-004",
+              "19_trust_evidence_phase2_validation.js#REQ-020-004"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-005",
+            "title": "Multi-Dimensional Reliability Model",
+            "verificationState": "IMPLEMENTED_PHASE2",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js",
+              "19_trust_evidence_dimensions.js",
+              "19_trust_evidence_reliability_profile.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-005",
+              "19_trust_evidence_phase2_validation.js#REQ-020-005"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-006",
+            "title": "Contradiction Preservation",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-006"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-007",
+            "title": "Independent Confirmation Assessment",
+            "verificationState": "IMPLEMENTED_PHASE2",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js",
+              "19_trust_evidence_independence.js",
+              "19_trust_evidence_reliability_profile.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-007",
+              "19_trust_evidence_phase2_validation.js#REQ-020-007"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-008",
+            "title": "Historical Outcome-Grounded Evaluation",
+            "verificationState": "IMPLEMENTED_PHASE3",
+            "implementationRefs": [
+              "19_trust_evidence_historical_outcome_adapter.js",
+              "19_trust_evidence_historical_outcome_assessment.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-008",
+              "19_trust_evidence_phase3_validation.js#REQ-020-008"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-009",
+            "title": "Versioned Reliability Revision",
+            "verificationState": "IMPLEMENTED_PHASE2",
+            "implementationRefs": [
+              "19_trust_evidence_reliability_revision.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-009",
+              "19_trust_evidence_phase2_validation.js#REQ-020-009"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-010",
+            "title": "Explicit Uncertainty / Abstention",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-010"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-011",
+            "title": "False Precision Prevention",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-011"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-012",
+            "title": "IDE-170 Confidence Separation",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_version_manifest.js",
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-012"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-013",
+            "title": "Evidence Authority / Action Authority Separation",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-013"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-014",
+            "title": "Reliability Explanation / Lineage",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_lineage.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-014"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-015",
+            "title": "External AI Governance Reuse",
+            "verificationState": "IMPLEMENTED_PHASE4",
+            "implementationRefs": [
+              "19_trust_evidence_external_ai_context_policy.js",
+              "19_trust_evidence_external_ai_governance_adapter.js",
+              "19_trust_evidence_external_ai_reasoning.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-015",
+              "19_trust_evidence_phase4_validation.js#REQ-020-015"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-016",
+            "title": "No Raw Evidence Mutation",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_external010_adapter.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-016"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-017",
+            "title": "No Automatic Knowledge Promotion",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-017"
+            ]
+          },
+          {
+            "requirementId": "REQ-020-018",
+            "title": "No Self-Granted / Execution Authority",
+            "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+            "implementationRefs": [
+              "19_trust_evidence_version_manifest.js",
+              "19_trust_evidence_evaluation_candidate.js"
+            ],
+            "validationRefs": [
+              "19_trust_evidence_phase1_validation.js#REQ-020-018"
+            ]
+          }
+        ]
+      },
+      "severity": "Critical"
+    }
+  ]
+}

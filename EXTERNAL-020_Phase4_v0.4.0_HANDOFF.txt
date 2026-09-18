@@ -1,0 +1,91 @@
+============================================================
+AI Prompt OS / AIプロンプト生成Pro
+EXTERNAL-020 Trust / Evidence Intelligence
+Phase 4 v0.4.0 Candidate Handoff
+============================================================
+
+Status:
+IMPLEMENTATION_PHASE4_CANDIDATE
+
+Parent:
+EXTERNAL-020 Phase 3 v0.3.1
+PROJECT_OWNER_ACCEPTED_FROZEN
+Freeze SHA-256:
+ffd0af69f5adc5f2a8ef690db0a5d0759f4179ed8239d81a98919d5b135eb339
+
+Decision:
+EXTERNAL-020-DECISION-001
+
+Completion Target:
+REQ-020-015 External AI Governance Reuse
+
+Phase 4 Result:
+- Reuses EXTERNAL-010 OpenAI Provider Integration
+- Reuses Source Registry / Operation Contract / Secret Reference / USD Budget / Usage Policy / Local Gateway / Authority Envelope / Usage Reconciliation
+- No second Provider Engine
+- No second Secret Store
+- No second Budget Engine
+- No second Gateway
+- Bounded explicit-evidence context only
+- Project Owner explicit external-transmission approval required before provider execution
+- Validation does NOT execute provider/network/paid API
+- Provider output = AI_RELIABILITY_REASONING_CANDIDATE_ONLY
+- Provider output cannot auto-confirm Truth
+- Provider output cannot auto-resolve contradictions
+- Provider output cannot auto-revise Reliability Profile
+- Provider output cannot auto-promote Knowledge
+- Provider output cannot grant Action / Trading / Financial / Business authority
+- Provider output cannot mutate Canonical Repository
+- Raw provider payload is not persisted by EXTERNAL-020 result boundary
+
+Candidate Identity:
+Script Count: 491
+Manifest Hash:
+a41256344c3eb472f12c930897d8a81eee6536dc46f709ef38ff14e903f9f66b
+Script Set Hash:
+734b2cc142482b97aad0962fe62d9cdf748c3df8b1250037505cf5a8dcb390e8
+
+Validation:
+491 / 491 JavaScript syntax PASS
+Static / Package / Functional: 16 / 16 PASS
+Phase 4 Functional Fixture: 20 / 20 PASS
+Decision 058 Phase 6 Regression: 28 / 28 PASS
+health = 100
+criticalFailed = 0
+Provider execution calls during validation = 0
+Authority activation calls during validation = 0
+
+Decision 001 Candidate Coverage:
+18 / 18 requirements
+candidate complete = true
+Project Owner acceptance = NOT YET
+releaseAllowed = false
+validationIsApproval = false
+
+PC Gate:
+Run in browser console:
+runExternal020Phase4Validation()
+
+Expected:
+version = 0.4.0
+passed = 20
+failed = 0
+total = 20
+health = 100
+criticalFailed = 0
+phase4ImplementationComplete = true
+phase4TechnicalGateReady = true
+decision001RequirementsComplete = 18
+decision001Complete = true
+releaseAllowed = false
+projectOwnerAcceptanceRequired = true
+externalTransmissionPerformed = false
+providerNetworkCallPerformed = false
+paidApiExecutionPerformed = false
+
+Android validation is NOT included yet.
+After PC v0.4.0 PASS, add Android-only validator as a separate candidate generation.
+
+============================================================
+END
+============================================================
