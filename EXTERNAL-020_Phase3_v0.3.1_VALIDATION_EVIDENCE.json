@@ -1,0 +1,2677 @@
+{
+  "evidenceId": "EXTERNAL-020-PHASE3-V0.3.1-ANDROID-VALIDATION-CANDIDATE-EVIDENCE",
+  "componentId": "EXTERNAL-020",
+  "decisionId": "EXTERNAL-020-DECISION-001",
+  "phase": 3,
+  "version": "0.3.1",
+  "status": "ANDROID_VALIDATION_CANDIDATE_STATIC_VALIDATED",
+  "candidateIdentity": {
+    "scriptCount": 485,
+    "manifestHash": "351d70ffd05c3312867582ee1ff272f179da69da77e3b8583c38e803918b6476",
+    "scriptSetHash": "69ea6a918db8a26702a0b3cfaffe0002d3247ac468a25ee485905fab247d7954"
+  },
+  "parent": {
+    "phase2Version": "0.2.1",
+    "phase2Status": "PROJECT_OWNER_ACCEPTED_FROZEN",
+    "phase2ScriptCount": 479,
+    "phase2ScriptSetHash": "9cd116d990e97864c8866abdf7c00e631f275bd6f74c8e6d31aa84a2961f6d03",
+    "canonicalRevision": "REPOSITORY010-CANONICAL-REVISION-0023",
+    "canonicalScriptCount": 462,
+    "canonicalScriptSetHash": "d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3"
+  },
+  "pcEvidence": {
+    "previousVersion": "0.3.0",
+    "validationId": "EXTERNAL020-PHASE3-VALIDATION-MU6V0WHB-0043",
+    "passed": 21,
+    "failed": 0,
+    "total": 21,
+    "health": 100,
+    "criticalFailed": 0,
+    "transferToV031": false,
+    "reason": "Candidate identity changed by Android validation addition; PC v0.3.1 must be re-run."
+  },
+  "staticPackageValidation": {
+    "id": "EXTERNAL-020-PHASE3-V0.3.1-ANDROID-VALIDATION-CANDIDATE-STATIC-FUNCTIONAL",
+    "decisionId": "EXTERNAL-020-DECISION-001",
+    "candidateVersion": "0.3.1",
+    "passed": 18,
+    "failed": 0,
+    "total": 18,
+    "health": 100,
+    "criticalFailed": 0,
+    "scriptCount": 485,
+    "manifestHash": "351d70ffd05c3312867582ee1ff272f179da69da77e3b8583c38e803918b6476",
+    "scriptSetHash": "69ea6a918db8a26702a0b3cfaffe0002d3247ac468a25ee485905fab247d7954",
+    "frozenPhase2ParentVerified": true,
+    "phase3FunctionalCoreByteIdentical": true,
+    "canonical0023ParentVerified": true,
+    "phase3FunctionalFixture": {
+      "passed": 21,
+      "failed": 0,
+      "total": 21
+    },
+    "androidValidatorFixture": {
+      "passed": 21,
+      "failed": 0,
+      "total": 21
+    },
+    "decision001RequirementsComplete": 17,
+    "decision001RequirementsTotal": 18,
+    "remainingRequirementIds": [
+      "REQ-020-015"
+    ],
+    "releaseAllowed": false,
+    "validationIsApproval": false,
+    "canonicalMutationPerformed": false,
+    "externalTransmissionPerformed": false,
+    "paidApiExecutionPerformed": false,
+    "checks": [
+      {
+        "name": "All 485 manifest script hashes and byte sizes match",
+        "passed": true,
+        "detail": {
+          "verified": 485,
+          "total": 485,
+          "missing": []
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "All manifest cache keys match",
+        "passed": true,
+        "detail": {
+          "verified": 485,
+          "total": 485
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Script Set Hash verifies",
+        "passed": true,
+        "detail": {
+          "computed": "69ea6a918db8a26702a0b3cfaffe0002d3247ac468a25ee485905fab247d7954",
+          "stored": "69ea6a918db8a26702a0b3cfaffe0002d3247ac468a25ee485905fab247d7954"
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Manifest Hash verifies",
+        "passed": true,
+        "detail": {
+          "computed": "351d70ffd05c3312867582ee1ff272f179da69da77e3b8583c38e803918b6476",
+          "stored": "351d70ffd05c3312867582ee1ff272f179da69da77e3b8583c38e803918b6476"
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "index manifest hash marker matches",
+        "passed": true,
+        "detail": {
+          "index": "351d70ffd05c3312867582ee1ff272f179da69da77e3b8583c38e803918b6476",
+          "manifest": "351d70ffd05c3312867582ee1ff272f179da69da77e3b8583c38e803918b6476"
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "index script sequence matches manifest",
+        "passed": true,
+        "detail": {
+          "indexCount": 485,
+          "manifestCount": 485
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Phase 3 Android validator is immediately after Phase 3 validation and before 99_init",
+        "passed": true,
+        "detail": {
+          "p3ValidationPos": 482,
+          "androidPos": 483,
+          "initPos": 484
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Frozen Phase 2 v0.2.1 parent script set remains byte/order identical",
+        "passed": true,
+        "detail": {
+          "parentScriptCount": 479,
+          "parentScriptSetHash": "9cd116d990e97864c8866abdf7c00e631f275bd6f74c8e6d31aa84a2961f6d03"
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Phase 3 functional core remains byte-identical to v0.3.0",
+        "passed": true,
+        "detail": [
+          {
+            "file": "19_trust_evidence_historical_outcome_adapter.js",
+            "expected": "6530f93e79450ebc35430097a62efdf93ff96b709ac40212df47721383e270c4",
+            "actual": "6530f93e79450ebc35430097a62efdf93ff96b709ac40212df47721383e270c4"
+          },
+          {
+            "file": "19_trust_evidence_historical_outcome_assessment.js",
+            "expected": "a766bd0275f576ea33a63566ab46687b0b15108b98d7326129141bed0287f855",
+            "actual": "a766bd0275f576ea33a63566ab46687b0b15108b98d7326129141bed0287f855"
+          },
+          {
+            "file": "19_trust_evidence_phase3_traceability.js",
+            "expected": "1fd7ba666297ddb183fac7586b32060d23b40b18570d119b10eaabca54ee1bea",
+            "actual": "1fd7ba666297ddb183fac7586b32060d23b40b18570d119b10eaabca54ee1bea"
+          },
+          {
+            "file": "19_trust_evidence_phase3_validation.js",
+            "expected": "7ca3c1dcc906e2b3996b20e9f1cc57ec113fe34aa932d65f35a8d64f77acc067",
+            "actual": "7ca3c1dcc906e2b3996b20e9f1cc57ec113fe34aa932d65f35a8d64f77acc067"
+          }
+        ],
+        "severity": "Critical"
+      },
+      {
+        "name": "Canonical 0023 parent script set remains byte/order identical",
+        "passed": true,
+        "detail": {
+          "parentScriptCount": 462,
+          "parentScriptSetHash": "d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3"
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "project_info identity matches Phase 3 v0.3.1 Android Validation candidate",
+        "passed": true,
+        "detail": {
+          "count": 485,
+          "releaseStatus": "EXTERNAL_020_PHASE3_ANDROID_VALIDATION_CANDIDATE",
+          "phase3Version": "0.3.1",
+          "phase3Status": "IMPLEMENTATION_PHASE3_ANDROID_VALIDATION_CANDIDATE",
+          "androidValidation": "runExternal020Phase3AndroidValidation",
+          "requirements": 17,
+          "releaseAllowed": false
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "project_info savedFiles covers every manifest script",
+        "passed": true,
+        "detail": {
+          "savedCount": 580,
+          "manifestCount": 485
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Phase 3 Version Manifest reports v0.3.1 Android Validation candidate",
+        "passed": true,
+        "detail": {
+          "componentId": "EXTERNAL-020",
+          "decisionId": "EXTERNAL-020-DECISION-001",
+          "version": "0.3.1",
+          "status": "IMPLEMENTATION_PHASE3_ANDROID_VALIDATION_CANDIDATE",
+          "phase": 3,
+          "phaseName": "Historical Outcome-Grounded Reliability Evaluation",
+          "parentPhase2": {
+            "version": "0.2.1",
+            "status": "PROJECT_OWNER_ACCEPTED_FROZEN",
+            "scriptCount": 479,
+            "manifestHash": "200a3f7191f11d7523ad2e721dddde35a4a0d3b4512bfe6c2f7fcfcf76114084",
+            "scriptSetHash": "9cd116d990e97864c8866abdf7c00e631f275bd6f74c8e6d31aa84a2961f6d03",
+            "freezeRecordSha256": "8b7abee8786735f85207cef67d9bae2d0611066fbed5571ff8d862d4be67e1b3"
+          },
+          "canonicalParent": {
+            "revisionId": "REPOSITORY010-CANONICAL-REVISION-0023",
+            "applicationVersion": "1.20.1",
+            "scriptCount": 462,
+            "manifestHash": "0673af6e0cff8332cd9322d62b582eea312b549f9f3660f28222a87957c4160b",
+            "scriptSetHash": "d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3"
+          },
+          "completionTargets": [
+            "REQ-020-008"
+          ],
+          "deferredAfterPhase3": [
+            "REQ-020-015"
+          ],
+          "historicalGroundingStates": [
+            "OUTCOME_GROUNDED",
+            "PARTIALLY_GROUNDED",
+            "CONFLICTED_HISTORY",
+            "INSUFFICIENT_HISTORY",
+            "UNKNOWN_HISTORY"
+          ],
+          "publicReadDependencies": [
+            "getExternalIntelligencePrediction",
+            "listExternalIntelligencePredictionHistory",
+            "getExternalIntelligenceOutcome",
+            "listExternalIntelligenceOutcomeHistory",
+            "listExternalIntelligenceCapabilityPerformanceProfiles"
+          ],
+          "safety": {
+            "historicalOutcomeGroundedEvaluationImplemented": true,
+            "externalAiReliabilityReasoningImplemented": false,
+            "external010WriteApiRequired": false,
+            "external010InternalStateAccessAllowed": false,
+            "predictionOutcomeMatchAutomaticallyComputed": false,
+            "universalTrustScoreImplemented": false,
+            "permanentGlobalSourceRankingImplemented": false,
+            "automaticConflictResolutionAllowed": false,
+            "truthConfirmationAllowed": false,
+            "automaticProfileRevisionAllowed": false,
+            "rawEvidenceMutationAllowed": false,
+            "automaticKnowledgePromotionAllowed": false,
+            "canonicalRepositoryMutationAllowed": false,
+            "externalTransmissionAutomaticallyAllowed": false,
+            "paidApiExecutionAutomaticallyAllowed": false,
+            "tradingAuthorityGranted": false,
+            "financialAuthorityGranted": false,
+            "businessAuthorityGranted": false,
+            "selfGrantedAuthorityAllowed": false,
+            "reliabilityEqualsTruth": false,
+            "reliabilityEqualsActionAuthority": false,
+            "ide170ConfidenceOverwriteAllowed": false
+          }
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Phase 3 functional fixture passes 21/21",
+        "passed": true,
+        "detail": {
+          "validationId": "EXTERNAL020-PHASE3-VALIDATION-MU6V7P5Q-0043",
+          "version": "0.3.1",
+          "passed": 21,
+          "failed": 0,
+          "criticalFailed": 0,
+          "decision001RequirementsComplete": 17
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Phase 3 Android validator fixture passes 21/21",
+        "passed": true,
+        "detail": {
+          "validationId": "EXTERNAL020-PHASE3-ANDROID-REAL-DEVICE-MU6V7P5R-0048",
+          "componentId": "EXTERNAL-020",
+          "decisionId": "EXTERNAL-020-DECISION-001",
+          "version": "0.3.1",
+          "phase": 3,
+          "passed": 21,
+          "failed": 0,
+          "total": 21,
+          "health": 100,
+          "criticalFailed": 0,
+          "status": "EXTERNAL-020 Phase 3 Android Real Device Validation PASS",
+          "androidRealDeviceValidation": {
+            "passed": true,
+            "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Mobile Safari/537.36"
+          },
+          "phase3AndroidRealDeviceComplete": true,
+          "phase3ProjectOwnerGateReady": true,
+          "decision001RequirementsComplete": 17,
+          "decision001RequirementsTotal": 18,
+          "decision001Complete": false,
+          "releaseAllowed": false,
+          "projectOwnerAcceptanceRequired": true,
+          "validationIsApproval": false,
+          "canonicalMutationPerformed": false,
+          "externalTransmissionPerformed": false,
+          "paidApiExecutionPerformed": false,
+          "historicalOutcomeGroundedEvaluationPerformed": true,
+          "externalAiReliabilityReasoningPerformed": false,
+          "checks": [
+            {
+              "name": "Phase 3 functional validation remains PASS",
+              "passed": true,
+              "detail": {
+                "validationId": "EXTERNAL020-PHASE3-VALIDATION-MU6V7P5Q-0043",
+                "version": "0.3.1",
+                "passed": 21,
+                "failed": 0,
+                "criticalFailed": 0,
+                "decision001RequirementsComplete": 17
+              },
+              "group": "Prerequisite",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android real-device user agent detected",
+              "passed": true,
+              "detail": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Mobile Safari/537.36",
+              "group": "Device",
+              "severity": "Critical"
+            },
+            {
+              "name": "Browser DOM runtime is available",
+              "passed": true,
+              "detail": {
+                "documentType": "object"
+              },
+              "group": "Runtime",
+              "severity": "Critical"
+            },
+            {
+              "name": "EXTERNAL-010 historical public read APIs remain available on Android",
+              "passed": true,
+              "detail": {
+                "external010": true,
+                "apis": {
+                  "getExternalIntelligencePrediction": true,
+                  "listExternalIntelligencePredictionHistory": true,
+                  "getExternalIntelligenceOutcome": true,
+                  "listExternalIntelligenceOutcomeHistory": true,
+                  "listExternalIntelligenceCapabilityPerformanceProfiles": true
+                },
+                "allRequiredPublicReadApisAvailable": true,
+                "writeApiRequired": false,
+                "internalStateAccessAllowed": false
+              },
+              "group": "Integration",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android Historical Input Adapter remains read-only with no EXTERNAL-010 write or internal-state access",
+              "passed": true,
+              "detail": {
+                "ok": true,
+                "code": "EXTERNAL020_HISTORICAL_INPUT_CAPTURED",
+                "status": "Ready",
+                "data": {
+                  "historicalInputPackage": {
+                    "historicalInputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0044",
+                    "sourceComponentId": "EXTERNAL-010",
+                    "sourceAuthorityBoundary": "OBSERVE_RECORD_DETECT",
+                    "finalReliabilityAuthority": "EXTERNAL-020",
+                    "predictionId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-PREDICTION",
+                    "outcomeId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-OUTCOME",
+                    "capabilityId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-CAPABILITY",
+                    "currentPrediction": null,
+                    "currentOutcome": null,
+                    "predictionHistory": [],
+                    "outcomeHistory": [],
+                    "capabilityPerformanceProfiles": [],
+                    "publicReadApisUsed": [
+                      "getExternalIntelligencePrediction",
+                      "listExternalIntelligencePredictionHistory",
+                      "getExternalIntelligenceOutcome",
+                      "listExternalIntelligenceOutcomeHistory",
+                      "listExternalIntelligenceCapabilityPerformanceProfiles"
+                    ],
+                    "readOnly": true,
+                    "external010WriteApiInvoked": false,
+                    "internalStateAccessPerformed": false,
+                    "rawEvidenceMutationPerformed": false,
+                    "externalTransmissionPerformed": false,
+                    "paidApiExecutionPerformed": false,
+                    "capturedAt": "2026-09-18T11:18:24.543Z",
+                    "immutable": true
+                  }
+                },
+                "at": "2026-09-18T11:18:24.543Z"
+              },
+              "group": "Safety",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android historical input capture performs no Raw Evidence mutation, external transmission, or paid API execution",
+              "passed": true,
+              "detail": {
+                "historicalInputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0044",
+                "sourceComponentId": "EXTERNAL-010",
+                "sourceAuthorityBoundary": "OBSERVE_RECORD_DETECT",
+                "finalReliabilityAuthority": "EXTERNAL-020",
+                "predictionId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-PREDICTION",
+                "outcomeId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-OUTCOME",
+                "capabilityId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-CAPABILITY",
+                "currentPrediction": null,
+                "currentOutcome": null,
+                "predictionHistory": [],
+                "outcomeHistory": [],
+                "capabilityPerformanceProfiles": [],
+                "publicReadApisUsed": [
+                  "getExternalIntelligencePrediction",
+                  "listExternalIntelligencePredictionHistory",
+                  "getExternalIntelligenceOutcome",
+                  "listExternalIntelligenceOutcomeHistory",
+                  "listExternalIntelligenceCapabilityPerformanceProfiles"
+                ],
+                "readOnly": true,
+                "external010WriteApiInvoked": false,
+                "internalStateAccessPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "capturedAt": "2026-09-18T11:18:24.543Z",
+                "immutable": true
+              },
+              "group": "Safety",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android missing historical outcomes produce INSUFFICIENT_HISTORY without invented score",
+              "passed": true,
+              "detail": {
+                "historicalGroundingState": "INSUFFICIENT_HISTORY",
+                "predictionHistoryCount": 0,
+                "outcomeHistoryCount": 0,
+                "latestOutcomeSettlementState": null,
+                "finalSettlementObserved": false,
+                "capabilityPerformanceProfileCount": 0,
+                "outcomeGroundedPerformanceProfileCount": 0,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                "historicalEvidenceRefs": [],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "automaticKnowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "immutable": true
+              },
+              "group": "Negative",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android FINAL historical Outcome produces OUTCOME_GROUNDED assessment",
+              "passed": true,
+              "detail": {
+                "historicalGroundingState": "OUTCOME_GROUNDED",
+                "predictionHistoryCount": 1,
+                "outcomeHistoryCount": 1,
+                "latestOutcomeSettlementState": "FINAL",
+                "finalSettlementObserved": true,
+                "capabilityPerformanceProfileCount": 1,
+                "outcomeGroundedPerformanceProfileCount": 1,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 1,
+                "historicalEvidenceRefs": [
+                  "EVIDENCE-ANDROID-PRED-1",
+                  "EVIDENCE-ANDROID-OUTCOME-1",
+                  "EVIDENCE-ANDROID-PERF-1"
+                ],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "automaticKnowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "immutable": true
+              },
+              "group": "Reliability",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android historical grounding preserves Prediction / Outcome / Capability evidence references",
+              "passed": true,
+              "detail": [
+                "EVIDENCE-ANDROID-PRED-1",
+                "EVIDENCE-ANDROID-OUTCOME-1",
+                "EVIDENCE-ANDROID-PERF-1"
+              ],
+              "group": "Lineage",
+              "severity": "Major"
+            },
+            {
+              "name": "Android outcome-grounded Capability Performance remains context-scoped evidence, not authority",
+              "passed": true,
+              "detail": {
+                "historicalGroundingState": "OUTCOME_GROUNDED",
+                "predictionHistoryCount": 1,
+                "outcomeHistoryCount": 1,
+                "latestOutcomeSettlementState": "FINAL",
+                "finalSettlementObserved": true,
+                "capabilityPerformanceProfileCount": 1,
+                "outcomeGroundedPerformanceProfileCount": 1,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 1,
+                "historicalEvidenceRefs": [
+                  "EVIDENCE-ANDROID-PRED-1",
+                  "EVIDENCE-ANDROID-OUTCOME-1",
+                  "EVIDENCE-ANDROID-PERF-1"
+                ],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "automaticKnowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "immutable": true
+              },
+              "group": "Authority",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android Prediction and Outcome are not automatically converted into an accuracy or reliability score",
+              "passed": true,
+              "detail": {
+                "historicalGroundingState": "OUTCOME_GROUNDED",
+                "predictionHistoryCount": 1,
+                "outcomeHistoryCount": 1,
+                "latestOutcomeSettlementState": "FINAL",
+                "finalSettlementObserved": true,
+                "capabilityPerformanceProfileCount": 1,
+                "outcomeGroundedPerformanceProfileCount": 1,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 1,
+                "historicalEvidenceRefs": [
+                  "EVIDENCE-ANDROID-PRED-1",
+                  "EVIDENCE-ANDROID-OUTCOME-1",
+                  "EVIDENCE-ANDROID-PERF-1"
+                ],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "automaticKnowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "immutable": true
+              },
+              "group": "Safety",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android DISPUTED historical Outcome remains CONFLICTED_HISTORY with no automatic winner",
+              "passed": true,
+              "detail": {
+                "historicalGroundingState": "CONFLICTED_HISTORY",
+                "predictionHistoryCount": 1,
+                "outcomeHistoryCount": 1,
+                "latestOutcomeSettlementState": "DISPUTED",
+                "finalSettlementObserved": false,
+                "capabilityPerformanceProfileCount": 0,
+                "outcomeGroundedPerformanceProfileCount": 0,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                "historicalEvidenceRefs": [
+                  "EVIDENCE-ANDROID-PRED-1",
+                  "EVIDENCE-ANDROID-CONFLICT-A",
+                  "EVIDENCE-ANDROID-CONFLICT-B"
+                ],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "automaticKnowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "immutable": true
+              },
+              "group": "Negative",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android PROVISIONAL historical Outcome remains PARTIALLY_GROUNDED",
+              "passed": true,
+              "detail": {
+                "historicalGroundingState": "PARTIALLY_GROUNDED",
+                "predictionHistoryCount": 1,
+                "outcomeHistoryCount": 1,
+                "latestOutcomeSettlementState": "PROVISIONAL",
+                "finalSettlementObserved": false,
+                "capabilityPerformanceProfileCount": 0,
+                "outcomeGroundedPerformanceProfileCount": 0,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                "historicalEvidenceRefs": [
+                  "EVIDENCE-ANDROID-PRED-1",
+                  "EVIDENCE-ANDROID-PARTIAL"
+                ],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "automaticKnowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "immutable": true
+              },
+              "group": "Reliability",
+              "severity": "Major"
+            },
+            {
+              "name": "Android Historical Outcome Assessment can link to an existing Reliability Profile",
+              "passed": true,
+              "detail": {
+                "ok": true,
+                "code": "EXTERNAL020_HISTORICAL_OUTCOME_ASSESSMENT_CREATED",
+                "status": "Candidate",
+                "data": {
+                  "assessment": {
+                    "historicalAssessmentId": "EXTERNAL020-HISTORICAL-ASSESSMENT-MU6V7P5R-0046",
+                    "profileId": "EXTERNAL020-PROFILE-MU6V7P5J-0017",
+                    "profileVersionRef": "EXTERNAL020-PROFILE-MU6V7P5J-0017@1.1.0",
+                    "subjectType": "SOURCE",
+                    "subjectRef": "SRC-PHASE2",
+                    "domain": "MARKET",
+                    "task": "PRICE_DATA_REVIEW",
+                    "purpose": "PHASE2_VALIDATION",
+                    "timeHorizon": "CURRENT",
+                    "historicalInputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0045",
+                    "predictionId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-PREDICTION",
+                    "outcomeId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-OUTCOME",
+                    "capabilityId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-CAPABILITY",
+                    "historicalGroundingState": "INSUFFICIENT_HISTORY",
+                    "predictionHistoryCount": 0,
+                    "outcomeHistoryCount": 0,
+                    "latestOutcomeSettlementState": null,
+                    "finalSettlementObserved": false,
+                    "capabilityPerformanceProfileCount": 0,
+                    "outcomeGroundedPerformanceProfileCount": 0,
+                    "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                    "historicalEvidenceRefs": [],
+                    "predictionOutcomeMatchComputed": false,
+                    "historicalAccuracyScore": null,
+                    "calibrationScore": null,
+                    "reliabilityScore": null,
+                    "authorityScore": null,
+                    "truthConfirmed": false,
+                    "conflictWinner": null,
+                    "automaticConflictResolutionPerformed": false,
+                    "automaticProfileRevisionPerformed": false,
+                    "profileRevisionCandidateOnly": true,
+                    "knowledgePromotionPerformed": false,
+                    "actionAuthorityGranted": false,
+                    "externalAiReasoningPerformed": false,
+                    "externalTransmissionPerformed": false,
+                    "paidApiExecutionPerformed": false,
+                    "rawEvidenceMutationPerformed": false,
+                    "canonicalRepositoryMutationPerformed": false,
+                    "ide170ConfidenceOverwritten": false,
+                    "historicalOutcomeGroundedEvaluationPerformed": true,
+                    "explanation": "Android Phase 3 read-only Historical Outcome integration validation",
+                    "createdAt": "2026-09-18T11:18:24.543Z",
+                    "immutable": true
+                  },
+                  "lineage": {
+                    "lineageId": "EXTERNAL020-LINEAGE-MU6V7P5R-0047",
+                    "relationType": "EVALUATED_FROM",
+                    "outputRef": "EXTERNAL020-HISTORICAL-ASSESSMENT-MU6V7P5R-0046",
+                    "inputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0045",
+                    "contextId": "EXTERNAL020-CONTEXT-MU6V7P5K-0033",
+                    "evidenceRefs": [],
+                    "contradictionRefs": [],
+                    "confirmationRefs": [
+                      "CONF-P2-INDEPENDENT"
+                    ],
+                    "explanation": "Historical Outcome Assessment for EXTERNAL020-PROFILE-MU6V7P5J-0017@1.1.0",
+                    "createdAt": "2026-09-18T11:18:24.543Z",
+                    "immutable": true
+                  }
+                },
+                "at": "2026-09-18T11:18:24.543Z"
+              },
+              "group": "Integration",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android Historical assessment is append-only evidence and does not automatically revise Profile history",
+              "passed": true,
+              "detail": {
+                "assessment": {
+                  "historicalAssessmentId": "EXTERNAL020-HISTORICAL-ASSESSMENT-MU6V7P5R-0046",
+                  "profileId": "EXTERNAL020-PROFILE-MU6V7P5J-0017",
+                  "profileVersionRef": "EXTERNAL020-PROFILE-MU6V7P5J-0017@1.1.0",
+                  "subjectType": "SOURCE",
+                  "subjectRef": "SRC-PHASE2",
+                  "domain": "MARKET",
+                  "task": "PRICE_DATA_REVIEW",
+                  "purpose": "PHASE2_VALIDATION",
+                  "timeHorizon": "CURRENT",
+                  "historicalInputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0045",
+                  "predictionId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-PREDICTION",
+                  "outcomeId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-OUTCOME",
+                  "capabilityId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-CAPABILITY",
+                  "historicalGroundingState": "INSUFFICIENT_HISTORY",
+                  "predictionHistoryCount": 0,
+                  "outcomeHistoryCount": 0,
+                  "latestOutcomeSettlementState": null,
+                  "finalSettlementObserved": false,
+                  "capabilityPerformanceProfileCount": 0,
+                  "outcomeGroundedPerformanceProfileCount": 0,
+                  "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                  "historicalEvidenceRefs": [],
+                  "predictionOutcomeMatchComputed": false,
+                  "historicalAccuracyScore": null,
+                  "calibrationScore": null,
+                  "reliabilityScore": null,
+                  "authorityScore": null,
+                  "truthConfirmed": false,
+                  "conflictWinner": null,
+                  "automaticConflictResolutionPerformed": false,
+                  "automaticProfileRevisionPerformed": false,
+                  "profileRevisionCandidateOnly": true,
+                  "knowledgePromotionPerformed": false,
+                  "actionAuthorityGranted": false,
+                  "externalAiReasoningPerformed": false,
+                  "externalTransmissionPerformed": false,
+                  "paidApiExecutionPerformed": false,
+                  "rawEvidenceMutationPerformed": false,
+                  "canonicalRepositoryMutationPerformed": false,
+                  "ide170ConfidenceOverwritten": false,
+                  "historicalOutcomeGroundedEvaluationPerformed": true,
+                  "explanation": "Android Phase 3 read-only Historical Outcome integration validation",
+                  "createdAt": "2026-09-18T11:18:24.543Z",
+                  "immutable": true
+                },
+                "historyBefore": 2,
+                "historyAfter": 2
+              },
+              "group": "Revision",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android Historical assessment grants no Truth / Knowledge / action authority",
+              "passed": true,
+              "detail": {
+                "historicalAssessmentId": "EXTERNAL020-HISTORICAL-ASSESSMENT-MU6V7P5R-0046",
+                "profileId": "EXTERNAL020-PROFILE-MU6V7P5J-0017",
+                "profileVersionRef": "EXTERNAL020-PROFILE-MU6V7P5J-0017@1.1.0",
+                "subjectType": "SOURCE",
+                "subjectRef": "SRC-PHASE2",
+                "domain": "MARKET",
+                "task": "PRICE_DATA_REVIEW",
+                "purpose": "PHASE2_VALIDATION",
+                "timeHorizon": "CURRENT",
+                "historicalInputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0045",
+                "predictionId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-PREDICTION",
+                "outcomeId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-OUTCOME",
+                "capabilityId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-CAPABILITY",
+                "historicalGroundingState": "INSUFFICIENT_HISTORY",
+                "predictionHistoryCount": 0,
+                "outcomeHistoryCount": 0,
+                "latestOutcomeSettlementState": null,
+                "finalSettlementObserved": false,
+                "capabilityPerformanceProfileCount": 0,
+                "outcomeGroundedPerformanceProfileCount": 0,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                "historicalEvidenceRefs": [],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "profileRevisionCandidateOnly": true,
+                "knowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "explanation": "Android Phase 3 read-only Historical Outcome integration validation",
+                "createdAt": "2026-09-18T11:18:24.543Z",
+                "immutable": true
+              },
+              "group": "Authority",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android Phase 3 remains local-only and mutation-free",
+              "passed": true,
+              "detail": {
+                "historicalAssessmentId": "EXTERNAL020-HISTORICAL-ASSESSMENT-MU6V7P5R-0046",
+                "profileId": "EXTERNAL020-PROFILE-MU6V7P5J-0017",
+                "profileVersionRef": "EXTERNAL020-PROFILE-MU6V7P5J-0017@1.1.0",
+                "subjectType": "SOURCE",
+                "subjectRef": "SRC-PHASE2",
+                "domain": "MARKET",
+                "task": "PRICE_DATA_REVIEW",
+                "purpose": "PHASE2_VALIDATION",
+                "timeHorizon": "CURRENT",
+                "historicalInputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0045",
+                "predictionId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-PREDICTION",
+                "outcomeId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-OUTCOME",
+                "capabilityId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-CAPABILITY",
+                "historicalGroundingState": "INSUFFICIENT_HISTORY",
+                "predictionHistoryCount": 0,
+                "outcomeHistoryCount": 0,
+                "latestOutcomeSettlementState": null,
+                "finalSettlementObserved": false,
+                "capabilityPerformanceProfileCount": 0,
+                "outcomeGroundedPerformanceProfileCount": 0,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                "historicalEvidenceRefs": [],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "profileRevisionCandidateOnly": true,
+                "knowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "explanation": "Android Phase 3 read-only Historical Outcome integration validation",
+                "createdAt": "2026-09-18T11:18:24.543Z",
+                "immutable": true
+              },
+              "group": "Safety",
+              "severity": "Critical"
+            },
+            {
+              "name": "IDE-170 Confidence remains untouched on Android",
+              "passed": true,
+              "detail": {
+                "ide170ConfidenceOverwritten": false,
+                "overwriteAllowed": false
+              },
+              "group": "Safety",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android preserves Decision 001 traceability at 17/18 with only REQ-020-015 remaining",
+              "passed": true,
+              "detail": {
+                "decisionId": "EXTERNAL-020-DECISION-001",
+                "phase": 3,
+                "version": "0.3.1",
+                "totalDecisionRequirements": 18,
+                "decisionRequirementsFullyImplemented": 17,
+                "allDecisionRequirementsComplete": false,
+                "remainingRequirementIds": [
+                  "REQ-020-015"
+                ],
+                "expectedRemaining": [
+                  "REQ-020-015"
+                ],
+                "falseFullDecisionCompletionClaimed": false,
+                "rows": [
+                  {
+                    "requirementId": "REQ-020-001",
+                    "title": "Canonical Baseline Identity",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_version_manifest.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-001"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-002",
+                    "title": "EXTERNAL-010 Reliability Input Reuse",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_external010_adapter.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-002"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-003",
+                    "title": "Source / Evidence / Claim Reliability Separation",
+                    "verificationState": "IMPLEMENTED_PHASE2",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_context.js",
+                      "19_trust_evidence_reliability_profile.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-003",
+                      "19_trust_evidence_phase2_validation.js#REQ-020-003"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-004",
+                    "title": "Context-Specific Reliability",
+                    "verificationState": "IMPLEMENTED_PHASE2",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_context.js",
+                      "19_trust_evidence_evaluation_candidate.js",
+                      "19_trust_evidence_reliability_profile.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-004",
+                      "19_trust_evidence_phase2_validation.js#REQ-020-004"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-005",
+                    "title": "Multi-Dimensional Reliability Model",
+                    "verificationState": "IMPLEMENTED_PHASE2",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js",
+                      "19_trust_evidence_dimensions.js",
+                      "19_trust_evidence_reliability_profile.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-005",
+                      "19_trust_evidence_phase2_validation.js#REQ-020-005"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-006",
+                    "title": "Contradiction Preservation",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-006"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-007",
+                    "title": "Independent Confirmation Assessment",
+                    "verificationState": "IMPLEMENTED_PHASE2",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js",
+                      "19_trust_evidence_independence.js",
+                      "19_trust_evidence_reliability_profile.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-007",
+                      "19_trust_evidence_phase2_validation.js#REQ-020-007"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-008",
+                    "title": "Historical Outcome-Grounded Evaluation",
+                    "verificationState": "IMPLEMENTED_PHASE3",
+                    "implementationRefs": [
+                      "19_trust_evidence_historical_outcome_adapter.js",
+                      "19_trust_evidence_historical_outcome_assessment.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-008",
+                      "19_trust_evidence_phase3_validation.js#REQ-020-008"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-009",
+                    "title": "Versioned Reliability Revision",
+                    "verificationState": "IMPLEMENTED_PHASE2",
+                    "implementationRefs": [
+                      "19_trust_evidence_reliability_revision.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-009",
+                      "19_trust_evidence_phase2_validation.js#REQ-020-009"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-010",
+                    "title": "Explicit Uncertainty / Abstention",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-010"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-011",
+                    "title": "False Precision Prevention",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-011"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-012",
+                    "title": "IDE-170 Confidence Separation",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_version_manifest.js",
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-012"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-013",
+                    "title": "Evidence Authority / Action Authority Separation",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-013"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-014",
+                    "title": "Reliability Explanation / Lineage",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_lineage.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-014"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-015",
+                    "title": "External AI Governance Reuse",
+                    "verificationState": "DEFERRED_LATER_PHASE",
+                    "implementationRefs": [],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-015"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-016",
+                    "title": "No Raw Evidence Mutation",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_external010_adapter.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-016"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-017",
+                    "title": "No Automatic Knowledge Promotion",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-017"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-018",
+                    "title": "No Self-Granted / Execution Authority",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_version_manifest.js",
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-018"
+                    ]
+                  }
+                ]
+              },
+              "group": "Traceability",
+              "severity": "Critical"
+            },
+            {
+              "name": "External AI Reliability Reasoning remains deferred on Android",
+              "passed": true,
+              "detail": {
+                "safety": {
+                  "historicalOutcomeGroundedEvaluationImplemented": true,
+                  "externalAiReliabilityReasoningImplemented": false,
+                  "external010WriteApiRequired": false,
+                  "external010InternalStateAccessAllowed": false,
+                  "predictionOutcomeMatchAutomaticallyComputed": false,
+                  "universalTrustScoreImplemented": false,
+                  "permanentGlobalSourceRankingImplemented": false,
+                  "automaticConflictResolutionAllowed": false,
+                  "truthConfirmationAllowed": false,
+                  "automaticProfileRevisionAllowed": false,
+                  "rawEvidenceMutationAllowed": false,
+                  "automaticKnowledgePromotionAllowed": false,
+                  "canonicalRepositoryMutationAllowed": false,
+                  "externalTransmissionAutomaticallyAllowed": false,
+                  "paidApiExecutionAutomaticallyAllowed": false,
+                  "tradingAuthorityGranted": false,
+                  "financialAuthorityGranted": false,
+                  "businessAuthorityGranted": false,
+                  "selfGrantedAuthorityAllowed": false,
+                  "reliabilityEqualsTruth": false,
+                  "reliabilityEqualsActionAuthority": false,
+                  "ide170ConfidenceOverwriteAllowed": false
+                },
+                "deferredAfterPhase3": [
+                  "REQ-020-015"
+                ]
+              },
+              "group": "Scope",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android validation does not equal Project Owner approval",
+              "passed": true,
+              "detail": {
+                "validationEqualsApproval": false
+              },
+              "group": "Authority",
+              "severity": "Critical"
+            }
+          ],
+          "validatedAt": "2026-09-18T11:18:24.543Z",
+          "immutable": true
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Backward compatibility keeps Frozen Phase 2 coverage at 16/18",
+        "passed": true,
+        "detail": {
+          "decisionId": "EXTERNAL-020-DECISION-001",
+          "phase": 2,
+          "version": "0.2.1",
+          "totalDecisionRequirements": 18,
+          "decisionRequirementsFullyImplemented": 16,
+          "allDecisionRequirementsComplete": false,
+          "remainingRequirementIds": [
+            "REQ-020-008",
+            "REQ-020-015"
+          ],
+          "expectedRemaining": [
+            "REQ-020-008",
+            "REQ-020-015"
+          ],
+          "falseFullDecisionCompletionClaimed": false,
+          "rows": [
+            {
+              "requirementId": "REQ-020-001",
+              "title": "Canonical Baseline Identity",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_version_manifest.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-001"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-002",
+              "title": "EXTERNAL-010 Reliability Input Reuse",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_external010_adapter.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-002"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-003",
+              "title": "Source / Evidence / Claim Reliability Separation",
+              "verificationState": "IMPLEMENTED_PHASE2",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_context.js",
+                "19_trust_evidence_reliability_profile.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-003",
+                "19_trust_evidence_phase2_validation.js#REQ-020-003"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-004",
+              "title": "Context-Specific Reliability",
+              "verificationState": "IMPLEMENTED_PHASE2",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_context.js",
+                "19_trust_evidence_evaluation_candidate.js",
+                "19_trust_evidence_reliability_profile.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-004",
+                "19_trust_evidence_phase2_validation.js#REQ-020-004"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-005",
+              "title": "Multi-Dimensional Reliability Model",
+              "verificationState": "IMPLEMENTED_PHASE2",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js",
+                "19_trust_evidence_dimensions.js",
+                "19_trust_evidence_reliability_profile.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-005",
+                "19_trust_evidence_phase2_validation.js#REQ-020-005"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-006",
+              "title": "Contradiction Preservation",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-006"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-007",
+              "title": "Independent Confirmation Assessment",
+              "verificationState": "IMPLEMENTED_PHASE2",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js",
+                "19_trust_evidence_independence.js",
+                "19_trust_evidence_reliability_profile.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-007",
+                "19_trust_evidence_phase2_validation.js#REQ-020-007"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-008",
+              "title": "Historical Outcome-Grounded Evaluation",
+              "verificationState": "DEFERRED_LATER_PHASE",
+              "implementationRefs": [],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-008"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-009",
+              "title": "Versioned Reliability Revision",
+              "verificationState": "IMPLEMENTED_PHASE2",
+              "implementationRefs": [
+                "19_trust_evidence_reliability_revision.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-009",
+                "19_trust_evidence_phase2_validation.js#REQ-020-009"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-010",
+              "title": "Explicit Uncertainty / Abstention",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-010"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-011",
+              "title": "False Precision Prevention",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-011"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-012",
+              "title": "IDE-170 Confidence Separation",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_version_manifest.js",
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-012"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-013",
+              "title": "Evidence Authority / Action Authority Separation",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-013"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-014",
+              "title": "Reliability Explanation / Lineage",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_lineage.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-014"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-015",
+              "title": "External AI Governance Reuse",
+              "verificationState": "DEFERRED_LATER_PHASE",
+              "implementationRefs": [],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-015"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-016",
+              "title": "No Raw Evidence Mutation",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_external010_adapter.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-016"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-017",
+              "title": "No Automatic Knowledge Promotion",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-017"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-018",
+              "title": "No Self-Granted / Execution Authority",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_version_manifest.js",
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-018"
+              ]
+            }
+          ]
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Phase 3 coverage remains 17/18 with only REQ-020-015 remaining",
+        "passed": true,
+        "detail": {
+          "decisionId": "EXTERNAL-020-DECISION-001",
+          "phase": 3,
+          "version": "0.3.1",
+          "totalDecisionRequirements": 18,
+          "decisionRequirementsFullyImplemented": 17,
+          "allDecisionRequirementsComplete": false,
+          "remainingRequirementIds": [
+            "REQ-020-015"
+          ],
+          "expectedRemaining": [
+            "REQ-020-015"
+          ],
+          "falseFullDecisionCompletionClaimed": false,
+          "rows": [
+            {
+              "requirementId": "REQ-020-001",
+              "title": "Canonical Baseline Identity",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_version_manifest.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-001"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-002",
+              "title": "EXTERNAL-010 Reliability Input Reuse",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_external010_adapter.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-002"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-003",
+              "title": "Source / Evidence / Claim Reliability Separation",
+              "verificationState": "IMPLEMENTED_PHASE2",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_context.js",
+                "19_trust_evidence_reliability_profile.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-003",
+                "19_trust_evidence_phase2_validation.js#REQ-020-003"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-004",
+              "title": "Context-Specific Reliability",
+              "verificationState": "IMPLEMENTED_PHASE2",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_context.js",
+                "19_trust_evidence_evaluation_candidate.js",
+                "19_trust_evidence_reliability_profile.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-004",
+                "19_trust_evidence_phase2_validation.js#REQ-020-004"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-005",
+              "title": "Multi-Dimensional Reliability Model",
+              "verificationState": "IMPLEMENTED_PHASE2",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js",
+                "19_trust_evidence_dimensions.js",
+                "19_trust_evidence_reliability_profile.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-005",
+                "19_trust_evidence_phase2_validation.js#REQ-020-005"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-006",
+              "title": "Contradiction Preservation",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-006"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-007",
+              "title": "Independent Confirmation Assessment",
+              "verificationState": "IMPLEMENTED_PHASE2",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js",
+                "19_trust_evidence_independence.js",
+                "19_trust_evidence_reliability_profile.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-007",
+                "19_trust_evidence_phase2_validation.js#REQ-020-007"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-008",
+              "title": "Historical Outcome-Grounded Evaluation",
+              "verificationState": "IMPLEMENTED_PHASE3",
+              "implementationRefs": [
+                "19_trust_evidence_historical_outcome_adapter.js",
+                "19_trust_evidence_historical_outcome_assessment.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-008",
+                "19_trust_evidence_phase3_validation.js#REQ-020-008"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-009",
+              "title": "Versioned Reliability Revision",
+              "verificationState": "IMPLEMENTED_PHASE2",
+              "implementationRefs": [
+                "19_trust_evidence_reliability_revision.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-009",
+                "19_trust_evidence_phase2_validation.js#REQ-020-009"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-010",
+              "title": "Explicit Uncertainty / Abstention",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-010"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-011",
+              "title": "False Precision Prevention",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-011"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-012",
+              "title": "IDE-170 Confidence Separation",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_version_manifest.js",
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-012"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-013",
+              "title": "Evidence Authority / Action Authority Separation",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-013"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-014",
+              "title": "Reliability Explanation / Lineage",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_lineage.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-014"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-015",
+              "title": "External AI Governance Reuse",
+              "verificationState": "DEFERRED_LATER_PHASE",
+              "implementationRefs": [],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-015"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-016",
+              "title": "No Raw Evidence Mutation",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_external010_adapter.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-016"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-017",
+              "title": "No Automatic Knowledge Promotion",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-017"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-018",
+              "title": "No Self-Granted / Execution Authority",
+              "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+              "implementationRefs": [
+                "19_trust_evidence_version_manifest.js",
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-018"
+              ]
+            }
+          ]
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Android gate remains non-approving and side-effect free",
+        "passed": true,
+        "detail": {
+          "validationId": "EXTERNAL020-PHASE3-ANDROID-REAL-DEVICE-MU6V7P5R-0048",
+          "componentId": "EXTERNAL-020",
+          "decisionId": "EXTERNAL-020-DECISION-001",
+          "version": "0.3.1",
+          "phase": 3,
+          "passed": 21,
+          "failed": 0,
+          "total": 21,
+          "health": 100,
+          "criticalFailed": 0,
+          "status": "EXTERNAL-020 Phase 3 Android Real Device Validation PASS",
+          "androidRealDeviceValidation": {
+            "passed": true,
+            "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Mobile Safari/537.36"
+          },
+          "phase3AndroidRealDeviceComplete": true,
+          "phase3ProjectOwnerGateReady": true,
+          "decision001RequirementsComplete": 17,
+          "decision001RequirementsTotal": 18,
+          "decision001Complete": false,
+          "releaseAllowed": false,
+          "projectOwnerAcceptanceRequired": true,
+          "validationIsApproval": false,
+          "canonicalMutationPerformed": false,
+          "externalTransmissionPerformed": false,
+          "paidApiExecutionPerformed": false,
+          "historicalOutcomeGroundedEvaluationPerformed": true,
+          "externalAiReliabilityReasoningPerformed": false,
+          "checks": [
+            {
+              "name": "Phase 3 functional validation remains PASS",
+              "passed": true,
+              "detail": {
+                "validationId": "EXTERNAL020-PHASE3-VALIDATION-MU6V7P5Q-0043",
+                "version": "0.3.1",
+                "passed": 21,
+                "failed": 0,
+                "criticalFailed": 0,
+                "decision001RequirementsComplete": 17
+              },
+              "group": "Prerequisite",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android real-device user agent detected",
+              "passed": true,
+              "detail": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Mobile Safari/537.36",
+              "group": "Device",
+              "severity": "Critical"
+            },
+            {
+              "name": "Browser DOM runtime is available",
+              "passed": true,
+              "detail": {
+                "documentType": "object"
+              },
+              "group": "Runtime",
+              "severity": "Critical"
+            },
+            {
+              "name": "EXTERNAL-010 historical public read APIs remain available on Android",
+              "passed": true,
+              "detail": {
+                "external010": true,
+                "apis": {
+                  "getExternalIntelligencePrediction": true,
+                  "listExternalIntelligencePredictionHistory": true,
+                  "getExternalIntelligenceOutcome": true,
+                  "listExternalIntelligenceOutcomeHistory": true,
+                  "listExternalIntelligenceCapabilityPerformanceProfiles": true
+                },
+                "allRequiredPublicReadApisAvailable": true,
+                "writeApiRequired": false,
+                "internalStateAccessAllowed": false
+              },
+              "group": "Integration",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android Historical Input Adapter remains read-only with no EXTERNAL-010 write or internal-state access",
+              "passed": true,
+              "detail": {
+                "ok": true,
+                "code": "EXTERNAL020_HISTORICAL_INPUT_CAPTURED",
+                "status": "Ready",
+                "data": {
+                  "historicalInputPackage": {
+                    "historicalInputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0044",
+                    "sourceComponentId": "EXTERNAL-010",
+                    "sourceAuthorityBoundary": "OBSERVE_RECORD_DETECT",
+                    "finalReliabilityAuthority": "EXTERNAL-020",
+                    "predictionId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-PREDICTION",
+                    "outcomeId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-OUTCOME",
+                    "capabilityId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-CAPABILITY",
+                    "currentPrediction": null,
+                    "currentOutcome": null,
+                    "predictionHistory": [],
+                    "outcomeHistory": [],
+                    "capabilityPerformanceProfiles": [],
+                    "publicReadApisUsed": [
+                      "getExternalIntelligencePrediction",
+                      "listExternalIntelligencePredictionHistory",
+                      "getExternalIntelligenceOutcome",
+                      "listExternalIntelligenceOutcomeHistory",
+                      "listExternalIntelligenceCapabilityPerformanceProfiles"
+                    ],
+                    "readOnly": true,
+                    "external010WriteApiInvoked": false,
+                    "internalStateAccessPerformed": false,
+                    "rawEvidenceMutationPerformed": false,
+                    "externalTransmissionPerformed": false,
+                    "paidApiExecutionPerformed": false,
+                    "capturedAt": "2026-09-18T11:18:24.543Z",
+                    "immutable": true
+                  }
+                },
+                "at": "2026-09-18T11:18:24.543Z"
+              },
+              "group": "Safety",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android historical input capture performs no Raw Evidence mutation, external transmission, or paid API execution",
+              "passed": true,
+              "detail": {
+                "historicalInputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0044",
+                "sourceComponentId": "EXTERNAL-010",
+                "sourceAuthorityBoundary": "OBSERVE_RECORD_DETECT",
+                "finalReliabilityAuthority": "EXTERNAL-020",
+                "predictionId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-PREDICTION",
+                "outcomeId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-OUTCOME",
+                "capabilityId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-CAPABILITY",
+                "currentPrediction": null,
+                "currentOutcome": null,
+                "predictionHistory": [],
+                "outcomeHistory": [],
+                "capabilityPerformanceProfiles": [],
+                "publicReadApisUsed": [
+                  "getExternalIntelligencePrediction",
+                  "listExternalIntelligencePredictionHistory",
+                  "getExternalIntelligenceOutcome",
+                  "listExternalIntelligenceOutcomeHistory",
+                  "listExternalIntelligenceCapabilityPerformanceProfiles"
+                ],
+                "readOnly": true,
+                "external010WriteApiInvoked": false,
+                "internalStateAccessPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "capturedAt": "2026-09-18T11:18:24.543Z",
+                "immutable": true
+              },
+              "group": "Safety",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android missing historical outcomes produce INSUFFICIENT_HISTORY without invented score",
+              "passed": true,
+              "detail": {
+                "historicalGroundingState": "INSUFFICIENT_HISTORY",
+                "predictionHistoryCount": 0,
+                "outcomeHistoryCount": 0,
+                "latestOutcomeSettlementState": null,
+                "finalSettlementObserved": false,
+                "capabilityPerformanceProfileCount": 0,
+                "outcomeGroundedPerformanceProfileCount": 0,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                "historicalEvidenceRefs": [],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "automaticKnowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "immutable": true
+              },
+              "group": "Negative",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android FINAL historical Outcome produces OUTCOME_GROUNDED assessment",
+              "passed": true,
+              "detail": {
+                "historicalGroundingState": "OUTCOME_GROUNDED",
+                "predictionHistoryCount": 1,
+                "outcomeHistoryCount": 1,
+                "latestOutcomeSettlementState": "FINAL",
+                "finalSettlementObserved": true,
+                "capabilityPerformanceProfileCount": 1,
+                "outcomeGroundedPerformanceProfileCount": 1,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 1,
+                "historicalEvidenceRefs": [
+                  "EVIDENCE-ANDROID-PRED-1",
+                  "EVIDENCE-ANDROID-OUTCOME-1",
+                  "EVIDENCE-ANDROID-PERF-1"
+                ],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "automaticKnowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "immutable": true
+              },
+              "group": "Reliability",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android historical grounding preserves Prediction / Outcome / Capability evidence references",
+              "passed": true,
+              "detail": [
+                "EVIDENCE-ANDROID-PRED-1",
+                "EVIDENCE-ANDROID-OUTCOME-1",
+                "EVIDENCE-ANDROID-PERF-1"
+              ],
+              "group": "Lineage",
+              "severity": "Major"
+            },
+            {
+              "name": "Android outcome-grounded Capability Performance remains context-scoped evidence, not authority",
+              "passed": true,
+              "detail": {
+                "historicalGroundingState": "OUTCOME_GROUNDED",
+                "predictionHistoryCount": 1,
+                "outcomeHistoryCount": 1,
+                "latestOutcomeSettlementState": "FINAL",
+                "finalSettlementObserved": true,
+                "capabilityPerformanceProfileCount": 1,
+                "outcomeGroundedPerformanceProfileCount": 1,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 1,
+                "historicalEvidenceRefs": [
+                  "EVIDENCE-ANDROID-PRED-1",
+                  "EVIDENCE-ANDROID-OUTCOME-1",
+                  "EVIDENCE-ANDROID-PERF-1"
+                ],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "automaticKnowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "immutable": true
+              },
+              "group": "Authority",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android Prediction and Outcome are not automatically converted into an accuracy or reliability score",
+              "passed": true,
+              "detail": {
+                "historicalGroundingState": "OUTCOME_GROUNDED",
+                "predictionHistoryCount": 1,
+                "outcomeHistoryCount": 1,
+                "latestOutcomeSettlementState": "FINAL",
+                "finalSettlementObserved": true,
+                "capabilityPerformanceProfileCount": 1,
+                "outcomeGroundedPerformanceProfileCount": 1,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 1,
+                "historicalEvidenceRefs": [
+                  "EVIDENCE-ANDROID-PRED-1",
+                  "EVIDENCE-ANDROID-OUTCOME-1",
+                  "EVIDENCE-ANDROID-PERF-1"
+                ],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "automaticKnowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "immutable": true
+              },
+              "group": "Safety",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android DISPUTED historical Outcome remains CONFLICTED_HISTORY with no automatic winner",
+              "passed": true,
+              "detail": {
+                "historicalGroundingState": "CONFLICTED_HISTORY",
+                "predictionHistoryCount": 1,
+                "outcomeHistoryCount": 1,
+                "latestOutcomeSettlementState": "DISPUTED",
+                "finalSettlementObserved": false,
+                "capabilityPerformanceProfileCount": 0,
+                "outcomeGroundedPerformanceProfileCount": 0,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                "historicalEvidenceRefs": [
+                  "EVIDENCE-ANDROID-PRED-1",
+                  "EVIDENCE-ANDROID-CONFLICT-A",
+                  "EVIDENCE-ANDROID-CONFLICT-B"
+                ],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "automaticKnowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "immutable": true
+              },
+              "group": "Negative",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android PROVISIONAL historical Outcome remains PARTIALLY_GROUNDED",
+              "passed": true,
+              "detail": {
+                "historicalGroundingState": "PARTIALLY_GROUNDED",
+                "predictionHistoryCount": 1,
+                "outcomeHistoryCount": 1,
+                "latestOutcomeSettlementState": "PROVISIONAL",
+                "finalSettlementObserved": false,
+                "capabilityPerformanceProfileCount": 0,
+                "outcomeGroundedPerformanceProfileCount": 0,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                "historicalEvidenceRefs": [
+                  "EVIDENCE-ANDROID-PRED-1",
+                  "EVIDENCE-ANDROID-PARTIAL"
+                ],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "automaticKnowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "immutable": true
+              },
+              "group": "Reliability",
+              "severity": "Major"
+            },
+            {
+              "name": "Android Historical Outcome Assessment can link to an existing Reliability Profile",
+              "passed": true,
+              "detail": {
+                "ok": true,
+                "code": "EXTERNAL020_HISTORICAL_OUTCOME_ASSESSMENT_CREATED",
+                "status": "Candidate",
+                "data": {
+                  "assessment": {
+                    "historicalAssessmentId": "EXTERNAL020-HISTORICAL-ASSESSMENT-MU6V7P5R-0046",
+                    "profileId": "EXTERNAL020-PROFILE-MU6V7P5J-0017",
+                    "profileVersionRef": "EXTERNAL020-PROFILE-MU6V7P5J-0017@1.1.0",
+                    "subjectType": "SOURCE",
+                    "subjectRef": "SRC-PHASE2",
+                    "domain": "MARKET",
+                    "task": "PRICE_DATA_REVIEW",
+                    "purpose": "PHASE2_VALIDATION",
+                    "timeHorizon": "CURRENT",
+                    "historicalInputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0045",
+                    "predictionId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-PREDICTION",
+                    "outcomeId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-OUTCOME",
+                    "capabilityId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-CAPABILITY",
+                    "historicalGroundingState": "INSUFFICIENT_HISTORY",
+                    "predictionHistoryCount": 0,
+                    "outcomeHistoryCount": 0,
+                    "latestOutcomeSettlementState": null,
+                    "finalSettlementObserved": false,
+                    "capabilityPerformanceProfileCount": 0,
+                    "outcomeGroundedPerformanceProfileCount": 0,
+                    "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                    "historicalEvidenceRefs": [],
+                    "predictionOutcomeMatchComputed": false,
+                    "historicalAccuracyScore": null,
+                    "calibrationScore": null,
+                    "reliabilityScore": null,
+                    "authorityScore": null,
+                    "truthConfirmed": false,
+                    "conflictWinner": null,
+                    "automaticConflictResolutionPerformed": false,
+                    "automaticProfileRevisionPerformed": false,
+                    "profileRevisionCandidateOnly": true,
+                    "knowledgePromotionPerformed": false,
+                    "actionAuthorityGranted": false,
+                    "externalAiReasoningPerformed": false,
+                    "externalTransmissionPerformed": false,
+                    "paidApiExecutionPerformed": false,
+                    "rawEvidenceMutationPerformed": false,
+                    "canonicalRepositoryMutationPerformed": false,
+                    "ide170ConfidenceOverwritten": false,
+                    "historicalOutcomeGroundedEvaluationPerformed": true,
+                    "explanation": "Android Phase 3 read-only Historical Outcome integration validation",
+                    "createdAt": "2026-09-18T11:18:24.543Z",
+                    "immutable": true
+                  },
+                  "lineage": {
+                    "lineageId": "EXTERNAL020-LINEAGE-MU6V7P5R-0047",
+                    "relationType": "EVALUATED_FROM",
+                    "outputRef": "EXTERNAL020-HISTORICAL-ASSESSMENT-MU6V7P5R-0046",
+                    "inputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0045",
+                    "contextId": "EXTERNAL020-CONTEXT-MU6V7P5K-0033",
+                    "evidenceRefs": [],
+                    "contradictionRefs": [],
+                    "confirmationRefs": [
+                      "CONF-P2-INDEPENDENT"
+                    ],
+                    "explanation": "Historical Outcome Assessment for EXTERNAL020-PROFILE-MU6V7P5J-0017@1.1.0",
+                    "createdAt": "2026-09-18T11:18:24.543Z",
+                    "immutable": true
+                  }
+                },
+                "at": "2026-09-18T11:18:24.543Z"
+              },
+              "group": "Integration",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android Historical assessment is append-only evidence and does not automatically revise Profile history",
+              "passed": true,
+              "detail": {
+                "assessment": {
+                  "historicalAssessmentId": "EXTERNAL020-HISTORICAL-ASSESSMENT-MU6V7P5R-0046",
+                  "profileId": "EXTERNAL020-PROFILE-MU6V7P5J-0017",
+                  "profileVersionRef": "EXTERNAL020-PROFILE-MU6V7P5J-0017@1.1.0",
+                  "subjectType": "SOURCE",
+                  "subjectRef": "SRC-PHASE2",
+                  "domain": "MARKET",
+                  "task": "PRICE_DATA_REVIEW",
+                  "purpose": "PHASE2_VALIDATION",
+                  "timeHorizon": "CURRENT",
+                  "historicalInputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0045",
+                  "predictionId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-PREDICTION",
+                  "outcomeId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-OUTCOME",
+                  "capabilityId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-CAPABILITY",
+                  "historicalGroundingState": "INSUFFICIENT_HISTORY",
+                  "predictionHistoryCount": 0,
+                  "outcomeHistoryCount": 0,
+                  "latestOutcomeSettlementState": null,
+                  "finalSettlementObserved": false,
+                  "capabilityPerformanceProfileCount": 0,
+                  "outcomeGroundedPerformanceProfileCount": 0,
+                  "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                  "historicalEvidenceRefs": [],
+                  "predictionOutcomeMatchComputed": false,
+                  "historicalAccuracyScore": null,
+                  "calibrationScore": null,
+                  "reliabilityScore": null,
+                  "authorityScore": null,
+                  "truthConfirmed": false,
+                  "conflictWinner": null,
+                  "automaticConflictResolutionPerformed": false,
+                  "automaticProfileRevisionPerformed": false,
+                  "profileRevisionCandidateOnly": true,
+                  "knowledgePromotionPerformed": false,
+                  "actionAuthorityGranted": false,
+                  "externalAiReasoningPerformed": false,
+                  "externalTransmissionPerformed": false,
+                  "paidApiExecutionPerformed": false,
+                  "rawEvidenceMutationPerformed": false,
+                  "canonicalRepositoryMutationPerformed": false,
+                  "ide170ConfidenceOverwritten": false,
+                  "historicalOutcomeGroundedEvaluationPerformed": true,
+                  "explanation": "Android Phase 3 read-only Historical Outcome integration validation",
+                  "createdAt": "2026-09-18T11:18:24.543Z",
+                  "immutable": true
+                },
+                "historyBefore": 2,
+                "historyAfter": 2
+              },
+              "group": "Revision",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android Historical assessment grants no Truth / Knowledge / action authority",
+              "passed": true,
+              "detail": {
+                "historicalAssessmentId": "EXTERNAL020-HISTORICAL-ASSESSMENT-MU6V7P5R-0046",
+                "profileId": "EXTERNAL020-PROFILE-MU6V7P5J-0017",
+                "profileVersionRef": "EXTERNAL020-PROFILE-MU6V7P5J-0017@1.1.0",
+                "subjectType": "SOURCE",
+                "subjectRef": "SRC-PHASE2",
+                "domain": "MARKET",
+                "task": "PRICE_DATA_REVIEW",
+                "purpose": "PHASE2_VALIDATION",
+                "timeHorizon": "CURRENT",
+                "historicalInputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0045",
+                "predictionId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-PREDICTION",
+                "outcomeId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-OUTCOME",
+                "capabilityId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-CAPABILITY",
+                "historicalGroundingState": "INSUFFICIENT_HISTORY",
+                "predictionHistoryCount": 0,
+                "outcomeHistoryCount": 0,
+                "latestOutcomeSettlementState": null,
+                "finalSettlementObserved": false,
+                "capabilityPerformanceProfileCount": 0,
+                "outcomeGroundedPerformanceProfileCount": 0,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                "historicalEvidenceRefs": [],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "profileRevisionCandidateOnly": true,
+                "knowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "explanation": "Android Phase 3 read-only Historical Outcome integration validation",
+                "createdAt": "2026-09-18T11:18:24.543Z",
+                "immutable": true
+              },
+              "group": "Authority",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android Phase 3 remains local-only and mutation-free",
+              "passed": true,
+              "detail": {
+                "historicalAssessmentId": "EXTERNAL020-HISTORICAL-ASSESSMENT-MU6V7P5R-0046",
+                "profileId": "EXTERNAL020-PROFILE-MU6V7P5J-0017",
+                "profileVersionRef": "EXTERNAL020-PROFILE-MU6V7P5J-0017@1.1.0",
+                "subjectType": "SOURCE",
+                "subjectRef": "SRC-PHASE2",
+                "domain": "MARKET",
+                "task": "PRICE_DATA_REVIEW",
+                "purpose": "PHASE2_VALIDATION",
+                "timeHorizon": "CURRENT",
+                "historicalInputPackageId": "EXTERNAL020-HISTORICAL-INPUT-MU6V7P5R-0045",
+                "predictionId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-PREDICTION",
+                "outcomeId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-OUTCOME",
+                "capabilityId": "EXTERNAL020-ANDROID-PHASE3-NO-DATA-CAPABILITY",
+                "historicalGroundingState": "INSUFFICIENT_HISTORY",
+                "predictionHistoryCount": 0,
+                "outcomeHistoryCount": 0,
+                "latestOutcomeSettlementState": null,
+                "finalSettlementObserved": false,
+                "capabilityPerformanceProfileCount": 0,
+                "outcomeGroundedPerformanceProfileCount": 0,
+                "contextMatchingOutcomeGroundedPerformanceProfileCount": 0,
+                "historicalEvidenceRefs": [],
+                "predictionOutcomeMatchComputed": false,
+                "historicalAccuracyScore": null,
+                "calibrationScore": null,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "conflictWinner": null,
+                "automaticConflictResolutionPerformed": false,
+                "automaticProfileRevisionPerformed": false,
+                "profileRevisionCandidateOnly": true,
+                "knowledgePromotionPerformed": false,
+                "actionAuthorityGranted": false,
+                "externalAiReasoningPerformed": false,
+                "externalTransmissionPerformed": false,
+                "paidApiExecutionPerformed": false,
+                "rawEvidenceMutationPerformed": false,
+                "canonicalRepositoryMutationPerformed": false,
+                "ide170ConfidenceOverwritten": false,
+                "historicalOutcomeGroundedEvaluationPerformed": true,
+                "explanation": "Android Phase 3 read-only Historical Outcome integration validation",
+                "createdAt": "2026-09-18T11:18:24.543Z",
+                "immutable": true
+              },
+              "group": "Safety",
+              "severity": "Critical"
+            },
+            {
+              "name": "IDE-170 Confidence remains untouched on Android",
+              "passed": true,
+              "detail": {
+                "ide170ConfidenceOverwritten": false,
+                "overwriteAllowed": false
+              },
+              "group": "Safety",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android preserves Decision 001 traceability at 17/18 with only REQ-020-015 remaining",
+              "passed": true,
+              "detail": {
+                "decisionId": "EXTERNAL-020-DECISION-001",
+                "phase": 3,
+                "version": "0.3.1",
+                "totalDecisionRequirements": 18,
+                "decisionRequirementsFullyImplemented": 17,
+                "allDecisionRequirementsComplete": false,
+                "remainingRequirementIds": [
+                  "REQ-020-015"
+                ],
+                "expectedRemaining": [
+                  "REQ-020-015"
+                ],
+                "falseFullDecisionCompletionClaimed": false,
+                "rows": [
+                  {
+                    "requirementId": "REQ-020-001",
+                    "title": "Canonical Baseline Identity",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_version_manifest.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-001"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-002",
+                    "title": "EXTERNAL-010 Reliability Input Reuse",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_external010_adapter.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-002"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-003",
+                    "title": "Source / Evidence / Claim Reliability Separation",
+                    "verificationState": "IMPLEMENTED_PHASE2",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_context.js",
+                      "19_trust_evidence_reliability_profile.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-003",
+                      "19_trust_evidence_phase2_validation.js#REQ-020-003"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-004",
+                    "title": "Context-Specific Reliability",
+                    "verificationState": "IMPLEMENTED_PHASE2",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_context.js",
+                      "19_trust_evidence_evaluation_candidate.js",
+                      "19_trust_evidence_reliability_profile.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-004",
+                      "19_trust_evidence_phase2_validation.js#REQ-020-004"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-005",
+                    "title": "Multi-Dimensional Reliability Model",
+                    "verificationState": "IMPLEMENTED_PHASE2",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js",
+                      "19_trust_evidence_dimensions.js",
+                      "19_trust_evidence_reliability_profile.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-005",
+                      "19_trust_evidence_phase2_validation.js#REQ-020-005"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-006",
+                    "title": "Contradiction Preservation",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-006"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-007",
+                    "title": "Independent Confirmation Assessment",
+                    "verificationState": "IMPLEMENTED_PHASE2",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js",
+                      "19_trust_evidence_independence.js",
+                      "19_trust_evidence_reliability_profile.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-007",
+                      "19_trust_evidence_phase2_validation.js#REQ-020-007"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-008",
+                    "title": "Historical Outcome-Grounded Evaluation",
+                    "verificationState": "IMPLEMENTED_PHASE3",
+                    "implementationRefs": [
+                      "19_trust_evidence_historical_outcome_adapter.js",
+                      "19_trust_evidence_historical_outcome_assessment.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-008",
+                      "19_trust_evidence_phase3_validation.js#REQ-020-008"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-009",
+                    "title": "Versioned Reliability Revision",
+                    "verificationState": "IMPLEMENTED_PHASE2",
+                    "implementationRefs": [
+                      "19_trust_evidence_reliability_revision.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-009",
+                      "19_trust_evidence_phase2_validation.js#REQ-020-009"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-010",
+                    "title": "Explicit Uncertainty / Abstention",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-010"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-011",
+                    "title": "False Precision Prevention",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-011"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-012",
+                    "title": "IDE-170 Confidence Separation",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_version_manifest.js",
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-012"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-013",
+                    "title": "Evidence Authority / Action Authority Separation",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-013"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-014",
+                    "title": "Reliability Explanation / Lineage",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_lineage.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-014"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-015",
+                    "title": "External AI Governance Reuse",
+                    "verificationState": "DEFERRED_LATER_PHASE",
+                    "implementationRefs": [],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-015"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-016",
+                    "title": "No Raw Evidence Mutation",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_external010_adapter.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-016"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-017",
+                    "title": "No Automatic Knowledge Promotion",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-017"
+                    ]
+                  },
+                  {
+                    "requirementId": "REQ-020-018",
+                    "title": "No Self-Granted / Execution Authority",
+                    "verificationState": "IMPLEMENTED_PREVIOUS_PHASE",
+                    "implementationRefs": [
+                      "19_trust_evidence_version_manifest.js",
+                      "19_trust_evidence_evaluation_candidate.js"
+                    ],
+                    "validationRefs": [
+                      "19_trust_evidence_phase1_validation.js#REQ-020-018"
+                    ]
+                  }
+                ]
+              },
+              "group": "Traceability",
+              "severity": "Critical"
+            },
+            {
+              "name": "External AI Reliability Reasoning remains deferred on Android",
+              "passed": true,
+              "detail": {
+                "safety": {
+                  "historicalOutcomeGroundedEvaluationImplemented": true,
+                  "externalAiReliabilityReasoningImplemented": false,
+                  "external010WriteApiRequired": false,
+                  "external010InternalStateAccessAllowed": false,
+                  "predictionOutcomeMatchAutomaticallyComputed": false,
+                  "universalTrustScoreImplemented": false,
+                  "permanentGlobalSourceRankingImplemented": false,
+                  "automaticConflictResolutionAllowed": false,
+                  "truthConfirmationAllowed": false,
+                  "automaticProfileRevisionAllowed": false,
+                  "rawEvidenceMutationAllowed": false,
+                  "automaticKnowledgePromotionAllowed": false,
+                  "canonicalRepositoryMutationAllowed": false,
+                  "externalTransmissionAutomaticallyAllowed": false,
+                  "paidApiExecutionAutomaticallyAllowed": false,
+                  "tradingAuthorityGranted": false,
+                  "financialAuthorityGranted": false,
+                  "businessAuthorityGranted": false,
+                  "selfGrantedAuthorityAllowed": false,
+                  "reliabilityEqualsTruth": false,
+                  "reliabilityEqualsActionAuthority": false,
+                  "ide170ConfidenceOverwriteAllowed": false
+                },
+                "deferredAfterPhase3": [
+                  "REQ-020-015"
+                ]
+              },
+              "group": "Scope",
+              "severity": "Critical"
+            },
+            {
+              "name": "Android validation does not equal Project Owner approval",
+              "passed": true,
+              "detail": {
+                "validationEqualsApproval": false
+              },
+              "group": "Authority",
+              "severity": "Critical"
+            }
+          ],
+          "validatedAt": "2026-09-18T11:18:24.543Z",
+          "immutable": true
+        },
+        "severity": "Critical"
+      }
+    ]
+  },
+  "javascriptSyntax": {
+    "passed": 485,
+    "failed": 0,
+    "total": 485
+  },
+  "phase3FunctionalFixture": {
+    "passed": 21,
+    "failed": 0,
+    "total": 21,
+    "health": 100,
+    "criticalFailed": 0
+  },
+  "androidValidatorFixture": {
+    "passed": 21,
+    "failed": 0,
+    "total": 21,
+    "health": 100,
+    "criticalFailed": 0
+  },
+  "decision058Phase6Regression": {
+    "passed": 28,
+    "failed": 0,
+    "total": 28,
+    "health": 100,
+    "criticalFailed": 0
+  },
+  "decision001Coverage": {
+    "complete": 17,
+    "total": 18,
+    "allComplete": false,
+    "remainingRequirementIds": [
+      "REQ-020-015"
+    ]
+  },
+  "safety": {
+    "canonicalMutationPerformed": false,
+    "externalTransmissionPerformed": false,
+    "paidApiExecutionPerformed": false,
+    "historicalOutcomeGroundedEvaluationPerformed": true,
+    "externalAiReliabilityReasoningPerformed": false,
+    "automaticProfileRevisionPerformed": false,
+    "truthConfirmed": false,
+    "releaseAllowed": false,
+    "validationIsApproval": false
+  },
+  "nextGate": [
+    "PC v0.3.1: runExternal020Phase3Validation()",
+    "Android v0.3.1: runExternal020Phase3AndroidValidation()",
+    "Project Owner Acceptance / Freeze only after both real-device gates PASS"
+  ]
+}

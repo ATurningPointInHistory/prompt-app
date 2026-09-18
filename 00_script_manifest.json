@@ -4,7 +4,7 @@
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "EXTERNAL-010 v1.20.1 Canonical 0023-derived candidate + Decision 058 FINAL_FROZEN lineage + EXTERNAL-020 Decision 001 Phase 1 v0.1.1 Frozen + Phase 2 v0.2.1 Frozen + Phase 3 v0.3.0 Historical Outcome-Grounded Evaluation candidate; public-read-only historical inputs, no universal trust score, no truth authority, no automatic profile revision, no external AI, no repository mutation, no action authority",
+  "description": "EXTERNAL-010 v1.20.1 Canonical 0023-derived candidate + Decision 058 FINAL_FROZEN lineage + EXTERNAL-020 Decision 001 Phase 1 v0.1.1 Frozen + Phase 2 v0.2.1 Frozen + Phase 3 v0.3.1 Android Validation candidate; public-read-only historical inputs, Historical Outcome grounding, no automatic accuracy score, no truth authority, no automatic profile revision, no external AI, no repository mutation, no action authority",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
   "scripts": [
@@ -486,11 +486,12 @@
     "./19_trust_evidence_phase2_traceability.js?h=ee6a877e9e9e",
     "./19_trust_evidence_phase2_validation.js?h=62f641d60ec1",
     "./19_trust_evidence_phase2_android_validation.js?h=4188853ab10d",
-    "./19_trust_evidence_phase3_version_manifest.js?h=09ab183d7282",
+    "./19_trust_evidence_phase3_version_manifest.js?h=24c66be7dcc3",
     "./19_trust_evidence_historical_outcome_adapter.js?h=6530f93e7945",
     "./19_trust_evidence_historical_outcome_assessment.js?h=a766bd0275f5",
     "./19_trust_evidence_phase3_traceability.js?h=1fd7ba666297",
     "./19_trust_evidence_phase3_validation.js?h=7ca3c1dcc906",
+    "./19_trust_evidence_phase3_android_validation.js?h=508c1d825ed7",
     "./99_init.js?h=de0ce6495428"
   ],
   "hashes": {
@@ -2890,9 +2891,9 @@
       "cacheKey": "4188853ab10d"
     },
     "19_trust_evidence_phase3_version_manifest.js": {
-      "sha256": "09ab183d7282f2e927cf45ff3edb7d8cb55398ee858f9474ea22ed9cb949af68",
-      "byteSize": 3150,
-      "cacheKey": "09ab183d7282"
+      "sha256": "24c66be7dcc32d9125fb141be512e2240fde6046468eee18752e0ff665a6f580",
+      "byteSize": 3169,
+      "cacheKey": "24c66be7dcc3"
     },
     "19_trust_evidence_historical_outcome_adapter.js": {
       "sha256": "6530f93e79450ebc35430097a62efdf93ff96b709ac40212df47721383e270c4",
@@ -2913,9 +2914,14 @@
       "sha256": "7ca3c1dcc906e2b3996b20e9f1cc57ec113fe34aa932d65f35a8d64f77acc067",
       "byteSize": 11317,
       "cacheKey": "7ca3c1dcc906"
+    },
+    "19_trust_evidence_phase3_android_validation.js": {
+      "sha256": "508c1d825ed749282222aec7516ccf635d8f69001251a73d0745c2291179582d",
+      "byteSize": 15185,
+      "cacheKey": "508c1d825ed7"
     }
   },
-  "scriptSetHash": "139f5f28e8a830921f3d20cd6805a8ec367e4c3304af069b7e634996b9f58dca",
+  "scriptSetHash": "69ea6a918db8a26702a0b3cfaffe0002d3247ac468a25ee485905fab247d7954",
   "files": {
     "00_core.js": {
       "sha256": "03cdc50b3874fb8e8350c650633bc7ff9eec0f821d92cda9a47cb650fc1fb47b",
@@ -5313,9 +5319,9 @@
       "cacheKey": "4188853ab10d"
     },
     "19_trust_evidence_phase3_version_manifest.js": {
-      "sha256": "09ab183d7282f2e927cf45ff3edb7d8cb55398ee858f9474ea22ed9cb949af68",
-      "byteSize": 3150,
-      "cacheKey": "09ab183d7282"
+      "sha256": "24c66be7dcc32d9125fb141be512e2240fde6046468eee18752e0ff665a6f580",
+      "byteSize": 3169,
+      "cacheKey": "24c66be7dcc3"
     },
     "19_trust_evidence_historical_outcome_adapter.js": {
       "sha256": "6530f93e79450ebc35430097a62efdf93ff96b709ac40212df47721383e270c4",
@@ -5336,8 +5342,13 @@
       "sha256": "7ca3c1dcc906e2b3996b20e9f1cc57ec113fe34aa932d65f35a8d64f77acc067",
       "byteSize": 11317,
       "cacheKey": "7ca3c1dcc906"
+    },
+    "19_trust_evidence_phase3_android_validation.js": {
+      "sha256": "508c1d825ed749282222aec7516ccf635d8f69001251a73d0745c2291179582d",
+      "byteSize": 15185,
+      "cacheKey": "508c1d825ed7"
     }
   },
-  "updatedAt": "2026-09-18T11:07:55.003418Z",
-  "manifestHash": "4e80cf613f0b8c508bf4edef1b54d7bc619f658c035e6f33566e5c4dbb32e8c0"
+  "updatedAt": "2026-09-18T11:17:21.622413Z",
+  "manifestHash": "351d70ffd05c3312867582ee1ff272f179da69da77e3b8583c38e803918b6476"
 }

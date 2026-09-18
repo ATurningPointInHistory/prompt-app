@@ -1092,7 +1092,8 @@
     "19_trust_evidence_phase3_validation.js",
     "validate_external020_phase3.cjs",
     "EXTERNAL-020_Phase3_v0.3.0_VALIDATION_EVIDENCE.json",
-    "EXTERNAL-020_Phase3_v0.3.0_HANDOFF.txt"
+    "EXTERNAL-020_Phase3_v0.3.0_HANDOFF.txt",
+    "19_trust_evidence_phase3_android_validation.js"
   ],
   "missingFiles": [],
   "externalFiles": [
@@ -1107,9 +1108,9 @@
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "4e80cf613f0b8c508bf4edef1b54d7bc619f658c035e6f33566e5c4dbb32e8c0",
-  "scriptSetHash": "139f5f28e8a830921f3d20cd6805a8ec367e4c3304af069b7e634996b9f58dca",
-  "scriptManifestCount": 484,
+  "scriptManifestHash": "351d70ffd05c3312867582ee1ff272f179da69da77e3b8583c38e803918b6476",
+  "scriptSetHash": "69ea6a918db8a26702a0b3cfaffe0002d3247ac468a25ee485905fab247d7954",
+  "scriptManifestCount": 485,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
     "runtimeLoader": false,
@@ -1118,7 +1119,7 @@
     "last": "99_init.js",
     "generatedAtSave": true
   },
-  "releaseStatus": "EXTERNAL_020_PHASE2_ANDROID_VALIDATION_CANDIDATE",
+  "releaseStatus": "EXTERNAL_020_PHASE3_ANDROID_VALIDATION_CANDIDATE",
   "releaseAllowed": false,
   "projectOwnerRevalidationRequired": true,
   "decision058CandidateVersion": "0.6.0",
@@ -1230,9 +1231,11 @@
   "external020Phase2AndroidValidationImplemented": true,
   "external020Phase2AndroidValidationFunction": "runExternal020Phase2AndroidValidation",
   "external020Phase2FreezeRecordSha256": "8b7abee8786735f85207cef67d9bae2d0611066fbed5571ff8d862d4be67e1b3",
-  "external020Phase3Version": "0.3.0",
-  "external020Phase3Status": "IMPLEMENTATION_PHASE3_CANDIDATE",
+  "external020Phase3Version": "0.3.1",
+  "external020Phase3Status": "IMPLEMENTATION_PHASE3_ANDROID_VALIDATION_CANDIDATE",
   "external020Phase3HistoricalOutcomeGroundedEvaluationImplemented": true,
   "external020Phase3ExternalAiReliabilityReasoningImplemented": false,
-  "external020Phase3ValidationFunction": "runExternal020Phase3Validation"
+  "external020Phase3ValidationFunction": "runExternal020Phase3Validation",
+  "external020Phase3AndroidValidationImplemented": true,
+  "external020Phase3AndroidValidationFunction": "runExternal020Phase3AndroidValidation"
 }

@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 19_trust_evidence_phase3_version_manifest.js
    EXTERNAL-020 Trust / Evidence Intelligence
-   Decision 001 / Candidate Release: 0.3.0
+   Decision 001 / Candidate Release: 0.3.1
    Phase 3: Historical Outcome-Grounded Evaluation
    ============================================================ */
 (function (global) {
@@ -10,8 +10,8 @@
   const manifest=deepFreeze({
     componentId:"EXTERNAL-020",
     decisionId:"EXTERNAL-020-DECISION-001",
-    version:"0.3.0",
-    status:"IMPLEMENTATION_PHASE3_CANDIDATE",
+    version:"0.3.1",
+    status:"IMPLEMENTATION_PHASE3_ANDROID_VALIDATION_CANDIDATE",
     phase:3,
     phaseName:"Historical Outcome-Grounded Reliability Evaluation",
     parentPhase2:{

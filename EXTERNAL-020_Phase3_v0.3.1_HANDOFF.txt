@@ -1,0 +1,72 @@
+============================================================
+AI Prompt OS / AIプロンプト生成Pro
+EXTERNAL-020 Trust / Evidence Intelligence
+Phase 3 v0.3.1 Android Validation Candidate
+============================================================
+
+Status:
+ANDROID_VALIDATION_CANDIDATE
+
+Parent Frozen:
+EXTERNAL-020 Phase 2 v0.2.1 PROJECT_OWNER_ACCEPTED_FROZEN
+
+Decision:
+EXTERNAL-020-DECISION-001
+
+Candidate Identity:
+Script Count: 485
+Manifest Hash:
+351d70ffd05c3312867582ee1ff272f179da69da77e3b8583c38e803918b6476
+
+Script Set Hash:
+69ea6a918db8a26702a0b3cfaffe0002d3247ac468a25ee485905fab247d7954
+
+Changes from v0.3.0:
+- Phase 3 functional core remains byte-identical
+- Phase 3 Version Manifest: 0.3.0 -> 0.3.1
+- Added 19_trust_evidence_phase3_android_validation.js
+- Added Android real-device validation function:
+  runExternal020Phase3AndroidValidation()
+
+Validation:
+- JavaScript syntax: 485 / 485 PASS
+- Static / Package: 18 / 18 PASS
+- Phase 3 Functional fixture: 21 / 21 PASS
+- Android validator fixture: 21 / 21 PASS
+- Decision 058 Phase 6 regression: 28 / 28 PASS
+- health = 100
+- criticalFailed = 0
+
+Decision 001 Coverage:
+17 / 18 candidate-complete
+Remaining:
+REQ-020-015 External AI Governance Reuse
+
+Safety:
+canonicalMutationPerformed = false
+externalTransmissionPerformed = false
+paidApiExecutionPerformed = false
+historicalOutcomeGroundedEvaluationPerformed = true
+externalAiReliabilityReasoningPerformed = false
+automaticProfileRevisionPerformed = false
+truthConfirmed = false
+releaseAllowed = false
+validationIsApproval = false
+
+Important Gate Semantics:
+The prior PC v0.3.0 result (21/21 PASS) remains valid evidence for v0.3.0 only.
+It is NOT automatically transferred to v0.3.1 because candidate identity changed.
+
+Next:
+1. On PC after applying v0.3.1:
+   runExternal020Phase3Validation()
+
+2. On Android after applying v0.3.1:
+   runExternal020Phase3AndroidValidation()
+
+3. Only after both PASS:
+   Project Owner Phase 3 v0.3.1 Acceptance / Freeze decision.
+
+============================================================
+END
+============================================================
