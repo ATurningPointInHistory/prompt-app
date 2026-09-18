@@ -1,13 +1,13 @@
 /* ============================================================
    FILE: 18_self_development_control_center.js
-   SELF-DEVELOPMENT-058 / Self-Development Workspace v0.1.2
+   SELF-DEVELOPMENT-058 / Self-Development Workspace v0.1.3
    Form-first UI over existing Decision 058 backend.
    No new mutation/adoption/provider authority.
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const VERSION = "0.1.2";
+  const VERSION = "0.1.3";
   const COMPONENT_ID = "SELF-DEVELOPMENT-058-CONTROL-CENTER";
   const namespace = global.SELFDEVELOPMENT058Environment;
   if (!namespace || !namespace.__internal) return;
@@ -65,6 +65,10 @@
       selectedFiles: [],
       relatedFunctions: [],
       architectureRefs: [],
+      architectureRelationships: [],
+      relevantFindings: [],
+      genericRepositoryFindings: [],
+      contextEnrichment: null,
       scopeResult: null,
       evidenceItems: [],
       analyzedAt: null,
@@ -430,7 +434,7 @@
     }).slice(0, 8);
     return Object.freeze({
       resolverId: "SDCC-RELEVANT-SCOPE-" + Date.now().toString(36).toUpperCase(),
-      resolverVersion: "0.1.2",
+      resolverVersion: "0.1.3",
       userIntent: String(intent || ""),
       primaryComponent: primaryProfile ? primaryProfile.componentId : "AI-PROMPT-OS",
       matchedProfiles: matchedProfiles.map(function (profile) { return { id: profile.id, componentId: profile.componentId, signals: profile.signals }; }),
@@ -450,18 +454,155 @@
     });
   }
 
-  function buildWorkspaceEvidence(intent, inspectionResult, p5, p6, scopeResult) {
-    const inspection = inspectionResult && inspectionResult.data && inspectionResult.data.inspection || {};
-    const findings = Array.isArray(inspection.findings) ? inspection.findings : [];
-    const findingSummary = findings.slice(0, 6).map(function (f) {
-      return { type: f.type || null, severity: f.severity || null, summary: f.summary || null, files: Array.isArray(f.files) ? f.files.slice(0, 5) : [] };
+  function scoreRelevantFunction(row, intent, selectedFiles, profileTerms) {
+    const file = String(row && row.file || "");
+    if (!file || !selectedFiles.includes(file)) return -1;
+    const text = normalizeIntentText([row && row.name, row && row.summary, row && row.role, row && row.category, row && row.section].filter(Boolean).join(" "));
+    let score = Math.max(0, 120 - selectedFiles.indexOf(file) * 12);
+    const intentTokens = fileKeywords(intent).filter(function (token) { return !/\.[a-z0-9]+$/i.test(token); });
+    intentTokens.forEach(function (token) { if (text.indexOf(token) >= 0) score += 12; });
+    (profileTerms || []).forEach(function (term) { if (text.indexOf(normalizeIntentText(term)) >= 0) score += 10; });
+    if (/workspace|control|render|open|analy|resolve|scope|dashboard|proposal|candidate|validate|status/i.test(String(row && row.name || ""))) score += 18;
+    return score;
+  }
+
+  function enrichRelevantFunctions(intent, scopeResult) {
+    if (typeof global.searchProject !== "function") return [];
+    const selectedFiles = Array.isArray(scopeResult && scopeResult.selectedFiles) ? scopeResult.selectedFiles.slice(0, 8) : [];
+    const profileTerms = [];
+    (scopeResult && scopeResult.matchedProfiles || []).forEach(function (profile) {
+      const definition = INTENT_SCOPE_PROFILES.find(function (candidate) { return candidate.id === profile.id; });
+      if (definition) definition.searchTerms.forEach(function (term) { if (!profileTerms.includes(term)) profileTerms.push(term); });
     });
+    const rows = [];
+    const seen = new Set();
+    selectedFiles.forEach(function (file) {
+      let results = [];
+      try { results = global.searchProject("", { file: file, type: "function", limit: 80 }) || []; } catch (_) { results = []; }
+      results.forEach(function (row) {
+        if (!row || String(row.file || "") !== file) return;
+        const name = String(row.name || "").trim();
+        const key = file + "::" + name;
+        if (!name || seen.has(key)) return;
+        seen.add(key);
+        rows.push({
+          id: row.id || ("function:" + name),
+          name: name,
+          file: file,
+          line: Number(row.line || 0),
+          summary: shortText(row.summary || row.role || row.description || "", 360),
+          called: Array.isArray(row.called) ? row.called.slice(0, 8) : [],
+          calledBy: Array.isArray(row.calledBy) ? row.calledBy.slice(0, 8) : [],
+          codeExcerpt: shortText(row.code || "", 900),
+          relevanceScore: scoreRelevantFunction(row, intent, selectedFiles, profileTerms)
+        });
+      });
+    });
+    return rows.filter(function (row) { return row.relevanceScore >= 0; }).sort(function (a, b) { return b.relevanceScore - a.relevanceScore || a.file.localeCompare(b.file) || a.name.localeCompare(b.name); }).slice(0, 16);
+  }
+
+  function enrichArchitectureContext(intent, scopeResult) {
+    const baseRefs = Array.isArray(scopeResult && scopeResult.architectureRefs) ? scopeResult.architectureRefs.slice() : [];
+    const refs = [];
+    const seen = new Set();
+    function addRef(row, reason) {
+      if (!row) return;
+      const id = String(row.id || row.objectId || row.name || row.title || "");
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      refs.push({
+        id: row.id || row.objectId || null,
+        name: row.name || row.title || null,
+        type: row.type || row.objectType || null,
+        layer: row.layer || null,
+        category: row.category || null,
+        file: row.file || row.path || row.sourceFile || null,
+        reason: reason || null
+      });
+    }
+    baseRefs.forEach(function (row) { addRef(row, "Intent search match"); });
+    addRef({ id: FORMAL_DECISION058_FREEZE.decisionId, name: "Decision 058 Formal Freeze Boundary", type: "DECISION", layer: null, category: "GOVERNANCE", file: null }, "Formal Decision 058 freeze boundary");
+    if (typeof global.searchArchitectureObjects === "function") {
+      const queries = [];
+      if (scopeResult && scopeResult.primaryComponent) queries.push(scopeResult.primaryComponent);
+      (scopeResult && scopeResult.selectedFiles || []).slice(0, 6).forEach(function (file) {
+        queries.push(file);
+        queries.push(String(file).replace(/\.[^.]+$/, "").replace(/_/g, " "));
+      });
+      queries.push("self development");
+      queries.push("workspace");
+      queries.slice(0, 16).forEach(function (query) {
+        let results = [];
+        try { results = global.searchArchitectureObjects(query, { limit: 10 }) || []; } catch (_) { results = []; }
+        results.forEach(function (row) { addRef(row, "Architecture enrichment: " + query); });
+      });
+    }
+    const relationships = [];
+    const relSeen = new Set();
+    function addRelationship(row, direction) {
+      if (!row) return;
+      const key = [row.source, row.type, row.target].map(String).join("::");
+      if (!row.source || !row.target || relSeen.has(key)) return;
+      relSeen.add(key);
+      relationships.push({ source: row.source, type: row.type || null, target: row.target, direction: direction || null });
+    }
+    refs.slice(0, 10).forEach(function (ref) {
+      if (!ref.id) return;
+      [["findArchitectureChildren", "outgoing"], ["findArchitectureParents", "incoming"], ["findArchitectureCalls", "calls"], ["findArchitectureCalledBy", "calledBy"]].forEach(function (pair) {
+        const fn = global[pair[0]];
+        if (typeof fn !== "function") return;
+        let rows = [];
+        try { rows = fn(ref.id) || []; } catch (_) { rows = []; }
+        rows.slice(0, 8).forEach(function (row) { addRelationship(row, pair[1]); });
+      });
+    });
+    return { refs: refs.slice(0, 16), relationships: relationships.slice(0, 24) };
+  }
+
+  function enrichRelevantContext(intent, inspectionResult, scopeResult) {
+    const inspection = inspectionResult && inspectionResult.data && inspectionResult.data.inspection || inspectionResult || {};
+    const findings = Array.isArray(inspection.findings) ? inspection.findings : [];
+    const selectedFiles = Array.isArray(scopeResult && scopeResult.selectedFiles) ? scopeResult.selectedFiles : [];
+    const relatedFunctions = enrichRelevantFunctions(intent, scopeResult);
+    const architecture = enrichArchitectureContext(intent, scopeResult);
+    const relevantFindings = findings.filter(function (finding) {
+      const files = Array.isArray(finding && finding.files) ? finding.files : [];
+      return files.some(function (file) { return selectedFiles.includes(file); });
+    }).slice(0, 8);
+    const genericRepositoryFindings = findings.filter(function (finding) {
+      const files = Array.isArray(finding && finding.files) ? finding.files : [];
+      return !files.some(function (file) { return selectedFiles.includes(file); });
+    }).slice(0, 8);
+    const result = {
+      enrichmentId: "SDCC-CONTEXT-ENRICHMENT-" + Date.now().toString(36).toUpperCase(),
+      enrichmentVersion: "0.1.3",
+      primaryComponent: scopeResult && scopeResult.primaryComponent || "AI-PROMPT-OS",
+      selectedFiles: selectedFiles.slice(0, 8),
+      relatedFunctions: relatedFunctions,
+      architectureRefs: architecture.refs,
+      architectureRelationships: architecture.relationships,
+      relevantFindings: relevantFindings,
+      genericRepositoryFindings: genericRepositoryFindings,
+      intentSignals: (scopeResult && scopeResult.matchedProfiles || []).map(function (profile) { return { id: profile.id, signals: profile.signals || [] }; }),
+      externalTransmissionPerformed: false,
+      providerNetworkCallPerformed: false,
+      canonicalMutationPerformed: false,
+      immutable: true
+    };
+    return Object.freeze(result);
+  }
+
+  function buildWorkspaceEvidence(intent, inspectionResult, p5, p6, scopeResult, enrichment) {
+    const inspection = inspectionResult && inspectionResult.data && inspectionResult.data.inspection || {};
+    const relevantFindings = Array.isArray(enrichment && enrichment.relevantFindings) ? enrichment.relevantFindings : [];
+    const genericFindings = Array.isArray(enrichment && enrichment.genericRepositoryFindings) ? enrichment.genericRepositoryFindings : [];
     const repositoryExcerpt = JSON.stringify({
       inventoryCount: inspection.inventoryCount || null,
       inspectedFileCount: inspection.inspectedFileCount || null,
       categoryCounts: inspection.categoryCounts || null,
       summary: inspection.summary || null,
-      findings: findingSummary,
+      relevantFindings: relevantFindings.slice(0, 6).map(function (f) { return { type: f.type || null, severity: f.severity || null, summary: f.summary || null, files: Array.isArray(f.files) ? f.files.slice(0, 5) : [] }; }),
+      genericFindingCount: genericFindings.length,
       sourceDigest: inspection.sourceDigest || null
     });
     const freezeExcerpt = JSON.stringify({
@@ -486,16 +627,24 @@
     const scopeExcerpt = JSON.stringify({
       primaryComponent: scopeResult && scopeResult.primaryComponent || null,
       matchedProfiles: scopeResult && scopeResult.matchedProfiles || [],
-      selectedFiles: scopeResult && scopeResult.selectedFiles || [],
-      relatedFunctions: scopeResult && scopeResult.relatedFunctions || [],
-      architectureRefs: scopeResult && scopeResult.architectureRefs || [],
-      confidence: scopeResult && scopeResult.confidence || "LOW"
+      selectedFiles: enrichment && enrichment.selectedFiles || scopeResult && scopeResult.selectedFiles || [],
+      confidence: scopeResult && scopeResult.confidence || "LOW",
+      intentSignals: enrichment && enrichment.intentSignals || []
+    });
+    const functionExcerpt = JSON.stringify((enrichment && enrichment.relatedFunctions || []).slice(0, 10).map(function (row) {
+      return { name: row.name || null, file: row.file || null, line: row.line || 0, summary: row.summary || null, called: row.called || [], calledBy: row.calledBy || [], codeExcerpt: row.codeExcerpt || "" };
+    }));
+    const architectureExcerpt = JSON.stringify({
+      objects: (enrichment && enrichment.architectureRefs || []).slice(0, 10),
+      relationships: (enrichment && enrichment.architectureRelationships || []).slice(0, 16)
     });
     return [
-      { evidenceId: "SDCC-WORKSPACE-SCOPE", evidenceType: "ARCHITECTURE", sourceId: "SDCC-RELEVANT-SCOPE-RESOLVER", excerpt: shortText(scopeExcerpt, 2600), selectionReason: "Intent-grounded relevant scope selected locally before any External AI transmission." },
-      { evidenceId: "SDCC-WORKSPACE-REPOSITORY", evidenceType: "RUNTIME_EVIDENCE", sourceId: "SELFDEV058-REPOSITORY-INSPECTION", excerpt: shortText(repositoryExcerpt, 2200), selectionReason: "Current repository inspection summary for requested improvement." },
-      { evidenceId: "SDCC-WORKSPACE-FREEZE", evidenceType: "ARCHITECTURE", sourceId: FORMAL_DECISION058_FREEZE.evidenceSource, excerpt: shortText(freezeExcerpt, 1600), selectionReason: "Formal Decision 058 boundary and completion state." },
-      { evidenceId: "SDCC-WORKSPACE-READINESS", evidenceType: "RUNTIME_EVIDENCE", sourceId: "SELFDEV058-OPERATIONAL-READINESS", excerpt: shortText(operationalExcerpt, 1600), selectionReason: "Current operational readiness; distinct from formal freeze status." }
+      { evidenceId: "SDCC-WORKSPACE-SCOPE", evidenceType: "ARCHITECTURE", sourceId: "SDCC-RELEVANT-SCOPE-RESOLVER", excerpt: shortText(scopeExcerpt, 2200), selectionReason: "Intent-grounded relevant scope selected locally before any External AI transmission." },
+      { evidenceId: "SDCC-WORKSPACE-FUNCTIONS", evidenceType: "REPOSITORY_FILE", sourceId: "PROJECT-SEARCH-FUNCTION-CONTEXT", excerpt: shortText(functionExcerpt, 2400), selectionReason: "Functions enumerated from the selected files using the existing Project Search database." },
+      { evidenceId: "SDCC-WORKSPACE-ARCHITECTURE", evidenceType: "ARCHITECTURE", sourceId: "ARCHITECTURE-REPOSITORY", excerpt: shortText(architectureExcerpt, 2400), selectionReason: "Architecture objects and relationships connected to the intent-selected scope." },
+      { evidenceId: "SDCC-WORKSPACE-REPOSITORY", evidenceType: "RUNTIME_EVIDENCE", sourceId: "SELFDEV058-REPOSITORY-INSPECTION", excerpt: shortText(repositoryExcerpt, 2000), selectionReason: "Relevant repository inspection evidence only; unrelated generic findings stay outside the AI context." },
+      { evidenceId: "SDCC-WORKSPACE-FREEZE", evidenceType: "ARCHITECTURE", sourceId: FORMAL_DECISION058_FREEZE.evidenceSource, excerpt: shortText(freezeExcerpt, 1400), selectionReason: "Formal Decision 058 boundary and completion state." },
+      { evidenceId: "SDCC-WORKSPACE-READINESS", evidenceType: "RUNTIME_EVIDENCE", sourceId: "SELFDEV058-OPERATIONAL-READINESS", excerpt: shortText(operationalExcerpt, 1400), selectionReason: "Current operational readiness; distinct from formal freeze status." }
     ];
   }
 
@@ -516,8 +665,10 @@
     const candidate = workspace.candidateResult && workspace.candidateResult.data && workspace.candidateResult.data.candidate || null;
     const proposal = workspace.proposalResult && workspace.proposalResult.data && workspace.proposalResult.data.proposal || null;
     const findings = inspection && Array.isArray(inspection.findings) ? inspection.findings : [];
+    const relevantFindings = Array.isArray(workspace.relevantFindings) ? workspace.relevantFindings : [];
+    const genericFindings = Array.isArray(workspace.genericRepositoryFindings) ? workspace.genericRepositoryFindings : [];
     const scope = workspace.scopeResult || {};
-    const currentSummary = inspection ? ("Repository " + (inspection.inventoryCount || "?") + " items / inspected " + (inspection.inspectedFileCount || "?") + " files / findings " + findings.length) : "まだ現状分析していません";
+    const currentSummary = inspection ? ("Repository " + (inspection.inventoryCount || "?") + " items / inspected " + (inspection.inspectedFileCount || "?") + " files / relevant " + relevantFindings.length + " / generic " + genericFindings.length) : "まだ現状分析していません";
     const expected = aiOutput ? shortText(aiOutput, 1600) : "外部AI分析はまだ実行していません。現時点では変更結果を確定せず、現状Evidenceと改善Candidateだけを扱います。";
     const next = proposal ? "Proposal登録済み。Controlled Trial / Reviewへ進めます（Adoptionではありません）。" : candidate ? "Candidate登録済み。Proposal作成またはAI分析結果をレビューしてください。" : workspace.state === "ANALYZED" ? "AI分析または改善候補登録へ進めます。" : "改善したいことを入力して「現状を分析」を押してください。";
     workspaceNode.innerHTML = [
@@ -525,7 +676,9 @@
       '<div class="sdcc-work-card"><span>あなたの目的</span><b>' + esc(shortText(intent, 500)) + '</b></div>',
       '<div class="sdcc-work-card"><span>現在</span><b>' + esc(currentSummary) + '</b><small>Formal FreezeとOperational Readinessは分離して判定</small></div>',
       '<div class="sdcc-work-card"><span>Intent Scope</span><b>' + esc(scope.primaryComponent || "未判定") + '</b><small>Confidence: ' + esc(scope.confidence || "-") + ' / 一般Repository findingとは分離</small></div>',
-      '<div class="sdcc-work-card"><span>関連ファイル候補</span><b>' + esc(workspace.selectedFiles.length ? workspace.selectedFiles.join(", ") : "未特定 / Architecture Review") + '</b><small>Functions: ' + esc((workspace.relatedFunctions || []).slice(0,4).map(function(row){return row.name || row.id || "";}).filter(Boolean).join(", ") || "未特定") + '</small></div>',
+      '<div class="sdcc-work-card"><span>関連ファイル候補</span><b>' + esc(workspace.selectedFiles.length ? workspace.selectedFiles.join(", ") : "未特定 / Architecture Review") + '</b><small>Intentに一致したScopeのみ</small></div>',
+      '<div class="sdcc-work-card"><span>関連Function</span><b>' + esc((workspace.relatedFunctions || []).slice(0,6).map(function(row){return row.name || row.id || "";}).filter(Boolean).join(", ") || "未特定") + '</b><small>' + esc((workspace.relatedFunctions || []).length) + ' functions enriched</small></div>',
+      '<div class="sdcc-work-card"><span>Architecture</span><b>' + esc((workspace.architectureRefs || []).slice(0,5).map(function(row){return row.name || row.id || "";}).filter(Boolean).join(", ") || "未特定") + '</b><small>' + esc((workspace.architectureRelationships || []).length) + ' relationships / Relevant findings ' + esc(relevantFindings.length) + ' / Generic ' + esc(genericFindings.length) + '</small></div>',
       '<div class="sdcc-work-card"><span>External AI</span><b>' + esc(readiness.readiness || "未確認") + '</b><small>自動送信なし。実行時はProject Owner明示確認</small></div>',
       '</div>',
       '<div class="sdcc-result"><h4>変更したらどうなるか（予測候補）</h4><div>' + esc(expected) + '</div><p>※ AI出力はProposal Candidateのみ。Validation前の予測であり、Truth/Approval/Adoptionではありません。</p></div>',
@@ -649,8 +802,9 @@
     const readiness = typeof namespace.inspectSelfDevelopmentPhase6ExternalAiReadiness === "function" ? namespace.inspectSelfDevelopmentPhase6ExternalAiReadiness() : { readiness: "UNAVAILABLE" };
     const inspection = inspectionResult.data && inspectionResult.data.inspection || {};
     const scopeResult = resolveRelevantScope(userIntent, inspectionResult);
-    const selectedFiles = scopeResult.selectedFiles || [];
-    const evidenceItems = buildWorkspaceEvidence(userIntent, inspectionResult, p5, p6, scopeResult);
+    const contextEnrichment = enrichRelevantContext(userIntent, inspectionResult, scopeResult);
+    const selectedFiles = contextEnrichment.selectedFiles || scopeResult.selectedFiles || [];
+    const evidenceItems = buildWorkspaceEvidence(userIntent, inspectionResult, p5, p6, scopeResult, contextEnrichment);
     let contextResult = null;
     if (typeof namespace.buildSelfDevelopmentPhase6ContextPackage === "function") contextResult = await namespace.buildSelfDevelopmentPhase6ContextPackage({ userIntent: userIntent, evidenceItems: evidenceItems });
     workspace = Object.assign(createEmptyWorkspace(), {
@@ -661,9 +815,13 @@
       contextResult: clone(contextResult),
       readiness: clone(readiness),
       scopeResult: clone(scopeResult),
+      contextEnrichment: clone(contextEnrichment),
       selectedFiles: selectedFiles,
-      relatedFunctions: clone(scopeResult.relatedFunctions || []),
-      architectureRefs: clone(scopeResult.architectureRefs || []),
+      relatedFunctions: clone(contextEnrichment.relatedFunctions || []),
+      architectureRefs: clone(contextEnrichment.architectureRefs || []),
+      architectureRelationships: clone(contextEnrichment.architectureRelationships || []),
+      relevantFindings: clone(contextEnrichment.relevantFindings || []),
+      genericRepositoryFindings: clone(contextEnrichment.genericRepositoryFindings || []),
       evidenceItems: clone(evidenceItems),
       analyzedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -680,10 +838,12 @@
         scopeConfidence: scopeResult.confidence,
         scopeConfidenceScore: scopeResult.confidenceScore,
         selectedFiles: selectedFiles,
-        relatedFunctions: scopeResult.relatedFunctions || [],
-        architectureRefs: scopeResult.architectureRefs || [],
-        genericRepositoryFindings: scopeResult.genericRepositoryFindings || [],
-        findings: inspection.findings || [],
+        relatedFunctions: contextEnrichment.relatedFunctions || [],
+        architectureRefs: contextEnrichment.architectureRefs || [],
+        architectureRelationships: contextEnrichment.architectureRelationships || [],
+        relevantFindings: contextEnrichment.relevantFindings || [],
+        genericRepositoryFindings: contextEnrichment.genericRepositoryFindings || [],
+        findings: contextEnrichment.relevantFindings || [],
         boundedContextReady: Boolean(contextResult && contextResult.ok === true),
         externalAiReadiness: readiness && readiness.readiness || "UNKNOWN",
         externalTransmissionPerformed: false,
@@ -992,6 +1152,12 @@
     check("Intent scope selects Self-Development Workspace ahead of unrelated generic findings", resolverProbe.primaryComponent === "SELF-DEVELOPMENT-058" && resolverProbe.selectedFiles[0] === "18_self_development_control_center.js", resolverProbe);
     check("Relevant Scope Resolver is local-only and performs no provider call", resolverProbe.externalTransmissionPerformed === false && resolverProbe.providerNetworkCallPerformed === false && resolverProbe.canonicalMutationPerformed === false, { externalTransmissionPerformed: resolverProbe.externalTransmissionPerformed, providerNetworkCallPerformed: resolverProbe.providerNetworkCallPerformed, canonicalMutationPerformed: resolverProbe.canonicalMutationPerformed });
     check("Intent scope exposes bounded file/function/architecture references", Array.isArray(resolverProbe.selectedFiles) && Array.isArray(resolverProbe.relatedFunctions) && Array.isArray(resolverProbe.architectureRefs), { selectedFiles: resolverProbe.selectedFiles, relatedFunctions: resolverProbe.relatedFunctions, architectureRefs: resolverProbe.architectureRefs });
+    const enrichmentProbe = enrichRelevantContext("自己改善プログラムをもっと使いやすくして改善前後を比較したい", { data: { inspection: { inspectedFiles: [{ path: "18_self_development_control_center.js" }, { path: "17_external_intelligence_openai_provider_integration.js" }], findings: [{ type: "LARGE_SOURCE_FILE", severity: "MEDIUM", files: ["17_external_intelligence_openai_provider_integration.js"] }] } } }, resolverProbe);
+    check("Relevant Context Enrichment API exists", typeof enrichRelevantContext === "function", typeof enrichRelevantContext);
+    check("Relevant Context enumerates selected-file functions when Project Search is available", typeof global.searchProject !== "function" || enrichmentProbe.relatedFunctions.length > 0, { functionCount: enrichmentProbe.relatedFunctions.length, functions: enrichmentProbe.relatedFunctions.slice(0, 5) });
+    check("Relevant Context carries Architecture / Decision boundary references", Array.isArray(enrichmentProbe.architectureRefs) && enrichmentProbe.architectureRefs.some(function (row) { return row.id === FORMAL_DECISION058_FREEZE.decisionId; }), enrichmentProbe.architectureRefs);
+    check("Relevant Findings and Generic Repository Findings are separated", Array.isArray(enrichmentProbe.relevantFindings) && Array.isArray(enrichmentProbe.genericRepositoryFindings) && enrichmentProbe.relevantFindings.length === 0 && enrichmentProbe.genericRepositoryFindings.length === 1, { relevantFindings: enrichmentProbe.relevantFindings, genericRepositoryFindings: enrichmentProbe.genericRepositoryFindings });
+    check("Relevant Context Enrichment is local-only", enrichmentProbe.externalTransmissionPerformed === false && enrichmentProbe.providerNetworkCallPerformed === false && enrichmentProbe.canonicalMutationPerformed === false, { externalTransmissionPerformed: enrichmentProbe.externalTransmissionPerformed, providerNetworkCallPerformed: enrichmentProbe.providerNetworkCallPerformed, canonicalMutationPerformed: enrichmentProbe.canonicalMutationPerformed });
     check("Phase 5 Controlled Trial UI bridge exists", typeof namespace.openSelfDevelopmentPhase5TrialUI === "function" || typeof global.openSelfDevelopmentPhase5TrialUI === "function", typeof namespace.openSelfDevelopmentPhase5TrialUI);
     check("Control Center does not expose automatic approval", s.hardBoundaries.automaticCandidateApproval === false, s.hardBoundaries.automaticCandidateApproval);
     check("Control Center does not expose automatic adoption", s.hardBoundaries.automaticAdoption === false, s.hardBoundaries.automaticAdoption);
@@ -1022,6 +1188,7 @@
     getSelfDevelopment058FormalFreezeStatus: function () { return clone(FORMAL_DECISION058_FREEZE); },
     getSelfDevelopment058WorkspaceState: function () { return clone(workspace); },
     resolveSelfDevelopment058RelevantScope: resolveRelevantScope,
+    enrichSelfDevelopment058RelevantContext: enrichRelevantContext,
     analyzeSelfDevelopment058WorkspaceIntent: analyzeWorkspaceIntent,
     prepareSelfDevelopment058WorkspaceExternalAi: prepareWorkspaceExternalAi,
     executeSelfDevelopment058WorkspaceExternalAi: executeWorkspaceExternalAi,
@@ -1035,6 +1202,7 @@
   global.closeSelfDevelopment058ControlCenter = closeControlCenter;
   global.validateSelfDevelopment058ControlCenter = validateControlCenter;
   global.resolveSelfDevelopment058RelevantScope = resolveRelevantScope;
+  global.enrichSelfDevelopment058RelevantContext = enrichRelevantContext;
   global.analyzeSelfDevelopment058WorkspaceIntent = analyzeWorkspaceIntent;
 
   if (global.document) {

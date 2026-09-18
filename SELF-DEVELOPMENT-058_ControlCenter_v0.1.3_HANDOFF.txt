@@ -1,0 +1,47 @@
+AI Prompt OS / SELF-DEVELOPMENT-058
+Self-Development Workspace v0.1.3 Relevant Context Enrichment Candidate
+Date: 2026-09-19
+
+PURPOSE
+- Extend v0.1.2 Intent -> Component/File scope into bounded Function / Architecture / Relevant Finding context.
+- Keep External AI optional and explicitly Project Owner approved.
+- Do not add approval, adoption, repository mutation, canonical reflection, or provider authority.
+
+RUNTIME DELTA
+- Runtime script count remains 493.
+- Only runtime delta from Frozen parent lineage remains 18_self_development_control_center.js.
+- Frozen EXTERNAL-020 parent 492 scripts remain byte/order identical.
+
+V0.1.3 BEHAVIOR
+- Enumerates functions from intent-selected files using existing searchProject().
+- Captures function name/file/line/summary/call relationships and bounded code excerpt.
+- Reuses Architecture Repository search and relationship APIs when records exist.
+- Always includes the formal Decision 058 freeze boundary as governance architecture evidence.
+- Splits Relevant Findings from Generic Repository Findings.
+- Generic unrelated findings are not included in the bounded External AI evidence excerpts.
+- Builds at most six Workspace evidence items, inside the existing Phase 6 context-policy limits.
+
+VALIDATION
+- 493/493 JS syntax PASS.
+- Static/Functional: 31/31 PASS, health 100, criticalFailed 0.
+- Runtime Control Center: 23/23 PASS.
+- Decision 058 Phase 6 regression: 28/28 PASS.
+- Provider execution during validation: 0.
+- External transmission during validation: false.
+- Canonical mutation during validation: false.
+
+CANDIDATE IDENTITY
+scriptCount = 493
+manifestHash = f3bd3d670f4823abb03fdbddc159c1e82b1f2344da31a9256f3f0bbadb5d64dc
+scriptSetHash = 0686ee23695269f5b766ff7d393b123997e18b65b6fc9d9f84c2990b7359bf04
+parentFrozenScriptSetHash = 891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30
+
+PROJECT OWNER GATE
+1. Apply the DIFF over v0.1.2.
+2. Run openSelfDevelopment058ControlCenter().
+3. Run validateSelfDevelopment058ControlCenter(). Expected: 23/23 PASS.
+4. Enter the same improvement intent and run local analysis.
+5. Confirm relatedFunctions is non-empty, architectureRefs contains Decision 058 boundary (and Architecture DB matches if available), Relevant Findings is separate from Generic Repository Findings.
+6. Android UI verification follows PC verification.
+
+Acceptance / Freeze has NOT been performed automatically.
