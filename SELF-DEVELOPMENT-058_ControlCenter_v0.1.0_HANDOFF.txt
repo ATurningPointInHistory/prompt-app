@@ -1,0 +1,72 @@
+============================================================
+AI Prompt OS / Self-Development Control Center v0.1.0
+============================================================
+
+Purpose:
+Make the existing Decision 058 Self-Development backend visible and usable
+without adding mutation, approval, adoption, provider, budget, or canonical authority.
+
+Parent:
+EXTERNAL-020 Decision 001 / Phase 4 v0.4.3 Frozen runtime lineage
+Parent Runtime Script Count: 492
+Parent Script Set Hash:
+891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30
+
+Current UI Candidate Identity:
+Script Count: 493
+Manifest Hash:
+4c6554bd4e21768b41b17d0ce549ecd393d897843fcddea56ad026679987fa89
+Script Set Hash:
+8fd9c1cd9f8d5f8d47c64279ec351a57e11087c1f077f49ccab85411db645dea
+
+New Runtime File:
+18_self_development_control_center.js
+
+Launcher:
+SD Center
+
+Visible / Usable Functions:
+- Current Decision 058 / Phase 1-6 state
+- Baseline Identity confirmation
+- Read-only Repository Inspect
+- Deterministic Improvement Candidate detection
+- Latest Candidate -> Structured Proposal
+- Candidate / Proposal list
+- Phase 1-6 Validation launcher
+- External AI Readiness inspection only
+- Existing Controlled Trial UI launcher
+- Copyable Status Report
+
+Not Added:
+- Automatic Candidate Approval
+- Automatic Adoption
+- Direct Canonical Repository Mutation
+- Persistent Reflection from Control Center
+- Baseline Promotion from Control Center
+- Provider execution from Control Center
+- Automatic external transmission
+- Automatic budget expansion
+
+Validation:
+Control Center Gate: 13 / 13 PASS
+Health: 100
+Critical Failed: 0
+Decision 058 Phase 6 Regression: 28 / 28 PASS
+Parent Frozen 492 runtime scripts byte/order identity: PASS
+
+Note:
+The legacy EXTERNAL-020 v0.4.3 static package validator validates the exact
+492-script package identity and therefore is not used as the current 493-script
+UI-candidate gate. The Frozen parent 492-script Script Set Hash is verified
+separately and remains exact.
+
+Project Owner Acceptance / Freeze:
+NOT PERFORMED
+
+Next Gate:
+Apply DIFF to the current v0.4.3 package and visually verify SD Center on PC,
+then Android. Run validateSelfDevelopment058ControlCenter() in the browser.
+
+============================================================
+END
+============================================================

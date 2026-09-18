@@ -4,7 +4,7 @@
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "EXTERNAL-010 v1.20.1 Canonical 0023-derived candidate + Decision 058 FINAL_FROZEN lineage + EXTERNAL-020 Decision 001 Phase 1 v0.1.1 Frozen + Phase 2 v0.2.1 Frozen + Phase 3 v0.3.1 Frozen + Phase 4 v0.4.3 Android Validation Candidate; governed External AI reliability reasoning reuses EXTERNAL-010 OpenAI governance; technical validation is live-readiness independent; Android real-device validation performs no provider call",
+  "description": "EXTERNAL-010 v1.20.1 Canonical 0023-derived candidate + Decision 058 FINAL_FROZEN lineage + EXTERNAL-020 Decision 001 Phase 1-4 Frozen lineage + SELF-DEVELOPMENT-058 Control Center UI v0.1.0 additive candidate; no new authority, no automatic approval/adoption/canonical mutation/provider execution",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
   "scripts": [
@@ -469,6 +469,7 @@
     "./18_self_development_phase6_traceability.js?h=7ee4dd9190c8",
     "./18_self_development_phase6_dashboard.js?h=50ddde551622",
     "./18_self_development_phase6_validation.js?h=0ade106576b9",
+    "./18_self_development_control_center.js?h=6b7739493cec",
     "./19_trust_evidence_version_manifest.js?h=10898623acf4",
     "./19_trust_evidence_core.js?h=5ff77d1cf7c8",
     "./19_trust_evidence_external010_adapter.js?h=c4189beae60b",
@@ -2961,9 +2962,14 @@
       "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
       "byteSize": 4742,
       "cacheKey": "de0ce6495428"
+    },
+    "18_self_development_control_center.js": {
+      "sha256": "6b7739493ceccf3706131a77cdd76b7650845d8a477f2faf12610a9101635ba7",
+      "byteSize": 27430,
+      "cacheKey": "6b7739493cec"
     }
   },
-  "scriptSetHash": "891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30",
+  "scriptSetHash": "8fd9c1cd9f8d5f8d47c64279ec351a57e11087c1f077f49ccab85411db645dea",
   "files": [
     "00_core.js",
     "01_task_manager.js",
@@ -3426,6 +3432,7 @@
     "18_self_development_phase6_traceability.js",
     "18_self_development_phase6_dashboard.js",
     "18_self_development_phase6_validation.js",
+    "18_self_development_control_center.js",
     "19_trust_evidence_version_manifest.js",
     "19_trust_evidence_core.js",
     "19_trust_evidence_external010_adapter.js",
@@ -3458,6 +3465,6 @@
     "99_init.js",
     "19_trust_evidence_phase4_android_validation.js"
   ],
-  "updatedAt": "2026-09-18T12:10:00.000Z",
-  "manifestHash": "49aeee3989604656b55fb61d845d0c0760811d2a129df258ec47d48e4aa959aa"
+  "updatedAt": "2026-09-18T12:40:00.000Z",
+  "manifestHash": "4c6554bd4e21768b41b17d0ce549ecd393d897843fcddea56ad026679987fa89"
 }

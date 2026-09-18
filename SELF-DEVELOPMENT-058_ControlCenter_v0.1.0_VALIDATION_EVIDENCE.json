@@ -1,0 +1,262 @@
+{
+  "id": "SELF-DEVELOPMENT-058-CONTROL-CENTER-V0.1.0-VALIDATION-EVIDENCE",
+  "componentId": "SELF-DEVELOPMENT-058",
+  "decisionId": "EXTERNAL-010-DECISION-058",
+  "controlCenterVersion": "0.1.0",
+  "status": "TECHNICAL_CANDIDATE",
+  "identity": {
+    "scriptCount": 493,
+    "manifestHash": "4c6554bd4e21768b41b17d0ce549ecd393d897843fcddea56ad026679987fa89",
+    "scriptSetHash": "8fd9c1cd9f8d5f8d47c64279ec351a57e11087c1f077f49ccab85411db645dea",
+    "parentFrozenScriptCount": 492,
+    "parentFrozenScriptSetHash": "891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30"
+  },
+  "validation": {
+    "id": "SELF-DEVELOPMENT-058-CONTROL-CENTER-V0.1.0-STATIC-FUNCTIONAL-VALIDATION",
+    "decisionId": "EXTERNAL-010-DECISION-058",
+    "version": "0.1.0",
+    "passed": 13,
+    "failed": 0,
+    "total": 13,
+    "health": 100,
+    "criticalFailed": 0,
+    "scriptCount": 493,
+    "manifestHash": "4c6554bd4e21768b41b17d0ce549ecd393d897843fcddea56ad026679987fa89",
+    "scriptSetHash": "8fd9c1cd9f8d5f8d47c64279ec351a57e11087c1f077f49ccab85411db645dea",
+    "parentFrozenScriptCount": 492,
+    "parentFrozenScriptSetHash": "891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30",
+    "newAuthorityGranted": false,
+    "automaticApprovalEnabled": false,
+    "automaticAdoptionEnabled": false,
+    "canonicalMutationEnabled": false,
+    "providerExecutionEnabled": false,
+    "releaseAllowed": false,
+    "validationIsApproval": false,
+    "checks": [
+      {
+        "name": "All 493 runtime script hashes and byte sizes match",
+        "passed": true,
+        "detail": {
+          "verified": 493,
+          "total": 493,
+          "missing": []
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "All 493 runtime cache keys match",
+        "passed": true,
+        "detail": {
+          "verified": 493,
+          "total": 493
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Current Script Set Hash verifies",
+        "passed": true,
+        "detail": {
+          "computed": "8fd9c1cd9f8d5f8d47c64279ec351a57e11087c1f077f49ccab85411db645dea",
+          "stored": "8fd9c1cd9f8d5f8d47c64279ec351a57e11087c1f077f49ccab85411db645dea"
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Current Manifest Hash verifies",
+        "passed": true,
+        "detail": {
+          "computed": "4c6554bd4e21768b41b17d0ce549ecd393d897843fcddea56ad026679987fa89",
+          "stored": "4c6554bd4e21768b41b17d0ce549ecd393d897843fcddea56ad026679987fa89"
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "index manifest marker matches",
+        "passed": true,
+        "detail": {
+          "index": "4c6554bd4e21768b41b17d0ce549ecd393d897843fcddea56ad026679987fa89",
+          "manifest": "4c6554bd4e21768b41b17d0ce549ecd393d897843fcddea56ad026679987fa89"
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "index runtime script sequence matches manifest",
+        "passed": true,
+        "detail": {
+          "indexCount": 493,
+          "manifestCount": 493
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "project_info identity matches current UI candidate",
+        "passed": true,
+        "detail": {
+          "count": 493,
+          "status": "ADDITIVE_UI_CANDIDATE"
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Frozen EXTERNAL-020 Decision001 / Phase4 parent 492 runtime scripts remain byte/order identical",
+        "passed": true,
+        "detail": {
+          "parentCount": 492,
+          "parentScriptSetHash": "891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30"
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Control Center loads additively after Decision058 Phase6 and before EXTERNAL020",
+        "passed": true,
+        "detail": {
+          "p6Pos": 460,
+          "uiPos": 461,
+          "p19Pos": 462
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Control Center exposes no direct External AI execution call",
+        "passed": true,
+        "detail": null,
+        "severity": "Critical"
+      },
+      {
+        "name": "Control Center exposes no automatic approval/adoption/canonical reflection action",
+        "passed": true,
+        "detail": null,
+        "severity": "Critical"
+      },
+      {
+        "name": "Decision058 Phase6 regression remains 28/28 PASS",
+        "passed": true,
+        "detail": {
+          "passed": 28,
+          "failed": 0,
+          "total": 28,
+          "health": 100,
+          "criticalFailed": 0,
+          "decision058Technical18Of18": true
+        },
+        "severity": "Critical"
+      },
+      {
+        "name": "Control Center runtime self-validation passes 12/12",
+        "passed": true,
+        "detail": {
+          "id": "SELF-DEVELOPMENT-058-CONTROL-CENTER-VALIDATION",
+          "version": "0.1.0",
+          "passed": 12,
+          "failed": 0,
+          "total": 12,
+          "health": 100,
+          "criticalFailed": 0,
+          "validationIsApproval": false,
+          "canonicalMutationPerformed": false,
+          "providerNetworkCallPerformed": false,
+          "externalTransmissionPerformed": false,
+          "checks": [
+            {
+              "name": "Control Center is additive UI only",
+              "passed": true,
+              "detail": {
+                "newAuthority": false
+              }
+            },
+            {
+              "name": "Self-Development namespace exists",
+              "passed": true,
+              "detail": "object"
+            },
+            {
+              "name": "Phase 1 status API exists",
+              "passed": true,
+              "detail": "function"
+            },
+            {
+              "name": "Phase 2 repository inspection API exists",
+              "passed": true,
+              "detail": "function"
+            },
+            {
+              "name": "Phase 2 candidate detection API exists",
+              "passed": true,
+              "detail": "function"
+            },
+            {
+              "name": "Proposal API exists",
+              "passed": true,
+              "detail": "function"
+            },
+            {
+              "name": "Phase 5 Controlled Trial UI bridge exists",
+              "passed": true,
+              "detail": "function"
+            },
+            {
+              "name": "Phase 6 External AI readiness API exists",
+              "passed": true,
+              "detail": "function"
+            },
+            {
+              "name": "Control Center does not expose automatic approval",
+              "passed": true,
+              "detail": false
+            },
+            {
+              "name": "Control Center does not expose automatic adoption",
+              "passed": true,
+              "detail": false
+            },
+            {
+              "name": "Control Center does not expose direct canonical mutation",
+              "passed": true,
+              "detail": false
+            },
+            {
+              "name": "Control Center does not execute provider network call during validation",
+              "passed": true,
+              "detail": false
+            }
+          ],
+          "validatedAt": "2026-09-18T13:01:32.563Z"
+        },
+        "severity": "Critical"
+      }
+    ]
+  },
+  "decision058Phase6Regression": {
+    "passed": 28,
+    "failed": 0,
+    "total": 28,
+    "health": 100,
+    "criticalFailed": 0,
+    "decision058Technical18Of18": true
+  },
+  "frozenParentRuntimeScriptsByteOrderIdentical": true,
+  "frozenParentRuntimeScriptCount": 492,
+  "uiScope": {
+    "baselineStatus": true,
+    "repositoryInspection": true,
+    "candidateDetection": true,
+    "proposalCreation": true,
+    "phase1To6Validation": true,
+    "candidateProposalList": true,
+    "externalAiReadiness": true,
+    "controlledTrialLauncher": true,
+    "reportCopy": true
+  },
+  "hardBoundaries": {
+    "newAuthorityGranted": false,
+    "automaticApprovalEnabled": false,
+    "automaticAdoptionEnabled": false,
+    "automaticCanonicalMutationEnabled": false,
+    "providerExecutionEnabled": false,
+    "persistentReflectionFromControlCenter": false,
+    "baselinePromotionFromControlCenter": false,
+    "externalTransmissionAutomatic": false
+  },
+  "releaseAllowed": false,
+  "validationIsApproval": false
+}

@@ -511,7 +511,8 @@
     "18_self_development_phase2_traceability.js",
     "18_self_development_phase2_dashboard.js",
     "18_self_development_phase2_validation.js",
-    "validate_self_development_058_phase2.cjs"
+    "validate_self_development_058_phase2.cjs",
+    "18_self_development_control_center.js"
   ],
   "savedFiles": [
     "#U8d77#U52d5#U7528/README.txt",
@@ -1058,6 +1059,7 @@
     "18_self_development_phase6_traceability.js",
     "18_self_development_phase6_dashboard.js",
     "18_self_development_phase6_validation.js",
+    "18_self_development_control_center.js",
     "validate_self_development_058_phase6.cjs",
     "19_trust_evidence_version_manifest.js",
     "19_trust_evidence_core.js",
@@ -1112,7 +1114,10 @@
     "19_trust_evidence_phase4_android_validation.js",
     "validate_external020_phase4_v043.cjs",
     "EXTERNAL-020_Phase4_v0.4.3_VALIDATION_EVIDENCE.json",
-    "EXTERNAL-020_Phase4_v0.4.3_HANDOFF.txt"
+    "EXTERNAL-020_Phase4_v0.4.3_HANDOFF.txt",
+    "validate_self_development_control_center_v010.cjs",
+    "SELF-DEVELOPMENT-058_ControlCenter_v0.1.0_VALIDATION_EVIDENCE.json",
+    "SELF-DEVELOPMENT-058_ControlCenter_v0.1.0_HANDOFF.txt"
   ],
   "missingFiles": [],
   "externalFiles": [
@@ -1127,9 +1132,9 @@
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "49aeee3989604656b55fb61d845d0c0760811d2a129df258ec47d48e4aa959aa",
-  "scriptSetHash": "891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30",
-  "scriptManifestCount": 492,
+  "scriptManifestHash": "4c6554bd4e21768b41b17d0ce549ecd393d897843fcddea56ad026679987fa89",
+  "scriptSetHash": "8fd9c1cd9f8d5f8d47c64279ec351a57e11087c1f077f49ccab85411db645dea",
+  "scriptManifestCount": 493,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
     "runtimeLoader": false,
@@ -1276,5 +1281,12 @@
   "external020Phase4TechnicalValidationRequiresLiveProviderReadiness": false,
   "external020Phase4LiveExecutionStillRequiresGovernedReadiness": true,
   "external020Phase4ProviderExecutionPathModifiedByHotfix": false,
-  "external020Phase4AndroidValidationFunction": "runExternal020Phase4AndroidValidation"
+  "external020Phase4AndroidValidationFunction": "runExternal020Phase4AndroidValidation",
+  "selfDevelopmentControlCenterVersion": "0.1.0",
+  "selfDevelopmentControlCenterStatus": "ADDITIVE_UI_CANDIDATE",
+  "selfDevelopmentControlCenterAuthorityExpansion": false,
+  "selfDevelopmentControlCenterAutomaticApproval": false,
+  "selfDevelopmentControlCenterAutomaticAdoption": false,
+  "selfDevelopmentControlCenterCanonicalMutation": false,
+  "selfDevelopmentControlCenterProviderExecution": false
 }
