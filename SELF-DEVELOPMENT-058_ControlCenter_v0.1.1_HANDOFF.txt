@@ -1,0 +1,98 @@
+============================================================
+AI Prompt OS / AIプロンプト生成Pro
+SELF-DEVELOPMENT-058
+Self-Development Workspace / Control Center v0.1.1
+============================================================
+
+STATUS
+------
+TECHNICAL CANDIDATE
+Project Owner Acceptance / Freeze: NOT YET
+
+PURPOSE
+-------
+Move the user experience from phase/dashboard operation to a form-first workflow:
+Input -> Local Current-State Analysis -> Bounded Context -> External AI Proposal Candidate -> Impact Review -> Human Gate.
+
+FORMAL DECISION 058 STATUS
+--------------------------
+FINAL_ACCEPTED / FINAL_FROZEN
+Requirements: 18 / 18 COMPLETE
+Canonical Freeze Baseline: REPOSITORY010-CANONICAL-REVISION-0023
+Freeze Record SHA-256:
+f89eb2f0d317cb2f544587480c6e23ec8a018c8a4abc282f62d35e6925a11daa
+
+IMPORTANT:
+Formal Freeze status is displayed separately from current operational readiness.
+LIVE Repository setup or External AI readiness may be NOT READY without changing the formal Freeze state.
+
+V0.1.1 WORKFLOW
+---------------
+1. Project Owner enters what they want to improve.
+2. Local Baseline + Repository + Architecture/Freeze state are inspected.
+3. A bounded context is built locally; repository-wide transmission is not used.
+4. External AI preparation reuses existing Decision 058 Phase 6 governance.
+5. Actual provider execution requires a separate button and explicit Project Owner confirmation.
+6. AI output is proposal-candidate-only and displayed as an expected-change candidate, not Truth or approval.
+7. "Approve improvement and continue" registers Candidate + Proposal only.
+8. Adoption / write / reflection still goes through existing Controlled Trial / Human Gate.
+
+SAFETY
+------
+Automatic Approval: OFF
+Automatic Adoption: OFF
+Automatic Canonical Mutation: OFF
+Automatic External Transmission: OFF
+New Provider Authority: NONE
+New Mutation Authority: NONE
+Provider Output = Proposal Candidate Only
+Project Owner external-transmission approval = REQUIRED
+
+CANDIDATE IDENTITY
+------------------
+Script Count: 493
+Manifest Hash:
+399743747f47442f3ec599d6bfbeef6347dea859491ba66f80ad5d5f3f277640
+
+Script Set Hash:
+73053a00da5a6b770621c81cb178d74eefb7fd1c6cc362344e00105c25da9569
+
+Frozen EXTERNAL-020 parent 492 Script Set Hash:
+891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30
+
+VALIDATION
+----------
+JS Syntax: 493 / 493 PASS
+Control Center v0.1.1 Gate: 18 / 18 PASS
+health = 100
+criticalFailed = 0
+Decision 058 Regression: 28 / 28 PASS
+Decision 058 technical 18/18 = true
+Local intent analysis provider execution calls = 0
+
+NEXT MANUAL GATE
+----------------
+Apply DIFF over v0.1.0 candidate/current runtime.
+PC:
+  openSelfDevelopment058ControlCenter()
+  validateSelfDevelopment058ControlCenter()
+
+Expected runtime validation:
+  14 / 14 PASS
+  health 100
+  criticalFailed 0
+
+UI check:
+- Main title = Self-Development Workspace
+- Main input = "何を改善したいですか？"
+- Press "現状を分析"
+- Confirm formal Decision 058 shows 18/18 FROZEN
+- Confirm current operational readiness is shown separately
+- External AI must not transmit automatically
+- If External AI is NOT READY, execution must block before owner confirmation/network call
+
+Then perform Android UI check.
+
+============================================================
+END
+============================================================

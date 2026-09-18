@@ -1,0 +1,74 @@
+{
+  "id": "SELF-DEVELOPMENT-058-CONTROL-CENTER-V0.1.1-VALIDATION-EVIDENCE",
+  "decisionId": "EXTERNAL-010-DECISION-058",
+  "version": "0.1.1",
+  "status": "TECHNICAL_CANDIDATE",
+  "purpose": "Form-first Self-Development Workspace over existing Decision 058 backend",
+  "candidateIdentity": {
+    "scriptCount": 493,
+    "manifestHash": "399743747f47442f3ec599d6bfbeef6347dea859491ba66f80ad5d5f3f277640",
+    "scriptSetHash": "73053a00da5a6b770621c81cb178d74eefb7fd1c6cc362344e00105c25da9569",
+    "parentFrozenScriptCount": 492,
+    "parentFrozenScriptSetHash": "891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30"
+  },
+  "formalDecision058": {
+    "status": "FINAL_ACCEPTED / FINAL_FROZEN",
+    "requirements": "18/18 COMPLETE",
+    "canonicalBaseline": "REPOSITORY010-CANONICAL-REVISION-0023",
+    "freezeRecordSha256": "f89eb2f0d317cb2f544587480c6e23ec8a018c8a4abc282f62d35e6925a11daa",
+    "formalStatusSeparatedFromOperationalReadiness": true
+  },
+  "implemented": {
+    "formFirstWorkspace": true,
+    "localBaselineRepositoryAnalysis": true,
+    "boundedContextPreview": true,
+    "externalAiPreparationViaExistingPhase6": true,
+    "externalAiExecutionViaExistingPhase6ExplicitProjectOwnerGate": true,
+    "beforeAfterProposalCandidateView": true,
+    "candidateProposalRegistration": true,
+    "controlledTrialBridgeReuse": true,
+    "dashboardMovedToDeveloperDetails": true
+  },
+  "hardBoundaries": {
+    "newAuthorityGranted": false,
+    "automaticApproval": false,
+    "automaticAdoption": false,
+    "automaticCanonicalMutation": false,
+    "automaticExternalTransmission": false,
+    "projectOwnerExternalTransmissionApprovalRequired": true,
+    "providerOutputIsProposalCandidateOnly": true,
+    "workspaceValidationMayCallProvider": false,
+    "workspaceLocalAnalysisMayCallProvider": false
+  },
+  "validation": {
+    "jsSyntax": {
+      "passed": 493,
+      "failed": 0,
+      "total": 493
+    },
+    "controlCenterGate": {
+      "passed": 18,
+      "failed": 0,
+      "total": 18,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "decision058Regression": {
+      "passed": 28,
+      "failed": 0,
+      "total": 28,
+      "health": 100,
+      "criticalFailed": 0,
+      "decision058Technical18Of18": true
+    },
+    "localIntentAnalysisProviderExecutionCalls": 0
+  },
+  "manualGateRequired": {
+    "pcUiVisualCheck": true,
+    "pcFormWorkflowCheck": true,
+    "androidUiCheck": true,
+    "projectOwnerAcceptanceFreeze": true
+  },
+  "releaseAllowed": false,
+  "validationIsApproval": false
+}
