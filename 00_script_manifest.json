@@ -469,7 +469,7 @@
     "./18_self_development_phase6_traceability.js?h=7ee4dd9190c8",
     "./18_self_development_phase6_dashboard.js?h=50ddde551622",
     "./18_self_development_phase6_validation.js?h=0ade106576b9",
-    "./18_self_development_control_center.js?h=5990d9d42cd2",
+    "./18_self_development_control_center.js?h=fc0b2a536f21",
     "./19_trust_evidence_version_manifest.js?h=10898623acf4",
     "./19_trust_evidence_core.js?h=5ff77d1cf7c8",
     "./19_trust_evidence_external010_adapter.js?h=c4189beae60b",
@@ -2964,12 +2964,12 @@
       "cacheKey": "de0ce6495428"
     },
     "18_self_development_control_center.js": {
-      "sha256": "5990d9d42cd20891b92f3ce8081cf487fe41fd065d9b45827d2aa6aa3908ba83",
-      "byteSize": 82353,
-      "cacheKey": "5990d9d42cd2"
+      "sha256": "fc0b2a536f21e111c894c391d74624d59f8374df3f669c4f99ae52764bf091af",
+      "byteSize": 87228,
+      "cacheKey": "fc0b2a536f21"
     }
   },
-  "scriptSetHash": "0686ee23695269f5b766ff7d393b123997e18b65b6fc9d9f84c2990b7359bf04",
+  "scriptSetHash": "8562d31d916f995adba371e587ec19a7fa879d23585f42edaaae3ea2c57c30dd",
   "files": [
     "00_core.js",
     "01_task_manager.js",
@@ -3465,6 +3465,6 @@
     "99_init.js",
     "19_trust_evidence_phase4_android_validation.js"
   ],
-  "updatedAt": "2026-09-19T01:35:00+09:00",
-  "manifestHash": "f3bd3d670f4823abb03fdbddc159c1e82b1f2344da31a9256f3f0bbadb5d64dc"
+  "updatedAt": "2026-09-19T00:00:00+09:00",
+  "manifestHash": "f6ad7495e22fce813dbc85536f5917556a84a5d7f3e02ed28e53b49f79628b6b"
 }

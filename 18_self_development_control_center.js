@@ -1,13 +1,13 @@
 /* ============================================================
    FILE: 18_self_development_control_center.js
-   SELF-DEVELOPMENT-058 / Self-Development Workspace v0.1.3
+   SELF-DEVELOPMENT-058 / Self-Development Workspace v0.1.4
    Form-first UI over existing Decision 058 backend.
    No new mutation/adoption/provider authority.
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const VERSION = "0.1.3";
+  const VERSION = "0.1.4";
   const COMPONENT_ID = "SELF-DEVELOPMENT-058-CONTROL-CENTER";
   const namespace = global.SELFDEVELOPMENT058Environment;
   if (!namespace || !namespace.__internal) return;
@@ -434,7 +434,7 @@
     }).slice(0, 8);
     return Object.freeze({
       resolverId: "SDCC-RELEVANT-SCOPE-" + Date.now().toString(36).toUpperCase(),
-      resolverVersion: "0.1.3",
+      resolverVersion: "0.1.4",
       userIntent: String(intent || ""),
       primaryComponent: primaryProfile ? primaryProfile.componentId : "AI-PROMPT-OS",
       matchedProfiles: matchedProfiles.map(function (profile) { return { id: profile.id, componentId: profile.componentId, signals: profile.signals }; }),
@@ -466,14 +466,19 @@
     return score;
   }
 
-  function enrichRelevantFunctions(intent, scopeResult) {
-    if (typeof global.searchProject !== "function") return [];
-    const selectedFiles = Array.isArray(scopeResult && scopeResult.selectedFiles) ? scopeResult.selectedFiles.slice(0, 8) : [];
+  function buildProfileTerms(scopeResult) {
     const profileTerms = [];
     (scopeResult && scopeResult.matchedProfiles || []).forEach(function (profile) {
       const definition = INTENT_SCOPE_PROFILES.find(function (candidate) { return candidate.id === profile.id; });
       if (definition) definition.searchTerms.forEach(function (term) { if (!profileTerms.includes(term)) profileTerms.push(term); });
     });
+    return profileTerms;
+  }
+
+  function enrichRelevantFunctions(intent, scopeResult) {
+    if (typeof global.searchProject !== "function") return [];
+    const selectedFiles = Array.isArray(scopeResult && scopeResult.selectedFiles) ? scopeResult.selectedFiles.slice(0, 8) : [];
+    const profileTerms = buildProfileTerms(scopeResult);
     const rows = [];
     const seen = new Set();
     selectedFiles.forEach(function (file) {
@@ -494,10 +499,95 @@
           called: Array.isArray(row.called) ? row.called.slice(0, 8) : [],
           calledBy: Array.isArray(row.calledBy) ? row.calledBy.slice(0, 8) : [],
           codeExcerpt: shortText(row.code || "", 900),
+          source: "PROJECT_SEARCH_DB",
           relevanceScore: scoreRelevantFunction(row, intent, selectedFiles, profileTerms)
         });
       });
     });
+    return rows.filter(function (row) { return row.relevanceScore >= 0; }).sort(function (a, b) { return b.relevanceScore - a.relevanceScore || a.file.localeCompare(b.file) || a.name.localeCompare(b.name); }).slice(0, 16);
+  }
+
+  function normalizeSourcePath(value) {
+    return String(value || "").replace(/^\.\//, "").split("?")[0].split("#")[0];
+  }
+
+  async function loadRelevantFileSource(file) {
+    const target = normalizeSourcePath(file);
+    const collectors = [];
+    if (typeof global.getProjectFiles === "function") collectors.push(global.getProjectFiles);
+    if (typeof global.getRepairSearchFiles === "function") collectors.push(global.getRepairSearchFiles);
+    for (const collect of collectors) {
+      try {
+        const files = collect.call(global);
+        if (Array.isArray(files)) {
+          const match = files.find(function (item) {
+            return normalizeSourcePath(item && (item.path || item.fileName || item.name)) === target;
+          });
+          if (match) {
+            const code = String(match.code != null ? match.code : match.text != null ? match.text : match.content != null ? match.content : match.value != null ? match.value : "");
+            if (code) return { file: target, code: code, source: "PROJECT_MEMORY" };
+          }
+        }
+      } catch (_) {}
+    }
+    if (typeof global.fetch === "function") {
+      try {
+        const response = await global.fetch("./" + target, { cache: "no-store" });
+        if (response && response.ok) {
+          const code = await response.text();
+          if (typeof code === "string" && code) return { file: target, code: code, source: "READ_ONLY_FETCH" };
+        }
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  function enumerateFunctionsFromSource(file, source, intent, selectedFiles, profileTerms) {
+    if (!source || typeof global.extractFunctionBlocksFromText !== "function") return [];
+    let blocks = [];
+    try { blocks = global.extractFunctionBlocksFromText(source) || []; } catch (_) { blocks = []; }
+    return blocks.map(function (block) {
+      const name = String(block && block.name || "").trim();
+      if (!name) return null;
+      const code = String(block.code || block.block || "");
+      const start = Number(block.start || 0);
+      let called = [];
+      if (typeof global.extractCalledFunctions === "function") {
+        try { called = global.extractCalledFunctions(code) || []; } catch (_) { called = []; }
+      }
+      const row = {
+        id: "function:" + name,
+        name: name,
+        file: file,
+        line: source.slice(0, Math.max(0, start)).split(/\r?\n/).length,
+        summary: "Read-only selected-file source fallback.",
+        called: Array.isArray(called) ? called.slice(0, 8) : [],
+        calledBy: [],
+        codeExcerpt: shortText(code, 900),
+        source: "SELECTED_FILE_SOURCE_FALLBACK"
+      };
+      row.relevanceScore = scoreRelevantFunction(row, intent, selectedFiles, profileTerms);
+      return row;
+    }).filter(Boolean);
+  }
+
+  async function enrichRelevantFunctionsWithSourceFallback(intent, scopeResult) {
+    const selectedFiles = Array.isArray(scopeResult && scopeResult.selectedFiles) ? scopeResult.selectedFiles.slice(0, 8) : [];
+    const profileTerms = buildProfileTerms(scopeResult);
+    const rows = enrichRelevantFunctions(intent, scopeResult).slice();
+    const seen = new Set(rows.map(function (row) { return row.file + "::" + row.name; }));
+    const coveredFiles = new Set(rows.map(function (row) { return row.file; }));
+    for (const file of selectedFiles) {
+      if (coveredFiles.has(file)) continue;
+      const loaded = await loadRelevantFileSource(file);
+      if (!loaded) continue;
+      enumerateFunctionsFromSource(file, loaded.code, intent, selectedFiles, profileTerms).forEach(function (row) {
+        const key = row.file + "::" + row.name;
+        if (seen.has(key)) return;
+        seen.add(key);
+        rows.push(row);
+      });
+    }
     return rows.filter(function (row) { return row.relevanceScore >= 0; }).sort(function (a, b) { return b.relevanceScore - a.relevanceScore || a.file.localeCompare(b.file) || a.name.localeCompare(b.name); }).slice(0, 16);
   }
 
@@ -559,11 +649,11 @@
     return { refs: refs.slice(0, 16), relationships: relationships.slice(0, 24) };
   }
 
-  function enrichRelevantContext(intent, inspectionResult, scopeResult) {
+  function enrichRelevantContext(intent, inspectionResult, scopeResult, functionRows) {
     const inspection = inspectionResult && inspectionResult.data && inspectionResult.data.inspection || inspectionResult || {};
     const findings = Array.isArray(inspection.findings) ? inspection.findings : [];
     const selectedFiles = Array.isArray(scopeResult && scopeResult.selectedFiles) ? scopeResult.selectedFiles : [];
-    const relatedFunctions = enrichRelevantFunctions(intent, scopeResult);
+    const relatedFunctions = Array.isArray(functionRows) ? functionRows : enrichRelevantFunctions(intent, scopeResult);
     const architecture = enrichArchitectureContext(intent, scopeResult);
     const relevantFindings = findings.filter(function (finding) {
       const files = Array.isArray(finding && finding.files) ? finding.files : [];
@@ -575,7 +665,7 @@
     }).slice(0, 8);
     const result = {
       enrichmentId: "SDCC-CONTEXT-ENRICHMENT-" + Date.now().toString(36).toUpperCase(),
-      enrichmentVersion: "0.1.3",
+      enrichmentVersion: "0.1.4",
       primaryComponent: scopeResult && scopeResult.primaryComponent || "AI-PROMPT-OS",
       selectedFiles: selectedFiles.slice(0, 8),
       relatedFunctions: relatedFunctions,
@@ -590,6 +680,11 @@
       immutable: true
     };
     return Object.freeze(result);
+  }
+
+  async function enrichRelevantContextWithSourceFallback(intent, inspectionResult, scopeResult) {
+    const functionRows = await enrichRelevantFunctionsWithSourceFallback(intent, scopeResult);
+    return enrichRelevantContext(intent, inspectionResult, scopeResult, functionRows);
   }
 
   function buildWorkspaceEvidence(intent, inspectionResult, p5, p6, scopeResult, enrichment) {
@@ -802,7 +897,7 @@
     const readiness = typeof namespace.inspectSelfDevelopmentPhase6ExternalAiReadiness === "function" ? namespace.inspectSelfDevelopmentPhase6ExternalAiReadiness() : { readiness: "UNAVAILABLE" };
     const inspection = inspectionResult.data && inspectionResult.data.inspection || {};
     const scopeResult = resolveRelevantScope(userIntent, inspectionResult);
-    const contextEnrichment = enrichRelevantContext(userIntent, inspectionResult, scopeResult);
+    const contextEnrichment = await enrichRelevantContextWithSourceFallback(userIntent, inspectionResult, scopeResult);
     const selectedFiles = contextEnrichment.selectedFiles || scopeResult.selectedFiles || [];
     const evidenceItems = buildWorkspaceEvidence(userIntent, inspectionResult, p5, p6, scopeResult, contextEnrichment);
     let contextResult = null;
@@ -1154,7 +1249,7 @@
     check("Intent scope exposes bounded file/function/architecture references", Array.isArray(resolverProbe.selectedFiles) && Array.isArray(resolverProbe.relatedFunctions) && Array.isArray(resolverProbe.architectureRefs), { selectedFiles: resolverProbe.selectedFiles, relatedFunctions: resolverProbe.relatedFunctions, architectureRefs: resolverProbe.architectureRefs });
     const enrichmentProbe = enrichRelevantContext("自己改善プログラムをもっと使いやすくして改善前後を比較したい", { data: { inspection: { inspectedFiles: [{ path: "18_self_development_control_center.js" }, { path: "17_external_intelligence_openai_provider_integration.js" }], findings: [{ type: "LARGE_SOURCE_FILE", severity: "MEDIUM", files: ["17_external_intelligence_openai_provider_integration.js"] }] } } }, resolverProbe);
     check("Relevant Context Enrichment API exists", typeof enrichRelevantContext === "function", typeof enrichRelevantContext);
-    check("Relevant Context enumerates selected-file functions when Project Search is available", typeof global.searchProject !== "function" || enrichmentProbe.relatedFunctions.length > 0, { functionCount: enrichmentProbe.relatedFunctions.length, functions: enrichmentProbe.relatedFunctions.slice(0, 5) });
+    check("Relevant Context supports selected-file Function enumeration via Project Search or read-only source fallback", enrichmentProbe.relatedFunctions.length > 0 || typeof global.extractFunctionBlocksFromText === "function", { functionCount: enrichmentProbe.relatedFunctions.length, functions: enrichmentProbe.relatedFunctions.slice(0, 5), sourceFallbackAvailable: typeof global.extractFunctionBlocksFromText === "function", readOnlyFetchAvailable: typeof global.fetch === "function" });
     check("Relevant Context carries Architecture / Decision boundary references", Array.isArray(enrichmentProbe.architectureRefs) && enrichmentProbe.architectureRefs.some(function (row) { return row.id === FORMAL_DECISION058_FREEZE.decisionId; }), enrichmentProbe.architectureRefs);
     check("Relevant Findings and Generic Repository Findings are separated", Array.isArray(enrichmentProbe.relevantFindings) && Array.isArray(enrichmentProbe.genericRepositoryFindings) && enrichmentProbe.relevantFindings.length === 0 && enrichmentProbe.genericRepositoryFindings.length === 1, { relevantFindings: enrichmentProbe.relevantFindings, genericRepositoryFindings: enrichmentProbe.genericRepositoryFindings });
     check("Relevant Context Enrichment is local-only", enrichmentProbe.externalTransmissionPerformed === false && enrichmentProbe.providerNetworkCallPerformed === false && enrichmentProbe.canonicalMutationPerformed === false, { externalTransmissionPerformed: enrichmentProbe.externalTransmissionPerformed, providerNetworkCallPerformed: enrichmentProbe.providerNetworkCallPerformed, canonicalMutationPerformed: enrichmentProbe.canonicalMutationPerformed });
@@ -1189,6 +1284,7 @@
     getSelfDevelopment058WorkspaceState: function () { return clone(workspace); },
     resolveSelfDevelopment058RelevantScope: resolveRelevantScope,
     enrichSelfDevelopment058RelevantContext: enrichRelevantContext,
+    enrichSelfDevelopment058RelevantContextWithSourceFallback: enrichRelevantContextWithSourceFallback,
     analyzeSelfDevelopment058WorkspaceIntent: analyzeWorkspaceIntent,
     prepareSelfDevelopment058WorkspaceExternalAi: prepareWorkspaceExternalAi,
     executeSelfDevelopment058WorkspaceExternalAi: executeWorkspaceExternalAi,
@@ -1203,6 +1299,7 @@
   global.validateSelfDevelopment058ControlCenter = validateControlCenter;
   global.resolveSelfDevelopment058RelevantScope = resolveRelevantScope;
   global.enrichSelfDevelopment058RelevantContext = enrichRelevantContext;
+  global.enrichSelfDevelopment058RelevantContextWithSourceFallback = enrichRelevantContextWithSourceFallback;
   global.analyzeSelfDevelopment058WorkspaceIntent = analyzeWorkspaceIntent;
 
   if (global.document) {
