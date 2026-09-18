@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 19_trust_evidence_phase4_version_manifest.js
    EXTERNAL-020 Trust / Evidence Intelligence
-   Decision 001 / Candidate Release: 0.4.2
+   Decision 001 / Candidate Release: 0.4.3
    Phase 4: Governed External AI Reliability Reasoning Reuse
    ============================================================ */
 (function (global) {
@@ -10,7 +10,7 @@
   const manifest=deepFreeze({
     componentId:"EXTERNAL-020",
     decisionId:"EXTERNAL-020-DECISION-001",
-    version:"0.4.2",
+    version:"0.4.3",
     status:"IMPLEMENTATION_PHASE4_CANDIDATE",
     phase:4,
     phaseName:"Governed External AI Reliability Reasoning Reuse",
@@ -30,7 +30,9 @@
       scriptSetHash:"d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3"
     },
     completionTargets:["REQ-020-015"],
-    hotfix:{id:"PHASE4-TECHNICAL-GATE-LIVE-READINESS-SEPARATION",scope:"VALIDATOR_ONLY",frozenPhase1To3ScriptsModified:false,isolatedRegressionState:true,restoresCallerState:true,technicalValidationRequiresLiveProviderReadiness:false,liveExecutionStillRequiresGovernedReadiness:true,providerExecutionPathModified:false},
+    parentPhase4:{version:"0.4.2",scriptCount:491,manifestHash:"ac73baa0e2c85fc3018836697c7a60b803572fff6f901f1de52d8c9a53443443",scriptSetHash:"c805b4dbf814f154046ad9fe26f5ee23db1c18c88b073b26d7932d445237f088",pcTechnicalValidationId:"EXTERNAL020-PHASE4-VALIDATION-MU6WUP80-0003",pcTechnicalValidationPassed:true},
+    hotfix:{id:"PHASE4-ANDROID-REAL-DEVICE-VALIDATION",scope:"ANDROID_VALIDATOR_ADDITION",frozenPhase1To3ScriptsModified:false,phase4FunctionalCoreModified:false,isolatedRegressionState:true,restoresCallerState:true,technicalValidationRequiresLiveProviderReadiness:false,liveExecutionStillRequiresGovernedReadiness:true,providerExecutionPathModified:false},
+    androidValidation:{implemented:true,functionName:"runExternal020Phase4AndroidValidation",liveReadinessIndependentForTechnicalGate:true,providerExecutionAllowed:false,externalTransmissionAllowed:false,paidApiExecutionAllowed:false},
     governanceReuse:{
       providerComponent:"EXTERNAL-010",
       provider:"OPENAI",

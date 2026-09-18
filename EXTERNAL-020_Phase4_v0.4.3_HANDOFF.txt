@@ -1,0 +1,67 @@
+============================================================
+AI Prompt OS / AIプロンプト生成Pro
+EXTERNAL-020 Trust / Evidence Intelligence
+Phase 4 v0.4.3 Android Validation Candidate
+============================================================
+
+Status:
+IMPLEMENTATION_PHASE4_CANDIDATE
+ANDROID_REAL_DEVICE_GATE_READY
+
+Parent:
+Phase 4 v0.4.2 Technical Gate Hotfix Candidate
+PC Real Runtime: 20 / 20 PASS
+validationId: EXTERNAL020-PHASE4-VALIDATION-MU6WUP80-0003
+
+Decision:
+EXTERNAL-020-DECISION-001
+
+Candidate Identity:
+Script Count: 492
+Manifest Hash:
+49aeee3989604656b55fb61d845d0c0760811d2a129df258ec47d48e4aa959aa
+Script Set Hash:
+891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30
+
+Changes from v0.4.2:
+- Phase 4 functional core remains byte-identical.
+- Phase 4 Version Manifest updated to v0.4.3.
+- Added 19_trust_evidence_phase4_android_validation.js.
+- Added runExternal020Phase4AndroidValidation().
+
+Validation:
+492 / 492 JavaScript syntax PASS
+Static / Package: 16 / 16 PASS
+Phase 4 Functional Fixture: 20 / 20 PASS
+Android Fixture: 21 / 21 PASS
+Same-session Android rerun: 21 / 21 PASS
+Decision 058 Phase 6 Regression: 28 / 28 PASS
+criticalFailed = 0
+
+Decision 001:
+18 / 18 Candidate Complete
+Project Owner Acceptance = NOT YET
+releaseAllowed = false
+
+Android Technical Gate Semantics:
+- LIVE provider readiness is NOT required for technical validation.
+- LIVE NOT READY must fail closed with providerNetworkCallPerformed=false.
+- LIVE execution still requires governed readiness and explicit Project Owner external-transmission approval.
+- Android validation performs no provider call, external transmission, paid API, or authority activation.
+- External AI output remains AI_RELIABILITY_REASONING_CANDIDATE_ONLY.
+- No Truth confirmation, automatic conflict resolution, automatic Profile revision, Knowledge promotion, Canonical mutation, or action/trading/financial/business authority.
+
+PC Revalidation after applying v0.4.3:
+runExternal020Phase4Validation().then(console.log)
+Expected: 20 / 20 PASS, failed 0, criticalFailed 0, health 100.
+
+Android Real Device:
+runExternal020Phase4AndroidValidation().then(console.log)
+Expected: 21 / 21 PASS, failed 0, criticalFailed 0, health 100,
+phase4AndroidRealDeviceComplete=true,
+phase4ProjectOwnerGateReady=true.
+
+Project Owner Acceptance / Freeze:
+NOT AUTOMATIC.
+Proceed only after PC v0.4.3 and Android v0.4.3 real-device gates PASS.
+============================================================

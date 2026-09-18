@@ -1,0 +1,84 @@
+{
+  "id": "EXTERNAL-020-PHASE4-V0.4.3-ANDROID-VALIDATION-EVIDENCE",
+  "componentId": "EXTERNAL-020",
+  "decisionId": "EXTERNAL-020-DECISION-001",
+  "phase": 4,
+  "version": "0.4.3",
+  "status": "ANDROID_VALIDATION_CANDIDATE_READY",
+  "parentPhase4": {
+    "version": "0.4.2",
+    "pcValidationId": "EXTERNAL020-PHASE4-VALIDATION-MU6WUP80-0003",
+    "pcPassed": 20,
+    "pcFailed": 0,
+    "pcCriticalFailed": 0,
+    "pcHealth": 100
+  },
+  "candidateIdentity": {
+    "scriptCount": 492,
+    "manifestHash": "49aeee3989604656b55fb61d845d0c0760811d2a129df258ec47d48e4aa959aa",
+    "scriptSetHash": "891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30"
+  },
+  "validation": {
+    "staticPackage": {
+      "passed": 16,
+      "failed": 0,
+      "total": 16,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "phase4FunctionalFixture": {
+      "passed": 20,
+      "failed": 0,
+      "total": 20,
+      "health": 100
+    },
+    "androidFixture": {
+      "passed": 21,
+      "failed": 0,
+      "total": 21,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "sameSessionAndroidRerun": {
+      "passed": 21,
+      "failed": 0,
+      "total": 21
+    },
+    "javascriptSyntax": {
+      "passed": 492,
+      "failed": 0,
+      "total": 492
+    },
+    "decision058Phase6Regression": {
+      "passed": 28,
+      "failed": 0,
+      "total": 28,
+      "health": 100,
+      "criticalFailed": 0
+    }
+  },
+  "decision001": {
+    "requirementsComplete": 18,
+    "requirementsTotal": 18,
+    "candidateComplete": true,
+    "projectOwnerAcceptanceRequired": true,
+    "releaseAllowed": false
+  },
+  "safety": {
+    "providerNetworkCallPerformed": false,
+    "externalTransmissionPerformed": false,
+    "paidApiExecutionPerformed": false,
+    "authorityActivationPerformed": false,
+    "canonicalMutationPerformed": false,
+    "externalAiReasoningPerformed": false,
+    "liveReadinessRequiredForTechnicalGate": false,
+    "liveExecutionStillRequiresGovernedReadiness": true
+  },
+  "changeScope": {
+    "phase4FunctionalCoreModified": false,
+    "phase4VersionManifestUpdated": true,
+    "androidValidatorAdded": true,
+    "frozenPhase1To3Modified": false
+  },
+  "nextGate": "PC v0.4.3 revalidation, then Android real-device runExternal020Phase4AndroidValidation()"
+}

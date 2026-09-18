@@ -4,7 +4,7 @@
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "EXTERNAL-010 v1.20.1 Canonical 0023-derived candidate + Decision 058 FINAL_FROZEN lineage + EXTERNAL-020 Decision 001 Phase 1 v0.1.1 Frozen + Phase 2 v0.2.1 Frozen + Phase 3 v0.3.1 Frozen + Phase 4 v0.4.2 Technical Gate Separation Hotfix Candidate; governed External AI reliability reasoning reuses EXTERNAL-010 OpenAI governance while technical validation is independent of current live provider activation; live execution remains fail-closed and explicitly Project Owner approved",
+  "description": "EXTERNAL-010 v1.20.1 Canonical 0023-derived candidate + Decision 058 FINAL_FROZEN lineage + EXTERNAL-020 Decision 001 Phase 1 v0.1.1 Frozen + Phase 2 v0.2.1 Frozen + Phase 3 v0.3.1 Frozen + Phase 4 v0.4.3 Android Validation Candidate; governed External AI reliability reasoning reuses EXTERNAL-010 OpenAI governance; technical validation is live-readiness independent; Android real-device validation performs no provider call",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
   "scripts": [
@@ -492,12 +492,13 @@
     "./19_trust_evidence_phase3_traceability.js?h=1fd7ba666297",
     "./19_trust_evidence_phase3_validation.js?h=7ca3c1dcc906",
     "./19_trust_evidence_phase3_android_validation.js?h=508c1d825ed7",
-    "./19_trust_evidence_phase4_version_manifest.js?h=c7bd77ea419d",
+    "./19_trust_evidence_phase4_version_manifest.js?h=82600e0743f5",
     "./19_trust_evidence_external_ai_context_policy.js?h=1efff0826922",
     "./19_trust_evidence_external_ai_governance_adapter.js?h=035fc0ce6b4b",
     "./19_trust_evidence_external_ai_reasoning.js?h=c95a011401b3",
     "./19_trust_evidence_phase4_traceability.js?h=cf74c4da2b87",
     "./19_trust_evidence_phase4_validation.js?h=11314e18626d",
+    "./19_trust_evidence_phase4_android_validation.js?h=3165183e1fe9",
     "./99_init.js?h=de0ce6495428"
   ],
   "hashes": {
@@ -2922,9 +2923,9 @@
       "cacheKey": "508c1d825ed7"
     },
     "19_trust_evidence_phase4_version_manifest.js": {
-      "sha256": "c7bd77ea419d309a9c65a3b5666e1482c5d9abc3523e91e80f68329ccec5f1ea",
-      "byteSize": 4047,
-      "cacheKey": "c7bd77ea419d"
+      "sha256": "82600e0743f5d04ee405a4fb47e6c7eda81b5d9639edfa0f31d852ec6a6892cc",
+      "byteSize": 4636,
+      "cacheKey": "82600e0743f5"
     },
     "19_trust_evidence_external_ai_context_policy.js": {
       "sha256": "1efff08269221d56c76fb49e02e8288d13f54bc929daaab0d1839db78ad54b7d",
@@ -2951,13 +2952,18 @@
       "byteSize": 15670,
       "cacheKey": "11314e18626d"
     },
+    "19_trust_evidence_phase4_android_validation.js": {
+      "sha256": "3165183e1fe916f708a45d612a6660f285195234e98102606e45a973acf8c4cb",
+      "byteSize": 15098,
+      "cacheKey": "3165183e1fe9"
+    },
     "99_init.js": {
       "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
       "byteSize": 4742,
       "cacheKey": "de0ce6495428"
     }
   },
-  "scriptSetHash": "c805b4dbf814f154046ad9fe26f5ee23db1c18c88b073b26d7932d445237f088",
+  "scriptSetHash": "891ef4dad32e25a896baf7f38b24717680c357c2adeabcc719d6e2fc35cf9c30",
   "files": [
     "00_core.js",
     "01_task_manager.js",
@@ -3449,8 +3455,9 @@
     "19_trust_evidence_external_ai_reasoning.js",
     "19_trust_evidence_phase4_traceability.js",
     "19_trust_evidence_phase4_validation.js",
-    "99_init.js"
+    "99_init.js",
+    "19_trust_evidence_phase4_android_validation.js"
   ],
-  "updatedAt": "2026-09-18T20:02:00+09:00",
-  "manifestHash": "ac73baa0e2c85fc3018836697c7a60b803572fff6f901f1de52d8c9a53443443"
+  "updatedAt": "2026-09-18T12:10:00.000Z",
+  "manifestHash": "49aeee3989604656b55fb61d845d0c0760811d2a129df258ec47d48e4aa959aa"
 }
