@@ -1,0 +1,72 @@
+{
+  "id": "EXTERNAL-020-PHASE4-V0.4.1-VALIDATION-EVIDENCE",
+  "componentId": "EXTERNAL-020",
+  "decisionId": "EXTERNAL-020-DECISION-001",
+  "version": "0.4.1",
+  "phase": 4,
+  "hotfixId": "PHASE4-VALIDATION-RERUN-IDEMPOTENCY",
+  "triggerEvidence": {
+    "observedException": "TypeError: Cannot read properties of undefined (reading contextIdentity)",
+    "rootCause": "Frozen Phase 2 validator reuses fixed profile contexts. Re-running higher-phase validation in a dirty browser session can cause EXTERNAL020_PROFILE_ALREADY_EXISTS_USE_REVISION; the frozen validator detail path then assumes data.profile exists.",
+    "functionalCoreDefect": false,
+    "providerGovernanceRootCauseConfirmed": false
+  },
+  "repair": {
+    "modifiedRuntimeFiles": [
+      "19_trust_evidence_phase4_version_manifest.js",
+      "19_trust_evidence_phase4_validation.js"
+    ],
+    "frozenPhase1To3ScriptsModified": false,
+    "strategy": "Run Frozen Phase 3 regression inside isolated EXTERNAL-020 validation fixture state and restore caller state in finally.",
+    "providerExecutionAdded": false,
+    "authorityExpansionAdded": false
+  },
+  "candidateIdentity": {
+    "scriptCount": 491,
+    "manifestHash": "ff15b6b5f5dde8dd4f9b8462299f4f1e329d7b3bb226b1d53f95154a706f9fe9",
+    "scriptSetHash": "c11f098d80d09d03ee1a08d8c2a114e966aeb1492e0b8df389008a3a13aa8df6"
+  },
+  "validation": {
+    "javascriptSyntax": {
+      "passed": 491,
+      "failed": 0,
+      "total": 491
+    },
+    "staticPackage": {
+      "passed": 15,
+      "failed": 0,
+      "total": 15,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "dirtyStatePhase4FirstRun": "20/20 PASS",
+    "sameSessionPhase4SecondRun": "20/20 PASS",
+    "rerunIdempotencyVerified": true,
+    "providerExecutionCallsDuringValidation": 0,
+    "authorityActivationCallsDuringValidation": 0,
+    "decision058Phase6Regression": {
+      "passed": 28,
+      "failed": 0,
+      "total": 28,
+      "health": 100,
+      "criticalFailed": 0,
+      "req058013Closed": true,
+      "decision058Technical18Of18": true
+    }
+  },
+  "decision001CandidateCoverage": {
+    "implemented": 18,
+    "total": 18,
+    "candidateComplete": true,
+    "projectOwnerAcceptanceRequired": true,
+    "releaseAllowed": false
+  },
+  "safety": {
+    "canonicalMutationPerformed": false,
+    "externalTransmissionPerformed": false,
+    "paidApiExecutionPerformed": false,
+    "providerNetworkCallPerformed": false,
+    "validationIsApproval": false
+  },
+  "nextGate": "Apply v0.4.1 hotfix and rerun runExternal020Phase4Validation() on PC. If failed checks remain, capture their names/details; do not proceed to Android until 20/20 PASS."
+}

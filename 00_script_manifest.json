@@ -4,7 +4,7 @@
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
   "mode": "static-script-manifest",
-  "description": "EXTERNAL-010 v1.20.1 Canonical 0023-derived candidate + Decision 058 FINAL_FROZEN lineage + EXTERNAL-020 Decision 001 Phase 1 v0.1.1 Frozen + Phase 2 v0.2.1 Frozen + Phase 3 v0.3.1 Frozen + Phase 4 v0.4.0 Candidate; governed External AI reliability reasoning reuses EXTERNAL-010 OpenAI governance, explicit Project Owner transmission approval, proposal-only output, no automatic truth/profile/Knowledge/action authority",
+  "description": "EXTERNAL-010 v1.20.1 Canonical 0023-derived candidate + Decision 058 FINAL_FROZEN lineage + EXTERNAL-020 Decision 001 Phase 1 v0.1.1 Frozen + Phase 2 v0.2.1 Frozen + Phase 3 v0.3.1 Frozen + Phase 4 v0.4.1 Hotfix Candidate; governed External AI reliability reasoning reuses EXTERNAL-010 OpenAI governance, explicit Project Owner transmission approval, proposal-only output, no automatic truth/profile/Knowledge/action authority",
   "hashAlgorithm": "SHA-256",
   "cacheKeyLength": 12,
   "scripts": [
@@ -492,12 +492,12 @@
     "./19_trust_evidence_phase3_traceability.js?h=1fd7ba666297",
     "./19_trust_evidence_phase3_validation.js?h=7ca3c1dcc906",
     "./19_trust_evidence_phase3_android_validation.js?h=508c1d825ed7",
-    "./19_trust_evidence_phase4_version_manifest.js?h=7108edf11bc9",
+    "./19_trust_evidence_phase4_version_manifest.js?h=32f27c892942",
     "./19_trust_evidence_external_ai_context_policy.js?h=1efff0826922",
     "./19_trust_evidence_external_ai_governance_adapter.js?h=035fc0ce6b4b",
     "./19_trust_evidence_external_ai_reasoning.js?h=c95a011401b3",
     "./19_trust_evidence_phase4_traceability.js?h=cf74c4da2b87",
-    "./19_trust_evidence_phase4_validation.js?h=4ecbfb9bd499",
+    "./19_trust_evidence_phase4_validation.js?h=f5666a45cd24",
     "./99_init.js?h=de0ce6495428"
   ],
   "hashes": {
@@ -2922,9 +2922,9 @@
       "cacheKey": "508c1d825ed7"
     },
     "19_trust_evidence_phase4_version_manifest.js": {
-      "sha256": "7108edf11bc91cee2a4925198750a0ff7ecb9c3aef470ff899ac9ba70c7eb4f4",
-      "byteSize": 3726,
-      "cacheKey": "7108edf11bc9"
+      "sha256": "32f27c892942c31e6d79139a5c34b1e06f41389fcfeec26aaf4a78ded28eeb06",
+      "byteSize": 3895,
+      "cacheKey": "32f27c892942"
     },
     "19_trust_evidence_external_ai_context_policy.js": {
       "sha256": "1efff08269221d56c76fb49e02e8288d13f54bc929daaab0d1839db78ad54b7d",
@@ -2947,9 +2947,9 @@
       "cacheKey": "cf74c4da2b87"
     },
     "19_trust_evidence_phase4_validation.js": {
-      "sha256": "4ecbfb9bd499261fb194baaefc087e06708e63e5c02fc017bf40064f0edc02ee",
-      "byteSize": 11502,
-      "cacheKey": "4ecbfb9bd499"
+      "sha256": "f5666a45cd24e4af27b355588e09f2f905f520d38397713f90118d907f9ce058",
+      "byteSize": 13309,
+      "cacheKey": "f5666a45cd24"
     },
     "99_init.js": {
       "sha256": "de0ce6495428eca41c515503c362d5db471d5ae2e4394abedf6d4878f6efc905",
@@ -2957,7 +2957,7 @@
       "cacheKey": "de0ce6495428"
     }
   },
-  "scriptSetHash": "734b2cc142482b97aad0962fe62d9cdf748c3df8b1250037505cf5a8dcb390e8",
+  "scriptSetHash": "c11f098d80d09d03ee1a08d8c2a114e966aeb1492e0b8df389008a3a13aa8df6",
   "files": [
     "00_core.js",
     "01_task_manager.js",
@@ -3451,6 +3451,6 @@
     "19_trust_evidence_phase4_validation.js",
     "99_init.js"
   ],
-  "updatedAt": "2026-09-18T00:00:00.000Z",
-  "manifestHash": "a41256344c3eb472f12c930897d8a81eee6536dc46f709ef38ff14e903f9f66b"
+  "updatedAt": "2026-09-18T11:50:00.000Z",
+  "manifestHash": "ff15b6b5f5dde8dd4f9b8462299f4f1e329d7b3bb226b1d53f95154a706f9fe9"
 }

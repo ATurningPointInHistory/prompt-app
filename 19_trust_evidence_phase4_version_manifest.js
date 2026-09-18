@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 19_trust_evidence_phase4_version_manifest.js
    EXTERNAL-020 Trust / Evidence Intelligence
-   Decision 001 / Candidate Release: 0.4.0
+   Decision 001 / Candidate Release: 0.4.1
    Phase 4: Governed External AI Reliability Reasoning Reuse
    ============================================================ */
 (function (global) {
@@ -10,7 +10,7 @@
   const manifest=deepFreeze({
     componentId:"EXTERNAL-020",
     decisionId:"EXTERNAL-020-DECISION-001",
-    version:"0.4.0",
+    version:"0.4.1",
     status:"IMPLEMENTATION_PHASE4_CANDIDATE",
     phase:4,
     phaseName:"Governed External AI Reliability Reasoning Reuse",
@@ -30,6 +30,7 @@
       scriptSetHash:"d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3"
     },
     completionTargets:["REQ-020-015"],
+    hotfix:{id:"PHASE4-VALIDATION-RERUN-IDEMPOTENCY",scope:"VALIDATOR_ONLY",frozenPhase1To3ScriptsModified:false,isolatedRegressionState:true,restoresCallerState:true},
     governanceReuse:{
       providerComponent:"EXTERNAL-010",
       provider:"OPENAI",

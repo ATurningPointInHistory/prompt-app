@@ -1,0 +1,70 @@
+============================================================
+AI Prompt OS / AIプロンプト生成Pro
+EXTERNAL-020 Phase 4 v0.4.1 Validation Rerun Idempotency Hotfix
+============================================================
+
+Status:
+IMPLEMENTATION_PHASE4_HOTFIX_CANDIDATE
+
+Trigger:
+PC Phase 4 first run returned 17/20, then repeated validation raised:
+TypeError: Cannot read properties of undefined (reading contextIdentity)
+from Frozen Phase 2 validation.
+
+Root Cause:
+Frozen Phase 2 validation uses fixed SOURCE/CLAIM test contexts.
+When the same browser state already contains those Reliability Profiles,
+createExternal020ReliabilityProfile() correctly returns
+EXTERNAL020_PROFILE_ALREADY_EXISTS_USE_REVISION.
+The Frozen validator then dereferenced data.profile in its diagnostic path.
+
+Hotfix Boundary:
+- Frozen Phase 1/2/3 runtime scripts are NOT modified.
+- Phase 4 functional governance/reasoning files are NOT modified.
+- Only Phase 4 Version Manifest and Phase 4 Validation are modified.
+- Frozen Phase 3 regression now runs in isolated temporary EXTERNAL-020 state.
+- Caller state is restored in finally.
+- Validation exceptions are converted to regression failure evidence instead of rejecting the Promise.
+
+Candidate Identity:
+Script Count: 491
+Manifest Hash: ff15b6b5f5dde8dd4f9b8462299f4f1e329d7b3bb226b1d53f95154a706f9fe9
+Script Set Hash: c11f098d80d09d03ee1a08d8c2a114e966aeb1492e0b8df389008a3a13aa8df6
+
+Validation:
+491 / 491 JS syntax PASS
+Static / Package / Hotfix: 15 / 15 PASS
+Dirty-state Phase 4 first run: 20 / 20 PASS
+Same-session Phase 4 second run: 20 / 20 PASS
+Decision 058 Phase 6 Regression: 28 / 28 PASS
+providerExecutionCallsDuringValidation = 0
+authorityActivationCallsDuringValidation = 0
+criticalFailed = 0
+
+Decision 001:
+18 / 18 Candidate Coverage remains intact.
+This is NOT Project Owner Acceptance and NOT Release.
+
+Important:
+The original first-run 17/20 result may still contain a separate
+OpenAI Governance readiness mismatch. The rerun crash previously prevented
+stable collection of those failed check details.
+
+Next PC Gate:
+runExternal020Phase4Validation()
+
+Expected only if governance runtime is ready:
+passed = 20
+failed = 0
+criticalFailed = 0
+health = 100
+phase4TechnicalGateReady = true
+decision001RequirementsComplete = 18
+decision001Complete = true
+releaseAllowed = false
+
+If it returns failures instead of 20/20, run:
+runExternal020Phase4Validation().then(r => console.log(r.checks.filter(c => !c.passed)))
+
+Do NOT proceed to Android until PC is 20/20.
+============================================================
