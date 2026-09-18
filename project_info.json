@@ -1068,7 +1068,11 @@
     "19_trust_evidence_phase1_validation.js",
     "validate_external020_phase1.cjs",
     "EXTERNAL-020_Phase1_v0.1.0_VALIDATION_EVIDENCE.json",
-    "EXTERNAL-020_Phase1_v0.1.0_HANDOFF.txt"
+    "EXTERNAL-020_Phase1_v0.1.0_HANDOFF.txt",
+    "19_trust_evidence_phase1_android_validation.js",
+    "validate_external020_phase1_v011.cjs",
+    "EXTERNAL-020_Phase1_v0.1.1_VALIDATION_EVIDENCE.json",
+    "EXTERNAL-020_Phase1_v0.1.1_HANDOFF.txt"
   ],
   "missingFiles": [],
   "externalFiles": [
@@ -1083,9 +1087,9 @@
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "c79c20526c2febe35d765e593626494b9ae9cbbe21652d102a3933817abf007e",
-  "scriptSetHash": "5594076d2187fec845ab13a0305200188ced79d9afc4810568c00636651403e0",
-  "scriptManifestCount": 470,
+  "scriptManifestHash": "ecbb5c7109f97c0195e8279c49d4ae8a6a7b90d5d5f841d1c5b1f3a91111d8b4",
+  "scriptSetHash": "dd94cd6f4cf1edb66b73a591d1c38fab7a37ccf5578c8233dc96c2f10a24353c",
+  "scriptManifestCount": 471,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
     "runtimeLoader": false,
@@ -1094,7 +1098,7 @@
     "last": "99_init.js",
     "generatedAtSave": true
   },
-  "releaseStatus": "EXTERNAL_020_PHASE1_TRUST_EVIDENCE_FOUNDATION_CANDIDATE",
+  "releaseStatus": "EXTERNAL_020_PHASE1_ANDROID_VALIDATION_CANDIDATE",
   "releaseAllowed": false,
   "projectOwnerRevalidationRequired": true,
   "decision058CandidateVersion": "0.6.0",
@@ -1177,8 +1181,8 @@
   "decision058ProjectOwnerFinalAcceptanceRequired": true,
   "external020ComponentId": "EXTERNAL-020",
   "external020Decision001Status": "PROJECT_OWNER_ACCEPTED",
-  "external020Phase1Version": "0.1.0",
-  "external020Phase1Status": "IMPLEMENTATION_PHASE1_CANDIDATE",
+  "external020Phase1Version": "0.1.1",
+  "external020Phase1Status": "IMPLEMENTATION_PHASE1_ANDROID_VALIDATION_CANDIDATE",
   "external020CanonicalParentRevision": "REPOSITORY010-CANONICAL-REVISION-0023",
   "external020CanonicalParentManifestHash": "0673af6e0cff8332cd9322d62b582eea312b549f9f3660f28222a87957c4160b",
   "external020CanonicalParentScriptSetHash": "d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3",
@@ -1189,5 +1193,7 @@
   "external020AutomaticKnowledgePromotionAllowed": false,
   "external020CanonicalRepositoryMutationAllowed": false,
   "external020ActionAuthorityGranted": false,
-  "external020ValidationIsApproval": false
+  "external020ValidationIsApproval": false,
+  "external020Phase1AndroidValidationImplemented": true,
+  "external020Phase1AndroidValidationFunction": "runExternal020Phase1AndroidValidation"
 }

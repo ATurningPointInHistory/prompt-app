@@ -1,7 +1,7 @@
 /* ============================================================
    FILE: 19_trust_evidence_version_manifest.js
    EXTERNAL-020 Trust / Evidence Intelligence
-   Decision 001 / Candidate Release: 0.1.0
+   Decision 001 / Candidate Release: 0.1.1
    Phase 1: Context-Specific Reliability Foundation
    ============================================================ */
 (function (global) {
@@ -38,7 +38,7 @@
     componentId: "EXTERNAL-020",
     decisionId: "EXTERNAL-020-DECISION-001",
     title: "Evidence-Grounded Multi-Dimensional Trust / Evidence Intelligence",
-    version: "0.1.0",
+    version: "0.1.1",
     status: "IMPLEMENTATION_PHASE1_CANDIDATE",
     phase: 1,
     phaseName: "Context-Specific Reliability Foundation",

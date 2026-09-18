@@ -1,0 +1,87 @@
+============================================================
+AI Prompt OS / AIプロンプト生成Pro
+EXTERNAL-020 Phase 1 v0.1.1 Android Validation Candidate
+Handoff
+============================================================
+
+Baseline:
+REPOSITORY010-CANONICAL-REVISION-0023
+
+Decision:
+EXTERNAL-020-DECISION-001 / PROJECT OWNER APPROVED
+
+Candidate:
+EXTERNAL-020 Phase 1 v0.1.1
+
+Purpose of v0.1.1:
+Add Android Real Device Validation only, without expanding Phase 1 authority.
+
+Changes from v0.1.0:
+- 19_trust_evidence_phase1_android_validation.js added
+- 19_trust_evidence_version_manifest.js candidate version metadata 0.1.1
+- index / script manifest / project_info synchronized
+- validate_external020_phase1_v011.cjs added
+- No EXTERNAL-010 implementation change
+- No IDE-170 implementation change
+- No Reliability scoring formula added
+- No authority expansion
+
+Static / Fixture Validation:
+- JavaScript Syntax: 471 / 471 PASS
+- Static / Package: 17 / 17 PASS
+- Phase 1 Functional Fixture: 21 / 21 PASS
+- Android Validator Fixture: 17 / 17 PASS
+- Decision 058 Phase 6 Regression: 28 / 28 PASS
+- criticalFailed = 0
+
+Important Evidence Boundary:
+The Project Owner PC real runtime result already obtained on v0.1.0 was:
+21 / 21 PASS
+validationId = EXTERNAL020-PHASE1-VALIDATION-MU6JXZOT-0011
+validatedAt = 2026-09-18T06:02:55.853Z
+
+That result is retained as v0.1.0 evidence only.
+It is NOT silently transferred to v0.1.1 because candidate package identity changed.
+
+Required Real Runtime Sequence for v0.1.1:
+
+1. PC
+Run:
+runExternal020Phase1Validation()
+
+Expected:
+version = 0.1.1
+passed = 21
+failed = 0
+health = 100
+criticalFailed = 0
+phase1TechnicalGateReady = true
+releaseAllowed = false
+
+2. Android
+Run directly; no await is required:
+runExternal020Phase1AndroidValidation()
+
+Expected:
+version = 0.1.1
+passed = 17
+failed = 0
+health = 100
+criticalFailed = 0
+phase1AndroidRealDeviceComplete = true
+phase1ProjectOwnerGateReady = true
+releaseAllowed = false
+androidRealDeviceValidation.passed = true
+User Agent contains Android
+
+3. Project Owner Gate
+Only after exact v0.1.1 PC + Android real runtime PASS:
+Project Owner may decide Phase 1 Acceptance / Freeze.
+
+Validation PASS != Approval
+Android PASS != Automatic Release
+releaseAllowed remains false until the Project Owner gate is explicitly handled.
+
+============================================================
+END OF HANDOFF
+============================================================

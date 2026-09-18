@@ -1,0 +1,97 @@
+{
+  "id": "EXTERNAL-020-PHASE1-v0.1.1-ANDROID-VALIDATION-CANDIDATE-EVIDENCE",
+  "componentId": "EXTERNAL-020",
+  "decisionId": "EXTERNAL-020-DECISION-001",
+  "version": "0.1.1",
+  "status": "ANDROID_VALIDATION_CANDIDATE_PC_REAL_RUNTIME_REVALIDATION_REQUIRED",
+  "parentCanonical": {
+    "revisionId": "REPOSITORY010-CANONICAL-REVISION-0023",
+    "scriptCount": 462,
+    "manifestHash": "0673af6e0cff8332cd9322d62b582eea312b549f9f3660f28222a87957c4160b",
+    "scriptSetHash": "d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3"
+  },
+  "priorPcRealRuntimeEvidence": {
+    "source": "PROJECT_OWNER_BROWSER_OUTPUT",
+    "candidateVersion": "0.1.0",
+    "validationId": "EXTERNAL020-PHASE1-VALIDATION-MU6JXZOT-0011",
+    "passed": 21,
+    "failed": 0,
+    "total": 21,
+    "health": 100,
+    "criticalFailed": 0,
+    "phase1ImplementationComplete": true,
+    "phase1TechnicalGateReady": true,
+    "releaseAllowed": false,
+    "projectOwnerAcceptanceRequired": true,
+    "canonicalMutationPerformed": false,
+    "externalTransmissionPerformed": false,
+    "paidApiExecutionPerformed": false,
+    "validatedAt": "2026-09-18T06:02:55.853Z",
+    "transferredToV011": false,
+    "reason": "v0.1.1 changes candidate package identity by adding Android validation and updating candidate metadata; real PC validation must be rerun on the exact v0.1.1 package."
+  },
+  "candidate": {
+    "scriptCount": 471,
+    "manifestHash": "ecbb5c7109f97c0195e8279c49d4ae8a6a7b90d5d5f841d1c5b1f3a91111d8b4",
+    "scriptSetHash": "dd94cd6f4cf1edb66b73a591d1c38fab7a37ccf5578c8233dc96c2f10a24353c",
+    "androidValidationFunction": "runExternal020Phase1AndroidValidation",
+    "androidValidationScript": "19_trust_evidence_phase1_android_validation.js"
+  },
+  "staticPackageValidation": {
+    "passed": 17,
+    "failed": 0,
+    "total": 17,
+    "health": 100,
+    "criticalFailed": 0
+  },
+  "javascriptSyntaxValidation": {
+    "passed": 471,
+    "failed": 0,
+    "total": 471
+  },
+  "phase1FunctionalFixtureValidation": {
+    "validationId": "EXTERNAL020-PHASE1-VALIDATION-MU6K4XB1-0011",
+    "passed": 21,
+    "failed": 0,
+    "total": 21,
+    "health": 100,
+    "criticalFailed": 0,
+    "phase1TechnicalGateReady": true
+  },
+  "androidValidationFixture": {
+    "validationId": "EXTERNAL020-PHASE1-ANDROID-REAL-DEVICE-MU6K4XB3-0027",
+    "passed": 17,
+    "failed": 0,
+    "total": 17,
+    "health": 100,
+    "criticalFailed": 0,
+    "phase1AndroidRealDeviceComplete": true,
+    "phase1ProjectOwnerGateReady": true,
+    "releaseAllowed": false,
+    "fixtureUserAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 Chrome/153.0.0.0 Mobile Safari/537.36",
+    "realDeviceEvidence": false
+  },
+  "decision058Phase6Regression": {
+    "passed": 28,
+    "failed": 0,
+    "total": 28,
+    "health": 100,
+    "criticalFailed": 0
+  },
+  "safety": {
+    "canonicalMutationPerformed": false,
+    "externalTransmissionPerformed": false,
+    "paidApiExecutionPerformed": false,
+    "automaticKnowledgePromotionPerformed": false,
+    "automaticConflictResolutionPerformed": false,
+    "validationIsApproval": false,
+    "releaseAllowed": false
+  },
+  "nextRequiredGates": [
+    "PC_REAL_RUNTIME_v0.1.1",
+    "ANDROID_REAL_DEVICE_v0.1.1",
+    "PROJECT_OWNER_PHASE1_ACCEPTANCE"
+  ],
+  "automaticAcceptancePerformed": false,
+  "automaticFreezePerformed": false
+}
