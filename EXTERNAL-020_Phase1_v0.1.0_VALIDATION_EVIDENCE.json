@@ -1,0 +1,1501 @@
+{
+  "id": "EXTERNAL-020-PHASE1-v0.1.0-VALIDATION-EVIDENCE",
+  "componentId": "EXTERNAL-020",
+  "decisionId": "EXTERNAL-020-DECISION-001",
+  "version": "0.1.0",
+  "status": "TECHNICAL_GATE_READY_PROJECT_OWNER_REAL_RUNTIME_PENDING",
+  "parentCanonical": {
+    "revisionId": "REPOSITORY010-CANONICAL-REVISION-0023",
+    "scriptCount": 462,
+    "manifestHash": "0673af6e0cff8332cd9322d62b582eea312b549f9f3660f28222a87957c4160b",
+    "scriptSetHash": "d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3"
+  },
+  "candidate": {
+    "scriptCount": 470,
+    "manifestHash": "c79c20526c2febe35d765e593626494b9ae9cbbe21652d102a3933817abf007e",
+    "scriptSetHash": "5594076d2187fec845ab13a0305200188ced79d9afc4810568c00636651403e0"
+  },
+  "phase1FunctionalValidation": {
+    "validationId": "EXTERNAL020-PHASE1-VALIDATION-MU6JSD7O-0011",
+    "componentId": "EXTERNAL-020",
+    "decisionId": "EXTERNAL-020-DECISION-001",
+    "version": "0.1.0",
+    "phase": 1,
+    "passed": 21,
+    "failed": 0,
+    "total": 21,
+    "health": 100,
+    "criticalFailed": 0,
+    "phase1ImplementationComplete": true,
+    "phase1TechnicalGateReady": true,
+    "releaseAllowed": false,
+    "projectOwnerAcceptanceRequired": true,
+    "validationIsApproval": false,
+    "canonicalMutationPerformed": false,
+    "externalTransmissionPerformed": false,
+    "paidApiExecutionPerformed": false,
+    "checks": [
+      {
+        "name": "REQ-020-002 EXTERNAL-010 Reliability Input API is available",
+        "passed": true,
+        "detail": {
+          "external010": true,
+          "external010ReliabilityInput": true,
+          "ide170": true,
+          "ide180": true
+        },
+        "group": "Integration",
+        "severity": "Critical"
+      },
+      {
+        "name": "EXTERNAL-010 adapter is read-only",
+        "passed": true,
+        "detail": {
+          "compatible": true,
+          "external010Present": true,
+          "reliabilityInputApiPresent": true,
+          "expectedFinalReliabilityAuthority": "EXTERNAL-020",
+          "mutationApiInvoked": false,
+          "providerNetworkCallPerformed": false
+        },
+        "group": "Safety",
+        "severity": "Critical"
+      },
+      {
+        "name": "Reliability Input Package can be captured read-only",
+        "passed": true,
+        "detail": {
+          "ok": true,
+          "code": "EXTERNAL020_EXTERNAL010_INPUT_CAPTURED",
+          "status": "Ready",
+          "data": {
+            "inputPackage": {
+              "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+              "sourceComponentId": "EXTERNAL-010",
+              "sourceContract": "EXTERNAL-010-CONTRACT-RELIABILITY-INPUT-PACKAGE",
+              "operationalSignals": [
+                {
+                  "reliabilitySignalId": "RS-1",
+                  "sourceId": "SRC-1",
+                  "operationalReliabilityOnly": true,
+                  "factualReliabilityDetermined": false,
+                  "reliabilityScore": null,
+                  "authorityScore": null,
+                  "finalReliabilityAuthority": "EXTERNAL-020"
+                }
+              ],
+              "evidenceQualitySignals": [
+                {
+                  "qualitySignalId": "EQ-1",
+                  "evidenceId": "EVIDENCE-A",
+                  "sourceId": "SRC-1",
+                  "qualityScore": null,
+                  "authorityScore": null,
+                  "truthConfirmed": false,
+                  "finalReliabilityAuthority": "EXTERNAL-020"
+                }
+              ],
+              "contradictionCandidates": [
+                {
+                  "candidateId": "CON-1",
+                  "candidateType": "CONTRADICTION",
+                  "evidenceIds": [
+                    "EVIDENCE-A",
+                    "EVIDENCE-B"
+                  ],
+                  "independenceVerified": false,
+                  "conflictWinner": null,
+                  "truthConfirmed": false,
+                  "automaticResolutionPerformed": false,
+                  "duplicateEqualsIndependentConfirmation": false,
+                  "finalReliabilityAuthority": "EXTERNAL-020"
+                }
+              ],
+              "confirmationCandidates": [
+                {
+                  "candidateId": "CONF-1",
+                  "candidateType": "CONFIRMATION",
+                  "evidenceIds": [
+                    "EVIDENCE-A",
+                    "EVIDENCE-C"
+                  ],
+                  "independenceVerified": false,
+                  "conflictWinner": null,
+                  "truthConfirmed": false,
+                  "automaticResolutionPerformed": false,
+                  "duplicateEqualsIndependentConfirmation": false,
+                  "finalReliabilityAuthority": "EXTERNAL-020"
+                }
+              ],
+              "finalReliabilityAuthority": "EXTERNAL-020",
+              "sourceGeneratedAt": "2026-09-18T05:58:33.439Z",
+              "contractValid": true,
+              "readOnly": true,
+              "rawEvidenceMutationPerformed": false,
+              "externalTransmissionPerformed": false,
+              "providerNetworkCallPerformed": false,
+              "capturedAt": "2026-09-18T05:58:33.442Z",
+              "immutable": true
+            }
+          },
+          "at": "2026-09-18T05:58:33.443Z"
+        },
+        "group": "Functional",
+        "severity": "Critical"
+      },
+      {
+        "name": "Final Reliability Authority remains EXTERNAL-020",
+        "passed": true,
+        "detail": {
+          "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+          "sourceComponentId": "EXTERNAL-010",
+          "sourceContract": "EXTERNAL-010-CONTRACT-RELIABILITY-INPUT-PACKAGE",
+          "operationalSignals": [
+            {
+              "reliabilitySignalId": "RS-1",
+              "sourceId": "SRC-1",
+              "operationalReliabilityOnly": true,
+              "factualReliabilityDetermined": false,
+              "reliabilityScore": null,
+              "authorityScore": null,
+              "finalReliabilityAuthority": "EXTERNAL-020"
+            }
+          ],
+          "evidenceQualitySignals": [
+            {
+              "qualitySignalId": "EQ-1",
+              "evidenceId": "EVIDENCE-A",
+              "sourceId": "SRC-1",
+              "qualityScore": null,
+              "authorityScore": null,
+              "truthConfirmed": false,
+              "finalReliabilityAuthority": "EXTERNAL-020"
+            }
+          ],
+          "contradictionCandidates": [
+            {
+              "candidateId": "CON-1",
+              "candidateType": "CONTRADICTION",
+              "evidenceIds": [
+                "EVIDENCE-A",
+                "EVIDENCE-B"
+              ],
+              "independenceVerified": false,
+              "conflictWinner": null,
+              "truthConfirmed": false,
+              "automaticResolutionPerformed": false,
+              "duplicateEqualsIndependentConfirmation": false,
+              "finalReliabilityAuthority": "EXTERNAL-020"
+            }
+          ],
+          "confirmationCandidates": [
+            {
+              "candidateId": "CONF-1",
+              "candidateType": "CONFIRMATION",
+              "evidenceIds": [
+                "EVIDENCE-A",
+                "EVIDENCE-C"
+              ],
+              "independenceVerified": false,
+              "conflictWinner": null,
+              "truthConfirmed": false,
+              "automaticResolutionPerformed": false,
+              "duplicateEqualsIndependentConfirmation": false,
+              "finalReliabilityAuthority": "EXTERNAL-020"
+            }
+          ],
+          "finalReliabilityAuthority": "EXTERNAL-020",
+          "sourceGeneratedAt": "2026-09-18T05:58:33.439Z",
+          "contractValid": true,
+          "readOnly": true,
+          "rawEvidenceMutationPerformed": false,
+          "externalTransmissionPerformed": false,
+          "providerNetworkCallPerformed": false,
+          "capturedAt": "2026-09-18T05:58:33.442Z",
+          "immutable": true
+        },
+        "group": "Authority",
+        "severity": "Critical"
+      },
+      {
+        "name": "REQ-020-003/004 Context distinguishes Claim and purpose",
+        "passed": true,
+        "detail": {
+          "ok": true,
+          "code": "EXTERNAL020_CONTEXT_CREATED",
+          "status": "Ready",
+          "data": {
+            "context": {
+              "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+              "contextVersion": "1.0.0",
+              "subjectType": "CLAIM",
+              "subjectRef": "CLAIM-VALIDATION-001",
+              "domain": "GENERAL",
+              "task": "EVIDENCE_REVIEW",
+              "purpose": "VALIDATION",
+              "timeHorizon": "CURRENT",
+              "evidenceRefs": [
+                "EVIDENCE-A",
+                "EVIDENCE-B"
+              ],
+              "sourceRefs": [],
+              "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+              "contextSpecific": true,
+              "globalPermanentScoreContext": false,
+              "unknownFields": [],
+              "createdAt": "2026-09-18T05:58:33.443Z",
+              "immutable": true
+            }
+          },
+          "at": "2026-09-18T05:58:33.443Z"
+        },
+        "group": "Functional",
+        "severity": "Major"
+      },
+      {
+        "name": "Reliability Evaluation Candidate can be created",
+        "passed": true,
+        "detail": {
+          "ok": true,
+          "code": "EXTERNAL020_EVALUATION_CANDIDATE_CREATED",
+          "status": "Candidate",
+          "data": {
+            "evaluation": {
+              "evaluationId": "EXTERNAL020-EVALUATION-MU6JSD7N-0003",
+              "evaluationVersion": "1.0.0",
+              "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+              "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+              "subjectType": "CLAIM",
+              "subjectRef": "CLAIM-VALIDATION-001",
+              "domain": "GENERAL",
+              "task": "EVIDENCE_REVIEW",
+              "purpose": "VALIDATION",
+              "timeHorizon": "CURRENT",
+              "evaluationState": "CONFLICTED",
+              "evidenceRefs": [
+                "EVIDENCE-A",
+                "EVIDENCE-B"
+              ],
+              "sourceRefs": [],
+              "factorSummary": {
+                "operationalSignalCount": 1,
+                "evidenceQualitySignalCount": 1,
+                "contradictionCandidateCount": 1,
+                "confirmationCandidateCount": 1,
+                "independentConfirmationCount": 0,
+                "unknownIndependenceCount": 1
+              },
+              "contradictionRefs": [
+                "CON-1"
+              ],
+              "confirmationRefs": [
+                "CONF-1"
+              ],
+              "missingInformation": [],
+              "reliabilityScore": null,
+              "authorityScore": null,
+              "truthConfirmed": false,
+              "conflictWinner": null,
+              "automaticConflictResolutionPerformed": false,
+              "duplicateEqualsIndependentConfirmation": false,
+              "independenceAssumedWhenUnknown": false,
+              "candidateOnly": true,
+              "evidenceAuthorityAssessmentOnly": true,
+              "actionAuthorityGranted": false,
+              "knowledgePromotionPerformed": false,
+              "canonicalRepositoryMutationPerformed": false,
+              "tradingAuthorityGranted": false,
+              "financialAuthorityGranted": false,
+              "businessAuthorityGranted": false,
+              "externalTransmissionPerformed": false,
+              "paidApiExecutionPerformed": false,
+              "ide170ConfidenceOverwritten": false,
+              "rawEvidenceMutationPerformed": false,
+              "explanation": "Phase 1 validation candidate",
+              "createdAt": "2026-09-18T05:58:33.443Z",
+              "immutable": true
+            },
+            "lineage": {
+              "lineageId": "EXTERNAL020-LINEAGE-MU6JSD7N-0004",
+              "relationType": "EVALUATED_FROM",
+              "outputRef": "EXTERNAL020-EVALUATION-MU6JSD7N-0003",
+              "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+              "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+              "evidenceRefs": [
+                "EVIDENCE-A",
+                "EVIDENCE-B"
+              ],
+              "contradictionRefs": [
+                "CON-1"
+              ],
+              "confirmationRefs": [
+                "CONF-1"
+              ],
+              "explanation": "Phase 1 validation candidate",
+              "createdAt": "2026-09-18T05:58:33.443Z",
+              "immutable": true
+            }
+          },
+          "at": "2026-09-18T05:58:33.443Z"
+        },
+        "group": "Functional",
+        "severity": "Critical"
+      },
+      {
+        "name": "REQ-020-006 Contradiction references are preserved",
+        "passed": true,
+        "detail": {
+          "evaluationId": "EXTERNAL020-EVALUATION-MU6JSD7N-0003",
+          "evaluationVersion": "1.0.0",
+          "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+          "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+          "subjectType": "CLAIM",
+          "subjectRef": "CLAIM-VALIDATION-001",
+          "domain": "GENERAL",
+          "task": "EVIDENCE_REVIEW",
+          "purpose": "VALIDATION",
+          "timeHorizon": "CURRENT",
+          "evaluationState": "CONFLICTED",
+          "evidenceRefs": [
+            "EVIDENCE-A",
+            "EVIDENCE-B"
+          ],
+          "sourceRefs": [],
+          "factorSummary": {
+            "operationalSignalCount": 1,
+            "evidenceQualitySignalCount": 1,
+            "contradictionCandidateCount": 1,
+            "confirmationCandidateCount": 1,
+            "independentConfirmationCount": 0,
+            "unknownIndependenceCount": 1
+          },
+          "contradictionRefs": [
+            "CON-1"
+          ],
+          "confirmationRefs": [
+            "CONF-1"
+          ],
+          "missingInformation": [],
+          "reliabilityScore": null,
+          "authorityScore": null,
+          "truthConfirmed": false,
+          "conflictWinner": null,
+          "automaticConflictResolutionPerformed": false,
+          "duplicateEqualsIndependentConfirmation": false,
+          "independenceAssumedWhenUnknown": false,
+          "candidateOnly": true,
+          "evidenceAuthorityAssessmentOnly": true,
+          "actionAuthorityGranted": false,
+          "knowledgePromotionPerformed": false,
+          "canonicalRepositoryMutationPerformed": false,
+          "tradingAuthorityGranted": false,
+          "financialAuthorityGranted": false,
+          "businessAuthorityGranted": false,
+          "externalTransmissionPerformed": false,
+          "paidApiExecutionPerformed": false,
+          "ide170ConfidenceOverwritten": false,
+          "rawEvidenceMutationPerformed": false,
+          "explanation": "Phase 1 validation candidate",
+          "createdAt": "2026-09-18T05:58:33.443Z",
+          "immutable": true
+        },
+        "group": "Reliability",
+        "severity": "Major"
+      },
+      {
+        "name": "REQ-020-007 Unknown independence is not assumed independent",
+        "passed": true,
+        "detail": {
+          "evaluationId": "EXTERNAL020-EVALUATION-MU6JSD7N-0003",
+          "evaluationVersion": "1.0.0",
+          "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+          "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+          "subjectType": "CLAIM",
+          "subjectRef": "CLAIM-VALIDATION-001",
+          "domain": "GENERAL",
+          "task": "EVIDENCE_REVIEW",
+          "purpose": "VALIDATION",
+          "timeHorizon": "CURRENT",
+          "evaluationState": "CONFLICTED",
+          "evidenceRefs": [
+            "EVIDENCE-A",
+            "EVIDENCE-B"
+          ],
+          "sourceRefs": [],
+          "factorSummary": {
+            "operationalSignalCount": 1,
+            "evidenceQualitySignalCount": 1,
+            "contradictionCandidateCount": 1,
+            "confirmationCandidateCount": 1,
+            "independentConfirmationCount": 0,
+            "unknownIndependenceCount": 1
+          },
+          "contradictionRefs": [
+            "CON-1"
+          ],
+          "confirmationRefs": [
+            "CONF-1"
+          ],
+          "missingInformation": [],
+          "reliabilityScore": null,
+          "authorityScore": null,
+          "truthConfirmed": false,
+          "conflictWinner": null,
+          "automaticConflictResolutionPerformed": false,
+          "duplicateEqualsIndependentConfirmation": false,
+          "independenceAssumedWhenUnknown": false,
+          "candidateOnly": true,
+          "evidenceAuthorityAssessmentOnly": true,
+          "actionAuthorityGranted": false,
+          "knowledgePromotionPerformed": false,
+          "canonicalRepositoryMutationPerformed": false,
+          "tradingAuthorityGranted": false,
+          "financialAuthorityGranted": false,
+          "businessAuthorityGranted": false,
+          "externalTransmissionPerformed": false,
+          "paidApiExecutionPerformed": false,
+          "ide170ConfidenceOverwritten": false,
+          "rawEvidenceMutationPerformed": false,
+          "explanation": "Phase 1 validation candidate",
+          "createdAt": "2026-09-18T05:58:33.443Z",
+          "immutable": true
+        },
+        "group": "Reliability",
+        "severity": "Critical"
+      },
+      {
+        "name": "REQ-020-010 Explicit evaluation state exists",
+        "passed": true,
+        "detail": {
+          "evaluationId": "EXTERNAL020-EVALUATION-MU6JSD7N-0003",
+          "evaluationVersion": "1.0.0",
+          "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+          "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+          "subjectType": "CLAIM",
+          "subjectRef": "CLAIM-VALIDATION-001",
+          "domain": "GENERAL",
+          "task": "EVIDENCE_REVIEW",
+          "purpose": "VALIDATION",
+          "timeHorizon": "CURRENT",
+          "evaluationState": "CONFLICTED",
+          "evidenceRefs": [
+            "EVIDENCE-A",
+            "EVIDENCE-B"
+          ],
+          "sourceRefs": [],
+          "factorSummary": {
+            "operationalSignalCount": 1,
+            "evidenceQualitySignalCount": 1,
+            "contradictionCandidateCount": 1,
+            "confirmationCandidateCount": 1,
+            "independentConfirmationCount": 0,
+            "unknownIndependenceCount": 1
+          },
+          "contradictionRefs": [
+            "CON-1"
+          ],
+          "confirmationRefs": [
+            "CONF-1"
+          ],
+          "missingInformation": [],
+          "reliabilityScore": null,
+          "authorityScore": null,
+          "truthConfirmed": false,
+          "conflictWinner": null,
+          "automaticConflictResolutionPerformed": false,
+          "duplicateEqualsIndependentConfirmation": false,
+          "independenceAssumedWhenUnknown": false,
+          "candidateOnly": true,
+          "evidenceAuthorityAssessmentOnly": true,
+          "actionAuthorityGranted": false,
+          "knowledgePromotionPerformed": false,
+          "canonicalRepositoryMutationPerformed": false,
+          "tradingAuthorityGranted": false,
+          "financialAuthorityGranted": false,
+          "businessAuthorityGranted": false,
+          "externalTransmissionPerformed": false,
+          "paidApiExecutionPerformed": false,
+          "ide170ConfidenceOverwritten": false,
+          "rawEvidenceMutationPerformed": false,
+          "explanation": "Phase 1 validation candidate",
+          "createdAt": "2026-09-18T05:58:33.443Z",
+          "immutable": true
+        },
+        "group": "Reliability",
+        "severity": "Major"
+      },
+      {
+        "name": "REQ-020-011 Phase 1 creates no false numerical precision",
+        "passed": true,
+        "detail": {
+          "evaluationId": "EXTERNAL020-EVALUATION-MU6JSD7N-0003",
+          "evaluationVersion": "1.0.0",
+          "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+          "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+          "subjectType": "CLAIM",
+          "subjectRef": "CLAIM-VALIDATION-001",
+          "domain": "GENERAL",
+          "task": "EVIDENCE_REVIEW",
+          "purpose": "VALIDATION",
+          "timeHorizon": "CURRENT",
+          "evaluationState": "CONFLICTED",
+          "evidenceRefs": [
+            "EVIDENCE-A",
+            "EVIDENCE-B"
+          ],
+          "sourceRefs": [],
+          "factorSummary": {
+            "operationalSignalCount": 1,
+            "evidenceQualitySignalCount": 1,
+            "contradictionCandidateCount": 1,
+            "confirmationCandidateCount": 1,
+            "independentConfirmationCount": 0,
+            "unknownIndependenceCount": 1
+          },
+          "contradictionRefs": [
+            "CON-1"
+          ],
+          "confirmationRefs": [
+            "CONF-1"
+          ],
+          "missingInformation": [],
+          "reliabilityScore": null,
+          "authorityScore": null,
+          "truthConfirmed": false,
+          "conflictWinner": null,
+          "automaticConflictResolutionPerformed": false,
+          "duplicateEqualsIndependentConfirmation": false,
+          "independenceAssumedWhenUnknown": false,
+          "candidateOnly": true,
+          "evidenceAuthorityAssessmentOnly": true,
+          "actionAuthorityGranted": false,
+          "knowledgePromotionPerformed": false,
+          "canonicalRepositoryMutationPerformed": false,
+          "tradingAuthorityGranted": false,
+          "financialAuthorityGranted": false,
+          "businessAuthorityGranted": false,
+          "externalTransmissionPerformed": false,
+          "paidApiExecutionPerformed": false,
+          "ide170ConfidenceOverwritten": false,
+          "rawEvidenceMutationPerformed": false,
+          "explanation": "Phase 1 validation candidate",
+          "createdAt": "2026-09-18T05:58:33.443Z",
+          "immutable": true
+        },
+        "group": "Safety",
+        "severity": "Critical"
+      },
+      {
+        "name": "REQ-020-012 IDE-170 Confidence is not overwritten",
+        "passed": true,
+        "detail": {
+          "evaluationId": "EXTERNAL020-EVALUATION-MU6JSD7N-0003",
+          "evaluationVersion": "1.0.0",
+          "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+          "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+          "subjectType": "CLAIM",
+          "subjectRef": "CLAIM-VALIDATION-001",
+          "domain": "GENERAL",
+          "task": "EVIDENCE_REVIEW",
+          "purpose": "VALIDATION",
+          "timeHorizon": "CURRENT",
+          "evaluationState": "CONFLICTED",
+          "evidenceRefs": [
+            "EVIDENCE-A",
+            "EVIDENCE-B"
+          ],
+          "sourceRefs": [],
+          "factorSummary": {
+            "operationalSignalCount": 1,
+            "evidenceQualitySignalCount": 1,
+            "contradictionCandidateCount": 1,
+            "confirmationCandidateCount": 1,
+            "independentConfirmationCount": 0,
+            "unknownIndependenceCount": 1
+          },
+          "contradictionRefs": [
+            "CON-1"
+          ],
+          "confirmationRefs": [
+            "CONF-1"
+          ],
+          "missingInformation": [],
+          "reliabilityScore": null,
+          "authorityScore": null,
+          "truthConfirmed": false,
+          "conflictWinner": null,
+          "automaticConflictResolutionPerformed": false,
+          "duplicateEqualsIndependentConfirmation": false,
+          "independenceAssumedWhenUnknown": false,
+          "candidateOnly": true,
+          "evidenceAuthorityAssessmentOnly": true,
+          "actionAuthorityGranted": false,
+          "knowledgePromotionPerformed": false,
+          "canonicalRepositoryMutationPerformed": false,
+          "tradingAuthorityGranted": false,
+          "financialAuthorityGranted": false,
+          "businessAuthorityGranted": false,
+          "externalTransmissionPerformed": false,
+          "paidApiExecutionPerformed": false,
+          "ide170ConfidenceOverwritten": false,
+          "rawEvidenceMutationPerformed": false,
+          "explanation": "Phase 1 validation candidate",
+          "createdAt": "2026-09-18T05:58:33.443Z",
+          "immutable": true
+        },
+        "group": "Safety",
+        "severity": "Critical"
+      },
+      {
+        "name": "REQ-020-013 Reliability grants no action authority",
+        "passed": true,
+        "detail": {
+          "evaluationId": "EXTERNAL020-EVALUATION-MU6JSD7N-0003",
+          "evaluationVersion": "1.0.0",
+          "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+          "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+          "subjectType": "CLAIM",
+          "subjectRef": "CLAIM-VALIDATION-001",
+          "domain": "GENERAL",
+          "task": "EVIDENCE_REVIEW",
+          "purpose": "VALIDATION",
+          "timeHorizon": "CURRENT",
+          "evaluationState": "CONFLICTED",
+          "evidenceRefs": [
+            "EVIDENCE-A",
+            "EVIDENCE-B"
+          ],
+          "sourceRefs": [],
+          "factorSummary": {
+            "operationalSignalCount": 1,
+            "evidenceQualitySignalCount": 1,
+            "contradictionCandidateCount": 1,
+            "confirmationCandidateCount": 1,
+            "independentConfirmationCount": 0,
+            "unknownIndependenceCount": 1
+          },
+          "contradictionRefs": [
+            "CON-1"
+          ],
+          "confirmationRefs": [
+            "CONF-1"
+          ],
+          "missingInformation": [],
+          "reliabilityScore": null,
+          "authorityScore": null,
+          "truthConfirmed": false,
+          "conflictWinner": null,
+          "automaticConflictResolutionPerformed": false,
+          "duplicateEqualsIndependentConfirmation": false,
+          "independenceAssumedWhenUnknown": false,
+          "candidateOnly": true,
+          "evidenceAuthorityAssessmentOnly": true,
+          "actionAuthorityGranted": false,
+          "knowledgePromotionPerformed": false,
+          "canonicalRepositoryMutationPerformed": false,
+          "tradingAuthorityGranted": false,
+          "financialAuthorityGranted": false,
+          "businessAuthorityGranted": false,
+          "externalTransmissionPerformed": false,
+          "paidApiExecutionPerformed": false,
+          "ide170ConfidenceOverwritten": false,
+          "rawEvidenceMutationPerformed": false,
+          "explanation": "Phase 1 validation candidate",
+          "createdAt": "2026-09-18T05:58:33.443Z",
+          "immutable": true
+        },
+        "group": "Authority",
+        "severity": "Critical"
+      },
+      {
+        "name": "REQ-020-014 Explanation and lineage are present",
+        "passed": true,
+        "detail": {
+          "lineageId": "EXTERNAL020-LINEAGE-MU6JSD7N-0004",
+          "relationType": "EVALUATED_FROM",
+          "outputRef": "EXTERNAL020-EVALUATION-MU6JSD7N-0003",
+          "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+          "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+          "evidenceRefs": [
+            "EVIDENCE-A",
+            "EVIDENCE-B"
+          ],
+          "contradictionRefs": [
+            "CON-1"
+          ],
+          "confirmationRefs": [
+            "CONF-1"
+          ],
+          "explanation": "Phase 1 validation candidate",
+          "createdAt": "2026-09-18T05:58:33.443Z",
+          "immutable": true
+        },
+        "group": "Lineage",
+        "severity": "Major"
+      },
+      {
+        "name": "REQ-020-016 Raw Evidence is not mutated",
+        "passed": true,
+        "detail": {
+          "evaluation": {
+            "evaluationId": "EXTERNAL020-EVALUATION-MU6JSD7N-0003",
+            "evaluationVersion": "1.0.0",
+            "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+            "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+            "subjectType": "CLAIM",
+            "subjectRef": "CLAIM-VALIDATION-001",
+            "domain": "GENERAL",
+            "task": "EVIDENCE_REVIEW",
+            "purpose": "VALIDATION",
+            "timeHorizon": "CURRENT",
+            "evaluationState": "CONFLICTED",
+            "evidenceRefs": [
+              "EVIDENCE-A",
+              "EVIDENCE-B"
+            ],
+            "sourceRefs": [],
+            "factorSummary": {
+              "operationalSignalCount": 1,
+              "evidenceQualitySignalCount": 1,
+              "contradictionCandidateCount": 1,
+              "confirmationCandidateCount": 1,
+              "independentConfirmationCount": 0,
+              "unknownIndependenceCount": 1
+            },
+            "contradictionRefs": [
+              "CON-1"
+            ],
+            "confirmationRefs": [
+              "CONF-1"
+            ],
+            "missingInformation": [],
+            "reliabilityScore": null,
+            "authorityScore": null,
+            "truthConfirmed": false,
+            "conflictWinner": null,
+            "automaticConflictResolutionPerformed": false,
+            "duplicateEqualsIndependentConfirmation": false,
+            "independenceAssumedWhenUnknown": false,
+            "candidateOnly": true,
+            "evidenceAuthorityAssessmentOnly": true,
+            "actionAuthorityGranted": false,
+            "knowledgePromotionPerformed": false,
+            "canonicalRepositoryMutationPerformed": false,
+            "tradingAuthorityGranted": false,
+            "financialAuthorityGranted": false,
+            "businessAuthorityGranted": false,
+            "externalTransmissionPerformed": false,
+            "paidApiExecutionPerformed": false,
+            "ide170ConfidenceOverwritten": false,
+            "rawEvidenceMutationPerformed": false,
+            "explanation": "Phase 1 validation candidate",
+            "createdAt": "2026-09-18T05:58:33.443Z",
+            "immutable": true
+          },
+          "inputPackage": {
+            "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+            "sourceComponentId": "EXTERNAL-010",
+            "sourceContract": "EXTERNAL-010-CONTRACT-RELIABILITY-INPUT-PACKAGE",
+            "operationalSignals": [
+              {
+                "reliabilitySignalId": "RS-1",
+                "sourceId": "SRC-1",
+                "operationalReliabilityOnly": true,
+                "factualReliabilityDetermined": false,
+                "reliabilityScore": null,
+                "authorityScore": null,
+                "finalReliabilityAuthority": "EXTERNAL-020"
+              }
+            ],
+            "evidenceQualitySignals": [
+              {
+                "qualitySignalId": "EQ-1",
+                "evidenceId": "EVIDENCE-A",
+                "sourceId": "SRC-1",
+                "qualityScore": null,
+                "authorityScore": null,
+                "truthConfirmed": false,
+                "finalReliabilityAuthority": "EXTERNAL-020"
+              }
+            ],
+            "contradictionCandidates": [
+              {
+                "candidateId": "CON-1",
+                "candidateType": "CONTRADICTION",
+                "evidenceIds": [
+                  "EVIDENCE-A",
+                  "EVIDENCE-B"
+                ],
+                "independenceVerified": false,
+                "conflictWinner": null,
+                "truthConfirmed": false,
+                "automaticResolutionPerformed": false,
+                "duplicateEqualsIndependentConfirmation": false,
+                "finalReliabilityAuthority": "EXTERNAL-020"
+              }
+            ],
+            "confirmationCandidates": [
+              {
+                "candidateId": "CONF-1",
+                "candidateType": "CONFIRMATION",
+                "evidenceIds": [
+                  "EVIDENCE-A",
+                  "EVIDENCE-C"
+                ],
+                "independenceVerified": false,
+                "conflictWinner": null,
+                "truthConfirmed": false,
+                "automaticResolutionPerformed": false,
+                "duplicateEqualsIndependentConfirmation": false,
+                "finalReliabilityAuthority": "EXTERNAL-020"
+              }
+            ],
+            "finalReliabilityAuthority": "EXTERNAL-020",
+            "sourceGeneratedAt": "2026-09-18T05:58:33.439Z",
+            "contractValid": true,
+            "readOnly": true,
+            "rawEvidenceMutationPerformed": false,
+            "externalTransmissionPerformed": false,
+            "providerNetworkCallPerformed": false,
+            "capturedAt": "2026-09-18T05:58:33.442Z",
+            "immutable": true
+          }
+        },
+        "group": "Safety",
+        "severity": "Critical"
+      },
+      {
+        "name": "REQ-020-017 Knowledge is not automatically promoted",
+        "passed": true,
+        "detail": {
+          "evaluationId": "EXTERNAL020-EVALUATION-MU6JSD7N-0003",
+          "evaluationVersion": "1.0.0",
+          "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+          "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+          "subjectType": "CLAIM",
+          "subjectRef": "CLAIM-VALIDATION-001",
+          "domain": "GENERAL",
+          "task": "EVIDENCE_REVIEW",
+          "purpose": "VALIDATION",
+          "timeHorizon": "CURRENT",
+          "evaluationState": "CONFLICTED",
+          "evidenceRefs": [
+            "EVIDENCE-A",
+            "EVIDENCE-B"
+          ],
+          "sourceRefs": [],
+          "factorSummary": {
+            "operationalSignalCount": 1,
+            "evidenceQualitySignalCount": 1,
+            "contradictionCandidateCount": 1,
+            "confirmationCandidateCount": 1,
+            "independentConfirmationCount": 0,
+            "unknownIndependenceCount": 1
+          },
+          "contradictionRefs": [
+            "CON-1"
+          ],
+          "confirmationRefs": [
+            "CONF-1"
+          ],
+          "missingInformation": [],
+          "reliabilityScore": null,
+          "authorityScore": null,
+          "truthConfirmed": false,
+          "conflictWinner": null,
+          "automaticConflictResolutionPerformed": false,
+          "duplicateEqualsIndependentConfirmation": false,
+          "independenceAssumedWhenUnknown": false,
+          "candidateOnly": true,
+          "evidenceAuthorityAssessmentOnly": true,
+          "actionAuthorityGranted": false,
+          "knowledgePromotionPerformed": false,
+          "canonicalRepositoryMutationPerformed": false,
+          "tradingAuthorityGranted": false,
+          "financialAuthorityGranted": false,
+          "businessAuthorityGranted": false,
+          "externalTransmissionPerformed": false,
+          "paidApiExecutionPerformed": false,
+          "ide170ConfidenceOverwritten": false,
+          "rawEvidenceMutationPerformed": false,
+          "explanation": "Phase 1 validation candidate",
+          "createdAt": "2026-09-18T05:58:33.443Z",
+          "immutable": true
+        },
+        "group": "Authority",
+        "severity": "Critical"
+      },
+      {
+        "name": "REQ-020-018 No self-granted execution authority",
+        "passed": true,
+        "detail": {
+          "evaluationId": "EXTERNAL020-EVALUATION-MU6JSD7N-0003",
+          "evaluationVersion": "1.0.0",
+          "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+          "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+          "subjectType": "CLAIM",
+          "subjectRef": "CLAIM-VALIDATION-001",
+          "domain": "GENERAL",
+          "task": "EVIDENCE_REVIEW",
+          "purpose": "VALIDATION",
+          "timeHorizon": "CURRENT",
+          "evaluationState": "CONFLICTED",
+          "evidenceRefs": [
+            "EVIDENCE-A",
+            "EVIDENCE-B"
+          ],
+          "sourceRefs": [],
+          "factorSummary": {
+            "operationalSignalCount": 1,
+            "evidenceQualitySignalCount": 1,
+            "contradictionCandidateCount": 1,
+            "confirmationCandidateCount": 1,
+            "independentConfirmationCount": 0,
+            "unknownIndependenceCount": 1
+          },
+          "contradictionRefs": [
+            "CON-1"
+          ],
+          "confirmationRefs": [
+            "CONF-1"
+          ],
+          "missingInformation": [],
+          "reliabilityScore": null,
+          "authorityScore": null,
+          "truthConfirmed": false,
+          "conflictWinner": null,
+          "automaticConflictResolutionPerformed": false,
+          "duplicateEqualsIndependentConfirmation": false,
+          "independenceAssumedWhenUnknown": false,
+          "candidateOnly": true,
+          "evidenceAuthorityAssessmentOnly": true,
+          "actionAuthorityGranted": false,
+          "knowledgePromotionPerformed": false,
+          "canonicalRepositoryMutationPerformed": false,
+          "tradingAuthorityGranted": false,
+          "financialAuthorityGranted": false,
+          "businessAuthorityGranted": false,
+          "externalTransmissionPerformed": false,
+          "paidApiExecutionPerformed": false,
+          "ide170ConfidenceOverwritten": false,
+          "rawEvidenceMutationPerformed": false,
+          "explanation": "Phase 1 validation candidate",
+          "createdAt": "2026-09-18T05:58:33.443Z",
+          "immutable": true
+        },
+        "group": "Authority",
+        "severity": "Critical"
+      },
+      {
+        "name": "Missing Evidence yields INSUFFICIENT_EVIDENCE without invented score",
+        "passed": true,
+        "detail": {
+          "ok": true,
+          "code": "EXTERNAL020_EVALUATION_CANDIDATE_CREATED",
+          "status": "Candidate",
+          "data": {
+            "evaluation": {
+              "evaluationId": "EXTERNAL020-EVALUATION-MU6JSD7N-0007",
+              "evaluationVersion": "1.0.0",
+              "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0006",
+              "inputPackageId": "EXTERNAL020-INPUT-EMPTY-MU6JSD7N-0005",
+              "subjectType": "SOURCE",
+              "subjectRef": "SOURCE-EMPTY",
+              "domain": "UNKNOWN",
+              "task": "UNKNOWN",
+              "purpose": "UNKNOWN",
+              "timeHorizon": "UNKNOWN",
+              "evaluationState": "INSUFFICIENT_EVIDENCE",
+              "evidenceRefs": [],
+              "sourceRefs": [],
+              "factorSummary": {
+                "operationalSignalCount": 0,
+                "evidenceQualitySignalCount": 0,
+                "contradictionCandidateCount": 0,
+                "confirmationCandidateCount": 0,
+                "independentConfirmationCount": 0,
+                "unknownIndependenceCount": 0
+              },
+              "contradictionRefs": [],
+              "confirmationRefs": [],
+              "missingInformation": [
+                "SUFFICIENT_EVIDENCE"
+              ],
+              "reliabilityScore": null,
+              "authorityScore": null,
+              "truthConfirmed": false,
+              "conflictWinner": null,
+              "automaticConflictResolutionPerformed": false,
+              "duplicateEqualsIndependentConfirmation": false,
+              "independenceAssumedWhenUnknown": false,
+              "candidateOnly": true,
+              "evidenceAuthorityAssessmentOnly": true,
+              "actionAuthorityGranted": false,
+              "knowledgePromotionPerformed": false,
+              "canonicalRepositoryMutationPerformed": false,
+              "tradingAuthorityGranted": false,
+              "financialAuthorityGranted": false,
+              "businessAuthorityGranted": false,
+              "externalTransmissionPerformed": false,
+              "paidApiExecutionPerformed": false,
+              "ide170ConfidenceOverwritten": false,
+              "rawEvidenceMutationPerformed": false,
+              "explanation": "Reliability candidate is context-specific and evidence-grounded; numerical false precision is intentionally withheld in Phase 1.",
+              "createdAt": "2026-09-18T05:58:33.443Z",
+              "immutable": true
+            },
+            "lineage": {
+              "lineageId": "EXTERNAL020-LINEAGE-MU6JSD7N-0008",
+              "relationType": "EVALUATED_FROM",
+              "outputRef": "EXTERNAL020-EVALUATION-MU6JSD7N-0007",
+              "inputPackageId": "EXTERNAL020-INPUT-EMPTY-MU6JSD7N-0005",
+              "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0006",
+              "evidenceRefs": [],
+              "contradictionRefs": [],
+              "confirmationRefs": [],
+              "explanation": "Reliability candidate is context-specific and evidence-grounded; numerical false precision is intentionally withheld in Phase 1.",
+              "createdAt": "2026-09-18T05:58:33.443Z",
+              "immutable": true
+            }
+          },
+          "at": "2026-09-18T05:58:33.443Z"
+        },
+        "group": "Negative",
+        "severity": "Critical"
+      },
+      {
+        "name": "UNRESOLVED is a valid formal result",
+        "passed": true,
+        "detail": {
+          "ok": true,
+          "code": "EXTERNAL020_EVALUATION_CANDIDATE_CREATED",
+          "status": "Candidate",
+          "data": {
+            "evaluation": {
+              "evaluationId": "EXTERNAL020-EVALUATION-MU6JSD7N-0009",
+              "evaluationVersion": "1.0.0",
+              "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+              "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+              "subjectType": "CLAIM",
+              "subjectRef": "CLAIM-VALIDATION-001",
+              "domain": "GENERAL",
+              "task": "EVIDENCE_REVIEW",
+              "purpose": "VALIDATION",
+              "timeHorizon": "CURRENT",
+              "evaluationState": "UNRESOLVED",
+              "evidenceRefs": [
+                "EVIDENCE-A",
+                "EVIDENCE-B"
+              ],
+              "sourceRefs": [],
+              "factorSummary": {
+                "operationalSignalCount": 1,
+                "evidenceQualitySignalCount": 1,
+                "contradictionCandidateCount": 1,
+                "confirmationCandidateCount": 1,
+                "independentConfirmationCount": 0,
+                "unknownIndependenceCount": 1
+              },
+              "contradictionRefs": [
+                "CON-1"
+              ],
+              "confirmationRefs": [
+                "CONF-1"
+              ],
+              "missingInformation": [],
+              "reliabilityScore": null,
+              "authorityScore": null,
+              "truthConfirmed": false,
+              "conflictWinner": null,
+              "automaticConflictResolutionPerformed": false,
+              "duplicateEqualsIndependentConfirmation": false,
+              "independenceAssumedWhenUnknown": false,
+              "candidateOnly": true,
+              "evidenceAuthorityAssessmentOnly": true,
+              "actionAuthorityGranted": false,
+              "knowledgePromotionPerformed": false,
+              "canonicalRepositoryMutationPerformed": false,
+              "tradingAuthorityGranted": false,
+              "financialAuthorityGranted": false,
+              "businessAuthorityGranted": false,
+              "externalTransmissionPerformed": false,
+              "paidApiExecutionPerformed": false,
+              "ide170ConfidenceOverwritten": false,
+              "rawEvidenceMutationPerformed": false,
+              "explanation": "Reliability candidate is context-specific and evidence-grounded; numerical false precision is intentionally withheld in Phase 1.",
+              "createdAt": "2026-09-18T05:58:33.444Z",
+              "immutable": true
+            },
+            "lineage": {
+              "lineageId": "EXTERNAL020-LINEAGE-MU6JSD7O-0010",
+              "relationType": "EVALUATED_FROM",
+              "outputRef": "EXTERNAL020-EVALUATION-MU6JSD7N-0009",
+              "inputPackageId": "EXTERNAL020-INPUT-MU6JSD7M-0001",
+              "contextId": "EXTERNAL020-CONTEXT-MU6JSD7N-0002",
+              "evidenceRefs": [
+                "EVIDENCE-A",
+                "EVIDENCE-B"
+              ],
+              "contradictionRefs": [
+                "CON-1"
+              ],
+              "confirmationRefs": [
+                "CONF-1"
+              ],
+              "explanation": "Reliability candidate is context-specific and evidence-grounded; numerical false precision is intentionally withheld in Phase 1.",
+              "createdAt": "2026-09-18T05:58:33.444Z",
+              "immutable": true
+            }
+          },
+          "at": "2026-09-18T05:58:33.444Z"
+        },
+        "group": "Negative",
+        "severity": "Critical"
+      },
+      {
+        "name": "Universal trust score / automatic conflict winner remain disabled",
+        "passed": true,
+        "detail": {
+          "universalTrustScoreImplemented": false,
+          "permanentGlobalSourceRankingImplemented": false,
+          "automaticConflictResolutionAllowed": false,
+          "truthConfirmationAllowed": false,
+          "rawEvidenceMutationAllowed": false,
+          "automaticKnowledgePromotionAllowed": false,
+          "canonicalRepositoryMutationAllowed": false,
+          "externalTransmissionAutomaticallyAllowed": false,
+          "paidApiExecutionAutomaticallyAllowed": false,
+          "tradingAuthorityGranted": false,
+          "financialAuthorityGranted": false,
+          "businessAuthorityGranted": false,
+          "selfGrantedAuthorityAllowed": false,
+          "reliabilityEqualsTruth": false,
+          "reliabilityEqualsActionAuthority": false,
+          "validationEqualsApproval": false,
+          "ide170ConfidenceOverwriteAllowed": false
+        },
+        "group": "Safety",
+        "severity": "Critical"
+      },
+      {
+        "name": "18 Requirement IDs are machine-trackable without false full Decision completion",
+        "passed": true,
+        "detail": {
+          "decisionId": "EXTERNAL-020-DECISION-001",
+          "totalDecisionRequirements": 18,
+          "decisionRequirementsFullyImplemented": 11,
+          "allDecisionRequirementsComplete": false,
+          "phase1ScopeTotal": 8,
+          "phase1ScopeImplemented": 8,
+          "phase1ScopeComplete": true,
+          "falseFullDecisionCompletionClaimed": false,
+          "rows": [
+            {
+              "requirementId": "REQ-020-001",
+              "title": "Canonical Baseline Identity",
+              "phase1Disposition": "PHASE1",
+              "verificationState": "IMPLEMENTED_PHASE1",
+              "implementationRefs": [
+                "19_trust_evidence_version_manifest.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-001"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-002",
+              "title": "EXTERNAL-010 Reliability Input Reuse",
+              "phase1Disposition": "PHASE1",
+              "verificationState": "IMPLEMENTED_PHASE1",
+              "implementationRefs": [
+                "19_trust_evidence_external010_adapter.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-002"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-003",
+              "title": "Source / Evidence / Claim Reliability Separation",
+              "phase1Disposition": "PHASE1_FOUNDATION",
+              "verificationState": "IMPLEMENTED_PHASE1_FOUNDATION",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_context.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-003"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-004",
+              "title": "Context-Specific Reliability",
+              "phase1Disposition": "PHASE1_FOUNDATION",
+              "verificationState": "IMPLEMENTED_PHASE1_FOUNDATION",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_context.js",
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-004"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-005",
+              "title": "Multi-Dimensional Reliability Model",
+              "phase1Disposition": "FOUNDATION",
+              "verificationState": "FOUNDATION_ONLY",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-005"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-006",
+              "title": "Contradiction Preservation",
+              "phase1Disposition": "PHASE1",
+              "verificationState": "IMPLEMENTED_PHASE1",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-006"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-007",
+              "title": "Independent Confirmation Assessment",
+              "phase1Disposition": "PHASE1_FOUNDATION",
+              "verificationState": "IMPLEMENTED_PHASE1_FOUNDATION",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-007"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-008",
+              "title": "Historical Outcome-Grounded Evaluation",
+              "phase1Disposition": "LATER_PHASE",
+              "verificationState": "DEFERRED_LATER_PHASE",
+              "implementationRefs": [],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-008"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-009",
+              "title": "Versioned Reliability Revision",
+              "phase1Disposition": "FOUNDATION",
+              "verificationState": "FOUNDATION_ONLY",
+              "implementationRefs": [],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-009"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-010",
+              "title": "Explicit Uncertainty / Abstention",
+              "phase1Disposition": "PHASE1",
+              "verificationState": "IMPLEMENTED_PHASE1",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-010"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-011",
+              "title": "False Precision Prevention",
+              "phase1Disposition": "PHASE1",
+              "verificationState": "IMPLEMENTED_PHASE1",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-011"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-012",
+              "title": "IDE-170 Confidence Separation",
+              "phase1Disposition": "PHASE1",
+              "verificationState": "IMPLEMENTED_PHASE1",
+              "implementationRefs": [
+                "19_trust_evidence_version_manifest.js",
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-012"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-013",
+              "title": "Evidence Authority / Action Authority Separation",
+              "phase1Disposition": "PHASE1",
+              "verificationState": "IMPLEMENTED_PHASE1",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-013"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-014",
+              "title": "Reliability Explanation / Lineage",
+              "phase1Disposition": "PHASE1",
+              "verificationState": "IMPLEMENTED_PHASE1",
+              "implementationRefs": [
+                "19_trust_evidence_lineage.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-014"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-015",
+              "title": "External AI Governance Reuse",
+              "phase1Disposition": "FOUNDATION",
+              "verificationState": "FOUNDATION_ONLY",
+              "implementationRefs": [],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-015"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-016",
+              "title": "No Raw Evidence Mutation",
+              "phase1Disposition": "PHASE1",
+              "verificationState": "IMPLEMENTED_PHASE1",
+              "implementationRefs": [
+                "19_trust_evidence_external010_adapter.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-016"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-017",
+              "title": "No Automatic Knowledge Promotion",
+              "phase1Disposition": "PHASE1",
+              "verificationState": "IMPLEMENTED_PHASE1",
+              "implementationRefs": [
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-017"
+              ]
+            },
+            {
+              "requirementId": "REQ-020-018",
+              "title": "No Self-Granted / Execution Authority",
+              "phase1Disposition": "PHASE1",
+              "verificationState": "IMPLEMENTED_PHASE1",
+              "implementationRefs": [
+                "19_trust_evidence_version_manifest.js",
+                "19_trust_evidence_evaluation_candidate.js"
+              ],
+              "validationRefs": [
+                "19_trust_evidence_phase1_validation.js#REQ-020-018"
+              ]
+            }
+          ],
+          "phase1Scope": [
+            {
+              "scopeId": "P1-020-001",
+              "title": "EXTERNAL-020 Component / Version Foundation",
+              "implemented": true
+            },
+            {
+              "scopeId": "P1-020-002",
+              "title": "EXTERNAL-010 Reliability Input Adapter",
+              "implemented": true
+            },
+            {
+              "scopeId": "P1-020-003",
+              "title": "Evaluation Context Foundation",
+              "implemented": true
+            },
+            {
+              "scopeId": "P1-020-004",
+              "title": "Reliability Evaluation Candidate",
+              "implemented": true
+            },
+            {
+              "scopeId": "P1-020-005",
+              "title": "Explicit Uncertainty / Abstention",
+              "implemented": true
+            },
+            {
+              "scopeId": "P1-020-006",
+              "title": "Explanation / Lineage Foundation",
+              "implemented": true
+            },
+            {
+              "scopeId": "P1-020-007",
+              "title": "Requirement Traceability",
+              "implemented": true
+            },
+            {
+              "scopeId": "P1-020-008",
+              "title": "No Universal Trust Score / No Automatic Truth Resolution",
+              "implemented": true
+            }
+          ]
+        },
+        "group": "Traceability",
+        "severity": "Critical"
+      },
+      {
+        "name": "Validation does not equal Project Owner approval",
+        "passed": true,
+        "detail": {
+          "validationEqualsApproval": false
+        },
+        "group": "Authority",
+        "severity": "Critical"
+      }
+    ],
+    "validatedAt": "2026-09-18T05:58:33.444Z",
+    "immutable": true
+  },
+  "staticPackageValidation": {
+    "passed": 15,
+    "failed": 0,
+    "total": 15,
+    "health": 100,
+    "criticalFailed": 0,
+    "releaseAllowed": false,
+    "validationIsApproval": false
+  },
+  "parentRegression": {
+    "canonical0023ParentScriptsByteOrderIdentical": true,
+    "parentScriptCount": 462,
+    "parentScriptSetHash": "d3121eb588b7c7b332cb86ef66f82fe2f2ecd77bd1be029143ff578f2d0514a3",
+    "decision058Phase6Validation": {
+      "passed": 28,
+      "failed": 0,
+      "total": 28,
+      "health": 100,
+      "criticalFailed": 0,
+      "req058013Closed": true,
+      "decision058Technical18Of18": true
+    }
+  },
+  "safety": {
+    "universalTrustScoreImplemented": false,
+    "automaticConflictResolutionAllowed": false,
+    "truthAuthorityGranted": false,
+    "rawEvidenceMutationPerformed": false,
+    "knowledgePromotionPerformed": false,
+    "canonicalRepositoryMutationPerformed": false,
+    "actionAuthorityGranted": false,
+    "validationEqualsApproval": false
+  },
+  "releaseAllowed": false,
+  "projectOwnerRealRuntimeValidationRequired": true
+}
