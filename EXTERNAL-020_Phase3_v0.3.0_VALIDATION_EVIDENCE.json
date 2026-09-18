@@ -1,0 +1,99 @@
+{
+  "id": "EXTERNAL-020-PHASE3-V0.3.0-VALIDATION-EVIDENCE",
+  "componentId": "EXTERNAL-020",
+  "decisionId": "EXTERNAL-020-DECISION-001",
+  "phase": 3,
+  "version": "0.3.0",
+  "status": "IMPLEMENTATION_PHASE3_CANDIDATE",
+  "parentPhase2": {
+    "version": "0.2.1",
+    "status": "PROJECT_OWNER_ACCEPTED_FROZEN",
+    "scriptCount": 479,
+    "manifestHash": "200a3f7191f11d7523ad2e721dddde35a4a0d3b4512bfe6c2f7fcfcf76114084",
+    "scriptSetHash": "9cd116d990e97864c8866abdf7c00e631f275bd6f74c8e6d31aa84a2961f6d03",
+    "freezeRecordSha256": "8b7abee8786735f85207cef67d9bae2d0611066fbed5571ff8d862d4be67e1b3"
+  },
+  "candidateIdentity": {
+    "scriptCount": 484,
+    "manifestHash": "4e80cf613f0b8c508bf4edef1b54d7bc619f658c035e6f33566e5c4dbb32e8c0",
+    "scriptSetHash": "139f5f28e8a830921f3d20cd6805a8ec367e4c3304af069b7e634996b9f58dca"
+  },
+  "implementation": {
+    "completionTarget": [
+      "REQ-020-008"
+    ],
+    "implemented": [
+      "EXTERNAL-010 public read historical adapter",
+      "Historical Outcome Snapshot evaluator",
+      "Profile-linked Historical Outcome Assessment",
+      "Phase 3 traceability",
+      "Phase 3 functional validation"
+    ],
+    "externalAiGovernanceReuseImplemented": false,
+    "external010WriteApiRequired": false,
+    "external010InternalStateAccessAllowed": false,
+    "automaticProfileRevisionAllowed": false
+  },
+  "validation": {
+    "staticPackage": {
+      "passed": 16,
+      "failed": 0,
+      "total": 16,
+      "health": 100,
+      "criticalFailed": 0
+    },
+    "functionalFixture": {
+      "passed": 21,
+      "failed": 0,
+      "total": 21,
+      "health": 100,
+      "criticalFailed": 0,
+      "phase3ImplementationComplete": true,
+      "phase3TechnicalGateReady": true
+    },
+    "decision058Phase6Regression": {
+      "passed": 28,
+      "failed": 0,
+      "total": 28,
+      "health": 100,
+      "criticalFailed": 0,
+      "req058013Closed": true,
+      "decision058Technical18Of18": true
+    },
+    "javascriptSyntax": {
+      "passed": 484,
+      "failed": 0,
+      "total": 484
+    },
+    "frozenPhase2ParentVerified": true,
+    "canonical0023ParentVerified": true
+  },
+  "decision001": {
+    "requirementsComplete": 17,
+    "requirementsTotal": 18,
+    "complete": false,
+    "remainingRequirementIds": [
+      "REQ-020-015"
+    ]
+  },
+  "safety": {
+    "universalTrustScoreImplemented": false,
+    "truthConfirmationAllowed": false,
+    "predictionOutcomeMatchAutomaticallyComputed": false,
+    "automaticConflictResolutionAllowed": false,
+    "automaticProfileRevisionAllowed": false,
+    "rawEvidenceMutationAllowed": false,
+    "automaticKnowledgePromotionAllowed": false,
+    "canonicalRepositoryMutationAllowed": false,
+    "externalTransmissionPerformed": false,
+    "paidApiExecutionPerformed": false,
+    "externalAiReliabilityReasoningPerformed": false,
+    "ide170ConfidenceOverwriteAllowed": false,
+    "actionAuthorityGranted": false,
+    "validationIsApproval": false
+  },
+  "releaseAllowed": false,
+  "projectOwnerAcceptanceRequired": true,
+  "pcRealRuntimeValidationPerformed": false,
+  "androidRealDeviceValidationPerformed": false
+}
