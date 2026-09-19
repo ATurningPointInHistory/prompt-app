@@ -1,13 +1,13 @@
 /* ============================================================
    FILE: 18_self_development_control_center.js
-   SELF-DEVELOPMENT-058 / Self-Development Workspace v0.1.4
+   SELF-DEVELOPMENT-058 / Self-Development Workspace v0.1.5
    Form-first UI over existing Decision 058 backend.
    No new mutation/adoption/provider authority.
    ============================================================ */
 (function (global) {
   "use strict";
 
-  const VERSION = "0.1.4";
+  const VERSION = "0.1.5";
   const COMPONENT_ID = "SELF-DEVELOPMENT-058-CONTROL-CENTER";
   const namespace = global.SELFDEVELOPMENT058Environment;
   if (!namespace || !namespace.__internal) return;
@@ -230,6 +230,15 @@
     return text.length > limit ? text.slice(0, limit) + "…" : text;
   }
 
+  function boundedEvidenceText(value, max) {
+    const text = String(value == null ? "" : value).trim();
+    const limit = Math.max(0, Number(max) || 0);
+    if (!limit) return "";
+    if (text.length <= limit) return text;
+    if (limit === 1) return "…";
+    return text.slice(0, limit - 1) + "…";
+  }
+
   const INTENT_SCOPE_PROFILES = Object.freeze([
     Object.freeze({
       id: "SELF_DEVELOPMENT",
@@ -434,7 +443,7 @@
     }).slice(0, 8);
     return Object.freeze({
       resolverId: "SDCC-RELEVANT-SCOPE-" + Date.now().toString(36).toUpperCase(),
-      resolverVersion: "0.1.4",
+      resolverVersion: "0.1.5",
       userIntent: String(intent || ""),
       primaryComponent: primaryProfile ? primaryProfile.componentId : "AI-PROMPT-OS",
       matchedProfiles: matchedProfiles.map(function (profile) { return { id: profile.id, componentId: profile.componentId, signals: profile.signals }; }),
@@ -665,7 +674,7 @@
     }).slice(0, 8);
     const result = {
       enrichmentId: "SDCC-CONTEXT-ENRICHMENT-" + Date.now().toString(36).toUpperCase(),
-      enrichmentVersion: "0.1.4",
+      enrichmentVersion: "0.1.5",
       primaryComponent: scopeResult && scopeResult.primaryComponent || "AI-PROMPT-OS",
       selectedFiles: selectedFiles.slice(0, 8),
       relatedFunctions: relatedFunctions,
@@ -734,12 +743,12 @@
       relationships: (enrichment && enrichment.architectureRelationships || []).slice(0, 16)
     });
     return [
-      { evidenceId: "SDCC-WORKSPACE-SCOPE", evidenceType: "ARCHITECTURE", sourceId: "SDCC-RELEVANT-SCOPE-RESOLVER", excerpt: shortText(scopeExcerpt, 2200), selectionReason: "Intent-grounded relevant scope selected locally before any External AI transmission." },
-      { evidenceId: "SDCC-WORKSPACE-FUNCTIONS", evidenceType: "REPOSITORY_FILE", sourceId: "PROJECT-SEARCH-FUNCTION-CONTEXT", excerpt: shortText(functionExcerpt, 2400), selectionReason: "Functions enumerated from the selected files using the existing Project Search database." },
-      { evidenceId: "SDCC-WORKSPACE-ARCHITECTURE", evidenceType: "ARCHITECTURE", sourceId: "ARCHITECTURE-REPOSITORY", excerpt: shortText(architectureExcerpt, 2400), selectionReason: "Architecture objects and relationships connected to the intent-selected scope." },
-      { evidenceId: "SDCC-WORKSPACE-REPOSITORY", evidenceType: "RUNTIME_EVIDENCE", sourceId: "SELFDEV058-REPOSITORY-INSPECTION", excerpt: shortText(repositoryExcerpt, 2000), selectionReason: "Relevant repository inspection evidence only; unrelated generic findings stay outside the AI context." },
-      { evidenceId: "SDCC-WORKSPACE-FREEZE", evidenceType: "ARCHITECTURE", sourceId: FORMAL_DECISION058_FREEZE.evidenceSource, excerpt: shortText(freezeExcerpt, 1400), selectionReason: "Formal Decision 058 boundary and completion state." },
-      { evidenceId: "SDCC-WORKSPACE-READINESS", evidenceType: "RUNTIME_EVIDENCE", sourceId: "SELFDEV058-OPERATIONAL-READINESS", excerpt: shortText(operationalExcerpt, 1400), selectionReason: "Current operational readiness; distinct from formal freeze status." }
+      { evidenceId: "SDCC-WORKSPACE-SCOPE", evidenceType: "ARCHITECTURE", sourceId: "SDCC-RELEVANT-SCOPE-RESOLVER", excerpt: boundedEvidenceText(scopeExcerpt, 2200), selectionReason: "Intent-grounded relevant scope selected locally before any External AI transmission." },
+      { evidenceId: "SDCC-WORKSPACE-FUNCTIONS", evidenceType: "REPOSITORY_FILE", sourceId: "PROJECT-SEARCH-FUNCTION-CONTEXT", excerpt: boundedEvidenceText(functionExcerpt, 2400), selectionReason: "Functions enumerated from the selected files using the existing Project Search database." },
+      { evidenceId: "SDCC-WORKSPACE-ARCHITECTURE", evidenceType: "ARCHITECTURE", sourceId: "ARCHITECTURE-REPOSITORY", excerpt: boundedEvidenceText(architectureExcerpt, 2400), selectionReason: "Architecture objects and relationships connected to the intent-selected scope." },
+      { evidenceId: "SDCC-WORKSPACE-REPOSITORY", evidenceType: "RUNTIME_EVIDENCE", sourceId: "SELFDEV058-REPOSITORY-INSPECTION", excerpt: boundedEvidenceText(repositoryExcerpt, 2000), selectionReason: "Relevant repository inspection evidence only; unrelated generic findings stay outside the AI context." },
+      { evidenceId: "SDCC-WORKSPACE-FREEZE", evidenceType: "ARCHITECTURE", sourceId: FORMAL_DECISION058_FREEZE.evidenceSource, excerpt: boundedEvidenceText(freezeExcerpt, 1400), selectionReason: "Formal Decision 058 boundary and completion state." },
+      { evidenceId: "SDCC-WORKSPACE-READINESS", evidenceType: "RUNTIME_EVIDENCE", sourceId: "SELFDEV058-OPERATIONAL-READINESS", excerpt: boundedEvidenceText(operationalExcerpt, 1400), selectionReason: "Current operational readiness; distinct from formal freeze status." }
     ];
   }
 

@@ -512,7 +512,8 @@
     "18_self_development_phase2_dashboard.js",
     "18_self_development_phase2_validation.js",
     "validate_self_development_058_phase2.cjs",
-    "18_self_development_control_center.js"
+    "18_self_development_control_center.js",
+    "validate_self_development_control_center_v015.cjs"
   ],
   "savedFiles": [
     "#U8d77#U52d5#U7528/README.txt",
@@ -1117,7 +1118,8 @@
     "EXTERNAL-020_Phase4_v0.4.3_HANDOFF.txt",
     "validate_self_development_control_center_v010.cjs",
     "SELF-DEVELOPMENT-058_ControlCenter_v0.1.0_VALIDATION_EVIDENCE.json",
-    "SELF-DEVELOPMENT-058_ControlCenter_v0.1.0_HANDOFF.txt"
+    "SELF-DEVELOPMENT-058_ControlCenter_v0.1.0_HANDOFF.txt",
+    "validate_self_development_control_center_v015.cjs"
   ],
   "missingFiles": [],
   "externalFiles": [
@@ -1132,8 +1134,8 @@
   "scriptManifestSchemaVersion": "2.0.0",
   "applicationReleaseVersion": "1.20.1",
   "versionArchitecture": "independent-version-v1",
-  "scriptManifestHash": "f6ad7495e22fce813dbc85536f5917556a84a5d7f3e02ed28e53b49f79628b6b",
-  "scriptSetHash": "8562d31d916f995adba371e587ec19a7fa879d23585f42edaaae3ea2c57c30dd",
+  "scriptManifestHash": "1bc05241fe03891767659fedb217282fd662e91df6a0d59a5ea3496bd9462b69",
+  "scriptSetHash": "55c28a27873a41eaab423e8b89b3cfd21fb5e1df46c0289aa0644e22880c188b",
   "scriptManifestCount": 493,
   "scriptLoading": {
     "mode": "Build-time Manifest to Static Scripts",
@@ -1282,8 +1284,8 @@
   "external020Phase4LiveExecutionStillRequiresGovernedReadiness": true,
   "external020Phase4ProviderExecutionPathModifiedByHotfix": false,
   "external020Phase4AndroidValidationFunction": "runExternal020Phase4AndroidValidation",
-  "selfDevelopmentControlCenterVersion": "0.1.4",
-  "selfDevelopmentControlCenterStatus": "FUNCTION_SOURCE_FALLBACK_HOTFIX_CANDIDATE",
+  "selfDevelopmentControlCenterVersion": "0.1.5",
+  "selfDevelopmentControlCenterStatus": "BOUNDED_EVIDENCE_LIMIT_HOTFIX_CANDIDATE",
   "selfDevelopmentControlCenterAuthorityExpansion": false,
   "selfDevelopmentControlCenterAutomaticApproval": false,
   "selfDevelopmentControlCenterAutomaticAdoption": false,
@@ -1313,5 +1315,8 @@
   "selfDevelopmentControlCenterEnrichmentExternalTransmission": false,
   "selfDevelopmentControlCenterEnrichmentProviderExecution": false,
   "selfDevelopmentControlCenterSelectedFileSourceFallbackImplemented": true,
-  "selfDevelopmentControlCenterProjectSearchFallbackImplemented": true
+  "selfDevelopmentControlCenterProjectSearchFallbackImplemented": true,
+  "selfDevelopmentControlCenterBoundedEvidenceLimitSafeImplemented": true,
+  "selfDevelopmentControlCenterBoundedEvidencePolicyMaxExcerptChars": 2400,
+  "selfDevelopmentControlCenterBoundedEvidencePolicyMaxTotalChars": 12000
 }
